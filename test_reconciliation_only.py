@@ -6,7 +6,7 @@ import sys
 def test_reconciliation_upload():
     """Test only the reconciliation upload endpoint"""
     
-    base_url = "https://gamemaster-panel-3.preview.emergentagent.com"
+    base_url = "https://finance-hub-348.preview.emergentagent.com"
     
     # Create CSV content for testing
     csv_content = """tx_id,amount,currency
