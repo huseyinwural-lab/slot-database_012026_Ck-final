@@ -299,6 +299,131 @@ class CasinoAdminAPITester:
         
         return success1 and success2
 
+    def test_custom_tables_management(self):
+        """Test Custom Tables: Create, List, Status Toggle"""
+        print("\n🎲 CUSTOM TABLES MANAGEMENT TESTS")
+        
+        # Test get tables list
+        success1, tables_response = self.run_test("Get Custom Tables List", "GET", "api/v1/tables", 200)
+        
+        # Test create custom table
+        new_table = {
+            "name": "VIP Blackjack Test",
+            "game_type": "Blackjack",
+            "provider": "Evolution",
+            "table_type": "vip",
+            "min_bet": 100,
+            "max_bet": 5000,
+            "status": "online"
+        }
+        success2, create_response = self.run_test("Create Custom Table", "POST", "api/v1/tables", 200, new_table)
+        
+        # Test table status toggle if we have tables
+        if success1 and isinstance(tables_response, list) and len(tables_response) > 0:
+            table_id = tables_response[0].get('id')
+            if table_id:
+                current_status = tables_response[0].get('status', 'online')
+                new_status = 'maintenance' if current_status == 'online' else 'online'
+                success3, _ = self.run_test(f"Toggle Table Status - {table_id}", "POST", f"api/v1/tables/{table_id}/status", 200, {"status": new_status})
+                
+                # Verify status change
+                success4, updated_tables = self.run_test("Verify Table Status Update", "GET", "api/v1/tables", 200)
+                if success4 and isinstance(updated_tables, list):
+                    updated_table = next((t for t in updated_tables if t.get('id') == table_id), None)
+                    if updated_table and updated_table.get('status') == new_status:
+                        print(f"✅ Table status successfully changed to: {new_status}")
+                    else:
+                        print(f"⚠️  Table status may not have been updated properly")
+                
+                return success1 and success2 and success3 and success4
+        
+        return success1 and success2
+
+    def test_game_config_versioning_rtp(self):
+        """Test Game Config: Versioning, RTP update"""
+        print("\n⚙️ GAME CONFIG VERSIONING & RTP TESTS")
+        
+        # First get games to test configuration on
+        success1, games_response = self.run_test("Get Games for Config Test", "GET", "api/v1/games", 200)
+        
+        if success1 and isinstance(games_response, list) and len(games_response) > 0:
+            game_id = games_response[0].get('id')
+            original_config = games_response[0].get('configuration', {})
+            original_version = original_config.get('version', '1.0.0')
+            
+            if game_id:
+                # Test updating game configuration with new RTP
+                updated_config = {
+                    "rtp": 97.2,
+                    "volatility": "medium",
+                    "min_bet": 0.50,
+                    "max_bet": 1000.0,
+                    "max_win_multiplier": 5000,
+                    "paytable": {"symbol_a": 100, "symbol_b": 50, "symbol_c": 25}
+                }
+                success2, update_response = self.run_test(f"Update Game Config - {game_id}", "PUT", f"api/v1/games/{game_id}", 200, updated_config)
+                
+                # Verify versioning worked
+                if success2 and isinstance(update_response, dict):
+                    new_version = update_response.get('version')
+                    if new_version and new_version != original_version:
+                        print(f"✅ Game configuration versioning working: {original_version} → {new_version}")
+                    else:
+                        print(f"⚠️  Game versioning may not be working properly")
+                
+                # Verify the configuration was actually updated
+                success3, updated_games = self.run_test("Verify Game Config Update", "GET", "api/v1/games", 200)
+                if success3 and isinstance(updated_games, list):
+                    updated_game = next((g for g in updated_games if g.get('id') == game_id), None)
+                    if updated_game and updated_game.get('configuration'):
+                        config = updated_game['configuration']
+                        if config.get('rtp') == 97.2 and config.get('volatility') == 'medium':
+                            print("✅ Game RTP and configuration updated successfully")
+                        else:
+                            print("⚠️  Game configuration may not have been updated properly")
+                
+                return success1 and success2 and success3
+        
+        print("⚠️  No games found to test configuration updates")
+        return success1
+
+    def test_game_upload_wizard(self):
+        """Test Game Upload: Fetch API simulation"""
+        print("\n📤 GAME UPLOAD WIZARD TESTS")
+        
+        # Test fetch API method
+        fetch_config = {
+            "provider": "Pragmatic Play",
+            "method": "fetch_api",
+            "game_ids": []
+        }
+        success1, fetch_response = self.run_test("Game Upload - Fetch API", "POST", "api/v1/games/upload", 200, fetch_config)
+        
+        if success1 and isinstance(fetch_response, dict):
+            message = fetch_response.get('message', '')
+            if 'imported' in message.lower():
+                print(f"✅ Game upload simulation working: {message}")
+            else:
+                print(f"⚠️  Unexpected upload response: {message}")
+        
+        # Test JSON upload method
+        json_config = {
+            "provider": "Evolution",
+            "method": "json_upload",
+            "game_ids": ["game1", "game2", "game3"]
+        }
+        success2, json_response = self.run_test("Game Upload - JSON Upload", "POST", "api/v1/games/upload", 200, json_config)
+        
+        # Test with different provider
+        netent_config = {
+            "provider": "NetEnt",
+            "method": "fetch_api",
+            "game_ids": []
+        }
+        success3, _ = self.run_test("Game Upload - NetEnt Provider", "POST", "api/v1/games/upload", 200, netent_config)
+        
+        return success1 and success2 and success3
+
     def test_bonuses_management(self):
         """Test bonuses management endpoints"""
         # Test get bonuses
