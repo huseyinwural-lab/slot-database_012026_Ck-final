@@ -2,7 +2,9 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime, timezone
 from enum import Enum
+import uuid
 
+# Enums
 class PlayerStatus(str, Enum):
     ACTIVE = "active"
     SUSPENDED = "suspended"
@@ -28,6 +30,7 @@ class TransactionStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+# Core Models
 class Player(BaseModel):
     id: str = Field(..., description="Player ID")
     username: str
@@ -41,7 +44,9 @@ class Player(BaseModel):
     registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_login: Optional[datetime] = None
     country: str = "Unknown"
-    risk_score: str = "low" # low, medium, high
+    risk_score: str = "low" 
+    address: Optional[str] = None
+    dob: Optional[datetime] = None
 
 class Transaction(BaseModel):
     id: str = Field(..., description="Transaction ID")
@@ -50,10 +55,43 @@ class Transaction(BaseModel):
     amount: float
     currency: str = "USD"
     status: TransactionStatus = TransactionStatus.PENDING
-    method: str  # e.g., "credit_card", "crypto", "bank_transfer"
+    method: str  
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     processed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
+
+class Game(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    provider: str
+    category: str # slot, live, table
+    rtp: float
+    status: str = "active"
+    image_url: Optional[str] = None
+
+class Bonus(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    type: str # deposit, nodeposit, freespins
+    amount: float
+    wager_req: int
+    status: str = "active"
+    valid_until: Optional[datetime] = None
+
+class TicketMessage(BaseModel):
+    sender: str # 'admin' or 'player'
+    text: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Ticket(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    player_id: str
+    player_username: str
+    subject: str
+    status: str = "open" # open, answered, closed
+    priority: str = "medium"
+    messages: List[TicketMessage] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class DashboardStats(BaseModel):
     total_deposit_today: float
