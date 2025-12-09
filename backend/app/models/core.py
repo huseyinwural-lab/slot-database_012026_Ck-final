@@ -38,17 +38,32 @@ class Player(BaseModel):
     username: str
     email: EmailStr
     phone: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    dob: Optional[datetime] = None
+    address: Optional[str] = None
+    
     balance_real: float = 0.0
     balance_bonus: float = 0.0
+    balance_locked: float = 0.0 # Wager locked
+    
     status: PlayerStatus = PlayerStatus.ACTIVE
     vip_level: int = 1
     kyc_status: KYCStatus = KYCStatus.NOT_SUBMITTED
+    
     registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    registration_ip: Optional[str] = None
+    referral_source: Optional[str] = None
+    
     last_login: Optional[datetime] = None
+    last_login_ip: Optional[str] = None
+    
     country: str = "Unknown"
-    risk_score: str = "low" 
-    address: Optional[str] = None
-    dob: Optional[datetime] = None
+    risk_score: str = "low" # low, medium, high
+    
+    tags: List[str] = [] # high roller, bonus hunter
+    notes: Optional[str] = None # Internal admin notes
+    
     luck_boost_factor: float = 1.0 
     luck_boost_remaining_spins: int = 0
 
@@ -121,37 +136,24 @@ class Ticket(BaseModel):
 
 class KPIMetric(BaseModel):
     value: float
-    change_percent: float # compared to yesterday
-    trend: str # up, down, neutral
+    change_percent: float 
+    trend: str 
 
 class DashboardStats(BaseModel):
-    # Core Financials
     ggr: KPIMetric
     ngr: KPIMetric
     total_bets: KPIMetric
     total_wins: KPIMetric
-    
-    # Operation Health
-    provider_health: List[Dict[str, str]] # {provider: "UP", status: "stable"}
-    payment_health: List[Dict[str, str]] # {method: "Papara", status: "UP"}
-    
-    # Risk Snapshot
-    risk_alerts: Dict[str, int] # {high_risk_withdrawals: 5, vpn_users: 12}
-    
-    # Live Activity
+    provider_health: List[Dict[str, str]] 
+    payment_health: List[Dict[str, str]] 
+    risk_alerts: Dict[str, int] 
     online_users: int
     active_sessions: int
     peak_sessions_24h: int
-    
-    # Bonus Perf
     bonuses_given_today_count: int
     bonuses_given_today_amount: float
-    
-    # Lists
-    top_games: List[Dict[str, Any]] # name, provider, revenue
+    top_games: List[Dict[str, Any]] 
     recent_registrations: List[Player]
-    
-    # Pending
     pending_withdrawals_count: int
     pending_kyc_count: int
 
@@ -181,4 +183,12 @@ class AuditLog(BaseModel):
     action: str
     target_id: str
     details: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LoginLog(BaseModel):
+    player_id: str
+    ip_address: str
+    location: str
+    device_info: str
+    status: str # success, failed
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

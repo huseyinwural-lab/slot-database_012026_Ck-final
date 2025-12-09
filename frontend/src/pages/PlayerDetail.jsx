@@ -8,43 +8,69 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Ban, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save, Ban, CheckCircle, Upload, DollarSign, Shield, FileText, History, Activity, MessageSquare } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const PlayerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [player, setPlayer] = useState(null);
-  const [games, setGames] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [kycDocs, setKycDocs] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Balance Adjustment State
+  const [isAdjOpen, setIsAdjOpen] = useState(false);
+  const [adjForm, setAdjForm] = useState({ amount: 0, type: 'real', note: '' });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [pRes, gRes] = await Promise.all([
+  const fetchData = async () => {
+    try {
+        const [pRes, tRes, kRes, lRes] = await Promise.all([
             api.get(`/v1/players/${id}`),
-            api.get(`/v1/players/${id}/games`)
+            api.get(`/v1/players/${id}/transactions`),
+            api.get(`/v1/players/${id}/kyc`),
+            api.get(`/v1/players/${id}/logs`)
         ]);
         setPlayer(pRes.data);
-        setGames(gRes.data);
-      } catch (err) {
+        setTransactions(tRes.data);
+        setKycDocs(kRes.data);
+        setLogs(lRes.data);
+    } catch (err) {
         toast.error("Failed to load player data");
-        navigate('/players');
-      } finally {
+    } finally {
         setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id, navigate]);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, [id]);
 
   const handleStatusChange = async (newStatus) => {
     try {
         await api.put(`/v1/players/${id}`, { status: newStatus });
         setPlayer({ ...player, status: newStatus });
         toast.success(`Player ${newStatus}`);
-    } catch (err) {
-        toast.error("Failed to update status");
-    }
+    } catch (err) { toast.error("Failed"); }
+  };
+
+  const handleBalanceAdj = async () => {
+    try {
+        const res = await api.post(`/v1/players/${id}/balance`, adjForm);
+        toast.success(res.data.message);
+        setIsAdjOpen(false);
+        fetchData();
+    } catch (err) { toast.error("Adjustment failed"); }
+  };
+
+  const handleKycReview = async (docId, status) => {
+    try {
+        await api.post(`/v1/kyc/${docId}/review`, { status });
+        toast.success(`Document ${status}`);
+        fetchData();
+    } catch (err) { toast.error("Failed"); }
   };
 
   if (loading) return <div>Loading...</div>;
@@ -52,131 +78,136 @@ const PlayerDetail = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/players')}>
             <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-            <h2 className="text-3xl font-bold tracking-tight">{player.username}</h2>
-            <p className="text-muted-foreground">{player.email} • {player.country}</p>
+            <div className="flex items-center gap-3">
+                <h2 className="text-3xl font-bold tracking-tight">{player.username}</h2>
+                <Badge variant={player.risk_score === 'high' ? 'destructive' : 'outline'}>{player.risk_score} risk</Badge>
+            </div>
+            <p className="text-muted-foreground">{player.email} • {player.country} • Joined {new Date(player.registered_at).toLocaleDateString()}</p>
         </div>
         <div className="ml-auto flex gap-2">
+            <Dialog open={isAdjOpen} onOpenChange={setIsAdjOpen}>
+                <DialogTrigger asChild>
+                    <Button variant="outline"><DollarSign className="w-4 h-4 mr-2" /> Adjust Balance</Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader><DialogTitle>Manual Balance Adjustment</DialogTitle></DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Amount (+/-)</Label>
+                            <Input type="number" value={adjForm.amount} onChange={e => setAdjForm({...adjForm, amount: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Wallet</Label>
+                            <Select value={adjForm.type} onValueChange={v => setAdjForm({...adjForm, type: v})}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="real">Real Money</SelectItem>
+                                    <SelectItem value="bonus">Bonus Money</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Admin Note (Mandatory)</Label>
+                            <Textarea value={adjForm.note} onChange={e => setAdjForm({...adjForm, note: e.target.value})} />
+                        </div>
+                        <Button onClick={handleBalanceAdj} className="w-full">Process Adjustment</Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             {player.status === 'active' ? (
                 <Button variant="destructive" onClick={() => handleStatusChange('suspended')}>
-                    <Ban className="w-4 h-4 mr-2" /> Suspend
+                    <Ban className="w-4 h-4 mr-2" /> Suspend Account
                 </Button>
             ) : (
                 <Button variant="default" onClick={() => handleStatusChange('active')}>
-                    <CheckCircle className="w-4 h-4 mr-2" /> Activate
+                    <CheckCircle className="w-4 h-4 mr-2" /> Unfreeze Account
                 </Button>
             )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Sidebar Info */}
         <Card className="md:col-span-1 h-fit">
-            <CardHeader>
-                <CardTitle>Overview</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Wallet</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-                <div>
-                    <Label className="text-muted-foreground">Status</Label>
-                    <div className="mt-1">
-                        <Badge variant={player.status === 'active' ? 'default' : 'destructive'}>{player.status}</Badge>
+                <div className="p-4 bg-green-950/20 border border-green-900/50 rounded-lg">
+                    <Label className="text-green-500">Real Balance</Label>
+                    <div className="text-2xl font-bold text-green-400">${player.balance_real.toFixed(2)}</div>
+                </div>
+                <div className="p-4 bg-yellow-950/20 border border-yellow-900/50 rounded-lg">
+                    <Label className="text-yellow-500">Bonus Balance</Label>
+                    <div className="text-xl font-bold text-yellow-400">${player.balance_bonus.toFixed(2)}</div>
+                </div>
+                <div className="space-y-1">
+                    <div className="flex justify-between text-sm"><span>VIP Level</span><span>{player.vip_level}</span></div>
+                    <div className="flex justify-between text-sm"><span>KYC Status</span><span className="uppercase">{player.kyc_status}</span></div>
+                </div>
+                <div className="pt-4 border-t">
+                    <Label className="mb-2 block">Tags</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {player.tags.map(t => <Badge key={t} variant="secondary">{t}</Badge>)}
+                        <Badge variant="outline" className="cursor-pointer">+ Add</Badge>
                     </div>
-                </div>
-                <div>
-                    <Label className="text-muted-foreground">Real Balance</Label>
-                    <div className="text-2xl font-bold text-green-500">${player.balance_real.toFixed(2)}</div>
-                </div>
-                <div>
-                    <Label className="text-muted-foreground">Bonus Balance</Label>
-                    <div className="text-xl font-bold text-yellow-500">${player.balance_bonus.toFixed(2)}</div>
-                </div>
-                <div>
-                    <Label className="text-muted-foreground">Risk Score</Label>
-                    <div className="mt-1">
-                        <Badge variant={player.risk_score === 'high' ? 'destructive' : 'outline'}>{player.risk_score}</Badge>
-                    </div>
-                </div>
-                <div>
-                    <Label className="text-muted-foreground">VIP Level</Label>
-                    <div className="text-lg font-medium">Level {player.vip_level}</div>
                 </div>
             </CardContent>
         </Card>
 
+        {/* Tabs Area */}
         <div className="md:col-span-3">
             <Tabs defaultValue="profile">
-                <TabsList>
-                    <TabsTrigger value="profile">Profile</TabsTrigger>
-                    <TabsTrigger value="kyc">KYC</TabsTrigger>
-                    <TabsTrigger value="games">Game History</TabsTrigger>
-                    <TabsTrigger value="logs">Logs</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-6">
+                    <TabsTrigger value="profile"><UserIcon className="w-4 h-4 mr-2 hidden md:block" /> Profile</TabsTrigger>
+                    <TabsTrigger value="kyc"><FileText className="w-4 h-4 mr-2 hidden md:block" /> KYC</TabsTrigger>
+                    <TabsTrigger value="finance"><DollarSign className="w-4 h-4 mr-2 hidden md:block" /> Finance</TabsTrigger>
+                    <TabsTrigger value="games"><Activity className="w-4 h-4 mr-2 hidden md:block" /> Games</TabsTrigger>
+                    <TabsTrigger value="logs"><History className="w-4 h-4 mr-2 hidden md:block" /> Logs</TabsTrigger>
+                    <TabsTrigger value="notes"><MessageSquare className="w-4 h-4 mr-2 hidden md:block" /> Notes</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="profile" className="space-y-4 mt-4">
+                <TabsContent value="profile" className="mt-6 space-y-6">
                     <Card>
                         <CardHeader><CardTitle>Personal Information</CardTitle></CardHeader>
-                        <CardContent className="grid gap-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Username</Label>
-                                    <Input value={player.username} readOnly />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Email</Label>
-                                    <Input value={player.email} readOnly />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Phone</Label>
-                                    <Input value={player.phone || '-'} readOnly />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Country</Label>
-                                    <Input value={player.country} readOnly />
-                                </div>
-                            </div>
+                        <CardContent className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2"><Label>First Name</Label><Input value={player.first_name || ''} readOnly /></div>
+                            <div className="space-y-2"><Label>Last Name</Label><Input value={player.last_name || ''} readOnly /></div>
+                            <div className="space-y-2"><Label>Email</Label><Input value={player.email} readOnly /></div>
+                            <div className="space-y-2"><Label>Phone</Label><Input value={player.phone || '-'} readOnly /></div>
+                            <div className="space-y-2"><Label>Address</Label><Input value={player.address || '-'} readOnly /></div>
+                            <div className="space-y-2"><Label>Country</Label><Input value={player.country} readOnly /></div>
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="kyc" className="mt-4">
+                <TabsContent value="kyc" className="mt-6">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>KYC Documents</CardTitle>
-                            <CardDescription>Status: <span className="font-bold uppercase">{player.kyc_status}</span></CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-center py-10 text-muted-foreground">
-                                No documents uploaded yet.
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="games" className="mt-4">
-                    <Card>
-                        <CardHeader><CardTitle>Recent Gameplay</CardTitle></CardHeader>
+                        <CardHeader><CardTitle>Documents</CardTitle></CardHeader>
                         <CardContent>
                             <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Game</TableHead>
-                                        <TableHead>Provider</TableHead>
-                                        <TableHead>Time</TableHead>
-                                        <TableHead className="text-right">Bet</TableHead>
-                                        <TableHead className="text-right">Win</TableHead>
-                                    </TableRow>
-                                </TableHeader>
+                                <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Date</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
                                 <TableBody>
-                                    {games.map((g, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell className="font-medium">{g.game}</TableCell>
-                                            <TableCell>{g.provider}</TableCell>
-                                            <TableCell className="text-muted-foreground">{new Date(g.time).toLocaleTimeString()}</TableCell>
-                                            <TableCell className="text-right text-red-400">-${g.bet}</TableCell>
-                                            <TableCell className="text-right text-green-400">+${g.win}</TableCell>
+                                    {kycDocs.length === 0 && <TableRow><TableCell colSpan={4} className="text-center">No documents</TableCell></TableRow>}
+                                    {kycDocs.map(doc => (
+                                        <TableRow key={doc.id}>
+                                            <TableCell className="capitalize font-medium">{doc.type.replace('_', ' ')}</TableCell>
+                                            <TableCell>{new Date(doc.uploaded_at).toLocaleDateString()}</TableCell>
+                                            <TableCell><Badge variant={doc.status === 'approved' ? 'default' : 'secondary'}>{doc.status}</Badge></TableCell>
+                                            <TableCell className="text-right">
+                                                {doc.status === 'pending' && (
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button size="sm" onClick={() => handleKycReview(doc.id, 'approved')}>Approve</Button>
+                                                        <Button size="sm" variant="destructive" onClick={() => handleKycReview(doc.id, 'rejected')}>Reject</Button>
+                                                    </div>
+                                                )}
+                                                <Button variant="link" size="sm">View File</Button>
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -184,12 +215,65 @@ const PlayerDetail = () => {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                
-                <TabsContent value="logs" className="mt-4">
-                     <Card>
-                        <CardHeader><CardTitle>Activity Logs</CardTitle></CardHeader>
+
+                <TabsContent value="finance" className="mt-6">
+                    <Card>
+                        <CardHeader><CardTitle>Transaction History</CardTitle></CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">Login from IP 192.168.1.1 at {new Date().toLocaleString()}</p>
+                            <Table>
+                                <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Method</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                                <TableBody>
+                                    {transactions.map(tx => (
+                                        <TableRow key={tx.id}>
+                                            <TableCell>{new Date(tx.created_at).toLocaleString()}</TableCell>
+                                            <TableCell className="uppercase text-xs font-bold">{tx.type}</TableCell>
+                                            <TableCell>{tx.method}</TableCell>
+                                            <TableCell className={tx.type === 'deposit' || tx.type === 'adjustment' ? "text-green-500" : "text-red-500"}>
+                                                ${tx.amount}
+                                            </TableCell>
+                                            <TableCell><Badge variant="outline">{tx.status}</Badge></TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="logs" className="mt-6">
+                    <Card>
+                        <CardHeader><CardTitle>Login & Security Logs</CardTitle></CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>IP Address</TableHead><TableHead>Location</TableHead><TableHead>Device</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                                <TableBody>
+                                    {logs.map((log, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
+                                            <TableCell className="font-mono text-xs">{log.ip_address}</TableCell>
+                                            <TableCell>{log.location}</TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{log.device_info}</TableCell>
+                                            <TableCell><Badge variant={log.status === 'success' ? 'default' : 'destructive'}>{log.status}</Badge></TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="notes" className="mt-6">
+                    <Card>
+                        <CardHeader><CardTitle>Admin Notes</CardTitle></CardHeader>
+                        <CardContent>
+                            <Textarea placeholder="Add a note about this player..." className="mb-4" />
+                            <Button>Add Note</Button>
+                            <div className="mt-6 space-y-4">
+                                <div className="p-4 border rounded bg-muted/50">
+                                    <p className="text-sm">User requested high roller bonus via chat. Approved by Manager.</p>
+                                    <p className="text-xs text-muted-foreground mt-2">By Admin • 2 days ago</p>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -199,5 +283,8 @@ const PlayerDetail = () => {
     </div>
   );
 };
+
+// Simple Icon Wrapper for Tabs
+const UserIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 
 export default PlayerDetail;
