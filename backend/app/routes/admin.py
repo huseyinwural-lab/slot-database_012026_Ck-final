@@ -5,7 +5,8 @@ import uuid
 import random
 from app.models.modules import (
     AdminUser, AdminRole, AdminTeam, AdminSession, SecurityPolicy, AdminInvite, AdminAPIKey,
-    AdminStatus, InviteStatus, SystemEvent, LogSeverity
+    AdminStatus, InviteStatus, SystemEvent, LogSeverity, AdminActivityLog, AdminLoginHistory,
+    AdminPermissionMatrix, AdminIPRestriction, AdminDeviceRestriction
 )
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
