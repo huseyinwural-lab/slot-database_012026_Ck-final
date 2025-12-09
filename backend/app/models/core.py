@@ -29,12 +29,12 @@ class TransactionStatus(str, Enum):
     REJECTED = "rejected"
     COMPLETED = "completed"
     FAILED = "failed"
-    WAITING_SECOND_APPROVAL = "waiting_second_approval" # For 4-eyes principle
+    WAITING_SECOND_APPROVAL = "waiting_second_approval" 
 
 # Core Models
 class Player(BaseModel):
     id: str = Field(..., description="Player ID")
-    tenant_id: str = "default_casino" # Multi-tenant readiness
+    tenant_id: str = "default_casino" 
     username: str
     email: EmailStr
     phone: Optional[str] = None
@@ -49,6 +49,10 @@ class Player(BaseModel):
     risk_score: str = "low" 
     address: Optional[str] = None
     dob: Optional[datetime] = None
+    
+    # New Fields for Luck Boost
+    luck_boost_factor: float = 1.0 # 1.0 = normal, 1.5 = 50% more chance
+    luck_boost_remaining_spins: int = 0
 
 class Transaction(BaseModel):
     id: str = Field(..., description="Transaction ID")
@@ -62,7 +66,16 @@ class Transaction(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     processed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
-    approver_id: Optional[str] = None # Log who approved
+    approver_id: Optional[str] = None 
+
+class GameConfig(BaseModel):
+    rtp: float = 96.0
+    volatility: str = "medium" # low, medium, high
+    paytable_id: str = "standard"
+    min_bet: float = 0.10
+    max_bet: float = 100.00
+    max_win_multiplier: int = 5000
+    bonus_buy_enabled: bool = False
 
 class Game(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -70,18 +83,28 @@ class Game(BaseModel):
     name: str
     provider: str
     category: str 
-    rtp: float
     status: str = "active"
     image_url: Optional[str] = None
+    configuration: GameConfig = Field(default_factory=GameConfig)
+
+class BonusRule(BaseModel):
+    min_deposit: Optional[float] = None
+    reward_amount: Optional[float] = None
+    reward_percentage: Optional[float] = None
+    luck_boost_factor: Optional[float] = None
+    luck_boost_spins: Optional[int] = None
+    cashback_percentage: Optional[float] = None
 
 class Bonus(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    type: str 
-    amount: float
-    wager_req: int
+    type: str # welcome, deposit, referral, luck_boost, cashback
+    description: str = ""
+    wager_req: int = 35
     status: str = "active"
     valid_until: Optional[datetime] = None
+    rules: BonusRule = Field(default_factory=BonusRule)
+    auto_apply: bool = False
 
 class TicketMessage(BaseModel):
     sender: str 
@@ -111,19 +134,19 @@ class DashboardStats(BaseModel):
 
 class FeatureFlag(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    key: str # e.g., "new_bonus_engine"
+    key: str 
     description: str
     is_enabled: bool = False
-    rollout_percentage: int = 0 # 0-100 for A/B testing or Gradual Rollout
-    target_countries: List[str] = [] # Segment based enabling
+    rollout_percentage: int = 0 
+    target_countries: List[str] = [] 
 
 class ApprovalRequest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    type: str # "withdrawal", "manual_bonus", "vip_upgrade"
-    related_entity_id: str # Transaction ID or Player ID
+    type: str 
+    related_entity_id: str 
     requester_admin: str
     amount: Optional[float] = None
-    status: str = "pending" # pending, approved, rejected
+    status: str = "pending" 
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     details: Dict[str, Any] = {}
 

@@ -6,7 +6,7 @@ import random
 from app.models.core import (
     Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus, 
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
-    FeatureFlag, ApprovalRequest
+    FeatureFlag, ApprovalRequest, GameConfig, BonusRule
 )
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -110,10 +110,8 @@ async def approve_transaction(tx_id: str):
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
-    # 4-Eyes Principle Logic (Simplified)
-    # If amount > 1000, move to Approval Queue instead of instant completion
+    # 4-Eyes Principle Logic
     if tx['amount'] > 1000 and tx['status'] == 'pending':
-        # Create approval request
         approval_req = ApprovalRequest(
             type="withdrawal_high_value",
             related_entity_id=tx_id,
@@ -152,7 +150,6 @@ async def action_approval(req_id: str, action: str = Body(..., embed=True)):
     new_status = "approved" if action == "approve" else "rejected"
     await db.approvals.update_one({"id": req_id}, {"$set": {"status": new_status}})
 
-    # If approved, finalize the transaction
     if new_status == "approved" and req['type'] == 'withdrawal_high_value':
         await db.transactions.update_one(
             {"id": req['related_entity_id']}, 
@@ -190,7 +187,6 @@ async def global_search(q: str):
     db = get_db()
     results = []
     
-    # Search Players
     players = await db.players.find({
         "$or": [
             {"username": {"$regex": q, "$options": "i"}},
@@ -201,7 +197,6 @@ async def global_search(q: str):
     for p in players:
         results.append({"type": "player", "title": p['username'], "id": p['id'], "details": p['email']})
 
-    # Search Transactions
     txs = await db.transactions.find({"id": q}).limit(5).to_list(5)
     for t in txs:
         results.append({"type": "transaction", "title": f"TX: {t['amount']}", "id": t['id'], "details": t['status']})
@@ -220,6 +215,14 @@ async def add_game(game: Game):
     db = get_db()
     await db.games.insert_one(game.model_dump())
     return game
+
+@router.put("/games/{game_id}")
+async def update_game_config(game_id: str, config: GameConfig):
+    db = get_db()
+    res = await db.games.update_one({"id": game_id}, {"$set": {"configuration": config.model_dump()}})
+    if res.matched_count == 0:
+        raise HTTPException(404, "Game not found")
+    return {"message": "Game configuration updated"}
 
 @router.post("/games/{game_id}/toggle")
 async def toggle_game_status(game_id: str):
@@ -275,28 +278,22 @@ async def seed_mock_data(db):
     await db.transactions.insert_many([
         Transaction(id="tx1", player_id="p1", type=TransactionType.DEPOSIT, amount=10000, status=TransactionStatus.COMPLETED, method="crypto").model_dump(),
         Transaction(id="tx2", player_id="p1", type=TransactionType.WITHDRAWAL, amount=5000, status=TransactionStatus.PENDING, method="bank_transfer").model_dump(),
-        Transaction(id="tx3", player_id="p1", type=TransactionType.WITHDRAWAL, amount=15000, status=TransactionStatus.WAITING_SECOND_APPROVAL, method="crypto").model_dump(), # High value example
     ])
     # Approvals
     await db.approvals.insert_many([
-        ApprovalRequest(type="withdrawal_high_value", related_entity_id="tx3", requester_admin="system_bot", amount=15000, details={"player_id": "p1"}).model_dump()
+        ApprovalRequest(type="withdrawal_high_value", related_entity_id="tx2", requester_admin="system_bot", amount=5000, details={"player_id": "p1"}).model_dump()
     ])
     # Features
     await db.features.insert_many([
-        FeatureFlag(key="new_bonus_engine", description="Enable V2 Bonus System with dynamic segmentation", is_enabled=False).model_dump(),
-        FeatureFlag(key="ai_fraud_check", description="Enable real-time AI scoring on deposits", is_enabled=True).model_dump(),
-        FeatureFlag(key="dark_mode_v2", description="New contrast layout", is_enabled=False, rollout_percentage=10).model_dump(),
+        FeatureFlag(key="new_bonus_engine", description="Enable V2 Bonus System", is_enabled=False).model_dump(),
     ])
-    # Games & Bonuses (previous seed)
+    # Games
     await db.games.insert_many([
-        Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", rtp=96.5).model_dump(),
-        Game(name="Lightning Roulette", provider="Evolution", category="Live", rtp=97.3).model_dump(),
+        Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", status="active", configuration=GameConfig(rtp=96.5, volatility="high").model_dump()).model_dump(),
+        Game(name="Lightning Roulette", provider="Evolution", category="Live", status="active", configuration=GameConfig(rtp=97.3, volatility="medium").model_dump()).model_dump(),
     ])
+    # Bonuses
     await db.bonuses.insert_many([
-        Bonus(name="Welcome Pack", type="deposit", amount=100, wager_req=30).model_dump(),
-    ])
-    await db.tickets.insert_many([
-        Ticket(id="t1", player_id="p2", player_username="newbie_luck", subject="Deposit issue", messages=[
-            TicketMessage(sender="player", text="My deposit is not showing up.").model_dump()
-        ]).model_dump()
+        Bonus(name="Welcome Offer", type="welcome", auto_apply=True, rules=BonusRule(reward_percentage=100, min_deposit=20).model_dump()).model_dump(),
+        Bonus(name="Weekly Cashback", type="cashback", rules=BonusRule(cashback_percentage=10).model_dump()).model_dump(),
     ])
