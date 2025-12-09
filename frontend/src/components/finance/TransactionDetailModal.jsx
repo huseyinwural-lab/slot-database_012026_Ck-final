@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { 
   CreditCard, CheckCircle, XCircle, Clock, ShieldAlert, FileText, 
   RefreshCw, Edit, Upload, Activity, Globe, Smartphone, User, ArrowRight,
-  AlertTriangle, Lock, Link
+  AlertTriangle, Lock, Link, BrainCircuit
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../services/api';
@@ -20,7 +20,9 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
   if (!transaction) return null;
 
   const [isLoading, setLoading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [note, setNote] = useState("");
+  const [aiAnalysis, setAiAnalysis] = useState(null);
 
   const handleAction = async (action, reason = '') => {
     setLoading(true);
@@ -33,6 +35,20 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
       toast.error('Action failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAnalyzeRisk = async () => {
+    setIsAnalyzing(true);
+    try {
+      const res = await api.post(`/v1/finance/transactions/${transaction.id}/analyze-risk`);
+      setAiAnalysis(res.data);
+      toast.success("AI Analysis Complete");
+      onRefresh(); // To update the timeline in parent list if needed, but locally we use state
+    } catch (err) {
+      toast.error('AI Analysis failed');
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -185,9 +201,38 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-6">
                     <div className="border rounded-lg p-4 bg-orange-50/50 border-orange-100">
-                        <h4 className="font-bold flex items-center gap-2 mb-4 text-orange-800">
-                            <ShieldAlert className="w-5 h-5"/> Risk Assessment
-                        </h4>
+                        <div className="flex justify-between items-start mb-4">
+                            <h4 className="font-bold flex items-center gap-2 text-orange-800">
+                                <ShieldAlert className="w-5 h-5"/> Risk Assessment
+                            </h4>
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="border-orange-200 text-orange-700 hover:bg-orange-100"
+                                onClick={handleAnalyzeRisk}
+                                disabled={isAnalyzing}
+                            >
+                                {isAnalyzing ? <RefreshCw className="w-3 h-3 animate-spin mr-1"/> : <BrainCircuit className="w-3 h-3 mr-1"/>}
+                                {isAnalyzing ? "Analyzing..." : "Analyze Risk (AI)"}
+                            </Button>
+                        </div>
+
+                        {/* AI ANALYSIS RESULT */}
+                        {aiAnalysis && (
+                             <div className="mb-4 bg-white p-3 rounded border border-orange-200 shadow-sm">
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className="font-bold text-sm">AI Score: {aiAnalysis.risk_score}/100</span>
+                                     <Badge variant={aiAnalysis.risk_level === 'low' ? 'outline' : 'destructive'}>{aiAnalysis.risk_level}</Badge>
+                                 </div>
+                                 <p className="text-xs text-muted-foreground italic">{aiAnalysis.reason}</p>
+                                 {aiAnalysis.flags && aiAnalysis.flags.length > 0 && (
+                                     <div className="flex gap-1 flex-wrap mt-2">
+                                         {aiAnalysis.flags.map(f => <Badge key={f} variant="secondary" className="text-[10px]">{f}</Badge>)}
+                                     </div>
+                                 )}
+                             </div>
+                        )}
+
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm">Risk Score at Transaction</span>
