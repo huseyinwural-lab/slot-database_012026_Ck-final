@@ -1557,7 +1557,8 @@ def main():
     test_results.append(("Bonuses Management", tester.test_bonuses_management()))
     test_results.append(("Advanced Bonus System", tester.test_advanced_bonus_system()))
     
-    print("\n🎫 SUPPORT TICKETS TESTS")
+    print("\n🎫 SUPPORT MODULE TESTS")
+    test_results.append(("Support Module", tester.test_support_module()))
     test_results.append(("Support Tickets", tester.test_support_tickets()))
     
     print("\n🎯 PLAYER GAME HISTORY TESTS")
