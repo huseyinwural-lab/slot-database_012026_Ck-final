@@ -4,6 +4,22 @@ from datetime import datetime, timezone
 from enum import Enum
 import uuid
 
+# --- SHARED ENUMS ---
+class KYCStatus(str, Enum):
+    NOT_STARTED = "not_started"
+    PENDING = "pending"
+    IN_REVIEW = "in_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+    SUSPENDED = "suspended"
+
+class DocStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
 # --- CRM ENUMS ---
 class ChannelType(str, Enum):
     EMAIL = "email"
