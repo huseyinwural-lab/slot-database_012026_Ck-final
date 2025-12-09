@@ -961,6 +961,128 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_review_request_specific(self):
+        """Test specific endpoints mentioned in the review request"""
+        print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
+        
+        # 1. AI Risk Analysis: POST /api/v1/finance/transactions/tx2/analyze-risk
+        print("\n🤖 Testing AI Risk Analysis Endpoint")
+        success1, risk_response = self.run_test("AI Risk Analysis - tx2", "POST", "api/v1/finance/transactions/tx2/analyze-risk", 200)
+        
+        risk_analysis_valid = True
+        if success1 and isinstance(risk_response, dict):
+            print("🔍 VALIDATING AI RISK ANALYSIS RESPONSE")
+            
+            # Check for risk_score
+            if 'risk_score' in risk_response:
+                risk_score = risk_response['risk_score']
+                print(f"   ✅ risk_score: {risk_score}")
+                if not isinstance(risk_score, (int, float)) or risk_score < 0 or risk_score > 100:
+                    print(f"   ❌ Invalid risk_score value: {risk_score} (should be 0-100)")
+                    risk_analysis_valid = False
+            else:
+                print(f"   ❌ MISSING: risk_score")
+                risk_analysis_valid = False
+            
+            # Check for risk_level
+            if 'risk_level' in risk_response:
+                risk_level = risk_response['risk_level']
+                print(f"   ✅ risk_level: {risk_level}")
+                valid_levels = ['low', 'medium', 'high', 'critical', 'unknown']
+                if risk_level not in valid_levels:
+                    print(f"   ⚠️  Unexpected risk_level: {risk_level}")
+            else:
+                print(f"   ❌ MISSING: risk_level")
+                risk_analysis_valid = False
+            
+            # Check for reason
+            if 'reason' in risk_response:
+                reason = risk_response['reason']
+                print(f"   ✅ reason: {reason[:50]}...")
+            else:
+                print(f"   ❌ MISSING: reason")
+                risk_analysis_valid = False
+                
+            # Optional fields validation
+            optional_fields = ['flags', 'recommendation', 'details', 'error']
+            for field in optional_fields:
+                if field in risk_response:
+                    print(f"   ✅ {field}: {risk_response[field]}")
+        else:
+            print("❌ Failed to get valid AI risk analysis response")
+            risk_analysis_valid = False
+        
+        # 2. Game Management: GET /api/v1/games
+        print("\n🎮 Testing Game Management Endpoint")
+        success2, games_response = self.run_test("Game Management - Get Games", "GET", "api/v1/games", 200)
+        
+        games_valid = True
+        if success2 and isinstance(games_response, list):
+            print(f"✅ Games endpoint returned {len(games_response)} games")
+            
+            if len(games_response) > 0:
+                game = games_response[0]
+                required_game_fields = ['id', 'name', 'provider', 'category']
+                missing_game_fields = [field for field in required_game_fields if field not in game]
+                
+                if not missing_game_fields:
+                    print(f"✅ Game structure complete: {game['name']} by {game['provider']}")
+                    print(f"   📂 Category: {game['category']}")
+                    print(f"   🆔 ID: {game['id']}")
+                else:
+                    print(f"⚠️  Game missing fields: {missing_game_fields}")
+                    games_valid = False
+            else:
+                print("⚠️  No games found in response")
+        else:
+            print("❌ Failed to get valid games list response")
+            games_valid = False
+        
+        # 3. Geo Rules: PUT /api/v1/games/{game_id}/details with countries_allowed
+        print("\n🌍 Testing Geo Rules Update")
+        geo_rules_valid = True
+        
+        if success2 and isinstance(games_response, list) and len(games_response) > 0:
+            game_id = games_response[0]['id']
+            geo_update_data = {
+                "countries_allowed": ["TR", "DE"]
+            }
+            
+            success3, geo_response = self.run_test(f"Geo Rules Update - {game_id}", "PUT", f"api/v1/games/{game_id}/details", 200, geo_update_data)
+            
+            if success3 and isinstance(geo_response, dict):
+                if 'message' in geo_response:
+                    print(f"✅ Geo rules update successful: {geo_response['message']}")
+                    
+                    # Verify the update by fetching the game again
+                    success4, updated_games = self.run_test("Verify Geo Rules Update", "GET", "api/v1/games", 200)
+                    if success4 and isinstance(updated_games, list):
+                        updated_game = next((g for g in updated_games if g.get('id') == game_id), None)
+                        if updated_game and 'countries_allowed' in updated_game:
+                            countries = updated_game['countries_allowed']
+                            if countries == ["TR", "DE"]:
+                                print(f"✅ Geo rules successfully updated: {countries}")
+                            else:
+                                print(f"⚠️  Geo rules may not have been updated correctly: {countries}")
+                        else:
+                            print("⚠️  Updated game not found or missing countries_allowed field")
+                else:
+                    print("⚠️  Geo rules update response missing message field")
+                    geo_rules_valid = False
+            else:
+                print("❌ Failed to update geo rules")
+                geo_rules_valid = False
+        else:
+            print("❌ Cannot test geo rules - no games available")
+            geo_rules_valid = False
+        
+        print(f"\n📊 REVIEW REQUEST TEST SUMMARY:")
+        print(f"   🤖 AI Risk Analysis: {'✅ PASS' if success1 and risk_analysis_valid else '❌ FAIL'}")
+        print(f"   🎮 Game Management: {'✅ PASS' if success2 and games_valid else '❌ FAIL'}")
+        print(f"   🌍 Geo Rules Update: {'✅ PASS' if geo_rules_valid else '❌ FAIL'}")
+        
+        return success1 and risk_analysis_valid and success2 and games_valid and geo_rules_valid
+
     def test_modules_kyc(self):
         """Test Enhanced KYC Module endpoints"""
         print("\n📋 ENHANCED KYC MODULE TESTS")
