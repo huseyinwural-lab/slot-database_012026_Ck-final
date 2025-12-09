@@ -25,6 +25,11 @@ class TransactionType(str, Enum):
     ADJUSTMENT = "adjustment"
     BET = "bet"
     WIN = "win"
+    BONUS_ISSUED = "bonus_issued"
+    BONUS_WAGERED = "bonus_wagered"
+    BONUS_CANCELLED = "bonus_cancelled"
+    JACKPOT_CONTRIBUTION = "jackpot_contribution"
+    JACKPOT_WIN = "jackpot_win"
 
 class TransactionStatus(str, Enum):
     REQUESTED = "requested"
@@ -183,6 +188,7 @@ class Player(BaseModel):
     kyc_level: int = 0
     account_flags: List[str] = [] # "bonus_abuse", "high_risk", "whale"
     tags: List[str] = [] 
+    linked_accounts: List[str] = [] # IDs of other accounts
     
     # Technical & Tracking
     registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -227,6 +233,7 @@ class Transaction(BaseModel):
     provider: str = "Internal" # "Papara", "Stripe", "CoinPayments"
     provider_tx_id: Optional[str] = None
     destination_address: Optional[str] = None # IBAN, Wallet Address
+    affiliate_source: Optional[str] = None
     
     # User Context at Transaction Time
     ip_address: Optional[str] = None
@@ -481,6 +488,11 @@ class FinancialReport(BaseModel):
     payment_fees: float = 0.0
     fraud_blocked_amount: float = 0.0
     total_player_balance: float = 0.0
+    
+    # Reports
+    fx_impact: float = 0.0
+    chargeback_count: int = 0
+    chargeback_amount: float = 0.0
 
 # --- NEW ARCHITECTURE MODELS ---
 

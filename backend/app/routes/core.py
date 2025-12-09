@@ -153,7 +153,9 @@ async def get_transactions(
     provider: Optional[str] = None,
     country: Optional[str] = None,
     start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None,
+    currency: Optional[str] = None,
+    ip_address: Optional[str] = None
 ):
     db = get_db()
     query = {}
@@ -165,6 +167,10 @@ async def get_transactions(
         query["provider"] = provider
     if country and country != "all":
         query["country"] = country
+    if currency and currency != "all":
+        query["currency"] = currency
+    if ip_address:
+         query["ip_address"] = ip_address
         
     if min_amount or max_amount:
         query["amount"] = {}
@@ -189,6 +195,7 @@ async def action_transaction(tx_id: str, action: str = Body(..., embed=True), re
     
     admin = "current_admin"
     new_timeline_entry = None
+    new_status = tx['status']
     
     if action == "approve":
         if tx['type'] == 'withdrawal' and tx['amount'] > 1000 and tx['status'] == 'pending':
@@ -232,18 +239,28 @@ async def action_transaction(tx_id: str, action: str = Body(..., embed=True), re
         new_status = "under_review" 
         new_timeline_entry = TransactionTimeline(status="under_review", description="Marked for Manual Review", operator=admin)
         
+    elif action == "mark_paid":
+        new_status = "paid"
+        new_timeline_entry = TransactionTimeline(status="paid", description="Marked as Paid manually", operator=admin)
+
+    elif action == "add_note":
+        new_timeline_entry = TransactionTimeline(status=tx['status'], description=f"Note Added: {reason}", operator=admin)
+
     else:
         raise HTTPException(400, "Invalid action")
 
     update_ops = {
-        "$set": {"status": new_status, "processed_at": datetime.now(timezone.utc), "admin_note": reason},
+        "$set": {"status": new_status, "processed_at": datetime.now(timezone.utc)},
     }
     
+    if reason and action != 'add_note':
+         update_ops["$set"]["admin_note"] = reason
+
     if new_timeline_entry:
         update_ops["$push"] = {"timeline": new_timeline_entry.model_dump()}
 
     await db.transactions.update_one({"id": tx_id}, update_ops)
-    return {"message": f"Transaction {new_status}"}
+    return {"message": f"Transaction updated: {action}"}
 
 @router.get("/finance/reports", response_model=FinancialReport)
 async def get_financial_reports(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
@@ -272,7 +289,10 @@ async def get_financial_reports(start_date: Optional[datetime] = None, end_date:
         provider_cost=ggr * 0.05,
         payment_fees=total_dep * 0.02,
         fraud_blocked_amount=5000.0,
-        total_player_balance=150000.0
+        total_player_balance=150000.0,
+        fx_impact=120.50,
+        chargeback_count=2,
+        chargeback_amount=450.00
     )
 
 # --- APPROVAL QUEUE ---
@@ -516,7 +536,8 @@ async def seed_mock_data(db):
             fraud_score=12,
             kyc_status=KYCStatus.APPROVED,
             kyc_level=3,
-            affiliate_source="google_ads"
+            affiliate_source="google_ads",
+            linked_accounts=["p2"] # Mock link
         ).model_dump(),
         Player(
             id="p2", 
@@ -558,6 +579,8 @@ async def seed_mock_data(db):
             risk_score_at_time="low",
             balance_before=40000,
             balance_after=50000,
+            currency="USD",
+            affiliate_source="google_ads",
             timeline=[
                 TransactionTimeline(status="pending", description="Created").model_dump(),
                 TransactionTimeline(status="completed", description="Confirmed by Blockchain").model_dump()
@@ -581,6 +604,7 @@ async def seed_mock_data(db):
             wagering_info=WageringStatus(required=1000, current=1500, is_met=True).model_dump(),
             balance_before=50000,
             balance_after=45000,
+            currency="USD",
             limit_flags=["weekly_limit_warning"],
             timeline=[
                 TransactionTimeline(status="requested", description="Request Created by Player").model_dump(),
@@ -605,6 +629,21 @@ async def seed_mock_data(db):
             balance_after=50,
             timeline=[
                 TransactionTimeline(status="requested", description="Request Created").model_dump()
+            ]
+        ).model_dump(),
+        Transaction(
+            id="tx4", 
+            player_id="p1", 
+            type=TransactionType.BONUS_ISSUED, 
+            amount=500, 
+            status=TransactionStatus.COMPLETED, 
+            method="system", 
+            player_username="highroller99",
+            provider="System",
+            currency="USD",
+            bonus_id="welcome_bonus",
+            timeline=[
+                TransactionTimeline(status="completed", description="Bonus Auto-Issued").model_dump()
             ]
         ).model_dump(),
     ])
