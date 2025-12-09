@@ -34,6 +34,8 @@ class TransactionStatus(str, Enum):
     FAILED = "failed"
     WAITING_SECOND_APPROVAL = "waiting_second_approval" 
     FRAUD_FLAGGED = "fraud_flagged"
+    CANCELLED = "cancelled"
+    REFUNDED = "refunded"
 
 # --- RISK ENUMS ---
 class RiskSeverity(str, Enum):
@@ -194,6 +196,12 @@ class Player(BaseModel):
     luck_boost_factor: float = 1.0 
     luck_boost_remaining_spins: int = 0
 
+class TransactionTimeline(BaseModel):
+    status: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    description: str
+    operator: Optional[str] = None
+
 class Transaction(BaseModel):
     id: str = Field(..., description="Transaction ID")
     tenant_id: str = "default_casino"
@@ -204,10 +212,27 @@ class Transaction(BaseModel):
     currency: str = "USD"
     status: TransactionStatus = TransactionStatus.PENDING
     method: str  
+    
+    # Enhanced Financial Fields
+    provider: str = "Internal" # "Papara", "Stripe", "CoinPayments"
+    provider_tx_id: Optional[str] = None
+    ip_address: Optional[str] = None
+    device_info: Optional[str] = None
+    country: Optional[str] = None
+    bonus_id: Optional[str] = None # Triggered bonus
+    fee: float = 0.0
+    net_amount: float = 0.0
+    
+    # Operational Fields
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     processed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
     approver_id: Optional[str] = None 
+    
+    # Detailed Views
+    timeline: List[TransactionTimeline] = []
+    raw_response: Optional[Dict[str, Any]] = None
+    attachments: List[str] = [] # Receipt URLs
 
 # --- GAME ADVANCED MODELS ---
 

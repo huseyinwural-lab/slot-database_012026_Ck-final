@@ -8,7 +8,7 @@ from app.models.core import (
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
     FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric, LoginLog,
     FinancialReport, CustomTable, GameUploadLog, Paytable, JackpotConfig,
-    BusinessStatus, RuntimeStatus, SpecialType
+    BusinessStatus, RuntimeStatus, SpecialType, TransactionTimeline
 )
 from app.models.modules import KYCDocument
 from config import settings
@@ -149,6 +149,8 @@ async def get_transactions(
     min_amount: Optional[float] = None,
     max_amount: Optional[float] = None,
     player_search: Optional[str] = None,
+    provider: Optional[str] = None,
+    country: Optional[str] = None,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None
 ):
@@ -158,6 +160,11 @@ async def get_transactions(
         query["type"] = type
     if status and status != "all":
         query["status"] = status
+    if provider and provider != "all":
+        query["provider"] = provider
+    if country and country != "all":
+        query["country"] = country
+        
     if min_amount or max_amount:
         query["amount"] = {}
         if min_amount: query["amount"]["$gte"] = min_amount
@@ -179,6 +186,9 @@ async def action_transaction(tx_id: str, action: str = Body(..., embed=True), re
     if not tx:
         raise HTTPException(404, "Transaction not found")
     
+    admin = "current_admin"
+    new_timeline_entry = None
+    
     if action == "approve":
         if tx['type'] == 'withdrawal' and tx['amount'] > 1000 and tx['status'] == 'pending':
             approval_req = ApprovalRequest(
@@ -193,19 +203,41 @@ async def action_transaction(tx_id: str, action: str = Body(..., embed=True), re
             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount'], "total_deposits": tx['amount'], "net_position": tx['amount']}})
         if tx['type'] == 'withdrawal':
              await db.players.update_one({"id": tx['player_id']}, {"$inc": {"total_withdrawals": tx['amount'], "net_position": -tx['amount'], "pending_withdrawals": -tx['amount']}})
+        new_timeline_entry = TransactionTimeline(status="completed", description="Transaction Approved", operator=admin)
 
     elif action == "reject":
         new_status = "rejected"
         if tx['type'] == 'withdrawal':
             # Refund
             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount'], "pending_withdrawals": -tx['amount']}})
+        new_timeline_entry = TransactionTimeline(status="rejected", description=f"Transaction Rejected: {reason}", operator=admin)
+            
     elif action == "fraud":
         new_status = "fraud_flagged"
         await db.players.update_one({"id": tx['player_id']}, {"$set": {"status": "suspended", "risk_score": "high"}})
+        new_timeline_entry = TransactionTimeline(status="fraud_flagged", description="Flagged for Fraud", operator=admin)
+        
+    elif action == "retry_callback":
+        # Mock retry
+        new_timeline_entry = TransactionTimeline(status=tx['status'], description="Callback Retried manually", operator=admin)
+        await db.transactions.update_one({"id": tx_id}, {"$push": {"timeline": new_timeline_entry.model_dump()}})
+        return {"message": "Callback retried"}
+        
+    elif action == "pending_review":
+        new_status = "pending" # Or specific review status
+        new_timeline_entry = TransactionTimeline(status="pending", description="Marked for Manual Review", operator=admin)
+        
     else:
         raise HTTPException(400, "Invalid action")
 
-    await db.transactions.update_one({"id": tx_id}, {"$set": {"status": new_status, "processed_at": datetime.now(timezone.utc), "admin_note": reason}})
+    update_ops = {
+        "$set": {"status": new_status, "processed_at": datetime.now(timezone.utc), "admin_note": reason},
+    }
+    
+    if new_timeline_entry:
+        update_ops["$push"] = {"timeline": new_timeline_entry.model_dump()}
+
+    await db.transactions.update_one({"id": tx_id}, update_ops)
     return {"message": f"Transaction {new_status}"}
 
 @router.get("/finance/reports", response_model=FinancialReport)
@@ -507,8 +539,42 @@ async def seed_mock_data(db):
         ).model_dump(),
     ])
     await db.transactions.insert_many([
-        Transaction(id="tx1", player_id="p1", type=TransactionType.DEPOSIT, amount=10000, status=TransactionStatus.COMPLETED, method="crypto", player_username="highroller99").model_dump(),
-        Transaction(id="tx2", player_id="p1", type=TransactionType.WITHDRAWAL, amount=5000, status=TransactionStatus.PENDING, method="bank_transfer", player_username="highroller99").model_dump(),
+        Transaction(
+            id="tx1", 
+            player_id="p1", 
+            type=TransactionType.DEPOSIT, 
+            amount=10000, 
+            status=TransactionStatus.COMPLETED, 
+            method="crypto", 
+            player_username="highroller99",
+            provider="CoinPayments",
+            provider_tx_id="CP_123456789",
+            ip_address="88.241.12.1",
+            device_info="iPhone 14 / Mobile Safari",
+            country="TR",
+            fee=50.0,
+            net_amount=9950.0,
+            timeline=[
+                TransactionTimeline(status="pending", description="Created").model_dump(),
+                TransactionTimeline(status="completed", description="Confirmed by Blockchain").model_dump()
+            ]
+        ).model_dump(),
+        Transaction(
+            id="tx2", 
+            player_id="p1", 
+            type=TransactionType.WITHDRAWAL, 
+            amount=5000, 
+            status=TransactionStatus.PENDING, 
+            method="bank_transfer", 
+            player_username="highroller99",
+            provider="InternalBank",
+            country="TR",
+            fee=0.0,
+            net_amount=5000.0,
+            timeline=[
+                TransactionTimeline(status="pending", description="Request Created").model_dump()
+            ]
+        ).model_dump(),
     ])
     await db.games.insert_many([
         Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE, configuration=GameConfig(rtp=96.5).model_dump()).model_dump(),
