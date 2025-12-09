@@ -4,6 +4,34 @@ from datetime import datetime, timezone
 from enum import Enum
 import uuid
 
+# --- SHARED ENUMS (CORE) ---
+class PlayerStatus(str, Enum):
+    ACTIVE = "active"
+    SUSPENDED = "suspended"
+    BANNED = "banned"
+    SELF_EXCLUDED = "self_excluded"
+
+class KYCStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    NOT_SUBMITTED = "not_submitted"
+
+class TransactionType(str, Enum):
+    DEPOSIT = "deposit"
+    WITHDRAWAL = "withdrawal"
+    BONUS = "bonus"
+    ADJUSTMENT = "adjustment"
+
+class TransactionStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    WAITING_SECOND_APPROVAL = "waiting_second_approval" 
+    FRAUD_FLAGGED = "fraud_flagged"
+
 # --- RISK ENUMS ---
 class RiskSeverity(str, Enum):
     LOW = "low"
