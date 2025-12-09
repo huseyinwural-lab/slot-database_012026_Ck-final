@@ -62,7 +62,8 @@ async def upload_reconciliation(
             provider_amount=raw_amount,
             original_currency=currency,
             exchange_rate=rate,
-            converted_amount=converted_amt
+            converted_amount=converted_amt,
+            status="pending"  # Default status, will be updated below
         )
 
         if not tx:
