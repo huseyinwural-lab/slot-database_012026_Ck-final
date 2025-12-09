@@ -49,9 +49,7 @@ class Player(BaseModel):
     risk_score: str = "low" 
     address: Optional[str] = None
     dob: Optional[datetime] = None
-    
-    # New Fields for Luck Boost
-    luck_boost_factor: float = 1.0 # 1.0 = normal, 1.5 = 50% more chance
+    luck_boost_factor: float = 1.0 
     luck_boost_remaining_spins: int = 0
 
 class Transaction(BaseModel):
@@ -70,7 +68,7 @@ class Transaction(BaseModel):
 
 class GameConfig(BaseModel):
     rtp: float = 96.0
-    volatility: str = "medium" # low, medium, high
+    volatility: str = "medium" 
     paytable_id: str = "standard"
     min_bet: float = 0.10
     max_bet: float = 100.00
@@ -98,7 +96,7 @@ class BonusRule(BaseModel):
 class Bonus(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    type: str # welcome, deposit, referral, luck_boost, cashback
+    type: str
     description: str = ""
     wager_req: int = 35
     status: str = "active"
@@ -121,14 +119,41 @@ class Ticket(BaseModel):
     messages: List[TicketMessage] = []
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class KPIMetric(BaseModel):
+    value: float
+    change_percent: float # compared to yesterday
+    trend: str # up, down, neutral
+
 class DashboardStats(BaseModel):
-    total_deposit_today: float
-    total_withdrawal_today: float
-    net_revenue_today: float
-    active_players_now: int
+    # Core Financials
+    ggr: KPIMetric
+    ngr: KPIMetric
+    total_bets: KPIMetric
+    total_wins: KPIMetric
+    
+    # Operation Health
+    provider_health: List[Dict[str, str]] # {provider: "UP", status: "stable"}
+    payment_health: List[Dict[str, str]] # {method: "Papara", status: "UP"}
+    
+    # Risk Snapshot
+    risk_alerts: Dict[str, int] # {high_risk_withdrawals: 5, vpn_users: 12}
+    
+    # Live Activity
+    online_users: int
+    active_sessions: int
+    peak_sessions_24h: int
+    
+    # Bonus Perf
+    bonuses_given_today_count: int
+    bonuses_given_today_amount: float
+    
+    # Lists
+    top_games: List[Dict[str, Any]] # name, provider, revenue
+    recent_registrations: List[Player]
+    
+    # Pending
     pending_withdrawals_count: int
     pending_kyc_count: int
-    recent_registrations: List[Player]
 
 # --- NEW ARCHITECTURE MODELS ---
 

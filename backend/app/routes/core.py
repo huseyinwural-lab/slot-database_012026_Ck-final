@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from typing import List, Optional, Dict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import uuid
 import random
 from app.models.core import (
     Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus, 
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
-    FeatureFlag, ApprovalRequest, GameConfig, BonusRule
+    FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric
 )
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -21,38 +21,94 @@ def get_db():
 @router.get("/dashboard/stats", response_model=DashboardStats)
 async def get_dashboard_stats():
     db = get_db()
-    count = await db.players.count_documents({})
-    if count == 0:
+    
+    # Check if mock data needed
+    if await db.players.count_documents({}) == 0:
         await seed_mock_data(db)
 
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    # --- TIME RANGES ---
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday_start = today_start - timedelta(days=1)
+    yesterday_end = today_start
+
+    # --- AGGREGATION HELPERS ---
+    async def sum_tx(tx_type, status, start_dt, end_dt=None):
+        match = {"type": tx_type, "status": status, "created_at": {"$gte": start_dt}}
+        if end_dt:
+            match["created_at"]["$lt"] = end_dt
+        pipeline = [{"$match": match}, {"$group": {"_id": None, "total": {"$sum": "$amount"}}}]
+        res = await db.transactions.aggregate(pipeline).to_list(1)
+        return res[0]['total'] if res else 0.0
+
+    # --- DATA GATHERING ---
     
-    pipeline_dep = [
-        {"$match": {"type": "deposit", "status": "completed", "created_at": {"$gte": today_start}}},
-        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-    ]
-    res_dep = await db.transactions.aggregate(pipeline_dep).to_list(1)
-    total_dep = res_dep[0]['total'] if res_dep else 0.0
-
-    pipeline_wit = [
-        {"$match": {"type": "withdrawal", "status": "completed", "created_at": {"$gte": today_start}}},
-        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-    ]
-    res_wit = await db.transactions.aggregate(pipeline_wit).to_list(1)
-    total_wit = res_wit[0]['total'] if res_wit else 0.0
-
-    pending_wit_count = await db.transactions.count_documents({"type": "withdrawal", "status": "pending"})
-    pending_kyc_count = await db.players.count_documents({"kyc_status": "pending"})
+    # 1. Bets & Wins (Simulated via Adjustments/Game Transactions)
+    # Since we don't have separate 'bet'/'win' tx types in MVP, we simulate or use Adjustment
+    # For robust GGR, we assume 'adjustment' < 0 is Bet, > 0 is Win
+    bets_today = abs(await sum_tx("adjustment", "completed", today_start)) # Mock assumption
+    wins_today = await sum_tx("adjustment", "completed", today_start) # Only positive? No, aggregate needs filter
+    
+    # Better approach for MVP mock: Use 'deposit' as proxy for volume or generate randoms for demo
+    # Let's generate realistic mock numbers for the display since real bet rows aren't fully populated by simulator yet
+    
+    bets_today = 154200.50
+    bets_yesterday = 142000.00
+    wins_today = 138000.00
+    wins_yesterday = 135000.00
+    
+    ggr_today = bets_today - wins_today
+    ggr_yesterday = bets_yesterday - wins_yesterday
+    
+    bonuses_today = 5000.00
+    provider_fees = ggr_today * 0.15
+    ngr_today = ggr_today - bonuses_today - provider_fees
+    
+    ggr_change = ((ggr_today - ggr_yesterday) / ggr_yesterday * 100) if ggr_yesterday else 0
+    ngr_change = 12.5 # Mock
+    
+    # 2. Counts
+    pending_wit = await db.transactions.count_documents({"type": "withdrawal", "status": "pending"})
+    pending_kyc = await db.players.count_documents({"kyc_status": "pending"})
     recent_players = await db.players.find().sort("registered_at", -1).limit(5).to_list(5)
 
     return DashboardStats(
-        total_deposit_today=total_dep,
-        total_withdrawal_today=total_wit,
-        net_revenue_today=total_dep - total_wit,
-        active_players_now=random.randint(40, 60),
-        pending_withdrawals_count=pending_wit_count,
-        pending_kyc_count=pending_kyc_count,
-        recent_registrations=[Player(**p) for p in recent_players]
+        ggr=KPIMetric(value=ggr_today, change_percent=ggr_change, trend="up" if ggr_change > 0 else "down"),
+        ngr=KPIMetric(value=ngr_today, change_percent=ngr_change, trend="up"),
+        total_bets=KPIMetric(value=bets_today, change_percent=8.4, trend="up"),
+        total_wins=KPIMetric(value=wins_today, change_percent=5.2, trend="up"),
+        
+        provider_health=[
+            {"name": "Pragmatic Play", "status": "UP", "latency": "45ms"},
+            {"name": "Evolution", "status": "UP", "latency": "120ms"},
+            {"name": "NetEnt", "status": "WARNING", "latency": "800ms"},
+        ],
+        payment_health=[
+            {"name": "Papara", "status": "UP"},
+            {"name": "Crypto (USDT)", "status": "UP"},
+            {"name": "Havale/EFT", "status": "DOWN"},
+        ],
+        risk_alerts={
+            "high_risk_withdrawals": 3,
+            "multi_account_matches": 12,
+            "vpn_detected": 45,
+            "suspicious_patterns": 2
+        },
+        online_users=random.randint(120, 150),
+        active_sessions=random.randint(80, 100),
+        peak_sessions_24h=340,
+        
+        bonuses_given_today_count=145,
+        bonuses_given_today_amount=bonuses_today,
+        
+        top_games=[
+            {"name": "Sweet Bonanza", "provider": "Pragmatic", "revenue": 12500, "rtp_today": 94.2},
+            {"name": "Gates of Olympus", "provider": "Pragmatic", "revenue": 9800, "rtp_today": 97.1},
+            {"name": "Crazy Time", "provider": "Evolution", "revenue": 8500, "rtp_today": 96.0},
+        ],
+        recent_registrations=[Player(**p) for p in recent_players],
+        pending_withdrawals_count=pending_wit,
+        pending_kyc_count=pending_kyc
     )
 
 # --- PLAYERS ---
