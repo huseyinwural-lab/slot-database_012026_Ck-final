@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Finance Module Overhaul: Enhanced Withdrawal Requests & Financial Reports"
+user_problem_statement: "Finance Module Review Request: New Features Verification"
 backend:
   - task: "Enhanced Transaction Model"
     implemented: true
@@ -132,6 +132,20 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "PASSED: Finance endpoints working correctly. GET /api/v1/finance/transactions?type=withdrawal returns enhanced fields. GET /api/v1/finance/reports returns ggr, ngr, and provider_breakdown as required. Database seeding was required to populate enhanced fields."
+  - task: "Finance Module Review Request Features"
+    implemented: true
+    working: true
+    file: "app/routes/core.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "TESTING REVIEW REQUEST: Verifying new Finance Module features: 1) ip_address and currency filters 2) affiliate_source and currency in responses 3) fx_impact, chargeback_count, chargeback_amount in reports 4) TransactionType enum support for bonus_issued and jackpot_win"
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PASSED ALL REVIEW REQUEST REQUIREMENTS: 1) GET /finance/transactions supports ip_address and currency filters (✅ PASS) 2) Response objects include affiliate_source and currency fields (✅ PASS) 3) GET /finance/reports includes fx_impact ($120.50), chargeback_count (2), and chargeback_amount ($450.00) (✅ PASS) 4) TransactionType enum accepts bonus_issued and jackpot_win types (✅ PASS) - All 6 test criteria passed successfully."
 
 frontend:
   - task: "Finance Page Update"
