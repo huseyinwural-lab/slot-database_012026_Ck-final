@@ -20,127 +20,6 @@ class DocStatus(str, Enum):
     REJECTED = "rejected"
     EXPIRED = "expired"
 
-# --- SYSTEM LOG ENUMS ---
-class LogSeverity(str, Enum):
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-    CRITICAL = "critical"
-
-class ServiceStatus(str, Enum):
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    DOWN = "down"
-
-class JobStatus(str, Enum):
-    SUCCESS = "success"
-    FAILED = "failed"
-    TIMEOUT = "timeout"
-    SKIPPED = "skipped"
-    RUNNING = "running"
-
-class DeployStatus(str, Enum):
-    SUCCESS = "success"
-    FAILED = "failed"
-    ROLLBACK = "rollback"
-    CANCELED = "canceled"
-
-# --- SYSTEM LOG MODELS ---
-
-class SystemEvent(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    module: str
-    severity: LogSeverity
-    event_type: str
-    message: str
-    host: Optional[str] = None
-    correlation_id: Optional[str] = None
-
-class CronLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    job_name: str
-    job_id: str
-    started_at: datetime
-    finished_at: Optional[datetime] = None
-    duration_ms: Optional[float] = None
-    status: JobStatus = JobStatus.RUNNING
-    error_message: Optional[str] = None
-
-class ServiceHealth(BaseModel):
-    service_name: str
-    status: ServiceStatus
-    latency_ms: float
-    error_rate: float
-    instance_count: int
-    last_heartbeat: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class DeploymentLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    environment: str
-    service: str
-    version: str
-    initiated_by: str
-    status: DeployStatus
-    start_time: datetime
-    end_time: Optional[datetime] = None
-    changelog: str
-
-class ConfigChangeLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    admin_id: str
-    target: str
-    diff: Dict[str, Any] # {old: ..., new: ...}
-    severity: LogSeverity
-    requires_restart: bool = False
-
-class ErrorLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    service: str
-    error_type: str
-    severity: LogSeverity
-    message: str
-    stack_trace: Optional[str] = None
-    impact_users: int = 0
-    correlation_id: Optional[str] = None
-
-class QueueLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    task_id: str
-    queue_name: str
-    payload_type: str
-    started_at: datetime
-    duration_ms: float
-    retries: int = 0
-    status: str
-    error: Optional[str] = None
-
-class DBLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    execution_time_ms: float
-    query_snippet: str
-    affected_rows: int
-    is_slow: bool = False
-
-class CacheLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    cache_type: str # redis, cdn
-    operation: str # hit, miss, set
-    key: str
-    ttl: int
-
-class LogArchive(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    log_type: str
-    date_range: str
-    size_mb: float
-    storage_type: str # s3
-    status: str # available, archived
-
 # --- CRM ENUMS ---
 class ChannelType(str, Enum):
     EMAIL = "email"
@@ -278,6 +157,86 @@ class CMSBannerPosition(str, Enum):
     LOBBY_TOP = "lobby_top"
     MOBILE_ONLY = "mobile_only"
     SIDEBAR = "sidebar"
+
+# --- ADMIN ENUMS ---
+class AdminStatus(str, Enum):
+    ACTIVE = "active"
+    SUSPENDED = "suspended"
+    LOCKED = "locked"
+    INVITED = "invited"
+
+class InviteStatus(str, Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    EXPIRED = "expired"
+
+# --- ADMIN MODELS ---
+
+class AdminRole(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    permissions: List[str] = [] # "player:read", "finance:approve"
+    user_count: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AdminTeam(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    member_count: int = 0
+    default_role_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AdminUser(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str
+    email: EmailStr
+    full_name: str
+    role: str # role_id or name
+    department: str = "General"
+    status: AdminStatus = AdminStatus.ACTIVE
+    is_2fa_enabled: bool = False
+    last_login: Optional[datetime] = None
+    last_ip: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AdminSession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    admin_name: str
+    ip_address: str
+    device_info: str
+    login_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_active: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    location: Optional[str] = None
+    is_suspicious: bool = False
+
+class SecurityPolicy(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    password_min_length: int = 12
+    session_timeout_minutes: int = 60
+    allowed_ips: List[str] = []
+    blocked_ips: List[str] = []
+    require_2fa: bool = False
+    max_login_attempts: int = 5
+
+class AdminInvite(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    email: EmailStr
+    role: str
+    status: InviteStatus = InviteStatus.PENDING
+    sent_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: datetime
+
+class AdminAPIKey(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    owner_id: str # Admin or Team ID
+    key_prefix: str # "sk_..."
+    permissions: List[str] = []
+    status: str = "active"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_used: Optional[datetime] = None
 
 # --- REPORTS MODELS ---
 
@@ -573,6 +532,126 @@ class RiskDashboardStats(BaseModel):
     risk_trend: List[Dict[str, Any]] 
     category_breakdown: Dict[str, int]
 
+# --- SYSTEM LOGS ---
+
+class LogSeverity(str, Enum):
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    CRITICAL = "critical"
+
+class ServiceStatus(str, Enum):
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    DOWN = "down"
+
+class JobStatus(str, Enum):
+    SUCCESS = "success"
+    FAILED = "failed"
+    TIMEOUT = "timeout"
+    SKIPPED = "skipped"
+    RUNNING = "running"
+
+class DeployStatus(str, Enum):
+    SUCCESS = "success"
+    FAILED = "failed"
+    ROLLBACK = "rollback"
+    CANCELED = "canceled"
+
+class SystemEvent(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    module: str
+    severity: LogSeverity
+    event_type: str
+    message: str
+    host: Optional[str] = None
+    correlation_id: Optional[str] = None
+
+class CronLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    job_name: str
+    job_id: str
+    started_at: datetime
+    finished_at: Optional[datetime] = None
+    duration_ms: Optional[float] = None
+    status: JobStatus = JobStatus.RUNNING
+    error_message: Optional[str] = None
+
+class ServiceHealth(BaseModel):
+    service_name: str
+    status: ServiceStatus
+    latency_ms: float
+    error_rate: float
+    instance_count: int
+    last_heartbeat: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class DeploymentLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    environment: str
+    service: str
+    version: str
+    initiated_by: str
+    status: DeployStatus
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    changelog: str
+
+class ConfigChangeLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    admin_id: str
+    target: str
+    diff: Dict[str, Any] 
+    severity: LogSeverity
+    requires_restart: bool = False
+
+class ErrorLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    service: str
+    error_type: str
+    severity: LogSeverity
+    message: str
+    stack_trace: Optional[str] = None
+    impact_users: int = 0
+    correlation_id: Optional[str] = None
+
+class QueueLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    task_id: str
+    queue_name: str
+    payload_type: str
+    started_at: datetime
+    duration_ms: float
+    retries: int = 0
+    status: str
+    error: Optional[str] = None
+
+class DBLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    execution_time_ms: float
+    query_snippet: str
+    affected_rows: int
+    is_slow: bool = False
+
+class CacheLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    cache_type: str 
+    operation: str 
+    key: str
+    ttl: int
+
+class LogArchive(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    log_type: str
+    date_range: str
+    size_mb: float
+    storage_type: str 
+    status: str 
+
 # --- SUPPORT MODELS ---
 
 class CannedResponse(BaseModel):
@@ -846,14 +925,6 @@ class KYCDocument(BaseModel):
     uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reviewed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
-
-class AdminUser(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    username: str
-    email: str
-    role: str 
-    active: bool = True
-    last_login: Optional[datetime] = None
 
 class SystemLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
