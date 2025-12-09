@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ShieldAlert, AlertTriangle, Search, Activity, Lock, Smartphone, FileText, UserMinus } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, Search, Activity, Lock, Smartphone, FileText, UserMinus, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 
