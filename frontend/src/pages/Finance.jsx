@@ -10,12 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { 
   DollarSign, ArrowUpRight, ArrowDownRight, RefreshCw, Filter, 
   Download, Eye, Globe, Smartphone, CreditCard, AlertTriangle, 
-  CheckCircle, XCircle, ShieldAlert, Calendar, FileText
+  CheckCircle, XCircle, ShieldAlert, Calendar, FileText, MoreHorizontal,
+  Edit, Upload, MessageSquare, ExternalLink, Settings2
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -36,7 +38,28 @@ const Finance = () => {
     provider: 'all',
     country: 'all',
     start_date: '',
-    end_date: ''
+    end_date: '',
+    currency: 'all',
+    ip_address: ''
+  });
+
+  // Column Visibility State
+  const [visibleColumns, setVisibleColumns] = useState({
+    id: true,
+    player: true,
+    type: true,
+    amount: true,
+    status: true,
+    date: true,
+    actions: true,
+    // Optional
+    provider_id: false,
+    wallet: false,
+    net_amount: false,
+    fee: false,
+    ip: false,
+    device: false,
+    risk: true
   });
   
   // Selected TX for Detail Modal
@@ -87,18 +110,18 @@ const Finance = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      completed: "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
-      paid: "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
-      pending: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100",
-      requested: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100",
-      under_review: "bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100",
-      rejected: "bg-red-100 text-red-800 border-red-200 hover:bg-red-100",
-      failed: "bg-red-100 text-red-800 border-red-200 hover:bg-red-100",
-      fraud_flagged: "bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-100",
-      processing: "bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-100",
+      completed: "bg-green-100 text-green-800 border-green-200",
+      paid: "bg-green-100 text-green-800 border-green-200",
+      pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      requested: "bg-blue-100 text-blue-800 border-blue-200",
+      under_review: "bg-orange-100 text-orange-800 border-orange-200",
+      rejected: "bg-red-100 text-red-800 border-red-200",
+      failed: "bg-red-100 text-red-800 border-red-200",
+      fraud_flagged: "bg-purple-100 text-purple-800 border-purple-200",
+      processing: "bg-indigo-100 text-indigo-800 border-indigo-200",
     };
     return (
-      <Badge className={`${styles[status] || "bg-gray-100 text-gray-800"} border shadow-none capitalize`}>
+      <Badge className={`${styles[status] || "bg-gray-100 text-gray-800"} border shadow-none capitalize whitespace-nowrap`}>
         {status?.replace('_', ' ')}
       </Badge>
     );
@@ -163,6 +186,8 @@ const Finance = () => {
                     <SelectItem value="deposit">Deposits</SelectItem>
                     <SelectItem value="withdrawal">Withdrawals</SelectItem>
                     <SelectItem value="adjustment">Adjustments</SelectItem>
+                    <SelectItem value="bonus_issued">Bonus Issued</SelectItem>
+                    <SelectItem value="jackpot_win">Jackpot Win</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -181,7 +206,6 @@ const Finance = () => {
                   </SelectContent>
                 </Select>
                 
-                {/* Date Range - MVP Simple Inputs */}
                 <div className="flex items-center gap-2">
                   <Input 
                     type="date" 
@@ -232,6 +256,22 @@ const Finance = () => {
                       </Select>
                     </div>
                     <div className="space-y-1">
+                      <Label>Currency</Label>
+                      <Select value={filters.currency} onValueChange={v => setFilters({...filters, currency: v})}>
+                        <SelectTrigger><SelectValue placeholder="Select Currency" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All</SelectItem>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="TRY">TRY</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                     <div className="space-y-1">
+                      <Label>IP Address</Label>
+                      <Input placeholder="192.168.x.x" value={filters.ip_address} onChange={e => setFilters({...filters, ip_address: e.target.value})} />
+                    </div>
+                    <div className="space-y-1">
                       <Label>Country</Label>
                       <Input placeholder="ISO Code (e.g. TR)" value={filters.country === 'all' ? '' : filters.country} onChange={e => setFilters({...filters, country: e.target.value})} />
                     </div>
@@ -248,14 +288,33 @@ const Finance = () => {
                 <CardTitle>Transaction History</CardTitle>
                 <CardDescription>Live feed of financial movements.</CardDescription>
               </div>
-              {selectedRows.length > 0 && (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">Approve ({selectedRows.length})</Button>
-                  <Button variant="outline" size="sm" className="text-red-600">Reject ({selectedRows.length})</Button>
-                </div>
-              )}
+              <div className="flex gap-2">
+                {selectedRows.length > 0 && (
+                  <>
+                    <Button variant="outline" size="sm" className="text-green-600 bg-green-50 border-green-200">Approve ({selectedRows.length})</Button>
+                    <Button variant="outline" size="sm" className="text-red-600 bg-red-50 border-red-200">Reject ({selectedRows.length})</Button>
+                  </>
+                )}
+                
+                {/* Column Toggle */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm"><Settings2 className="w-4 h-4 mr-2"/> Columns</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem checked={visibleColumns.provider_id} onCheckedChange={(c) => setVisibleColumns({...visibleColumns, provider_id: c})}>Provider Tx ID</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={visibleColumns.wallet} onCheckedChange={(c) => setVisibleColumns({...visibleColumns, wallet: c})}>Wallet Before/After</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={visibleColumns.net_amount} onCheckedChange={(c) => setVisibleColumns({...visibleColumns, net_amount: c})}>Net Amount</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={visibleColumns.fee} onCheckedChange={(c) => setVisibleColumns({...visibleColumns, fee: c})}>Fee</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={visibleColumns.ip} onCheckedChange={(c) => setVisibleColumns({...visibleColumns, ip: c})}>IP Address</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem checked={visibleColumns.device} onCheckedChange={(c) => setVisibleColumns({...visibleColumns, device: c})}>Device</DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -264,16 +323,20 @@ const Finance = () => {
                     <TableHead>Player</TableHead>
                     <TableHead>Type/Method</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
+                    
+                    {visibleColumns.net_amount && <TableHead className="text-right">Net</TableHead>}
+                    {visibleColumns.fee && <TableHead className="text-right">Fee</TableHead>}
+                    {visibleColumns.wallet && <TableHead className="text-right">Wallet</TableHead>}
+                    
                     <TableHead>Status</TableHead>
                     
-                    {/* Conditional Columns for Withdrawal */}
-                    {filters.type === 'withdrawal' && (
-                      <>
-                        <TableHead>Risk</TableHead>
-                        <TableHead>Wager</TableHead>
-                        <TableHead>Dest.</TableHead>
-                      </>
-                    )}
+                    {/* Optional Columns */}
+                    {visibleColumns.provider_id && <TableHead>Ref ID</TableHead>}
+                    {visibleColumns.ip && <TableHead>IP</TableHead>}
+                    {visibleColumns.device && <TableHead>Device</TableHead>}
+                    
+                    {/* Withdrawal Specific - Always show if withdrawal filter active, else conditional? Let's keep risk always */}
+                    <TableHead>Risk</TableHead>
                     
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -281,9 +344,9 @@ const Finance = () => {
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={10} className="text-center h-32">Loading...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={15} className="text-center h-32">Loading...</TableCell></TableRow>
                   ) : transactions.length === 0 ? (
-                    <TableRow><TableCell colSpan={10} className="text-center h-32 text-muted-foreground">No transactions found matching filters</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={15} className="text-center h-32 text-muted-foreground">No transactions found matching filters</TableCell></TableRow>
                   ) : (
                     transactions.map((tx) => (
                       <TableRow key={tx.id}>
@@ -297,8 +360,8 @@ const Finance = () => {
                         </TableCell>
                         <TableCell>
                            <div className="flex items-center gap-2">
-                             <Badge variant="outline" className={tx.type === 'deposit' ? 'text-green-600 border-green-200' : 'text-red-600 border-red-200'}>
-                                {tx.type === 'deposit' ? <ArrowDownRight className="w-3 h-3 mr-1" /> : <ArrowUpRight className="w-3 h-3 mr-1" />}
+                             <Badge variant="outline" className={tx.type === 'deposit' ? 'text-green-600 border-green-200' : tx.type === 'withdrawal' ? 'text-red-600 border-red-200' : 'text-blue-600 border-blue-200'}>
+                                {tx.type === 'deposit' ? <ArrowDownRight className="w-3 h-3 mr-1" /> : tx.type === 'withdrawal' ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <RefreshCw className="w-3 h-3 mr-1" />}
                                 {tx.type.toUpperCase()}
                              </Badge>
                              <span className="text-xs text-muted-foreground">{tx.method}</span>
@@ -307,39 +370,70 @@ const Finance = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="font-bold">${tx.amount.toLocaleString()}</div>
-                          {tx.fee > 0 && <div className="text-[10px] text-red-500">Fee: ${tx.fee}</div>}
+                          <div className="text-[10px] text-muted-foreground">{tx.currency}</div>
                         </TableCell>
+                        
+                        {visibleColumns.net_amount && <TableCell className="text-right font-mono text-xs">${tx.net_amount?.toLocaleString()}</TableCell>}
+                        {visibleColumns.fee && <TableCell className="text-right text-red-500 text-xs">-${tx.fee}</TableCell>}
+                        {visibleColumns.wallet && (
+                             <TableCell className="text-right text-xs">
+                                 <div className="text-muted-foreground">{tx.balance_before?.toLocaleString()}</div>
+                                 <div className="font-bold">→ {tx.balance_after?.toLocaleString()}</div>
+                             </TableCell>
+                        )}
+
                         <TableCell>
                           {getStatusBadge(tx.status)}
                         </TableCell>
                         
-                        {filters.type === 'withdrawal' && (
-                          <>
-                            <TableCell>{getRiskBadge(tx.risk_score_at_time || 'low')}</TableCell>
-                            <TableCell>
-                                {tx.wagering_info ? (
-                                    <div className="w-[80px]">
-                                        <div className="flex justify-between text-[10px] mb-1">
-                                            <span>{Math.round((tx.wagering_info.current / tx.wagering_info.required) * 100)}%</span>
-                                            {tx.wagering_info.is_met ? <CheckCircle className="w-3 h-3 text-green-500"/> : <AlertTriangle className="w-3 h-3 text-orange-500"/>}
-                                        </div>
-                                        <Progress value={(tx.wagering_info.current / tx.wagering_info.required) * 100} className="h-1.5" />
-                                    </div>
-                                ) : <span className="text-xs text-muted-foreground">-</span>}
-                            </TableCell>
-                            <TableCell className="max-w-[120px] truncate text-xs font-mono" title={tx.destination_address}>
-                                {tx.destination_address || '-'}
-                            </TableCell>
-                          </>
-                        )}
+                         {visibleColumns.provider_id && <TableCell className="font-mono text-xs">{tx.provider_tx_id || '-'}</TableCell>}
+                         {visibleColumns.ip && <TableCell className="font-mono text-xs">{tx.ip_address || '-'}</TableCell>}
+                         {visibleColumns.device && <TableCell className="text-xs truncate max-w-[100px]" title={tx.device_info}>{tx.device_info || '-'}</TableCell>}
+                        
+                        <TableCell>{getRiskBadge(tx.risk_score_at_time || 'low')}</TableCell>
 
-                        <TableCell className="text-xs text-muted-foreground">
-                          {new Date(tx.created_at).toLocaleString()}
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(tx.created_at).toLocaleDateString()}
+                          <div className="text-[10px]">{new Date(tx.created_at).toLocaleTimeString()}</div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" variant="ghost" onClick={() => handleViewDetails(tx)}>
-                            <Eye className="w-4 h-4 text-blue-600" />
-                          </Button>
+                          <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm"><MoreHorizontal className="w-4 h-4"/></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleViewDetails(tx)}>
+                                      <Eye className="w-4 h-4 mr-2"/> View Details
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                      <Edit className="w-4 h-4 mr-2"/> Edit Transaction
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                      <ExternalLink className="w-4 h-4 mr-2"/> Retry Callback
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  {tx.status === 'pending' || tx.status === 'under_review' ? (
+                                      <>
+                                        <DropdownMenuItem className="text-green-600">
+                                            <CheckCircle className="w-4 h-4 mr-2"/> Approve
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-red-600">
+                                            <XCircle className="w-4 h-4 mr-2"/> Reject
+                                        </DropdownMenuItem>
+                                      </>
+                                  ) : null}
+                                  <DropdownMenuItem className="text-orange-600">
+                                      <ShieldAlert className="w-4 h-4 mr-2"/> Open in Fraud
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem>
+                                      <Upload className="w-4 h-4 mr-2"/> Upload Proof
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                      <MessageSquare className="w-4 h-4 mr-2"/> Add Note
+                                  </DropdownMenuItem>
+                              </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))
@@ -434,10 +528,18 @@ const Finance = () => {
                                         <TableCell className="font-medium">Payment Gateway Fees</TableCell>
                                         <TableCell className="text-right text-red-500">-${reportData.payment_fees?.toLocaleString()}</TableCell>
                                     </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium">Chargebacks ({reportData.chargeback_count || 0})</TableCell>
+                                        <TableCell className="text-right text-red-500">-${reportData.chargeback_amount?.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium">FX Impact</TableCell>
+                                        <TableCell className="text-right text-yellow-600">${reportData.fx_impact?.toLocaleString()}</TableCell>
+                                    </TableRow>
                                     <TableRow className="bg-muted/50">
                                         <TableCell className="font-bold">Total Operational Costs</TableCell>
                                         <TableCell className="text-right font-bold text-red-700">
-                                            -${((reportData.bonus_cost || 0) + (reportData.provider_cost || 0) + (reportData.payment_fees || 0)).toLocaleString()}
+                                            -${((reportData.bonus_cost || 0) + (reportData.provider_cost || 0) + (reportData.payment_fees || 0) + (reportData.chargeback_amount || 0)).toLocaleString()}
                                         </TableCell>
                                     </TableRow>
                                 </TableBody>
