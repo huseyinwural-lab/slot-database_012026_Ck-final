@@ -39,6 +39,86 @@ class RiskCaseStatus(str, Enum):
     CLOSED_FALSE_POSITIVE = "closed_false_positive"
     CLOSED_CONFIRMED = "closed_confirmed"
 
+# --- RG ENUMS ---
+class RGAlertSeverity(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class RGCaseStatus(str, Enum):
+    NEW = "new"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    DISMISSED = "dismissed"
+
+class ExclusionType(str, Enum):
+    COOL_OFF = "cool_off"
+    SELF_EXCLUSION = "self_exclusion"
+    PERMANENT_BAN = "permanent_ban"
+
+# --- RG MODELS ---
+
+class RGLimitConfig(BaseModel):
+    deposit_daily: Optional[float] = None
+    deposit_weekly: Optional[float] = None
+    deposit_monthly: Optional[float] = None
+    loss_daily: Optional[float] = None
+    loss_weekly: Optional[float] = None
+    loss_monthly: Optional[float] = None
+    session_time_daily_minutes: Optional[int] = None
+    wager_daily: Optional[float] = None
+
+class PlayerRGProfile(BaseModel):
+    player_id: str
+    risk_level: RGAlertSeverity = RGAlertSeverity.LOW
+    active_limits: RGLimitConfig = Field(default_factory=RGLimitConfig)
+    exclusion_active: bool = False
+    exclusion_type: Optional[ExclusionType] = None
+    exclusion_start: Optional[datetime] = None
+    exclusion_end: Optional[datetime] = None # None = indefinite
+    last_assessment_date: Optional[datetime] = None
+    notes: List[Dict[str, Any]] = []
+
+class RGRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    conditions: Dict[str, Any] = {} # e.g. {"net_loss_daily": {">": 1000}}
+    actions: List[str] = [] # ["alert_team", "suggest_limit"]
+    severity: RGAlertSeverity
+    active: bool = True
+
+class RGAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    player_id: str
+    rule_id: Optional[str] = None
+    type: str # "high_loss", "long_session"
+    severity: RGAlertSeverity
+    status: str = "new"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    resolved_at: Optional[datetime] = None
+    assigned_to: Optional[str] = None
+
+class RGCase(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    player_id: str
+    linked_alerts: List[str] = []
+    risk_level: RGAlertSeverity
+    status: RGCaseStatus = RGCaseStatus.NEW
+    notes: List[Dict[str, Any]] = []
+    actions_taken: List[str] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RGDashboardStats(BaseModel):
+    active_self_exclusions: int
+    active_cool_offs: int
+    players_with_limits: int
+    high_loss_alerts_7d: int
+    open_cases: int
+    risk_distribution: Dict[str, int] # {low: 100, high: 5}
+
 # --- RISK MODELS ---
 
 class RiskRuleCondition(BaseModel):
