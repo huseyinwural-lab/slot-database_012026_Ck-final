@@ -8,7 +8,8 @@ from app.models.core import (
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
     FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric, LoginLog,
     FinancialReport, CustomTable, GameUploadLog, Paytable, JackpotConfig,
-    BusinessStatus, RuntimeStatus, SpecialType, TransactionTimeline
+    BusinessStatus, RuntimeStatus, SpecialType, TransactionTimeline,
+    WageringStatus
 )
 from app.models.modules import KYCDocument
 from config import settings
@@ -198,12 +199,16 @@ async def action_transaction(tx_id: str, action: str = Body(..., embed=True), re
             await db.approvals.insert_one(approval_req.model_dump())
             await db.transactions.update_one({"id": tx_id}, {"$set": {"status": "waiting_second_approval"}})
             return {"message": "High value withdrawal moved to Approval Queue"}
-        new_status = "completed"
+        
+        new_status = "completed" if tx['type'] == 'deposit' else "processing"
+        
         if tx['type'] == 'deposit':
             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount'], "total_deposits": tx['amount'], "net_position": tx['amount']}})
         if tx['type'] == 'withdrawal':
-             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"total_withdrawals": tx['amount'], "net_position": -tx['amount'], "pending_withdrawals": -tx['amount']}})
-        new_timeline_entry = TransactionTimeline(status="completed", description="Transaction Approved", operator=admin)
+             # For withdrawal, 'approve' means moving to 'processing'. Payment done later.
+             pass 
+
+        new_timeline_entry = TransactionTimeline(status=new_status, description=f"Transaction {action.capitalize()}d", operator=admin)
 
     elif action == "reject":
         new_status = "rejected"
@@ -224,8 +229,8 @@ async def action_transaction(tx_id: str, action: str = Body(..., embed=True), re
         return {"message": "Callback retried"}
         
     elif action == "pending_review":
-        new_status = "pending" # Or specific review status
-        new_timeline_entry = TransactionTimeline(status="pending", description="Marked for Manual Review", operator=admin)
+        new_status = "under_review" 
+        new_timeline_entry = TransactionTimeline(status="under_review", description="Marked for Manual Review", operator=admin)
         
     else:
         raise HTTPException(400, "Invalid action")
@@ -250,9 +255,24 @@ async def get_financial_reports(start_date: Optional[datetime] = None, end_date:
     total_wit = totals.get('withdrawal', 0)
     providers = {"Papara": total_dep * 0.4, "Crypto": total_dep * 0.3, "Bank Transfer": total_dep * 0.3}
     daily = [{"date": "2025-12-08", "deposit": 14000, "withdrawal": 2000}, {"date": "2025-12-09", "deposit": 10100, "withdrawal": 5000}]
+    
+    # Enhanced data
+    ggr = total_dep * 1.5 # Mock
+    ngr = ggr * 0.8
+    
     return FinancialReport(
-        total_deposit=total_dep, total_withdrawal=total_wit, net_cashflow=total_dep - total_wit,
-        provider_breakdown=providers, daily_stats=daily
+        total_deposit=total_dep, 
+        total_withdrawal=total_wit, 
+        net_cashflow=total_dep - total_wit,
+        provider_breakdown=providers, 
+        daily_stats=daily,
+        ggr=ggr,
+        ngr=ngr,
+        bonus_cost=ggr * 0.1,
+        provider_cost=ggr * 0.05,
+        payment_fees=total_dep * 0.02,
+        fraud_blocked_amount=5000.0,
+        total_player_balance=150000.0
     )
 
 # --- APPROVAL QUEUE ---
@@ -278,9 +298,8 @@ async def action_approval(req_id: str, action: str = Body(..., embed=True)):
         if tx:
              await db.transactions.update_one(
                 {"id": req['related_entity_id']}, 
-                {"$set": {"status": "completed", "processed_at": datetime.now(timezone.utc)}}
+                {"$set": {"status": "processing", "processed_at": datetime.now(timezone.utc)}}
             )
-             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"total_withdrawals": tx['amount'], "net_position": -tx['amount'], "pending_withdrawals": -tx['amount']}})
 
     return {"message": f"Request {new_status}"}
 
@@ -350,12 +369,9 @@ async def get_games():
     db = get_db()
     games = await db.games.find().limit(100).to_list(100)
     
-    # Auto-Suggestion Logic (Mock)
     enhanced_games = []
     for g in games:
-        # Check if should be suggested as VIP
         config = g.get('configuration', {})
-        # Handle case where configuration is a dict or model dump
         min_bet = config.get('min_bet', 0) if isinstance(config, dict) else 0
         
         if min_bet > 10 and not g.get('is_special_game'):
@@ -414,7 +430,6 @@ async def toggle_game_status(game_id: str):
     db = get_db()
     game = await db.games.find_one({"id": game_id})
     if game:
-        # Default behavior: Toggle Business Status Active/Suspended
         new_status = BusinessStatus.SUSPENDED if game.get("business_status") == BusinessStatus.ACTIVE else BusinessStatus.ACTIVE
         await db.games.update_one({"id": game_id}, {"$set": {"business_status": new_status}})
         return {"status": new_status}
@@ -479,6 +494,7 @@ async def reply_ticket(ticket_id: str, message: TicketMessage):
 
 # --- SEED DATA ---
 async def seed_mock_data(db):
+    # Players
     await db.players.insert_many([
         Player(
             id="p1", 
@@ -520,24 +536,9 @@ async def seed_mock_data(db):
             fraud_score=5,
             affiliate_source="direct"
         ).model_dump(),
-        Player(
-            id="p3", 
-            username="bonus_hunter", 
-            email="fraud@alert.com", 
-            balance_real=5, 
-            vip_level=1, 
-            status=PlayerStatus.SUSPENDED, 
-            risk_score="high", 
-            fraud_score=88,
-            country="Russia", 
-            tags=["bonus_abuse", "multi_account"],
-            total_deposits=50,
-            total_withdrawals=0,
-            net_position=50,
-            account_flags=["bonus_abuse"],
-            kyc_status=KYCStatus.REJECTED
-        ).model_dump(),
     ])
+    
+    # Enhanced Transactions
     await db.transactions.insert_many([
         Transaction(
             id="tx1", 
@@ -554,6 +555,9 @@ async def seed_mock_data(db):
             country="TR",
             fee=50.0,
             net_amount=9950.0,
+            risk_score_at_time="low",
+            balance_before=40000,
+            balance_after=50000,
             timeline=[
                 TransactionTimeline(status="pending", description="Created").model_dump(),
                 TransactionTimeline(status="completed", description="Confirmed by Blockchain").model_dump()
@@ -564,26 +568,51 @@ async def seed_mock_data(db):
             player_id="p1", 
             type=TransactionType.WITHDRAWAL, 
             amount=5000, 
-            status=TransactionStatus.PENDING, 
+            status=TransactionStatus.UNDER_REVIEW, 
             method="bank_transfer", 
             player_username="highroller99",
             provider="InternalBank",
             country="TR",
+            destination_address="TR56 0006 1000 0000 1234 5678 90",
             fee=0.0,
             net_amount=5000.0,
+            risk_score_at_time="medium",
+            kyc_status_at_time="approved",
+            wagering_info=WageringStatus(required=1000, current=1500, is_met=True).model_dump(),
+            balance_before=50000,
+            balance_after=45000,
+            limit_flags=["weekly_limit_warning"],
             timeline=[
-                TransactionTimeline(status="pending", description="Request Created").model_dump()
+                TransactionTimeline(status="requested", description="Request Created by Player").model_dump(),
+                TransactionTimeline(status="pending", description="System Check Passed").model_dump(),
+                TransactionTimeline(status="under_review", description="Flagged for Manual Review (Amount > 2000)").model_dump()
+            ]
+        ).model_dump(),
+        Transaction(
+            id="tx3", 
+            player_id="p2", 
+            type=TransactionType.WITHDRAWAL, 
+            amount=50, 
+            status=TransactionStatus.PENDING, 
+            method="papara", 
+            player_username="newbie_luck",
+            provider="Papara",
+            country="DE",
+            destination_address="1234567890",
+            risk_score_at_time="low",
+            wagering_info=WageringStatus(required=500, current=100, is_met=False, remaining=400).model_dump(),
+            balance_before=100,
+            balance_after=50,
+            timeline=[
+                TransactionTimeline(status="requested", description="Request Created").model_dump()
             ]
         ).model_dump(),
     ])
+    
     await db.games.insert_many([
         Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE, configuration=GameConfig(rtp=96.5).model_dump()).model_dump(),
-        Game(name="VIP Roulette", provider="Evolution", category="Live", is_special_game=True, special_type=SpecialType.VIP, business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE, configuration=GameConfig(min_bet=100).model_dump()).model_dump(),
     ])
+    
     await db.bonuses.insert_many([
         Bonus(name="Welcome Offer", type="deposit_match", auto_apply=True, rules=BonusRule(reward_percentage=100).model_dump()).model_dump(),
-        Bonus(name="Weekly Cashback", type="periodic_cashback", rules=BonusRule(cashback_percentage=10).model_dump()).model_dump(),
-    ])
-    await db.tables.insert_many([
-        CustomTable(name="VIP Blackjack TR", game_type="Blackjack", provider="Evolution", table_type="vip", min_bet=100, max_bet=10000, business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE).model_dump()
     ])
