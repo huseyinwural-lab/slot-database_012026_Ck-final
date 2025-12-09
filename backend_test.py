@@ -1082,6 +1082,9 @@ def main():
     test_results.append(("Logs Module", tester.test_modules_logs()))
     test_results.append(("Responsible Gaming Module", tester.test_modules_rg()))
     
+    print("\n👑 VIP GAMES MODULE TESTS")
+    test_results.append(("VIP Games Module", tester.test_vip_games_module()))
+    
     print("\n🎯 ADVANCED FEATURES TESTS")
     test_results.append(("Advanced Game Config", tester.test_advanced_game_config()))
     test_results.append(("Luck Boost Bonus", tester.test_luck_boost_bonus()))
