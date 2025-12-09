@@ -6,7 +6,7 @@ import random
 from app.models.modules import (
     RiskRule, RiskCase, DeviceProfile, RiskAlert, RiskDashboardStats,
     RiskCategory, RiskSeverity, RiskActionType, RiskCaseStatus,
-    VelocityRule, BlacklistEntry
+    VelocityRule, BlacklistEntry, Evidence
 )
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -109,6 +109,21 @@ async def update_case_status(id: str, status: str = Body(..., embed=True), note:
         }
     )
     return {"message": "Status updated"}
+
+# --- EVIDENCE ---
+@router.get("/evidence", response_model=List[Evidence])
+async def get_evidence(related_id: Optional[str] = None):
+    db = get_db()
+    query = {}
+    if related_id: query["related_id"] = related_id
+    evidence = await db.risk_evidence.find(query).sort("uploaded_at", -1).limit(100).to_list(100)
+    return [Evidence(**e) for e in evidence]
+
+@router.post("/evidence")
+async def add_evidence(ev: Evidence):
+    db = get_db()
+    await db.risk_evidence.insert_one(ev.model_dump())
+    return ev
 
 # --- DEVICE INTELLIGENCE ---
 @router.get("/devices", response_model=List[DeviceProfile])

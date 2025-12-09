@@ -103,6 +103,7 @@ class RiskCase(BaseModel):
     status: RiskCaseStatus = RiskCaseStatus.OPEN
     assigned_to: Optional[str] = None
     notes: List[Dict[str, Any]] = [] 
+    evidence_ids: List[str] = [] # Linked evidence
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -115,6 +116,16 @@ class RiskAlert(BaseModel):
     metadata: Dict[str, Any] = {}
     is_resolved: bool = False
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Evidence(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    related_id: str # PlayerID, TransactionID, CaseID
+    type: str # screenshot, document, log_export
+    description: str
+    file_url: Optional[str] = None
+    uploaded_by: str
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    tags: List[str] = []
 
 class RiskDashboardStats(BaseModel):
     daily_alerts: int

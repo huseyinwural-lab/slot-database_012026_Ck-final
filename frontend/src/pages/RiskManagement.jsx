@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ShieldAlert, AlertTriangle, Search, Activity, Lock, Smartphone, FileText, UserMinus, Plus, Zap, CreditCard, MapPin, Skull, Ban, LayoutTemplate } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, Search, Activity, Lock, Smartphone, FileText, UserMinus, Plus, Zap, CreditCard, MapPin, Skull, Ban, LayoutTemplate, Briefcase, Paperclip } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,6 +22,7 @@ const RiskManagement = () => {
   const [alerts, setAlerts] = useState([]);
   const [velocity, setVelocity] = useState([]);
   const [blacklist, setBlacklist] = useState([]);
+  const [evidence, setEvidence] = useState([]);
   
   // Rule Creation
   const [isRuleOpen, setIsRuleOpen] = useState(false);
@@ -30,6 +31,10 @@ const RiskManagement = () => {
   // Blacklist Creation
   const [isBlacklistOpen, setIsBlacklistOpen] = useState(false);
   const [newBan, setNewBan] = useState({ type: 'ip', value: '', reason: '' });
+
+  // Evidence Creation
+  const [isEvidenceOpen, setIsEvidenceOpen] = useState(false);
+  const [newEvidence, setNewEvidence] = useState({ related_id: '', type: 'note', description: '' });
 
   // Case Management
   const [selectedCase, setSelectedCase] = useState(null);
@@ -43,6 +48,7 @@ const RiskManagement = () => {
         if (activeTab === 'blacklist') setBlacklist((await api.get('/v1/risk/blacklist')).data);
         if (activeTab === 'cases') setCases((await api.get('/v1/risk/cases')).data);
         if (activeTab === 'alerts') setAlerts((await api.get('/v1/risk/alerts')).data);
+        if (activeTab === 'investigation') setEvidence((await api.get('/v1/risk/evidence')).data);
     } catch (err) { console.error(err); }
   };
 
@@ -54,6 +60,10 @@ const RiskManagement = () => {
 
   const handleCreateBan = async () => {
     try { await api.post('/v1/risk/blacklist', { ...newBan, added_by: 'admin' }); setIsBlacklistOpen(false); fetchData(); toast.success("Entry Blacklisted"); } catch { toast.error("Failed"); }
+  };
+
+  const handleAddEvidence = async () => {
+    try { await api.post('/v1/risk/evidence', { ...newEvidence, uploaded_by: 'admin' }); setIsEvidenceOpen(false); fetchData(); toast.success("Evidence Added"); } catch { toast.error("Failed"); }
   };
 
   const handleToggleRule = async (id) => {
@@ -103,24 +113,144 @@ const RiskManagement = () => {
                 ) : <div>Loading...</div>}
             </TabsContent>
 
-            {/* VELOCITY */}
-            <TabsContent value="velocity" className="mt-4">
+            {/* INVESTIGATION HUB */}
+            <TabsContent value="investigation" className="mt-4">
+                <div className="flex justify-end mb-4">
+                    <Dialog open={isEvidenceOpen} onOpenChange={setIsEvidenceOpen}>
+                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Evidence</Button></DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader><DialogTitle>Add Note / Evidence</DialogTitle></DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2"><Label>Related ID (Player/Case)</Label><Input value={newEvidence.related_id} onChange={e=>setNewEvidence({...newEvidence, related_id: e.target.value})} /></div>
+                                <div className="space-y-2"><Label>Type</Label>
+                                    <Select value={newEvidence.type} onValueChange={v=>setNewEvidence({...newEvidence, type: v})}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent><SelectItem value="note">Internal Note</SelectItem><SelectItem value="file">File/Document</SelectItem></SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2"><Label>Description</Label><Textarea value={newEvidence.description} onChange={e=>setNewEvidence({...newEvidence, description: e.target.value})} /></div>
+                                <Button onClick={handleAddEvidence} className="w-full">Save</Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
                 <Card>
-                    <CardHeader><CardTitle>Velocity Checks</CardTitle><CardDescription>High frequency event detection</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>Evidence & Notes</CardTitle></CardHeader>
                     <CardContent>
                         <Table>
-                            <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Event</TableHead><TableHead>Threshold</TableHead><TableHead>Action</TableHead></TableRow></TableHeader>
-                            <TableBody>{velocity.map(v => (
-                                <TableRow key={v.id}>
-                                    <TableCell>{v.name}</TableCell>
-                                    <TableCell className="uppercase">{v.event_type}</TableCell>
-                                    <TableCell>{v.threshold_count} in {v.time_window_minutes}m</TableCell>
-                                    <TableCell><Badge>{v.action}</Badge></TableCell>
+                            <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Description</TableHead><TableHead>Related To</TableHead><TableHead>Time</TableHead></TableRow></TableHeader>
+                            <TableBody>{evidence.map(e => (
+                                <TableRow key={e.id}>
+                                    <TableCell className="capitalize flex items-center gap-2">
+                                        {e.type === 'file' ? <Paperclip className="w-4 h-4" /> : <Briefcase className="w-4 h-4" />} {e.type}
+                                    </TableCell>
+                                    <TableCell>{e.description}</TableCell>
+                                    <TableCell className="font-mono">{e.related_id}</TableCell>
+                                    <TableCell>{new Date(e.uploaded_at).toLocaleString()}</TableCell>
                                 </TableRow>
                             ))}</TableBody>
                         </Table>
                     </CardContent>
                 </Card>
+            </TabsContent>
+
+            {/* ALERT LIST */}
+            <TabsContent value="alerts" className="mt-4">
+                <Card><CardContent className="pt-6">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Message</TableHead><TableHead>Severity</TableHead><TableHead>Time</TableHead></TableRow></TableHeader>
+                        <TableBody>{alerts.map(a => (
+                            <TableRow key={a.id}>
+                                <TableCell className="uppercase font-bold text-xs">{a.type}</TableCell>
+                                <TableCell>{a.message}</TableCell>
+                                <TableCell><Badge variant={a.severity==='critical'?'destructive':'outline'}>{a.severity}</Badge></TableCell>
+                                <TableCell>{new Date(a.timestamp).toLocaleTimeString()}</TableCell>
+                            </TableRow>
+                        ))}</TableBody>
+                    </Table>
+                </CardContent></Card>
+            </TabsContent>
+
+            {/* RULES */}
+            <TabsContent value="rules" className="mt-4">
+                <div className="flex justify-end mb-4">
+                    <Dialog open={isRuleOpen} onOpenChange={setIsRuleOpen}>
+                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Rule</Button></DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader><DialogTitle>New Risk Rule</DialogTitle></DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2"><Label>Rule Name</Label><Input value={newRule.name} onChange={e=>setNewRule({...newRule, name: e.target.value})} /></div>
+                                <div className="space-y-2"><Label>Category</Label>
+                                    <Select value={newRule.category} onValueChange={v=>setNewRule({...newRule, category: v})}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent><SelectItem value="account">Account</SelectItem><SelectItem value="payment">Payment</SelectItem><SelectItem value="bonus_abuse">Bonus Abuse</SelectItem></SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2"><Label>Score Impact</Label><Input type="number" value={newRule.score_impact} onChange={e=>setNewRule({...newRule, score_impact: e.target.value})} /></div>
+                                <Button onClick={handleCreateRule} className="w-full">Save Rule</Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+                <Card><CardContent className="pt-6">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Category</TableHead><TableHead>Impact</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
+                        <TableBody>{rules.map(r => (
+                            <TableRow key={r.id}>
+                                <TableCell>{r.name}</TableCell>
+                                <TableCell className="uppercase text-xs">{r.category}</TableCell>
+                                <TableCell><Badge variant="secondary">+{r.score_impact}</Badge></TableCell>
+                                <TableCell><Badge variant={r.status==='active'?'default':'outline'}>{r.status}</Badge></TableCell>
+                                <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => handleToggleRule(r.id)}>{r.status==='active'?'Pause':'Activate'}</Button></TableCell>
+                            </TableRow>
+                        ))}</TableBody>
+                    </Table>
+                </CardContent></Card>
+            </TabsContent>
+
+            {/* CASES */}
+            <TabsContent value="cases" className="mt-4">
+                <div className="grid md:grid-cols-3 gap-6">
+                    <Card className="md:col-span-1">
+                        <CardHeader><CardTitle>Case List</CardTitle></CardHeader>
+                        <div className="space-y-2 p-4">
+                            {cases.map(c => (
+                                <div key={c.id} onClick={() => setSelectedCase(c)} className={`p-3 border rounded cursor-pointer hover:bg-secondary/50 ${selectedCase?.id === c.id ? 'border-primary bg-secondary/30' : ''}`}>
+                                    <div className="flex justify-between mb-1">
+                                        <Badge variant="destructive">{c.risk_score}</Badge>
+                                        <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="font-bold text-sm">Player: {c.player_id}</div>
+                                    <div className="text-xs text-muted-foreground">Rules: {c.triggered_rules.join(", ")}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                    <Card className="md:col-span-2">
+                        {selectedCase ? (
+                            <>
+                                <CardHeader><CardTitle>Investigation: {selectedCase.id}</CardTitle><CardDescription>Status: {selectedCase.status.toUpperCase()}</CardDescription></CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="p-4 bg-secondary/20 rounded">
+                                        <div className="font-bold mb-2">Evidence</div>
+                                        <ul className="list-disc pl-5 text-sm">
+                                            {selectedCase.triggered_rules.map(r => <li key={r}>{r}</li>)}
+                                        </ul>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Analyst Note</Label>
+                                        <Textarea value={caseNote} onChange={e => setCaseNote(e.target.value)} placeholder="Findings..." />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button variant="destructive" onClick={() => handleCaseStatus('closed_confirmed')}><UserMinus className="w-4 h-4 mr-2" /> Confirm Fraud (Ban)</Button>
+                                        <Button variant="outline" onClick={() => handleCaseStatus('closed_false_positive')}>False Positive</Button>
+                                        <Button className="ml-auto" onClick={() => handleCaseStatus('escalated')}>Escalate</Button>
+                                    </div>
+                                </CardContent>
+                            </>
+                        ) : <div className="flex items-center justify-center h-40 text-muted-foreground">Select a case</div>}
+                    </Card>
+                </div>
             </TabsContent>
 
             {/* BLACKLIST */}
@@ -159,65 +289,32 @@ const RiskManagement = () => {
                 </CardContent></Card>
             </TabsContent>
 
-            {/* INVESTIGATION HUB */}
-            <TabsContent value="investigation" className="mt-4">
+            {/* VELOCITY */}
+            <TabsContent value="velocity" className="mt-4">
                 <Card>
-                    <CardHeader><CardTitle>Deep Investigation</CardTitle></CardHeader>
-                    <CardContent className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
-                        <div className="text-center text-muted-foreground">
-                            <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                            <p>Select a Player or Case to view Timeline & Graph</p>
-                            <Button variant="secondary" className="mt-4">Search Subject</Button>
-                        </div>
+                    <CardHeader><CardTitle>Velocity Checks</CardTitle><CardDescription>High frequency event detection</CardDescription></CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Event</TableHead><TableHead>Threshold</TableHead><TableHead>Action</TableHead></TableRow></TableHeader>
+                            <TableBody>{velocity.map(v => (
+                                <TableRow key={v.id}>
+                                    <TableCell>{v.name}</TableCell>
+                                    <TableCell className="uppercase">{v.event_type}</TableCell>
+                                    <TableCell>{v.threshold_count} in {v.time_window_minutes}m</TableCell>
+                                    <TableCell><Badge>{v.action}</Badge></TableCell>
+                                </TableRow>
+                            ))}</TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
             </TabsContent>
 
-            {/* VISUALS */}
-            <TabsContent value="visuals" className="mt-4">
-                <div className="grid md:grid-cols-2 gap-6">
-                    <Card>
-                        <CardHeader><CardTitle>Risk Score Logic</CardTitle></CardHeader>
-                        <CardContent>
-                            <div className="space-y-2 text-sm font-mono p-4 bg-secondary/20 rounded">
-                                <p>1. Event Trigger (Login/Deposit/Bet)</p>
-                                <p>↓</p>
-                                <p>2. Check Whitelist (Exit if True)</p>
-                                <p>↓</p>
-                                <p>3. Check Velocity & Rules</p>
-                                <p>↓</p>
-                                <p>4. Sum Rule Impacts (+10, +50...)</p>
-                                <p>↓</p>
-                                <p>5. If Score > Threshold → Action</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader><CardTitle>Bonus Fraud Loop</CardTitle></CardHeader>
-                        <CardContent>
-                            <div className="space-y-2 text-sm font-mono p-4 bg-secondary/20 rounded">
-                                <p>1. Bonus Claim Request</p>
-                                <p>↓</p>
-                                <p>2. Device Fingerprint Check</p>
-                                <p>↓</p>
-                                <p>3. IP/Geo Check</p>
-                                <p>↓</p>
-                                <p>4. Abuse History Check</p>
-                                <p>↓</p>
-                                <p>5. Approve or Block</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </TabsContent>
-
-            {/* PLACEHOLDERS FOR OTHER TABS */}
-            <TabsContent value="rules" className="mt-4"><Card><CardContent className="p-10 text-center">Rules Engine (Existing)</CardContent></Card></TabsContent>
-            <TabsContent value="payment" className="mt-4"><Card><CardContent className="p-10 text-center">Payment Risk Analysis (BIN/Card)</CardContent></Card></TabsContent>
-            <TabsContent value="geo" className="mt-4"><Card><CardContent className="p-10 text-center">IP & Geo Intelligence (VPN/Proxy)</CardContent></Card></TabsContent>
-            <TabsContent value="bonus" className="mt-4"><Card><CardContent className="p-10 text-center">Bonus Abuse Analytics</CardContent></Card></TabsContent>
-            <TabsContent value="alerts" className="mt-4"><Card><CardContent className="p-10 text-center">Live Alerts (Existing)</CardContent></Card></TabsContent>
-            <TabsContent value="cases" className="mt-4"><Card><CardContent className="p-10 text-center">Case Management (Existing)</CardContent></Card></TabsContent>
+            {/* PLACEHOLDERS */}
+            <TabsContent value="devices" className="mt-4"><Card><CardContent className="p-10 text-center">Device Intelligence Graph (Coming Soon)</CardContent></Card></TabsContent>
+            <TabsContent value="payment" className="mt-4"><Card><CardContent className="p-10 text-center">Payment Risk (Coming Soon)</CardContent></Card></TabsContent>
+            <TabsContent value="geo" className="mt-4"><Card><CardContent className="p-10 text-center">IP & Geo Intelligence (Coming Soon)</CardContent></Card></TabsContent>
+            <TabsContent value="bonus" className="mt-4"><Card><CardContent className="p-10 text-center">Bonus Abuse Analytics (Coming Soon)</CardContent></Card></TabsContent>
+            <TabsContent value="visuals" className="mt-4"><Card><CardContent className="p-10 text-center">Logic Visualizer (Coming Soon)</CardContent></Card></TabsContent>
 
         </Tabs>
     </div>
