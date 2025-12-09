@@ -1387,8 +1387,8 @@ class CasinoAdminAPITester:
     def test_reports_module(self):
         """Test Reports Module - Legacy method for compatibility"""
         return self.test_all_16_report_types()
-        
-        # Test Financial Report - Daily data
+
+    def test_404_endpoints(self):
         success2, financial_response = self.run_test("Financial Report - Daily Data", "GET", "api/v1/reports/financial", 200)
         if success2 and isinstance(financial_response, list):
             print(f"✅ Financial Report returned {len(financial_response)} daily records")
