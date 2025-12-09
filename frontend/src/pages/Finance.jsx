@@ -9,44 +9,48 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { 
   DollarSign, ArrowUpRight, ArrowDownRight, RefreshCw, Filter, 
-  Download, Eye, MoreHorizontal, Globe, Smartphone, CreditCard
+  Download, Eye, Globe, Smartphone, CreditCard, AlertTriangle, 
+  CheckCircle, XCircle, ShieldAlert, Calendar, FileText
 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Components
-import DepositDetailModal from '../components/finance/DepositDetailModal';
+import TransactionDetailModal from '../components/finance/TransactionDetailModal';
 
 const Finance = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reportData, setReportData] = useState(null);
+  
   const [filters, setFilters] = useState({
-    type: 'deposit',
+    type: 'all',
     status: 'all',
     min_amount: '',
     max_amount: '',
     player_search: '',
     provider: 'all',
-    country: 'all'
+    country: 'all',
+    start_date: '',
+    end_date: ''
   });
   
   // Selected TX for Detail Modal
   const [selectedTx, setSelectedTx] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (filters.type !== 'all') params.append('type', filters.type);
-      if (filters.status !== 'all') params.append('status', filters.status);
-      if (filters.min_amount) params.append('min_amount', filters.min_amount);
-      if (filters.max_amount) params.append('max_amount', filters.max_amount);
-      if (filters.player_search) params.append('player_search', filters.player_search);
-      if (filters.provider !== 'all') params.append('provider', filters.provider);
-      if (filters.country !== 'all') params.append('country', filters.country);
+      Object.keys(filters).forEach(key => {
+        if (filters[key] && filters[key] !== 'all') params.append(key, filters[key]);
+      });
 
       const res = await api.get(`/v1/finance/transactions?${params.toString()}`);
       setTransactions(res.data);
@@ -57,6 +61,15 @@ const Finance = () => {
     }
   };
 
+  const fetchReports = async () => {
+    try {
+      const res = await api.get('/v1/finance/reports');
+      setReportData(res.data);
+    } catch (err) {
+      toast.error('Failed to load reports');
+    }
+  };
+
   useEffect(() => { fetchData(); }, [filters]);
 
   const handleViewDetails = (tx) => {
@@ -64,181 +77,262 @@ const Finance = () => {
     setIsDetailOpen(true);
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'completed': return 'default'; // black/white
-      case 'pending': return 'secondary'; // gray
-      case 'rejected': return 'destructive'; // red
-      case 'fraud_flagged': return 'destructive'; 
-      default: return 'outline';
+  const toggleRow = (id) => {
+    if (selectedRows.includes(id)) {
+      setSelectedRows(selectedRows.filter(r => r !== id));
+    } else {
+      setSelectedRows([...selectedRows, id]);
     }
+  };
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      completed: "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
+      paid: "bg-green-100 text-green-800 border-green-200 hover:bg-green-100",
+      pending: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100",
+      requested: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100",
+      under_review: "bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100",
+      rejected: "bg-red-100 text-red-800 border-red-200 hover:bg-red-100",
+      failed: "bg-red-100 text-red-800 border-red-200 hover:bg-red-100",
+      fraud_flagged: "bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-100",
+      processing: "bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-100",
+    };
+    return (
+      <Badge className={`${styles[status] || "bg-gray-100 text-gray-800"} border shadow-none capitalize`}>
+        {status?.replace('_', ' ')}
+      </Badge>
+    );
+  };
+
+  const getRiskBadge = (score) => {
+    const styles = {
+      low: "text-green-600 bg-green-50",
+      medium: "text-yellow-600 bg-yellow-50",
+      high: "text-red-600 bg-red-50",
+      critical: "text-purple-600 bg-purple-50",
+    };
+    return (
+      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${styles[score] || "text-gray-500"}`}>
+        {score}
+      </span>
+    );
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <DollarSign className="w-8 h-8 text-green-600" /> Finance Management
+            <DollarSign className="w-8 h-8 text-green-600" /> Finance Hub
           </h2>
-          <p className="text-muted-foreground">Manage deposits, withdrawals, and approvals.</p>
+          <p className="text-muted-foreground">Comprehensive financial monitoring and operations center.</p>
         </div>
-        <Button onClick={fetchData} variant="outline">
-          <RefreshCw className="w-4 h-4 mr-2" /> Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={fetchData} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+          </Button>
+          <Button variant="default" size="sm">
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+        </div>
       </div>
 
-      {/* Main Filter Bar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="relative flex-1 min-w-[200px]">
-              <Input 
-                placeholder="Search Transaction ID or Player..." 
-                value={filters.player_search}
-                onChange={e => setFilters({...filters, player_search: e.target.value})}
-              />
-            </div>
-            
-            <Select value={filters.type} onValueChange={v => setFilters({...filters, type: v})}>
-              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Type" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="deposit">Deposits</SelectItem>
-                <SelectItem value="withdrawal">Withdrawals</SelectItem>
-                <SelectItem value="adjustment">Adjustments</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filters.status} onValueChange={v => setFilters({...filters, status: v})}>
-              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="fraud_flagged">Fraud</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Advanced Filters */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="border-dashed">
-                  <Filter className="w-4 h-4 mr-2" /> Advanced
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4 space-y-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Filter Options</h4>
-                  <p className="text-sm text-muted-foreground">Detailed filtering controls.</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label>Min Amount</Label>
-                    <Input type="number" placeholder="0" value={filters.min_amount} onChange={e => setFilters({...filters, min_amount: e.target.value})} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Max Amount</Label>
-                    <Input type="number" placeholder="∞" value={filters.max_amount} onChange={e => setFilters({...filters, max_amount: e.target.value})} />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <Label>Provider</Label>
-                  <Select value={filters.provider} onValueChange={v => setFilters({...filters, provider: v})}>
-                    <SelectTrigger><SelectValue placeholder="Select Provider" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Providers</SelectItem>
-                      <SelectItem value="Stripe">Stripe</SelectItem>
-                      <SelectItem value="CoinPayments">CoinPayments</SelectItem>
-                      <SelectItem value="Papara">Papara</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label>Country</Label>
-                  <Input placeholder="ISO Code (e.g. TR)" value={filters.country === 'all' ? '' : filters.country} onChange={e => setFilters({...filters, country: e.target.value})} />
-                </div>
-                <Button className="w-full" onClick={fetchData}>Apply Filters</Button>
-              </PopoverContent>
-            </Popover>
-
-            <Button variant="outline"><Download className="w-4 h-4 mr-2" /> Export</Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="transactions" className="w-full">
-        <TabsList>
+      <Tabs defaultValue="transactions" className="w-full" onValueChange={(v) => v === 'reports' && fetchReports()}>
+        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="reports">Daily Reports</TabsTrigger>
+          <TabsTrigger value="reports">Financial Reports</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="transactions">
+        <TabsContent value="transactions" className="space-y-4">
+          {/* Main Filter Bar */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle>Transaction History</CardTitle>
-              <CardDescription>All financial movements.</CardDescription>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex flex-wrap gap-4 items-center">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Input 
+                    placeholder="Search Transaction ID, Player, or Provider Ref..." 
+                    value={filters.player_search}
+                    onChange={e => setFilters({...filters, player_search: e.target.value})}
+                  />
+                </div>
+                
+                <Select value={filters.type} onValueChange={v => setFilters({...filters, type: v})}>
+                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="deposit">Deposits</SelectItem>
+                    <SelectItem value="withdrawal">Withdrawals</SelectItem>
+                    <SelectItem value="adjustment">Adjustments</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={filters.status} onValueChange={v => setFilters({...filters, status: v})}>
+                  <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="requested">Requested</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="completed">Completed / Paid</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="fraud_flagged">Fraud Flagged</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {/* Date Range - MVP Simple Inputs */}
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="date" 
+                    className="w-[140px]" 
+                    value={filters.start_date} 
+                    onChange={e => setFilters({...filters, start_date: e.target.value})}
+                  />
+                  <span className="text-muted-foreground">-</span>
+                  <Input 
+                    type="date" 
+                    className="w-[140px]" 
+                    value={filters.end_date} 
+                    onChange={e => setFilters({...filters, end_date: e.target.value})}
+                  />
+                </div>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="border-dashed">
+                      <Filter className="w-4 h-4 mr-2" /> More Filters
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4 space-y-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium leading-none">Advanced Filters</h4>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label>Min Amount</Label>
+                        <Input type="number" placeholder="0" value={filters.min_amount} onChange={e => setFilters({...filters, min_amount: e.target.value})} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Max Amount</Label>
+                        <Input type="number" placeholder="∞" value={filters.max_amount} onChange={e => setFilters({...filters, max_amount: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Provider</Label>
+                      <Select value={filters.provider} onValueChange={v => setFilters({...filters, provider: v})}>
+                        <SelectTrigger><SelectValue placeholder="Select Provider" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Providers</SelectItem>
+                          <SelectItem value="Stripe">Stripe</SelectItem>
+                          <SelectItem value="CoinPayments">CoinPayments</SelectItem>
+                          <SelectItem value="Papara">Papara</SelectItem>
+                          <SelectItem value="InternalBank">Bank Transfer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Country</Label>
+                      <Input placeholder="ISO Code (e.g. TR)" value={filters.country === 'all' ? '' : filters.country} onChange={e => setFilters({...filters, country: e.target.value})} />
+                    </div>
+                    <Button className="w-full" onClick={fetchData}>Apply Filters</Button>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Transaction History</CardTitle>
+                <CardDescription>Live feed of financial movements.</CardDescription>
+              </div>
+              {selectedRows.length > 0 && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">Approve ({selectedRows.length})</Button>
+                  <Button variant="outline" size="sm" className="text-red-600">Reject ({selectedRows.length})</Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[30px]"><Checkbox /></TableHead>
                     <TableHead>Tx ID</TableHead>
                     <TableHead>Player</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Method/Provider</TableHead>
+                    <TableHead>Type/Method</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Fee/Net</TableHead>
-                    <TableHead>Info</TableHead>
                     <TableHead>Status</TableHead>
+                    
+                    {/* Conditional Columns for Withdrawal */}
+                    {filters.type === 'withdrawal' && (
+                      <>
+                        <TableHead>Risk</TableHead>
+                        <TableHead>Wager</TableHead>
+                        <TableHead>Dest.</TableHead>
+                      </>
+                    )}
+                    
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={10} className="text-center h-24">Loading...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={10} className="text-center h-32">Loading...</TableCell></TableRow>
                   ) : transactions.length === 0 ? (
-                    <TableRow><TableCell colSpan={10} className="text-center h-24 text-muted-foreground">No transactions found</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={10} className="text-center h-32 text-muted-foreground">No transactions found matching filters</TableCell></TableRow>
                   ) : (
                     transactions.map((tx) => (
                       <TableRow key={tx.id}>
-                        <TableCell className="font-mono text-xs">{tx.id}</TableCell>
-                        <TableCell className="font-medium text-blue-600 cursor-pointer">{tx.player_username}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={tx.type === 'deposit' ? 'text-green-600 border-green-200' : 'text-red-600 border-red-200'}>
-                            {tx.type.toUpperCase()}
-                          </Badge>
-                        </TableCell>
+                        <TableCell><Checkbox checked={selectedRows.includes(tx.id)} onCheckedChange={() => toggleRow(tx.id)}/></TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{tx.id.substring(0, 8)}...</TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-medium text-sm">{tx.method}</span>
-                            <span className="text-xs text-muted-foreground">{tx.provider}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right font-bold">
-                          ${tx.amount.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right text-xs">
-                          {tx.fee > 0 ? (
-                            <>
-                              <div className="text-red-500">-${tx.fee}</div>
-                              <div className="font-bold text-green-600">${tx.net_amount.toLocaleString()}</div>
-                            </>
-                          ) : (
-                            '-'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {tx.country && <Badge variant="secondary" className="text-[10px] px-1 h-5"><Globe className="w-3 h-3 mr-1" />{tx.country}</Badge>}
-                            {tx.device_info && <Badge variant="secondary" className="text-[10px] px-1 h-5"><Smartphone className="w-3 h-3" /></Badge>}
+                            <span className="font-medium text-blue-600 cursor-pointer hover:underline">{tx.player_username}</span>
+                            {tx.country && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Globe className="w-3 h-3"/> {tx.country}</span>}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getStatusColor(tx.status)}>{tx.status}</Badge>
+                           <div className="flex items-center gap-2">
+                             <Badge variant="outline" className={tx.type === 'deposit' ? 'text-green-600 border-green-200' : 'text-red-600 border-red-200'}>
+                                {tx.type === 'deposit' ? <ArrowDownRight className="w-3 h-3 mr-1" /> : <ArrowUpRight className="w-3 h-3 mr-1" />}
+                                {tx.type.toUpperCase()}
+                             </Badge>
+                             <span className="text-xs text-muted-foreground">{tx.method}</span>
+                           </div>
+                           <div className="text-[10px] text-muted-foreground mt-1">{tx.provider}</div>
                         </TableCell>
+                        <TableCell className="text-right">
+                          <div className="font-bold">${tx.amount.toLocaleString()}</div>
+                          {tx.fee > 0 && <div className="text-[10px] text-red-500">Fee: ${tx.fee}</div>}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(tx.status)}
+                        </TableCell>
+                        
+                        {filters.type === 'withdrawal' && (
+                          <>
+                            <TableCell>{getRiskBadge(tx.risk_score_at_time || 'low')}</TableCell>
+                            <TableCell>
+                                {tx.wagering_info ? (
+                                    <div className="w-[80px]">
+                                        <div className="flex justify-between text-[10px] mb-1">
+                                            <span>{Math.round((tx.wagering_info.current / tx.wagering_info.required) * 100)}%</span>
+                                            {tx.wagering_info.is_met ? <CheckCircle className="w-3 h-3 text-green-500"/> : <AlertTriangle className="w-3 h-3 text-orange-500"/>}
+                                        </div>
+                                        <Progress value={(tx.wagering_info.current / tx.wagering_info.required) * 100} className="h-1.5" />
+                                    </div>
+                                ) : <span className="text-xs text-muted-foreground">-</span>}
+                            </TableCell>
+                            <TableCell className="max-w-[120px] truncate text-xs font-mono" title={tx.destination_address}>
+                                {tx.destination_address || '-'}
+                            </TableCell>
+                          </>
+                        )}
+
                         <TableCell className="text-xs text-muted-foreground">
                           {new Date(tx.created_at).toLocaleString()}
                         </TableCell>
@@ -256,13 +350,107 @@ const Finance = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="reports">
-          <div className="p-10 text-center text-muted-foreground">Reports Module Placeholder</div>
+        <TabsContent value="reports" className="space-y-6">
+            {!reportData ? (
+                <div className="text-center p-10">Loading Reports...</div>
+            ) : (
+                <>
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <Card>
+                            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">GGR (Gross Gaming Revenue)</CardTitle></CardHeader>
+                            <CardContent><div className="text-2xl font-bold text-green-700">${reportData.ggr?.toLocaleString()}</div></CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">NGR (Net Gaming Revenue)</CardTitle></CardHeader>
+                            <CardContent><div className="text-2xl font-bold text-blue-700">${reportData.ngr?.toLocaleString()}</div></CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Deposits</CardTitle></CardHeader>
+                            <CardContent><div className="text-2xl font-bold">${reportData.total_deposit?.toLocaleString()}</div></CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Withdrawals</CardTitle></CardHeader>
+                            <CardContent><div className="text-2xl font-bold text-red-600">${reportData.total_withdrawal?.toLocaleString()}</div></CardContent>
+                        </Card>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Provider Breakdown */}
+                        <Card>
+                            <CardHeader><CardTitle>Provider Volume Breakdown</CardTitle></CardHeader>
+                            <CardContent className="h-[300px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie 
+                                            data={Object.entries(reportData.provider_breakdown || {}).map(([k,v]) => ({name: k, value: v}))}
+                                            cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label
+                                        >
+                                            {Object.keys(reportData.provider_breakdown || {}).map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042'][index % 4]} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+
+                        {/* Daily Stats */}
+                        <Card>
+                            <CardHeader><CardTitle>Daily Cashflow</CardTitle></CardHeader>
+                            <CardContent className="h-[300px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={reportData.daily_stats}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="date" />
+                                        <YAxis />
+                                        <RechartsTooltip />
+                                        <Legend />
+                                        <Bar dataKey="deposit" fill="#10b981" name="Deposits" />
+                                        <Bar dataKey="withdrawal" fill="#ef4444" name="Withdrawals" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Detailed Metrics Table */}
+                    <Card>
+                        <CardHeader><CardTitle>Detailed Cost Analysis</CardTitle></CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell className="font-medium">Bonus Costs</TableCell>
+                                        <TableCell className="text-right text-red-500">-${reportData.bonus_cost?.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium">Provider Costs (Estimated)</TableCell>
+                                        <TableCell className="text-right text-red-500">-${reportData.provider_cost?.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium">Payment Gateway Fees</TableCell>
+                                        <TableCell className="text-right text-red-500">-${reportData.payment_fees?.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                    <TableRow className="bg-muted/50">
+                                        <TableCell className="font-bold">Total Operational Costs</TableCell>
+                                        <TableCell className="text-right font-bold text-red-700">
+                                            -${((reportData.bonus_cost || 0) + (reportData.provider_cost || 0) + (reportData.payment_fees || 0)).toLocaleString()}
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </>
+            )}
         </TabsContent>
       </Tabs>
 
       {/* Detailed Modal */}
-      <DepositDetailModal 
+      <TransactionDetailModal 
         transaction={selectedTx} 
         open={isDetailOpen} 
         onOpenChange={setIsDetailOpen}
