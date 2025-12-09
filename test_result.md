@@ -102,53 +102,33 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Finance Module Review Request: New Features Verification"
+user_problem_statement: "Finance Module Fix & Game Management Implementation"
 backend:
-  - task: "Enhanced Transaction Model"
+  - task: "AI Risk Analysis Endpoint"
     implemented: true
-    working: true
-    file: "app/models/core.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-        -working: "NA"
-        -agent: "main"
-        -comment: "Added fields: risk_score_at_time, wagering_info, destination_address, etc."
-        -working: true
-        -agent: "testing"
-        -comment: "PASSED: All enhanced transaction model fields validated. Withdrawal transactions contain destination_address, wagering_info (with required/current/is_met structure), and risk_score_at_time fields as expected."
-  - task: "Finance Endpoints"
-    implemented: true
-    working: true
+    working: "NA"
     file: "app/routes/core.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: "NA"
         -agent: "main"
-        -comment: "Updated GET /transactions and GET /reports with new logic."
-        -working: true
-        -agent: "testing"
-        -comment: "PASSED: Finance endpoints working correctly. GET /api/v1/finance/transactions?type=withdrawal returns enhanced fields. GET /api/v1/finance/reports returns ggr, ngr, and provider_breakdown as required. Database seeding was required to populate enhanced fields."
-  - task: "Finance Module Review Request Features"
+        -comment: "Implemented POST /api/v1/finance/transactions/{tx_id}/analyze-risk using Emergent LLM Key."
+  - task: "Game Management Endpoints"
     implemented: true
-    working: true
+    working: "NA"
     file: "app/routes/core.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: "NA"
-        -agent: "testing"
-        -comment: "TESTING REVIEW REQUEST: Verifying new Finance Module features: 1) ip_address and currency filters 2) affiliate_source and currency in responses 3) fx_impact, chargeback_count, chargeback_amount in reports 4) TransactionType enum support for bonus_issued and jackpot_win"
-        -working: true
-        -agent: "testing"
-        -comment: "✅ PASSED ALL REVIEW REQUEST REQUIREMENTS: 1) GET /finance/transactions supports ip_address and currency filters (✅ PASS) 2) Response objects include affiliate_source and currency fields (✅ PASS) 3) GET /finance/reports includes fx_impact ($120.50), chargeback_count (2), and chargeback_amount ($450.00) (✅ PASS) 4) TransactionType enum accepts bonus_issued and jackpot_win types (✅ PASS) - All 6 test criteria passed successfully."
+        -agent: "main"
+        -comment: "Verified endpoints /api/v1/games and /api/v1/tables exist. Tested logic for details update."
 
 frontend:
-  - task: "Finance Page Update"
+  - task: "Finance Frontend Fix"
     implemented: true
     working: "NA"
     file: "src/pages/Finance.jsx"
@@ -158,25 +138,34 @@ frontend:
     status_history:
         -working: "NA"
         -agent: "main"
-        -comment: "Added specific columns for withdrawals and reports tab."
+        -comment: "Fixed missing modal error. Added 'Analyze Risk (AI)' button. Verified page loads."
+  - task: "Game Management Frontend"
+    implemented: true
+    working: "NA"
+    file: "src/pages/GameManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented full Game Management UI with List, Upload, Config (including Geo rules)."
 
 metadata:
   created_by: "main_agent"
-  version: "1.3"
-  test_sequence: 3
-  run_ui: false
+  version: "1.4"
+  test_sequence: 4
+  run_ui: true
 
 test_plan:
   current_focus:
-    - "Finance Page Update"
+    - "AI Risk Analysis Endpoint"
+    - "Finance Frontend Fix"
+    - "Game Management Frontend"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     -agent: "main"
-    -message: "Updated Finance module. Please verify backend endpoints return new fields (wagering_info, risk, etc) for withdrawal transactions."
-    -agent: "testing"
-    -message: "✅ BACKEND TESTING COMPLETE: All Finance module backend endpoints are working correctly. Review request requirements fully satisfied: 1) GET /api/v1/finance/transactions?type=withdrawal returns destination_address, wagering_info, risk_score_at_time 2) GET /api/v1/finance/reports returns ggr, ngr, provider_breakdown 3) wagering_info structure validated with required/current/is_met fields. Database re-seeding was performed to ensure enhanced fields were populated. Ready for frontend testing if needed."
-    -agent: "testing"
-    -message: "🎯 FINANCE MODULE REVIEW REQUEST TESTING COMPLETE: All 4 review request requirements have been successfully verified and are working correctly: ✅ 1. GET /finance/transactions supports ip_address and currency filters ✅ 2. Response objects include affiliate_source and currency fields ✅ 3. GET /finance/reports includes fx_impact, chargeback_count, and chargeback_amount ✅ 4. TransactionType enum supports bonus_issued and jackpot_win types. The Finance Module's new features are fully functional and ready for production use."
+    -message: "Please test: 1. AI Risk Analysis (POST /finance/transactions/{tx_id}/analyze-risk) - Verify it returns valid JSON with score. 2. Game Management endpoints (GET /games, POST /games/upload). 3. Frontend navigation to /finance and /games."
