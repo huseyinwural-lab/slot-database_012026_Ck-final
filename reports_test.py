@@ -259,7 +259,8 @@ class ReportsAPITester:
         if self.failed_tests:
             print(f"\n❌ FAILED TESTS DETAILS:")
             for failed in self.failed_tests:
-                print(f"   - {failed['name']}: {failed.get('error', f'Status {failed.get(\"actual\", \"unknown\")}')}")
+                error_msg = failed.get('error', f'Status {failed.get("actual", "unknown")}')
+                print(f"   - {failed['name']}: {error_msg}")
         
         return passed_reports, total_reports, self.failed_tests
 
