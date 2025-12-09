@@ -135,11 +135,6 @@ async def get_banners():
     db = get_db()
     return [Banner(**b) for b in await db.banners.find().to_list(100)]
 
-@router.get("/affiliates", response_model=List[Affiliate])
-async def get_affiliates():
-    db = get_db()
-    return [Affiliate(**a) for a in await db.affiliates.find().to_list(100)]
-
 @router.get("/risk/rules", response_model=List[RiskRule])
 async def get_risk_rules():
     db = get_db()
