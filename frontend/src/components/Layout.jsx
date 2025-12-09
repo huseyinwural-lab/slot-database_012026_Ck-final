@@ -5,20 +5,20 @@ import {
   Gamepad2, Gift, MessageSquare, Settings, LogOut,
   ListChecks, ToggleRight, Search, FlaskConical,
   FileText, Megaphone, BarChart3, Globe, Handshake,
-  AlertOctagon, UserCog, ScrollText, Scale
+  AlertOctagon, UserCog, ScrollText, Scale, Crown
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '../services/api';
 
-const SidebarItem = ({ to, icon: Icon, label }) => (
+const SidebarItem = ({ to, icon: Icon, label, activeClassName }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
       `flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
         isActive
-          ? 'bg-primary text-primary-foreground'
+          ? activeClassName || 'bg-primary text-primary-foreground'
           : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
       }`
     }
@@ -59,6 +59,7 @@ const Layout = ({ children }) => {
               <SidebarItem to="/players" icon={Users} label="Players" />
               <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
               <SidebarItem to="/games" icon={Gamepad2} label="Games" />
+              <SidebarItem to="/vip-games" icon={Crown} label="VIP Games" activeClassName="bg-yellow-500/20 text-yellow-500 border border-yellow-500/50" />
           </div>
 
           <div className="space-y-1 mb-6">

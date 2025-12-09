@@ -12,6 +12,7 @@ import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
 import FeatureFlags from './pages/FeatureFlags';
 import Simulator from './pages/Simulator';
+import VipGames from './pages/VipGames';
 import { KYC, CRM, CMS, Affiliates, Risk, Admins, Logs, RG, Reports } from './pages/Modules';
 import { Toaster } from 'sonner';
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="/finance" element={<Finance />} />
           <Route path="/approvals" element={<ApprovalQueue />} />
           <Route path="/games" element={<GameManagement />} />
+          <Route path="/vip-games" element={<VipGames />} />
           <Route path="/bonuses" element={<BonusManagement />} />
           <Route path="/fraud" element={<FraudCheck />} />
           <Route path="/support" element={<Support />} />
