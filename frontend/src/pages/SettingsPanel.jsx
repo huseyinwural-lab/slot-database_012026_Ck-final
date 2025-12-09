@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { 
   Settings, Building2, Globe, DollarSign, CreditCard, Shield, Gamepad2,
   Mail, Scale, Wrench, Key, Palette, AlertTriangle, GitBranch, FileText,
-  Plus, Edit, Trash2, Download, Upload, Play, RefreshCw
+  RefreshCw
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+// Sub-components
+import BrandSettings from '../components/settings/BrandSettings';
+import CurrencySettings from '../components/settings/CurrencySettings';
+import CountrySettings from '../components/settings/CountrySettings';
+import ApiKeySettings from '../components/settings/ApiKeySettings';
 
 const SettingsPanel = () => {
   const [activeTab, setActiveTab] = useState("brands");
@@ -24,13 +26,6 @@ const SettingsPanel = () => {
   const [countryRules, setCountryRules] = useState([]);
   const [platformDefaults, setPlatformDefaults] = useState(null);
   const [apiKeys, setApiKeys] = useState([]);
-  
-  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
-  const [newBrand, setNewBrand] = useState({
-    brand_name: '',
-    default_currency: 'USD',
-    default_language: 'en'
-  });
 
   const fetchData = async () => {
     try {
@@ -45,31 +40,6 @@ const SettingsPanel = () => {
   };
 
   useEffect(() => { fetchData(); }, [activeTab]);
-
-  const handleCreateBrand = async () => {
-    try {
-      await api.post('/v1/settings/brands', newBrand);
-      setIsBrandModalOpen(false);
-      fetchData();
-      toast.success('Marka oluşturuldu');
-    } catch { toast.error('Başarısız'); }
-  };
-
-  const handleSyncRates = async () => {
-    try {
-      await api.post('/v1/settings/currencies/sync-rates');
-      toast.success('Döviz kurları güncellendi');
-      fetchData();
-    } catch { toast.error('Başarısız'); }
-  };
-
-  const handleGenerateAPIKey = async () => {
-    try {
-      const result = await api.post('/v1/settings/api-keys/generate', { key_name: 'New API Key', owner: 'system' });
-      toast.success(`API Key: ${result.data.api_key}`);
-      fetchData();
-    } catch { toast.error('Başarısız'); }
-  };
 
   return (
     <div className="space-y-6">
@@ -102,145 +72,17 @@ const SettingsPanel = () => {
 
         {/* BRANDS */}
         <TabsContent value="brands" className="mt-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">Tenants / Brands</CardTitle>
-                <CardDescription>Multi-brand yönetimi</CardDescription>
-              </div>
-              <Dialog open={isBrandModalOpen} onOpenChange={setIsBrandModalOpen}>
-                <DialogTrigger asChild>
-                  <Button><Plus className="w-4 h-4 mr-2" /> Add Brand</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Yeni Marka</DialogTitle></DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Brand Name</Label>
-                      <Input value={newBrand.brand_name} onChange={e=>setNewBrand({...newBrand, brand_name: e.target.value})} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Default Currency</Label>
-                      <Select value={newBrand.default_currency} onValueChange={v=>setNewBrand({...newBrand, default_currency: v})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="TRY">TRY</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button onClick={handleCreateBrand} className="w-full">Oluştur</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Brand Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Currency</TableHead>
-                    <TableHead>Language</TableHead>
-                    <TableHead>Countries</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {brands.map(brand => (
-                    <TableRow key={brand.id}>
-                      <TableCell className="font-medium">{brand.brand_name}</TableCell>
-                      <TableCell><Badge variant={brand.status === 'active' ? 'default' : 'secondary'}>{brand.status}</Badge></TableCell>
-                      <TableCell>{brand.default_currency}</TableCell>
-                      <TableCell>{brand.default_language}</TableCell>
-                      <TableCell>{brand.country_availability?.length || 0}</TableCell>
-                      <TableCell className="text-xs">{new Date(brand.created_at).toLocaleDateString('tr-TR')}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                          <Button size="sm" variant="ghost"><Download className="w-4 h-4" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {brands.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz marka yok</p>}
-            </CardContent>
-          </Card>
+          <BrandSettings brands={brands} onRefresh={fetchData} />
         </TabsContent>
 
         {/* CURRENCIES */}
         <TabsContent value="currencies" className="mt-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">Currencies & Exchange Rates</CardTitle>
-              </div>
-              <Button onClick={handleSyncRates}><RefreshCw className="w-4 h-4 mr-2" /> Sync Rates</Button>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Currency</TableHead>
-                    <TableHead>Symbol</TableHead>
-                    <TableHead>Exchange Rate</TableHead>
-                    <TableHead>Min Deposit</TableHead>
-                    <TableHead>Max Deposit</TableHead>
-                    <TableHead>Updated</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currencies.map(curr => (
-                    <TableRow key={curr.id}>
-                      <TableCell className="font-medium">{curr.currency_code}</TableCell>
-                      <TableCell>{curr.symbol}</TableCell>
-                      <TableCell>{curr.exchange_rate.toFixed(4)}</TableCell>
-                      <TableCell>${curr.min_deposit}</TableCell>
-                      <TableCell>${curr.max_deposit}</TableCell>
-                      <TableCell className="text-xs">{new Date(curr.updated_at).toLocaleDateString('tr-TR')}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <CurrencySettings currencies={currencies} onRefresh={fetchData} />
         </TabsContent>
 
         {/* COUNTRIES */}
         <TabsContent value="countries" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">Country Rules & Geoblocking</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Country</TableHead>
-                    <TableHead>Allowed</TableHead>
-                    <TableHead>Games</TableHead>
-                    <TableHead>Bonuses</TableHead>
-                    <TableHead>KYC Level</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {countryRules.map(rule => (
-                    <TableRow key={rule.id}>
-                      <TableCell className="font-medium">{rule.country_name} ({rule.country_code})</TableCell>
-                      <TableCell><Badge variant={rule.is_allowed ? 'default' : 'destructive'}>{rule.is_allowed ? 'Yes' : 'No'}</Badge></TableCell>
-                      <TableCell>{rule.games_allowed ? '✓' : '✗'}</TableCell>
-                      <TableCell>{rule.bonuses_allowed ? '✓' : '✗'}</TableCell>
-                      <TableCell><Badge variant="outline">Level {rule.kyc_level}</Badge></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <CountrySettings countryRules={countryRules} />
         </TabsContent>
 
         {/* PLATFORM DEFAULTS */}
@@ -276,43 +118,7 @@ const SettingsPanel = () => {
 
         {/* API KEYS */}
         <TabsContent value="api-keys" className="mt-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">API Keys & Webhooks</CardTitle>
-              </div>
-              <Button onClick={handleGenerateAPIKey}><Plus className="w-4 h-4 mr-2" /> Generate Key</Button>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Key Name</TableHead>
-                    <TableHead>Key Hash</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {apiKeys.map(key => (
-                    <TableRow key={key.id}>
-                      <TableCell className="font-medium">{key.key_name}</TableCell>
-                      <TableCell className="font-mono text-xs">{key.key_hash}</TableCell>
-                      <TableCell>{key.owner}</TableCell>
-                      <TableCell><Badge variant={key.status === 'active' ? 'default' : 'secondary'}>{key.status}</Badge></TableCell>
-                      <TableCell className="text-xs">{new Date(key.created_at).toLocaleDateString('tr-TR')}</TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="destructive">Revoke</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {apiKeys.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz API key yok</p>}
-            </CardContent>
-          </Card>
+          <ApiKeySettings apiKeys={apiKeys} onRefresh={fetchData} />
         </TabsContent>
 
         {/* PLACEHOLDER TABS */}
