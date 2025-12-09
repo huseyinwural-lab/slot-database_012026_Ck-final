@@ -277,10 +277,23 @@ const GameManagement = () => {
                             </div>
                         )}
 
-                        <Button onClick={handleUpload} className="w-full">
+                        <Button onClick={handleUpload} className="w-full" disabled={isImporting}>
                             {uploadForm.method === 'fetch_api' ? <Server className="w-4 h-4 mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
-                            {uploadForm.method === 'fetch_api' ? 'Start Import' : 'Upload Bundle'}
+                            {isImporting ? 'Importing...' : uploadForm.method === 'fetch_api' ? 'Start Import' : 'Upload Bundle'}
                         </Button>
+
+                        {isImporting && (
+                            <div className="space-y-2 pt-2 border-t">
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                    <span>Status</span>
+                                    <span>{importProgress}%</span>
+                                </div>
+                                <Progress value={importProgress} className="h-2" />
+                                <div className="h-24 bg-slate-950 text-green-400 p-2 text-xs font-mono overflow-auto rounded border border-slate-800">
+                                    {importLogs.map((l, i) => <div key={i}>{l}</div>)}
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </TabsContent>
