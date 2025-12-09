@@ -168,6 +168,8 @@ const Finance = () => {
           <TabsTrigger value="reports">Financial Reports</TabsTrigger>
         </TabsList>
 
+          <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
+          <TabsTrigger value="chargebacks">Chargebacks</TabsTrigger>
         <TabsContent value="transactions" className="space-y-4">
           {/* Main Filter Bar */}
           <Card>
