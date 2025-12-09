@@ -19,7 +19,8 @@ import { AffiliateManagement } from './pages/AffiliateManagement';
 import RiskManagement from './pages/RiskManagement';
 import ResponsibleGaming from './pages/ResponsibleGaming';
 import { CMSManagement } from './pages/CMSManagement';
-import { Admins, Logs, Reports } from './pages/Modules';
+import { Admins, Logs } from './pages/Modules';
+import { Reports } from './pages/Reports';
 import { Toaster } from 'sonner';
 
 function App() {
