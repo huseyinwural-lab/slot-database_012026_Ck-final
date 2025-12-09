@@ -101,3 +101,59 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Finance Module Overhaul: Enhanced Withdrawal Requests & Financial Reports"
+backend:
+  - task: "Enhanced Transaction Model"
+    implemented: true
+    working: "NA"
+    file: "app/models/core.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Added fields: risk_score_at_time, wagering_info, destination_address, etc."
+  - task: "Finance Endpoints"
+    implemented: true
+    working: "NA"
+    file: "app/routes/core.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Updated GET /transactions and GET /reports with new logic."
+
+frontend:
+  - task: "Finance Page Update"
+    implemented: true
+    working: "NA"
+    file: "src/pages/Finance.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Added specific columns for withdrawals and reports tab."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.1"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Enhanced Transaction Model"
+    - "Finance Endpoints"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "main"
+    -message: "Updated Finance module. Please verify backend endpoints return new fields (wagering_info, risk, etc) for withdrawal transactions."
