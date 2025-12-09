@@ -13,7 +13,8 @@ import Support from './pages/Support';
 import FeatureFlags from './pages/FeatureFlags';
 import Simulator from './pages/Simulator';
 import VipGames from './pages/VipGames';
-import { KYC, CRM, CMS, Affiliates, Risk, Admins, Logs, RG, Reports } from './pages/Modules';
+import KYCManagement from './pages/KYCManagement';
+import { CRM, CMS, Affiliates, Risk, Admins, Logs, RG, Reports } from './pages/Modules';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -35,7 +36,7 @@ function App() {
           <Route path="/simulator" element={<Simulator />} />
           
           {/* New Modules */}
-          <Route path="/kyc" element={<KYC />} />
+          <Route path="/kyc" element={<KYCManagement />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/cms" element={<CMS />} />
           <Route path="/affiliates" element={<Affiliates />} />
