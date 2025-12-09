@@ -68,9 +68,9 @@ async def get_players(
         query["status"] = status
     if vip_level:
         query["vip_level"] = vip_level
-    if risk_score:
+    if risk_score and risk_score != "all":
         query["risk_score"] = risk_score
-    if country:
+    if country and country != "all":
         query["country"] = country
         
     if search:
@@ -113,6 +113,7 @@ async def manual_balance_adjustment(player_id: str, amount: float = Body(...), t
         return {"message": "Adjustment > $1000. Moved to Approval Queue."}
 
     field = "balance_real" if type == "real" else "balance_bonus"
+    # Also update deposits/withdrawals/net if needed
     await db.players.update_one({"id": player_id}, {"$inc": {field: amount}})
     tx = Transaction(
         id=f"adj-{uuid.uuid4().hex[:8]}", player_id=player_id, type=TransactionType.ADJUSTMENT,
@@ -189,11 +190,15 @@ async def action_transaction(tx_id: str, action: str = Body(..., embed=True), re
             return {"message": "High value withdrawal moved to Approval Queue"}
         new_status = "completed"
         if tx['type'] == 'deposit':
-            await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
+            await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount'], "total_deposits": tx['amount'], "net_position": tx['amount']}})
+        if tx['type'] == 'withdrawal':
+             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"total_withdrawals": tx['amount'], "net_position": -tx['amount'], "pending_withdrawals": -tx['amount']}})
+
     elif action == "reject":
         new_status = "rejected"
         if tx['type'] == 'withdrawal':
-            await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
+            # Refund
+            await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount'], "pending_withdrawals": -tx['amount']}})
     elif action == "fraud":
         new_status = "fraud_flagged"
         await db.players.update_one({"id": tx['player_id']}, {"$set": {"status": "suspended", "risk_score": "high"}})
@@ -236,10 +241,14 @@ async def action_approval(req_id: str, action: str = Body(..., embed=True)):
     await db.approvals.update_one({"id": req_id}, {"$set": {"status": new_status}})
 
     if new_status == "approved" and req['type'] == 'withdrawal_high_value':
-        await db.transactions.update_one(
-            {"id": req['related_entity_id']}, 
-            {"$set": {"status": "completed", "processed_at": datetime.now(timezone.utc)}}
-        )
+        # Approve underlying tx
+        tx = await db.transactions.find_one({"id": req['related_entity_id']})
+        if tx:
+             await db.transactions.update_one(
+                {"id": req['related_entity_id']}, 
+                {"$set": {"status": "completed", "processed_at": datetime.now(timezone.utc)}}
+            )
+             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"total_withdrawals": tx['amount'], "net_position": -tx['amount'], "pending_withdrawals": -tx['amount']}})
 
     return {"message": f"Request {new_status}"}
 
@@ -439,9 +448,63 @@ async def reply_ticket(ticket_id: str, message: TicketMessage):
 # --- SEED DATA ---
 async def seed_mock_data(db):
     await db.players.insert_many([
-        Player(id="p1", username="highroller99", email="vip@casino.com", balance_real=50000, vip_level=5, status=PlayerStatus.ACTIVE, country="Turkey", first_name="Mehmet", last_name="Yilmaz", tags=["high_roller"]).model_dump(),
-        Player(id="p2", username="newbie_luck", email="new@gmail.com", balance_real=100, vip_level=1, status=PlayerStatus.ACTIVE, country="Germany", first_name="Hans", last_name="Muller").model_dump(),
-        Player(id="p3", username="bonus_hunter", email="fraud@alert.com", balance_real=5, vip_level=1, status=PlayerStatus.SUSPENDED, risk_score="high", country="Russia", tags=["bonus_abuse"]).model_dump(),
+        Player(
+            id="p1", 
+            username="highroller99", 
+            email="vip@casino.com", 
+            balance_real=50000, 
+            vip_level=5, 
+            status=PlayerStatus.ACTIVE, 
+            country="Turkey", 
+            first_name="Mehmet", 
+            last_name="Yilmaz", 
+            tags=["high_roller", "whale"],
+            total_deposits=120000,
+            total_withdrawals=45000,
+            net_position=75000,
+            last_login=datetime.now(timezone.utc),
+            last_ip="192.168.1.1",
+            risk_score="low",
+            fraud_score=12,
+            kyc_status=KYCStatus.APPROVED,
+            kyc_level=3,
+            affiliate_source="google_ads"
+        ).model_dump(),
+        Player(
+            id="p2", 
+            username="newbie_luck", 
+            email="new@gmail.com", 
+            balance_real=100, 
+            vip_level=1, 
+            status=PlayerStatus.ACTIVE, 
+            country="Germany", 
+            first_name="Hans", 
+            last_name="Muller",
+            total_deposits=200,
+            total_withdrawals=0,
+            net_position=200,
+            last_login=datetime.now(timezone.utc)-timedelta(days=2),
+            risk_score="low",
+            fraud_score=5,
+            affiliate_source="direct"
+        ).model_dump(),
+        Player(
+            id="p3", 
+            username="bonus_hunter", 
+            email="fraud@alert.com", 
+            balance_real=5, 
+            vip_level=1, 
+            status=PlayerStatus.SUSPENDED, 
+            risk_score="high", 
+            fraud_score=88,
+            country="Russia", 
+            tags=["bonus_abuse", "multi_account"],
+            total_deposits=50,
+            total_withdrawals=0,
+            net_position=50,
+            account_flags=["bonus_abuse"],
+            kyc_status=KYCStatus.REJECTED
+        ).model_dump(),
     ])
     await db.transactions.insert_many([
         Transaction(id="tx1", player_id="p1", type=TransactionType.DEPOSIT, amount=10000, status=TransactionStatus.COMPLETED, method="crypto", player_username="highroller99").model_dump(),

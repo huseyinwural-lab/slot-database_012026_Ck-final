@@ -10,6 +10,7 @@ class PlayerStatus(str, Enum):
     SUSPENDED = "suspended"
     BANNED = "banned"
     SELF_EXCLUDED = "self_excluded"
+    LOCKED = "locked"
 
 class KYCStatus(str, Enum):
     PENDING = "pending"
@@ -22,6 +23,8 @@ class TransactionType(str, Enum):
     WITHDRAWAL = "withdrawal"
     BONUS = "bonus"
     ADJUSTMENT = "adjustment"
+    BET = "bet"
+    WIN = "win"
 
 class TransactionStatus(str, Enum):
     PENDING = "pending"
@@ -157,17 +160,37 @@ class Player(BaseModel):
     last_name: Optional[str] = None
     dob: Optional[datetime] = None
     address: Optional[str] = None
+    
+    # Wallet & Financials
     balance_real: float = 0.0
     balance_bonus: float = 0.0
     balance_locked: float = 0.0 
+    pending_withdrawals: float = 0.0
+    total_deposits: float = 0.0
+    total_withdrawals: float = 0.0
+    net_position: float = 0.0 # Deposits - Withdrawals
+    
+    # Status & Flags
     status: PlayerStatus = PlayerStatus.ACTIVE
     vip_level: int = 1
     kyc_status: KYCStatus = KYCStatus.NOT_SUBMITTED
+    kyc_level: int = 0
+    account_flags: List[str] = [] # "bonus_abuse", "high_risk", "whale"
+    tags: List[str] = [] 
+    
+    # Technical & Tracking
     registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_login: Optional[datetime] = None
+    last_ip: Optional[str] = None
+    device_fingerprint: Optional[str] = None
     country: str = "Unknown"
-    risk_score: str = "low" 
-    tags: List[str] = [] 
+    affiliate_source: Optional[str] = None
+    
+    # Risk
+    risk_score: str = "low" # low, medium, high, critical
+    fraud_score: int = 0 # 0-100
+    
+    # Gameplay
     luck_boost_factor: float = 1.0 
     luck_boost_remaining_spins: int = 0
 
