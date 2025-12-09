@@ -306,8 +306,13 @@ const GameManagement = () => {
                                     <SelectContent><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem></SelectContent>
                                 </Select>
                             </div>
-                            <div className="space-y-2"><Label>Min Bet</Label><Input type="number" value={configForm.min_bet} onChange={e => setConfigForm({...configForm, min_bet: e.target.value})} /></div>
+                            <div className="space-y-2"><Label>Min Bet ($)</Label><Input type="number" value={configForm.min_bet} onChange={e => setConfigForm({...configForm, min_bet: e.target.value})} /></div>
                             <div className="space-y-2"><Label>Max Win (x)</Label><Input type="number" value={configForm.max_win_multiplier} onChange={e => setConfigForm({...configForm, max_win_multiplier: e.target.value})} /></div>
+                            <div className="space-y-2 col-span-2 border-t pt-4 mt-2">
+                                <Label className="text-yellow-600 flex items-center gap-2"><Lock className="w-3 h-3" /> Min Wallet Balance to Enter ($)</Label>
+                                <Input type="number" value={configForm.min_balance_to_enter || 0} onChange={e => setConfigForm({...configForm, min_balance_to_enter: e.target.value})} placeholder="0.00" className="border-yellow-200 focus:ring-yellow-500" />
+                                <p className="text-[10px] text-muted-foreground">Player must have this much money just to open the game.</p>
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <Label>Paytable (JSON)</Label>
