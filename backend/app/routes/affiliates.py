@@ -17,7 +17,7 @@ def get_db():
     return client[settings.db_name]
 
 # --- AFFILIATES ---
-@router.get("/", response_model=List[Affiliate])
+@router.get("", response_model=List[Affiliate])
 async def get_affiliates(status: Optional[str] = None):
     db = get_db()
     query = {}
@@ -26,7 +26,7 @@ async def get_affiliates(status: Optional[str] = None):
     affiliates = await db.affiliates.find(query).to_list(100)
     return [Affiliate(**a) for a in affiliates]
 
-@router.post("/")
+@router.post("")
 async def create_affiliate(aff: Affiliate):
     db = get_db()
     # Ensure id and basic fields
