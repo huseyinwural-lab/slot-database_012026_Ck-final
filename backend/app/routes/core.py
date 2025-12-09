@@ -385,13 +385,49 @@ async def update_table_status(table_id: str, status: str = Body(..., embed=True)
 
 # --- GAMES & ADVANCED SETTINGS ---
 @router.get("/games", response_model=List[Game])
-async def get_games():
+async def get_games(
+    category: Optional[str] = None,
+    provider: Optional[str] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    rtp_min: Optional[float] = None,
+    rtp_max: Optional[float] = None,
+    volatility: Optional[str] = None,
+    country: Optional[str] = None,
+    feature_buy: Optional[bool] = None
+):
     db = get_db()
-    games = await db.games.find().limit(100).to_list(100)
+    query = {}
+    if category and category != "all":
+        query["category"] = category
+    if provider and provider != "all":
+        query["provider"] = provider
+    if status and status != "all":
+        query["business_status"] = status
+    if volatility and volatility != "all":
+        query["configuration.volatility"] = volatility
+    if feature_buy is not None:
+        query["feature_buy_available"] = feature_buy
+    
+    if rtp_min or rtp_max:
+        query["configuration.rtp"] = {}
+        if rtp_min: query["configuration.rtp"]["$gte"] = rtp_min
+        if rtp_max: query["configuration.rtp"]["$lte"] = rtp_max
+        
+    if country:
+        # Check if country allowed (mock logic: if not in blocked)
+        query["countries_blocked"] = {"$ne": country}
+
+    if search:
+        query["name"] = {"$regex": search, "$options": "i"}
+
+    games = await db.games.find(query).limit(100).to_list(100)
     
     enhanced_games = []
     for g in games:
+        # Auto-Suggestion Logic (Mock)
         config = g.get('configuration', {})
+        # Handle case where configuration is a dict or model dump
         min_bet = config.get('min_bet', 0) if isinstance(config, dict) else 0
         
         if min_bet > 10 and not g.get('is_special_game'):
@@ -399,6 +435,19 @@ async def get_games():
         enhanced_games.append(Game(**g))
         
     return enhanced_games
+
+@router.get("/games/{game_id}/analytics")
+async def get_game_analytics(game_id: str):
+    # Mock Analytics
+    return {
+        "ggr_24h": 12500.50,
+        "ggr_7d": 85000.00,
+        "active_players_24h": 342,
+        "rounds_24h": 15000,
+        "rtp_actual_24h": 95.8,
+        "volatility_observed": "high",
+        "retention_rate": 45.2
+    }
 
 @router.post("/games")
 async def add_game(game: Game):
@@ -433,7 +482,8 @@ async def update_game_details(game_id: str, details: Dict[str, Any] = Body(...))
     })
     
     allowed = ["name", "category", "provider", "image_url", "tags", 
-               "business_status", "runtime_status", "is_special_game", "special_type"]
+               "business_status", "runtime_status", "is_special_game", "special_type",
+               "countries_allowed", "countries_blocked", "sort_order", "feature_buy_available"]
     update_data = {k: v for k, v in details.items() if k in allowed}
     
     if not update_data:
@@ -459,26 +509,50 @@ async def toggle_game_status(game_id: str):
 async def upload_games(
     provider: str = Body(...),
     method: str = Body(...), 
-    game_ids: List[str] = Body([])
+    game_ids: List[str] = Body([]),
+    preview: bool = Body(False)
 ):
     db = get_db()
-    imported_count = 0
+    
+    # Mock Provider API Fetch
     if method == "fetch_api":
-        new_games = [
-            Game(name=f"{provider} Slot {random.randint(100,999)}", provider=provider, category="Slot", 
-                 configuration=GameConfig(rtp=96.5).model_dump()).model_dump()
-            for _ in range(3)
-        ]
+        if preview:
+            # Return Preview List
+            return {
+                "status": "preview",
+                "games": [
+                    {"id": "ext_101", "name": f"{provider} Slot 101", "rtp": 96.5, "category": "Slot", "new": True, "version": "1.0"},
+                    {"id": "ext_102", "name": f"{provider} Live 102", "rtp": 97.0, "category": "Live", "new": False, "version": "2.1"},
+                    {"id": "ext_103", "name": f"{provider} Crash 103", "rtp": 95.0, "category": "Crash", "new": True, "version": "1.0"},
+                ],
+                "summary": {"total_found": 3, "new": 2}
+            }
+        
+        imported_count = 0
+        new_games = []
+        for _ in range(len(game_ids) if game_ids else 3):
+             new_games.append(
+                Game(
+                    name=f"{provider} Imported Game {random.randint(1000,9999)}", 
+                    provider=provider, 
+                    category="Slot", 
+                    business_status=BusinessStatus.DRAFT,
+                    configuration=GameConfig(rtp=96.5).model_dump()
+                ).model_dump()
+             )
+        
         if new_games:
             await db.games.insert_many(new_games)
             imported_count = len(new_games)
             
-    await db.upload_logs.insert_one(GameUploadLog(
-        admin_id="current_admin", provider=provider, total_games=imported_count, 
-        success_count=imported_count, error_count=0
-    ).model_dump())
+        await db.upload_logs.insert_one(GameUploadLog(
+            admin_id="current_admin", provider=provider, total_games=imported_count, 
+            success_count=imported_count, error_count=0, status="completed"
+        ).model_dump())
+        
+        return {"message": f"Successfully imported {imported_count} games from {provider}", "imported_count": imported_count}
     
-    return {"message": f"Successfully imported {imported_count} games from {provider}"}
+    return {"message": "Invalid method"}
 
 # --- BONUSES ---
 @router.get("/bonuses", response_model=List[Bonus])
