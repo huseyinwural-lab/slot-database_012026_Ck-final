@@ -103,13 +103,12 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.7"
-  test_sequence: 7
+  version: "1.8"
+  test_sequence: 8
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Finance Refactor & New Routes"
     - "Transaction Detail Audit"
   stuck_tasks: []
   test_all: false
