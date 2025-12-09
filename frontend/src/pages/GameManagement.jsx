@@ -194,23 +194,36 @@ const GameManagement = () => {
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="fetch_api">Auto-Fetch from Provider API</SelectItem>
-                                    <SelectItem value="json_upload">Manual Bundle Upload (.zip)</SelectItem>
+                                    <SelectItem value="json_upload">Manual Bundle Upload (.zip / .json)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Provider</Label>
-                            <Select value={uploadForm.provider} onValueChange={v => setUploadForm({...uploadForm, provider: v})}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Pragmatic Play">Pragmatic Play</SelectItem>
-                                    <SelectItem value="Evolution">Evolution</SelectItem>
-                                    <SelectItem value="NetEnt">NetEnt</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        
+                        {uploadForm.method === 'fetch_api' ? (
+                            <div className="space-y-2">
+                                <Label>Provider</Label>
+                                <Select value={uploadForm.provider} onValueChange={v => setUploadForm({...uploadForm, provider: v})}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Pragmatic Play">Pragmatic Play</SelectItem>
+                                        <SelectItem value="Evolution">Evolution</SelectItem>
+                                        <SelectItem value="NetEnt">NetEnt</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <Label>Game Bundle File</Label>
+                                <div className="flex items-center gap-2">
+                                    <Input type="file" accept=".zip,.json" onChange={(e) => setUploadForm({...uploadForm, file: e.target.files[0]})} />
+                                </div>
+                                <p className="text-[10px] text-muted-foreground">Supported: .json metadata or .zip asset bundle.</p>
+                            </div>
+                        )}
+
                         <Button onClick={handleUpload} className="w-full">
-                            <Server className="w-4 h-4 mr-2" /> Start Import
+                            {uploadForm.method === 'fetch_api' ? <Server className="w-4 h-4 mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                            {uploadForm.method === 'fetch_api' ? 'Start Import' : 'Upload Bundle'}
                         </Button>
                     </CardContent>
                 </Card>
