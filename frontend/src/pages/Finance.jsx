@@ -163,13 +163,12 @@ const Finance = () => {
       </div>
 
       <Tabs defaultValue="transactions" className="w-full" onValueChange={(v) => v === 'reports' && fetchReports()}>
-        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+        <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="reports">Financial Reports</TabsTrigger>
-        </TabsList>
-
+          <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           <TabsTrigger value="chargebacks">Chargebacks</TabsTrigger>
+        </TabsList>
         <TabsContent value="transactions" className="space-y-4">
           {/* Main Filter Bar */}
           <Card>
