@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ShieldAlert, Paperclip, Gavel } from 'lucide-react';
+import { ShieldAlert, Paperclip, Gavel, AlertTriangle } from 'lucide-react';
 
 const ChargebackList = () => {
     return (
@@ -20,6 +20,8 @@ const ChargebackList = () => {
                             <TableRow>
                                 <TableHead>Case ID</TableHead>
                                 <TableHead>Transaction</TableHead>
+                                <TableHead>Risk Score (At Time)</TableHead>
+                                <TableHead>Fraud Cluster</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Reason Code</TableHead>
                                 <TableHead>Deadline</TableHead>
@@ -31,6 +33,8 @@ const ChargebackList = () => {
                             <TableRow>
                                 <TableCell className="font-mono">CB-9921</TableCell>
                                 <TableCell>tx_123 (User: highroller)</TableCell>
+                                <TableCell><Badge variant="destructive">95 (Critical)</Badge></TableCell>
+                                <TableCell><div className="flex items-center gap-1 text-red-600"><AlertTriangle className="w-3 h-3"/> Cluster #8821</div></TableCell>
                                 <TableCell>$500.00</TableCell>
                                 <TableCell>Fraud / Not Authorized</TableCell>
                                 <TableCell className="text-red-600 font-bold">2 Days</TableCell>
@@ -42,6 +46,8 @@ const ChargebackList = () => {
                             <TableRow>
                                 <TableCell className="font-mono">CB-9922</TableCell>
                                 <TableCell>tx_456</TableCell>
+                                <TableCell><Badge variant="outline" className="bg-green-50 text-green-700">10 (Low)</Badge></TableCell>
+                                <TableCell>-</TableCell>
                                 <TableCell>$120.00</TableCell>
                                 <TableCell>Product Not Received</TableCell>
                                 <TableCell>15 Days</TableCell>
