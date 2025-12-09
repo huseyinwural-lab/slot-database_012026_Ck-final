@@ -415,6 +415,233 @@ class CasinoAdminAPITester:
         
         return success1
 
+    def test_advanced_game_config(self):
+        """Test Advanced Game Configuration (RTP, Volatility updates)"""
+        print("\n🎮 ADVANCED GAME CONFIG TESTS")
+        
+        # First get games list to find a game to configure
+        success1, games_response = self.run_test("Get Games for Config Test", "GET", "api/v1/games", 200)
+        
+        if success1 and isinstance(games_response, list) and len(games_response) > 0:
+            game_id = games_response[0].get('id')
+            if game_id:
+                # Test updating game configuration with advanced settings
+                advanced_config = {
+                    "rtp": 97.5,
+                    "volatility": "high",
+                    "min_bet": 0.25,
+                    "max_bet": 500.0,
+                    "max_win_multiplier": 10000,
+                    "paytable_id": "premium_paytable",
+                    "bonus_buy_enabled": True
+                }
+                success2, _ = self.run_test(f"Update Advanced Game Config - {game_id}", "PUT", f"api/v1/games/{game_id}", 200, advanced_config)
+                
+                # Verify the configuration was updated
+                success3, updated_game = self.run_test("Verify Game Config Update", "GET", "api/v1/games", 200)
+                if success3 and isinstance(updated_game, list):
+                    updated_game_data = next((g for g in updated_game if g.get('id') == game_id), None)
+                    if updated_game_data and updated_game_data.get('configuration'):
+                        config = updated_game_data['configuration']
+                        if config.get('rtp') == 97.5 and config.get('volatility') == 'high':
+                            print("✅ Game configuration updated successfully")
+                        else:
+                            print("⚠️  Game configuration may not have been updated properly")
+                
+                return success1 and success2 and success3
+        
+        print("⚠️  No games found to test advanced configuration")
+        return success1
+
+    def test_luck_boost_bonus(self):
+        """Test Luck Boost Bonus Creation and Rules"""
+        print("\n🍀 LUCK BOOST BONUS TESTS")
+        
+        # Test creating a luck boost bonus
+        luck_boost_bonus = {
+            "name": "Lucky Spins Boost",
+            "type": "luck_boost",
+            "description": "Increases win rate for next 10 spins",
+            "wager_req": 0,
+            "status": "active",
+            "rules": {
+                "luck_boost_factor": 1.5,
+                "luck_boost_spins": 10,
+                "min_deposit": 50.0
+            },
+            "auto_apply": False
+        }
+        success1, bonus_response = self.run_test("Create Luck Boost Bonus", "POST", "api/v1/bonuses", 200, luck_boost_bonus)
+        
+        # Test creating a welcome bonus with luck boost
+        welcome_luck_bonus = {
+            "name": "Welcome Luck Boost",
+            "type": "welcome",
+            "description": "Welcome bonus with luck enhancement",
+            "wager_req": 25,
+            "status": "active",
+            "rules": {
+                "reward_percentage": 100,
+                "min_deposit": 20.0,
+                "luck_boost_factor": 1.3,
+                "luck_boost_spins": 5
+            },
+            "auto_apply": True
+        }
+        success2, _ = self.run_test("Create Welcome Luck Bonus", "POST", "api/v1/bonuses", 200, welcome_luck_bonus)
+        
+        # Test creating a referral bonus
+        referral_bonus = {
+            "name": "Referral Bonus",
+            "type": "referral",
+            "description": "Bonus for referring friends",
+            "wager_req": 15,
+            "status": "active",
+            "rules": {
+                "reward_amount": 25.0,
+                "luck_boost_factor": 1.2,
+                "luck_boost_spins": 3
+            },
+            "auto_apply": False
+        }
+        success3, _ = self.run_test("Create Referral Bonus", "POST", "api/v1/bonuses", 200, referral_bonus)
+        
+        # Verify bonus creation response structure
+        if success1 and isinstance(bonus_response, dict):
+            required_fields = ['id', 'name', 'type', 'rules']
+            if all(field in bonus_response for field in required_fields):
+                print("✅ Luck boost bonus created with correct structure")
+                if 'luck_boost_factor' in bonus_response.get('rules', {}):
+                    print("✅ Luck boost rules properly included")
+            else:
+                print(f"⚠️  Bonus response missing fields: {[f for f in required_fields if f not in bonus_response]}")
+        
+        return success1 and success2 and success3
+
+    def test_dashboard_kpis(self):
+        """Test Dashboard KPIs (GGR, NGR, Provider Health)"""
+        print("\n📊 DASHBOARD KPI TESTS")
+        
+        # Test dashboard stats with detailed validation
+        success1, dashboard_response = self.run_test("Get Dashboard KPIs", "GET", "api/v1/dashboard/stats", 200)
+        
+        if success1 and isinstance(dashboard_response, dict):
+            # Validate GGR metrics
+            ggr = dashboard_response.get('ggr', {})
+            if isinstance(ggr, dict) and all(key in ggr for key in ['value', 'change_percent', 'trend']):
+                print(f"✅ GGR KPI: ${ggr['value']:,.2f} ({ggr['change_percent']:+.1f}% {ggr['trend']})")
+            else:
+                print("⚠️  GGR KPI structure incomplete")
+            
+            # Validate NGR metrics
+            ngr = dashboard_response.get('ngr', {})
+            if isinstance(ngr, dict) and all(key in ngr for key in ['value', 'change_percent', 'trend']):
+                print(f"✅ NGR KPI: ${ngr['value']:,.2f} ({ngr['change_percent']:+.1f}% {ngr['trend']})")
+            else:
+                print("⚠️  NGR KPI structure incomplete")
+            
+            # Validate Provider Health
+            provider_health = dashboard_response.get('provider_health', [])
+            if isinstance(provider_health, list) and len(provider_health) > 0:
+                print(f"✅ Provider Health: {len(provider_health)} providers monitored")
+                for provider in provider_health:
+                    if isinstance(provider, dict) and 'name' in provider and 'status' in provider:
+                        status_emoji = "🟢" if provider['status'] == 'UP' else "🟡" if provider['status'] == 'WARNING' else "🔴"
+                        latency = provider.get('latency', 'N/A')
+                        print(f"   {status_emoji} {provider['name']}: {provider['status']} ({latency})")
+            else:
+                print("⚠️  Provider health data missing or empty")
+            
+            # Validate Total Bets and Wins
+            total_bets = dashboard_response.get('total_bets', {})
+            total_wins = dashboard_response.get('total_wins', {})
+            if isinstance(total_bets, dict) and isinstance(total_wins, dict):
+                bets_value = total_bets.get('value', 0)
+                wins_value = total_wins.get('value', 0)
+                if bets_value > 0 and wins_value > 0:
+                    house_edge = ((bets_value - wins_value) / bets_value) * 100
+                    print(f"✅ Betting Volume: ${bets_value:,.2f} bets, ${wins_value:,.2f} wins")
+                    print(f"✅ Calculated House Edge: {house_edge:.2f}%")
+            
+            # Validate Risk Alerts
+            risk_alerts = dashboard_response.get('risk_alerts', {})
+            if isinstance(risk_alerts, dict):
+                total_alerts = sum(risk_alerts.values())
+                print(f"✅ Risk Monitoring: {total_alerts} total alerts across {len(risk_alerts)} categories")
+                for alert_type, count in risk_alerts.items():
+                    if count > 0:
+                        print(f"   ⚠️  {alert_type.replace('_', ' ').title()}: {count}")
+            
+            return True
+        else:
+            print("❌ Dashboard response invalid or missing")
+            return False
+
+    def test_luck_boost_simulation(self):
+        """Test Luck Boost Logic in Game Simulation"""
+        print("\n🎲 LUCK BOOST SIMULATION TESTS")
+        
+        # First, create a player with luck boost
+        # We'll use the existing player simulation but then manually set luck boost
+        player_sim_config = {
+            "count": 1,
+            "delay_ms": 10,
+            "country_code": "TR",
+            "risk_profile": "low"
+        }
+        success1, _ = self.run_test("Create Test Player for Luck Boost", "POST", "api/v1/simulator/players/start", 200, player_sim_config)
+        
+        # Wait a moment for player creation
+        import time
+        time.sleep(1)
+        
+        # Get the created player to modify luck boost settings
+        success2, players_response = self.run_test("Get Players for Luck Boost Test", "GET", "api/v1/players", 200)
+        
+        if success2 and isinstance(players_response, list) and len(players_response) > 0:
+            # Find a simulated player
+            sim_player = next((p for p in players_response if p.get('username', '').startswith('SimUser_')), None)
+            if sim_player:
+                player_id = sim_player['id']
+                
+                # Update player with luck boost settings
+                luck_boost_update = {
+                    "luck_boost_factor": 1.8,
+                    "luck_boost_remaining_spins": 5
+                }
+                success3, _ = self.run_test(f"Set Luck Boost for Player {player_id}", "PUT", f"api/v1/players/{player_id}", 200, luck_boost_update)
+                
+                # Run game simulation to test luck boost logic
+                game_sim_config = {
+                    "count": 5,
+                    "delay_ms": 100,
+                    "game_provider": "Pragmatic Play",
+                    "win_rate": 0.2  # Low base win rate to see luck boost effect
+                }
+                success4, _ = self.run_test("Run Game Simulation with Luck Boost", "POST", "api/v1/simulator/games/start", 200, game_sim_config)
+                
+                # Wait for simulation to complete
+                time.sleep(2)
+                
+                # Check simulation logs for luck boost activity
+                success5, logs_response = self.run_test("Get Simulation Logs", "GET", "api/v1/simulator/logs?limit=20", 200)
+                
+                if success5 and isinstance(logs_response, list):
+                    boost_logs = [log for log in logs_response if 'BOOSTED' in log.get('message', '')]
+                    if len(boost_logs) > 0:
+                        print(f"✅ Luck boost simulation working: {len(boost_logs)} boosted spins detected")
+                        for log in boost_logs[:3]:  # Show first 3 boost logs
+                            details = log.get('details', {})
+                            luck_factor = details.get('luck_factor', 1.0)
+                            print(f"   🍀 {log.get('message', '')} (Factor: {luck_factor}x)")
+                    else:
+                        print("⚠️  No luck boost activity detected in simulation logs")
+                
+                return success1 and success2 and success3 and success4 and success5
+        
+        print("⚠️  Could not find suitable player for luck boost testing")
+        return success1 and success2
+
     def test_modules_seed(self):
         """Test Modules Seed endpoint"""
         print("\n🌱 MODULES SEED TESTS")
