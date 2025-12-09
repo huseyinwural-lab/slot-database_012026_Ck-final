@@ -512,10 +512,10 @@ const AdminManagement = () => {
                       </div>
                       <div>
                         <Label>Sonuç</Label>
-                        <Select value={loginFilter.result} onValueChange={v => setLoginFilter({...loginFilter, result: v})}>
+                        <Select value={loginFilter.result || "all"} onValueChange={v => setLoginFilter({...loginFilter, result: v === "all" ? "" : v})}>
                           <SelectTrigger><SelectValue placeholder="Tümü" /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Tümü</SelectItem>
+                            <SelectItem value="all">Tümü</SelectItem>
                             <SelectItem value="success">✅ Başarılı</SelectItem>
                             <SelectItem value="failed">❌ Başarısız</SelectItem>
                           </SelectContent>
