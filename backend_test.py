@@ -1201,6 +1201,125 @@ class CasinoAdminAPITester:
         
         return all([success_no_slash, success_seed, success1, success6, success8, success11, success12])
 
+    def test_system_logs_module(self):
+        """Test System Logs Module - All 11 Sub-modules"""
+        print("\n📋 SYSTEM LOGS MODULE TESTS - ALL 11 SUB-MODULES")
+        
+        # First seed logs data
+        success_seed, seed_response = self.run_test("Seed System Logs", "POST", "api/v1/logs/seed", 200)
+        if success_seed and isinstance(seed_response, dict):
+            print(f"✅ System logs seeding: {seed_response.get('message', 'Success')}")
+        
+        # 1. Test System Events
+        success1, events_response = self.run_test("1. System Events", "GET", "api/v1/logs/events", 200)
+        if success1 and isinstance(events_response, list):
+            print(f"✅ Found {len(events_response)} system events")
+            if len(events_response) > 0:
+                event = events_response[0]
+                required_fields = ['id', 'timestamp', 'module', 'severity', 'event_type', 'message']
+                missing_fields = [field for field in required_fields if field not in event]
+                if not missing_fields:
+                    print(f"✅ Event structure complete: {event['module']} - {event['severity']} - {event['event_type']}")
+                else:
+                    print(f"⚠️  Event missing fields: {missing_fields}")
+        
+        # Test events with severity filter
+        success1a, _ = self.run_test("System Events - Severity Filter", "GET", "api/v1/logs/events?severity=info", 200)
+        
+        # 2. Test Cron Jobs
+        success2, cron_response = self.run_test("2. Cron Jobs List", "GET", "api/v1/logs/cron", 200)
+        if success2 and isinstance(cron_response, list):
+            print(f"✅ Found {len(cron_response)} cron logs")
+        
+        # Test running a cron job
+        success2a, run_response = self.run_test("Run Cron Job", "POST", "api/v1/logs/cron/run", 200, {"job_name": "test_job"})
+        if success2a and isinstance(run_response, dict):
+            print(f"✅ Cron job executed: {run_response.get('job_name', 'Unknown')} - {run_response.get('status', 'Unknown')}")
+        
+        # 3. Test Service Health
+        success3, health_response = self.run_test("3. Service Health", "GET", "api/v1/logs/health", 200)
+        if success3 and isinstance(health_response, list):
+            print(f"✅ Found {len(health_response)} service health records")
+            if len(health_response) > 0:
+                service = health_response[0]
+                required_fields = ['service_name', 'status', 'latency_ms', 'error_rate', 'instance_count']
+                missing_fields = [field for field in required_fields if field not in service]
+                if not missing_fields:
+                    print(f"✅ Health structure complete: {service['service_name']} - {service['status']} - {service['latency_ms']}ms")
+                else:
+                    print(f"⚠️  Health missing fields: {missing_fields}")
+        
+        # 4. Test Deployments
+        success4, deploy_response = self.run_test("4. Deployment Logs", "GET", "api/v1/logs/deployments", 200)
+        if success4 and isinstance(deploy_response, list):
+            print(f"✅ Found {len(deploy_response)} deployment logs")
+        
+        # 5. Test Config Changes
+        success5, config_response = self.run_test("5. Config Changes", "GET", "api/v1/logs/config", 200)
+        if success5 and isinstance(config_response, list):
+            print(f"✅ Found {len(config_response)} config change logs")
+        
+        # 6. Test Error Logs
+        success6, error_response = self.run_test("6. Error Logs", "GET", "api/v1/logs/errors", 200)
+        if success6 and isinstance(error_response, list):
+            print(f"✅ Found {len(error_response)} error logs")
+            if len(error_response) > 0:
+                error = error_response[0]
+                required_fields = ['id', 'timestamp', 'service', 'error_type', 'severity', 'message']
+                missing_fields = [field for field in required_fields if field not in error]
+                if not missing_fields:
+                    print(f"✅ Error structure complete: {error['service']} - {error['error_type']} - {error['severity']}")
+                else:
+                    print(f"⚠️  Error missing fields: {missing_fields}")
+        
+        # Test errors with severity filter
+        success6a, _ = self.run_test("Error Logs - Severity Filter", "GET", "api/v1/logs/errors?severity=error", 200)
+        
+        # 7. Test Queue Logs
+        success7, queue_response = self.run_test("7. Queue/Worker Logs", "GET", "api/v1/logs/queues", 200)
+        if success7 and isinstance(queue_response, list):
+            print(f"✅ Found {len(queue_response)} queue logs")
+        
+        # 8. Test Database Logs
+        success8, db_response = self.run_test("8. Database Logs", "GET", "api/v1/logs/db", 200)
+        if success8 and isinstance(db_response, list):
+            print(f"✅ Found {len(db_response)} database logs")
+        
+        # Test DB logs with slow query filter
+        success8a, _ = self.run_test("Database Logs - Slow Queries", "GET", "api/v1/logs/db?slow_only=true", 200)
+        
+        # 9. Test Cache Logs
+        success9, cache_response = self.run_test("9. Cache Logs", "GET", "api/v1/logs/cache", 200)
+        if success9 and isinstance(cache_response, list):
+            print(f"✅ Found {len(cache_response)} cache logs")
+        
+        # 10. Test Log Archive
+        success10, archive_response = self.run_test("10. Log Archive", "GET", "api/v1/logs/archive", 200)
+        if success10 and isinstance(archive_response, list):
+            print(f"✅ Found {len(archive_response)} archived logs")
+        
+        # Test creating a new system event
+        new_event = {
+            "module": "Test",
+            "severity": "info",
+            "event_type": "test_event",
+            "message": "Test event created by automated testing"
+        }
+        success11, create_response = self.run_test("Create System Event", "POST", "api/v1/logs/events", 200, new_event)
+        if success11 and isinstance(create_response, dict):
+            print(f"✅ System event created: {create_response.get('event_type', 'Unknown')}")
+        
+        # Summary of all sub-modules tested
+        all_tests = [success_seed, success1, success1a, success2, success2a, success3, success4, success5, success6, success6a, success7, success8, success8a, success9, success10, success11]
+        passed_count = sum(all_tests)
+        total_count = len(all_tests)
+        
+        print(f"\n📊 SYSTEM LOGS MODULE SUMMARY:")
+        print(f"   ✅ Passed: {passed_count}/{total_count} tests")
+        print(f"   📋 Sub-modules tested: Events, Cron, Health, Deployments, Config, Errors, Queues, DB, Cache, Archive")
+        
+        return all(all_tests)
+
     def test_all_16_report_types(self):
         """Test ALL 16 Report Types - Comprehensive Testing"""
         print("\n📊 TESTING ALL 16 REPORT TYPES - COMPREHENSIVE")
