@@ -1127,126 +1127,234 @@ TX-MISSING,75.25"""
         return success1 and success2 and success3 and success4
 
     def test_review_request_specific(self):
-        """Test specific endpoints mentioned in the review request"""
-        print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
+        """Test specific finance endpoints mentioned in the review request"""
+        print("\n🎯 REVIEW REQUEST SPECIFIC TESTS - UPDATED FINANCE ENDPOINTS")
         
-        # 1. AI Risk Analysis: POST /api/v1/finance/transactions/tx2/analyze-risk
-        print("\n🤖 Testing AI Risk Analysis Endpoint")
-        success1, risk_response = self.run_test("AI Risk Analysis - tx2", "POST", "api/v1/finance/transactions/tx2/analyze-risk", 200)
+        # 1. Reconciliation Upload (POST /api/v1/finance/reconciliation/upload)
+        print("\n📊 Testing Reconciliation Upload with FX Conversion & Fraud Detection")
         
-        risk_analysis_valid = True
-        if success1 and isinstance(risk_response, dict):
-            print("🔍 VALIDATING AI RISK ANALYSIS RESPONSE")
+        # Create CSV with multi-currency data and high-value missing transaction
+        csv_content = """tx_id,amount,currency
+TX-001,100.50,USD
+TX-002,250.75,EUR
+TX-003,500.00,TRY
+TX-MISSING-HIGH,7500.00,USD
+TX-MISSING-LOW,25.50,EUR"""
+        
+        files = {
+            'file': ('test_fx_reconciliation.csv', csv_content, 'text/csv')
+        }
+        
+        url = f"{self.base_url}/api/v1/finance/reconciliation/upload?provider=Stripe"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Reconciliation Upload with FX & Fraud Detection...")
+        print(f"   URL: {url}")
+        
+        try:
+            import requests
+            response = requests.post(url, files=files, timeout=30)
             
-            # Check for risk_score
-            if 'risk_score' in risk_response:
-                risk_score = risk_response['risk_score']
-                print(f"   ✅ risk_score: {risk_score}")
-                if not isinstance(risk_score, (int, float)) or risk_score < 0 or risk_score > 100:
-                    print(f"   ❌ Invalid risk_score value: {risk_score} (should be 0-100)")
-                    risk_analysis_valid = False
-            else:
-                print(f"   ❌ MISSING: risk_score")
-                risk_analysis_valid = False
-            
-            # Check for risk_level
-            if 'risk_level' in risk_response:
-                risk_level = risk_response['risk_level']
-                print(f"   ✅ risk_level: {risk_level}")
-                valid_levels = ['low', 'medium', 'high', 'critical', 'unknown']
-                if risk_level not in valid_levels:
-                    print(f"   ⚠️  Unexpected risk_level: {risk_level}")
-            else:
-                print(f"   ❌ MISSING: risk_level")
-                risk_analysis_valid = False
-            
-            # Check for reason
-            if 'reason' in risk_response:
-                reason = risk_response['reason']
-                print(f"   ✅ reason: {reason[:50]}...")
-            else:
-                print(f"   ❌ MISSING: reason")
-                risk_analysis_valid = False
+            success1 = response.status_code == 200
+            if success1:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
                 
-            # Optional fields validation
-            optional_fields = ['flags', 'recommendation', 'details', 'error']
-            for field in optional_fields:
-                if field in risk_response:
-                    print(f"   ✅ {field}: {risk_response[field]}")
-        else:
-            print("❌ Failed to get valid AI risk analysis response")
-            risk_analysis_valid = False
-        
-        # 2. Game Management: GET /api/v1/games
-        print("\n🎮 Testing Game Management Endpoint")
-        success2, games_response = self.run_test("Game Management - Get Games", "GET", "api/v1/games", 200)
-        
-        games_valid = True
-        if success2 and isinstance(games_response, list):
-            print(f"✅ Games endpoint returned {len(games_response)} games")
-            
-            if len(games_response) > 0:
-                game = games_response[0]
-                required_game_fields = ['id', 'name', 'provider', 'category']
-                missing_game_fields = [field for field in required_game_fields if field not in game]
+                reconciliation_response = response.json()
+                print(f"   Response keys: {list(reconciliation_response.keys())}")
                 
-                if not missing_game_fields:
-                    print(f"✅ Game structure complete: {game['name']} by {game['provider']}")
-                    print(f"   📂 Category: {game['category']}")
-                    print(f"   🆔 ID: {game['id']}")
+                # Validate FX conversion functionality
+                fx_validation = True
+                if 'items' in reconciliation_response:
+                    items = reconciliation_response['items']
+                    print(f"\n🔍 VALIDATING FX CONVERSION & FRAUD DETECTION")
+                    
+                    for item in items:
+                        if 'original_currency' in item and 'exchange_rate' in item and 'converted_amount' in item:
+                            print(f"   ✅ FX Data: {item['provider_amount']} {item['original_currency']} → {item['converted_amount']} USD (rate: {item['exchange_rate']})")
+                        else:
+                            print(f"   ❌ Missing FX fields in item: {item.get('provider_ref', 'unknown')}")
+                            fx_validation = False
+                        
+                        # Check fraud detection for high-value missing transactions
+                        if item.get('provider_ref') == 'TX-MISSING-HIGH':
+                            if item.get('status') == 'potential_fraud' and item.get('risk_flag') == True:
+                                print(f"   ✅ Fraud Detection: High-value missing TX flagged as potential fraud")
+                            else:
+                                print(f"   ❌ Fraud Detection Failed: High-value TX not flagged properly")
+                                fx_validation = False
+                
+                # Check fraud_alerts count
+                if 'fraud_alerts' in reconciliation_response:
+                    fraud_count = reconciliation_response['fraud_alerts']
+                    print(f"   ✅ Fraud Alerts Count: {fraud_count}")
+                    if fraud_count > 0:
+                        print(f"   ✅ Fraud detection working - alerts generated")
+                    else:
+                        print(f"   ⚠️  No fraud alerts generated (expected at least 1)")
                 else:
-                    print(f"⚠️  Game missing fields: {missing_game_fields}")
-                    games_valid = False
+                    print(f"   ❌ Missing fraud_alerts field")
+                    fx_validation = False
+                
             else:
-                print("⚠️  No games found in response")
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                print(f"   Response: {response.text[:200]}...")
+                fx_validation = False
+                
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            fx_validation = False
+            success1 = False
+        
+        # 2. Auto-Scheduler Config (POST /api/v1/finance/reconciliation/config)
+        print("\n⏰ Testing Auto-Scheduler Config Update")
+        
+        config_data = {
+            "provider": "Adyen",
+            "frequency": "hourly",
+            "auto_fetch_enabled": True,
+            "api_credentials_enc": "encrypted_test_credentials"
+        }
+        
+        success2, config_response = self.run_test("Auto-Scheduler Config Update", "POST", "api/v1/finance/reconciliation/config", 200, config_data)
+        
+        config_validation = True
+        if success2 and isinstance(config_response, dict):
+            if 'message' in config_response:
+                print(f"   ✅ Config update successful: {config_response['message']}")
+                
+                # Verify config was saved by fetching it
+                success2b, get_config_response = self.run_test("Get Updated Config", "GET", "api/v1/finance/reconciliation/config", 200)
+                if success2b and isinstance(get_config_response, list):
+                    adyen_config = next((c for c in get_config_response if c.get('provider') == 'Adyen'), None)
+                    if adyen_config:
+                        if adyen_config.get('frequency') == 'hourly' and adyen_config.get('auto_fetch_enabled') == True:
+                            print(f"   ✅ Config verification: Adyen config saved correctly")
+                        else:
+                            print(f"   ⚠️  Config may not have been saved correctly")
+                            config_validation = False
+                    else:
+                        print(f"   ⚠️  Adyen config not found in response")
+                        config_validation = False
+            else:
+                print(f"   ❌ Config update response missing message")
+                config_validation = False
         else:
-            print("❌ Failed to get valid games list response")
-            games_valid = False
+            print(f"   ❌ Config update failed")
+            config_validation = False
         
-        # 3. Geo Rules: PUT /api/v1/games/{game_id}/details with countries_allowed
-        print("\n🌍 Testing Geo Rules Update")
-        geo_rules_valid = True
+        # 3. Auto-Run Reconciliation (POST /api/v1/finance/reconciliation/run-auto)
+        print("\n🚀 Testing Auto-Run Reconciliation")
         
-        if success2 and isinstance(games_response, list) and len(games_response) > 0:
-            game_id = games_response[0]['id']
-            geo_update_data = {
-                "countries_allowed": ["TR", "DE"]
+        auto_run_data = {"provider": "Stripe"}
+        success3, auto_run_response = self.run_test("Auto-Run Reconciliation", "POST", "api/v1/finance/reconciliation/run-auto", 200, auto_run_data)
+        
+        auto_run_validation = True
+        if success3 and isinstance(auto_run_response, dict):
+            required_fields = ['id', 'provider_name', 'file_name', 'status', 'total_records', 'mismatches']
+            missing_fields = [field for field in required_fields if field not in auto_run_response]
+            
+            if not missing_fields:
+                print(f"   ✅ Auto-run report structure complete")
+                print(f"   📊 Provider: {auto_run_response['provider_name']}")
+                print(f"   📁 File: {auto_run_response['file_name']}")
+                print(f"   📈 Records: {auto_run_response['total_records']}")
+                print(f"   ⚠️  Mismatches: {auto_run_response['mismatches']}")
+                print(f"   📋 Status: {auto_run_response['status']}")
+                
+                # Verify report was saved by checking reconciliation list
+                success3b, reports_list = self.run_test("Verify Auto-Run Report Saved", "GET", "api/v1/finance/reconciliation", 200)
+                if success3b and isinstance(reports_list, list):
+                    auto_report = next((r for r in reports_list if r.get('id') == auto_run_response['id']), None)
+                    if auto_report:
+                        print(f"   ✅ Auto-run report saved to database")
+                    else:
+                        print(f"   ⚠️  Auto-run report not found in database")
+                        auto_run_validation = False
+            else:
+                print(f"   ❌ Auto-run response missing fields: {missing_fields}")
+                auto_run_validation = False
+        else:
+            print(f"   ❌ Auto-run failed")
+            auto_run_validation = False
+        
+        # 4. Chargeback Creation with Risk Score Integration (POST /api/v1/finance/chargebacks)
+        print("\n💳 Testing Chargeback Creation with Risk Score Integration")
+        
+        # First, let's get a transaction to use for chargeback
+        success4a, transactions = self.run_test("Get Transactions for Chargeback Test", "GET", "api/v1/finance/transactions", 200)
+        
+        chargeback_validation = True
+        if success4a and isinstance(transactions, list) and len(transactions) > 0:
+            # Use first transaction
+            tx = transactions[0]
+            tx_id = tx['id']
+            
+            chargeback_data = {
+                "transaction_id": tx_id,
+                "player_id": tx.get('player_id', 'player_123'),
+                "amount": 500.0,
+                "reason_code": "4855",
+                "due_date": "2025-02-15T00:00:00Z"
             }
             
-            success3, geo_response = self.run_test(f"Geo Rules Update - {game_id}", "PUT", f"api/v1/games/{game_id}/details", 200, geo_update_data)
+            success4, chargeback_response = self.run_test("Create Chargeback with Risk Integration", "POST", "api/v1/finance/chargebacks", 200, chargeback_data)
             
-            if success3 and isinstance(geo_response, dict):
-                if 'message' in geo_response:
-                    print(f"✅ Geo rules update successful: {geo_response['message']}")
+            if success4 and isinstance(chargeback_response, dict):
+                required_fields = ['id', 'transaction_id', 'player_id', 'amount', 'reason_code', 'risk_score_at_time']
+                missing_fields = [field for field in required_fields if field not in chargeback_response]
+                
+                if not missing_fields:
+                    print(f"   ✅ Chargeback structure complete")
+                    print(f"   💰 Amount: ${chargeback_response['amount']}")
+                    print(f"   🔍 Reason Code: {chargeback_response['reason_code']}")
+                    print(f"   📊 Risk Score: {chargeback_response['risk_score_at_time']}")
                     
-                    # Verify the update by fetching the game again
-                    success4, updated_games = self.run_test("Verify Geo Rules Update", "GET", "api/v1/games", 200)
-                    if success4 and isinstance(updated_games, list):
-                        updated_game = next((g for g in updated_games if g.get('id') == game_id), None)
-                        if updated_game and 'countries_allowed' in updated_game:
-                            countries = updated_game['countries_allowed']
-                            if countries == ["TR", "DE"]:
-                                print(f"✅ Geo rules successfully updated: {countries}")
-                            else:
-                                print(f"⚠️  Geo rules may not have been updated correctly: {countries}")
+                    # Check if fraud cluster was assigned for high risk
+                    if chargeback_response['risk_score_at_time'] > 70:
+                        if 'fraud_cluster_id' in chargeback_response and chargeback_response['fraud_cluster_id']:
+                            print(f"   ✅ High-risk fraud cluster assigned: {chargeback_response['fraud_cluster_id']}")
                         else:
-                            print("⚠️  Updated game not found or missing countries_allowed field")
+                            print(f"   ⚠️  High-risk transaction but no fraud cluster assigned")
+                    else:
+                        print(f"   ℹ️  Low-risk transaction, no fraud cluster needed")
+                    
+                    # Verify chargeback was saved
+                    success4b, chargebacks_list = self.run_test("Verify Chargeback Saved", "GET", "api/v1/finance/chargebacks", 200)
+                    if success4b and isinstance(chargebacks_list, list):
+                        created_chargeback = next((c for c in chargebacks_list if c.get('id') == chargeback_response['id']), None)
+                        if created_chargeback:
+                            print(f"   ✅ Chargeback saved to database")
+                        else:
+                            print(f"   ⚠️  Chargeback not found in database")
+                            chargeback_validation = False
                 else:
-                    print("⚠️  Geo rules update response missing message field")
-                    geo_rules_valid = False
+                    print(f"   ❌ Chargeback response missing fields: {missing_fields}")
+                    chargeback_validation = False
             else:
-                print("❌ Failed to update geo rules")
-                geo_rules_valid = False
+                print(f"   ❌ Chargeback creation failed")
+                chargeback_validation = False
         else:
-            print("❌ Cannot test geo rules - no games available")
-            geo_rules_valid = False
+            print(f"   ⚠️  No transactions available for chargeback test")
+            # Create a mock chargeback anyway
+            mock_chargeback_data = {
+                "transaction_id": "TX-MOCK-001",
+                "player_id": "player_mock",
+                "amount": 1000.0,
+                "reason_code": "4855",
+                "due_date": "2025-02-15T00:00:00Z"
+            }
+            
+            success4, chargeback_response = self.run_test("Create Mock Chargeback", "POST", "api/v1/finance/chargebacks", 200, mock_chargeback_data)
+            chargeback_validation = success4
         
-        print(f"\n📊 REVIEW REQUEST TEST SUMMARY:")
-        print(f"   🤖 AI Risk Analysis: {'✅ PASS' if success1 and risk_analysis_valid else '❌ FAIL'}")
-        print(f"   🎮 Game Management: {'✅ PASS' if success2 and games_valid else '❌ FAIL'}")
-        print(f"   🌍 Geo Rules Update: {'✅ PASS' if geo_rules_valid else '❌ FAIL'}")
+        print(f"\n📊 REVIEW REQUEST FINANCE TESTS SUMMARY:")
+        print(f"   📊 Reconciliation Upload (FX & Fraud): {'✅ PASS' if success1 and fx_validation else '❌ FAIL'}")
+        print(f"   ⏰ Auto-Scheduler Config: {'✅ PASS' if success2 and config_validation else '❌ FAIL'}")
+        print(f"   🚀 Auto-Run Reconciliation: {'✅ PASS' if success3 and auto_run_validation else '❌ FAIL'}")
+        print(f"   💳 Chargeback Risk Integration: {'✅ PASS' if success4 and chargeback_validation else '❌ FAIL'}")
         
-        return success1 and risk_analysis_valid and success2 and games_valid and geo_rules_valid
+        return success1 and fx_validation and success2 and config_validation and success3 and auto_run_validation and success4 and chargeback_validation
 
     def test_modules_kyc(self):
         """Test Enhanced KYC Module endpoints"""
