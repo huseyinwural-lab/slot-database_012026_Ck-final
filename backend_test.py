@@ -918,10 +918,124 @@ class CasinoAdminAPITester:
         """Test Affiliates Module endpoints"""
         print("\n🤝 AFFILIATES MODULE TESTS")
         
-        # Test get affiliates
-        success1, _ = self.run_test("Get Affiliates", "GET", "api/v1/affiliates", 200)
+        # First seed affiliate data
+        success_seed, seed_response = self.run_test("Seed Affiliate Data", "POST", "api/v1/affiliates/seed", 200)
+        if success_seed and isinstance(seed_response, dict):
+            print(f"✅ Affiliate seeding: {seed_response.get('message', 'Success')}")
         
-        return success1
+        # Test get affiliates (should have seeded data)
+        success1, affiliates_response = self.run_test("Get Affiliates List", "GET", "api/v1/affiliates", 200)
+        if success1 and isinstance(affiliates_response, list):
+            print(f"✅ Found {len(affiliates_response)} affiliates")
+            if len(affiliates_response) > 0:
+                affiliate = affiliates_response[0]
+                required_fields = ['id', 'username', 'email', 'status', 'balance']
+                missing_fields = [field for field in required_fields if field not in affiliate]
+                if not missing_fields:
+                    print(f"✅ Affiliate structure complete: {affiliate['username']} - {affiliate['status']}")
+                else:
+                    print(f"⚠️  Affiliate missing fields: {missing_fields}")
+        
+        # Test get affiliates with status filter
+        success2, active_affiliates = self.run_test("Get Active Affiliates", "GET", "api/v1/affiliates?status=active", 200)
+        success3, pending_affiliates = self.run_test("Get Pending Affiliates", "GET", "api/v1/affiliates?status=pending", 200)
+        
+        # Test create new affiliate
+        new_affiliate = {
+            "username": "testpartner123",
+            "email": "test@partner.com",
+            "company_name": "Test Partner Company",
+            "status": "pending",
+            "balance": 0.0,
+            "total_earnings": 0.0
+        }
+        success4, create_response = self.run_test("Create New Affiliate", "POST", "api/v1/affiliates", 200, new_affiliate)
+        if success4 and isinstance(create_response, dict):
+            print(f"✅ Affiliate created: {create_response.get('username')}")
+        
+        # Test affiliate status update (approve pending affiliate)
+        if success1 and isinstance(affiliates_response, list):
+            pending_affiliate = next((a for a in affiliates_response if a.get('status') == 'pending'), None)
+            if pending_affiliate:
+                affiliate_id = pending_affiliate['id']
+                success5, status_response = self.run_test(f"Approve Affiliate - {affiliate_id}", "PUT", f"api/v1/affiliates/{affiliate_id}/status", 200, {"status": "active"})
+                if success5 and isinstance(status_response, dict):
+                    print(f"✅ Affiliate status updated: {status_response.get('message')}")
+            else:
+                success5 = True
+                print("⚠️  No pending affiliates found to test approval")
+        else:
+            success5 = True
+        
+        # Test get offers (should have seeded data)
+        success6, offers_response = self.run_test("Get Affiliate Offers", "GET", "api/v1/affiliates/offers", 200)
+        if success6 and isinstance(offers_response, list):
+            print(f"✅ Found {len(offers_response)} affiliate offers")
+            if len(offers_response) > 0:
+                offer = offers_response[0]
+                required_fields = ['id', 'name', 'model', 'default_commission']
+                missing_fields = [field for field in required_fields if field not in offer]
+                if not missing_fields:
+                    commission = offer['default_commission']
+                    if offer['model'] == 'cpa':
+                        print(f"✅ Offer structure complete: {offer['name']} - CPA ${commission.get('cpa_amount', 0)}")
+                    else:
+                        print(f"✅ Offer structure complete: {offer['name']} - RevShare {commission.get('revshare_percentage', 0)}%")
+                else:
+                    print(f"⚠️  Offer missing fields: {missing_fields}")
+        
+        # Test create new offer
+        new_offer = {
+            "name": "Test CPA Offer",
+            "model": "cpa",
+            "default_commission": {
+                "cpa_amount": 75.0
+            },
+            "status": "active"
+        }
+        success7, offer_create_response = self.run_test("Create New Offer", "POST", "api/v1/affiliates/offers", 200, new_offer)
+        
+        # Test tracking links
+        success8, links_response = self.run_test("Get Tracking Links", "GET", "api/v1/affiliates/links", 200)
+        if success8 and isinstance(links_response, list):
+            print(f"✅ Found {len(links_response)} tracking links")
+        
+        # Test create tracking link (if we have affiliates and offers)
+        if success1 and isinstance(affiliates_response, list) and len(affiliates_response) > 0 and success6 and isinstance(offers_response, list) and len(offers_response) > 0:
+            affiliate_id = affiliates_response[0]['id']
+            offer_id = offers_response[0]['id']
+            new_link = {
+                "affiliate_id": affiliate_id,
+                "offer_id": offer_id,
+                "campaign": "test_campaign"
+            }
+            success9, link_create_response = self.run_test("Create Tracking Link", "POST", "api/v1/affiliates/links", 200, new_link)
+            if success9 and isinstance(link_create_response, dict):
+                generated_url = link_create_response.get('url', '')
+                if 'track.casino.com' in generated_url:
+                    print(f"✅ Tracking link generated: {generated_url}")
+                else:
+                    print(f"⚠️  Unexpected tracking URL format: {generated_url}")
+        else:
+            success9 = True
+            print("⚠️  Insufficient data to test tracking link creation")
+        
+        # Test conversions endpoint
+        success10, conversions_response = self.run_test("Get Conversions", "GET", "api/v1/affiliates/conversions", 200)
+        if success10 and isinstance(conversions_response, list):
+            print(f"✅ Found {len(conversions_response)} conversions")
+        
+        # Test payouts endpoint
+        success11, payouts_response = self.run_test("Get Payouts", "GET", "api/v1/affiliates/payouts", 200)
+        if success11 and isinstance(payouts_response, list):
+            print(f"✅ Found {len(payouts_response)} payouts")
+        
+        # Test creatives endpoint
+        success12, creatives_response = self.run_test("Get Creatives", "GET", "api/v1/affiliates/creatives", 200)
+        if success12 and isinstance(creatives_response, list):
+            print(f"✅ Found {len(creatives_response)} creatives")
+        
+        return all([success_seed, success1, success2, success3, success4, success5, success6, success7, success8, success9, success10, success11, success12])
 
     def test_modules_risk(self):
         """Test Risk Module endpoints"""
