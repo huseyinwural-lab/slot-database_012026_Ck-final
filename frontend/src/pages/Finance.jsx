@@ -553,6 +553,13 @@ const Finance = () => {
                 </>
             )}
         </TabsContent>
+        <TabsContent value="reconciliation">
+            <ReconciliationPanel />
+        </TabsContent>
+
+        <TabsContent value="chargebacks">
+            <ChargebackList />
+        </TabsContent>
       </Tabs>
 
       {/* Detailed Modal */}
