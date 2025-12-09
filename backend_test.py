@@ -230,6 +230,18 @@ def main():
     print("\n🔍 FRAUD DETECTION TESTS")
     test_results.append(("Fraud Analysis", tester.test_fraud_analysis()))
     
+    print("\n🎮 GAME MANAGEMENT TESTS")
+    test_results.append(("Games Management", tester.test_games_management()))
+    
+    print("\n🎁 BONUS MANAGEMENT TESTS")
+    test_results.append(("Bonuses Management", tester.test_bonuses_management()))
+    
+    print("\n🎫 SUPPORT TICKETS TESTS")
+    test_results.append(("Support Tickets", tester.test_support_tickets()))
+    
+    print("\n🎯 PLAYER GAME HISTORY TESTS")
+    test_results.append(("Player Game History", tester.test_player_game_history()))
+    
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
