@@ -235,8 +235,40 @@ class CasinoAdminAPITester:
         # Test reports with date filters
         success2, _ = self.run_test("Reports with Date Filter", "GET", "api/v1/finance/reports?start_date=2025-01-01&end_date=2025-12-31", 200)
         
-        # Validate report structure
+        # SPECIFIC VALIDATION FOR REVIEW REQUEST
+        report_validation_success = True
         if success1 and isinstance(report_response, dict):
+            print("\n🔍 VALIDATING FINANCE REPORT FIELDS (Review Request)")
+            
+            # Check for ggr field
+            if 'ggr' in report_response:
+                print(f"   ✅ ggr: ${report_response['ggr']:,.2f}")
+            else:
+                print(f"   ❌ MISSING: ggr")
+                report_validation_success = False
+            
+            # Check for ngr field
+            if 'ngr' in report_response:
+                print(f"   ✅ ngr: ${report_response['ngr']:,.2f}")
+            else:
+                print(f"   ❌ MISSING: ngr")
+                report_validation_success = False
+            
+            # Check for provider_breakdown field
+            if 'provider_breakdown' in report_response:
+                provider_breakdown = report_response['provider_breakdown']
+                if isinstance(provider_breakdown, dict) and len(provider_breakdown) > 0:
+                    print(f"   ✅ provider_breakdown: {len(provider_breakdown)} providers")
+                    for provider, amount in provider_breakdown.items():
+                        print(f"      - {provider}: ${amount:,.2f}")
+                else:
+                    print(f"   ⚠️  provider_breakdown is empty or invalid format")
+                    report_validation_success = False
+            else:
+                print(f"   ❌ MISSING: provider_breakdown")
+                report_validation_success = False
+            
+            # Validate general report structure
             required_fields = ['total_deposit', 'total_withdrawal', 'net_cashflow', 'provider_breakdown', 'daily_stats']
             missing_fields = [field for field in required_fields if field not in report_response]
             
@@ -251,15 +283,6 @@ class CasinoAdminAPITester:
                 print(f"   📈 Total Deposits: ${total_deposit:,.2f}")
                 print(f"   📉 Total Withdrawals: ${total_withdrawal:,.2f}")
                 print(f"   💰 Net Cashflow: ${net_cashflow:,.2f}")
-                
-                # Validate provider breakdown
-                provider_breakdown = report_response.get('provider_breakdown', {})
-                if isinstance(provider_breakdown, dict) and len(provider_breakdown) > 0:
-                    print(f"   🏦 Provider Breakdown: {len(provider_breakdown)} providers")
-                    for provider, amount in provider_breakdown.items():
-                        print(f"      - {provider}: ${amount:,.2f}")
-                else:
-                    print("⚠️  Provider breakdown is empty or invalid")
                 
                 # Validate daily stats
                 daily_stats = report_response.get('daily_stats', [])
@@ -280,8 +303,12 @@ class CasinoAdminAPITester:
                 
             else:
                 print(f"⚠️  Financial report missing fields: {missing_fields}")
+                report_validation_success = False
+        else:
+            print("❌ Failed to get valid finance report response")
+            report_validation_success = False
         
-        return success1 and success2
+        return success1 and success2 and report_validation_success
 
     def test_fraud_analysis(self):
         """Test fraud analysis endpoint"""
