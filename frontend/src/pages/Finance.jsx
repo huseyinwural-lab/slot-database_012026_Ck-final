@@ -558,14 +558,6 @@ const Finance = () => {
       {/* Detailed Modal */}
       <TransactionDetailModal 
         transaction={selectedTx} 
-
-        <TabsContent value="reconciliation">
-            <ReconciliationPanel />
-        </TabsContent>
-
-        <TabsContent value="chargebacks">
-            <ChargebackList />
-        </TabsContent>
         open={isDetailOpen} 
         onOpenChange={setIsDetailOpen}
         onRefresh={fetchData}
