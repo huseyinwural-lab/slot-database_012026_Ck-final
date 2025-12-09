@@ -70,6 +70,20 @@ async def create_currency(currency: Currency):
     await db.currencies.insert_one(currency.model_dump())
     return currency
 
+@router.put("/currencies/{currency_id}", response_model=Currency)
+async def update_currency(currency_id: str, updates: Dict[str, Any] = Body(...)):
+    db = get_db()
+    updates["updated_at"] = datetime.now(timezone.utc)
+    await db.currencies.update_one({"id": currency_id}, {"$set": updates})
+    currency = await db.currencies.find_one({"id": currency_id})
+    return Currency(**currency)
+
+@router.delete("/currencies/{currency_id}")
+async def delete_currency(currency_id: str):
+    db = get_db()
+    await db.currencies.delete_one({"id": currency_id})
+    return {"message": "Currency deleted"}
+
 @router.post("/currencies/sync-rates")
 async def sync_exchange_rates():
     """Mock: Sync from external API"""
