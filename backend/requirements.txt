@@ -21,6 +21,7 @@ httpx==0.28.1
 idna==3.11
 iniconfig==2.3.0
 isort==7.0.0
+jiter==0.12.0
 jmespath==1.0.1
 jq==1.10.0
 markdown-it-py==4.0.0
@@ -31,7 +32,7 @@ mypy==1.18.2
 mypy_extensions==1.1.0
 numpy==2.3.5
 oauthlib==3.3.1
-openai==1.14.0
+openai==2.9.0
 packaging==25.0
 pandas==2.3.3
 passlib==1.7.4
