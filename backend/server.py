@@ -54,6 +54,10 @@ app.include_router(fraud_detection.router)
 app.include_router(email_notification.router)
 app.include_router(simulator.router)
 
+
+# Finance Advanced
+from app.routes import finance
+app.include_router(finance.router)
 # Feature Flags & A/B Testing
 from app.routes import feature_flags
 app.include_router(feature_flags.router)
