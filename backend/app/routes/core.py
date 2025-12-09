@@ -7,7 +7,7 @@ from app.models.core import (
     Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus, 
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
     FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric, LoginLog,
-    FinancialReport
+    FinancialReport, CustomTable, GameUploadLog, Paytable, JackpotConfig
 )
 from app.models.modules import KYCDocument
 from config import settings
@@ -26,8 +26,7 @@ async def get_dashboard_stats():
     if await db.players.count_documents({}) == 0:
         await seed_mock_data(db)
 
-    now = datetime.now(timezone.utc)
-    # Mock data for MVP
+    # Mock aggregation for MVP speed
     bets_today = 154200.50
     wins_today = 138000.00
     ggr_today = bets_today - wins_today
@@ -140,7 +139,7 @@ async def get_player_logs(player_id: str):
         LoginLog(player_id=player_id, ip_address="192.168.1.1", location="Istanbul, TR", device_info="Chrome / Win10", status="success", timestamp=datetime.now(timezone.utc)-timedelta(days=1)),
     ]
 
-# --- FINANCE & APPROVALS (UPDATED) ---
+# --- FINANCE & APPROVALS ---
 @router.get("/finance/transactions", response_model=List[Transaction])
 async def get_transactions(
     type: Optional[str] = None,
@@ -163,30 +162,22 @@ async def get_transactions(
         if max_amount: query["amount"]["$lte"] = max_amount
     if start_date:
         query["created_at"] = {"$gte": start_date}
-    
-    # Note: Search by player username is tricky without join in simplistic mongo
-    # For MVP we can filter if player_search matches ID, or we fetch player ID first
     if player_search:
         p = await db.players.find_one({"username": player_search})
         if p: query["player_id"] = p['id']
-        else: query["id"] = player_search # fallback to tx id search
+        else: query["id"] = player_search
 
     txs = await db.transactions.find(query).sort("created_at", -1).limit(100).to_list(100)
     return [Transaction(**t) for t in txs]
 
 @router.post("/finance/transactions/{tx_id}/action")
-async def action_transaction(
-    tx_id: str, 
-    action: str = Body(..., embed=True), # approve, reject, fraud
-    reason: str = Body(None, embed=True)
-):
+async def action_transaction(tx_id: str, action: str = Body(..., embed=True), reason: str = Body(None, embed=True)):
     db = get_db()
     tx = await db.transactions.find_one({"id": tx_id})
     if not tx:
         raise HTTPException(404, "Transaction not found")
     
     if action == "approve":
-        # 4-Eyes Check for Withdrawal > 1000
         if tx['type'] == 'withdrawal' and tx['amount'] > 1000 and tx['status'] == 'pending':
             approval_req = ApprovalRequest(
                 type="withdrawal_high_value", related_entity_id=tx_id, requester_admin="system_bot",
@@ -195,62 +186,35 @@ async def action_transaction(
             await db.approvals.insert_one(approval_req.model_dump())
             await db.transactions.update_one({"id": tx_id}, {"$set": {"status": "waiting_second_approval"}})
             return {"message": "High value withdrawal moved to Approval Queue"}
-        
-        # Complete
         new_status = "completed"
         if tx['type'] == 'deposit':
             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
-    
     elif action == "reject":
         new_status = "rejected"
-        # If rejecting withdrawal, return funds? Usually funds are locked on request. 
-        # For MVP assume funds returned to balance.
         if tx['type'] == 'withdrawal':
             await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
-            
     elif action == "fraud":
         new_status = "fraud_flagged"
-        # Freeze account potentially
         await db.players.update_one({"id": tx['player_id']}, {"$set": {"status": "suspended", "risk_score": "high"}})
-    
     else:
         raise HTTPException(400, "Invalid action")
 
-    await db.transactions.update_one(
-        {"id": tx_id}, 
-        {"$set": {"status": new_status, "processed_at": datetime.now(timezone.utc), "admin_note": reason}}
-    )
+    await db.transactions.update_one({"id": tx_id}, {"$set": {"status": new_status, "processed_at": datetime.now(timezone.utc), "admin_note": reason}})
     return {"message": f"Transaction {new_status}"}
 
 @router.get("/finance/reports", response_model=FinancialReport)
-async def get_financial_reports(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None
-):
+async def get_financial_reports(start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
     db = get_db()
-    # Aggregations for report
     pipeline = [{"$match": {"status": "completed"}}, {"$group": {"_id": "$type", "total": {"$sum": "$amount"}}}]
     res = await db.transactions.aggregate(pipeline).to_list(10)
     totals = {r['_id']: r['total'] for r in res}
-    
     total_dep = totals.get('deposit', 0)
     total_wit = totals.get('withdrawal', 0)
-    
-    # Mock Provider breakdown
     providers = {"Papara": total_dep * 0.4, "Crypto": total_dep * 0.3, "Bank Transfer": total_dep * 0.3}
-    
-    # Mock Daily Stats
-    daily = [
-        {"date": "2025-12-08", "deposit": 14000, "withdrawal": 2000},
-        {"date": "2025-12-09", "deposit": 10100, "withdrawal": 5000}
-    ]
-    
+    daily = [{"date": "2025-12-08", "deposit": 14000, "withdrawal": 2000}, {"date": "2025-12-09", "deposit": 10100, "withdrawal": 5000}]
     return FinancialReport(
-        total_deposit=total_dep,
-        total_withdrawal=total_wit,
-        net_cashflow=total_dep - total_wit,
-        provider_breakdown=providers,
-        daily_stats=daily
+        total_deposit=total_dep, total_withdrawal=total_wit, net_cashflow=total_dep - total_wit,
+        provider_breakdown=providers, daily_stats=daily
     )
 
 # --- APPROVAL QUEUE ---
@@ -308,11 +272,7 @@ async def global_search(q: str):
     results = []
     
     players = await db.players.find({
-        "$or": [
-            {"username": {"$regex": q, "$options": "i"}},
-            {"email": {"$regex": q, "$options": "i"}},
-            {"id": q}
-        ]
+        "$or": [{"username": {"$regex": q, "$options": "i"}}, {"email": {"$regex": q, "$options": "i"}}, {"id": q}]
     }).limit(5).to_list(5)
     for p in players:
         results.append({"type": "player", "title": p['username'], "id": p['id'], "details": p['email']})
@@ -323,7 +283,26 @@ async def global_search(q: str):
 
     return results
 
-# --- GAMES ---
+# --- CUSTOM TABLES ---
+@router.get("/tables", response_model=List[CustomTable])
+async def get_tables():
+    db = get_db()
+    tables = await db.tables.find().to_list(100)
+    return [CustomTable(**t) for t in tables]
+
+@router.post("/tables")
+async def create_table(table: CustomTable):
+    db = get_db()
+    await db.tables.insert_one(table.model_dump())
+    return table
+
+@router.post("/tables/{table_id}/status")
+async def update_table_status(table_id: str, status: str = Body(..., embed=True)):
+    db = get_db()
+    await db.tables.update_one({"id": table_id}, {"$set": {"status": status}})
+    return {"message": "Status updated"}
+
+# --- GAMES & ADVANCED SETTINGS ---
 @router.get("/games", response_model=List[Game])
 async def get_games():
     db = get_db()
@@ -339,10 +318,18 @@ async def add_game(game: Game):
 @router.put("/games/{game_id}")
 async def update_game_config(game_id: str, config: GameConfig):
     db = get_db()
+    # Auto-versioning
+    current = await db.games.find_one({"id": game_id})
+    if current:
+        old_ver = current.get("configuration", {}).get("version", "1.0.0")
+        parts = old_ver.split(".")
+        new_ver = f"{parts[0]}.{parts[1]}.{int(parts[2])+1}"
+        config.version = new_ver
+        
     res = await db.games.update_one({"id": game_id}, {"$set": {"configuration": config.model_dump()}})
     if res.matched_count == 0:
         raise HTTPException(404, "Game not found")
-    return {"message": "Game configuration updated"}
+    return {"message": "Game configuration updated", "version": config.version}
 
 @router.post("/games/{game_id}/toggle")
 async def toggle_game_status(game_id: str):
@@ -353,6 +340,34 @@ async def toggle_game_status(game_id: str):
         await db.games.update_one({"id": game_id}, {"$set": {"status": new_status}})
         return {"status": new_status}
     raise HTTPException(404, "Game not found")
+
+@router.post("/games/upload")
+async def upload_games(
+    provider: str = Body(...),
+    method: str = Body(...), # fetch_api, json_upload
+    game_ids: List[str] = Body([])
+):
+    # Mocking the upload/fetch process
+    db = get_db()
+    imported_count = 0
+    
+    if method == "fetch_api":
+        # Simulating fetching from provider
+        new_games = [
+            Game(name=f"{provider} Slot {random.randint(100,999)}", provider=provider, category="Slot", 
+                 configuration=GameConfig(rtp=96.5).model_dump()).model_dump()
+            for _ in range(3)
+        ]
+        if new_games:
+            await db.games.insert_many(new_games)
+            imported_count = len(new_games)
+            
+    await db.upload_logs.insert_one(GameUploadLog(
+        admin_id="current_admin", provider=provider, total_games=imported_count, 
+        success_count=imported_count, error_count=0
+    ).model_dump())
+    
+    return {"message": f"Successfully imported {imported_count} games from {provider}"}
 
 # --- BONUSES ---
 @router.get("/bonuses", response_model=List[Bonus])
@@ -402,4 +417,7 @@ async def seed_mock_data(db):
     ])
     await db.bonuses.insert_many([
         Bonus(name="Welcome Offer", type="welcome", auto_apply=True, rules=BonusRule(reward_percentage=100).model_dump()).model_dump(),
+    ])
+    await db.tables.insert_many([
+        CustomTable(name="VIP Blackjack TR", game_type="Blackjack", provider="Evolution", table_type="vip", min_bet=100, max_bet=10000).model_dump()
     ])

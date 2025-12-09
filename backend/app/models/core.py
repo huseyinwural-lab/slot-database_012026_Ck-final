@@ -30,7 +30,7 @@ class TransactionStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     WAITING_SECOND_APPROVAL = "waiting_second_approval" 
-    FRAUD_FLAGGED = "fraud_flagged" # New status
+    FRAUD_FLAGGED = "fraud_flagged"
 
 # Core Models
 class Player(BaseModel):
@@ -43,28 +43,17 @@ class Player(BaseModel):
     last_name: Optional[str] = None
     dob: Optional[datetime] = None
     address: Optional[str] = None
-    
     balance_real: float = 0.0
     balance_bonus: float = 0.0
     balance_locked: float = 0.0 
-    
     status: PlayerStatus = PlayerStatus.ACTIVE
     vip_level: int = 1
     kyc_status: KYCStatus = KYCStatus.NOT_SUBMITTED
-    
     registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    registration_ip: Optional[str] = None
-    referral_source: Optional[str] = None
-    
     last_login: Optional[datetime] = None
-    last_login_ip: Optional[str] = None
-    
     country: str = "Unknown"
     risk_score: str = "low" 
-    
     tags: List[str] = [] 
-    notes: Optional[str] = None 
-    
     luck_boost_factor: float = 1.0 
     luck_boost_remaining_spins: int = 0
 
@@ -72,7 +61,7 @@ class Transaction(BaseModel):
     id: str = Field(..., description="Transaction ID")
     tenant_id: str = "default_casino"
     player_id: str
-    player_username: Optional[str] = None # Denormalized for lists
+    player_username: Optional[str] = None 
     type: TransactionType
     amount: float
     currency: str = "USD"
@@ -82,17 +71,37 @@ class Transaction(BaseModel):
     processed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
     approver_id: Optional[str] = None 
-    reference_id: Optional[str] = None # Provider reference
-    provider_response: Optional[Dict[str, Any]] = None # Raw response log
+
+# --- GAME ADVANCED MODELS ---
+
+class Paytable(BaseModel):
+    version: str = "1.0.0"
+    symbols: List[Dict[str, Any]] = [] # {id, name, pays: [x3, x4, x5]}
+    lines: int = 20
+
+class JackpotConfig(BaseModel):
+    type: str # grand, major, minor, mini
+    seed_amount: float
+    contribution_percent: float
+    hit_frequency: float
+    current_value: float = 0.0
+
+class ReelStrip(BaseModel):
+    reel_id: int
+    symbols: List[str] # ["A", "K", "Q", "J", ...]
+    weights: Optional[List[int]] = None
 
 class GameConfig(BaseModel):
     rtp: float = 96.0
     volatility: str = "medium" 
-    paytable_id: str = "standard"
     min_bet: float = 0.10
     max_bet: float = 100.00
     max_win_multiplier: int = 5000
     bonus_buy_enabled: bool = False
+    paytable: Optional[Paytable] = None
+    jackpots: List[JackpotConfig] = []
+    reel_strips: List[ReelStrip] = []
+    version: str = "1.0.0"
 
 class Game(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -100,9 +109,38 @@ class Game(BaseModel):
     name: str
     provider: str
     category: str 
-    status: str = "active"
+    status: str = "active" # active, maintenance, draft
     image_url: Optional[str] = None
     configuration: GameConfig = Field(default_factory=GameConfig)
+    tags: List[str] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CustomTable(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    game_type: str # Blackjack, Roulette
+    provider: str
+    table_type: str # standard, vip, brand
+    currency: str = "USD"
+    min_bet: float
+    max_bet: float
+    status: str = "offline" # online, offline, scheduled, maintenance
+    seats: int = 7
+    dealer_language: str = "EN"
+    schedule_start: Optional[str] = None # "18:00"
+    schedule_end: Optional[str] = None # "02:00"
+    visibility_segments: List[str] = [] # ["VIP", "TR"]
+
+class GameUploadLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    provider: str
+    total_games: int
+    success_count: int
+    error_count: int
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# --- BONUS & OTHERS ---
 
 class BonusRule(BaseModel):
     min_deposit: Optional[float] = None
@@ -201,5 +239,5 @@ class LoginLog(BaseModel):
     ip_address: str
     location: str
     device_info: str
-    status: str # success, failed
+    status: str 
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
