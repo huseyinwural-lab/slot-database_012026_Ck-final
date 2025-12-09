@@ -97,7 +97,7 @@ class CasinoAdminAPITester:
         # Test deposit transactions filter
         success2, deposit_response = self.run_test("Deposit Transactions", "GET", "api/v1/finance/transactions?type=deposit", 200)
         
-        # Test withdrawal transactions filter
+        # Test withdrawal transactions filter - SPECIFIC TEST FOR REVIEW REQUEST
         success3, withdrawal_response = self.run_test("Withdrawal Transactions", "GET", "api/v1/finance/transactions?type=withdrawal", 200)
         
         # Test status filters
@@ -111,7 +111,52 @@ class CasinoAdminAPITester:
         # Test player search filter
         success8, _ = self.run_test("Player Search Filter", "GET", "api/v1/finance/transactions?player_search=highroller99", 200)
         
-        # Validate transaction structure
+        # SPECIFIC VALIDATION FOR REVIEW REQUEST - Withdrawal transactions
+        withdrawal_validation_success = True
+        if success3 and isinstance(withdrawal_response, list) and len(withdrawal_response) > 0:
+            print("\n🔍 VALIDATING WITHDRAWAL TRANSACTION FIELDS (Review Request)")
+            for i, tx in enumerate(withdrawal_response[:3]):  # Check first 3 withdrawals
+                print(f"\n   Withdrawal {i+1}: {tx.get('id', 'Unknown ID')}")
+                
+                # Check for destination_address
+                if 'destination_address' in tx:
+                    print(f"   ✅ destination_address: {tx['destination_address']}")
+                else:
+                    print(f"   ❌ MISSING: destination_address")
+                    withdrawal_validation_success = False
+                
+                # Check for risk_score_at_time
+                if 'risk_score_at_time' in tx:
+                    print(f"   ✅ risk_score_at_time: {tx['risk_score_at_time']}")
+                else:
+                    print(f"   ❌ MISSING: risk_score_at_time")
+                    withdrawal_validation_success = False
+                
+                # Check for wagering_info and its structure
+                if 'wagering_info' in tx and tx['wagering_info'] is not None:
+                    wagering = tx['wagering_info']
+                    print(f"   ✅ wagering_info found")
+                    
+                    # Validate wagering_info structure
+                    required_wagering_fields = ['required', 'current', 'is_met']
+                    missing_wagering_fields = [field for field in required_wagering_fields if field not in wagering]
+                    
+                    if not missing_wagering_fields:
+                        print(f"   ✅ wagering_info structure complete:")
+                        print(f"      - required: {wagering['required']}")
+                        print(f"      - current: {wagering['current']}")
+                        print(f"      - is_met: {wagering['is_met']}")
+                    else:
+                        print(f"   ❌ wagering_info MISSING fields: {missing_wagering_fields}")
+                        withdrawal_validation_success = False
+                else:
+                    print(f"   ❌ MISSING: wagering_info")
+                    withdrawal_validation_success = False
+        else:
+            print("⚠️  No withdrawal transactions found to validate")
+            withdrawal_validation_success = False
+        
+        # Validate general transaction structure
         if success1 and isinstance(tx_response, list) and len(tx_response) > 0:
             tx = tx_response[0]
             required_fields = ['id', 'player_id', 'type', 'amount', 'status', 'method', 'created_at']
@@ -122,7 +167,7 @@ class CasinoAdminAPITester:
             else:
                 print(f"⚠️  Transaction missing fields: {missing_fields}")
         
-        return all([success1, success2, success3, success4, success5, success6, success7, success8])
+        return all([success1, success2, success3, success4, success5, success6, success7, success8, withdrawal_validation_success])
 
     def test_finance_transaction_actions(self):
         """Test Enhanced Finance Module - Transaction Actions (Approve, Reject, Fraud)"""
