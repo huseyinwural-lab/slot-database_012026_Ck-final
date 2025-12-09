@@ -1033,16 +1033,117 @@ class CasinoAdminAPITester:
         return success_seed and success1 and success2 and success3 and success4 and success5
 
     def test_modules_cms(self):
-        """Test CMS Module endpoints"""
-        print("\n🌐 CMS MODULE TESTS")
+        """Test CMS Module endpoints - COMPREHENSIVE TESTING"""
+        print("\n🌐 CMS MODULE TESTS - COMPREHENSIVE")
         
-        # Test get pages
-        success1, _ = self.run_test("Get CMS Pages", "GET", "api/v1/cms/pages", 200)
+        # First seed CMS data
+        success_seed, seed_response = self.run_test("Seed CMS Data", "POST", "api/v1/cms/seed", 200)
+        if success_seed and isinstance(seed_response, dict):
+            print(f"✅ CMS seeding: {seed_response.get('message', 'Success')}")
         
-        # Test get banners
-        success2, _ = self.run_test("Get CMS Banners", "GET", "api/v1/cms/banners", 200)
+        # Test CMS Dashboard Stats
+        success1, dashboard_response = self.run_test("CMS Dashboard Stats", "GET", "api/v1/cms/dashboard", 200)
+        if success1 and isinstance(dashboard_response, dict):
+            required_fields = ['published_pages', 'active_banners', 'draft_count', 'scheduled_count', 'recent_changes']
+            missing_fields = [field for field in required_fields if field not in dashboard_response]
+            if not missing_fields:
+                print("✅ CMS Dashboard structure is complete")
+                print(f"   📄 Published Pages: {dashboard_response['published_pages']}")
+                print(f"   🖼️  Active Banners: {dashboard_response['active_banners']}")
+                print(f"   📝 Drafts: {dashboard_response['draft_count']}")
+                print(f"   📅 Scheduled: {dashboard_response['scheduled_count']}")
+            else:
+                print(f"⚠️  CMS Dashboard missing fields: {missing_fields}")
         
-        return success1 and success2
+        # Test get CMS pages (should have seeded data)
+        success2, pages_response = self.run_test("Get CMS Pages (Seeded)", "GET", "api/v1/cms/pages", 200)
+        if success2 and isinstance(pages_response, list):
+            print(f"✅ Found {len(pages_response)} CMS pages")
+            if len(pages_response) > 0:
+                page = pages_response[0]
+                required_fields = ['id', 'title', 'slug', 'template', 'status']
+                missing_fields = [field for field in required_fields if field not in page]
+                if not missing_fields:
+                    print(f"✅ Page structure complete: {page['title']} - {page['slug']} ({page['status']})")
+                else:
+                    print(f"⚠️  Page missing fields: {missing_fields}")
+        
+        # Test get CMS banners (should have seeded data)
+        success3, banners_response = self.run_test("Get CMS Banners (Seeded)", "GET", "api/v1/cms/banners", 200)
+        if success3 and isinstance(banners_response, list):
+            print(f"✅ Found {len(banners_response)} CMS banners")
+            if len(banners_response) > 0:
+                banner = banners_response[0]
+                required_fields = ['id', 'title', 'position', 'status', 'image_desktop']
+                missing_fields = [field for field in required_fields if field not in banner]
+                if not missing_fields:
+                    print(f"✅ Banner structure complete: {banner['title']} - {banner['position']} ({banner['status']})")
+                else:
+                    print(f"⚠️  Banner missing fields: {missing_fields}")
+        
+        # Test create new CMS page
+        new_page = {
+            "title": "Test Page",
+            "slug": "/test-page",
+            "template": "static",
+            "status": "draft",
+            "content_blocks": [],
+            "seo": {"title": "Test Page SEO", "description": "Test page description"}
+        }
+        success4, create_page_response = self.run_test("Create CMS Page", "POST", "api/v1/cms/pages", 200, new_page)
+        if success4 and isinstance(create_page_response, dict):
+            print(f"✅ CMS page created: {create_page_response.get('title', 'Unknown')}")
+            created_page_id = create_page_response.get('id')
+            
+            # Test update page if created successfully
+            if created_page_id:
+                update_data = {"status": "published", "title": "Updated Test Page"}
+                success5, update_response = self.run_test(f"Update CMS Page - {created_page_id}", "PUT", f"api/v1/cms/pages/{created_page_id}", 200, update_data)
+                if success5 and isinstance(update_response, dict):
+                    print(f"✅ Page update successful: {update_response.get('message', 'Success')}")
+        
+        # Test create new CMS banner
+        new_banner = {
+            "title": "Test Banner",
+            "position": "home_hero",
+            "image_desktop": "test-banner.jpg",
+            "status": "draft",
+            "priority": 1
+        }
+        success6, create_banner_response = self.run_test("Create CMS Banner", "POST", "api/v1/cms/banners", 200, new_banner)
+        if success6 and isinstance(create_banner_response, dict):
+            print(f"✅ CMS banner created: {create_banner_response.get('title', 'Unknown')}")
+        
+        # Test other CMS endpoints
+        success7, menus_response = self.run_test("Get CMS Menus", "GET", "api/v1/cms/menus", 200)
+        success8, layouts_response = self.run_test("Get CMS Layouts", "GET", "api/v1/cms/layout", 200)
+        success9, collections_response = self.run_test("Get CMS Collections", "GET", "api/v1/cms/collections", 200)
+        success10, popups_response = self.run_test("Get CMS Popups", "GET", "api/v1/cms/popups", 200)
+        success11, translations_response = self.run_test("Get CMS Translations", "GET", "api/v1/cms/translations", 200)
+        success12, media_response = self.run_test("Get CMS Media", "GET", "api/v1/cms/media", 200)
+        success13, legal_response = self.run_test("Get CMS Legal", "GET", "api/v1/cms/legal", 200)
+        success14, experiments_response = self.run_test("Get CMS Experiments", "GET", "api/v1/cms/experiments", 200)
+        success15, audit_response = self.run_test("Get CMS Audit", "GET", "api/v1/cms/audit", 200)
+        
+        # Validate seeded collections
+        if success9 and isinstance(collections_response, list) and len(collections_response) > 0:
+            collection = collections_response[0]
+            if 'name' in collection and 'type' in collection:
+                print(f"✅ Collections structure valid: {collection['name']} - {collection['type']}")
+        
+        # Validate seeded popups
+        if success10 and isinstance(popups_response, list) and len(popups_response) > 0:
+            popup = popups_response[0]
+            if 'title' in popup and 'type' in popup:
+                print(f"✅ Popups structure valid: {popup['title']} - {popup['type']}")
+        
+        # Validate seeded media
+        if success12 and isinstance(media_response, list) and len(media_response) > 0:
+            media = media_response[0]
+            if 'filename' in media and 'type' in media:
+                print(f"✅ Media structure valid: {media['filename']} - {media['type']}")
+        
+        return all([success_seed, success1, success2, success3, success4, success6, success7, success8, success9, success10, success11, success12, success13, success14, success15])
 
     def test_modules_affiliates(self):
         """Test Affiliates Module endpoints - FOCUSED ON SLASH ISSUE FIX"""
