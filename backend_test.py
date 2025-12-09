@@ -923,6 +923,89 @@ class CasinoAdminAPITester:
         
         return success1
 
+    def test_game_status_lifecycle(self):
+        """Test Game Status and Lifecycle Features"""
+        print("\n🎮 GAME STATUS & LIFECYCLE TESTS")
+        
+        # Test get all games to check status badges
+        success1, games_response = self.run_test("Get Games with Status Badges", "GET", "api/v1/games", 200)
+        
+        if success1 and isinstance(games_response, list) and len(games_response) > 0:
+            # Validate game status structure
+            for game in games_response[:3]:  # Check first 3 games
+                game_name = game.get('name', 'Unknown')
+                business_status = game.get('business_status')
+                runtime_status = game.get('runtime_status')
+                is_special = game.get('is_special_game', False)
+                special_type = game.get('special_type')
+                suggestion_reason = game.get('suggestion_reason')
+                
+                print(f"   🎯 {game_name}:")
+                print(f"      Business Status: {business_status}")
+                print(f"      Runtime Status: {runtime_status}")
+                print(f"      Special Game: {is_special}")
+                if is_special and special_type:
+                    print(f"      Special Type: {special_type}")
+                if suggestion_reason:
+                    print(f"      🔔 Auto-Suggestion: {suggestion_reason}")
+            
+            # Test updating game business and runtime status
+            test_game = games_response[0]
+            game_id = test_game.get('id')
+            
+            if game_id:
+                # Test updating business status
+                status_update = {
+                    "business_status": "suspended",
+                    "runtime_status": "maintenance"
+                }
+                success2, _ = self.run_test(f"Update Game Status - {game_id}", "PUT", f"api/v1/games/{game_id}/details", 200, status_update)
+                
+                # Test updating special game flags
+                special_update = {
+                    "is_special_game": True,
+                    "special_type": "vip"
+                }
+                success3, _ = self.run_test(f"Update Special Game Flags - {game_id}", "PUT", f"api/v1/games/{game_id}/details", 200, special_update)
+                
+                # Test toggle functionality (should toggle business status)
+                success4, toggle_response = self.run_test(f"Toggle Game Status - {game_id}", "POST", f"api/v1/games/{game_id}/toggle", 200)
+                if success4 and isinstance(toggle_response, dict):
+                    new_status = toggle_response.get('status')
+                    print(f"✅ Game toggle successful, new business status: {new_status}")
+                
+                # Verify status updates
+                success5, updated_games = self.run_test("Verify Status Updates", "GET", "api/v1/games", 200)
+                if success5 and isinstance(updated_games, list):
+                    updated_game = next((g for g in updated_games if g.get('id') == game_id), None)
+                    if updated_game:
+                        print(f"✅ Game status verification:")
+                        print(f"   Business: {updated_game.get('business_status')}")
+                        print(f"   Runtime: {updated_game.get('runtime_status')}")
+                        print(f"   Special: {updated_game.get('is_special_game')}")
+                        print(f"   Type: {updated_game.get('special_type')}")
+                
+                # Test auto-suggestion for high min bet games
+                high_bet_config = {
+                    "min_bet": 50.0,  # High min bet to trigger suggestion
+                    "rtp": 96.5
+                }
+                success6, _ = self.run_test(f"Update High Min Bet Config - {game_id}", "PUT", f"api/v1/games/{game_id}", 200, high_bet_config)
+                
+                # Check if auto-suggestion appears
+                success7, suggestion_games = self.run_test("Check Auto-Suggestion", "GET", "api/v1/games", 200)
+                if success7 and isinstance(suggestion_games, list):
+                    suggested_game = next((g for g in suggestion_games if g.get('id') == game_id), None)
+                    if suggested_game and suggested_game.get('suggestion_reason'):
+                        print(f"✅ Auto-suggestion working: {suggested_game.get('suggestion_reason')}")
+                    else:
+                        print("⚠️  Auto-suggestion may not be working for high min bet")
+                
+                return success1 and success2 and success3 and success4 and success5 and success6 and success7
+        
+        print("⚠️  No games found to test status and lifecycle features")
+        return success1
+
     def test_vip_games_module(self):
         """Test VIP Games Module - List, Filter, and Tag Management"""
         print("\n👑 VIP GAMES MODULE TESTS")
