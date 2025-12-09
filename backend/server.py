@@ -46,6 +46,7 @@ app.include_router(risk.router)
 app.include_router(approvals.router)
 app.include_router(rg.router)
 app.include_router(cms.router)
+app.include_router(dashboard.router)
 app.include_router(reports.router)
 app.include_router(logs.router)
 app.include_router(admin.router) # New Admin Router
