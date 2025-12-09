@@ -88,11 +88,155 @@ class CasinoAdminAPITester:
         return success1 and success2
 
     def test_finance_transactions(self):
-        """Test finance transactions endpoint"""
-        success1, _ = self.run_test("All Transactions", "GET", "api/v1/finance/transactions", 200)
-        success2, _ = self.run_test("Deposit Transactions", "GET", "api/v1/finance/transactions?type=deposit", 200)
-        success3, _ = self.run_test("Pending Transactions", "GET", "api/v1/finance/transactions?status=pending", 200)
-        return success1 and success2 and success3
+        """Test Enhanced Finance Module - Transactions List with Filters"""
+        print("\n💰 ENHANCED FINANCE MODULE TESTS")
+        
+        # Test basic transactions list
+        success1, tx_response = self.run_test("All Transactions", "GET", "api/v1/finance/transactions", 200)
+        
+        # Test deposit transactions filter
+        success2, deposit_response = self.run_test("Deposit Transactions", "GET", "api/v1/finance/transactions?type=deposit", 200)
+        
+        # Test withdrawal transactions filter
+        success3, withdrawal_response = self.run_test("Withdrawal Transactions", "GET", "api/v1/finance/transactions?type=withdrawal", 200)
+        
+        # Test status filters
+        success4, _ = self.run_test("Pending Transactions", "GET", "api/v1/finance/transactions?status=pending", 200)
+        success5, _ = self.run_test("Completed Transactions", "GET", "api/v1/finance/transactions?status=completed", 200)
+        
+        # Test amount filters
+        success6, _ = self.run_test("High Value Transactions", "GET", "api/v1/finance/transactions?min_amount=1000", 200)
+        success7, _ = self.run_test("Amount Range Filter", "GET", "api/v1/finance/transactions?min_amount=100&max_amount=5000", 200)
+        
+        # Test player search filter
+        success8, _ = self.run_test("Player Search Filter", "GET", "api/v1/finance/transactions?player_search=highroller99", 200)
+        
+        # Validate transaction structure
+        if success1 and isinstance(tx_response, list) and len(tx_response) > 0:
+            tx = tx_response[0]
+            required_fields = ['id', 'player_id', 'type', 'amount', 'status', 'method', 'created_at']
+            missing_fields = [field for field in required_fields if field not in tx]
+            if not missing_fields:
+                print("✅ Transaction structure is complete")
+                print(f"   Sample TX: {tx['id']} - ${tx['amount']} ({tx['type']}) - {tx['status']}")
+            else:
+                print(f"⚠️  Transaction missing fields: {missing_fields}")
+        
+        return all([success1, success2, success3, success4, success5, success6, success7, success8])
+
+    def test_finance_transaction_actions(self):
+        """Test Enhanced Finance Module - Transaction Actions (Approve, Reject, Fraud)"""
+        print("\n⚡ FINANCE TRANSACTION ACTIONS TESTS")
+        
+        # First get pending transactions to test actions on
+        success1, pending_txs = self.run_test("Get Pending Transactions for Actions", "GET", "api/v1/finance/transactions?status=pending", 200)
+        
+        if success1 and isinstance(pending_txs, list) and len(pending_txs) > 0:
+            tx_id = pending_txs[0]['id']
+            
+            # Test approve action
+            success2, approve_response = self.run_test(f"Approve Transaction - {tx_id}", "POST", f"api/v1/finance/transactions/{tx_id}/action", 200, {
+                "action": "approve",
+                "reason": "Test approval"
+            })
+            
+            # Create another pending transaction for reject test (if available)
+            if len(pending_txs) > 1:
+                tx_id2 = pending_txs[1]['id']
+                success3, _ = self.run_test(f"Reject Transaction - {tx_id2}", "POST", f"api/v1/finance/transactions/{tx_id2}/action", 200, {
+                    "action": "reject", 
+                    "reason": "Test rejection"
+                })
+            else:
+                success3 = True  # Skip if no second transaction
+                print("⚠️  Only one pending transaction available, skipping reject test")
+            
+            # Create another pending transaction for fraud test (if available)
+            if len(pending_txs) > 2:
+                tx_id3 = pending_txs[2]['id']
+                success4, _ = self.run_test(f"Flag as Fraud - {tx_id3}", "POST", f"api/v1/finance/transactions/{tx_id3}/action", 200, {
+                    "action": "fraud",
+                    "reason": "Suspicious activity detected"
+                })
+            else:
+                success4 = True  # Skip if no third transaction
+                print("⚠️  Less than 3 pending transactions, skipping fraud test")
+            
+            # Test invalid action
+            if len(pending_txs) > 3:
+                tx_id4 = pending_txs[3]['id']
+                success5, _ = self.run_test(f"Invalid Action Test - {tx_id4}", "POST", f"api/v1/finance/transactions/{tx_id4}/action", 400, {
+                    "action": "invalid_action"
+                })
+            else:
+                success5 = True  # Skip if no fourth transaction
+            
+            return success1 and success2 and success3 and success4 and success5
+        else:
+            print("⚠️  No pending transactions found to test actions")
+            # Test with non-existent transaction ID to verify error handling
+            success2, _ = self.run_test("Action on Non-existent TX", "POST", "api/v1/finance/transactions/nonexistent/action", 404, {
+                "action": "approve"
+            })
+            return success1 and success2
+
+    def test_finance_reports(self):
+        """Test Enhanced Finance Module - Financial Reports and Data Aggregation"""
+        print("\n📊 FINANCE REPORTS TESTS")
+        
+        # Test basic financial report
+        success1, report_response = self.run_test("Financial Reports", "GET", "api/v1/finance/reports", 200)
+        
+        # Test reports with date filters
+        success2, _ = self.run_test("Reports with Date Filter", "GET", "api/v1/finance/reports?start_date=2025-01-01&end_date=2025-12-31", 200)
+        
+        # Validate report structure
+        if success1 and isinstance(report_response, dict):
+            required_fields = ['total_deposit', 'total_withdrawal', 'net_cashflow', 'provider_breakdown', 'daily_stats']
+            missing_fields = [field for field in required_fields if field not in report_response]
+            
+            if not missing_fields:
+                print("✅ Financial report structure is complete")
+                
+                # Validate specific metrics
+                total_deposit = report_response.get('total_deposit', 0)
+                total_withdrawal = report_response.get('total_withdrawal', 0)
+                net_cashflow = report_response.get('net_cashflow', 0)
+                
+                print(f"   📈 Total Deposits: ${total_deposit:,.2f}")
+                print(f"   📉 Total Withdrawals: ${total_withdrawal:,.2f}")
+                print(f"   💰 Net Cashflow: ${net_cashflow:,.2f}")
+                
+                # Validate provider breakdown
+                provider_breakdown = report_response.get('provider_breakdown', {})
+                if isinstance(provider_breakdown, dict) and len(provider_breakdown) > 0:
+                    print(f"   🏦 Provider Breakdown: {len(provider_breakdown)} providers")
+                    for provider, amount in provider_breakdown.items():
+                        print(f"      - {provider}: ${amount:,.2f}")
+                else:
+                    print("⚠️  Provider breakdown is empty or invalid")
+                
+                # Validate daily stats
+                daily_stats = report_response.get('daily_stats', [])
+                if isinstance(daily_stats, list) and len(daily_stats) > 0:
+                    print(f"   📅 Daily Stats: {len(daily_stats)} days of data")
+                    for day in daily_stats[:3]:  # Show first 3 days
+                        if isinstance(day, dict) and 'date' in day:
+                            print(f"      - {day['date']}: Deposits ${day.get('deposit', 0)}, Withdrawals ${day.get('withdrawal', 0)}")
+                else:
+                    print("⚠️  Daily stats are empty or invalid")
+                
+                # Validate net cashflow calculation
+                calculated_net = total_deposit - total_withdrawal
+                if abs(calculated_net - net_cashflow) < 0.01:  # Allow for small floating point differences
+                    print("✅ Net cashflow calculation is correct")
+                else:
+                    print(f"⚠️  Net cashflow mismatch: calculated {calculated_net}, reported {net_cashflow}")
+                
+            else:
+                print(f"⚠️  Financial report missing fields: {missing_fields}")
+        
+        return success1 and success2
 
     def test_fraud_analysis(self):
         """Test fraud analysis endpoint"""
