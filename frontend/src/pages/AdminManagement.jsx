@@ -239,10 +239,10 @@ const AdminManagement = () => {
                       </div>
                       <div>
                         <Label>Modül</Label>
-                        <Select value={activityFilter.module} onValueChange={v => setActivityFilter({...activityFilter, module: v})}>
+                        <Select value={activityFilter.module || "all"} onValueChange={v => setActivityFilter({...activityFilter, module: v === "all" ? "" : v})}>
                           <SelectTrigger><SelectValue placeholder="Tümü" /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Tümü</SelectItem>
+                            <SelectItem value="all">Tümü</SelectItem>
                             <SelectItem value="players">Players</SelectItem>
                             <SelectItem value="finance">Finance</SelectItem>
                             <SelectItem value="games">Games</SelectItem>
