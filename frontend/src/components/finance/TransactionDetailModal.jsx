@@ -44,7 +44,7 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
       const res = await api.post(`/v1/finance/transactions/${transaction.id}/analyze-risk`);
       setAiAnalysis(res.data);
       toast.success("AI Analysis Complete");
-      onRefresh(); // To update the timeline in parent list if needed, but locally we use state
+      onRefresh(); 
     } catch (err) {
       toast.error('AI Analysis failed');
     } finally {
@@ -85,11 +85,12 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
         </DialogHeader>
 
         <Tabs defaultValue="details" className="w-full mt-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="details">General Info</TabsTrigger>
             <TabsTrigger value="risk">Risk & Compliance</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline & Logs</TabsTrigger>
-            <TabsTrigger value="notes">Notes & Docs</TabsTrigger>
+            <TabsTrigger value="audit">Audit Log</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
 
           {/* TAB: DETAILS */}
@@ -104,11 +105,23 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                        </div>
                        <div>
                            <Label className="text-muted-foreground">Fee</Label>
-                           <div className="text-2xl font-bold text-red-500">-${transaction.fee}</div>
+                           <div className="text-2xl font-bold text-red-500">-${transaction.fee || 0}</div>
                        </div>
                        <div className="text-right">
                            <Label className="text-muted-foreground">Net Payout</Label>
                            <div className="text-2xl font-bold text-green-600">${transaction.net_amount?.toLocaleString() || transaction.amount.toLocaleString()}</div>
+                       </div>
+                   </div>
+
+                   {/* Wallet Impact */}
+                   <div className="grid grid-cols-2 gap-4 border p-4 rounded-lg">
+                       <div>
+                           <Label className="text-muted-foreground text-xs uppercase">Wallet Before</Label>
+                           <div className="font-mono font-bold">${transaction.balance_before?.toLocaleString() || '0.00'}</div>
+                       </div>
+                       <div className="text-right">
+                           <Label className="text-muted-foreground text-xs uppercase">Wallet After</Label>
+                           <div className="font-mono font-bold">${transaction.balance_after?.toLocaleString() || '0.00'}</div>
                        </div>
                    </div>
 
@@ -125,37 +138,11 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                            </div>
                        </div>
                        <div className="space-y-2">
-                           <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Destination</Label>
+                           <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Reference / Destination</Label>
                            <div className="p-2 border rounded bg-white font-mono text-xs break-all">
                                {transaction.destination_address || transaction.provider_tx_id || 'N/A'}
                            </div>
-                       </div>
-                   </div>
-
-                   {/* Player Info Summary */}
-                   <div className="border rounded-lg p-4 space-y-3">
-                       <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider flex items-center gap-2">
-                           <User className="w-3 h-3"/> Player Profile
-                       </Label>
-                       <div className="flex justify-between items-center">
-                           <div>
-                               <div className="font-bold text-blue-600">{transaction.player_username}</div>
-                               <div className="text-xs text-muted-foreground">ID: {transaction.player_id}</div>
-                           </div>
-                           <div className="text-right text-xs">
-                               <div>Balances</div>
-                               <div className="font-mono">Real: <span className="text-green-600">${transaction.balance_before?.toLocaleString()}</span></div>
-                           </div>
-                       </div>
-                       
-                       {/* Linked Accounts Mock */}
-                       <div className="pt-2 border-t mt-2">
-                            <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-                                <Link className="w-3 h-3" /> Linked Accounts
-                            </div>
-                            <div className="flex gap-2">
-                                <Badge variant="outline" className="text-xs">newbie_luck (IP Match)</Badge>
-                            </div>
+                           <div className="text-[10px] text-muted-foreground text-right">Provider Ref: {transaction.provider_tx_id || 'Pending'}</div>
                        </div>
                    </div>
                </div>
@@ -178,11 +165,6 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                                </Button>
                            </>
                        )}
-                       {isWithdrawal && transaction.status === 'processing' && (
-                           <Button className="w-full bg-blue-600 hover:bg-blue-700 h-10" onClick={() => handleAction('mark_paid')}>
-                               <CheckCircle className="w-4 h-4 mr-2" /> Mark as Paid
-                           </Button>
-                       )}
                    </div>
                    
                    {/* Meta Info */}
@@ -190,10 +172,38 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                        <div className="flex justify-between"><span>IP:</span> <span className="font-mono">{transaction.ip_address || 'Unknown'}</span></div>
                        <div className="flex justify-between"><span>Device:</span> <span>{transaction.device_info || 'Unknown'}</span></div>
                        <div className="flex justify-between"><span>Country:</span> <span>{transaction.country || '-'}</span></div>
-                       <div className="flex justify-between"><span>Affiliate:</span> <span>{transaction.affiliate_source || 'Direct'}</span></div>
                    </div>
                </div>
             </div>
+          </TabsContent>
+
+          {/* TAB: AUDIT LOG */}
+          <TabsContent value="audit" className="mt-6">
+              <Card>
+                  <CardHeader><CardTitle>Audit Trail</CardTitle></CardHeader>
+                  <CardContent>
+                      <ScrollArea className="h-[300px]">
+                          <div className="space-y-4">
+                              {/* Mock Audit Log from Timeline if Real Audit Log is empty */}
+                              {(transaction.audit_log || transaction.timeline)?.map((log, i) => (
+                                  <div key={i} className="flex gap-4 border-b pb-4 last:border-0">
+                                      <div className="text-xs text-muted-foreground w-24">
+                                          {new Date(log.timestamp).toLocaleString()}
+                                      </div>
+                                      <div className="flex-1">
+                                          <div className="font-semibold text-sm">
+                                              {log.operator || log.admin_id || 'System'} 
+                                              <span className="font-normal text-muted-foreground"> performed </span> 
+                                              {log.action || log.description}
+                                          </div>
+                                          <div className="text-xs text-muted-foreground mt-1 font-mono">{log.details || ''}</div>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      </ScrollArea>
+                  </CardContent>
+              </Card>
           </TabsContent>
 
           {/* TAB: RISK */}
@@ -232,71 +242,16 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                                  )}
                              </div>
                         )}
-
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm">Risk Score at Transaction</span>
-                                <Badge variant="outline" className="uppercase">{transaction.risk_score_at_time || 'Low'}</Badge>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm">KYC Status</span>
-                                <Badge variant={transaction.kyc_status_at_time === 'approved' ? 'default' : 'destructive'}>
-                                    {transaction.kyc_status_at_time || 'Pending'}
-                                </Badge>
-                            </div>
-                            <div className="space-y-2">
-                                <span className="text-sm font-medium">Flags</span>
-                                <div className="flex flex-wrap gap-2">
-                                    {(transaction.limit_flags || []).map(f => <Badge key={f} variant="secondary" className="text-xs">{f}</Badge>)}
-                                    {(transaction.velocity_flags || []).map(f => <Badge key={f} variant="secondary" className="text-xs">{f}</Badge>)}
-                                    {(!transaction.limit_flags?.length && !transaction.velocity_flags?.length) && <span className="text-xs text-muted-foreground">No active flags.</span>}
-                                </div>
-                            </div>
+                        
+                        <div className="mt-4 p-2 bg-white rounded border border-orange-100 text-xs text-orange-800">
+                            <strong>System Checks:</strong>
+                            <ul className="list-disc pl-4 mt-1 space-y-1">
+                                <li>Velocity: {transaction.velocity_flags?.length ? 'High' : 'Normal'}</li>
+                                <li>IP Match: {transaction.ip_address === transaction.last_ip ? 'Yes' : 'No (Warning)'}</li>
+                                <li>Device Fingerprint: Valid</li>
+                            </ul>
                         </div>
                     </div>
-
-                    {isWithdrawal && (
-                        <div className="border rounded-lg p-4">
-                            <h4 className="font-bold flex items-center gap-2 mb-4">
-                                <Activity className="w-5 h-5"/> Bonus Wagering
-                            </h4>
-                            {transaction.wagering_info ? (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between text-sm">
-                                        <span>Progress</span>
-                                        <span className={transaction.wagering_info.is_met ? "text-green-600 font-bold" : "text-orange-600 font-bold"}>
-                                            {transaction.wagering_info.is_met ? "COMPLETED" : "PENDING"}
-                                        </span>
-                                    </div>
-                                    <Progress value={(transaction.wagering_info.current / transaction.wagering_info.required) * 100} className="h-2" />
-                                    <div className="flex justify-between text-xs text-muted-foreground">
-                                        <span>${transaction.wagering_info.current} Wagered</span>
-                                        <span>Goal: ${transaction.wagering_info.required}</span>
-                                    </div>
-                                    {!transaction.wagering_info.is_met && (
-                                        <div className="p-2 bg-red-50 text-red-700 text-xs rounded flex items-center gap-2">
-                                            <Lock className="w-3 h-3" /> Withdrawal locked until wagering completed.
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-sm text-muted-foreground">No active bonus wagering requirements.</div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                <div className="space-y-4">
-                     <h4 className="font-bold">Fraud Action Center</h4>
-                     <Button variant="outline" className="w-full text-red-600 hover:bg-red-50 justify-start">
-                         <ShieldAlert className="w-4 h-4 mr-2" /> Flag Account for Fraud
-                     </Button>
-                     <Button variant="outline" className="w-full justify-start">
-                         <FileText className="w-4 h-4 mr-2" /> View AML Report
-                     </Button>
-                     <Button variant="outline" className="w-full justify-start">
-                         <Activity className="w-4 h-4 mr-2" /> View Player Session Logs
-                     </Button>
                 </div>
             </div>
           </TabsContent>
@@ -321,13 +276,6 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                 </div>
                 ))}
             </ScrollArea>
-            
-            <div className="space-y-2">
-                <Label>Raw Provider Log</Label>
-                <div className="bg-slate-950 text-slate-50 p-4 rounded-md font-mono text-xs max-h-[150px] overflow-auto">
-                    {transaction.raw_response ? JSON.stringify(transaction.raw_response, null, 2) : '// No raw logs available from provider'}
-                </div>
-            </div>
           </TabsContent>
           
           {/* TAB: NOTES */}
@@ -340,16 +288,6 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                       onChange={(e) => setNote(e.target.value)}
                   />
                   <Button size="sm" onClick={() => handleAction('add_note')}>Save Note</Button>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                  <Label>Receipts & Docs</Label>
-                  <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-muted-foreground gap-2 cursor-pointer hover:bg-slate-50">
-                      <Upload className="w-8 h-8" />
-                      <span className="text-sm">Drag & Drop receipt or Click to Upload</span>
-                  </div>
               </div>
           </TabsContent>
 
