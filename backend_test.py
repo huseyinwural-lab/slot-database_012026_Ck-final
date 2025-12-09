@@ -971,13 +971,112 @@ class CasinoAdminAPITester:
         return all([success_no_slash, success_seed, success1, success6, success8, success11, success12])
 
     def test_modules_risk(self):
-        """Test Risk Module endpoints"""
-        print("\n⚠️ RISK MODULE TESTS")
+        """Test Risk Module endpoints - NEW TABS AND FEATURES"""
+        print("\n⚠️ RISK MODULE TESTS - NEW TABS AND FEATURES")
+        
+        # First seed risk data
+        success_seed, seed_response = self.run_test("Seed Risk Data", "POST", "api/v1/risk/seed", 200)
+        if success_seed and isinstance(seed_response, dict):
+            print(f"✅ Risk seeding: {seed_response.get('message', 'Success')}")
+        
+        # Test Risk Dashboard
+        success1, dashboard_response = self.run_test("Risk Dashboard", "GET", "api/v1/risk/dashboard", 200)
+        if success1 and isinstance(dashboard_response, dict):
+            required_fields = ['daily_alerts', 'open_cases', 'high_risk_players', 'suspicious_withdrawals', 'bonus_abuse_alerts']
+            missing_fields = [field for field in required_fields if field not in dashboard_response]
+            if not missing_fields:
+                print("✅ Risk Dashboard structure is complete")
+                print(f"   📊 Daily Alerts: {dashboard_response['daily_alerts']}")
+                print(f"   📋 Open Cases: {dashboard_response['open_cases']}")
+                print(f"   ⚠️  High Risk Players: {dashboard_response['high_risk_players']}")
+            else:
+                print(f"⚠️  Risk Dashboard missing fields: {missing_fields}")
         
         # Test get risk rules
-        success1, _ = self.run_test("Get Risk Rules", "GET", "api/v1/risk/rules", 200)
+        success2, rules_response = self.run_test("Get Risk Rules", "GET", "api/v1/risk/rules", 200)
+        if success2 and isinstance(rules_response, list):
+            print(f"✅ Found {len(rules_response)} risk rules")
         
-        return success1
+        # Test NEW FEATURE: Velocity Rules (Seeded)
+        success3, velocity_response = self.run_test("Get Velocity Rules (NEW TAB)", "GET", "api/v1/risk/velocity", 200)
+        if success3 and isinstance(velocity_response, list):
+            print(f"✅ Found {len(velocity_response)} velocity rules")
+            if len(velocity_response) > 0:
+                velocity_rule = velocity_response[0]
+                required_fields = ['id', 'name', 'event_type', 'time_window_minutes', 'threshold_count', 'action']
+                missing_fields = [field for field in required_fields if field not in velocity_rule]
+                if not missing_fields:
+                    print(f"✅ Velocity rule structure complete: {velocity_rule['name']} - {velocity_rule['event_type']}")
+                    print(f"   ⚡ Threshold: {velocity_rule['threshold_count']} in {velocity_rule['time_window_minutes']}m")
+                    print(f"   🎯 Action: {velocity_rule['action']}")
+                else:
+                    print(f"⚠️  Velocity rule missing fields: {missing_fields}")
+        
+        # Test NEW FEATURE: Blacklist (Seeded)
+        success4, blacklist_response = self.run_test("Get Blacklist (NEW TAB)", "GET", "api/v1/risk/blacklist", 200)
+        if success4 and isinstance(blacklist_response, list):
+            print(f"✅ Found {len(blacklist_response)} blacklist entries")
+            if len(blacklist_response) > 0:
+                blacklist_entry = blacklist_response[0]
+                required_fields = ['id', 'type', 'value', 'reason', 'added_by', 'added_at']
+                missing_fields = [field for field in required_fields if field not in blacklist_entry]
+                if not missing_fields:
+                    print(f"✅ Blacklist entry structure complete: {blacklist_entry['type']} - {blacklist_entry['value']}")
+                    print(f"   🚫 Reason: {blacklist_entry['reason']}")
+                    print(f"   👤 Added by: {blacklist_entry['added_by']}")
+                else:
+                    print(f"⚠️  Blacklist entry missing fields: {missing_fields}")
+        
+        # Test Evidence endpoint (for Investigation tab)
+        success5, evidence_response = self.run_test("Get Evidence (INVESTIGATION TAB)", "GET", "api/v1/risk/evidence", 200)
+        if success5 and isinstance(evidence_response, list):
+            print(f"✅ Found {len(evidence_response)} evidence entries")
+        
+        # Test Cases endpoint
+        success6, cases_response = self.run_test("Get Risk Cases", "GET", "api/v1/risk/cases", 200)
+        if success6 and isinstance(cases_response, list):
+            print(f"✅ Found {len(cases_response)} risk cases")
+        
+        # Test Alerts endpoint
+        success7, alerts_response = self.run_test("Get Risk Alerts", "GET", "api/v1/risk/alerts", 200)
+        if success7 and isinstance(alerts_response, list):
+            print(f"✅ Found {len(alerts_response)} risk alerts")
+        
+        # Test creating new velocity rule
+        new_velocity_rule = {
+            "name": "Test Rapid Deposits",
+            "event_type": "deposit",
+            "time_window_minutes": 5,
+            "threshold_count": 5,
+            "action": "manual_review"
+        }
+        success8, create_velocity_response = self.run_test("Create Velocity Rule", "POST", "api/v1/risk/velocity", 200, new_velocity_rule)
+        if success8 and isinstance(create_velocity_response, dict):
+            print(f"✅ Velocity rule created: {create_velocity_response.get('name', 'Unknown')}")
+        
+        # Test creating new blacklist entry
+        new_blacklist_entry = {
+            "type": "ip",
+            "value": "192.168.1.200",
+            "reason": "Test suspicious activity",
+            "added_by": "test_admin"
+        }
+        success9, create_blacklist_response = self.run_test("Create Blacklist Entry", "POST", "api/v1/risk/blacklist", 200, new_blacklist_entry)
+        if success9 and isinstance(create_blacklist_response, dict):
+            print(f"✅ Blacklist entry created: {create_blacklist_response.get('type', 'Unknown')} - {create_blacklist_response.get('value', 'Unknown')}")
+        
+        # Test creating new evidence (for Investigation tab)
+        new_evidence = {
+            "related_id": "test_case_001",
+            "type": "note",
+            "description": "Test evidence for investigation tab",
+            "uploaded_by": "test_admin"
+        }
+        success10, create_evidence_response = self.run_test("Create Evidence Entry", "POST", "api/v1/risk/evidence", 200, new_evidence)
+        if success10 and isinstance(create_evidence_response, dict):
+            print(f"✅ Evidence entry created: {create_evidence_response.get('type', 'Unknown')} - {create_evidence_response.get('description', 'Unknown')}")
+        
+        return all([success_seed, success1, success2, success3, success4, success5, success6, success7, success8, success9, success10])
 
     def test_modules_admin(self):
         """Test Admin Users Module endpoints"""
