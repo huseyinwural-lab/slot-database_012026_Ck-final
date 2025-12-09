@@ -24,6 +24,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 // Components
 import TransactionDetailModal from '../components/finance/TransactionDetailModal';
 
+import ReconciliationPanel from '../components/finance/ReconciliationPanel';
+import ChargebackList from '../components/finance/ChargebackList';
 const Finance = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
