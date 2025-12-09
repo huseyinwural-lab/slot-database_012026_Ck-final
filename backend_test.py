@@ -268,6 +268,25 @@ class CasinoAdminAPITester:
                 print(f"   ❌ MISSING: provider_breakdown")
                 report_validation_success = False
             
+            # NEW REVIEW REQUEST FIELDS - Check for fx_impact, chargeback_count, chargeback_amount
+            if 'fx_impact' in report_response:
+                print(f"   ✅ fx_impact: ${report_response['fx_impact']:,.2f}")
+            else:
+                print(f"   ❌ MISSING: fx_impact")
+                report_validation_success = False
+            
+            if 'chargeback_count' in report_response:
+                print(f"   ✅ chargeback_count: {report_response['chargeback_count']}")
+            else:
+                print(f"   ❌ MISSING: chargeback_count")
+                report_validation_success = False
+            
+            if 'chargeback_amount' in report_response:
+                print(f"   ✅ chargeback_amount: ${report_response['chargeback_amount']:,.2f}")
+            else:
+                print(f"   ❌ MISSING: chargeback_amount")
+                report_validation_success = False
+            
             # Validate general report structure
             required_fields = ['total_deposit', 'total_withdrawal', 'net_cashflow', 'provider_breakdown', 'daily_stats']
             missing_fields = [field for field in required_fields if field not in report_response]
