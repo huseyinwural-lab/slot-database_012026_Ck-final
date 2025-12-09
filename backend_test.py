@@ -2309,6 +2309,7 @@ def main():
     test_results.append(("Reports Module", tester.test_reports_module()))
     test_results.append(("Admin Users Module", tester.test_modules_admin()))
     test_results.append(("Logs Module", tester.test_modules_logs()))
+    test_results.append(("System Logs Module", tester.test_system_logs_module()))
     test_results.append(("Responsible Gaming Module", tester.test_modules_rg()))
     
     print("\n🎮 GAME STATUS & LIFECYCLE TESTS")
