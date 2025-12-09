@@ -22,6 +22,7 @@ import { CMSManagement } from './pages/CMSManagement';
 import { Reports } from './pages/Reports';
 import { SystemLogs } from './pages/SystemLogs';
 import { AdminManagement } from './pages/AdminManagement';
+import SettingsPanel from './pages/SettingsPanel';
 import { Toaster } from 'sonner';
 
 function App() {
