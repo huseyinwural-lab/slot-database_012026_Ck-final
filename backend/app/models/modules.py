@@ -238,6 +238,75 @@ class AdminAPIKey(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_used: Optional[datetime] = None
 
+# --- NEW CRITICAL ADMIN MODELS ---
+
+class AdminActivityLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    admin_name: str
+    action: str  # "player_limit_change", "bonus_manual_load", "game_rtp_change", etc.
+    module: str  # "players", "bonuses", "games", "finance", etc.
+    target_entity_id: Optional[str] = None  # ID of affected entity
+    before_snapshot: Optional[Dict[str, Any]] = None
+    after_snapshot: Optional[Dict[str, Any]] = None
+    ip_address: str
+    user_agent: Optional[str] = None
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    risk_level: str = "low"  # low, medium, high, critical
+
+class AdminLoginHistory(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    admin_name: str
+    login_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    ip_address: str
+    device_info: str
+    device_fingerprint: Optional[str] = None
+    location: Optional[str] = None
+    result: str  # "success", "failed"
+    failure_reason: Optional[str] = None  # "wrong_password", "brute_force", "ip_blocked", "2fa_failed"
+    session_duration_minutes: Optional[int] = None
+    is_suspicious: bool = False
+
+class AdminPermissionMatrix(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    role_id: str
+    role_name: str
+    module: str  # "players", "finance", "games", etc.
+    permissions: Dict[str, bool] = {
+        "read": False,
+        "write": False, 
+        "approve": False,
+        "export": False,
+        "restricted": False
+    }
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_by: str
+
+class AdminIPRestriction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: Optional[str] = None  # If None, applies to all admins
+    ip_address: str
+    restriction_type: str  # "allowed", "blocked"
+    reason: Optional[str] = None
+    added_by: str
+    added_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: Optional[datetime] = None
+    is_active: bool = True
+
+class AdminDeviceRestriction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    device_fingerprint: str
+    device_name: Optional[str] = None
+    device_type: Optional[str] = None  # "desktop", "mobile", "tablet"
+    browser_info: Optional[str] = None
+    status: str = "pending"  # "pending", "approved", "blocked"
+    first_seen: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_seen: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    approved_by: Optional[str] = None
+    approved_at: Optional[datetime] = None
+
 # --- REPORTS MODELS ---
 
 class ReportSchedule(BaseModel):
