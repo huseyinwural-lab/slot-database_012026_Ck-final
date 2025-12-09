@@ -6,27 +6,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { BarChart3, TrendingUp, DollarSign, Users, Gamepad2, FileText, Download, Calendar, Activity } from 'lucide-react';
+import { 
+    BarChart3, TrendingUp, DollarSign, Users, Gamepad2, FileText, Download, Calendar, Activity, 
+    Gift, Handshake, ShieldAlert, Scale, CheckCircle, Megaphone, Layout, Server, Settings2, Zap
+} from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Reports = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [overview, setOverview] = useState(null);
-  const [financial, setFinancial] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [games, setGames] = useState([]);
-  const [schedules, setSchedules] = useState([]);
-  const [exports, setExports] = useState([]);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-        if (activeTab === 'overview') setOverview((await api.get('/v1/reports/overview')).data);
-        if (activeTab === 'financial') setFinancial((await api.get('/v1/reports/financial')).data);
-        if (activeTab === 'players') setPlayers((await api.get('/v1/reports/players/ltv')).data);
-        if (activeTab === 'games') setGames((await api.get('/v1/reports/games')).data);
-        if (activeTab === 'scheduled') setSchedules((await api.get('/v1/reports/schedules')).data);
-        if (activeTab === 'exports') setExports((await api.get('/v1/reports/exports')).data);
-    } catch (err) { console.error(err); }
+        let endpoint = '/v1/reports/overview';
+        if (activeTab === 'financial') endpoint = '/v1/reports/financial';
+        if (activeTab === 'players') endpoint = '/v1/reports/players/ltv';
+        if (activeTab === 'games') endpoint = '/v1/reports/games';
+        if (activeTab === 'providers') endpoint = '/v1/reports/providers';
+        if (activeTab === 'bonuses') endpoint = '/v1/reports/bonuses';
+        if (activeTab === 'affiliates') endpoint = '/v1/reports/affiliates';
+        if (activeTab === 'risk') endpoint = '/v1/reports/risk';
+        if (activeTab === 'rg') endpoint = '/v1/reports/rg';
+        if (activeTab === 'kyc') endpoint = '/v1/reports/kyc';
+        if (activeTab === 'crm') endpoint = '/v1/reports/crm';
+        if (activeTab === 'cms') endpoint = '/v1/reports/cms';
+        if (activeTab === 'operational') endpoint = '/v1/reports/operational';
+        if (activeTab === 'scheduled') endpoint = '/v1/reports/schedules';
+        if (activeTab === 'exports') endpoint = '/v1/reports/exports';
+        
+        const res = await api.get(endpoint);
+        setData(res.data);
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchData(); }, [activeTab]);
@@ -35,102 +47,150 @@ const Reports = () => {
     try {
         await api.post('/v1/reports/exports', { type, requested_by: "admin" });
         toast.success("Export started");
-        setActiveTab("exports");
     } catch { toast.error("Failed"); }
   };
+
+  const NavButton = ({ tab, icon: Icon, label }) => (
+    <Button 
+        variant={activeTab===tab ? 'secondary' : 'ghost'} 
+        className="w-full justify-start text-sm" 
+        onClick={()=>setActiveTab(tab)}
+    >
+        <Icon className="w-4 h-4 mr-2" /> {label}
+    </Button>
+  );
 
   return (
     <div className="flex h-[calc(100vh-100px)]">
         {/* SIDEBAR NAVIGATION */}
-        <div className="w-64 border-r bg-card p-4 space-y-2 overflow-y-auto">
-            <h3 className="font-bold mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> Reports</h3>
-            <Button variant={activeTab==='overview'?'secondary':'ghost'} className="w-full justify-start" onClick={()=>setActiveTab('overview')}><Activity className="w-4 h-4 mr-2" /> Overview</Button>
-            <Button variant={activeTab==='financial'?'secondary':'ghost'} className="w-full justify-start" onClick={()=>setActiveTab('financial')}><DollarSign className="w-4 h-4 mr-2" /> Financial</Button>
-            <Button variant={activeTab==='players'?'secondary':'ghost'} className="w-full justify-start" onClick={()=>setActiveTab('players')}><Users className="w-4 h-4 mr-2" /> Players</Button>
-            <Button variant={activeTab==='games'?'secondary':'ghost'} className="w-full justify-start" onClick={()=>setActiveTab('games')}><Gamepad2 className="w-4 h-4 mr-2" /> Games</Button>
-            <Button variant={activeTab==='scheduled'?'secondary':'ghost'} className="w-full justify-start" onClick={()=>setActiveTab('scheduled')}><Calendar className="w-4 h-4 mr-2" /> Scheduled</Button>
-            <Button variant={activeTab==='exports'?'secondary':'ghost'} className="w-full justify-start" onClick={()=>setActiveTab('exports')}><Download className="w-4 h-4 mr-2" /> Export Center</Button>
+        <div className="w-64 border-r bg-card p-2 flex flex-col h-full">
+            <h3 className="font-bold mb-2 px-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> Reports</h3>
+            <ScrollArea className="flex-1 pr-2">
+                <div className="space-y-1">
+                    <NavButton tab="overview" icon={Activity} label="Overview" />
+                    <NavButton tab="live" icon={Zap} label="Real-Time" />
+                    <div className="px-2 pt-2 text-[10px] font-bold text-muted-foreground uppercase">Core</div>
+                    <NavButton tab="financial" icon={DollarSign} label="Financial" />
+                    <NavButton tab="players" icon={Users} label="Players" />
+                    <NavButton tab="games" icon={Gamepad2} label="Games" />
+                    <NavButton tab="providers" icon={Server} label="Providers" />
+                    <div className="px-2 pt-2 text-[10px] font-bold text-muted-foreground uppercase">Marketing</div>
+                    <NavButton tab="bonuses" icon={Gift} label="Bonuses" />
+                    <NavButton tab="affiliates" icon={Handshake} label="Affiliates" />
+                    <NavButton tab="crm" icon={Megaphone} label="CRM" />
+                    <NavButton tab="cms" icon={Layout} label="CMS" />
+                    <div className="px-2 pt-2 text-[10px] font-bold text-muted-foreground uppercase">Risk & Compliance</div>
+                    <NavButton tab="risk" icon={ShieldAlert} label="Risk & Fraud" />
+                    <NavButton tab="rg" icon={Scale} label="Responsible Gaming" />
+                    <NavButton tab="kyc" icon={CheckCircle} label="KYC" />
+                    <div className="px-2 pt-2 text-[10px] font-bold text-muted-foreground uppercase">System</div>
+                    <NavButton tab="operational" icon={Settings2} label="Operational" />
+                    <NavButton tab="custom" icon={FileText} label="Custom Builder" />
+                    <NavButton tab="scheduled" icon={Calendar} label="Scheduled" />
+                    <NavButton tab="exports" icon={Download} label="Export Center" />
+                </div>
+            </ScrollArea>
         </div>
 
         {/* CONTENT AREA */}
-        <ScrollArea className="flex-1 p-6">
-            {activeTab === 'overview' && overview && (
-                <div className="space-y-6">
-                    <div className="grid grid-cols-4 gap-4">
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">GGR</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">${overview.ggr.toLocaleString()}</div></CardContent></Card>
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">NGR</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-green-500">${overview.ngr.toLocaleString()}</div></CardContent></Card>
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Active Players</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{overview.active_players}</div></CardContent></Card>
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Bonus Cost</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-500">${overview.bonus_cost.toLocaleString()}</div></CardContent></Card>
+        <ScrollArea className="flex-1 p-6 bg-secondary/5">
+            {loading ? <div className="text-center p-10">Loading...</div> : (
+                <>
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold capitalize">{activeTab.replace('_', ' ')} Reports</h2>
+                        <Button onClick={() => handleExport(activeTab + "_report")}>
+                            <Download className="w-4 h-4 mr-2" /> Export
+                        </Button>
                     </div>
-                    <Button onClick={() => handleExport("overview_pdf")}>Download PDF Report</Button>
-                </div>
-            )}
 
-            {activeTab === 'financial' && (
-                <Card><CardContent className="pt-6">
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>GGR</TableHead><TableHead>NGR</TableHead><TableHead>Deposits</TableHead><TableHead>Withdrawals</TableHead></TableRow></TableHeader>
-                        <TableBody>{financial.map((f, i) => (
-                            <TableRow key={i}>
-                                <TableCell>{f.date}</TableCell>
-                                <TableCell>${f.ggr}</TableCell>
-                                <TableCell>${f.ngr}</TableCell>
-                                <TableCell>${f.deposits}</TableCell>
-                                <TableCell>${f.withdrawals}</TableCell>
-                            </TableRow>
-                        ))}</TableBody>
-                    </Table>
-                </CardContent></Card>
-            )}
+                    {/* OVERVIEW */}
+                    {activeTab === 'overview' && data && (
+                        <div className="grid grid-cols-4 gap-4">
+                            <Card><CardHeader className="pb-2"><CardTitle className="text-sm">GGR</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">${data.ggr.toLocaleString()}</div></CardContent></Card>
+                            <Card><CardHeader className="pb-2"><CardTitle className="text-sm">NGR</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-green-500">${data.ngr.toLocaleString()}</div></CardContent></Card>
+                            <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Active Players</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{data.active_players}</div></CardContent></Card>
+                            <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Bonus Cost</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-500">${data.bonus_cost.toLocaleString()}</div></CardContent></Card>
+                        </div>
+                    )}
 
-            {activeTab === 'players' && (
-                <Card><CardContent className="pt-6">
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Player ID</TableHead><TableHead>Deposits</TableHead><TableHead>Withdrawals</TableHead><TableHead>Net Revenue</TableHead><TableHead>VIP</TableHead></TableRow></TableHeader>
-                        <TableBody>{players.map((p, i) => (
-                            <TableRow key={i}>
-                                <TableCell>{p.player_id}</TableCell>
-                                <TableCell>${p.deposits}</TableCell>
-                                <TableCell>${p.withdrawals}</TableCell>
-                                <TableCell className="font-bold text-green-500">${p.net_revenue}</TableCell>
-                                <TableCell>{p.vip}</TableCell>
-                            </TableRow>
-                        ))}</TableBody>
-                    </Table>
-                </CardContent></Card>
-            )}
+                    {/* GENERIC TABLE RENDERER FOR MOST REPORTS */}
+                    {['financial', 'players', 'games', 'providers', 'bonuses', 'affiliates', 'crm', 'cms', 'scheduled', 'exports'].includes(activeTab) && Array.isArray(data) && (
+                        <Card><CardContent className="pt-6">
+                            <Table>
+                                <TableHeader><TableRow>
+                                    {Object.keys(data[0] || {}).map(k => <TableHead key={k} className="capitalize">{k.replace(/_/g, ' ')}</TableHead>)}
+                                </TableRow></TableHeader>
+                                <TableBody>
+                                    {data.map((row, i) => (
+                                        <TableRow key={i}>
+                                            {Object.values(row).map((val, j) => (
+                                                <TableCell key={j}>{typeof val === 'object' ? JSON.stringify(val) : val}</TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent></Card>
+                    )}
 
-            {activeTab === 'games' && (
-                <Card><CardContent className="pt-6">
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Game</TableHead><TableHead>Provider</TableHead><TableHead>Bets</TableHead><TableHead>Wins</TableHead><TableHead>GGR</TableHead></TableRow></TableHeader>
-                        <TableBody>{games.map((g, i) => (
-                            <TableRow key={i}>
-                                <TableCell>{g.game}</TableCell>
-                                <TableCell>{g.provider}</TableCell>
-                                <TableCell>${g.bets.toLocaleString()}</TableCell>
-                                <TableCell>${g.wins.toLocaleString()}</TableCell>
-                                <TableCell className="font-bold">${g.ggr.toLocaleString()}</TableCell>
-                            </TableRow>
-                        ))}</TableBody>
-                    </Table>
-                </CardContent></Card>
-            )}
+                    {/* SPECIAL FORMATS */}
+                    {activeTab === 'risk' && Array.isArray(data) && (
+                        <div className="grid md:grid-cols-3 gap-4">
+                            {data.map((d, i) => (
+                                <Card key={i} className="border-l-4 border-red-500">
+                                    <CardHeader className="pb-2"><CardTitle className="text-sm">{d.metric}</CardTitle></CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{d.count}</div>
+                                        <div className="text-xs text-muted-foreground">Saved: ${d.prevented_loss}</div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
 
-            {activeTab === 'exports' && (
-                <Card><CardContent className="pt-6">
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Export ID</TableHead><TableHead>Type</TableHead><TableHead>Status</TableHead><TableHead>Link</TableHead></TableRow></TableHeader>
-                        <TableBody>{exports.map((e) => (
-                            <TableRow key={e.id}>
-                                <TableCell>{e.id.substring(0,8)}</TableCell>
-                                <TableCell>{e.type}</TableCell>
-                                <TableCell><Badge>{e.status}</Badge></TableCell>
-                                <TableCell><Button variant="link" size="sm" asChild><a href={e.download_url}>Download</a></Button></TableCell>
-                            </TableRow>
-                        ))}</TableBody>
-                    </Table>
-                </CardContent></Card>
+                    {activeTab === 'rg' && Array.isArray(data) && (
+                        <div className="grid md:grid-cols-3 gap-4">
+                            {data.map((d, i) => (
+                                <Card key={i} className="border-l-4 border-green-500">
+                                    <CardHeader className="pb-2"><CardTitle className="text-sm">{d.metric}</CardTitle></CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{d.count}</div>
+                                        <div className="text-xs text-muted-foreground">Trend: {d.trend}</div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+
+                    {activeTab === 'kyc' && Array.isArray(data) && (
+                        <div className="grid md:grid-cols-3 gap-4">
+                            {data.map((d, i) => (
+                                <Card key={i} className="border-l-4 border-blue-500">
+                                    <CardHeader className="pb-2"><CardTitle className="text-sm">{d.status}</CardTitle></CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{d.count}</div>
+                                        <div className="text-xs text-muted-foreground">Avg Time: {d.avg_time}</div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+
+                    {activeTab === 'operational' && Array.isArray(data) && (
+                        <div className="grid md:grid-cols-4 gap-4">
+                            {data.map((d, i) => (
+                                <Card key={i}>
+                                    <CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">{d.metric}</CardTitle></CardHeader>
+                                    <CardContent><div className="text-xl font-bold">{d.value}</div></CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* PLACEHOLDERS */}
+                    {activeTab === 'live' && <Card><CardContent className="p-10 text-center">Real-Time Dashboard (WebSocket Mock)</CardContent></Card>}
+                    {activeTab === 'custom' && <Card><CardContent className="p-10 text-center">Drag & Drop Report Builder</CardContent></Card>}
+                </>
             )}
         </ScrollArea>
     </div>
