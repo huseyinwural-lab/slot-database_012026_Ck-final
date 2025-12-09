@@ -19,8 +19,9 @@ import { AffiliateManagement } from './pages/AffiliateManagement';
 import RiskManagement from './pages/RiskManagement';
 import ResponsibleGaming from './pages/ResponsibleGaming';
 import { CMSManagement } from './pages/CMSManagement';
-import { Admins, Logs } from './pages/Modules';
 import { Reports } from './pages/Reports';
+import { SystemLogs } from './pages/SystemLogs';
+import { Admins } from './pages/Modules';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -48,7 +49,7 @@ function App() {
           <Route path="/affiliates" element={<AffiliateManagement />} />
           <Route path="/risk" element={<RiskManagement />} />
           <Route path="/admins" element={<Admins />} />
-          <Route path="/logs" element={<Logs />} />
+          <Route path="/logs" element={<SystemLogs />} />
           <Route path="/rg" element={<ResponsibleGaming />} />
           <Route path="/reports" element={<Reports />} />
           

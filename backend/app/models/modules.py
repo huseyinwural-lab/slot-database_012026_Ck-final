@@ -20,6 +20,127 @@ class DocStatus(str, Enum):
     REJECTED = "rejected"
     EXPIRED = "expired"
 
+# --- SYSTEM LOG ENUMS ---
+class LogSeverity(str, Enum):
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    CRITICAL = "critical"
+
+class ServiceStatus(str, Enum):
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    DOWN = "down"
+
+class JobStatus(str, Enum):
+    SUCCESS = "success"
+    FAILED = "failed"
+    TIMEOUT = "timeout"
+    SKIPPED = "skipped"
+    RUNNING = "running"
+
+class DeployStatus(str, Enum):
+    SUCCESS = "success"
+    FAILED = "failed"
+    ROLLBACK = "rollback"
+    CANCELED = "canceled"
+
+# --- SYSTEM LOG MODELS ---
+
+class SystemEvent(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    module: str
+    severity: LogSeverity
+    event_type: str
+    message: str
+    host: Optional[str] = None
+    correlation_id: Optional[str] = None
+
+class CronLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    job_name: str
+    job_id: str
+    started_at: datetime
+    finished_at: Optional[datetime] = None
+    duration_ms: Optional[float] = None
+    status: JobStatus = JobStatus.RUNNING
+    error_message: Optional[str] = None
+
+class ServiceHealth(BaseModel):
+    service_name: str
+    status: ServiceStatus
+    latency_ms: float
+    error_rate: float
+    instance_count: int
+    last_heartbeat: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class DeploymentLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    environment: str
+    service: str
+    version: str
+    initiated_by: str
+    status: DeployStatus
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    changelog: str
+
+class ConfigChangeLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    admin_id: str
+    target: str
+    diff: Dict[str, Any] # {old: ..., new: ...}
+    severity: LogSeverity
+    requires_restart: bool = False
+
+class ErrorLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    service: str
+    error_type: str
+    severity: LogSeverity
+    message: str
+    stack_trace: Optional[str] = None
+    impact_users: int = 0
+    correlation_id: Optional[str] = None
+
+class QueueLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    task_id: str
+    queue_name: str
+    payload_type: str
+    started_at: datetime
+    duration_ms: float
+    retries: int = 0
+    status: str
+    error: Optional[str] = None
+
+class DBLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    execution_time_ms: float
+    query_snippet: str
+    affected_rows: int
+    is_slow: bool = False
+
+class CacheLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    cache_type: str # redis, cdn
+    operation: str # hit, miss, set
+    key: str
+    ttl: int
+
+class LogArchive(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    log_type: str
+    date_range: str
+    size_mb: float
+    storage_type: str # s3
+    status: str # available, archived
+
 # --- CRM ENUMS ---
 class ChannelType(str, Enum):
     EMAIL = "email"
@@ -162,8 +283,8 @@ class CMSBannerPosition(str, Enum):
 
 class ReportSchedule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    report_type: str # financial_daily, player_ltv
-    frequency: str # daily, weekly
+    report_type: str 
+    frequency: str 
     recipients: List[str] = []
     format: str = "pdf"
     next_run: datetime
@@ -172,7 +293,7 @@ class ReportSchedule(BaseModel):
 class ExportJob(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     type: str
-    status: str = "processing" # processing, ready, failed
+    status: str = "processing" 
     requested_by: str
     download_url: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -186,8 +307,8 @@ class CMSPage(BaseModel):
     language: str = "en"
     template: CMSPageType = CMSPageType.STATIC
     status: CMSStatus = CMSStatus.DRAFT
-    content_blocks: List[Dict[str, Any]] = [] # json blocks
-    seo: Dict[str, Any] = {} # title, desc, og_image
+    content_blocks: List[Dict[str, Any]] = [] 
+    seo: Dict[str, Any] = {} 
     publish_at: Optional[datetime] = None
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_by: Optional[str] = None
@@ -195,13 +316,13 @@ class CMSPage(BaseModel):
 class CMSMenu(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    location: str # header, footer
-    items: List[Dict[str, Any]] = [] # tree structure
+    location: str 
+    items: List[Dict[str, Any]] = [] 
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class CMSBanner(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str # internal name
+    title: str 
     position: CMSBannerPosition
     language: str = "en"
     image_desktop: str
@@ -211,18 +332,18 @@ class CMSBanner(BaseModel):
     priority: int = 0
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    targeting: Dict[str, Any] = {} # segments, device
+    targeting: Dict[str, Any] = {} 
 
 class CMSLayout(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str # e.g. "Default Homepage"
-    sections: List[Dict[str, Any]] = [] # ordered list of components
+    name: str 
+    sections: List[Dict[str, Any]] = [] 
     status: CMSStatus = CMSStatus.DRAFT
 
 class CMSCollection(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    type: str # dynamic, manual
+    type: str 
     rules: Dict[str, Any] = {}
     game_ids: List[str] = []
 
@@ -230,7 +351,7 @@ class CMSPopup(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     content: str
-    type: str # entry, exit, system
+    type: str 
     targeting: Dict[str, Any] = {}
     status: CMSStatus = CMSStatus.DRAFT
 
@@ -244,7 +365,7 @@ class CMSTranslation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     key: str
     default_text: str
-    translations: Dict[str, str] = {} # {tr: "Merhaba"}
+    translations: Dict[str, str] = {} 
 
 class CMSMedia(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -257,7 +378,7 @@ class CMSMedia(BaseModel):
 
 class CMSLegalDoc(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    type: str # terms, privacy
+    type: str 
     version: str
     content: str
     effective_date: datetime
@@ -266,7 +387,7 @@ class CMSLegalDoc(BaseModel):
 class CMSExperiment(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    target_type: str # banner, page
+    target_type: str 
     variants: List[Dict[str, Any]] = []
     status: str = "running"
     results: Dict[str, Any] = {}
@@ -274,7 +395,7 @@ class CMSExperiment(BaseModel):
 class CMSMaintenance(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     message: str
-    type: str # banner, full_page
+    type: str 
     start_time: datetime
     end_time: datetime
     active: bool = True
@@ -741,14 +862,6 @@ class SystemLog(BaseModel):
     message: str
     details: Dict[str, Any] = {}
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class RGLimit(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    player_id: str
-    type: str 
-    amount: float
-    period: str 
-    set_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # KYC extra models
 class KYCLevel(BaseModel):
