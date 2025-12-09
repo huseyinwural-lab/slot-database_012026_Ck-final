@@ -1165,6 +1165,9 @@ def main():
     test_results.append(("Logs Module", tester.test_modules_logs()))
     test_results.append(("Responsible Gaming Module", tester.test_modules_rg()))
     
+    print("\n🎮 GAME STATUS & LIFECYCLE TESTS")
+    test_results.append(("Game Status & Lifecycle", tester.test_game_status_lifecycle()))
+    
     print("\n👑 VIP GAMES MODULE TESTS")
     test_results.append(("VIP Games Module", tester.test_vip_games_module()))
     
