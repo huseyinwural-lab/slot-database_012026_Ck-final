@@ -65,6 +65,112 @@ class PayoutStatus(str, Enum):
     PAID = "paid"
     REJECTED = "rejected"
 
+# --- SUPPORT ENUMS ---
+class TicketPriority(str, Enum):
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class TicketStatus(str, Enum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    WAITING_PLAYER = "waiting_player"
+    SOLVED = "solved"
+    CLOSED = "closed"
+
+class ChatStatus(str, Enum):
+    QUEUED = "queued"
+    ACTIVE = "active"
+    ENDED = "ended"
+    MISSED = "missed"
+
+# --- SUPPORT MODELS ---
+
+class CannedResponse(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str
+    category: str # payment, bonus, tech
+    language: str = "en"
+    tags: List[str] = []
+
+class Macro(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    actions: List[Dict[str, Any]] = [] # {type: "add_tag", value: "vip"}, {type: "change_status", value: "solved"}
+    active: bool = True
+
+class SupportWorkflow(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    trigger_event: str # "ticket_created", "chat_started"
+    conditions: Dict[str, Any] = {} # {vip_level: {gte: 3}}
+    actions: List[Dict[str, Any]] = []
+    active: bool = True
+
+class KnowledgeBaseArticle(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    slug: str
+    content: str
+    category: str
+    language: str = "en"
+    is_internal: bool = False
+    tags: List[str] = []
+    views: int = 0
+    helpful_count: int = 0
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ChatMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    sender_type: str # player, agent, system, bot
+    sender_id: str
+    sender_name: str
+    content: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    attachments: List[str] = []
+
+class ChatSession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    player_id: str
+    player_name: str
+    agent_id: Optional[str] = None
+    agent_name: Optional[str] = None
+    status: ChatStatus = ChatStatus.QUEUED
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    ended_at: Optional[datetime] = None
+    rating: Optional[int] = None
+    tags: List[str] = []
+    messages: List[ChatMessage] = []
+
+class SupportTicket(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    subject: str
+    description: str
+    player_id: str
+    player_email: str
+    category: str
+    priority: TicketPriority = TicketPriority.NORMAL
+    status: TicketStatus = TicketStatus.OPEN
+    assigned_agent_id: Optional[str] = None
+    channel: str = "email" # email, chat, form
+    tags: List[str] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    messages: List[Dict[str, Any]] = [] # Thread: {sender, content, time}
+    
+class AgentPerformance(BaseModel):
+    agent_id: str
+    agent_name: str
+    tickets_solved: int = 0
+    avg_response_time_mins: float = 0.0
+    csat_score: float = 0.0
+    active_chats: int = 0
+    status: str = "online" # online, away, offline
+
 # --- AFFILIATE MODELS ---
 
 class CommissionPlan(BaseModel):
@@ -85,26 +191,17 @@ class Affiliate(BaseModel):
     account_manager_id: Optional[str] = None
     group: str = "Standard" # VIP, Super
     country: str = "Unknown"
-    
-    # Financials
     balance: float = 0.0
     total_earnings: float = 0.0
     total_paid: float = 0.0
     currency: str = "USD"
-    
-    # Commission
     default_plan: CommissionPlan = Field(default_factory=CommissionPlan)
-    
-    # Tracking
     tracking_link_template: Optional[str] = None
     postback_url: Optional[str] = None
-    
-    # Stats
     total_clicks: int = 0
     total_registrations: int = 0
-    total_ftd: int = 0 # First Time Deposits
+    total_ftd: int = 0 
     last_activity_at: Optional[datetime] = None
-    
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class AffiliateOffer(BaseModel):
@@ -123,14 +220,14 @@ class TrackingLink(BaseModel):
     offer_id: str
     name: str
     url: str
-    sub_ids: Dict[str, str] = {} # sub1, sub2 defaults
+    sub_ids: Dict[str, str] = {} 
 
 class Conversion(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     affiliate_id: str
     offer_id: Optional[str] = None
     player_id: str
-    event_type: str # registration, ftd, deposit
+    event_type: str 
     amount: float = 0.0
     commission: float = 0.0
     status: str = "approved"
@@ -150,7 +247,7 @@ class Payout(BaseModel):
 class Creative(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    type: str # banner, landing
+    type: str 
     size: Optional[str] = None
     url: str
     preview_url: Optional[str] = None
@@ -160,10 +257,10 @@ class Creative(BaseModel):
 
 class ChannelConfig(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str # "Sendgrid Main"
+    name: str 
     type: ChannelType
-    provider: str # "sendgrid", "twilio"
-    config: Dict[str, Any] = {} # api_key, sender_email
+    provider: str 
+    config: Dict[str, Any] = {} 
     rate_limits: Dict[str, int] = {"max_per_minute": 60}
     enabled: bool = True
     default_locale: str = "en"
@@ -184,10 +281,10 @@ class PlayerCommPrefs(BaseModel):
 
 class Segment(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str # "VIP Users"
+    name: str 
     description: Optional[str] = None
-    type: str = "dynamic" # dynamic, static
-    rule_definition: Dict[str, Any] = {} # {"vip_level": {"$gte": 2}}
+    type: str = "dynamic" 
+    rule_definition: Dict[str, Any] = {} 
     estimated_size: int = 0
     tags: List[str] = []
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -196,22 +293,22 @@ class MessageTemplate(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     channel: ChannelType
-    category: str = "marketing" # transactional, marketing
+    category: str = "marketing" 
     locale: str = "en"
     subject: Optional[str] = None
     body_html: Optional[str] = None
     body_text: Optional[str] = None
-    placeholders: List[str] = [] # ["username", "bonus_amount"]
+    placeholders: List[str] = [] 
     status: str = "active"
 
 class Campaign(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    type: str = "one_time" # one_time, recurring, journey
+    type: str = "one_time" 
     channel: ChannelType
     segment_id: str
     template_id: str
-    goal: Optional[str] = None # deposit, login
+    goal: Optional[str] = None 
     status: CampaignStatus = CampaignStatus.DRAFT
     schedule_type: str = "immediate"
     start_at: Optional[datetime] = None
@@ -227,7 +324,7 @@ class JourneyStep(BaseModel):
 class Journey(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    trigger_event: str # registration, first_deposit
+    trigger_event: str 
     steps: List[JourneyStep] = []
     status: str = "active"
 
