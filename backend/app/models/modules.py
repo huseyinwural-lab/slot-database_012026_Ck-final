@@ -478,6 +478,14 @@ class Banner(BaseModel):
     position: str 
     active: bool = True
 
+class RiskRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    condition: str 
+    action: str 
+    severity: str 
+    active: bool = True
+
 class AdminUser(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     username: str

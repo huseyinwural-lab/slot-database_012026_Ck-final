@@ -181,6 +181,7 @@ const RiskManagement = () => {
                 </div>
             </TabsContent>
 
+            {/* DEVICES */}
             <TabsContent value="devices" className="mt-4">
                 <div className="p-10 text-center border border-dashed rounded text-muted-foreground">
                     Device Intelligence Graph Visualization (Coming Soon)
