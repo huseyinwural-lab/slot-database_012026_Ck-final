@@ -1201,6 +1201,117 @@ class CasinoAdminAPITester:
         
         return all([success_no_slash, success_seed, success1, success6, success8, success11, success12])
 
+    def test_reports_module(self):
+        """Test Reports Module - Comprehensive Testing"""
+        print("\n📊 REPORTS MODULE TESTS - COMPREHENSIVE")
+        
+        # Test Report Overview - KPI data
+        success1, overview_response = self.run_test("Reports Overview - KPI Data", "GET", "api/v1/reports/overview", 200)
+        if success1 and isinstance(overview_response, dict):
+            required_fields = ['ggr', 'ngr', 'total_deposits', 'total_withdrawals', 'active_players', 'new_registrations', 'bonus_cost', 'fraud_loss']
+            missing_fields = [field for field in required_fields if field not in overview_response]
+            if not missing_fields:
+                print("✅ Reports Overview structure is complete")
+                print(f"   💰 GGR: ${overview_response['ggr']:,.2f}")
+                print(f"   💚 NGR: ${overview_response['ngr']:,.2f}")
+                print(f"   📈 Total Deposits: ${overview_response['total_deposits']:,.2f}")
+                print(f"   📉 Total Withdrawals: ${overview_response['total_withdrawals']:,.2f}")
+                print(f"   👥 Active Players: {overview_response['active_players']}")
+                print(f"   🆕 New Registrations: {overview_response['new_registrations']}")
+            else:
+                print(f"⚠️  Reports Overview missing fields: {missing_fields}")
+        
+        # Test Financial Report - Daily data
+        success2, financial_response = self.run_test("Financial Report - Daily Data", "GET", "api/v1/reports/financial", 200)
+        if success2 and isinstance(financial_response, list):
+            print(f"✅ Financial Report returned {len(financial_response)} daily records")
+            if len(financial_response) > 0:
+                record = financial_response[0]
+                required_fields = ['date', 'ggr', 'ngr', 'deposits', 'withdrawals']
+                missing_fields = [field for field in required_fields if field not in record]
+                if not missing_fields:
+                    print(f"✅ Financial record structure complete: {record['date']} - GGR: ${record['ggr']}, NGR: ${record['ngr']}")
+                else:
+                    print(f"⚠️  Financial record missing fields: {missing_fields}")
+        
+        # Test Financial Report with type filter
+        success3, _ = self.run_test("Financial Report - Type Filter", "GET", "api/v1/reports/financial?type=weekly", 200)
+        
+        # Test Player LTV Report
+        success4, player_ltv_response = self.run_test("Player LTV Report", "GET", "api/v1/reports/players/ltv", 200)
+        if success4 and isinstance(player_ltv_response, list):
+            print(f"✅ Player LTV Report returned {len(player_ltv_response)} player records")
+            if len(player_ltv_response) > 0:
+                player = player_ltv_response[0]
+                required_fields = ['player_id', 'deposits', 'withdrawals', 'net_revenue', 'vip']
+                missing_fields = [field for field in required_fields if field not in player]
+                if not missing_fields:
+                    print(f"✅ Player LTV structure complete: {player['player_id']} - Net Revenue: ${player['net_revenue']}, VIP: {player['vip']}")
+                else:
+                    print(f"⚠️  Player LTV missing fields: {missing_fields}")
+        
+        # Test Game Performance Report
+        success5, games_response = self.run_test("Game Performance Report", "GET", "api/v1/reports/games", 200)
+        if success5 and isinstance(games_response, list):
+            print(f"✅ Game Performance Report returned {len(games_response)} game records")
+            if len(games_response) > 0:
+                game = games_response[0]
+                required_fields = ['game', 'provider', 'bets', 'wins', 'ggr']
+                missing_fields = [field for field in required_fields if field not in game]
+                if not missing_fields:
+                    print(f"✅ Game performance structure complete: {game['game']} ({game['provider']}) - GGR: ${game['ggr']:,}")
+                else:
+                    print(f"⚠️  Game performance missing fields: {missing_fields}")
+        
+        # Test Report Schedules
+        success6, schedules_response = self.run_test("Get Report Schedules", "GET", "api/v1/reports/schedules", 200)
+        if success6 and isinstance(schedules_response, list):
+            print(f"✅ Report Schedules returned {len(schedules_response)} schedules")
+        
+        # Test Create Report Schedule
+        new_schedule = {
+            "report_type": "financial_daily",
+            "frequency": "daily",
+            "recipients": ["admin@test.com"],
+            "format": "pdf",
+            "next_run": "2025-01-15T09:00:00Z",
+            "active": True
+        }
+        success7, create_schedule_response = self.run_test("Create Report Schedule", "POST", "api/v1/reports/schedules", 200, new_schedule)
+        if success7 and isinstance(create_schedule_response, dict):
+            print(f"✅ Report schedule created: {create_schedule_response.get('report_type', 'Unknown')} - {create_schedule_response.get('frequency', 'Unknown')}")
+        
+        # Test Export Jobs
+        success8, exports_response = self.run_test("Get Export Jobs", "GET", "api/v1/reports/exports", 200)
+        if success8 and isinstance(exports_response, list):
+            print(f"✅ Export Jobs returned {len(exports_response)} jobs")
+        
+        # Test Create Export Job
+        new_export = {
+            "type": "overview_pdf",
+            "requested_by": "test_admin"
+        }
+        success9, create_export_response = self.run_test("Create Export Job", "POST", "api/v1/reports/exports", 200, new_export)
+        if success9 and isinstance(create_export_response, dict):
+            print(f"✅ Export job created: {create_export_response.get('type', 'Unknown')} - Status: {create_export_response.get('status', 'Unknown')}")
+            if create_export_response.get('download_url'):
+                print(f"   📥 Download URL: {create_export_response['download_url']}")
+        
+        # Test Report Audit
+        success10, audit_response = self.run_test("Report Audit", "GET", "api/v1/reports/audit", 200)
+        if success10 and isinstance(audit_response, list):
+            print(f"✅ Report Audit returned {len(audit_response)} audit records")
+            if len(audit_response) > 0:
+                audit = audit_response[0]
+                required_fields = ['admin', 'action', 'time']
+                missing_fields = [field for field in required_fields if field not in audit]
+                if not missing_fields:
+                    print(f"✅ Audit record structure complete: {audit['admin']} - {audit['action']}")
+                else:
+                    print(f"⚠️  Audit record missing fields: {missing_fields}")
+        
+        return all([success1, success2, success3, success4, success5, success6, success7, success8, success9, success10])
+
     def test_modules_risk(self):
         """Test Risk Module endpoints - NEW TABS AND FEATURES"""
         print("\n⚠️ RISK MODULE TESTS - NEW TABS AND FEATURES")
