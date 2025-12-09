@@ -25,6 +25,7 @@ db = client[settings.db_name]
 app.state.db = db
 
 # Configure CORS
+from app.routes import dashboard
 origins = settings.cors_origins.split(",")
 
 app.add_middleware(
