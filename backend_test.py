@@ -957,8 +957,11 @@ def main():
     print("\n🔍 FRAUD DETECTION TESTS")
     test_results.append(("Fraud Analysis", tester.test_fraud_analysis()))
     
-    print("\n🎮 GAME MANAGEMENT TESTS")
+    print("\n🎮 ADVANCED GAME MANAGEMENT TESTS")
     test_results.append(("Games Management", tester.test_games_management()))
+    test_results.append(("Custom Tables Management", tester.test_custom_tables_management()))
+    test_results.append(("Game Config Versioning & RTP", tester.test_game_config_versioning_rtp()))
+    test_results.append(("Game Upload Wizard", tester.test_game_upload_wizard()))
     
     print("\n🎁 BONUS MANAGEMENT TESTS")
     test_results.append(("Bonuses Management", tester.test_bonuses_management()))
