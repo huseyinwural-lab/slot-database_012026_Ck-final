@@ -1386,7 +1386,7 @@ class CasinoAdminAPITester:
 
     def test_reports_module(self):
         """Test Reports Module - Legacy method for compatibility"""
-        return self.test_all_16_report_types()iew missing fields: {missing_fields}")
+        return self.test_all_16_report_types()
         
         # Test Financial Report - Daily data
         success2, financial_response = self.run_test("Financial Report - Daily Data", "GET", "api/v1/reports/financial", 200)
