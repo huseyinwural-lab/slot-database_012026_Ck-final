@@ -824,8 +824,10 @@ def main():
     test_results.append(("Players Filters", tester.test_players_with_filters()))
     test_results.append(("Player Detail", tester.test_player_detail()))
     
-    print("\n💰 FINANCE TESTS")
-    test_results.append(("Finance Transactions", tester.test_finance_transactions()))
+    print("\n💰 ENHANCED FINANCE MODULE TESTS")
+    test_results.append(("Finance Transactions & Filters", tester.test_finance_transactions()))
+    test_results.append(("Finance Transaction Actions", tester.test_finance_transaction_actions()))
+    test_results.append(("Finance Reports & Aggregation", tester.test_finance_reports()))
     
     print("\n🔍 FRAUD DETECTION TESTS")
     test_results.append(("Fraud Analysis", tester.test_fraud_analysis()))
