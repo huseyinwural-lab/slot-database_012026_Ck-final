@@ -13,6 +13,7 @@ from app.models.core import (
 )
 from app.models.modules import KYCDocument
 from config import settings
+from app.services.ai_service import risk_analyzer
 from motor.motor_asyncio import AsyncIOMotorClient
 
 router = APIRouter(prefix="/api/v1", tags=["core"])
