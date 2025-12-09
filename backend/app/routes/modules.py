@@ -125,17 +125,6 @@ async def get_kyc_rules():
 
 # --- EXISTING MODULES ---
 
-@router.get("/crm/campaigns", response_model=List[Campaign])
-async def get_campaigns():
-    db = get_db()
-    return [Campaign(**c) for c in await db.campaigns.find().to_list(100)]
-
-@router.post("/crm/campaigns")
-async def create_campaign(camp: Campaign):
-    db = get_db()
-    await db.campaigns.insert_one(camp.model_dump())
-    return camp
-
 @router.get("/cms/pages", response_model=List[CMSPage])
 async def get_pages():
     db = get_db()
