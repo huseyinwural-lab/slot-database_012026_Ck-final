@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import logging
 from config import settings
-from app.routes import fraud_detection, email_notification
+from app.routes import fraud_detection, email_notification, core
 
 # Configure logging
 logging.basicConfig(
@@ -38,6 +38,7 @@ app.add_middleware(
 )
 
 # Include Routes
+app.include_router(core.router)
 app.include_router(fraud_detection.router)
 app.include_router(email_notification.router)
 
