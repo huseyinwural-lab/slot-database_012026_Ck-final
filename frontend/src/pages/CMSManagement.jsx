@@ -9,7 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Layout, File, Image, Menu, Globe, AlertTriangle, Plus, Eye, Activity } from 'lucide-react';
+import { 
+    Layout, File, Image, Menu, Globe, AlertTriangle, Plus, Eye, 
+    Layers, Grid, Tag, MessageSquare, Languages, Scale, Beaker, History 
+} from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -18,7 +21,13 @@ const CMSManagement = () => {
   const [dashboard, setDashboard] = useState(null);
   const [pages, setPages] = useState([]);
   const [banners, setBanners] = useState([]);
-  const [menus, setMenus] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [popups, setPopups] = useState([]);
+  const [translations, setTranslations] = useState([]);
+  const [media, setMedia] = useState([]);
+  const [legal, setLegal] = useState([]);
+  const [experiments, setExperiments] = useState([]);
+  const [audit, setAudit] = useState([]);
   
   // Create States
   const [isPageOpen, setIsPageOpen] = useState(false);
@@ -29,7 +38,13 @@ const CMSManagement = () => {
         if (activeTab === 'dashboard') setDashboard((await api.get('/v1/cms/dashboard')).data);
         if (activeTab === 'pages') setPages((await api.get('/v1/cms/pages')).data);
         if (activeTab === 'banners') setBanners((await api.get('/v1/cms/banners')).data);
-        if (activeTab === 'menus') setMenus((await api.get('/v1/cms/menus')).data);
+        if (activeTab === 'collections') setCollections((await api.get('/v1/cms/collections')).data);
+        if (activeTab === 'popups') setPopups((await api.get('/v1/cms/popups')).data);
+        if (activeTab === 'translations') setTranslations((await api.get('/v1/cms/translations')).data);
+        if (activeTab === 'media') setMedia((await api.get('/v1/cms/media')).data);
+        if (activeTab === 'legal') setLegal((await api.get('/v1/cms/legal')).data);
+        if (activeTab === 'experiments') setExperiments((await api.get('/v1/cms/experiments')).data);
+        if (activeTab === 'audit') setAudit((await api.get('/v1/cms/audit')).data);
     } catch (err) { console.error(err); }
   };
 
@@ -46,12 +61,18 @@ const CMSManagement = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
             <ScrollArea className="w-full whitespace-nowrap rounded-md border">
                 <TabsList className="w-full flex justify-start">
-                    <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
+                    <TabsTrigger value="dashboard"><ActivityIcon className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
                     <TabsTrigger value="pages"><File className="w-4 h-4 mr-2" /> Pages</TabsTrigger>
+                    <TabsTrigger value="layout"><Grid className="w-4 h-4 mr-2" /> Homepage</TabsTrigger>
                     <TabsTrigger value="banners"><Image className="w-4 h-4 mr-2" /> Banners</TabsTrigger>
-                    <TabsTrigger value="menus"><Menu className="w-4 h-4 mr-2" /> Navigation</TabsTrigger>
-                    <TabsTrigger value="seo"><Globe className="w-4 h-4 mr-2" /> SEO</TabsTrigger>
+                    <TabsTrigger value="collections"><Tag className="w-4 h-4 mr-2" /> Collections</TabsTrigger>
+                    <TabsTrigger value="popups"><MessageSquare className="w-4 h-4 mr-2" /> Popups</TabsTrigger>
+                    <TabsTrigger value="media"><Layers className="w-4 h-4 mr-2" /> Media</TabsTrigger>
+                    <TabsTrigger value="translations"><Languages className="w-4 h-4 mr-2" /> i18n</TabsTrigger>
+                    <TabsTrigger value="legal"><Scale className="w-4 h-4 mr-2" /> Legal</TabsTrigger>
+                    <TabsTrigger value="experiments"><Beaker className="w-4 h-4 mr-2" /> A/B Test</TabsTrigger>
                     <TabsTrigger value="maintenance"><AlertTriangle className="w-4 h-4 mr-2" /> System</TabsTrigger>
+                    <TabsTrigger value="audit"><History className="w-4 h-4 mr-2" /> Audit</TabsTrigger>
                 </TabsList>
             </ScrollArea>
 
@@ -120,13 +141,63 @@ const CMSManagement = () => {
                 </CardContent></Card>
             </TabsContent>
 
-            {/* MENUS */}
-            <TabsContent value="menus" className="mt-4"><Card><CardContent className="p-10 text-center">Menu Editor (Mock)</CardContent></Card></TabsContent>
-            <TabsContent value="seo" className="mt-4"><Card><CardContent className="p-10 text-center">SEO Tools (Mock)</CardContent></Card></TabsContent>
+            {/* LAYOUT */}
+            <TabsContent value="layout" className="mt-4"><Card><CardContent className="p-10 text-center">Homepage Layout Editor (Drag & Drop Mock)</CardContent></Card></TabsContent>
+            
+            {/* COLLECTIONS */}
+            <TabsContent value="collections" className="mt-4">
+                <Card><CardContent className="pt-6">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Type</TableHead></TableRow></TableHeader>
+                        <TableBody>{collections.map(c => <TableRow key={c.id}><TableCell>{c.name}</TableCell><TableCell>{c.type}</TableCell></TableRow>)}</TableBody>
+                    </Table>
+                </CardContent></Card>
+            </TabsContent>
+
+            {/* POPUPS */}
+            <TabsContent value="popups" className="mt-4">
+                <Card><CardContent className="pt-6">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Type</TableHead></TableRow></TableHeader>
+                        <TableBody>{popups.map(p => <TableRow key={p.id}><TableCell>{p.title}</TableCell><TableCell>{p.type}</TableCell></TableRow>)}</TableBody>
+                    </Table>
+                </CardContent></Card>
+            </TabsContent>
+
+            {/* MEDIA */}
+            <TabsContent value="media" className="mt-4">
+                <div className="grid grid-cols-4 gap-4">
+                    {media.map(m => (
+                        <Card key={m.id} className="overflow-hidden">
+                            <div className="aspect-square bg-secondary flex items-center justify-center text-muted-foreground">
+                                <Image className="w-8 h-8" />
+                            </div>
+                            <div className="p-2 text-xs truncate">{m.filename}</div>
+                        </Card>
+                    ))}
+                </div>
+            </TabsContent>
+
+            {/* TRANSLATIONS */}
+            <TabsContent value="translations" className="mt-4"><Card><CardContent className="p-10 text-center">i18n Key Manager (Mock)</CardContent></Card></TabsContent>
+            
+            {/* LEGAL */}
+            <TabsContent value="legal" className="mt-4"><Card><CardContent className="p-10 text-center">Terms & Privacy Versions (Mock)</CardContent></Card></TabsContent>
+            
+            {/* EXPERIMENTS */}
+            <TabsContent value="experiments" className="mt-4"><Card><CardContent className="p-10 text-center">A/B Testing Dashboard (Mock)</CardContent></Card></TabsContent>
+            
+            {/* MAINTENANCE */}
             <TabsContent value="maintenance" className="mt-4"><Card><CardContent className="p-10 text-center">System Messages (Mock)</CardContent></Card></TabsContent>
+            
+            {/* AUDIT */}
+            <TabsContent value="audit" className="mt-4"><Card><CardContent className="p-10 text-center">CMS Audit Log (Mock)</CardContent></Card></TabsContent>
         </Tabs>
     </div>
   );
 };
+
+// Activity icon missing in Lucide (sometimes), using wrapper
+const ActivityIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
 
 export { CMSManagement };

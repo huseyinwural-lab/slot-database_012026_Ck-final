@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 import uuid
 from app.models.modules import (
     CMSPage, CMSBanner, CMSMenu, CMSCollection, CMSPopup, CMSTranslation,
-    CMSAuditLog, CMSDashboardStats, CMSStatus, CMSPageType, CMSBannerPosition
+    CMSAuditLog, CMSDashboardStats, CMSStatus, CMSPageType, CMSBannerPosition,
+    CMSLayout, CMSMedia, CMSLegalDoc, CMSExperiment, CMSMaintenance
 )
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -19,7 +20,6 @@ def get_db():
 @router.get("/dashboard", response_model=CMSDashboardStats)
 async def get_cms_dashboard():
     db = get_db()
-    # Mock data
     return CMSDashboardStats(
         published_pages=await db.cms_pages.count_documents({"status": "published"}),
         active_banners=await db.cms_banners.count_documents({"status": "published"}),
@@ -75,6 +75,96 @@ async def create_menu(menu: CMSMenu):
     await db.cms_menus.insert_one(menu.model_dump())
     return menu
 
+# --- HOMEPAGE LAYOUT ---
+@router.get("/layout", response_model=List[CMSLayout])
+async def get_layouts():
+    db = get_db()
+    return [CMSLayout(**l) for l in await db.cms_layouts.find().to_list(100)]
+
+@router.post("/layout")
+async def save_layout(layout: CMSLayout):
+    db = get_db()
+    await db.cms_layouts.insert_one(layout.model_dump())
+    return layout
+
+# --- COLLECTIONS ---
+@router.get("/collections", response_model=List[CMSCollection])
+async def get_collections():
+    db = get_db()
+    return [CMSCollection(**c) for c in await db.cms_collections.find().to_list(100)]
+
+@router.post("/collections")
+async def create_collection(coll: CMSCollection):
+    db = get_db()
+    await db.cms_collections.insert_one(coll.model_dump())
+    return coll
+
+# --- POPUPS ---
+@router.get("/popups", response_model=List[CMSPopup])
+async def get_popups():
+    db = get_db()
+    return [CMSPopup(**p) for p in await db.cms_popups.find().to_list(100)]
+
+@router.post("/popups")
+async def create_popup(popup: CMSPopup):
+    db = get_db()
+    await db.cms_popups.insert_one(popup.model_dump())
+    return popup
+
+# --- TRANSLATIONS ---
+@router.get("/translations", response_model=List[CMSTranslation])
+async def get_translations():
+    db = get_db()
+    return [CMSTranslation(**t) for t in await db.cms_translations.find().to_list(100)]
+
+@router.post("/translations")
+async def create_translation(trans: CMSTranslation):
+    db = get_db()
+    await db.cms_translations.insert_one(trans.model_dump())
+    return trans
+
+# --- MEDIA LIBRARY ---
+@router.get("/media", response_model=List[CMSMedia])
+async def get_media():
+    db = get_db()
+    return [CMSMedia(**m) for m in await db.cms_media.find().to_list(100)]
+
+@router.post("/media")
+async def upload_media(media: CMSMedia):
+    db = get_db()
+    await db.cms_media.insert_one(media.model_dump())
+    return media
+
+# --- LEGAL ---
+@router.get("/legal", response_model=List[CMSLegalDoc])
+async def get_legal_docs():
+    db = get_db()
+    return [CMSLegalDoc(**d) for d in await db.cms_legal.find().to_list(100)]
+
+@router.post("/legal")
+async def create_legal_doc(doc: CMSLegalDoc):
+    db = get_db()
+    await db.cms_legal.insert_one(doc.model_dump())
+    return doc
+
+# --- EXPERIMENTS ---
+@router.get("/experiments", response_model=List[CMSExperiment])
+async def get_experiments():
+    db = get_db()
+    return [CMSExperiment(**e) for e in await db.cms_experiments.find().to_list(100)]
+
+@router.post("/experiments")
+async def create_experiment(exp: CMSExperiment):
+    db = get_db()
+    await db.cms_experiments.insert_one(exp.model_dump())
+    return exp
+
+# --- AUDIT ---
+@router.get("/audit", response_model=List[CMSAuditLog])
+async def get_audit_logs():
+    db = get_db()
+    return [CMSAuditLog(**l) for l in await db.cms_audit.find().sort("timestamp", -1).limit(100).to_list(100)]
+
 # --- SEED ---
 @router.post("/seed")
 async def seed_cms():
@@ -88,4 +178,11 @@ async def seed_cms():
         await db.cms_banners.insert_one(
             CMSBanner(title="Welcome Bonus", position=CMSBannerPosition.HOME_HERO, image_desktop="banner1.jpg", status=CMSStatus.PUBLISHED).model_dump()
         )
+    if await db.cms_collections.count_documents({}) == 0:
+        await db.cms_collections.insert_one(CMSCollection(name="New Games", type="dynamic").model_dump())
+    if await db.cms_popups.count_documents({}) == 0:
+        await db.cms_popups.insert_one(CMSPopup(title="Welcome", content="Hi!", type="entry").model_dump())
+    if await db.cms_media.count_documents({}) == 0:
+        await db.cms_media.insert_one(CMSMedia(filename="banner1.jpg", type="image", url="/images/b1.jpg", size=1024).model_dump())
+    
     return {"message": "CMS Seeded"}
