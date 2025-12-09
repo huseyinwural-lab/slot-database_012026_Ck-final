@@ -2424,6 +2424,7 @@ def main():
     test_results.append(("Player Detail", tester.test_player_detail()))
     
     print("\n💰 ENHANCED FINANCE MODULE TESTS")
+    test_results.append(("Finance Module Review Request", tester.test_finance_module_review_request()))
     test_results.append(("Finance Transactions & Filters", tester.test_finance_transactions()))
     test_results.append(("Finance Transaction Actions", tester.test_finance_transaction_actions()))
     test_results.append(("Finance Reports & Aggregation", tester.test_finance_reports()))
