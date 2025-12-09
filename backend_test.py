@@ -365,6 +365,9 @@ def main():
     test_results.append(("Approval Queue", tester.test_approval_queue()))
     test_results.append(("Global Search", tester.test_global_search()))
     
+    print("\n🧪 SIMULATOR MODULE TESTS")
+    test_results.append(("Simulator Endpoints", tester.test_simulator_endpoints()))
+    
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
