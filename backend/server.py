@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import logging
 from config import settings
-from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg
+from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms
 
 # Configure logging
 logging.basicConfig(
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Casino Admin Panel API",
     description="Backend for Casino Admin Dashboard with AI Fraud Detection",
-    version="9.0.0"
+    version="10.0.0"
 )
 
 # MongoDB Connection
@@ -43,7 +43,8 @@ app.include_router(affiliates.router)
 app.include_router(support.router)
 app.include_router(risk.router)
 app.include_router(approvals.router)
-app.include_router(rg.router) # New RG Router
+app.include_router(rg.router)
+app.include_router(cms.router) # New CMS Router
 app.include_router(fraud_detection.router)
 app.include_router(email_notification.router)
 app.include_router(simulator.router)

@@ -18,7 +18,8 @@ import { CRM } from './pages/CRM';
 import { AffiliateManagement } from './pages/AffiliateManagement';
 import RiskManagement from './pages/RiskManagement';
 import ResponsibleGaming from './pages/ResponsibleGaming';
-import { CMS, Admins, Logs, Reports } from './pages/Modules';
+import { CMSManagement } from './pages/CMSManagement';
+import { Admins, Logs, Reports } from './pages/Modules';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -42,7 +43,7 @@ function App() {
           {/* New Modules */}
           <Route path="/kyc" element={<KYCManagement />} />
           <Route path="/crm" element={<CRM />} />
-          <Route path="/cms" element={<CMS />} />
+          <Route path="/cms" element={<CMSManagement />} />
           <Route path="/affiliates" element={<AffiliateManagement />} />
           <Route path="/risk" element={<RiskManagement />} />
           <Route path="/admins" element={<Admins />} />

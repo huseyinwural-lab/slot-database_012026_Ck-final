@@ -4,218 +4,6 @@ from datetime import datetime, timezone
 from enum import Enum
 import uuid
 
-# --- RISK ENUMS ---
-class RiskSeverity(str, Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
-
-class RiskCategory(str, Enum):
-    ACCOUNT = "account"
-    DEVICE = "device"
-    IP_GEO = "ip_geo"
-    PAYMENT = "payment"
-    BONUS_ABUSE = "bonus_abuse"
-    GAME_BEHAVIOR = "game_behavior"
-    VELOCITY = "velocity"
-    KYC_IDENTITY = "kyc_identity"
-    RESPONSIBLE_GAMING = "rg"
-
-class RiskActionType(str, Enum):
-    WITHDRAW_FREEZE = "withdraw_freeze"
-    ACCOUNT_BLOCK = "account_block"
-    LOGIN_BLOCK = "login_block"
-    BONUS_CANCEL = "bonus_cancel"
-    RISK_SCORE_INCREASE = "risk_score_increase"
-    MANUAL_REVIEW = "manual_review"
-    ALERT_TEAM = "alert_team"
-    TAG_PLAYER = "tag_player"
-
-class RiskCaseStatus(str, Enum):
-    OPEN = "open"
-    UNDER_REVIEW = "under_review"
-    ESCALATED = "escalated"
-    CLOSED_FALSE_POSITIVE = "closed_false_positive"
-    CLOSED_CONFIRMED = "closed_confirmed"
-
-# --- RG ENUMS ---
-class RGAlertSeverity(str, Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
-
-class RGCaseStatus(str, Enum):
-    NEW = "new"
-    IN_PROGRESS = "in_progress"
-    RESOLVED = "resolved"
-    DISMISSED = "dismissed"
-
-class ExclusionType(str, Enum):
-    COOL_OFF = "cool_off"
-    SELF_EXCLUSION = "self_exclusion"
-    PERMANENT_BAN = "permanent_ban"
-
-# --- RG MODELS ---
-
-class RGLimitConfig(BaseModel):
-    deposit_daily: Optional[float] = None
-    deposit_weekly: Optional[float] = None
-    deposit_monthly: Optional[float] = None
-    loss_daily: Optional[float] = None
-    loss_weekly: Optional[float] = None
-    loss_monthly: Optional[float] = None
-    session_time_daily_minutes: Optional[int] = None
-    wager_daily: Optional[float] = None
-
-class PlayerRGProfile(BaseModel):
-    player_id: str
-    risk_level: RGAlertSeverity = RGAlertSeverity.LOW
-    active_limits: RGLimitConfig = Field(default_factory=RGLimitConfig)
-    exclusion_active: bool = False
-    exclusion_type: Optional[ExclusionType] = None
-    exclusion_start: Optional[datetime] = None
-    exclusion_end: Optional[datetime] = None # None = indefinite
-    last_assessment_date: Optional[datetime] = None
-    notes: List[Dict[str, Any]] = []
-
-class RGRule(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    description: str
-    conditions: Dict[str, Any] = {} # e.g. {"net_loss_daily": {">": 1000}}
-    actions: List[str] = [] # ["alert_team", "suggest_limit"]
-    severity: RGAlertSeverity
-    active: bool = True
-
-class RGAlert(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    player_id: str
-    rule_id: Optional[str] = None
-    type: str # "high_loss", "long_session"
-    severity: RGAlertSeverity
-    status: str = "new"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    resolved_at: Optional[datetime] = None
-    assigned_to: Optional[str] = None
-
-class RGCase(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    player_id: str
-    linked_alerts: List[str] = []
-    risk_level: RGAlertSeverity
-    status: RGCaseStatus = RGCaseStatus.NEW
-    notes: List[Dict[str, Any]] = []
-    actions_taken: List[str] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class RGDashboardStats(BaseModel):
-    active_self_exclusions: int
-    active_cool_offs: int
-    players_with_limits: int
-    high_loss_alerts_7d: int
-    open_cases: int
-    risk_distribution: Dict[str, int] # {low: 100, high: 5}
-
-# --- RISK MODELS ---
-
-class RiskRuleCondition(BaseModel):
-    field: str # e.g. "deposit_velocity_1h"
-    operator: str # "gt", "lt", "eq", "contains"
-    value: Any
-    description: Optional[str] = None
-
-class RiskRuleAction(BaseModel):
-    type: RiskActionType
-    parameters: Dict[str, Any] = {} # e.g. {score: 50}
-
-class RiskRule(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    description: str
-    category: RiskCategory
-    severity: RiskSeverity
-    priority: int = 1
-    status: str = "active" # active, testing, paused
-    conditions: List[RiskRuleCondition] = []
-    actions: List[RiskRuleAction] = []
-    score_impact: int = 0
-    version: int = 1
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class VelocityRule(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str # e.g. "Login Spike"
-    event_type: str # login, deposit, registration
-    time_window_minutes: int
-    threshold_count: int
-    action: RiskActionType
-    status: str = "active"
-
-class BlacklistEntry(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    type: str # ip, device, email_domain, bin, crypto_address
-    value: str
-    reason: str
-    added_by: str
-    added_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    expires_at: Optional[datetime] = None
-
-class DeviceProfile(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    fingerprint_hash: str
-    player_ids: List[str] = [] 
-    user_agent: str
-    ip_address: str
-    is_rooted: bool = False
-    is_emulator: bool = False
-    trust_score: int = 100
-    last_seen: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class RiskCase(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    player_id: str
-    risk_score: int
-    severity: RiskSeverity
-    triggered_rules: List[str] = [] 
-    status: RiskCaseStatus = RiskCaseStatus.OPEN
-    assigned_to: Optional[str] = None
-    notes: List[Dict[str, Any]] = [] 
-    evidence_ids: List[str] = [] # Linked evidence
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class RiskAlert(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    type: str 
-    message: str
-    severity: RiskSeverity
-    player_id: Optional[str] = None
-    metadata: Dict[str, Any] = {}
-    is_resolved: bool = False
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class Evidence(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    related_id: str # PlayerID, TransactionID, CaseID
-    type: str # screenshot, document, log_export
-    description: str
-    file_url: Optional[str] = None
-    uploaded_by: str
-    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    tags: List[str] = []
-
-class RiskDashboardStats(BaseModel):
-    daily_alerts: int
-    open_cases: int
-    high_risk_players: int
-    suspicious_withdrawals: int
-    bonus_abuse_alerts: int
-    risk_trend: List[Dict[str, Any]] 
-    category_breakdown: Dict[str, int]
-
 # --- SHARED ENUMS ---
 class KYCStatus(str, Enum):
     NOT_STARTED = "not_started"
@@ -296,6 +84,354 @@ class ChatStatus(str, Enum):
     ACTIVE = "active"
     ENDED = "ended"
     MISSED = "missed"
+
+# --- RISK ENUMS ---
+class RiskSeverity(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class RiskCategory(str, Enum):
+    ACCOUNT = "account"
+    DEVICE = "device"
+    IP_GEO = "ip_geo"
+    PAYMENT = "payment"
+    BONUS_ABUSE = "bonus_abuse"
+    GAME_BEHAVIOR = "game_behavior"
+    VELOCITY = "velocity"
+    KYC_IDENTITY = "kyc_identity"
+    RESPONSIBLE_GAMING = "rg"
+
+class RiskActionType(str, Enum):
+    WITHDRAW_FREEZE = "withdraw_freeze"
+    ACCOUNT_BLOCK = "account_block"
+    LOGIN_BLOCK = "login_block"
+    BONUS_CANCEL = "bonus_cancel"
+    RISK_SCORE_INCREASE = "risk_score_increase"
+    MANUAL_REVIEW = "manual_review"
+    ALERT_TEAM = "alert_team"
+    TAG_PLAYER = "tag_player"
+
+class RiskCaseStatus(str, Enum):
+    OPEN = "open"
+    UNDER_REVIEW = "under_review"
+    ESCALATED = "escalated"
+    CLOSED_FALSE_POSITIVE = "closed_false_positive"
+    CLOSED_CONFIRMED = "closed_confirmed"
+
+# --- RG ENUMS ---
+class RGAlertSeverity(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class RGCaseStatus(str, Enum):
+    NEW = "new"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    DISMISSED = "dismissed"
+
+class ExclusionType(str, Enum):
+    COOL_OFF = "cool_off"
+    SELF_EXCLUSION = "self_exclusion"
+    PERMANENT_BAN = "permanent_ban"
+
+# --- CMS ENUMS ---
+class CMSStatus(str, Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    SCHEDULED = "scheduled"
+    ARCHIVED = "archived"
+
+class CMSPageType(str, Enum):
+    HOMEPAGE = "homepage"
+    PROMO = "promo"
+    STATIC = "static"
+    BLOG = "blog"
+    LANDING = "landing"
+
+class CMSBannerPosition(str, Enum):
+    HOME_HERO = "home_hero"
+    LOBBY_TOP = "lobby_top"
+    MOBILE_ONLY = "mobile_only"
+    SIDEBAR = "sidebar"
+
+# --- CMS MODELS ---
+
+class CMSPage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    slug: str
+    language: str = "en"
+    template: CMSPageType = CMSPageType.STATIC
+    status: CMSStatus = CMSStatus.DRAFT
+    content_blocks: List[Dict[str, Any]] = [] # json blocks
+    seo: Dict[str, Any] = {} # title, desc, og_image
+    publish_at: Optional[datetime] = None
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_by: Optional[str] = None
+
+class CMSMenu(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    location: str # header, footer
+    items: List[Dict[str, Any]] = [] # tree structure
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CMSBanner(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str # internal name
+    position: CMSBannerPosition
+    language: str = "en"
+    image_desktop: str
+    image_mobile: Optional[str] = None
+    link_url: Optional[str] = None
+    status: CMSStatus = CMSStatus.DRAFT
+    priority: int = 0
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    targeting: Dict[str, Any] = {} # segments, device
+
+class CMSLayout(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str # e.g. "Default Homepage"
+    sections: List[Dict[str, Any]] = [] # ordered list of components
+    status: CMSStatus = CMSStatus.DRAFT
+
+class CMSCollection(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    type: str # dynamic, manual
+    rules: Dict[str, Any] = {}
+    game_ids: List[str] = []
+
+class CMSPopup(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str
+    type: str # entry, exit, system
+    targeting: Dict[str, Any] = {}
+    status: CMSStatus = CMSStatus.DRAFT
+
+class CMSRedirect(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    from_url: str
+    to_url: str
+    type: int = 301
+
+class CMSTranslation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    key: str
+    default_text: str
+    translations: Dict[str, str] = {} # {tr: "Merhaba"}
+
+class CMSMedia(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    filename: str
+    type: str
+    url: str
+    size: int
+    tags: List[str] = []
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CMSLegalDoc(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str # terms, privacy
+    version: str
+    content: str
+    effective_date: datetime
+    status: CMSStatus = CMSStatus.DRAFT
+
+class CMSExperiment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    target_type: str # banner, page
+    variants: List[Dict[str, Any]] = []
+    status: str = "running"
+    results: Dict[str, Any] = {}
+
+class CMSMaintenance(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    message: str
+    type: str # banner, full_page
+    start_time: datetime
+    end_time: datetime
+    active: bool = True
+
+class CMSAuditLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    action: str
+    target_type: str
+    target_id: str
+    diff: Optional[Dict[str, Any]] = None
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CMSDashboardStats(BaseModel):
+    published_pages: int
+    active_banners: int
+    draft_count: int
+    scheduled_count: int
+    recent_changes: List[CMSAuditLog] = []
+
+# --- EXISTING MODULES (RG, Risk, etc.) ---
+
+class RGLimitConfig(BaseModel):
+    deposit_daily: Optional[float] = None
+    deposit_weekly: Optional[float] = None
+    deposit_monthly: Optional[float] = None
+    loss_daily: Optional[float] = None
+    loss_weekly: Optional[float] = None
+    loss_monthly: Optional[float] = None
+    session_time_daily_minutes: Optional[int] = None
+    wager_daily: Optional[float] = None
+
+class PlayerRGProfile(BaseModel):
+    player_id: str
+    risk_level: RGAlertSeverity = RGAlertSeverity.LOW
+    active_limits: RGLimitConfig = Field(default_factory=RGLimitConfig)
+    exclusion_active: bool = False
+    exclusion_type: Optional[ExclusionType] = None
+    exclusion_start: Optional[datetime] = None
+    exclusion_end: Optional[datetime] = None 
+    last_assessment_date: Optional[datetime] = None
+    notes: List[Dict[str, Any]] = []
+
+class RGRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    conditions: Dict[str, Any] = {} 
+    actions: List[str] = [] 
+    severity: RGAlertSeverity
+    active: bool = True
+
+class RGAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    player_id: str
+    rule_id: Optional[str] = None
+    type: str 
+    severity: RGAlertSeverity
+    status: str = "new"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    resolved_at: Optional[datetime] = None
+    assigned_to: Optional[str] = None
+
+class RGCase(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    player_id: str
+    linked_alerts: List[str] = []
+    risk_level: RGAlertSeverity
+    status: RGCaseStatus = RGCaseStatus.NEW
+    notes: List[Dict[str, Any]] = []
+    actions_taken: List[str] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RGDashboardStats(BaseModel):
+    active_self_exclusions: int
+    active_cool_offs: int
+    players_with_limits: int
+    high_loss_alerts_7d: int
+    open_cases: int
+    risk_distribution: Dict[str, int] 
+
+class RiskRuleCondition(BaseModel):
+    field: str 
+    operator: str 
+    value: Any
+    description: Optional[str] = None
+
+class RiskRuleAction(BaseModel):
+    type: RiskActionType
+    parameters: Dict[str, Any] = {} 
+
+class RiskRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    category: RiskCategory
+    severity: RiskSeverity
+    priority: int = 1
+    status: str = "active" 
+    conditions: List[RiskRuleCondition] = []
+    actions: List[RiskRuleAction] = []
+    score_impact: int = 0
+    version: int = 1
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class VelocityRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str 
+    event_type: str 
+    time_window_minutes: int
+    threshold_count: int
+    action: RiskActionType
+    status: str = "active"
+
+class BlacklistEntry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str 
+    value: str
+    reason: str
+    added_by: str
+    added_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: Optional[datetime] = None
+
+class DeviceProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    fingerprint_hash: str
+    player_ids: List[str] = [] 
+    user_agent: str
+    ip_address: str
+    is_rooted: bool = False
+    is_emulator: bool = False
+    trust_score: int = 100
+    last_seen: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RiskCase(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    player_id: str
+    risk_score: int
+    severity: RiskSeverity
+    triggered_rules: List[str] = [] 
+    status: RiskCaseStatus = RiskCaseStatus.OPEN
+    assigned_to: Optional[str] = None
+    notes: List[Dict[str, Any]] = [] 
+    evidence_ids: List[str] = [] 
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RiskAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str 
+    message: str
+    severity: RiskSeverity
+    player_id: Optional[str] = None
+    metadata: Dict[str, Any] = {}
+    is_resolved: bool = False
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Evidence(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    related_id: str 
+    type: str 
+    description: str
+    file_url: Optional[str] = None
+    uploaded_by: str
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    tags: List[str] = []
+
+class RiskDashboardStats(BaseModel):
+    daily_alerts: int
+    open_cases: int
+    high_risk_players: int
+    suspicious_withdrawals: int
+    bonus_abuse_alerts: int
+    risk_trend: List[Dict[str, Any]] 
+    category_breakdown: Dict[str, int]
 
 # --- SUPPORT MODELS ---
 
@@ -571,21 +707,27 @@ class KYCDocument(BaseModel):
     reviewed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
 
-class CMSPage(BaseModel):
+class Affiliate(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str
-    slug: str
-    content: str
-    status: str = "published"
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class Banner(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str
-    image_url: str
-    target_url: str
-    position: str 
-    active: bool = True
+    username: str
+    email: EmailStr
+    company_name: Optional[str] = None
+    status: AffiliateStatus = AffiliateStatus.PENDING
+    account_manager_id: Optional[str] = None
+    group: str = "Standard" 
+    country: str = "Unknown"
+    balance: float = 0.0
+    total_earnings: float = 0.0
+    total_paid: float = 0.0
+    currency: str = "USD"
+    default_plan: CommissionPlan = Field(default_factory=CommissionPlan)
+    tracking_link_template: Optional[str] = None
+    postback_url: Optional[str] = None
+    total_clicks: int = 0
+    total_registrations: int = 0
+    total_ftd: int = 0 
+    last_activity_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class RiskRule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -618,47 +760,3 @@ class RGLimit(BaseModel):
     amount: float
     period: str 
     set_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-# KYC extra models
-class KYCLevel(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str 
-    description: str
-    requirements: List[str] = [] 
-    limits: Dict[str, float] = {}
-    active: bool = True
-
-class KYCRule(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    condition: str 
-    target_level: str 
-    action: str 
-    active: bool = True
-
-class KYCCheck(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    player_id: str
-    type: str 
-    status: str 
-    provider: str = "Internal Mock"
-    checked_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    result_details: Dict[str, Any] = {}
-
-class KYCAuditLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    entity_id: str 
-    admin_id: str
-    action: str 
-    old_value: Optional[str] = None
-    new_value: Optional[str] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class KYCDashboardStats(BaseModel):
-    pending_count: int
-    in_review_count: int
-    approved_today: int
-    rejected_today: int
-    level_distribution: Dict[str, int]
-    avg_review_time_mins: float
-    high_risk_pending: int
