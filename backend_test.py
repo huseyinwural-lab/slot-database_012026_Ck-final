@@ -440,6 +440,158 @@ class CasinoAdminAPITester:
         
         return success1 and success2
 
+    def test_advanced_bonus_system(self):
+        """Test Advanced Bonus System - Financial, RTP, FreeSpin, Cashback Types and Triggers"""
+        print("\n🎁 ADVANCED BONUS SYSTEM TESTS")
+        
+        # Test get existing bonuses first
+        success1, bonuses_response = self.run_test("Get Existing Bonuses", "GET", "api/v1/bonuses", 200)
+        
+        # Test creating High Roller bonus (Financial category)
+        high_roller_bonus = {
+            "name": "High Roller VIP Bonus",
+            "type": "high_roller",
+            "category": "Financial",
+            "trigger": "deposit_amount",
+            "description": "Exclusive bonus for high-value deposits",
+            "wager_req": 25,
+            "auto_apply": False,
+            "rules": {
+                "min_deposit": 5000.0,
+                "reward_percentage": 50.0,
+                "max_reward": 2500.0,
+                "valid_days": 30
+            }
+        }
+        success2, high_roller_response = self.run_test("Create High Roller Bonus", "POST", "api/v1/bonuses", 200, high_roller_bonus)
+        
+        # Test creating RTP Booster bonus (RTP category)
+        rtp_booster_bonus = {
+            "name": "Lucky Spins RTP Boost",
+            "type": "rtp_booster",
+            "category": "RTP",
+            "trigger": "vip_level_up",
+            "description": "Temporary RTP increase for VIP players",
+            "wager_req": 0,
+            "auto_apply": True,
+            "rules": {
+                "rtp_boost_percent": 3.5,
+                "luck_boost_factor": 1.4,
+                "luck_boost_spins": 25,
+                "valid_days": 7
+            }
+        }
+        success3, rtp_response = self.run_test("Create RTP Booster Bonus", "POST", "api/v1/bonuses", 200, rtp_booster_bonus)
+        
+        # Test creating Free Spin Package (FreeSpin category)
+        freespin_bonus = {
+            "name": "Weekend Free Spins",
+            "type": "fs_package",
+            "category": "FreeSpin",
+            "trigger": "manual",
+            "description": "Weekend special free spins package",
+            "wager_req": 40,
+            "auto_apply": False,
+            "rules": {
+                "fs_count": 50,
+                "fs_bet_value": 0.50,
+                "fs_game_ids": ["sweet_bonanza", "gates_of_olympus"],
+                "valid_days": 3
+            }
+        }
+        success4, fs_response = self.run_test("Create Free Spin Package", "POST", "api/v1/bonuses", 200, freespin_bonus)
+        
+        # Test creating Cashback bonus (Cashback category)
+        cashback_bonus = {
+            "name": "Weekly Loss Cashback",
+            "type": "loss_cashback",
+            "category": "Cashback",
+            "trigger": "loss_amount",
+            "description": "Get back percentage of weekly losses",
+            "wager_req": 1,
+            "auto_apply": True,
+            "rules": {
+                "cashback_percentage": 15.0,
+                "provider_ids": ["pragmatic_play", "evolution"],
+                "valid_days": 7
+            }
+        }
+        success5, cashback_response = self.run_test("Create Cashback Bonus", "POST", "api/v1/bonuses", 200, cashback_bonus)
+        
+        # Test creating Ladder bonus (Financial category with complex rules)
+        ladder_bonus = {
+            "name": "VIP Ladder Rewards",
+            "type": "ladder",
+            "category": "Financial",
+            "trigger": "deposit_amount",
+            "description": "Progressive rewards based on deposit tiers",
+            "wager_req": 35,
+            "auto_apply": True,
+            "rules": {
+                "ladder_tiers": [
+                    {"level": 1, "deposit_amount": 100.0, "reward_percent": 25.0},
+                    {"level": 2, "deposit_amount": 500.0, "reward_percent": 50.0},
+                    {"level": 3, "deposit_amount": 1000.0, "reward_percent": 75.0}
+                ],
+                "valid_days": 14
+            }
+        }
+        success6, ladder_response = self.run_test("Create Ladder Bonus", "POST", "api/v1/bonuses", 200, ladder_bonus)
+        
+        # Verify bonus creation responses
+        if success2 and isinstance(high_roller_response, dict):
+            required_fields = ['id', 'name', 'type', 'category', 'trigger', 'rules']
+            missing_fields = [field for field in required_fields if field not in high_roller_response]
+            if not missing_fields:
+                print("✅ High Roller bonus created with complete structure")
+                print(f"   💰 Name: {high_roller_response['name']}")
+                print(f"   🎯 Type: {high_roller_response['type']}")
+                print(f"   📂 Category: {high_roller_response['category']}")
+                print(f"   ⚡ Trigger: {high_roller_response['trigger']}")
+                
+                # Verify rules structure
+                rules = high_roller_response.get('rules', {})
+                if 'min_deposit' in rules and 'reward_percentage' in rules:
+                    print(f"   💵 Min Deposit: ${rules['min_deposit']}")
+                    print(f"   🎁 Reward: {rules['reward_percentage']}%")
+            else:
+                print(f"⚠️  High Roller bonus missing fields: {missing_fields}")
+        
+        # Test getting updated bonuses list to verify all creations
+        success7, updated_bonuses = self.run_test("Get Updated Bonuses List", "GET", "api/v1/bonuses", 200)
+        
+        if success7 and isinstance(updated_bonuses, list):
+            print(f"✅ Total bonuses after creation: {len(updated_bonuses)}")
+            
+            # Verify different categories are present
+            categories = set()
+            types = set()
+            triggers = set()
+            
+            for bonus in updated_bonuses:
+                if 'category' in bonus:
+                    categories.add(bonus['category'])
+                if 'type' in bonus:
+                    types.add(bonus['type'])
+                if 'trigger' in bonus:
+                    triggers.add(bonus['trigger'])
+            
+            print(f"✅ Bonus Categories found: {', '.join(categories)}")
+            print(f"✅ Bonus Types found: {', '.join(types)}")
+            print(f"✅ Bonus Triggers found: {', '.join(triggers)}")
+            
+            # Verify specific bonus types exist
+            bonus_names = [b.get('name', '') for b in updated_bonuses]
+            expected_bonuses = ['High Roller VIP Bonus', 'Lucky Spins RTP Boost', 'Weekend Free Spins', 'Weekly Loss Cashback']
+            found_bonuses = [name for name in expected_bonuses if any(name in bonus_name for bonus_name in bonus_names)]
+            
+            if len(found_bonuses) >= 3:
+                print(f"✅ Advanced bonus types successfully created: {len(found_bonuses)}/4")
+            else:
+                print(f"⚠️  Only {len(found_bonuses)}/4 advanced bonus types found")
+        
+        return success1 and success2 and success3 and success4 and success5 and success6 and success7
+
     def test_support_tickets(self):
         """Test support tickets endpoints"""
         # Test get tickets
