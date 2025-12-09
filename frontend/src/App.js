@@ -11,7 +11,7 @@ import BonusManagement from './pages/BonusManagement';
 import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
 import { FeatureFlags } from './pages/FeatureFlags';
-import Simulator from './pages/Simulator';
+import SimulationLab from './pages/SimulationLab';
 import VipGames from './pages/VipGames';
 import KYCManagement from './pages/KYCManagement';
 import { CRM } from './pages/CRM';
