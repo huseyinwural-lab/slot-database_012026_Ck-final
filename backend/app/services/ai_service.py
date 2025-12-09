@@ -17,9 +17,9 @@ class RiskAnalyzer:
         else:
             self.client = OpenAI(
                 api_key=api_key,
-                base_url="https://api.emergent.sh/v1/openai" # Using Emergent Proxy
+                base_url="https://api.emergent.sh/openai/v1" # Corrected Base URL
             )
-        self.model = "gpt-5"
+        self.model = "gpt-4o" # Safer model choice
 
     async def analyze_transaction(self, transaction: Dict[str, Any]) -> Dict[str, Any]:
         if not self.client:
@@ -36,7 +36,7 @@ class RiskAnalyzer:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are a risk analysis expert for an online casino. Analyze the transaction for fraud, money laundering, and risk."},
+                    {"role": "system", "content": "You are a risk analysis expert for an online casino. Analyze the transaction for fraud, money laundering, and risk. Respond in JSON. Important: The 'reason' field and 'recommendation' should be in Turkish language."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.1,
@@ -81,7 +81,7 @@ class RiskAnalyzer:
         {{
             "risk_score": <int 0-100>,
             "risk_level": "<low|medium|high|critical>",
-            "reason": "<short summary>",
+            "reason": "<short summary in Turkish>",
             "flags": ["<flag1>", "<flag2>"],
             "recommendation": "<approve|reject|review>"
         }}
