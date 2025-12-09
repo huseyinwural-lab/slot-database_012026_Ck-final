@@ -1273,6 +1273,91 @@ class CasinoAdminAPITester:
         
         return all([success_no_slash, success_seed, success1, success6, success8, success11, success12])
 
+    def test_finance_module_review_request(self):
+        """Test Finance Module - Specific Review Request Validation"""
+        print("\n🎯 FINANCE MODULE REVIEW REQUEST TESTS")
+        print("Testing specific requirements from review request:")
+        print("1. GET /api/v1/finance/transactions?type=withdrawal - validate destination_address, wagering_info, risk_score_at_time")
+        print("2. GET /api/v1/finance/reports - validate ggr, ngr, provider_breakdown")
+        print("3. Verify wagering_info structure: {required, current, is_met}")
+        
+        # Test 1: Withdrawal transactions with specific fields
+        success1, withdrawal_response = self.run_test("Withdrawal Transactions (Review Request)", "GET", "api/v1/finance/transactions?type=withdrawal", 200)
+        
+        withdrawal_fields_valid = True
+        if success1 and isinstance(withdrawal_response, list):
+            if len(withdrawal_response) > 0:
+                print(f"\n✅ Found {len(withdrawal_response)} withdrawal transactions")
+                
+                # Validate each withdrawal transaction
+                for i, tx in enumerate(withdrawal_response[:5]):  # Check first 5
+                    print(f"\n   Withdrawal {i+1}: {tx.get('id', 'Unknown')}")
+                    
+                    # Required fields check
+                    required_fields = ['destination_address', 'wagering_info', 'risk_score_at_time']
+                    for field in required_fields:
+                        if field in tx and tx[field] is not None:
+                            if field == 'wagering_info':
+                                wagering = tx[field]
+                                wagering_required_fields = ['required', 'current', 'is_met']
+                                wagering_missing = [f for f in wagering_required_fields if f not in wagering]
+                                if not wagering_missing:
+                                    print(f"   ✅ {field}: {wagering}")
+                                else:
+                                    print(f"   ❌ {field} missing subfields: {wagering_missing}")
+                                    withdrawal_fields_valid = False
+                            else:
+                                print(f"   ✅ {field}: {tx[field]}")
+                        else:
+                            print(f"   ❌ MISSING: {field}")
+                            withdrawal_fields_valid = False
+            else:
+                print("⚠️  No withdrawal transactions found")
+                withdrawal_fields_valid = False
+        else:
+            print("❌ Failed to get withdrawal transactions")
+            withdrawal_fields_valid = False
+        
+        # Test 2: Finance reports with specific fields
+        success2, report_response = self.run_test("Finance Reports (Review Request)", "GET", "api/v1/finance/reports", 200)
+        
+        report_fields_valid = True
+        if success2 and isinstance(report_response, dict):
+            print(f"\n✅ Finance report retrieved successfully")
+            
+            # Required fields check
+            required_report_fields = ['ggr', 'ngr', 'provider_breakdown']
+            for field in required_report_fields:
+                if field in report_response and report_response[field] is not None:
+                    if field == 'provider_breakdown':
+                        if isinstance(report_response[field], dict) and len(report_response[field]) > 0:
+                            print(f"   ✅ {field}: {len(report_response[field])} providers")
+                        else:
+                            print(f"   ❌ {field} is empty or invalid")
+                            report_fields_valid = False
+                    else:
+                        print(f"   ✅ {field}: {report_response[field]}")
+                else:
+                    print(f"   ❌ MISSING: {field}")
+                    report_fields_valid = False
+        else:
+            print("❌ Failed to get finance reports")
+            report_fields_valid = False
+        
+        # Summary
+        overall_success = success1 and success2 and withdrawal_fields_valid and report_fields_valid
+        
+        if overall_success:
+            print("\n🎉 REVIEW REQUEST VALIDATION: ALL TESTS PASSED")
+        else:
+            print("\n❌ REVIEW REQUEST VALIDATION: SOME TESTS FAILED")
+            if not withdrawal_fields_valid:
+                print("   - Withdrawal transaction fields validation failed")
+            if not report_fields_valid:
+                print("   - Finance report fields validation failed")
+        
+        return overall_success
+
     def test_system_logs_module(self):
         """Test System Logs Module - All 11 Sub-modules"""
         print("\n📋 SYSTEM LOGS MODULE TESTS - ALL 11 SUB-MODULES")
