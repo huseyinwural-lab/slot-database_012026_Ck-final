@@ -46,6 +46,116 @@ class MessageStatus(str, Enum):
     CLICKED = "clicked"
     UNSUBSCRIBED = "unsubscribed"
 
+# --- AFFILIATE ENUMS ---
+class AffiliateStatus(str, Enum):
+    PENDING = "pending"
+    ACTIVE = "active"
+    SUSPENDED = "suspended"
+    BANNED = "banned"
+
+class CommissionModel(str, Enum):
+    CPA = "cpa"
+    REVSHARE = "revshare"
+    HYBRID = "hybrid"
+    CPL = "cpl"
+
+class PayoutStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    PAID = "paid"
+    REJECTED = "rejected"
+
+# --- AFFILIATE MODELS ---
+
+class CommissionPlan(BaseModel):
+    model: CommissionModel = CommissionModel.REVSHARE
+    cpa_amount: float = 0.0
+    cpa_currency: str = "USD"
+    revshare_percentage: float = 25.0
+    hybrid_cpa: float = 0.0
+    hybrid_revshare: float = 0.0
+    negative_carryover: bool = True
+
+class Affiliate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str
+    email: EmailStr
+    company_name: Optional[str] = None
+    status: AffiliateStatus = AffiliateStatus.PENDING
+    account_manager_id: Optional[str] = None
+    group: str = "Standard" # VIP, Super
+    country: str = "Unknown"
+    
+    # Financials
+    balance: float = 0.0
+    total_earnings: float = 0.0
+    total_paid: float = 0.0
+    currency: str = "USD"
+    
+    # Commission
+    default_plan: CommissionPlan = Field(default_factory=CommissionPlan)
+    
+    # Tracking
+    tracking_link_template: Optional[str] = None
+    postback_url: Optional[str] = None
+    
+    # Stats
+    total_clicks: int = 0
+    total_registrations: int = 0
+    total_ftd: int = 0 # First Time Deposits
+    last_activity_at: Optional[datetime] = None
+    
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AffiliateOffer(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    brand_id: str = "default"
+    model: CommissionModel
+    default_commission: CommissionPlan
+    landing_pages: List[str] = []
+    allowed_countries: List[str] = []
+    status: str = "active"
+
+class TrackingLink(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    affiliate_id: str
+    offer_id: str
+    name: str
+    url: str
+    sub_ids: Dict[str, str] = {} # sub1, sub2 defaults
+
+class Conversion(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    affiliate_id: str
+    offer_id: Optional[str] = None
+    player_id: str
+    event_type: str # registration, ftd, deposit
+    amount: float = 0.0
+    commission: float = 0.0
+    status: str = "approved"
+    sub_ids: Dict[str, str] = {}
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Payout(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    affiliate_id: str
+    amount: float
+    period_start: datetime
+    period_end: datetime
+    status: PayoutStatus = PayoutStatus.PENDING
+    payment_method: str = "bank_transfer"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Creative(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    type: str # banner, landing
+    size: Optional[str] = None
+    url: str
+    preview_url: Optional[str] = None
+    status: str = "active"
+
 # --- CRM MODELS ---
 
 class ChannelConfig(BaseModel):
@@ -167,14 +277,6 @@ class Banner(BaseModel):
     target_url: str
     position: str 
     active: bool = True
-
-class Affiliate(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    email: str
-    commission_rate: float = 0.25 
-    total_earnings: float = 0.0
-    status: str = "active"
 
 class RiskRule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

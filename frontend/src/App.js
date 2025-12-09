@@ -14,7 +14,9 @@ import FeatureFlags from './pages/FeatureFlags';
 import Simulator from './pages/Simulator';
 import VipGames from './pages/VipGames';
 import KYCManagement from './pages/KYCManagement';
-import { CRM, CMS, Affiliates, Risk, Admins, Logs, RG, Reports } from './pages/Modules';
+import { CRM } from './pages/CRM';
+import { AffiliateManagement } from './pages/AffiliateManagement';
+import { CMS, Risk, Admins, Logs, RG, Reports } from './pages/Modules';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -39,7 +41,7 @@ function App() {
           <Route path="/kyc" element={<KYCManagement />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/cms" element={<CMS />} />
-          <Route path="/affiliates" element={<Affiliates />} />
+          <Route path="/affiliates" element={<AffiliateManagement />} />
           <Route path="/risk" element={<Risk />} />
           <Route path="/admins" element={<Admins />} />
           <Route path="/logs" element={<Logs />} />
