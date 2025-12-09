@@ -961,6 +961,171 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_phase1_finance_features(self):
+        """Test Phase 1 Finance Features: Reconciliation Upload, Chargebacks, Routing Rules"""
+        print("\n💰 PHASE 1 FINANCE FEATURES TESTS")
+        
+        # 1. Test Reconciliation Upload with dummy CSV
+        print("\n📊 Testing Reconciliation Upload")
+        
+        # Create a dummy CSV content for testing
+        csv_content = """tx_id,amount
+TX-001,100.50
+TX-002,250.75
+TX-003,500.00
+TX-MISSING,75.25"""
+        
+        # Prepare multipart form data for file upload
+        files = {
+            'file': ('test_reconciliation.csv', csv_content, 'text/csv')
+        }
+        
+        # Test reconciliation upload
+        url = f"{self.base_url}/api/v1/finance/reconciliation/upload?provider=Stripe"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Reconciliation Upload...")
+        print(f"   URL: {url}")
+        
+        try:
+            import requests
+            response = requests.post(url, files=files, timeout=30)
+            
+            success1 = response.status_code == 200
+            if success1:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    reconciliation_response = response.json()
+                    print(f"   Response keys: {list(reconciliation_response.keys()) if isinstance(reconciliation_response, dict) else 'Non-dict response'}")
+                    
+                    # Validate reconciliation response structure
+                    if isinstance(reconciliation_response, dict):
+                        required_fields = ['id', 'provider_name', 'file_name', 'total_records', 'mismatches', 'status', 'items']
+                        missing_fields = [field for field in required_fields if field not in reconciliation_response]
+                        
+                        if not missing_fields:
+                            print("✅ Reconciliation response structure is complete")
+                            print(f"   📊 Provider: {reconciliation_response['provider_name']}")
+                            print(f"   📁 File: {reconciliation_response['file_name']}")
+                            print(f"   📈 Total Records: {reconciliation_response['total_records']}")
+                            print(f"   ⚠️  Mismatches: {reconciliation_response['mismatches']}")
+                            print(f"   📋 Status: {reconciliation_response['status']}")
+                            
+                            # Validate items structure
+                            items = reconciliation_response.get('items', [])
+                            if isinstance(items, list) and len(items) > 0:
+                                item = items[0]
+                                item_fields = ['id', 'provider_ref', 'status']
+                                missing_item_fields = [field for field in item_fields if field not in item]
+                                if not missing_item_fields:
+                                    print(f"✅ Reconciliation items structure is complete")
+                                    print(f"   📝 Sample Item: {item['provider_ref']} - {item['status']}")
+                                else:
+                                    print(f"⚠️  Reconciliation item missing fields: {missing_item_fields}")
+                            else:
+                                print("⚠️  No reconciliation items found")
+                        else:
+                            print(f"⚠️  Reconciliation response missing fields: {missing_fields}")
+                except Exception as e:
+                    print(f"⚠️  Error parsing reconciliation response: {e}")
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                print(f"   Response: {response.text[:200]}...")
+                self.failed_tests.append({
+                    "name": "Reconciliation Upload",
+                    "endpoint": "api/v1/finance/reconciliation/upload",
+                    "expected": 200,
+                    "actual": response.status_code,
+                    "response": response.text[:200]
+                })
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            self.failed_tests.append({
+                "name": "Reconciliation Upload",
+                "endpoint": "api/v1/finance/reconciliation/upload",
+                "error": str(e)
+            })
+            success1 = False
+        
+        # 2. Test Chargebacks endpoint
+        success2, chargebacks_response = self.run_test("Chargebacks List", "GET", "api/v1/finance/chargebacks", 200)
+        
+        if success2 and isinstance(chargebacks_response, list):
+            print(f"✅ Chargebacks endpoint returned {len(chargebacks_response)} cases")
+            
+            if len(chargebacks_response) > 0:
+                chargeback = chargebacks_response[0]
+                required_chargeback_fields = ['id', 'transaction_id', 'player_id', 'amount', 'reason_code', 'status', 'due_date']
+                missing_chargeback_fields = [field for field in required_chargeback_fields if field not in chargeback]
+                
+                if not missing_chargeback_fields:
+                    print(f"✅ Chargeback structure complete")
+                    print(f"   💰 Amount: ${chargeback['amount']}")
+                    print(f"   📋 Status: {chargeback['status']}")
+                    print(f"   🔍 Reason: {chargeback['reason_code']}")
+                else:
+                    print(f"⚠️  Chargeback missing fields: {missing_chargeback_fields}")
+            else:
+                print("ℹ️  No chargeback cases found (expected for new system)")
+        
+        # 3. Test Routing Rules endpoint
+        success3, routing_response = self.run_test("Routing Rules", "GET", "api/v1/finance/routing/rules", 200)
+        
+        if success3 and isinstance(routing_response, list):
+            print(f"✅ Routing Rules endpoint returned {len(routing_response)} rules")
+            
+            if len(routing_response) > 0:
+                rule = routing_response[0]
+                required_rule_fields = ['id', 'name', 'condition', 'action']
+                missing_rule_fields = [field for field in required_rule_fields if field not in rule]
+                
+                if not missing_rule_fields:
+                    print(f"✅ Routing rule structure complete")
+                    print(f"   📝 Rule: {rule['name']}")
+                    print(f"   🔍 Condition: {rule['condition']}")
+                    print(f"   ⚡ Action: {rule['action']}")
+                    
+                    # Validate expected rules are present
+                    rule_names = [r.get('name', '') for r in routing_response]
+                    expected_rules = ['High Risk -> Crypto Only', 'TR Traffic -> Papara', 'Failover Stripe -> Adyen']
+                    found_rules = [name for name in expected_rules if any(name in rule_name for rule_name in rule_names)]
+                    
+                    if len(found_rules) >= 2:
+                        print(f"✅ Expected routing rules found: {len(found_rules)}/3")
+                        for rule_name in found_rules:
+                            print(f"   ✓ {rule_name}")
+                    else:
+                        print(f"⚠️  Only {len(found_rules)}/3 expected rules found")
+                else:
+                    print(f"⚠️  Routing rule missing fields: {missing_rule_fields}")
+            else:
+                print("⚠️  No routing rules found")
+        
+        # 4. Test getting reconciliation reports (to verify upload worked)
+        success4, reports_response = self.run_test("Reconciliation Reports List", "GET", "api/v1/finance/reconciliation", 200)
+        
+        if success4 and isinstance(reports_response, list):
+            print(f"✅ Reconciliation Reports endpoint returned {len(reports_response)} reports")
+            
+            if len(reports_response) > 0:
+                report = reports_response[0]
+                if report.get('provider_name') == 'Stripe' and report.get('file_name') == 'test_reconciliation.csv':
+                    print(f"✅ Uploaded reconciliation report found in list")
+                    print(f"   📊 Provider: {report['provider_name']}")
+                    print(f"   📁 File: {report['file_name']}")
+                    print(f"   📈 Records: {report.get('total_records', 0)}")
+                else:
+                    print(f"⚠️  Uploaded report not found in recent reports")
+        
+        print(f"\n📊 PHASE 1 FINANCE FEATURES SUMMARY:")
+        print(f"   📊 Reconciliation Upload: {'✅ PASS' if success1 else '❌ FAIL'}")
+        print(f"   💳 Chargebacks List: {'✅ PASS' if success2 else '❌ FAIL'}")
+        print(f"   🔀 Routing Rules: {'✅ PASS' if success3 else '❌ FAIL'}")
+        print(f"   📋 Reconciliation Reports: {'✅ PASS' if success4 else '❌ FAIL'}")
+        
+        return success1 and success2 and success3 and success4
+
     def test_review_request_specific(self):
         """Test specific endpoints mentioned in the review request"""
         print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
