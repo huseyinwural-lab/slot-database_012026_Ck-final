@@ -476,6 +476,17 @@ def main():
     print("\n🧪 SIMULATOR MODULE TESTS")
     test_results.append(("Simulator Endpoints", tester.test_simulator_endpoints()))
     
+    print("\n🆕 NEW MODULES TESTS")
+    test_results.append(("Modules Seed", tester.test_modules_seed()))
+    test_results.append(("KYC Module", tester.test_modules_kyc()))
+    test_results.append(("CRM Module", tester.test_modules_crm()))
+    test_results.append(("CMS Module", tester.test_modules_cms()))
+    test_results.append(("Affiliates Module", tester.test_modules_affiliates()))
+    test_results.append(("Risk Module", tester.test_modules_risk()))
+    test_results.append(("Admin Users Module", tester.test_modules_admin()))
+    test_results.append(("Logs Module", tester.test_modules_logs()))
+    test_results.append(("Responsible Gaming Module", tester.test_modules_rg()))
+    
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
