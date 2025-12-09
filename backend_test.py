@@ -686,20 +686,69 @@ class CasinoAdminAPITester:
         """Test CRM Module endpoints"""
         print("\n📧 CRM MODULE TESTS")
         
+        # First seed CRM data
+        success_seed, _ = self.run_test("Seed CRM Data", "POST", "api/v1/crm/seed", 200)
+        
         # Test get campaigns
         success1, campaigns_response = self.run_test("Get CRM Campaigns", "GET", "api/v1/crm/campaigns", 200)
+        
+        # Test get templates (seeded)
+        success2, templates_response = self.run_test("Get CRM Templates", "GET", "api/v1/crm/templates", 200)
+        
+        # Test get segments (seeded)
+        success3, segments_response = self.run_test("Get CRM Segments", "GET", "api/v1/crm/segments", 200)
+        
+        # Test get channels (seeded)
+        success4, channels_response = self.run_test("Get CRM Channels", "GET", "api/v1/crm/channels", 200)
+        
+        # Validate seeded data structure
+        if success2 and isinstance(templates_response, list) and len(templates_response) > 0:
+            template = templates_response[0]
+            required_fields = ['id', 'name', 'channel']
+            if all(field in template for field in required_fields):
+                print(f"✅ Templates structure valid: {len(templates_response)} templates found")
+            else:
+                print(f"⚠️  Template missing fields: {[f for f in required_fields if f not in template]}")
+        
+        if success3 and isinstance(segments_response, list) and len(segments_response) > 0:
+            segment = segments_response[0]
+            required_fields = ['id', 'name', 'description']
+            if all(field in segment for field in required_fields):
+                print(f"✅ Segments structure valid: {len(segments_response)} segments found")
+            else:
+                print(f"⚠️  Segment missing fields: {[f for f in required_fields if f not in segment]}")
+        
+        if success4 and isinstance(channels_response, list) and len(channels_response) > 0:
+            channel = channels_response[0]
+            required_fields = ['id', 'name', 'type', 'provider']
+            if all(field in channel for field in required_fields):
+                print(f"✅ Channels structure valid: {len(channels_response)} channels found")
+            else:
+                print(f"⚠️  Channel missing fields: {[f for f in required_fields if f not in channel]}")
         
         # Test create campaign
         new_campaign = {
             "name": "Test Campaign",
-            "subject": "Test Subject",
-            "content": "Test content with {name} placeholder",
-            "segment": "test_segment",
-            "channel": "email"
+            "channel": "email",
+            "segment_id": "test_segment_id",
+            "template_id": "test_template_id"
         }
-        success2, _ = self.run_test("Create CRM Campaign", "POST", "api/v1/crm/campaigns", 200, new_campaign)
+        success5, create_response = self.run_test("Create CRM Campaign", "POST", "api/v1/crm/campaigns", 200, new_campaign)
         
-        return success1 and success2
+        # Test send campaign if we have campaigns
+        if success1 and isinstance(campaigns_response, list) and len(campaigns_response) > 0:
+            campaign_id = campaigns_response[0].get('id')
+            if campaign_id:
+                success6, send_response = self.run_test(f"Send Campaign - {campaign_id}", "POST", f"api/v1/crm/campaigns/{campaign_id}/send", 200)
+                if success6 and isinstance(send_response, dict):
+                    message = send_response.get('message', '')
+                    if 'sent' in message.lower():
+                        print(f"✅ Campaign send successful: {message}")
+                    else:
+                        print(f"⚠️  Unexpected send response: {message}")
+                return success_seed and success1 and success2 and success3 and success4 and success5 and success6
+        
+        return success_seed and success1 and success2 and success3 and success4 and success5
 
     def test_modules_cms(self):
         """Test CMS Module endpoints"""
