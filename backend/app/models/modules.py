@@ -158,6 +158,25 @@ class CMSBannerPosition(str, Enum):
     MOBILE_ONLY = "mobile_only"
     SIDEBAR = "sidebar"
 
+# --- REPORTS MODELS ---
+
+class ReportSchedule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    report_type: str # financial_daily, player_ltv
+    frequency: str # daily, weekly
+    recipients: List[str] = []
+    format: str = "pdf"
+    next_run: datetime
+    active: bool = True
+
+class ExportJob(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str
+    status: str = "processing" # processing, ready, failed
+    requested_by: str
+    download_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # --- CMS MODELS ---
 
 class CMSPage(BaseModel):
@@ -706,36 +725,6 @@ class KYCDocument(BaseModel):
     uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reviewed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
-
-class Affiliate(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    username: str
-    email: EmailStr
-    company_name: Optional[str] = None
-    status: AffiliateStatus = AffiliateStatus.PENDING
-    account_manager_id: Optional[str] = None
-    group: str = "Standard" 
-    country: str = "Unknown"
-    balance: float = 0.0
-    total_earnings: float = 0.0
-    total_paid: float = 0.0
-    currency: str = "USD"
-    default_plan: CommissionPlan = Field(default_factory=CommissionPlan)
-    tracking_link_template: Optional[str] = None
-    postback_url: Optional[str] = None
-    total_clicks: int = 0
-    total_registrations: int = 0
-    total_ftd: int = 0 
-    last_activity_at: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class RiskRule(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    condition: str 
-    action: str 
-    severity: str 
-    active: bool = True
 
 class AdminUser(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
