@@ -129,6 +129,75 @@ class CasinoAdminAPITester:
         print("⚠️  No players found to test player detail endpoint")
         return False
 
+    def test_games_management(self):
+        """Test games management endpoints"""
+        # Test get games
+        success1, games_response = self.run_test("Get Games List", "GET", "api/v1/games", 200)
+        
+        # Test add game
+        new_game = {
+            "name": "Test Slot Game",
+            "provider": "Test Provider",
+            "category": "Slot",
+            "rtp": 96.5
+        }
+        success2, add_response = self.run_test("Add New Game", "POST", "api/v1/games", 200, new_game)
+        
+        # Test toggle game status if we have games
+        if success1 and isinstance(games_response, list) and len(games_response) > 0:
+            game_id = games_response[0].get('id')
+            if game_id:
+                success3, _ = self.run_test(f"Toggle Game Status - {game_id}", "POST", f"api/v1/games/{game_id}/toggle", 200)
+                return success1 and success2 and success3
+        
+        return success1 and success2
+
+    def test_bonuses_management(self):
+        """Test bonuses management endpoints"""
+        # Test get bonuses
+        success1, _ = self.run_test("Get Bonuses List", "GET", "api/v1/bonuses", 200)
+        
+        # Test create bonus
+        new_bonus = {
+            "name": "Test Welcome Bonus",
+            "type": "deposit",
+            "amount": 100,
+            "wager_req": 30
+        }
+        success2, _ = self.run_test("Create New Bonus", "POST", "api/v1/bonuses", 200, new_bonus)
+        
+        return success1 and success2
+
+    def test_support_tickets(self):
+        """Test support tickets endpoints"""
+        # Test get tickets
+        success1, tickets_response = self.run_test("Get Support Tickets", "GET", "api/v1/tickets", 200)
+        
+        # Test reply to ticket if we have tickets
+        if success1 and isinstance(tickets_response, list) and len(tickets_response) > 0:
+            ticket_id = tickets_response[0].get('id')
+            if ticket_id:
+                reply_message = {
+                    "sender": "admin",
+                    "text": "Thank you for contacting support. We are looking into your issue."
+                }
+                success2, _ = self.run_test(f"Reply to Ticket - {ticket_id}", "POST", f"api/v1/tickets/{ticket_id}/reply", 200, reply_message)
+                return success1 and success2
+        
+        return success1
+
+    def test_player_game_history(self):
+        """Test player game history endpoint"""
+        # First get a player ID
+        success, players_response = self.run_test("Players List for Game History", "GET", "api/v1/players", 200)
+        if success and isinstance(players_response, list) and len(players_response) > 0:
+            player_id = players_response[0].get('id')
+            if player_id:
+                return self.run_test(f"Player Game History - {player_id}", "GET", f"api/v1/players/{player_id}/games", 200)
+        
+        print("⚠️  No players found to test game history endpoint")
+        return False
+
     def test_nonexistent_endpoints(self):
         """Test some endpoints that should return 404"""
         success1, _ = self.run_test("Non-existent Player", "GET", "api/v1/players/nonexistent", 404)
