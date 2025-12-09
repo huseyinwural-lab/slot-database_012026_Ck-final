@@ -1414,6 +1414,7 @@ def main():
     
     print("\n🎁 BONUS MANAGEMENT TESTS")
     test_results.append(("Bonuses Management", tester.test_bonuses_management()))
+    test_results.append(("Advanced Bonus System", tester.test_advanced_bonus_system()))
     
     print("\n🎫 SUPPORT TICKETS TESTS")
     test_results.append(("Support Tickets", tester.test_support_tickets()))
