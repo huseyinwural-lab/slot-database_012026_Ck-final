@@ -4,34 +4,42 @@ from datetime import datetime, timezone
 from enum import Enum
 import uuid
 
-# Enums
-class PlayerStatus(str, Enum):
-    ACTIVE = "active"
-    SUSPENDED = "suspended"
-    BANNED = "banned"
-    SELF_EXCLUDED = "self_excluded"
+# --- RISK ENUMS ---
+class RiskSeverity(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
-class KYCStatus(str, Enum):
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-    NOT_SUBMITTED = "not_submitted"
+class RiskCategory(str, Enum):
+    ACCOUNT = "account"
+    DEVICE = "device"
+    IP_GEO = "ip_geo"
+    PAYMENT = "payment"
+    BONUS_ABUSE = "bonus_abuse"
+    GAME_BEHAVIOR = "game_behavior"
+    VELOCITY = "velocity"
+    KYC_IDENTITY = "kyc_identity"
+    RESPONSIBLE_GAMING = "rg"
 
-class TransactionType(str, Enum):
-    DEPOSIT = "deposit"
-    WITHDRAWAL = "withdrawal"
-    BONUS = "bonus"
-    ADJUSTMENT = "adjustment"
+class RiskActionType(str, Enum):
+    WITHDRAW_FREEZE = "withdraw_freeze"
+    ACCOUNT_BLOCK = "account_block"
+    LOGIN_BLOCK = "login_block"
+    BONUS_CANCEL = "bonus_cancel"
+    RISK_SCORE_INCREASE = "risk_score_increase"
+    MANUAL_REVIEW = "manual_review"
+    ALERT_TEAM = "alert_team"
+    TAG_PLAYER = "tag_player"
 
-class TransactionStatus(str, Enum):
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    WAITING_SECOND_APPROVAL = "waiting_second_approval" 
-    FRAUD_FLAGGED = "fraud_flagged"
+class RiskCaseStatus(str, Enum):
+    OPEN = "open"
+    UNDER_REVIEW = "under_review"
+    ESCALATED = "escalated"
+    CLOSED_FALSE_POSITIVE = "closed_false_positive"
+    CLOSED_CONFIRMED = "closed_confirmed"
 
+# --- GAME STATUS ENUMS ---
 class BusinessStatus(str, Enum):
     DRAFT = "draft"
     PENDING_APPROVAL = "pending_approval"
@@ -53,7 +61,64 @@ class SpecialType(str, Enum):
     BRANDED = "branded"
     EVENT = "event"
 
-# Core Models
+# --- APPROVAL ENUMS ---
+class ApprovalStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    CANCELLED = "cancelled"
+    ESCALATED = "escalated"
+
+class ApprovalCategory(str, Enum):
+    FINANCE = "finance"
+    KYC = "kyc"
+    BONUS = "bonus"
+    GAME = "game"
+    RISK = "risk"
+    PLAYER = "player"
+    AFFILIATE = "affiliate"
+    SYSTEM = "system"
+
+# --- CORE MODELS ---
+
+class ApprovalRequest(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    category: ApprovalCategory = ApprovalCategory.FINANCE
+    action_type: str # "withdrawal_approve", "rtp_change"
+    related_entity_id: str 
+    requester_admin: str
+    requester_role: str = "admin"
+    assigned_approver_role: Optional[str] = None # "supervisor", "manager"
+    assigned_approver_id: Optional[str] = None
+    amount: Optional[float] = None
+    status: ApprovalStatus = ApprovalStatus.PENDING
+    details: Dict[str, Any] = {} # Metadata
+    diff: Dict[str, Any] = {} # {old: ..., new: ...}
+    notes: List[Dict[str, Any]] = [] # {admin, text, time}
+    documents: List[str] = [] # URLs
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ApprovalRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    action_type: str
+    condition: str # "amount > 5000"
+    required_role: str
+    auto_approve: bool = False
+    sla_hours: int = 24
+    active: bool = True
+
+class Delegation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    from_admin_id: str
+    to_admin_id: str
+    start_date: datetime
+    end_date: datetime
+    categories: List[ApprovalCategory] = []
+    active: bool = True
+
+# --- OTHER CORE MODELS (Preserved) ---
+
 class Player(BaseModel):
     id: str = Field(..., description="Player ID")
     tenant_id: str = "default_casino" 
@@ -226,40 +291,29 @@ class LadderTier(BaseModel):
     reward_percent: float
 
 class BonusRule(BaseModel):
-    # Financial
     min_deposit: Optional[float] = None
-    reward_amount: Optional[float] = None # Fixed amount
-    reward_percentage: Optional[float] = None # % Match
+    reward_amount: Optional[float] = None 
+    reward_percentage: Optional[float] = None 
     max_reward: Optional[float] = None
-    
-    # RTP / Balance
     luck_boost_factor: Optional[float] = None
     luck_boost_spins: Optional[int] = None
-    rtp_boost_percent: Optional[float] = None # e.g. +2.0%
+    rtp_boost_percent: Optional[float] = None 
     guaranteed_win_spins: Optional[int] = None
-    
-    # Free Spins
     fs_game_ids: List[str] = []
     fs_count: Optional[int] = None
     fs_bet_value: Optional[float] = None
-    
-    # Cashback
     cashback_percentage: Optional[float] = None
-    provider_ids: List[str] = [] # Specific providers
-    game_ids: List[str] = [] # Specific games
-    
-    # Ladder / Milestone
+    provider_ids: List[str] = [] 
+    game_ids: List[str] = [] 
     ladder_tiers: List[LadderTier] = []
-    milestone_target: Optional[float] = None # e.g. wager 10000
-    
-    # Time
+    milestone_target: Optional[float] = None 
     valid_days: int = 7
 
 class Bonus(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     type: BonusType = BonusType.DEPOSIT_MATCH
-    category: str = "Financial" # Financial, RTP, Non-Deposit, FreeSpin, Cashback
+    category: str = "Financial" 
     trigger: BonusTrigger = BonusTrigger.MANUAL
     description: str = ""
     wager_req: int = 35
@@ -323,16 +377,6 @@ class FeatureFlag(BaseModel):
     is_enabled: bool = False
     rollout_percentage: int = 0 
     target_countries: List[str] = [] 
-
-class ApprovalRequest(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    type: str 
-    related_entity_id: str 
-    requester_admin: str
-    amount: Optional[float] = None
-    status: str = "pending" 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    details: Dict[str, Any] = {}
 
 class AuditLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
