@@ -106,26 +106,32 @@ user_problem_statement: "Finance Module Fix & Game Management Implementation"
 backend:
   - task: "AI Risk Analysis Endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "app/routes/core.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Implemented POST /api/v1/finance/transactions/{tx_id}/analyze-risk using Emergent LLM Key."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: POST /api/v1/finance/transactions/tx2/analyze-risk returns 200 with valid JSON containing risk_score (70), risk_level (high), reason, flags, and recommendation. AI service working correctly with Emergent LLM integration."
   - task: "Game Management Endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "app/routes/core.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Verified endpoints /api/v1/games and /api/v1/tables exist. Tested logic for details update."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: GET /api/v1/games returns 200 with list of 100 games. PUT /api/v1/games/{game_id}/details successfully updates geo rules with countries_allowed: ['TR', 'DE']. All game management endpoints working correctly."
 
 frontend:
   - task: "Finance Frontend Fix"
