@@ -42,6 +42,7 @@ async def get_dashboard_stats():
         {"id": 1, "type": "provider_failure", "message": "Evolution Gaming API latency high", "severity": "high", "timestamp": (today - timedelta(minutes=5)).isoformat()},
         {"id": 2, "type": "payment_gateway", "message": "Stripe failure rate > 5%", "severity": "critical", "timestamp": (today - timedelta(minutes=15)).isoformat()},
         {"id": 3, "type": "fraud_engine", "message": "Risk engine queue backing up", "severity": "medium", "timestamp": (today - timedelta(minutes=45)).isoformat()},
+        {"id": 4, "type": "cache_overload", "message": "Redis memory usage at 85%", "severity": "medium", "timestamp": (today - timedelta(hours=1)).isoformat()},
     ]
 
     # 5. Financial Summary
@@ -66,7 +67,7 @@ async def get_dashboard_stats():
     players = ["user_882", "vip_king", "poker_face", "lucky_guy", "high_roller"]
     
     live_bets = []
-    for _ in range(10):
+    for _ in range(15): # More items for ticker
         bet = random.randint(10, 500)
         win = bet * random.choice([0, 0, 0, 1.5, 2, 5, 10])
         live_bets.append({
@@ -78,6 +79,29 @@ async def get_dashboard_stats():
             "timestamp": datetime.now(timezone.utc).isoformat()
         })
 
+    # 8. Bonus Performance Extended
+    bonus_performance = {
+        "given_count": 145,
+        "redeemed_count": 112,
+        "total_value": 50000.00,
+        "expired_count": 12,
+        "roi": 12.5, # Return on Investment %
+        "wagering_completion_rate": 45.2 # %
+    }
+    
+    # 9. Provider & Payment Health (Extended)
+    provider_health = [
+        {"name": "Pragmatic Play", "status": "UP", "latency": "45ms", "last_error": "None"},
+        {"name": "Evolution", "status": "WARNING", "latency": "120ms", "last_error": "Timeout"},
+        {"name": "NetEnt", "status": "UP", "latency": "35ms", "last_error": "None"},
+    ]
+    
+    payment_health = [
+        {"name": "Stripe", "status": "DOWN", "latency": "-", "last_error": "Gateway Timeout"},
+        {"name": "Crypto", "status": "UP", "latency": "200ms", "last_error": "None"},
+        {"name": "Papara", "status": "UP", "latency": "50ms", "last_error": "None"},
+    ]
+
     return {
         "financial_trend": financial_trend,
         "retention_metrics": retention_metrics,
@@ -85,5 +109,10 @@ async def get_dashboard_stats():
         "critical_alerts": critical_alerts,
         "financial_summary": financial_summary,
         "negative_performing_games": negative_performing_games,
-        "live_bets": live_bets
+        "live_bets": live_bets,
+        "bonus_performance": bonus_performance,
+        "provider_health": provider_health,
+        "payment_health": payment_health,
+        "online_users": 124,
+        "active_sessions": 90
     }

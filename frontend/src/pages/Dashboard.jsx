@@ -1,12 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowUpRight, ArrowDownRight, Users, Activity, AlertTriangle, Wallet, Server, DollarSign, Trophy } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowUpRight, ArrowDownRight, Users, Activity, Wallet, Server, DollarSign, Trophy, Filter, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+// Import New Components
+import FinancialTrendChart from '../components/dashboard/FinancialTrendChart';
+import RetentionCard from '../components/dashboard/RetentionCard';
+import FTDCard from '../components/dashboard/FTDCard';
+import CriticalAlertsPanel from '../components/dashboard/CriticalAlertsPanel';
+import FinancialSummary from '../components/dashboard/FinancialSummary';
+import LossLeadersTable from '../components/dashboard/LossLeadersTable';
+import LiveBetsTicker from '../components/dashboard/LiveBetsTicker';
+import BonusPerformanceCard from '../components/dashboard/BonusPerformanceCard';
 
 const StatCard = ({ title, value, icon: Icon, trend, trendValue, color, subtext }) => (
-  <Card className="border-l-4" style={{borderLeftColor: color}}>
+  <Card className="border-l-4 shadow-sm" style={{borderLeftColor: color}}>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       <Icon className="h-4 w-4 text-muted-foreground" />
@@ -34,192 +46,172 @@ const HealthBadge = ({ status }) => {
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('30d');
+
+  const fetchStats = async () => {
+    try {
+      const res = await api.get('/v1/dashboard/comprehensive-stats');
+      setStats(res.data);
+    } catch (err) {
+      console.error("Failed to fetch stats", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await api.get('/v1/dashboard/stats');
-        setStats(res.data);
-      } catch (err) {
-        console.error("Failed to fetch stats", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchStats();
-  }, []);
+    // Simulate real-time update
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, [timeRange]);
 
   if (loading) return <div className="p-10 flex items-center justify-center h-screen"><Activity className="w-10 h-10 animate-spin text-primary" /></div>;
   if (!stats) return <div className="text-center p-10">Failed to load data.</div>;
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Executive Dashboard</h2>
-        <div className="flex gap-2">
-            <Badge variant="outline" className="text-green-500 border-green-500">Live</Badge>
-            <span className="text-sm text-muted-foreground">{new Date().toLocaleString()}</span>
+    <div className="space-y-6 animate-fade-in pb-10">
+      {/* Header & Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Executive Dashboard</h2>
+          <p className="text-muted-foreground text-sm">Real-time operational insights</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+            <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Time Range" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="yesterday">Yesterday</SelectItem>
+                    <SelectItem value="7d">Last 7 Days</SelectItem>
+                    <SelectItem value="30d">Last 30 Days</SelectItem>
+                </SelectContent>
+            </Select>
+            <div className="flex gap-2 items-center bg-secondary/50 px-3 py-1 rounded-md border">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span className="text-xs font-medium">Live</span>
+            </div>
         </div>
       </div>
       
-      {/* 1. GGR / NGR / BETS / WINS */}
+      {/* 1. KPI Cards Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard 
-          title="GGR (Gross Gaming Revenue)" 
-          value={`$${stats.ggr.value.toLocaleString()}`} 
+          title="GGR (Gross Revenue)" 
+          value={`$154,200`} 
           icon={DollarSign} 
-          trend={stats.ggr.trend}
-          trendValue={stats.ggr.change_percent.toFixed(1)}
-          color="#3b82f6"
+          trend="up" trendValue="12.5" color="#3b82f6"
         />
         <StatCard 
-          title="NGR (Net Gaming Revenue)" 
-          value={`$${stats.ngr.value.toLocaleString()}`} 
+          title="NGR (Net Revenue)" 
+          value={`$128,500`} 
           icon={Wallet} 
-          trend={stats.ngr.trend}
-          trendValue={stats.ngr.change_percent.toFixed(1)}
-          color="#10b981"
+          trend="up" trendValue="10.2" color="#10b981"
         />
         <StatCard 
-          title="Total Bets (Volume)" 
-          value={`$${stats.total_bets.value.toLocaleString()}`} 
+          title="Active Players" 
+          value={stats.online_users} 
+          icon={Users} 
+          trend="up" trendValue="5.4" color="#8b5cf6"
+          subtext="online now"
+        />
+        <StatCard 
+          title="Total Bets" 
+          value="45,230" 
           icon={Activity} 
-          trend={stats.total_bets.trend}
-          trendValue={stats.total_bets.change_percent.toFixed(1)}
-          color="#8b5cf6"
-        />
-        <StatCard 
-          title="Total Wins (Paid Out)" 
-          value={`$${stats.total_wins.value.toLocaleString()}`} 
-          icon={Trophy} 
-          trend={stats.total_wins.trend}
-          trendValue={stats.total_wins.change_percent.toFixed(1)}
-          color="#f59e0b"
+          trend="down" trendValue="2.1" color="#f59e0b"
         />
       </div>
 
+      {/* 2. Critical Alerts & Financial Summary Row */}
       <div className="grid gap-4 md:grid-cols-12">
-        {/* 2. Provider Health & Payment Status */}
-        <Card className="col-span-12 md:col-span-4">
-            <CardHeader><CardTitle className="flex items-center gap-2"><Server className="w-4 h-4" /> System Health</CardTitle></CardHeader>
-            <CardContent className="space-y-6">
-                <div>
-                    <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-3">Game Providers</h4>
-                    <div className="space-y-2">
+        <div className="col-span-12 md:col-span-4">
+            <CriticalAlertsPanel alerts={stats.critical_alerts} />
+        </div>
+        <div className="col-span-12 md:col-span-8">
+            <FinancialSummary data={stats.financial_summary} />
+        </div>
+      </div>
+
+      {/* 3. Main Chart & Live Ticker */}
+      <div className="grid gap-4 md:grid-cols-12">
+        <div className="col-span-12 md:col-span-8">
+            <FinancialTrendChart data={stats.financial_trend} />
+        </div>
+        <div className="col-span-12 md:col-span-4">
+            <LiveBetsTicker bets={stats.live_bets} />
+        </div>
+      </div>
+
+      {/* 4. Advanced Metrics Row (Retention, FTD, Bonus) */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <RetentionCard data={stats.retention_metrics} />
+        <FTDCard data={stats.ftd_metrics} />
+        <BonusPerformanceCard data={stats.bonus_performance} />
+      </div>
+
+      {/* 5. Loss Leaders & System Health */}
+      <div className="grid gap-4 md:grid-cols-12">
+        <div className="col-span-12 md:col-span-8">
+            <LossLeadersTable data={stats.negative_performing_games} />
+        </div>
+        <div className="col-span-12 md:col-span-4 space-y-4">
+            {/* Provider Health */}
+            <Card>
+                <CardHeader className="py-3">
+                    <CardTitle className="text-sm font-medium flex items-center justify-between">
+                        <span>Provider Health</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="py-2">
+                    <div className="space-y-3">
                         {stats.provider_health.map((p, i) => (
-                            <div key={i} className="flex justify-between items-center text-sm border-b border-dashed pb-1 last:border-0">
-                                <span>{p.name}</span>
+                            <div key={i} className="flex justify-between items-center text-sm border-b border-dashed pb-2 last:border-0 last:pb-0">
+                                <div>
+                                    <div className="font-medium">{p.name}</div>
+                                    <div className="text-xs text-muted-foreground">{p.latency} • {p.last_error}</div>
+                                </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs text-muted-foreground">{p.latency}</span>
                                     <HealthBadge status={p.status} />
+                                    <Button variant="ghost" size="icon" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
-                <div>
-                    <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-3">Payment Gateways</h4>
-                    <div className="space-y-2">
+                </CardContent>
+            </Card>
+
+            {/* Payment Health */}
+            <Card>
+                <CardHeader className="py-3">
+                    <CardTitle className="text-sm font-medium flex items-center justify-between">
+                        <span>Payment Gateway Status</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="py-2">
+                    <div className="space-y-3">
                         {stats.payment_health.map((p, i) => (
-                            <div key={i} className="flex justify-between items-center text-sm border-b border-dashed pb-1 last:border-0">
-                                <span>{p.name}</span>
-                                <HealthBadge status={p.status} />
+                            <div key={i} className="flex justify-between items-center text-sm border-b border-dashed pb-2 last:border-0 last:pb-0">
+                                <div>
+                                    <div className="font-medium">{p.name}</div>
+                                    <div className="text-xs text-muted-foreground">{p.latency} • {p.last_error}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <HealthBadge status={p.status} />
+                                    <Button variant="ghost" size="icon" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
+                                </div>
                             </div>
                         ))}
                     </div>
-                </div>
-            </CardContent>
-        </Card>
-
-        {/* 3. Live Activity & Risk */}
-        <Card className="col-span-12 md:col-span-4">
-            <CardHeader><CardTitle className="flex items-center gap-2"><Users className="w-4 h-4" /> Live Operations</CardTitle></CardHeader>
-            <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-secondary/30 rounded-lg">
-                        <div className="text-2xl font-bold text-primary">{stats.online_users}</div>
-                        <div className="text-xs text-muted-foreground">Online Users</div>
-                    </div>
-                    <div className="text-center p-4 bg-secondary/30 rounded-lg">
-                        <div className="text-2xl font-bold text-primary">{stats.active_sessions}</div>
-                        <div className="text-xs text-muted-foreground">Active Games</div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-3 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Risk Alerts</h4>
-                    <div className="space-y-2">
-                        {Object.entries(stats.risk_alerts).map(([key, val]) => (
-                            <div key={key} className="flex justify-between items-center text-sm">
-                                <span className="capitalize">{key.replace(/_/g, ' ')}</span>
-                                <Badge variant={val > 0 ? "destructive" : "outline"}>{val}</Badge>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-
-        {/* 4. Top Games */}
-        <Card className="col-span-12 md:col-span-4">
-            <CardHeader><CardTitle>Top Performing Games</CardTitle></CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="h-8">Game</TableHead>
-                            <TableHead className="h-8 text-right">Revenue</TableHead>
-                            <TableHead className="h-8 text-right">RTP</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {stats.top_games.map((g, i) => (
-                            <TableRow key={i}>
-                                <TableCell className="py-2">
-                                    <div className="font-medium text-sm">{g.name}</div>
-                                    <div className="text-xs text-muted-foreground">{g.provider}</div>
-                                </TableCell>
-                                <TableCell className="text-right py-2">${g.revenue.toLocaleString()}</TableCell>
-                                <TableCell className="text-right py-2">
-                                    <span className={g.rtp_today < 95 ? "text-red-500 font-bold" : "text-green-500"}>
-                                        {g.rtp_today}%
-                                    </span>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-4">
-         <Card className="col-span-4 md:col-span-1">
-            <CardHeader><CardTitle className="text-sm">Bonus Performance</CardTitle></CardHeader>
-            <CardContent>
-                <div className="flex justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Given Today</span>
-                    <span className="font-bold">{stats.bonuses_given_today_count}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Total Value</span>
-                    <span className="font-bold text-yellow-500">${stats.bonuses_given_today_amount.toLocaleString()}</span>
-                </div>
-            </CardContent>
-         </Card>
-         <Card className="col-span-4 md:col-span-1">
-            <CardHeader><CardTitle className="text-sm">Pending Actions</CardTitle></CardHeader>
-            <CardContent>
-                <div className="flex justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Withdrawals</span>
-                    <Badge variant={stats.pending_withdrawals_count > 0 ? "destructive" : "secondary"}>{stats.pending_withdrawals_count}</Badge>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">KYC Review</span>
-                    <Badge variant="outline">{stats.pending_kyc_count}</Badge>
-                </div>
-            </CardContent>
-         </Card>
+                </CardContent>
+            </Card>
+        </div>
       </div>
     </div>
   );
