@@ -127,7 +127,7 @@ async def seed_rg():
         )
     if await db.rg_rules.count_documents({}) == 0:
         await db.rg_rules.insert_many([
-            RGRule(name="High Loss Alert", severity=RGAlertSeverity.HIGH, conditions={"net_loss_24h": {">": 5000}}).model_dump(),
-            RGRule(name="Session Limit", severity=RGAlertSeverity.MEDIUM, conditions={"session_time": {">": 240}}).model_dump()
+            RGRule(name="High Loss Alert", description="Alert if user loses > 5000", severity=RGAlertSeverity.HIGH, conditions={"net_loss_24h": {">": 5000}}).model_dump(),
+            RGRule(name="Session Limit", description="Warn after 4 hours play", severity=RGAlertSeverity.MEDIUM, conditions={"session_time": {">": 240}}).model_dump()
         ])
     return {"message": "RG Seeded"}
