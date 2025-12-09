@@ -10,7 +10,7 @@ import GameManagement from './pages/GameManagement';
 import BonusManagement from './pages/BonusManagement';
 import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
-import FeatureFlags from './pages/FeatureFlags';
+import { FeatureFlags } from './pages/FeatureFlags';
 import Simulator from './pages/Simulator';
 import VipGames from './pages/VipGames';
 import KYCManagement from './pages/KYCManagement';
