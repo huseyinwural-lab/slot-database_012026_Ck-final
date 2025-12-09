@@ -1245,6 +1245,100 @@ class CasinoAdminAPITester:
         
         return success1
 
+    def test_support_module(self):
+        """Test Support Module - Dashboard, Tickets, Chat, KB"""
+        print("\n🎧 SUPPORT MODULE TESTS")
+        
+        # First seed support data
+        success_seed, seed_response = self.run_test("Seed Support Data", "POST", "api/v1/support/seed", 200)
+        if success_seed and isinstance(seed_response, dict):
+            print(f"✅ Support seeding: {seed_response.get('message', 'Success')}")
+        
+        # Test Support Dashboard Stats
+        success1, dashboard_response = self.run_test("Support Dashboard Stats", "GET", "api/v1/support/dashboard", 200)
+        if success1 and isinstance(dashboard_response, dict):
+            required_fields = ['open_tickets', 'waiting_tickets', 'active_chats', 'avg_response_time', 'csat_score', 'agents_online']
+            missing_fields = [field for field in required_fields if field not in dashboard_response]
+            if not missing_fields:
+                print("✅ Support Dashboard structure is complete")
+                print(f"   📊 Open Tickets: {dashboard_response['open_tickets']}")
+                print(f"   ⏳ Waiting Tickets: {dashboard_response['waiting_tickets']}")
+                print(f"   💬 Active Chats: {dashboard_response['active_chats']}")
+                print(f"   ⭐ CSAT Score: {dashboard_response['csat_score']}")
+                print(f"   👥 Agents Online: {dashboard_response['agents_online']}")
+            else:
+                print(f"⚠️  Support Dashboard missing fields: {missing_fields}")
+        
+        # Test Ticket Inbox - List tickets (Seeded)
+        success2, tickets_response = self.run_test("Support Tickets List", "GET", "api/v1/support/tickets", 200)
+        if success2 and isinstance(tickets_response, list):
+            print(f"✅ Found {len(tickets_response)} support tickets")
+            if len(tickets_response) > 0:
+                ticket = tickets_response[0]
+                required_fields = ['id', 'subject', 'description', 'player_id', 'player_email', 'category', 'priority', 'status']
+                missing_fields = [field for field in required_fields if field not in ticket]
+                if not missing_fields:
+                    print(f"✅ Ticket structure complete: {ticket['subject']} - {ticket['status']}")
+                else:
+                    print(f"⚠️  Ticket missing fields: {missing_fields}")
+        
+        # Test Ticket Detail - View thread and reply
+        if success2 and isinstance(tickets_response, list) and len(tickets_response) > 0:
+            ticket_id = tickets_response[0]['id']
+            
+            # Test adding a message to ticket (reply)
+            success3, reply_response = self.run_test(f"Add Ticket Message - {ticket_id}", "POST", f"api/v1/support/tickets/{ticket_id}/message", 200, {
+                "sender": "agent",
+                "content": "Thank you for contacting support. We are reviewing your case.",
+                "time": datetime.now().isoformat()
+            })
+            
+            if success3:
+                print("✅ Ticket reply functionality working")
+            
+            # Test updating ticket status
+            success4, update_response = self.run_test(f"Update Ticket Status - {ticket_id}", "PUT", f"api/v1/support/tickets/{ticket_id}", 200, {
+                "status": "in_progress"
+            })
+            
+            if success4:
+                print("✅ Ticket update functionality working")
+        else:
+            success3 = success4 = True  # Skip if no tickets
+        
+        # Test Chat functionality
+        success5, chats_response = self.run_test("Support Chats List", "GET", "api/v1/support/chats", 200)
+        if success5 and isinstance(chats_response, list):
+            print(f"✅ Found {len(chats_response)} chat sessions")
+        
+        # Test Knowledge Base
+        success6, kb_response = self.run_test("Knowledge Base Articles", "GET", "api/v1/support/kb", 200)
+        if success6 and isinstance(kb_response, list):
+            print(f"✅ Found {len(kb_response)} KB articles")
+            if len(kb_response) > 0:
+                article = kb_response[0]
+                required_fields = ['id', 'title', 'content', 'category']
+                missing_fields = [field for field in required_fields if field not in article]
+                if not missing_fields:
+                    print(f"✅ KB Article structure complete: {article['title']}")
+                else:
+                    print(f"⚠️  KB Article missing fields: {missing_fields}")
+        
+        # Test Canned Responses
+        success7, canned_response = self.run_test("Canned Responses", "GET", "api/v1/support/canned", 200)
+        if success7 and isinstance(canned_response, list):
+            print(f"✅ Found {len(canned_response)} canned responses")
+            if len(canned_response) > 0:
+                canned = canned_response[0]
+                required_fields = ['id', 'title', 'content', 'category']
+                missing_fields = [field for field in required_fields if field not in canned]
+                if not missing_fields:
+                    print(f"✅ Canned Response structure complete: {canned['title']}")
+                else:
+                    print(f"⚠️  Canned Response missing fields: {missing_fields}")
+        
+        return all([success_seed, success1, success2, success3, success4, success5, success6, success7])
+
     def test_game_status_lifecycle(self):
         """Test Game Status and Lifecycle Features"""
         print("\n🎮 GAME STATUS & LIFECYCLE TESTS")
