@@ -2,27 +2,21 @@ import os
 import json
 import logging
 from typing import Dict, Any
-from openai import OpenAI, RateLimitError, APIError
 from config import settings
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 logger = logging.getLogger(__name__)
 
 class RiskAnalyzer:
     def __init__(self):
-        # Use settings to get the key from .env via Pydantic
-        api_key = settings.emergent_llm_key
-        if not api_key:
-            logger.warning("EMERGENT_LLM_KEY not found in settings. AI features will be disabled.")
-            self.client = None
-        else:
-            self.client = OpenAI(
-                api_key=api_key,
-                base_url="https://api.emergent.sh/openai/v1" # Corrected Base URL
-            )
-        self.model = "gpt-4o" # Safer model choice
+        self.api_key = settings.emergent_llm_key
+        if not self.api_key:
+            logger.warning("EMERGENT_LLM_KEY not found in settings.")
+        
+        self.model = "gpt-4o"
 
     async def analyze_transaction(self, transaction: Dict[str, Any]) -> Dict[str, Any]:
-        if not self.client:
+        if not self.api_key:
             return {
                 "risk_score": 0,
                 "risk_level": "unknown",
@@ -33,18 +27,23 @@ class RiskAnalyzer:
         prompt = self._construct_prompt(transaction)
         
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are a risk analysis expert for an online casino. Analyze the transaction for fraud, money laundering, and risk. Respond in JSON. Important: The 'reason' field and 'recommendation' should be in Turkish language."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.1,
-                response_format={"type": "json_object"}
+            # Initialize Chat
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=f"tx_{transaction.get('id', 'unknown')}",
+                system_message="You are a risk analysis expert for an online casino. Analyze the transaction for fraud, money laundering, and risk. Respond in JSON. Important: The 'reason' field and 'recommendation' should be in Turkish language."
             )
             
-            content = response.choices[0].message.content
-            result = json.loads(content)
+            # Configure Model and JSON mode
+            chat.with_model("openai", self.model)
+            chat.with_params(response_format={"type": "json_object"})
+            
+            # Send Message
+            user_msg = UserMessage(text=prompt)
+            response_text = await chat.send_message(user_msg)
+            
+            # Parse Result
+            result = json.loads(response_text)
             return result
 
         except Exception as e:
@@ -57,7 +56,6 @@ class RiskAnalyzer:
             }
 
     def _construct_prompt(self, tx: Dict[str, Any]) -> str:
-        # Helper to safely get values
         def safe_get(key):
             return tx.get(key, 'N/A')
 
