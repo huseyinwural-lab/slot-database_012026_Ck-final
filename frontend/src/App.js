@@ -40,7 +40,7 @@ function App() {
           <Route path="/fraud" element={<FraudCheck />} />
           <Route path="/support" element={<Support />} />
           <Route path="/features" element={<FeatureFlags />} />
-          <Route path="/simulator" element={<Simulator />} />
+          <Route path="/simulator" element={<SimulationLab />} />
           
           {/* New Modules */}
           <Route path="/kyc" element={<KYCManagement />} />
