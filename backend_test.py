@@ -923,6 +923,97 @@ class CasinoAdminAPITester:
         
         return success1
 
+    def test_vip_games_module(self):
+        """Test VIP Games Module - List, Filter, and Tag Management"""
+        print("\n👑 VIP GAMES MODULE TESTS")
+        
+        # Test get all games (base for VIP filtering)
+        success1, games_response = self.run_test("Get All Games for VIP Testing", "GET", "api/v1/games", 200)
+        
+        if success1 and isinstance(games_response, list) and len(games_response) > 0:
+            # Find a game to test VIP tagging
+            test_game = games_response[0]
+            game_id = test_game.get('id')
+            current_tags = test_game.get('tags', [])
+            
+            if game_id:
+                # Test adding VIP tag to a game
+                new_tags = current_tags.copy() if current_tags else []
+                if 'VIP' not in new_tags:
+                    new_tags.append('VIP')
+                
+                success2, _ = self.run_test(f"Add VIP Tag to Game - {game_id}", "PUT", f"api/v1/games/{game_id}/details", 200, {
+                    "tags": new_tags
+                })
+                
+                # Verify the VIP tag was added
+                success3, updated_games = self.run_test("Verify VIP Tag Addition", "GET", "api/v1/games", 200)
+                vip_games_count = 0
+                if success3 and isinstance(updated_games, list):
+                    vip_games = [g for g in updated_games if g.get('tags') and 'VIP' in g.get('tags', [])]
+                    vip_games_count = len(vip_games)
+                    if vip_games_count > 0:
+                        print(f"✅ VIP Games found: {vip_games_count} games with VIP tag")
+                        for vip_game in vip_games[:3]:  # Show first 3 VIP games
+                            print(f"   👑 {vip_game.get('name', 'Unknown')} ({vip_game.get('provider', 'Unknown')})")
+                    else:
+                        print("⚠️  No VIP games found after adding VIP tag")
+                
+                # Test removing VIP tag from a game
+                if len(games_response) > 1:
+                    second_game = games_response[1]
+                    second_game_id = second_game.get('id')
+                    second_tags = second_game.get('tags', [])
+                    
+                    # First add VIP tag, then remove it
+                    if 'VIP' not in second_tags:
+                        temp_tags = second_tags.copy() if second_tags else []
+                        temp_tags.append('VIP')
+                        await_success, _ = self.run_test(f"Temporarily Add VIP Tag - {second_game_id}", "PUT", f"api/v1/games/{second_game_id}/details", 200, {
+                            "tags": temp_tags
+                        })
+                    
+                    # Now remove VIP tag
+                    remove_tags = [tag for tag in (second_game.get('tags', []) + ['VIP']) if tag != 'VIP']
+                    success4, _ = self.run_test(f"Remove VIP Tag from Game - {second_game_id}", "PUT", f"api/v1/games/{second_game_id}/details", 200, {
+                        "tags": remove_tags
+                    })
+                else:
+                    success4 = True  # Skip if only one game available
+                
+                # Test updating other game details (should work with VIP games)
+                success5, _ = self.run_test(f"Update VIP Game Details - {game_id}", "PUT", f"api/v1/games/{game_id}/details", 200, {
+                    "name": test_game.get('name', 'Test Game') + " (VIP Edition)",
+                    "tags": new_tags
+                })
+                
+                # Test invalid game ID for error handling
+                success6, _ = self.run_test("Update Non-existent Game", "PUT", "api/v1/games/nonexistent/details", 404, {
+                    "tags": ["VIP"]
+                })
+                
+                # Test invalid fields (should be filtered out)
+                success7, _ = self.run_test(f"Update Game with Invalid Fields - {game_id}", "PUT", f"api/v1/games/{game_id}/details", 200, {
+                    "tags": new_tags,
+                    "invalid_field": "should_be_ignored",
+                    "another_invalid": 123
+                })
+                
+                # Validate that only allowed fields are updated
+                success8, final_games = self.run_test("Verify Field Filtering", "GET", "api/v1/games", 200)
+                if success8 and isinstance(final_games, list):
+                    updated_game = next((g for g in final_games if g.get('id') == game_id), None)
+                    if updated_game:
+                        if 'invalid_field' not in updated_game and 'another_invalid' not in updated_game:
+                            print("✅ Invalid fields properly filtered out")
+                        else:
+                            print("⚠️  Invalid fields may not have been filtered properly")
+                
+                return success1 and success2 and success3 and success4 and success5 and success6 and success7 and success8
+        
+        print("⚠️  No games found to test VIP functionality")
+        return success1
+
     def test_nonexistent_endpoints(self):
         """Test some endpoints that should return 404"""
         success1, _ = self.run_test("Non-existent Player", "GET", "api/v1/players/nonexistent", 404)
