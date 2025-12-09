@@ -714,6 +714,12 @@ def main():
     test_results.append(("Logs Module", tester.test_modules_logs()))
     test_results.append(("Responsible Gaming Module", tester.test_modules_rg()))
     
+    print("\n🎯 ADVANCED FEATURES TESTS")
+    test_results.append(("Advanced Game Config", tester.test_advanced_game_config()))
+    test_results.append(("Luck Boost Bonus", tester.test_luck_boost_bonus()))
+    test_results.append(("Dashboard KPIs", tester.test_dashboard_kpis()))
+    test_results.append(("Luck Boost Simulation", tester.test_luck_boost_simulation()))
+    
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
