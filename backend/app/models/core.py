@@ -27,10 +27,14 @@ class TransactionType(str, Enum):
     WIN = "win"
 
 class TransactionStatus(str, Enum):
+    REQUESTED = "requested"
     PENDING = "pending"
+    UNDER_REVIEW = "under_review"
     APPROVED = "approved"
+    PROCESSING = "processing"
+    PAID = "paid"
+    COMPLETED = "completed" # Legacy/Generic
     REJECTED = "rejected"
-    COMPLETED = "completed"
     FAILED = "failed"
     WAITING_SECOND_APPROVAL = "waiting_second_approval" 
     FRAUD_FLAGGED = "fraud_flagged"
@@ -202,6 +206,12 @@ class TransactionTimeline(BaseModel):
     description: str
     operator: Optional[str] = None
 
+class WageringStatus(BaseModel):
+    required: float = 0.0
+    current: float = 0.0
+    is_met: bool = True
+    remaining: float = 0.0
+
 class Transaction(BaseModel):
     id: str = Field(..., description="Transaction ID")
     tenant_id: str = "default_casino"
@@ -216,17 +226,35 @@ class Transaction(BaseModel):
     # Enhanced Financial Fields
     provider: str = "Internal" # "Papara", "Stripe", "CoinPayments"
     provider_tx_id: Optional[str] = None
+    destination_address: Optional[str] = None # IBAN, Wallet Address
+    
+    # User Context at Transaction Time
     ip_address: Optional[str] = None
     device_info: Optional[str] = None
     country: Optional[str] = None
+    risk_score_at_time: Optional[str] = "low"
+    kyc_status_at_time: Optional[str] = "pending"
+    
+    # Financial Context
+    balance_before: Optional[float] = None
+    balance_after: Optional[float] = None
     bonus_id: Optional[str] = None # Triggered bonus
+    wagering_info: Optional[WageringStatus] = None # Wagering snapshot
+    
+    # Costs
     fee: float = 0.0
     net_amount: float = 0.0
+    
+    # Flags
+    limit_flags: List[str] = [] # "daily_limit_exceeded"
+    velocity_flags: List[str] = [] # "high_velocity"
+    aml_flags: List[str] = []
     
     # Operational Fields
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     processed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
+    compliance_notes: List[str] = []
     approver_id: Optional[str] = None 
     
     # Detailed Views
@@ -418,6 +446,7 @@ class KPIMetric(BaseModel):
     value: float
     change_percent: float 
     trend: str 
+    description: Optional[str] = None
 
 class DashboardStats(BaseModel):
     ggr: KPIMetric
@@ -443,29 +472,13 @@ class FinancialReport(BaseModel):
     net_cashflow: float
     provider_breakdown: Dict[str, float]
     daily_stats: List[Dict[str, Any]]
-
-# --- NEW ARCHITECTURE MODELS ---
-
-class FeatureFlag(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    key: str 
-    description: str
-    is_enabled: bool = False
-    rollout_percentage: int = 0 
-    target_countries: List[str] = [] 
-
-class AuditLog(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    admin_id: str
-    action: str
-    target_id: str
-    details: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class LoginLog(BaseModel):
-    player_id: str
-    ip_address: str
-    location: str
-    device_info: str
-    status: str 
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # Detailed additions
+    ggr: float = 0.0
+    ngr: float = 0.0
+    bonus_cost: float = 0.0
+    provider_cost: float = 0.0
+    payment_fees: float = 0.0
+    fraud_blocked_amount: float = 0.0
+    total_player_balance: float = 0.0
+    
