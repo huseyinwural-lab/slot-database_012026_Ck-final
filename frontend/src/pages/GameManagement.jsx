@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Settings2, Upload, Server, Table as TableIcon, LayoutGrid, Database, List, Star, Lock } from 'lucide-react';
+import { Plus, Settings2, Upload, Server, Table as TableIcon, LayoutGrid, Database, List, Star, Lock, Activity, Globe } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -66,7 +66,9 @@ const GameManagement = () => {
         business_status: game.business_status || 'draft',
         runtime_status: game.runtime_status || 'offline',
         is_special_game: game.is_special_game,
-        special_type: game.special_type || 'none'
+        special_type: game.special_type || 'none',
+        countries_allowed: game.countries_allowed || [],
+        countries_blocked: game.countries_blocked || []
     });
     setIsConfigOpen(true);
   };
@@ -138,6 +140,7 @@ const GameManagement = () => {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right flex justify-end gap-2">
+                                            <Button size="sm" variant="ghost" onClick={() => toast.info("Analytics Coming Soon")}><Activity className="w-4 h-4 text-blue-500" /></Button>
                                             <Button size="sm" variant="outline" onClick={() => openConfig(game)}><Settings2 className="w-4 h-4 mr-1" /> Config</Button>
                                             <Switch checked={game.business_status==='active'} onCheckedChange={() => handleToggleGame(game.id)} />
                                         </TableCell>
@@ -248,9 +251,10 @@ const GameManagement = () => {
                 </DialogHeader>
                 
                 <Tabs defaultValue="general" className="w-full mt-4">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-5">
                         <TabsTrigger value="general">Lifecycle</TabsTrigger>
-                        <TabsTrigger value="math">Math & RTP</TabsTrigger>
+                        <TabsTrigger value="math">Math</TabsTrigger>
+                        <TabsTrigger value="geo">Geo & Rules</TabsTrigger>
                         <TabsTrigger value="jackpot">Jackpots</TabsTrigger>
                         <TabsTrigger value="visuals">Assets</TabsTrigger>
                     </TabsList>
@@ -327,6 +331,28 @@ const GameManagement = () => {
                             <Label>Paytable (JSON)</Label>
                             <Textarea value={JSON.stringify(configForm.paytable || {}, null, 2)} readOnly className="font-mono text-xs" />
                             <Button variant="secondary" size="sm" className="w-full">Refresh from Provider</Button>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="geo" className="space-y-4 py-4">
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2"><Globe className="w-4 h-4" /> Allowed Countries (ISO Codes)</Label>
+                                <Input 
+                                    placeholder="TR, DE, UK (Empty = All)" 
+                                    value={statusForm.countries_allowed?.join(', ') || ''} 
+                                    onChange={e => setStatusForm({...statusForm, countries_allowed: e.target.value.split(',').map(s=>s.trim()).filter(s=>s)})} 
+                                />
+                                <p className="text-[10px] text-muted-foreground">Comma separated. Leave empty to allow all.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="flex items-center gap-2 text-red-600"><Lock className="w-4 h-4" /> Blocked Countries</Label>
+                                <Input 
+                                    placeholder="US, IL" 
+                                    value={statusForm.countries_blocked?.join(', ') || ''} 
+                                    onChange={e => setStatusForm({...statusForm, countries_blocked: e.target.value.split(',').map(s=>s.trim()).filter(s=>s)})} 
+                                />
+                            </div>
                         </div>
                     </TabsContent>
 
