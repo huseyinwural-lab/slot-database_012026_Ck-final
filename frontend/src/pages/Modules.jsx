@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { CRM } from './CRM';
 
 const GenericList = ({ title, endpoint, columns, actions }) => {
+// ... (existing GenericList implementation)
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,12 +64,12 @@ const GenericList = ({ title, endpoint, columns, actions }) => {
 
 export const KYC = () => {
   const handleReview = async (id, status) => {
-    try { await api.post(`/v1/kyc/${id}/review`, { status }); toast.success(`Document ${status}`); }
+    try { await api.post(`/v1/kyc/documents/${id}/review`, { status }); toast.success(`Document ${status}`); }
     catch { toast.error("Failed"); }
   };
   return <GenericList 
     title="KYC Verification" 
-    endpoint="/v1/kyc" 
+    endpoint="/v1/kyc/queue" 
     columns={[
       { header: "User", accessor: "player_username" },
       { header: "Type", accessor: "type" },
@@ -82,9 +84,8 @@ export const KYC = () => {
   />;
 };
 
-export const CRM = () => <GenericList title="CRM Campaigns" endpoint="/v1/crm/campaigns" columns={[
-  { header: "Name", accessor: "name" }, { header: "Subject", accessor: "subject" }, { header: "Channel", accessor: "channel" }, { header: "Status", accessor: "status" }
-]} />;
+// Export the new CRM component
+export { CRM };
 
 export const CMS = () => <GenericList title="Content Management" endpoint="/v1/cms/banners" columns={[
   { header: "Title", accessor: "title" }, { header: "Position", accessor: "position" }, { header: "Active", render: d => d.active ? "Yes" : "No" }
