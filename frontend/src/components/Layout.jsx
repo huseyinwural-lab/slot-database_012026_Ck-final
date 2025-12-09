@@ -3,10 +3,13 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, CreditCard, ShieldAlert, 
   Gamepad2, Gift, MessageSquare, Settings, LogOut,
-  ListChecks, ToggleRight, Search, FlaskConical
+  ListChecks, ToggleRight, Search, FlaskConical,
+  FileText, Megaphone, BarChart3, Globe, Handshake,
+  AlertOctagon, UserCog, ScrollText, Scale
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '../services/api';
 
 const SidebarItem = ({ to, icon: Icon, label }) => (
@@ -49,21 +52,45 @@ const Layout = ({ children }) => {
           </h1>
         </div>
         
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-          <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" />
-          <SidebarItem to="/players" icon={Users} label="Players" />
-          <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
-          <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />
-          <SidebarItem to="/games" icon={Gamepad2} label="Games" />
-          <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" />
-          <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />
-          <SidebarItem to="/support" icon={MessageSquare} label="Support" />
-          <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />
-          <SidebarItem to="/simulator" icon={FlaskConical} label="Simulation Lab" />
-          <SidebarItem to="/settings" icon={Settings} label="Settings" />
-        </nav>
+        <ScrollArea className="flex-1 px-4">
+          <div className="space-y-1 mb-6">
+              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Core</div>
+              <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" />
+              <SidebarItem to="/players" icon={Users} label="Players" />
+              <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
+              <SidebarItem to="/games" icon={Gamepad2} label="Games" />
+          </div>
 
-        <div className="p-4 border-t border-border mt-auto">
+          <div className="space-y-1 mb-6">
+              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Operations</div>
+              <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" />
+              <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" />
+              <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" />
+              <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" />
+              <SidebarItem to="/support" icon={MessageSquare} label="Support" />
+          </div>
+
+           <div className="space-y-1 mb-6">
+              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Risk & Compliance</div>
+              <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" />
+              <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />
+              <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />
+              <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" />
+          </div>
+
+          <div className="space-y-1 mb-6">
+              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">System</div>
+              <SidebarItem to="/cms" icon={Globe} label="CMS" />
+              <SidebarItem to="/reports" icon={BarChart3} label="Reports" />
+              <SidebarItem to="/logs" icon={ScrollText} label="Logs" />
+              <SidebarItem to="/admins" icon={UserCog} label="Admin Users" />
+              <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />
+              <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" />
+              <SidebarItem to="/settings" icon={Settings} label="Settings" />
+          </div>
+        </ScrollArea>
+
+        <div className="p-4 border-t border-border mt-auto bg-card">
           <button className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg w-full transition-colors">
             <LogOut className="w-5 h-5" />
             Logout
@@ -99,7 +126,6 @@ const Layout = ({ children }) => {
           {children}
         </div>
 
-        {/* Global Search Dialog */}
         <CommandDialog open={open} onOpenChange={setOpen}>
           <CommandInput placeholder="Type to search players, transactions..." onValueChange={handleSearch} />
           <CommandList>

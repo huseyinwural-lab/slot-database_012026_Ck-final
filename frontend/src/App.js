@@ -12,6 +12,7 @@ import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
 import FeatureFlags from './pages/FeatureFlags';
 import Simulator from './pages/Simulator';
+import { KYC, CRM, CMS, Affiliates, Risk, Admins, Logs, RG, Reports } from './pages/Modules';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -30,6 +31,18 @@ function App() {
           <Route path="/support" element={<Support />} />
           <Route path="/features" element={<FeatureFlags />} />
           <Route path="/simulator" element={<Simulator />} />
+          
+          {/* New Modules */}
+          <Route path="/kyc" element={<KYC />} />
+          <Route path="/crm" element={<CRM />} />
+          <Route path="/cms" element={<CMS />} />
+          <Route path="/affiliates" element={<Affiliates />} />
+          <Route path="/risk" element={<Risk />} />
+          <Route path="/admins" element={<Admins />} />
+          <Route path="/logs" element={<Logs />} />
+          <Route path="/rg" element={<RG />} />
+          <Route path="/reports" element={<Reports />} />
+          
           <Route path="/settings" element={<div className="p-10 text-xl font-bold">Settings Panel (Multi-Tenant Config)</div>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
