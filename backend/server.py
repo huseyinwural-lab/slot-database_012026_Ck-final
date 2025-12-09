@@ -52,6 +52,10 @@ app.include_router(fraud_detection.router)
 app.include_router(email_notification.router)
 app.include_router(simulator.router)
 
+# Feature Flags & A/B Testing
+from app.routes import feature_flags
+app.include_router(feature_flags.router)
+
 @app.get("/api/health")
 async def health_check():
     return {
