@@ -481,4 +481,29 @@ class FinancialReport(BaseModel):
     payment_fees: float = 0.0
     fraud_blocked_amount: float = 0.0
     total_player_balance: float = 0.0
-    
+
+# --- NEW ARCHITECTURE MODELS ---
+
+class FeatureFlag(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    key: str 
+    description: str
+    is_enabled: bool = False
+    rollout_percentage: int = 0 
+    target_countries: List[str] = [] 
+
+class AuditLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    admin_id: str
+    action: str
+    target_id: str
+    details: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LoginLog(BaseModel):
+    player_id: str
+    ip_address: str
+    location: str
+    device_info: str
+    status: str 
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
