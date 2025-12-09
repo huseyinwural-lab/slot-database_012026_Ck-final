@@ -647,21 +647,151 @@ class CasinoAdminAPITester:
         
         return success1 and success2
 
-    def test_approval_queue(self):
-        """Test Approval Queue endpoints"""
-        # Test get approvals
-        success1, approvals_response = self.run_test("Get Approval Queue", "GET", "api/v1/approvals", 200)
+    def test_approval_queue_module(self):
+        """Test Approval Queue Module - Comprehensive Testing"""
+        print("\n📋 APPROVAL QUEUE MODULE TESTS")
         
-        # Test approval action if we have pending approvals
-        if success1 and isinstance(approvals_response, list) and len(approvals_response) > 0:
-            approval_id = approvals_response[0].get('id')
-            if approval_id:
+        # First seed approval data
+        success_seed, seed_response = self.run_test("Seed Approval Data", "POST", "api/v1/approvals/seed", 200)
+        if success_seed and isinstance(seed_response, dict):
+            print(f"✅ Approval seeding: {seed_response.get('message', 'Success')}")
+        
+        # Test get approval rules (seeded)
+        success1, rules_response = self.run_test("Get Approval Rules (Seeded)", "GET", "api/v1/approvals/rules", 200)
+        if success1 and isinstance(rules_response, list):
+            print(f"✅ Found {len(rules_response)} approval rules")
+            if len(rules_response) > 0:
+                rule = rules_response[0]
+                required_fields = ['id', 'action_type', 'condition', 'required_role', 'sla_hours']
+                missing_fields = [field for field in required_fields if field not in rule]
+                if not missing_fields:
+                    print(f"✅ Rule structure complete: {rule['action_type']} - {rule['condition']}")
+                    print(f"   👤 Required Role: {rule['required_role']}")
+                    print(f"   ⏰ SLA: {rule['sla_hours']} hours")
+                else:
+                    print(f"⚠️  Rule missing fields: {missing_fields}")
+        
+        # Test get approval requests (mock/seeded)
+        success2, requests_response = self.run_test("Get Approval Requests (All)", "GET", "api/v1/approvals/requests", 200)
+        if success2 and isinstance(requests_response, list):
+            print(f"✅ Found {len(requests_response)} approval requests")
+        
+        # Test get approval requests with status filters
+        success3, pending_response = self.run_test("Get Pending Approval Requests", "GET", "api/v1/approvals/requests?status=pending", 200)
+        success4, approved_response = self.run_test("Get Approved Approval Requests", "GET", "api/v1/approvals/requests?status=approved", 200)
+        success5, rejected_response = self.run_test("Get Rejected Approval Requests", "GET", "api/v1/approvals/requests?status=rejected", 200)
+        
+        if success3 and isinstance(pending_response, list):
+            print(f"✅ Pending requests: {len(pending_response)}")
+        if success4 and isinstance(approved_response, list):
+            print(f"✅ Approved requests: {len(approved_response)}")
+        if success5 and isinstance(rejected_response, list):
+            print(f"✅ Rejected requests: {len(rejected_response)}")
+        
+        # Test get approval requests with category filters
+        success6, finance_response = self.run_test("Get Finance Approval Requests", "GET", "api/v1/approvals/requests?category=finance", 200)
+        success7, kyc_response = self.run_test("Get KYC Approval Requests", "GET", "api/v1/approvals/requests?category=kyc", 200)
+        
+        # Test creating a new approval request
+        new_request = {
+            "category": "finance",
+            "action_type": "withdrawal_approve",
+            "related_entity_id": "TX-TEST-001",
+            "requester_admin": "test_admin",
+            "requester_role": "admin",
+            "amount": 2500.0,
+            "details": {
+                "player_id": "player_123",
+                "withdrawal_method": "bank_transfer"
+            }
+        }
+        success8, create_response = self.run_test("Create Approval Request", "POST", "api/v1/approvals/requests", 200, new_request)
+        if success8 and isinstance(create_response, dict):
+            print(f"✅ Approval request created: {create_response.get('id', 'Unknown')}")
+            created_request_id = create_response.get('id')
+            
+            # Test approval actions on the created request
+            if created_request_id:
+                # Test approve action
+                success9, approve_response = self.run_test(f"Approve Request - {created_request_id}", "POST", f"api/v1/approvals/requests/{created_request_id}/action", 200, {
+                    "action": "approve",
+                    "note": "Test approval - all checks passed"
+                })
+                if success9 and isinstance(approve_response, dict):
+                    print(f"✅ Request approval successful: {approve_response.get('message', 'Success')}")
+        
+        # Test creating another request for reject action
+        reject_request = {
+            "category": "kyc",
+            "action_type": "kyc_document_review",
+            "related_entity_id": "DOC-TEST-002",
+            "requester_admin": "test_admin",
+            "requester_role": "admin",
+            "details": {
+                "player_id": "player_456",
+                "document_type": "passport"
+            }
+        }
+        success10, reject_create_response = self.run_test("Create Request for Reject Test", "POST", "api/v1/approvals/requests", 200, reject_request)
+        if success10 and isinstance(reject_create_response, dict):
+            reject_request_id = reject_create_response.get('id')
+            if reject_request_id:
                 # Test reject action
-                success2, _ = self.run_test(f"Reject Approval - {approval_id}", "POST", f"api/v1/approvals/{approval_id}/action", 200, {"action": "reject"})
-                return success1 and success2
-        else:
-            print("✅ Approval queue is empty (expected for clean system)")
-            return success1
+                success11, reject_response = self.run_test(f"Reject Request - {reject_request_id}", "POST", f"api/v1/approvals/requests/{reject_request_id}/action", 200, {
+                    "action": "reject",
+                    "note": "Test rejection - insufficient documentation"
+                })
+                if success11 and isinstance(reject_response, dict):
+                    print(f"✅ Request rejection successful: {reject_response.get('message', 'Success')}")
+        
+        # Test get delegations
+        success12, delegations_response = self.run_test("Get Delegations", "GET", "api/v1/approvals/delegations", 200)
+        if success12 and isinstance(delegations_response, list):
+            print(f"✅ Found {len(delegations_response)} delegations")
+        
+        # Test creating a new approval rule
+        new_rule = {
+            "action_type": "bonus_approve",
+            "condition": "amount > 1000",
+            "required_role": "manager",
+            "auto_approve": False,
+            "sla_hours": 48
+        }
+        success13, rule_create_response = self.run_test("Create Approval Rule", "POST", "api/v1/approvals/rules", 200, new_rule)
+        if success13 and isinstance(rule_create_response, dict):
+            print(f"✅ Approval rule created: {rule_create_response.get('action_type', 'Unknown')}")
+        
+        # Test creating a delegation
+        new_delegation = {
+            "from_admin_id": "admin_001",
+            "to_admin_id": "admin_002",
+            "start_date": "2025-01-01T00:00:00Z",
+            "end_date": "2025-01-31T23:59:59Z",
+            "categories": ["finance", "kyc"],
+            "active": True
+        }
+        success14, delegation_create_response = self.run_test("Create Delegation", "POST", "api/v1/approvals/delegations", 200, new_delegation)
+        if success14 and isinstance(delegation_create_response, dict):
+            print(f"✅ Delegation created: {delegation_create_response.get('id', 'Unknown')}")
+        
+        # Validate request structure if we have requests
+        if success2 and isinstance(requests_response, list) and len(requests_response) > 0:
+            request = requests_response[0]
+            required_fields = ['id', 'category', 'action_type', 'related_entity_id', 'requester_admin', 'status', 'created_at']
+            missing_fields = [field for field in required_fields if field not in request]
+            if not missing_fields:
+                print(f"✅ Request structure complete: {request['action_type']} - {request['status']}")
+                print(f"   📂 Category: {request['category']}")
+                print(f"   👤 Requester: {request['requester_admin']}")
+                print(f"   📅 Created: {request['created_at']}")
+            else:
+                print(f"⚠️  Request missing fields: {missing_fields}")
+        
+        return all([success_seed, success1, success2, success3, success4, success5, success6, success7, success8, success12, success13, success14])
+
+    def test_approval_queue(self):
+        """Test Approval Queue endpoints - Legacy method for compatibility"""
+        return self.test_approval_queue_module()
 
     def test_global_search(self):
         """Test Global Search endpoint"""
