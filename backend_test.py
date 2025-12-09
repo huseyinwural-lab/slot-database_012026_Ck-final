@@ -198,6 +198,67 @@ class CasinoAdminAPITester:
         print("⚠️  No players found to test game history endpoint")
         return False
 
+    def test_feature_flags(self):
+        """Test Feature Flags endpoints"""
+        # Test get feature flags
+        success1, flags_response = self.run_test("Get Feature Flags", "GET", "api/v1/features", 200)
+        
+        # Test create feature flag
+        new_flag = {
+            "key": "test_feature_flag",
+            "description": "Test feature flag for automated testing",
+            "is_enabled": False,
+            "rollout_percentage": 0
+        }
+        success2, create_response = self.run_test("Create Feature Flag", "POST", "api/v1/features", 200, new_flag)
+        
+        # Test toggle feature flag if we have flags
+        if success1 and isinstance(flags_response, list) and len(flags_response) > 0:
+            flag_id = flags_response[0].get('id')
+            if flag_id:
+                success3, toggle_response = self.run_test(f"Toggle Feature Flag - {flag_id}", "POST", f"api/v1/features/{flag_id}/toggle", 200)
+                if success3 and isinstance(toggle_response, dict):
+                    print(f"✅ Feature flag toggled, new state: {toggle_response.get('is_enabled')}")
+                return success1 and success2 and success3
+        
+        return success1 and success2
+
+    def test_approval_queue(self):
+        """Test Approval Queue endpoints"""
+        # Test get approvals
+        success1, approvals_response = self.run_test("Get Approval Queue", "GET", "api/v1/approvals", 200)
+        
+        # Test approval action if we have pending approvals
+        if success1 and isinstance(approvals_response, list) and len(approvals_response) > 0:
+            approval_id = approvals_response[0].get('id')
+            if approval_id:
+                # Test reject action
+                success2, _ = self.run_test(f"Reject Approval - {approval_id}", "POST", f"api/v1/approvals/{approval_id}/action", 200, {"action": "reject"})
+                return success1 and success2
+        else:
+            print("✅ Approval queue is empty (expected for clean system)")
+            return success1
+
+    def test_global_search(self):
+        """Test Global Search endpoint"""
+        # Test search with various queries
+        success1, search1 = self.run_test("Global Search - Player", "GET", "api/v1/search?q=highroller", 200)
+        success2, search2 = self.run_test("Global Search - Transaction", "GET", "api/v1/search?q=tx1", 200)
+        success3, search3 = self.run_test("Global Search - Empty", "GET", "api/v1/search?q=nonexistent", 200)
+        
+        # Validate search results structure
+        if success1 and isinstance(search1, list):
+            print(f"✅ Search returned {len(search1)} results for 'highroller'")
+            if len(search1) > 0:
+                result = search1[0]
+                required_fields = ['type', 'title', 'id']
+                if all(field in result for field in required_fields):
+                    print(f"✅ Search result structure is correct")
+                else:
+                    print(f"⚠️  Search result missing fields: {[f for f in required_fields if f not in result]}")
+        
+        return success1 and success2 and success3
+
     def test_nonexistent_endpoints(self):
         """Test some endpoints that should return 404"""
         success1, _ = self.run_test("Non-existent Player", "GET", "api/v1/players/nonexistent", 404)
