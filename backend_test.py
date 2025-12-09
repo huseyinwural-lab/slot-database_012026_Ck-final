@@ -316,6 +316,114 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_modules_kyc(self):
+        """Test KYC Module endpoints"""
+        print("\n📋 KYC MODULE TESTS")
+        
+        # Test get KYC documents
+        success1, kyc_response = self.run_test("Get KYC Documents", "GET", "api/v1/kyc", 200)
+        
+        # Test KYC with status filter
+        success2, _ = self.run_test("Get Pending KYC", "GET", "api/v1/kyc?status=pending", 200)
+        
+        # Test KYC review (if we have documents)
+        if success1 and isinstance(kyc_response, list) and len(kyc_response) > 0:
+            doc_id = kyc_response[0].get('id')
+            if doc_id:
+                review_data = {"status": "approved", "note": "Test approval"}
+                success3, _ = self.run_test(f"Review KYC Document - {doc_id}", "POST", f"api/v1/kyc/{doc_id}/review", 200, review_data)
+                return success1 and success2 and success3
+        
+        return success1 and success2
+
+    def test_modules_crm(self):
+        """Test CRM Module endpoints"""
+        print("\n📧 CRM MODULE TESTS")
+        
+        # Test get campaigns
+        success1, campaigns_response = self.run_test("Get CRM Campaigns", "GET", "api/v1/crm/campaigns", 200)
+        
+        # Test create campaign
+        new_campaign = {
+            "name": "Test Campaign",
+            "subject": "Test Subject",
+            "content": "Test content with {name} placeholder",
+            "segment": "test_segment",
+            "channel": "email"
+        }
+        success2, _ = self.run_test("Create CRM Campaign", "POST", "api/v1/crm/campaigns", 200, new_campaign)
+        
+        return success1 and success2
+
+    def test_modules_cms(self):
+        """Test CMS Module endpoints"""
+        print("\n🌐 CMS MODULE TESTS")
+        
+        # Test get pages
+        success1, _ = self.run_test("Get CMS Pages", "GET", "api/v1/cms/pages", 200)
+        
+        # Test get banners
+        success2, _ = self.run_test("Get CMS Banners", "GET", "api/v1/cms/banners", 200)
+        
+        return success1 and success2
+
+    def test_modules_affiliates(self):
+        """Test Affiliates Module endpoints"""
+        print("\n🤝 AFFILIATES MODULE TESTS")
+        
+        # Test get affiliates
+        success1, _ = self.run_test("Get Affiliates", "GET", "api/v1/affiliates", 200)
+        
+        return success1
+
+    def test_modules_risk(self):
+        """Test Risk Module endpoints"""
+        print("\n⚠️ RISK MODULE TESTS")
+        
+        # Test get risk rules
+        success1, _ = self.run_test("Get Risk Rules", "GET", "api/v1/risk/rules", 200)
+        
+        return success1
+
+    def test_modules_admin(self):
+        """Test Admin Users Module endpoints"""
+        print("\n👤 ADMIN USERS MODULE TESTS")
+        
+        # Test get admin users
+        success1, _ = self.run_test("Get Admin Users", "GET", "api/v1/admin/users", 200)
+        
+        return success1
+
+    def test_modules_logs(self):
+        """Test Logs Module endpoints"""
+        print("\n📜 LOGS MODULE TESTS")
+        
+        # Test get system logs
+        success1, _ = self.run_test("Get System Logs", "GET", "api/v1/logs/system", 200)
+        
+        # Test logs with service filter
+        success2, _ = self.run_test("Get Payment Logs", "GET", "api/v1/logs/system?service=payment", 200)
+        
+        return success1 and success2
+
+    def test_modules_rg(self):
+        """Test Responsible Gaming Module endpoints"""
+        print("\n⚖️ RESPONSIBLE GAMING MODULE TESTS")
+        
+        # Test get RG limits
+        success1, _ = self.run_test("Get RG Limits", "GET", "api/v1/rg/limits", 200)
+        
+        return success1
+
+    def test_modules_seed(self):
+        """Test Modules Seed endpoint"""
+        print("\n🌱 MODULES SEED TESTS")
+        
+        # Test seed modules data
+        success1, _ = self.run_test("Seed Modules Data", "POST", "api/v1/modules/seed", 200)
+        
+        return success1
+
     def test_nonexistent_endpoints(self):
         """Test some endpoints that should return 404"""
         success1, _ = self.run_test("Non-existent Player", "GET", "api/v1/players/nonexistent", 404)
