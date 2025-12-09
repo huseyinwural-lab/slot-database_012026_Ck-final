@@ -86,6 +86,20 @@ frontend:
         -working: true
         -agent: "testing"
         -comment: "✅ CHARGEBACKS INTEGRATION FULLY WORKING: 1) Chargeback Cases title and overview description display correctly. 2) Table calls GET /api/v1/finance/chargebacks API successfully and renders 4 chargeback cases with proper data (Case ID, Transaction, Risk Score, Fraud Cluster, Amount, Reason Code, Deadline, Status). 3) Upload Evidence functionality works perfectly - button opens dialog, shows selected case details, accepts evidence file URL input, calls POST /api/v1/finance/chargebacks/{case_id}/evidence API successfully, displays success toast 'Evidence uploaded', and closes dialog properly. 4) Status badges render correctly (Open, Evidence Gathering), risk scores display with proper color coding, and deadline formatting shows '298 days ago' correctly. All UI components and API integrations working without errors."
+  - task: "Game Settings Panel"
+    implemented: true
+    working: true
+    file: "src/components/games/GameConfigPanel.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented GameConfigPanel with 5 tabs (General, Math & RTP, Bets & Limits, Features, Logs) and full API integration for game configuration management."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ GAME SETTINGS PANEL FULLY WORKING: 1) /games page loads with 100 games, Config button opens modal with proper title 'Game Settings: [Game Name]'. 2) All 5 tabs visible and functional (General, Math & RTP, Bets & Limits, Features, Logs). 3) General tab: Fields populate from GET /api/v1/games/{id}/config/general, Save General works with POST returning 200 OK and success toast. 4) Math & RTP tab: RTP profile creation form loads correctly. 5) Bets & Limits tab: Bet configuration form with min/max/step/presets inputs. 6) Features tab: Feature toggles load (103 switches detected). 7) Logs tab: Displays config change logs with timestamps showing recent general_update actions. All backend APIs working (GET/POST general, GET rtp/bets/features/logs all return 200 OK). Modal closes properly, returns to games list. Core functionality working perfectly."
 
 metadata:
   created_by: "main_agent"
