@@ -119,6 +119,7 @@ class GameConfig(BaseModel):
     min_bet: float = 0.10
     max_bet: float = 100.00
     max_win_multiplier: int = 5000
+    min_balance_to_enter: float = 0.0 # New field: Min wallet balance required to open game
     bonus_buy_enabled: bool = False
     paytable: Optional[Paytable] = None
     jackpots: List[JackpotConfig] = []
