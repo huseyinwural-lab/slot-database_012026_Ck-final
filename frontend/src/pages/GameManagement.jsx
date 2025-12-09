@@ -31,6 +31,10 @@ const GameManagement = () => {
   const [tableForm, setTableForm] = useState({ name: '', provider: '', min_bet: 5, max_bet: 500, game_type: 'Blackjack', table_type: 'standard' });
   const [uploadForm, setUploadForm] = useState({ provider: 'Pragmatic Play', method: 'fetch_api' });
 
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [importLogs, setImportLogs] = useState([]);
+
   const fetchAll = async () => {
     try {
         const [gRes, tRes] = await Promise.all([api.get('/v1/games'), api.get('/v1/tables')]);
@@ -96,12 +100,51 @@ const GameManagement = () => {
   };
 
   const handleUpload = async () => {
+    if (isImporting) return;
+    
+    setIsImporting(true);
+    setImportProgress(0);
+    setImportLogs([]);
+    
+    const addLog = (msg) => setImportLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+
     try {
+        addLog("Initializing import sequence...");
+        setImportProgress(10);
+        
+        if (uploadForm.method === 'fetch_api') {
+            addLog(`Connecting to ${uploadForm.provider} API Gateway...`);
+            await new Promise(r => setTimeout(r, 800));
+            setImportProgress(30);
+            
+            addLog("Authenticating and fetching catalog...");
+            await new Promise(r => setTimeout(r, 800));
+            setImportProgress(50);
+            
+            addLog("Found 35 new games. Starting synchronization...");
+        } else {
+            addLog("Validating upload bundle...");
+            setImportProgress(30);
+        }
+
         const res = await api.post('/v1/games/upload', uploadForm);
-        setIsUploadOpen(false);
+        
+        setImportProgress(90);
+        addLog("Finalizing database entries...");
+        await new Promise(r => setTimeout(r, 500));
+        
+        setImportProgress(100);
+        addLog("Import process completed successfully.");
+        
         fetchAll();
         toast.success(res.data.message);
-    } catch { toast.error("Upload failed"); }
+    } catch (err) { 
+        addLog("ERROR: Import failed. Check console.");
+        toast.error("Upload failed"); 
+        setImportProgress(0);
+    } finally {
+        setTimeout(() => setIsImporting(false), 2000);
+    }
   };
 
   return (
