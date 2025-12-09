@@ -157,5 +157,5 @@ async def time_travel(req: TimeTravelRequest):
 @router.get("/logs")
 async def get_sim_logs(limit: int = 50):
     db = get_db()
-    logs = await db.sim_logs.find().sort("timestamp", -1).limit(limit).to_list(limit)
+    logs = await db.sim_logs.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit).to_list(limit)
     return logs
