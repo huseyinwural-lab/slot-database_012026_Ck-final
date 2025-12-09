@@ -5,7 +5,8 @@ import uuid
 import random
 from app.models.core import (
     Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus, 
-    TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage
+    TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
+    FeatureFlag, ApprovalRequest
 )
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -64,7 +65,8 @@ async def get_players(status: Optional[str] = None, search: Optional[str] = None
     if search:
         query["$or"] = [
             {"username": {"$regex": search, "$options": "i"}},
-            {"email": {"$regex": search, "$options": "i"}}
+            {"email": {"$regex": search, "$options": "i"}},
+            {"id": search} 
         ]
     players = await db.players.find(query).limit(100).to_list(100)
     return [Player(**p) for p in players]
@@ -80,20 +82,18 @@ async def get_player_detail(player_id: str):
 @router.put("/players/{player_id}")
 async def update_player(player_id: str, update_data: Dict = Body(...)):
     db = get_db()
-    # Simple update
     await db.players.update_one({"id": player_id}, {"$set": update_data})
     return {"message": "Player updated"}
 
 @router.get("/players/{player_id}/games")
 async def get_player_game_history(player_id: str):
-    # Mock game history
     return [
         {"game": "Sweet Bonanza", "provider": "Pragmatic", "bet": 10, "win": 0, "time": datetime.now(timezone.utc)},
         {"game": "Gates of Olympus", "provider": "Pragmatic", "bet": 5, "win": 50, "time": datetime.now(timezone.utc)},
         {"game": "Blackjack VIP", "provider": "Evolution", "bet": 100, "win": 200, "time": datetime.now(timezone.utc)},
     ]
 
-# --- FINANCE ---
+# --- FINANCE & APPROVALS ---
 @router.get("/finance/transactions", response_model=List[Transaction])
 async def get_transactions(type: Optional[str] = None):
     db = get_db()
@@ -110,15 +110,103 @@ async def approve_transaction(tx_id: str):
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
+    # 4-Eyes Principle Logic (Simplified)
+    # If amount > 1000, move to Approval Queue instead of instant completion
+    if tx['amount'] > 1000 and tx['status'] == 'pending':
+        # Create approval request
+        approval_req = ApprovalRequest(
+            type="withdrawal_high_value",
+            related_entity_id=tx_id,
+            requester_admin="system_bot",
+            amount=tx['amount'],
+            details={"player_id": tx['player_id'], "method": tx['method']}
+        )
+        await db.approvals.insert_one(approval_req.model_dump())
+        await db.transactions.update_one({"id": tx_id}, {"$set": {"status": "waiting_second_approval"}})
+        return {"message": "High value transaction moved to Approval Queue (4-Eyes Check)"}
+
+    # Normal Flow
     await db.transactions.update_one(
         {"id": tx_id}, 
         {"$set": {"status": "completed", "processed_at": datetime.now(timezone.utc)}}
     )
-    
     if tx['type'] == 'deposit':
         await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
     
     return {"message": "Approved"}
+
+# --- APPROVAL QUEUE ---
+@router.get("/approvals", response_model=List[ApprovalRequest])
+async def get_approvals():
+    db = get_db()
+    approvals = await db.approvals.find({"status": "pending"}).to_list(100)
+    return [ApprovalRequest(**a) for a in approvals]
+
+@router.post("/approvals/{req_id}/action")
+async def action_approval(req_id: str, action: str = Body(..., embed=True)):
+    db = get_db()
+    req = await db.approvals.find_one({"id": req_id})
+    if not req:
+        raise HTTPException(404, "Request not found")
+    
+    new_status = "approved" if action == "approve" else "rejected"
+    await db.approvals.update_one({"id": req_id}, {"$set": {"status": new_status}})
+
+    # If approved, finalize the transaction
+    if new_status == "approved" and req['type'] == 'withdrawal_high_value':
+        await db.transactions.update_one(
+            {"id": req['related_entity_id']}, 
+            {"$set": {"status": "completed", "processed_at": datetime.now(timezone.utc)}}
+        )
+
+    return {"message": f"Request {new_status}"}
+
+# --- FEATURE FLAGS ---
+@router.get("/features", response_model=List[FeatureFlag])
+async def get_feature_flags():
+    db = get_db()
+    flags = await db.features.find().to_list(100)
+    return [FeatureFlag(**f) for f in flags]
+
+@router.post("/features")
+async def create_feature_flag(flag: FeatureFlag):
+    db = get_db()
+    await db.features.insert_one(flag.model_dump())
+    return flag
+
+@router.post("/features/{flag_id}/toggle")
+async def toggle_feature(flag_id: str):
+    db = get_db()
+    flag = await db.features.find_one({"id": flag_id})
+    if flag:
+        new_val = not flag['is_enabled']
+        await db.features.update_one({"id": flag_id}, {"$set": {"is_enabled": new_val}})
+        return {"is_enabled": new_val}
+    raise HTTPException(404, "Flag not found")
+
+# --- GLOBAL SEARCH ---
+@router.get("/search")
+async def global_search(q: str):
+    db = get_db()
+    results = []
+    
+    # Search Players
+    players = await db.players.find({
+        "$or": [
+            {"username": {"$regex": q, "$options": "i"}},
+            {"email": {"$regex": q, "$options": "i"}},
+            {"id": q}
+        ]
+    }).limit(5).to_list(5)
+    for p in players:
+        results.append({"type": "player", "title": p['username'], "id": p['id'], "details": p['email']})
+
+    # Search Transactions
+    txs = await db.transactions.find({"id": q}).limit(5).to_list(5)
+    for t in txs:
+        results.append({"type": "transaction", "title": f"TX: {t['amount']}", "id": t['id'], "details": t['status']})
+
+    return results
 
 # --- GAMES ---
 @router.get("/games", response_model=List[Game])
@@ -187,19 +275,26 @@ async def seed_mock_data(db):
     await db.transactions.insert_many([
         Transaction(id="tx1", player_id="p1", type=TransactionType.DEPOSIT, amount=10000, status=TransactionStatus.COMPLETED, method="crypto").model_dump(),
         Transaction(id="tx2", player_id="p1", type=TransactionType.WITHDRAWAL, amount=5000, status=TransactionStatus.PENDING, method="bank_transfer").model_dump(),
+        Transaction(id="tx3", player_id="p1", type=TransactionType.WITHDRAWAL, amount=15000, status=TransactionStatus.WAITING_SECOND_APPROVAL, method="crypto").model_dump(), # High value example
     ])
-    # Games
+    # Approvals
+    await db.approvals.insert_many([
+        ApprovalRequest(type="withdrawal_high_value", related_entity_id="tx3", requester_admin="system_bot", amount=15000, details={"player_id": "p1"}).model_dump()
+    ])
+    # Features
+    await db.features.insert_many([
+        FeatureFlag(key="new_bonus_engine", description="Enable V2 Bonus System with dynamic segmentation", is_enabled=False).model_dump(),
+        FeatureFlag(key="ai_fraud_check", description="Enable real-time AI scoring on deposits", is_enabled=True).model_dump(),
+        FeatureFlag(key="dark_mode_v2", description="New contrast layout", is_enabled=False, rollout_percentage=10).model_dump(),
+    ])
+    # Games & Bonuses (previous seed)
     await db.games.insert_many([
         Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", rtp=96.5).model_dump(),
         Game(name="Lightning Roulette", provider="Evolution", category="Live", rtp=97.3).model_dump(),
-        Game(name="Aviator", provider="Spribe", category="Crash", rtp=97.0).model_dump(),
     ])
-    # Bonuses
     await db.bonuses.insert_many([
         Bonus(name="Welcome Pack", type="deposit", amount=100, wager_req=30).model_dump(),
-        Bonus(name="Weekend Cashback", type="cashback", amount=10, wager_req=1).model_dump(),
     ])
-    # Tickets
     await db.tickets.insert_many([
         Ticket(id="t1", player_id="p2", player_username="newbie_luck", subject="Deposit issue", messages=[
             TicketMessage(sender="player", text="My deposit is not showing up.").model_dump()

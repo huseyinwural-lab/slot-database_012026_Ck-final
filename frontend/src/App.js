@@ -5,10 +5,12 @@ import Dashboard from './pages/Dashboard';
 import PlayerList from './pages/PlayerList';
 import PlayerDetail from './pages/PlayerDetail';
 import Finance from './pages/Finance';
+import ApprovalQueue from './pages/ApprovalQueue';
 import GameManagement from './pages/GameManagement';
 import BonusManagement from './pages/BonusManagement';
 import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
+import FeatureFlags from './pages/FeatureFlags';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -20,11 +22,13 @@ function App() {
           <Route path="/players" element={<PlayerList />} />
           <Route path="/players/:id" element={<PlayerDetail />} />
           <Route path="/finance" element={<Finance />} />
+          <Route path="/approvals" element={<ApprovalQueue />} />
           <Route path="/games" element={<GameManagement />} />
           <Route path="/bonuses" element={<BonusManagement />} />
           <Route path="/fraud" element={<FraudCheck />} />
           <Route path="/support" element={<Support />} />
-          <Route path="/settings" element={<div className="p-10 text-xl font-bold">Settings Panel (Coming Soon)</div>} />
+          <Route path="/features" element={<FeatureFlags />} />
+          <Route path="/settings" element={<div className="p-10 text-xl font-bold">Settings Panel (Multi-Tenant Config)</div>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <Toaster position="top-right" theme="dark" />

@@ -1,9 +1,13 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, CreditCard, ShieldAlert, 
-  Gamepad2, Gift, MessageSquare, Settings, LogOut 
+  Gamepad2, Gift, MessageSquare, Settings, LogOut,
+  ListChecks, ToggleRight, Search
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import api from '../services/api';
 
 const SidebarItem = ({ to, icon: Icon, label }) => (
   <NavLink
@@ -22,6 +26,19 @@ const SidebarItem = ({ to, icon: Icon, label }) => (
 );
 
 const Layout = ({ children }) => {
+  const [open, setOpen] = useState(false);
+  const [results, setResults] = useState([]);
+  const navigate = useNavigate();
+
+  const handleSearch = async (val) => {
+    if (val.length > 2) {
+      try {
+        const res = await api.get(`/v1/search?q=${val}`);
+        setResults(res.data);
+      } catch (e) { console.error(e); }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
@@ -36,10 +53,12 @@ const Layout = ({ children }) => {
           <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" />
           <SidebarItem to="/players" icon={Users} label="Players" />
           <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
+          <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />
           <SidebarItem to="/games" icon={Gamepad2} label="Games" />
           <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" />
           <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />
           <SidebarItem to="/support" icon={MessageSquare} label="Support" />
+          <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />
           <SidebarItem to="/settings" icon={Settings} label="Settings" />
         </nav>
 
@@ -54,7 +73,16 @@ const Layout = ({ children }) => {
       {/* Main Content */}
       <main className="flex-1 ml-64 min-h-screen flex flex-col">
         <header className="h-16 border-b border-border bg-card/50 backdrop-blur px-6 flex items-center justify-between sticky top-0 z-10">
-          <h2 className="text-lg font-semibold">Admin Panel</h2>
+          <div className="flex items-center gap-4 flex-1">
+             <div className="relative w-full max-w-md">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Global Search (Press Ctrl+K)"
+                  className="pl-8 bg-secondary/50 border-0"
+                  onFocus={() => setOpen(true)}
+                />
+             </div>
+          </div>
           <div className="flex items-center gap-4">
             <div className="text-sm text-right hidden md:block">
               <p className="font-medium">Super Admin</p>
@@ -65,9 +93,31 @@ const Layout = ({ children }) => {
             </div>
           </div>
         </header>
+        
         <div className="p-6 flex-1 overflow-auto">
           {children}
         </div>
+
+        {/* Global Search Dialog */}
+        <CommandDialog open={open} onOpenChange={setOpen}>
+          <CommandInput placeholder="Type to search players, transactions..." onValueChange={handleSearch} />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading="Results">
+                {results.map((item, i) => (
+                    <CommandItem key={i} onSelect={() => {
+                        setOpen(false);
+                        if(item.type === 'player') navigate(`/players/${item.id}`);
+                    }}>
+                        {item.type === 'player' ? <Users className="mr-2 h-4 w-4" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                        <span>{item.title}</span>
+                        <span className="ml-2 text-muted-foreground text-xs">({item.details})</span>
+                    </CommandItem>
+                ))}
+            </CommandGroup>
+          </CommandList>
+        </CommandDialog>
+
       </main>
     </div>
   );
