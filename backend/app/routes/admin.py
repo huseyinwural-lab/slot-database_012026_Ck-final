@@ -276,53 +276,212 @@ async def update_security_ip_restrictions(
 async def seed_admin():
     db = get_db()
     
-    # Seed basic admin and role
-    if await db.admins.count_documents({}) == 0:
-        admin_user = AdminUser(username="superadmin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
-        await db.admins.insert_one(admin_user.model_dump())
-        
-        # Seed sample activity log
-        activity_log = AdminActivityLog(
-            admin_id=admin_user.id,
-            admin_name="Super Admin",
-            action="system_setup",
-            module="admin",
-            ip_address="127.0.0.1",
-            before_snapshot={},
-            after_snapshot={"status": "initialized"}
-        )
-        await db.admin_activity_log.insert_one(activity_log.model_dump())
-        
-        # Seed sample login history
-        login_history = AdminLoginHistory(
-            admin_id=admin_user.id,
-            admin_name="Super Admin",
-            ip_address="127.0.0.1",
-            device_info="Chrome/120.0 (Windows)",
-            result="success"
-        )
-        await db.admin_login_history.insert_one(login_history.model_dump())
+    # Always seed fresh data for demo
+    admin_count = await db.admins.count_documents({})
     
-    if await db.admin_roles.count_documents({}) == 0:
-        role = AdminRole(name="Super Admin", description="Full Access", permissions=["*"], user_count=1)
-        await db.admin_roles.insert_one(role.model_dump())
+    # Create admin users
+    if admin_count == 0:
+        admin_users = [
+            AdminUser(username="superadmin", email="admin@casino.com", full_name="Super Admin", role="super_admin"),
+            AdminUser(username="manager1", email="manager@casino.com", full_name="Ahmet Yılmaz", role="manager"),
+            AdminUser(username="support1", email="support@casino.com", full_name="Ayşe Demir", role="support")
+        ]
+        for admin in admin_users:
+            await db.admins.insert_one(admin.model_dump())
         
-        # Seed permission matrix for super admin role
-        modules = ["players", "finance", "games", "bonuses", "support", "risk", "cms", "reports"]
-        for module in modules:
-            matrix = AdminPermissionMatrix(
-                role_id=role.id,
-                role_name="Super Admin",
-                module=module,
-                permissions={
-                    "read": True,
-                    "write": True,
-                    "approve": True,
-                    "export": True,
-                    "restricted": True
-                },
-                updated_by="system"
+        # Seed activity logs for all admins
+        activity_logs = [
+            AdminActivityLog(
+                admin_id=admin_users[0].id,
+                admin_name="Super Admin",
+                action="player_limit_change",
+                module="players",
+                ip_address="192.168.1.100",
+                before_snapshot={"deposit_limit": 1000},
+                after_snapshot={"deposit_limit": 5000},
+                risk_level="medium"
+            ),
+            AdminActivityLog(
+                admin_id=admin_users[0].id,
+                admin_name="Super Admin",
+                action="bonus_manual_load",
+                module="bonuses",
+                ip_address="192.168.1.100",
+                before_snapshot={},
+                after_snapshot={"bonus_amount": 100, "player_id": "p123"},
+                risk_level="high"
+            ),
+            AdminActivityLog(
+                admin_id=admin_users[1].id,
+                admin_name="Ahmet Yılmaz",
+                action="game_rtp_change",
+                module="games",
+                ip_address="192.168.1.101",
+                before_snapshot={"rtp": 96.5},
+                after_snapshot={"rtp": 95.0},
+                risk_level="critical"
+            ),
+            AdminActivityLog(
+                admin_id=admin_users[1].id,
+                admin_name="Ahmet Yılmaz",
+                action="withdrawal_approve",
+                module="finance",
+                ip_address="192.168.1.101",
+                before_snapshot={},
+                after_snapshot={"amount": 10000, "player_id": "p456"},
+                risk_level="high"
+            ),
+            AdminActivityLog(
+                admin_id=admin_users[2].id,
+                admin_name="Ayşe Demir",
+                action="cms_content_update",
+                module="cms",
+                ip_address="192.168.1.102",
+                before_snapshot={"title": "Old Title"},
+                after_snapshot={"title": "New Title"},
+                risk_level="low"
             )
-            await db.admin_permission_matrix.insert_one(matrix.model_dump())
+        ]
+        for log in activity_logs:
+            await db.admin_activity_log.insert_one(log.model_dump())
+        
+        # Seed login history
+        login_history_entries = [
+            AdminLoginHistory(
+                admin_id=admin_users[0].id,
+                admin_name="Super Admin",
+                ip_address="192.168.1.100",
+                device_info="Chrome/120.0 (Windows 10)",
+                location="Istanbul, TR",
+                result="success"
+            ),
+            AdminLoginHistory(
+                admin_id=admin_users[0].id,
+                admin_name="Super Admin",
+                ip_address="192.168.1.100",
+                device_info="Chrome/120.0 (Windows 10)",
+                location="Istanbul, TR",
+                result="success"
+            ),
+            AdminLoginHistory(
+                admin_id=admin_users[1].id,
+                admin_name="Ahmet Yılmaz",
+                ip_address="192.168.1.101",
+                device_info="Firefox/119.0 (Mac OS)",
+                location="Ankara, TR",
+                result="failed",
+                failure_reason="wrong_password",
+                is_suspicious=True
+            ),
+            AdminLoginHistory(
+                admin_id=admin_users[1].id,
+                admin_name="Ahmet Yılmaz",
+                ip_address="192.168.1.101",
+                device_info="Firefox/119.0 (Mac OS)",
+                location="Ankara, TR",
+                result="success"
+            ),
+            AdminLoginHistory(
+                admin_id=admin_users[2].id,
+                admin_name="Ayşe Demir",
+                ip_address="10.0.0.50",
+                device_info="Safari/17.0 (iOS 17)",
+                location="Izmir, TR",
+                result="success"
+            ),
+            AdminLoginHistory(
+                admin_id=admin_users[0].id,
+                admin_name="Super Admin",
+                ip_address="203.0.113.45",
+                device_info="Chrome/120.0 (Unknown)",
+                location="Moscow, RU",
+                result="failed",
+                failure_reason="ip_blocked",
+                is_suspicious=True
+            )
+        ]
+        for entry in login_history_entries:
+            await db.admin_login_history.insert_one(entry.model_dump())
+        
+        # Seed IP restrictions
+        ip_restrictions = [
+            AdminIPRestriction(
+                admin_id=None,
+                ip_address="192.168.1.0/24",
+                restriction_type="allowed",
+                reason="Office network",
+                added_by="system"
+            ),
+            AdminIPRestriction(
+                admin_id=None,
+                ip_address="203.0.113.0/24",
+                restriction_type="blocked",
+                reason="Suspicious login attempts",
+                added_by="Super Admin"
+            )
+        ]
+        for restriction in ip_restrictions:
+            await db.admin_ip_restrictions.insert_one(restriction.model_dump())
+        
+        # Seed device restrictions
+        device_restrictions = [
+            AdminDeviceRestriction(
+                admin_id=admin_users[0].id,
+                device_fingerprint="fp_abc123xyz",
+                device_name="Work Laptop",
+                device_type="desktop",
+                browser_info="Chrome 120 / Windows 10",
+                status="approved",
+                approved_by="system"
+            ),
+            AdminDeviceRestriction(
+                admin_id=admin_users[1].id,
+                device_fingerprint="fp_def456uvw",
+                device_name="iPhone 15",
+                device_type="mobile",
+                browser_info="Safari 17 / iOS",
+                status="pending"
+            ),
+            AdminDeviceRestriction(
+                admin_id=admin_users[2].id,
+                device_fingerprint="fp_ghi789rst",
+                device_name="Unknown Device",
+                device_type="unknown",
+                browser_info="Unknown",
+                status="blocked",
+                approved_by="Super Admin"
+            )
+        ]
+        for device in device_restrictions:
+            await db.admin_device_restrictions.insert_one(device.model_dump())
+    
+    # Seed roles
+    if await db.admin_roles.count_documents({}) == 0:
+        roles = [
+            AdminRole(name="Super Admin", description="Tam Yetkili", permissions=["*"], user_count=1),
+            AdminRole(name="Manager", description="Yönetici - Çoğu modüle erişim", permissions=["players:read", "players:write", "finance:read", "games:read"], user_count=1),
+            AdminRole(name="Support", description="Destek - Sadece okuma yetkisi", permissions=["players:read", "support:read", "support:write"], user_count=1)
+        ]
+        for role in roles:
+            await db.admin_roles.insert_one(role.model_dump())
+            
+            # Seed permission matrix for each role
+            modules = ["players", "finance", "games", "bonuses", "support", "risk", "cms", "reports"]
+            for module in modules:
+                if role.name == "Super Admin":
+                    perms = {"read": True, "write": True, "approve": True, "export": True, "restricted": True}
+                elif role.name == "Manager":
+                    perms = {"read": True, "write": module in ["players", "games"], "approve": module == "finance", "export": True, "restricted": False}
+                else:  # Support
+                    perms = {"read": module in ["players", "support"], "write": module == "support", "approve": False, "export": False, "restricted": False}
+                    
+                matrix = AdminPermissionMatrix(
+                    role_id=role.id,
+                    role_name=role.name,
+                    module=module,
+                    permissions=perms,
+                    updated_by="system"
+                )
+                await db.admin_permission_matrix.insert_one(matrix.model_dump())
     
     return {"message": "Admin Seeded with Critical Modules"}
