@@ -52,7 +52,16 @@ const GameManagement = () => {
 
   const openConfig = (game) => {
     setSelectedGame(game);
-    setConfigForm(game.configuration || { rtp: 96.0, volatility: 'medium' });
+    const conf = game.configuration || {};
+    setConfigForm({
+        rtp: conf.rtp || 96.0,
+        volatility: conf.volatility || 'medium',
+        min_bet: conf.min_bet || 0.1,
+        max_bet: conf.max_bet || 100,
+        max_win_multiplier: conf.max_win_multiplier || 5000,
+        min_balance_to_enter: conf.min_balance_to_enter || 0,
+        paytable_id: conf.paytable_id || 'standard'
+    });
     setStatusForm({
         business_status: game.business_status || 'draft',
         runtime_status: game.runtime_status || 'offline',
