@@ -32,7 +32,6 @@ class TransactionStatus(str, Enum):
     WAITING_SECOND_APPROVAL = "waiting_second_approval" 
     FRAUD_FLAGGED = "fraud_flagged"
 
-# --- NEW GAME STATUS ENUMS ---
 class BusinessStatus(str, Enum):
     DRAFT = "draft"
     PENDING_APPROVAL = "pending_approval"
@@ -98,11 +97,11 @@ class Transaction(BaseModel):
 
 class Paytable(BaseModel):
     version: str = "1.0.0"
-    symbols: List[Dict[str, Any]] = [] # {id, name, pays: [x3, x4, x5]}
+    symbols: List[Dict[str, Any]] = [] 
     lines: int = 20
 
 class JackpotConfig(BaseModel):
-    type: str # grand, major, minor, mini
+    type: str 
     seed_amount: float
     contribution_percent: float
     hit_frequency: float
@@ -110,7 +109,7 @@ class JackpotConfig(BaseModel):
 
 class ReelStrip(BaseModel):
     reel_id: int
-    symbols: List[str] # ["A", "K", "Q", "J", ...]
+    symbols: List[str] 
     weights: Optional[List[int]] = None
 
 class GameConfig(BaseModel):
@@ -119,7 +118,7 @@ class GameConfig(BaseModel):
     min_bet: float = 0.10
     max_bet: float = 100.00
     max_win_multiplier: int = 5000
-    min_balance_to_enter: float = 0.0 # New field: Min wallet balance required to open game
+    min_balance_to_enter: float = 0.0
     bonus_buy_enabled: bool = False
     paytable: Optional[Paytable] = None
     jackpots: List[JackpotConfig] = []
@@ -132,43 +131,33 @@ class Game(BaseModel):
     name: str
     provider: str
     category: str 
-    
-    # New Status Fields
     business_status: BusinessStatus = BusinessStatus.DRAFT
     runtime_status: RuntimeStatus = RuntimeStatus.OFFLINE
-    
-    # New Special Fields
     is_special_game: bool = False
     special_type: SpecialType = SpecialType.NONE
-    
     image_url: Optional[str] = None
     configuration: GameConfig = Field(default_factory=GameConfig)
     tags: List[str] = []
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    
-    # Auto-Suggestion Flags (Transient)
     suggestion_reason: Optional[str] = None
 
 class CustomTable(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    game_type: str # Blackjack, Roulette
+    game_type: str 
     provider: str
-    
-    # Updated Fields
     business_status: BusinessStatus = BusinessStatus.DRAFT
     runtime_status: RuntimeStatus = RuntimeStatus.OFFLINE
     is_special_game: bool = False
     special_type: SpecialType = SpecialType.NONE
-    
     currency: str = "USD"
     min_bet: float
     max_bet: float
     seats: int = 7
     dealer_language: str = "EN"
-    schedule_start: Optional[str] = None # "18:00"
-    schedule_end: Optional[str] = None # "02:00"
-    visibility_segments: List[str] = [] # ["VIP", "TR"]
+    schedule_start: Optional[str] = None 
+    schedule_end: Optional[str] = None 
+    visibility_segments: List[str] = [] 
 
 class GameUploadLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -179,26 +168,106 @@ class GameUploadLog(BaseModel):
     error_count: int
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-# --- BONUS & OTHERS ---
+# --- BONUS SYSTEM (EXPANDED) ---
+
+class BonusType(str, Enum):
+    # Financial
+    DEPOSIT_MATCH = "deposit_match"
+    THRESHOLD_DEPOSIT = "threshold_deposit"
+    HIGH_ROLLER = "high_roller"
+    MANUAL_COMP = "manual_comp"
+    MONEYBACK = "moneyback"
+    MILESTONE = "milestone"
+    LADDER = "ladder"
+    
+    # Balance & RTP
+    RTP_BOOSTER = "rtp_booster"
+    GUARANTEED_WIN = "guaranteed_win"
+    SPINS_POWERUP = "spins_powerup"
+    MYSTERY_RTP = "mystery_rtp"
+    RAKEBACK = "rakeback"
+    
+    # Non-Deposit
+    WELCOME_NO_DEP = "welcome_no_dep"
+    REFERRAL = "referral"
+    KYC_COMPLETION = "kyc_completion"
+    REACTIVATION = "reactivation"
+    BIRTHDAY = "birthday"
+    
+    # Free Spins
+    FREE_SPIN_PACKAGE = "fs_package"
+    MULTI_GAME_BUNDLE = "fs_bundle"
+    FS_PLUS_BONUS = "fs_plus_bonus"
+    VIP_FS_RELOAD = "vip_fs_reload"
+    
+    # Cashback
+    CASHBACK_LOSS = "loss_cashback"
+    CASHBACK_PERIODIC = "periodic_cashback"
+    CASHBACK_PROVIDER = "provider_cashback"
+    CASHBACK_GAME = "game_cashback"
+
+class BonusTrigger(str, Enum):
+    MANUAL = "manual"
+    REGISTRATION = "registration"
+    FIRST_LOGIN = "first_login"
+    FIRST_DEPOSIT = "first_deposit"
+    DEPOSIT_X = "deposit_amount"
+    LOSS_X = "loss_amount"
+    BET_X = "bet_amount"
+    VIP_LEVEL_UP = "vip_level_up"
+    SEGMENT_CHANGE = "segment_change"
+    REFERRAL = "referral"
+    TOURNAMENT = "tournament"
+    RANDOM = "random"
+
+class LadderTier(BaseModel):
+    level: int
+    deposit_amount: float
+    reward_percent: float
 
 class BonusRule(BaseModel):
+    # Financial
     min_deposit: Optional[float] = None
-    reward_amount: Optional[float] = None
-    reward_percentage: Optional[float] = None
+    reward_amount: Optional[float] = None # Fixed amount
+    reward_percentage: Optional[float] = None # % Match
+    max_reward: Optional[float] = None
+    
+    # RTP / Balance
     luck_boost_factor: Optional[float] = None
     luck_boost_spins: Optional[int] = None
+    rtp_boost_percent: Optional[float] = None # e.g. +2.0%
+    guaranteed_win_spins: Optional[int] = None
+    
+    # Free Spins
+    fs_game_ids: List[str] = []
+    fs_count: Optional[int] = None
+    fs_bet_value: Optional[float] = None
+    
+    # Cashback
     cashback_percentage: Optional[float] = None
+    provider_ids: List[str] = [] # Specific providers
+    game_ids: List[str] = [] # Specific games
+    
+    # Ladder / Milestone
+    ladder_tiers: List[LadderTier] = []
+    milestone_target: Optional[float] = None # e.g. wager 10000
+    
+    # Time
+    valid_days: int = 7
 
 class Bonus(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    type: str
+    type: BonusType = BonusType.DEPOSIT_MATCH
+    category: str = "Financial" # Financial, RTP, Non-Deposit, FreeSpin, Cashback
+    trigger: BonusTrigger = BonusTrigger.MANUAL
     description: str = ""
     wager_req: int = 35
     status: str = "active"
     valid_until: Optional[datetime] = None
     rules: BonusRule = Field(default_factory=BonusRule)
     auto_apply: bool = False
+    tags: List[str] = []
 
 class TicketMessage(BaseModel):
     sender: str 
