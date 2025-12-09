@@ -2659,6 +2659,9 @@ def main():
     # Run all tests
     test_results = []
     
+    print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
+    test_results.append(("Review Request Specific", tester.test_review_request_specific()))
+    
     print("\n📊 CORE API TESTS")
     test_results.append(("Health Check", tester.test_health_check()))
     
