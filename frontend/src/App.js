@@ -54,7 +54,7 @@ function App() {
           <Route path="/rg" element={<ResponsibleGaming />} />
           <Route path="/reports" element={<Reports />} />
           
-          <Route path="/settings" element={<div className="p-10 text-xl font-bold">Settings Panel (Multi-Tenant Config)</div>} />
+          <Route path="/settings" element={<SettingsPanel />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <Toaster position="top-right" theme="dark" />
