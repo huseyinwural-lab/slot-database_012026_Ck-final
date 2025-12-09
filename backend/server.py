@@ -56,6 +56,10 @@ app.include_router(simulator.router)
 from app.routes import feature_flags
 app.include_router(feature_flags.router)
 
+# Simulation Lab
+from app.routes import simulation_lab
+app.include_router(simulation_lab.router)
+
 @app.get("/api/health")
 async def health_check():
     return {
