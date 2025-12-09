@@ -6,7 +6,8 @@ import random
 from app.models.core import (
     Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus, 
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
-    FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric, LoginLog
+    FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric, LoginLog,
+    FinancialReport
 )
 from app.models.modules import KYCDocument
 from config import settings
@@ -22,15 +23,11 @@ def get_db():
 @router.get("/dashboard/stats", response_model=DashboardStats)
 async def get_dashboard_stats():
     db = get_db()
-    
-    # Check if mock data needed
     if await db.players.count_documents({}) == 0:
         await seed_mock_data(db)
 
     now = datetime.now(timezone.utc)
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    # Mock aggregation for MVP speed
+    # Mock data for MVP
     bets_today = 154200.50
     wins_today = 138000.00
     ggr_today = bets_today - wins_today
@@ -97,49 +94,31 @@ async def get_player_detail(player_id: str):
 @router.put("/players/{player_id}")
 async def update_player(player_id: str, update_data: Dict = Body(...)):
     db = get_db()
-    # Ensure sensitive updates are logged (Audit Log)
     await db.audit_logs.insert_one({
-        "admin_id": "current_admin",
-        "action": "update_player",
-        "target_id": player_id,
-        "details": str(update_data),
-        "timestamp": datetime.now(timezone.utc)
+        "admin_id": "current_admin", "action": "update_player", "target_id": player_id,
+        "details": str(update_data), "timestamp": datetime.now(timezone.utc)
     })
-    
     await db.players.update_one({"id": player_id}, {"$set": update_data})
     return {"message": "Player updated"}
 
 @router.post("/players/{player_id}/balance")
 async def manual_balance_adjustment(player_id: str, amount: float = Body(...), type: str = Body(...), note: str = Body(...)):
     db = get_db()
-    # 4-Eyes Check for large amounts
     if abs(amount) > 1000:
         approval_req = ApprovalRequest(
-            type="manual_adjustment",
-            related_entity_id=player_id,
-            requester_admin="current_admin",
-            amount=amount,
-            details={"type": type, "note": note}
+            type="manual_adjustment", related_entity_id=player_id, requester_admin="current_admin",
+            amount=amount, details={"type": type, "note": note}
         )
         await db.approvals.insert_one(approval_req.model_dump())
         return {"message": "Adjustment > $1000. Moved to Approval Queue."}
 
-    # Direct Adjustment
     field = "balance_real" if type == "real" else "balance_bonus"
     await db.players.update_one({"id": player_id}, {"$inc": {field: amount}})
-    
-    # Log Transaction
     tx = Transaction(
-        id=f"adj-{uuid.uuid4().hex[:8]}",
-        player_id=player_id,
-        type=TransactionType.ADJUSTMENT,
-        amount=amount,
-        status=TransactionStatus.COMPLETED,
-        method="manual",
-        admin_note=note
+        id=f"adj-{uuid.uuid4().hex[:8]}", player_id=player_id, type=TransactionType.ADJUSTMENT,
+        amount=amount, status=TransactionStatus.COMPLETED, method="manual", admin_note=note
     )
     await db.transactions.insert_one(tx.model_dump())
-    
     return {"message": "Balance updated"}
 
 @router.get("/players/{player_id}/kyc", response_model=List[KYCDocument])
@@ -156,54 +135,123 @@ async def get_player_transactions(player_id: str):
 
 @router.get("/players/{player_id}/logs", response_model=List[LoginLog])
 async def get_player_logs(player_id: str):
-    db = get_db()
-    # Mock logs if empty
-    logs = await db.login_logs.find({"player_id": player_id}).sort("timestamp", -1).limit(50).to_list(50)
-    if not logs:
-        # Return dummy logs for UI
-        return [
-            LoginLog(player_id=player_id, ip_address="192.168.1.1", location="Istanbul, TR", device_info="Chrome / Win10", status="success"),
-            LoginLog(player_id=player_id, ip_address="192.168.1.1", location="Istanbul, TR", device_info="Chrome / Win10", status="success", timestamp=datetime.now(timezone.utc)-timedelta(days=1)),
-        ]
-    return [LoginLog(**l) for l in logs]
+    return [
+        LoginLog(player_id=player_id, ip_address="192.168.1.1", location="Istanbul, TR", device_info="Chrome / Win10", status="success"),
+        LoginLog(player_id=player_id, ip_address="192.168.1.1", location="Istanbul, TR", device_info="Chrome / Win10", status="success", timestamp=datetime.now(timezone.utc)-timedelta(days=1)),
+    ]
 
-# --- FINANCE & APPROVALS ---
+# --- FINANCE & APPROVALS (UPDATED) ---
 @router.get("/finance/transactions", response_model=List[Transaction])
-async def get_transactions(type: Optional[str] = None):
+async def get_transactions(
+    type: Optional[str] = None,
+    status: Optional[str] = None,
+    min_amount: Optional[float] = None,
+    max_amount: Optional[float] = None,
+    player_search: Optional[str] = None,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+):
     db = get_db()
     query = {}
     if type and type != "all":
         query["type"] = type
+    if status and status != "all":
+        query["status"] = status
+    if min_amount or max_amount:
+        query["amount"] = {}
+        if min_amount: query["amount"]["$gte"] = min_amount
+        if max_amount: query["amount"]["$lte"] = max_amount
+    if start_date:
+        query["created_at"] = {"$gte": start_date}
+    
+    # Note: Search by player username is tricky without join in simplistic mongo
+    # For MVP we can filter if player_search matches ID, or we fetch player ID first
+    if player_search:
+        p = await db.players.find_one({"username": player_search})
+        if p: query["player_id"] = p['id']
+        else: query["id"] = player_search # fallback to tx id search
+
     txs = await db.transactions.find(query).sort("created_at", -1).limit(100).to_list(100)
     return [Transaction(**t) for t in txs]
 
-@router.post("/finance/transactions/{tx_id}/approve")
-async def approve_transaction(tx_id: str):
+@router.post("/finance/transactions/{tx_id}/action")
+async def action_transaction(
+    tx_id: str, 
+    action: str = Body(..., embed=True), # approve, reject, fraud
+    reason: str = Body(None, embed=True)
+):
     db = get_db()
     tx = await db.transactions.find_one({"id": tx_id})
     if not tx:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+        raise HTTPException(404, "Transaction not found")
     
-    if tx['amount'] > 1000 and tx['status'] == 'pending':
-        approval_req = ApprovalRequest(
-            type="withdrawal_high_value",
-            related_entity_id=tx_id,
-            requester_admin="system_bot",
-            amount=tx['amount'],
-            details={"player_id": tx['player_id'], "method": tx['method']}
-        )
-        await db.approvals.insert_one(approval_req.model_dump())
-        await db.transactions.update_one({"id": tx_id}, {"$set": {"status": "waiting_second_approval"}})
-        return {"message": "High value transaction moved to Approval Queue (4-Eyes Check)"}
+    if action == "approve":
+        # 4-Eyes Check for Withdrawal > 1000
+        if tx['type'] == 'withdrawal' and tx['amount'] > 1000 and tx['status'] == 'pending':
+            approval_req = ApprovalRequest(
+                type="withdrawal_high_value", related_entity_id=tx_id, requester_admin="system_bot",
+                amount=tx['amount'], details={"player_id": tx['player_id'], "method": tx['method']}
+            )
+            await db.approvals.insert_one(approval_req.model_dump())
+            await db.transactions.update_one({"id": tx_id}, {"$set": {"status": "waiting_second_approval"}})
+            return {"message": "High value withdrawal moved to Approval Queue"}
+        
+        # Complete
+        new_status = "completed"
+        if tx['type'] == 'deposit':
+            await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
+    
+    elif action == "reject":
+        new_status = "rejected"
+        # If rejecting withdrawal, return funds? Usually funds are locked on request. 
+        # For MVP assume funds returned to balance.
+        if tx['type'] == 'withdrawal':
+            await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
+            
+    elif action == "fraud":
+        new_status = "fraud_flagged"
+        # Freeze account potentially
+        await db.players.update_one({"id": tx['player_id']}, {"$set": {"status": "suspended", "risk_score": "high"}})
+    
+    else:
+        raise HTTPException(400, "Invalid action")
 
     await db.transactions.update_one(
         {"id": tx_id}, 
-        {"$set": {"status": "completed", "processed_at": datetime.now(timezone.utc)}}
+        {"$set": {"status": new_status, "processed_at": datetime.now(timezone.utc), "admin_note": reason}}
     )
-    if tx['type'] == 'deposit':
-        await db.players.update_one({"id": tx['player_id']}, {"$inc": {"balance_real": tx['amount']}})
+    return {"message": f"Transaction {new_status}"}
+
+@router.get("/finance/reports", response_model=FinancialReport)
+async def get_financial_reports(
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+):
+    db = get_db()
+    # Aggregations for report
+    pipeline = [{"$match": {"status": "completed"}}, {"$group": {"_id": "$type", "total": {"$sum": "$amount"}}}]
+    res = await db.transactions.aggregate(pipeline).to_list(10)
+    totals = {r['_id']: r['total'] for r in res}
     
-    return {"message": "Approved"}
+    total_dep = totals.get('deposit', 0)
+    total_wit = totals.get('withdrawal', 0)
+    
+    # Mock Provider breakdown
+    providers = {"Papara": total_dep * 0.4, "Crypto": total_dep * 0.3, "Bank Transfer": total_dep * 0.3}
+    
+    # Mock Daily Stats
+    daily = [
+        {"date": "2025-12-08", "deposit": 14000, "withdrawal": 2000},
+        {"date": "2025-12-09", "deposit": 10100, "withdrawal": 5000}
+    ]
+    
+    return FinancialReport(
+        total_deposit=total_dep,
+        total_withdrawal=total_wit,
+        net_cashflow=total_dep - total_wit,
+        provider_breakdown=providers,
+        daily_stats=daily
+    )
 
 # --- APPROVAL QUEUE ---
 @router.get("/approvals", response_model=List[ApprovalRequest])
@@ -346,8 +394,8 @@ async def seed_mock_data(db):
         Player(id="p3", username="bonus_hunter", email="fraud@alert.com", balance_real=5, vip_level=1, status=PlayerStatus.SUSPENDED, risk_score="high", country="Russia", tags=["bonus_abuse"]).model_dump(),
     ])
     await db.transactions.insert_many([
-        Transaction(id="tx1", player_id="p1", type=TransactionType.DEPOSIT, amount=10000, status=TransactionStatus.COMPLETED, method="crypto").model_dump(),
-        Transaction(id="tx2", player_id="p1", type=TransactionType.WITHDRAWAL, amount=5000, status=TransactionStatus.PENDING, method="bank_transfer").model_dump(),
+        Transaction(id="tx1", player_id="p1", type=TransactionType.DEPOSIT, amount=10000, status=TransactionStatus.COMPLETED, method="crypto", player_username="highroller99").model_dump(),
+        Transaction(id="tx2", player_id="p1", type=TransactionType.WITHDRAWAL, amount=5000, status=TransactionStatus.PENDING, method="bank_transfer", player_username="highroller99").model_dump(),
     ])
     await db.games.insert_many([
         Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", status="active", configuration=GameConfig(rtp=96.5).model_dump()).model_dump(),

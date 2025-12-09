@@ -30,6 +30,7 @@ class TransactionStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     WAITING_SECOND_APPROVAL = "waiting_second_approval" 
+    FRAUD_FLAGGED = "fraud_flagged" # New status
 
 # Core Models
 class Player(BaseModel):
@@ -45,7 +46,7 @@ class Player(BaseModel):
     
     balance_real: float = 0.0
     balance_bonus: float = 0.0
-    balance_locked: float = 0.0 # Wager locked
+    balance_locked: float = 0.0 
     
     status: PlayerStatus = PlayerStatus.ACTIVE
     vip_level: int = 1
@@ -59,10 +60,10 @@ class Player(BaseModel):
     last_login_ip: Optional[str] = None
     
     country: str = "Unknown"
-    risk_score: str = "low" # low, medium, high
+    risk_score: str = "low" 
     
-    tags: List[str] = [] # high roller, bonus hunter
-    notes: Optional[str] = None # Internal admin notes
+    tags: List[str] = [] 
+    notes: Optional[str] = None 
     
     luck_boost_factor: float = 1.0 
     luck_boost_remaining_spins: int = 0
@@ -71,6 +72,7 @@ class Transaction(BaseModel):
     id: str = Field(..., description="Transaction ID")
     tenant_id: str = "default_casino"
     player_id: str
+    player_username: Optional[str] = None # Denormalized for lists
     type: TransactionType
     amount: float
     currency: str = "USD"
@@ -80,6 +82,8 @@ class Transaction(BaseModel):
     processed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
     approver_id: Optional[str] = None 
+    reference_id: Optional[str] = None # Provider reference
+    provider_response: Optional[Dict[str, Any]] = None # Raw response log
 
 class GameConfig(BaseModel):
     rtp: float = 96.0
@@ -156,6 +160,13 @@ class DashboardStats(BaseModel):
     recent_registrations: List[Player]
     pending_withdrawals_count: int
     pending_kyc_count: int
+
+class FinancialReport(BaseModel):
+    total_deposit: float
+    total_withdrawal: float
+    net_cashflow: float
+    provider_breakdown: Dict[str, float]
+    daily_stats: List[Dict[str, Any]]
 
 # --- NEW ARCHITECTURE MODELS ---
 
