@@ -2020,6 +2020,7 @@ def main():
     test_results.append(("CMS Module", tester.test_modules_cms()))
     test_results.append(("Affiliates Module", tester.test_modules_affiliates()))
     test_results.append(("Risk Module", tester.test_modules_risk()))
+    test_results.append(("Reports Module", tester.test_reports_module()))
     test_results.append(("Admin Users Module", tester.test_modules_admin()))
     test_results.append(("Logs Module", tester.test_modules_logs()))
     test_results.append(("Responsible Gaming Module", tester.test_modules_rg()))
