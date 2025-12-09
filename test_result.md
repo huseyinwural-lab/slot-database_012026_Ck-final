@@ -75,6 +75,17 @@ frontend:
         -working: "NA"
         -agent: "testing"
         -comment: "Transaction Detail Modal not tested in this session - focused on main Finance page tabs and Reconciliation/Chargebacks integrations as per review request. Modal functionality testing can be done separately if needed."
+  - task: "Chargebacks Integration"
+    implemented: true
+    working: true
+    file: "src/components/finance/ChargebackList.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ CHARGEBACKS INTEGRATION FULLY WORKING: 1) Chargeback Cases title and overview description display correctly. 2) Table calls GET /api/v1/finance/chargebacks API successfully and renders 4 chargeback cases with proper data (Case ID, Transaction, Risk Score, Fraud Cluster, Amount, Reason Code, Deadline, Status). 3) Upload Evidence functionality works perfectly - button opens dialog, shows selected case details, accepts evidence file URL input, calls POST /api/v1/finance/chargebacks/{case_id}/evidence API successfully, displays success toast 'Evidence uploaded', and closes dialog properly. 4) Status badges render correctly (Open, Evidence Gathering), risk scores display with proper color coding, and deadline formatting shows '298 days ago' correctly. All UI components and API integrations working without errors."
 
 metadata:
   created_by: "main_agent"
