@@ -106,26 +106,32 @@ user_problem_statement: "Finance Module Overhaul: Enhanced Withdrawal Requests &
 backend:
   - task: "Enhanced Transaction Model"
     implemented: true
-    working: "NA"
+    working: true
     file: "app/models/core.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Added fields: risk_score_at_time, wagering_info, destination_address, etc."
+        -working: true
+        -agent: "testing"
+        -comment: "PASSED: All enhanced transaction model fields validated. Withdrawal transactions contain destination_address, wagering_info (with required/current/is_met structure), and risk_score_at_time fields as expected."
   - task: "Finance Endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "app/routes/core.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Updated GET /transactions and GET /reports with new logic."
+        -working: true
+        -agent: "testing"
+        -comment: "PASSED: Finance endpoints working correctly. GET /api/v1/finance/transactions?type=withdrawal returns enhanced fields. GET /api/v1/finance/reports returns ggr, ngr, and provider_breakdown as required. Database seeding was required to populate enhanced fields."
 
 frontend:
   - task: "Finance Page Update"
