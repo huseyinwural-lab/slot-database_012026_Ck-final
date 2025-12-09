@@ -3,22 +3,23 @@ import json
 import logging
 from typing import Dict, Any
 from openai import OpenAI, RateLimitError, APIError
+from config import settings
 
 logger = logging.getLogger(__name__)
 
 class RiskAnalyzer:
     def __init__(self):
-        # EMERGENT_LLM_KEY is used as the API key for OpenAI
-        api_key = os.environ.get("EMERGENT_LLM_KEY")
+        # Use settings to get the key from .env via Pydantic
+        api_key = settings.emergent_llm_key
         if not api_key:
-            logger.warning("EMERGENT_LLM_KEY not found. AI features will be disabled.")
+            logger.warning("EMERGENT_LLM_KEY not found in settings. AI features will be disabled.")
             self.client = None
         else:
             self.client = OpenAI(
                 api_key=api_key,
                 base_url="https://api.emergent.sh/v1/openai" # Using Emergent Proxy
             )
-        self.model = "gpt-5" # As per user request/playbook
+        self.model = "gpt-5"
 
     async def analyze_transaction(self, transaction: Dict[str, Any]) -> Dict[str, Any]:
         if not self.client:
@@ -48,30 +49,33 @@ class RiskAnalyzer:
 
         except Exception as e:
             logger.error(f"AI Analysis Failed: {str(e)}")
-            # Fallback
             return {
                 "risk_score": 50,
                 "risk_level": "medium", 
-                "reason": "AI Analysis Failed. Manual Review Recommended.",
+                "reason": f"AI Analysis Failed: {str(e)}",
                 "error": str(e)
             }
 
     def _construct_prompt(self, tx: Dict[str, Any]) -> str:
+        # Helper to safely get values
+        def safe_get(key):
+            return tx.get(key, 'N/A')
+
         return f"""
         Analyze this transaction for risk.
         
         Transaction Details:
-        - ID: {tx.get('id')}
-        - Player: {tx.get('player_username')} (ID: {tx.get('player_id')})
-        - Amount: {tx.get('amount')} {tx.get('currency')}
-        - Type: {tx.get('type')}
-        - Method: {tx.get('method')}
-        - IP: {tx.get('ip_address')}
-        - Country: {tx.get('country')}
-        - Device: {tx.get('device_info')}
-        - Status: {tx.get('status')}
-        - Balance Before: {tx.get('balance_before')}
-        - Balance After: {tx.get('balance_after')}
+        - ID: {safe_get('id')}
+        - Player: {safe_get('player_username')} (ID: {safe_get('player_id')})
+        - Amount: {safe_get('amount')} {safe_get('currency')}
+        - Type: {safe_get('type')}
+        - Method: {safe_get('method')}
+        - IP: {safe_get('ip_address')}
+        - Country: {safe_get('country')}
+        - Device: {safe_get('device_info')}
+        - Status: {safe_get('status')}
+        - Balance Before: {safe_get('balance_before')}
+        - Balance After: {safe_get('balance_after')}
         
         Provide output in JSON format:
         {{
