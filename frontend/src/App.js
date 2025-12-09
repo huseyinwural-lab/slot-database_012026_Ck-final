@@ -17,7 +17,8 @@ import KYCManagement from './pages/KYCManagement';
 import { CRM } from './pages/CRM';
 import { AffiliateManagement } from './pages/AffiliateManagement';
 import RiskManagement from './pages/RiskManagement';
-import { CMS, Admins, Logs, RG, Reports } from './pages/Modules';
+import ResponsibleGaming from './pages/ResponsibleGaming';
+import { CMS, Admins, Logs, Reports } from './pages/Modules';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -46,7 +47,7 @@ function App() {
           <Route path="/risk" element={<RiskManagement />} />
           <Route path="/admins" element={<Admins />} />
           <Route path="/logs" element={<Logs />} />
-          <Route path="/rg" element={<RG />} />
+          <Route path="/rg" element={<ResponsibleGaming />} />
           <Route path="/reports" element={<Reports />} />
           
           <Route path="/settings" element={<div className="p-10 text-xl font-bold">Settings Panel (Multi-Tenant Config)</div>} />
