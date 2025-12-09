@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { 
   CreditCard, CheckCircle, XCircle, Clock, ShieldAlert, FileText, 
   RefreshCw, Edit, Upload, Activity, Globe, Smartphone, User, ArrowRight,
-  AlertTriangle, Lock
+  AlertTriangle, Lock, Link
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../services/api';
@@ -131,6 +131,16 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                                <div className="font-mono">Real: <span className="text-green-600">${transaction.balance_before?.toLocaleString()}</span></div>
                            </div>
                        </div>
+                       
+                       {/* Linked Accounts Mock */}
+                       <div className="pt-2 border-t mt-2">
+                            <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                                <Link className="w-3 h-3" /> Linked Accounts
+                            </div>
+                            <div className="flex gap-2">
+                                <Badge variant="outline" className="text-xs">newbie_luck (IP Match)</Badge>
+                            </div>
+                       </div>
                    </div>
                </div>
 
@@ -164,6 +174,7 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                        <div className="flex justify-between"><span>IP:</span> <span className="font-mono">{transaction.ip_address || 'Unknown'}</span></div>
                        <div className="flex justify-between"><span>Device:</span> <span>{transaction.device_info || 'Unknown'}</span></div>
                        <div className="flex justify-between"><span>Country:</span> <span>{transaction.country || '-'}</span></div>
+                       <div className="flex justify-between"><span>Affiliate:</span> <span>{transaction.affiliate_source || 'Direct'}</span></div>
                    </div>
                </div>
             </div>
@@ -246,7 +257,7 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
           </TabsContent>
 
           {/* TAB: TIMELINE */}
-          <TabsContent value="timeline" className="mt-6">
+          <TabsContent value="timeline" className="mt-6 space-y-6">
             <ScrollArea className="h-[300px] w-full rounded-md border p-4">
                 {transaction.timeline?.map((event, i) => (
                 <div key={i} className="mb-6 last:mb-0 relative pl-6 border-l-2 border-muted">
@@ -265,6 +276,13 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                 </div>
                 ))}
             </ScrollArea>
+            
+            <div className="space-y-2">
+                <Label>Raw Provider Log</Label>
+                <div className="bg-slate-950 text-slate-50 p-4 rounded-md font-mono text-xs max-h-[150px] overflow-auto">
+                    {transaction.raw_response ? JSON.stringify(transaction.raw_response, null, 2) : '// No raw logs available from provider'}
+                </div>
+            </div>
           </TabsContent>
           
           {/* TAB: NOTES */}
