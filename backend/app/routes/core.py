@@ -452,7 +452,8 @@ async def seed_mock_data(db):
         Game(name="VIP Roulette", provider="Evolution", category="Live", is_special_game=True, special_type=SpecialType.VIP, business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE, configuration=GameConfig(min_bet=100).model_dump()).model_dump(),
     ])
     await db.bonuses.insert_many([
-        Bonus(name="Welcome Offer", type="welcome", auto_apply=True, rules=BonusRule(reward_percentage=100).model_dump()).model_dump(),
+        Bonus(name="Welcome Offer", type="deposit_match", auto_apply=True, rules=BonusRule(reward_percentage=100).model_dump()).model_dump(),
+        Bonus(name="Weekly Cashback", type="periodic_cashback", rules=BonusRule(cashback_percentage=10).model_dump()).model_dump(),
     ])
     await db.tables.insert_many([
         CustomTable(name="VIP Blackjack TR", game_type="Blackjack", provider="Evolution", table_type="vip", min_bet=100, max_bet=10000, business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE).model_dump()
