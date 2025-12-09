@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # OpenAI
     openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4-turbo-preview")
     
+    emergent_llm_key: Optional[str] = None
     class Config:
         env_file = ".env"
         case_sensitive = False
