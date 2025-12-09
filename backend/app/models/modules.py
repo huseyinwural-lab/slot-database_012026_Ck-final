@@ -65,10 +65,28 @@ class RiskRule(BaseModel):
     version: int = 1
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class VelocityRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str # e.g. "Login Spike"
+    event_type: str # login, deposit, registration
+    time_window_minutes: int
+    threshold_count: int
+    action: RiskActionType
+    status: str = "active"
+
+class BlacklistEntry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str # ip, device, email_domain, bin, crypto_address
+    value: str
+    reason: str
+    added_by: str
+    added_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: Optional[datetime] = None
+
 class DeviceProfile(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     fingerprint_hash: str
-    player_ids: List[str] = [] # Linked players
+    player_ids: List[str] = [] 
     user_agent: str
     ip_address: str
     is_rooted: bool = False
@@ -81,16 +99,16 @@ class RiskCase(BaseModel):
     player_id: str
     risk_score: int
     severity: RiskSeverity
-    triggered_rules: List[str] = [] # Rule IDs
+    triggered_rules: List[str] = [] 
     status: RiskCaseStatus = RiskCaseStatus.OPEN
     assigned_to: Optional[str] = None
-    notes: List[Dict[str, Any]] = [] # {admin, text, time}
+    notes: List[Dict[str, Any]] = [] 
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class RiskAlert(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    type: str # "payment_fraud", "bonus_abuse"
+    type: str 
     message: str
     severity: RiskSeverity
     player_id: Optional[str] = None
@@ -104,7 +122,7 @@ class RiskDashboardStats(BaseModel):
     high_risk_players: int
     suspicious_withdrawals: int
     bonus_abuse_alerts: int
-    risk_trend: List[Dict[str, Any]] # date, count
+    risk_trend: List[Dict[str, Any]] 
     category_breakdown: Dict[str, int]
 
 # --- SHARED ENUMS ---

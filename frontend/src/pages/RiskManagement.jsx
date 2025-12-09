@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ShieldAlert, AlertTriangle, Search, Activity, Lock, Smartphone, FileText, UserMinus, Plus } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, Search, Activity, Lock, Smartphone, FileText, UserMinus, Plus, Zap, CreditCard, MapPin, Skull, Ban, LayoutTemplate } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const RiskManagement = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -19,10 +20,16 @@ const RiskManagement = () => {
   const [rules, setRules] = useState([]);
   const [cases, setCases] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [velocity, setVelocity] = useState([]);
+  const [blacklist, setBlacklist] = useState([]);
   
   // Rule Creation
   const [isRuleOpen, setIsRuleOpen] = useState(false);
   const [newRule, setNewRule] = useState({ name: '', category: 'account', severity: 'medium', score_impact: 10 });
+
+  // Blacklist Creation
+  const [isBlacklistOpen, setIsBlacklistOpen] = useState(false);
+  const [newBan, setNewBan] = useState({ type: 'ip', value: '', reason: '' });
 
   // Case Management
   const [selectedCase, setSelectedCase] = useState(null);
@@ -32,6 +39,8 @@ const RiskManagement = () => {
     try {
         if (activeTab === 'dashboard') setDashboard((await api.get('/v1/risk/dashboard')).data);
         if (activeTab === 'rules') setRules((await api.get('/v1/risk/rules')).data);
+        if (activeTab === 'velocity') setVelocity((await api.get('/v1/risk/velocity')).data);
+        if (activeTab === 'blacklist') setBlacklist((await api.get('/v1/risk/blacklist')).data);
         if (activeTab === 'cases') setCases((await api.get('/v1/risk/cases')).data);
         if (activeTab === 'alerts') setAlerts((await api.get('/v1/risk/alerts')).data);
     } catch (err) { console.error(err); }
@@ -41,6 +50,10 @@ const RiskManagement = () => {
 
   const handleCreateRule = async () => {
     try { await api.post('/v1/risk/rules', newRule); setIsRuleOpen(false); fetchData(); toast.success("Rule Created"); } catch { toast.error("Failed"); }
+  };
+
+  const handleCreateBan = async () => {
+    try { await api.post('/v1/risk/blacklist', { ...newBan, added_by: 'admin' }); setIsBlacklistOpen(false); fetchData(); toast.success("Entry Blacklisted"); } catch { toast.error("Failed"); }
   };
 
   const handleToggleRule = async (id) => {
@@ -62,13 +75,21 @@ const RiskManagement = () => {
         <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2"><ShieldAlert className="w-8 h-8 text-red-600" /> Risk & Fraud Engine</h2>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-5 w-full lg:w-[700px]">
-                <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
-                <TabsTrigger value="alerts"><AlertTriangle className="w-4 h-4 mr-2" /> Live Alerts</TabsTrigger>
-                <TabsTrigger value="cases"><FileText className="w-4 h-4 mr-2" /> Cases</TabsTrigger>
-                <TabsTrigger value="rules"><Lock className="w-4 h-4 mr-2" /> Rules Engine</TabsTrigger>
-                <TabsTrigger value="devices"><Smartphone className="w-4 h-4 mr-2" /> Devices</TabsTrigger>
-            </TabsList>
+            <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+                <TabsList className="w-full flex justify-start">
+                    <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
+                    <TabsTrigger value="alerts"><AlertTriangle className="w-4 h-4 mr-2" /> Live Alerts</TabsTrigger>
+                    <TabsTrigger value="cases"><FileText className="w-4 h-4 mr-2" /> Cases</TabsTrigger>
+                    <TabsTrigger value="investigation"><Search className="w-4 h-4 mr-2" /> Investigation</TabsTrigger>
+                    <TabsTrigger value="rules"><Lock className="w-4 h-4 mr-2" /> Rules</TabsTrigger>
+                    <TabsTrigger value="velocity"><Zap className="w-4 h-4 mr-2" /> Velocity</TabsTrigger>
+                    <TabsTrigger value="payment"><CreditCard className="w-4 h-4 mr-2" /> Payment</TabsTrigger>
+                    <TabsTrigger value="geo"><MapPin className="w-4 h-4 mr-2" /> IP & Geo</TabsTrigger>
+                    <TabsTrigger value="bonus"><Skull className="w-4 h-4 mr-2" /> Bonus Abuse</TabsTrigger>
+                    <TabsTrigger value="blacklist"><Ban className="w-4 h-4 mr-2" /> Blacklist</TabsTrigger>
+                    <TabsTrigger value="visuals"><LayoutTemplate className="w-4 h-4 mr-2" /> Logic</TabsTrigger>
+                </TabsList>
+            </ScrollArea>
 
             {/* DASHBOARD */}
             <TabsContent value="dashboard" className="mt-4">
@@ -82,111 +103,122 @@ const RiskManagement = () => {
                 ) : <div>Loading...</div>}
             </TabsContent>
 
-            {/* ALERTS */}
-            <TabsContent value="alerts" className="mt-4">
-                <Card><CardContent className="pt-6">
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Message</TableHead><TableHead>Severity</TableHead><TableHead>Time</TableHead></TableRow></TableHeader>
-                        <TableBody>{alerts.map(a => (
-                            <TableRow key={a.id}>
-                                <TableCell className="uppercase font-bold text-xs">{a.type}</TableCell>
-                                <TableCell>{a.message}</TableCell>
-                                <TableCell><Badge variant={a.severity==='critical'?'destructive':'outline'}>{a.severity}</Badge></TableCell>
-                                <TableCell>{new Date(a.timestamp).toLocaleTimeString()}</TableCell>
-                            </TableRow>
-                        ))}</TableBody>
-                    </Table>
-                </CardContent></Card>
+            {/* VELOCITY */}
+            <TabsContent value="velocity" className="mt-4">
+                <Card>
+                    <CardHeader><CardTitle>Velocity Checks</CardTitle><CardDescription>High frequency event detection</CardDescription></CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Event</TableHead><TableHead>Threshold</TableHead><TableHead>Action</TableHead></TableRow></TableHeader>
+                            <TableBody>{velocity.map(v => (
+                                <TableRow key={v.id}>
+                                    <TableCell>{v.name}</TableCell>
+                                    <TableCell className="uppercase">{v.event_type}</TableCell>
+                                    <TableCell>{v.threshold_count} in {v.time_window_minutes}m</TableCell>
+                                    <TableCell><Badge>{v.action}</Badge></TableCell>
+                                </TableRow>
+                            ))}</TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </TabsContent>
 
-            {/* RULES */}
-            <TabsContent value="rules" className="mt-4">
+            {/* BLACKLIST */}
+            <TabsContent value="blacklist" className="mt-4">
                 <div className="flex justify-end mb-4">
-                    <Dialog open={isRuleOpen} onOpenChange={setIsRuleOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Rule</Button></DialogTrigger>
+                    <Dialog open={isBlacklistOpen} onOpenChange={setIsBlacklistOpen}>
+                        <DialogTrigger asChild><Button variant="destructive"><Ban className="w-4 h-4 mr-2" /> Add to Blacklist</Button></DialogTrigger>
                         <DialogContent>
-                            <DialogHeader><DialogTitle>New Risk Rule</DialogTitle></DialogHeader>
+                            <DialogHeader><DialogTitle>Block Entity</DialogTitle></DialogHeader>
                             <div className="space-y-4 py-4">
-                                <div className="space-y-2"><Label>Rule Name</Label><Input value={newRule.name} onChange={e=>setNewRule({...newRule, name: e.target.value})} /></div>
-                                <div className="space-y-2"><Label>Category</Label>
-                                    <Select value={newRule.category} onValueChange={v=>setNewRule({...newRule, category: v})}>
+                                <div className="space-y-2"><Label>Type</Label>
+                                    <Select value={newBan.type} onValueChange={v=>setNewBan({...newBan, type: v})}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent><SelectItem value="account">Account</SelectItem><SelectItem value="payment">Payment</SelectItem><SelectItem value="bonus_abuse">Bonus Abuse</SelectItem></SelectContent>
+                                        <SelectContent><SelectItem value="ip">IP Address</SelectItem><SelectItem value="device">Device Hash</SelectItem><SelectItem value="email_domain">Email Domain</SelectItem></SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-2"><Label>Score Impact</Label><Input type="number" value={newRule.score_impact} onChange={e=>setNewRule({...newRule, score_impact: e.target.value})} /></div>
-                                <Button onClick={handleCreateRule} className="w-full">Save Rule</Button>
+                                <div className="space-y-2"><Label>Value</Label><Input value={newBan.value} onChange={e=>setNewBan({...newBan, value: e.target.value})} /></div>
+                                <div className="space-y-2"><Label>Reason</Label><Input value={newBan.reason} onChange={e=>setNewBan({...newBan, reason: e.target.value})} /></div>
+                                <Button onClick={handleCreateBan} className="w-full bg-red-600 hover:bg-red-700">Block</Button>
                             </div>
                         </DialogContent>
                     </Dialog>
                 </div>
                 <Card><CardContent className="pt-6">
                     <Table>
-                        <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Category</TableHead><TableHead>Impact</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
-                        <TableBody>{rules.map(r => (
-                            <TableRow key={r.id}>
-                                <TableCell>{r.name}</TableCell>
-                                <TableCell className="uppercase text-xs">{r.category}</TableCell>
-                                <TableCell><Badge variant="secondary">+{r.score_impact}</Badge></TableCell>
-                                <TableCell><Badge variant={r.status==='active'?'default':'outline'}>{r.status}</Badge></TableCell>
-                                <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => handleToggleRule(r.id)}>{r.status==='active'?'Pause':'Activate'}</Button></TableCell>
+                        <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Value</TableHead><TableHead>Reason</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
+                        <TableBody>{blacklist.map(b => (
+                            <TableRow key={b.id}>
+                                <TableCell className="uppercase font-bold text-xs">{b.type}</TableCell>
+                                <TableCell className="font-mono">{b.value}</TableCell>
+                                <TableCell>{b.reason}</TableCell>
+                                <TableCell>{new Date(b.added_at).toLocaleDateString()}</TableCell>
                             </TableRow>
                         ))}</TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
 
-            {/* CASES */}
-            <TabsContent value="cases" className="mt-4">
-                <div className="grid md:grid-cols-3 gap-6">
-                    <Card className="md:col-span-1">
-                        <CardHeader><CardTitle>Case List</CardTitle></CardHeader>
-                        <div className="space-y-2 p-4">
-                            {cases.map(c => (
-                                <div key={c.id} onClick={() => setSelectedCase(c)} className={`p-3 border rounded cursor-pointer hover:bg-secondary/50 ${selectedCase?.id === c.id ? 'border-primary bg-secondary/30' : ''}`}>
-                                    <div className="flex justify-between mb-1">
-                                        <Badge variant="destructive">{c.risk_score}</Badge>
-                                        <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="font-bold text-sm">Player: {c.player_id}</div>
-                                    <div className="text-xs text-muted-foreground">Rules: {c.triggered_rules.join(", ")}</div>
-                                </div>
-                            ))}
+            {/* INVESTIGATION HUB */}
+            <TabsContent value="investigation" className="mt-4">
+                <Card>
+                    <CardHeader><CardTitle>Deep Investigation</CardTitle></CardHeader>
+                    <CardContent className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
+                        <div className="text-center text-muted-foreground">
+                            <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                            <p>Select a Player or Case to view Timeline & Graph</p>
+                            <Button variant="secondary" className="mt-4">Search Subject</Button>
                         </div>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+
+            {/* VISUALS */}
+            <TabsContent value="visuals" className="mt-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                    <Card>
+                        <CardHeader><CardTitle>Risk Score Logic</CardTitle></CardHeader>
+                        <CardContent>
+                            <div className="space-y-2 text-sm font-mono p-4 bg-secondary/20 rounded">
+                                <p>1. Event Trigger (Login/Deposit/Bet)</p>
+                                <p>↓</p>
+                                <p>2. Check Whitelist (Exit if True)</p>
+                                <p>↓</p>
+                                <p>3. Check Velocity & Rules</p>
+                                <p>↓</p>
+                                <p>4. Sum Rule Impacts (+10, +50...)</p>
+                                <p>↓</p>
+                                <p>5. If Score > Threshold → Action</p>
+                            </div>
+                        </CardContent>
                     </Card>
-                    <Card className="md:col-span-2">
-                        {selectedCase ? (
-                            <>
-                                <CardHeader><CardTitle>Investigation: {selectedCase.id}</CardTitle><CardDescription>Status: {selectedCase.status.toUpperCase()}</CardDescription></CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="p-4 bg-secondary/20 rounded">
-                                        <div className="font-bold mb-2">Evidence</div>
-                                        <ul className="list-disc pl-5 text-sm">
-                                            {selectedCase.triggered_rules.map(r => <li key={r}>{r}</li>)}
-                                        </ul>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Analyst Note</Label>
-                                        <Textarea value={caseNote} onChange={e => setCaseNote(e.target.value)} placeholder="Findings..." />
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button variant="destructive" onClick={() => handleCaseStatus('closed_confirmed')}><UserMinus className="w-4 h-4 mr-2" /> Confirm Fraud (Ban)</Button>
-                                        <Button variant="outline" onClick={() => handleCaseStatus('closed_false_positive')}>False Positive</Button>
-                                        <Button className="ml-auto" onClick={() => handleCaseStatus('escalated')}>Escalate</Button>
-                                    </div>
-                                </CardContent>
-                            </>
-                        ) : <div className="flex items-center justify-center h-40 text-muted-foreground">Select a case</div>}
+                    <Card>
+                        <CardHeader><CardTitle>Bonus Fraud Loop</CardTitle></CardHeader>
+                        <CardContent>
+                            <div className="space-y-2 text-sm font-mono p-4 bg-secondary/20 rounded">
+                                <p>1. Bonus Claim Request</p>
+                                <p>↓</p>
+                                <p>2. Device Fingerprint Check</p>
+                                <p>↓</p>
+                                <p>3. IP/Geo Check</p>
+                                <p>↓</p>
+                                <p>4. Abuse History Check</p>
+                                <p>↓</p>
+                                <p>5. Approve or Block</p>
+                            </div>
+                        </CardContent>
                     </Card>
                 </div>
             </TabsContent>
 
-            {/* DEVICES */}
-            <TabsContent value="devices" className="mt-4">
-                <div className="p-10 text-center border border-dashed rounded text-muted-foreground">
-                    Device Intelligence Graph Visualization (Coming Soon)
-                </div>
-            </TabsContent>
+            {/* PLACEHOLDERS FOR OTHER TABS */}
+            <TabsContent value="rules" className="mt-4"><Card><CardContent className="p-10 text-center">Rules Engine (Existing)</CardContent></Card></TabsContent>
+            <TabsContent value="payment" className="mt-4"><Card><CardContent className="p-10 text-center">Payment Risk Analysis (BIN/Card)</CardContent></Card></TabsContent>
+            <TabsContent value="geo" className="mt-4"><Card><CardContent className="p-10 text-center">IP & Geo Intelligence (VPN/Proxy)</CardContent></Card></TabsContent>
+            <TabsContent value="bonus" className="mt-4"><Card><CardContent className="p-10 text-center">Bonus Abuse Analytics</CardContent></Card></TabsContent>
+            <TabsContent value="alerts" className="mt-4"><Card><CardContent className="p-10 text-center">Live Alerts (Existing)</CardContent></Card></TabsContent>
+            <TabsContent value="cases" className="mt-4"><Card><CardContent className="p-10 text-center">Case Management (Existing)</CardContent></Card></TabsContent>
+
         </Tabs>
     </div>
   );

@@ -5,7 +5,8 @@ import uuid
 import random
 from app.models.modules import (
     RiskRule, RiskCase, DeviceProfile, RiskAlert, RiskDashboardStats,
-    RiskCategory, RiskSeverity, RiskActionType, RiskCaseStatus
+    RiskCategory, RiskSeverity, RiskActionType, RiskCaseStatus,
+    VelocityRule, BlacklistEntry
 )
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -55,6 +56,32 @@ async def toggle_rule(id: str):
         await db.risk_rules.update_one({"id": id}, {"$set": {"status": new_status}})
         return {"status": new_status}
     raise HTTPException(404, "Rule not found")
+
+# --- VELOCITY RULES ---
+@router.get("/velocity", response_model=List[VelocityRule])
+async def get_velocity_rules():
+    db = get_db()
+    return [VelocityRule(**r) for r in await db.risk_velocity.find().to_list(100)]
+
+@router.post("/velocity")
+async def create_velocity_rule(rule: VelocityRule):
+    db = get_db()
+    await db.risk_velocity.insert_one(rule.model_dump())
+    return rule
+
+# --- BLACKLISTS ---
+@router.get("/blacklist", response_model=List[BlacklistEntry])
+async def get_blacklist(type: Optional[str] = None):
+    db = get_db()
+    query = {}
+    if type and type != "all": query["type"] = type
+    return [BlacklistEntry(**b) for b in await db.risk_blacklist.find(query).to_list(100)]
+
+@router.post("/blacklist")
+async def add_to_blacklist(entry: BlacklistEntry):
+    db = get_db()
+    await db.risk_blacklist.insert_one(entry.model_dump())
+    return entry
 
 # --- CASES ---
 @router.get("/cases", response_model=List[RiskCase])
@@ -109,6 +136,14 @@ async def seed_risk():
             RiskRule(name="Bonus Abuse Pattern", category=RiskCategory.BONUS_ABUSE, severity=RiskSeverity.MEDIUM, score_impact=30).model_dump(),
             RiskRule(name="High Velocity Withdrawal", category=RiskCategory.PAYMENT, severity=RiskSeverity.CRITICAL, score_impact=100).model_dump(),
         ])
+    if await db.risk_velocity.count_documents({}) == 0:
+        await db.risk_velocity.insert_one(
+            VelocityRule(name="Fast Withdrawals", event_type="withdrawal", time_window_minutes=10, threshold_count=3, action=RiskActionType.MANUAL_REVIEW).model_dump()
+        )
+    if await db.risk_blacklist.count_documents({}) == 0:
+        await db.risk_blacklist.insert_one(
+            BlacklistEntry(type="ip", value="192.168.1.100", reason="DDOS Attack", added_by="system").model_dump()
+        )
     if await db.risk_cases.count_documents({}) == 0:
         await db.risk_cases.insert_one(
             RiskCase(player_id="p3", risk_score=85, severity=RiskSeverity.HIGH, triggered_rules=["Bonus Abuse"]).model_dump()
