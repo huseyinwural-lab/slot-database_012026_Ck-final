@@ -313,7 +313,22 @@ class Game(BaseModel):
     special_type: SpecialType = SpecialType.NONE
     image_url: Optional[str] = None
     configuration: GameConfig = Field(default_factory=GameConfig)
-    tags: List[str] = []
+    
+    # Expanded Fields for Game Ops
+    tags: List[str] = [] # "new", "trending", "feature_buy"
+    sort_order: int = 0
+    hit_frequency: Optional[float] = None
+    feature_buy_available: bool = False
+    countries_allowed: List[str] = [] # ["TR", "DE"] (Empty = All)
+    countries_blocked: List[str] = [] 
+    platform: str = "both" # "mobile", "desktop", "both"
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    provider_game_id: Optional[str] = None
+    
+    # Metrics
+    active_players_24h: int = 0
+    ggr_24h: float = 0.0
+    
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     suggestion_reason: Optional[str] = None
 
@@ -331,9 +346,15 @@ class CustomTable(BaseModel):
     max_bet: float
     seats: int = 7
     dealer_language: str = "EN"
+    
+    # Expanded Live Table Fields
     schedule_start: Optional[str] = None 
     schedule_end: Optional[str] = None 
-    visibility_segments: List[str] = [] 
+    visibility_segments: List[str] = [] # "vip_gold", "high_risk"
+    branding_logo_url: Optional[str] = None
+    uptime_percentage: float = 99.9
+    
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class GameUploadLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -342,6 +363,8 @@ class GameUploadLog(BaseModel):
     total_games: int
     success_count: int
     error_count: int
+    validation_warnings: List[str] = []
+    status: str = "completed" # "processing", "completed", "failed"
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # --- BONUS SYSTEM (EXPANDED) ---
