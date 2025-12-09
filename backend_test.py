@@ -589,24 +589,98 @@ class CasinoAdminAPITester:
         return success1 and success2 and success3 and success4 and success5
 
     def test_modules_kyc(self):
-        """Test KYC Module endpoints"""
-        print("\n📋 KYC MODULE TESTS")
+        """Test Enhanced KYC Module endpoints"""
+        print("\n📋 ENHANCED KYC MODULE TESTS")
         
-        # Test get KYC documents
-        success1, kyc_response = self.run_test("Get KYC Documents", "GET", "api/v1/kyc", 200)
+        # Test KYC Dashboard Stats
+        success1, dashboard_response = self.run_test("KYC Dashboard Stats", "GET", "api/v1/kyc/dashboard", 200)
+        if success1 and isinstance(dashboard_response, dict):
+            required_fields = ['pending_count', 'in_review_count', 'approved_today', 'rejected_today', 'level_distribution', 'avg_review_time_mins', 'high_risk_pending']
+            missing_fields = [field for field in required_fields if field not in dashboard_response]
+            if not missing_fields:
+                print("✅ KYC Dashboard structure is complete")
+                print(f"   📊 Pending: {dashboard_response['pending_count']}, In Review: {dashboard_response['in_review_count']}")
+                print(f"   📈 Approved Today: {dashboard_response['approved_today']}, Rejected Today: {dashboard_response['rejected_today']}")
+                print(f"   ⚠️  High Risk Pending: {dashboard_response['high_risk_pending']}")
+            else:
+                print(f"⚠️  KYC Dashboard missing fields: {missing_fields}")
         
-        # Test KYC with status filter
-        success2, _ = self.run_test("Get Pending KYC", "GET", "api/v1/kyc?status=pending", 200)
+        # Test KYC Queue (pending documents list)
+        success2, queue_response = self.run_test("KYC Queue - Pending Documents", "GET", "api/v1/kyc/queue", 200)
+        if success2 and isinstance(queue_response, list):
+            print(f"✅ KYC Queue returned {len(queue_response)} documents")
+            if len(queue_response) > 0:
+                doc = queue_response[0]
+                required_doc_fields = ['id', 'player_id', 'player_username', 'type', 'status', 'uploaded_at']
+                missing_doc_fields = [field for field in required_doc_fields if field not in doc]
+                if not missing_doc_fields:
+                    print(f"✅ Document structure complete: {doc['player_username']} - {doc['type']} ({doc['status']})")
+                else:
+                    print(f"⚠️  Document missing fields: {missing_doc_fields}")
         
-        # Test KYC review (if we have documents)
-        if success1 and isinstance(kyc_response, list) and len(kyc_response) > 0:
-            doc_id = kyc_response[0].get('id')
+        # Test KYC Queue with filters
+        success3, _ = self.run_test("KYC Queue - Status Filter", "GET", "api/v1/kyc/queue?status=pending", 200)
+        success4, _ = self.run_test("KYC Queue - Level Filter", "GET", "api/v1/kyc/queue?level=Level 1", 200)
+        success5, _ = self.run_test("KYC Queue - Risk Filter", "GET", "api/v1/kyc/queue?risk=high", 200)
+        
+        # Test Document Review Actions (Approve/Reject)
+        if success2 and isinstance(queue_response, list) and len(queue_response) > 0:
+            doc_id = queue_response[0].get('id')
             if doc_id:
-                review_data = {"status": "approved", "note": "Test approval"}
-                success3, _ = self.run_test(f"Review KYC Document - {doc_id}", "POST", f"api/v1/kyc/{doc_id}/review", 200, review_data)
-                return success1 and success2 and success3
+                # Test approve action
+                success6, approve_response = self.run_test(f"Approve KYC Document - {doc_id}", "POST", f"api/v1/kyc/documents/{doc_id}/review", 200, {
+                    "status": "approved",
+                    "reason": None,
+                    "admin_id": "test_admin"
+                })
+                
+                # Test reject action (if we have more documents)
+                if len(queue_response) > 1:
+                    doc_id2 = queue_response[1].get('id')
+                    success7, reject_response = self.run_test(f"Reject KYC Document - {doc_id2}", "POST", f"api/v1/kyc/documents/{doc_id2}/review", 200, {
+                        "status": "rejected",
+                        "reason": "Document quality insufficient",
+                        "admin_id": "test_admin"
+                    })
+                else:
+                    success7 = True  # Skip if only one document
+                    print("⚠️  Only one document available, skipping reject test")
+                
+                # Validate approve response
+                if success6 and isinstance(approve_response, dict):
+                    if 'message' in approve_response:
+                        print(f"✅ Document approval successful: {approve_response['message']}")
+                    else:
+                        print("⚠️  Approval response missing message field")
+                
+                return success1 and success2 and success3 and success4 and success5 and success6 and success7
         
-        return success1 and success2
+        # Test KYC Levels endpoint
+        success8, levels_response = self.run_test("KYC Levels", "GET", "api/v1/kyc/levels", 200)
+        if success8 and isinstance(levels_response, list):
+            print(f"✅ KYC Levels returned {len(levels_response)} levels")
+        
+        # Test KYC Rules endpoint
+        success9, rules_response = self.run_test("KYC Rules", "GET", "api/v1/kyc/rules", 200)
+        if success9 and isinstance(rules_response, list):
+            print(f"✅ KYC Rules returned {len(rules_response)} rules")
+        
+        # Test Player KYC History (if we have a player)
+        if success2 and isinstance(queue_response, list) and len(queue_response) > 0:
+            player_id = queue_response[0].get('player_id')
+            if player_id:
+                success10, history_response = self.run_test(f"Player KYC History - {player_id}", "GET", f"api/v1/kyc/player/{player_id}/history", 200)
+                success11, checks_response = self.run_test(f"Player KYC Checks - {player_id}", "GET", f"api/v1/kyc/player/{player_id}/checks", 200)
+                
+                # Test running a KYC check
+                success12, check_response = self.run_test("Run KYC Check", "POST", "api/v1/kyc/checks/run", 200, {
+                    "player_id": player_id,
+                    "type": "sanctions"
+                })
+                
+                return success1 and success2 and success3 and success4 and success5 and success8 and success9 and success10 and success11 and success12
+        
+        return success1 and success2 and success3 and success4 and success5 and success8 and success9
 
     def test_modules_crm(self):
         """Test CRM Module endpoints"""
