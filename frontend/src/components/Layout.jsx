@@ -3,7 +3,7 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, CreditCard, ShieldAlert, 
   Gamepad2, Gift, MessageSquare, Settings, LogOut,
-  ListChecks, ToggleRight, Search
+  ListChecks, ToggleRight, Search, FlaskConical
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -59,6 +59,7 @@ const Layout = ({ children }) => {
           <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />
           <SidebarItem to="/support" icon={MessageSquare} label="Support" />
           <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />
+          <SidebarItem to="/simulator" icon={FlaskConical} label="Simulation Lab" />
           <SidebarItem to="/settings" icon={Settings} label="Settings" />
         </nav>
 

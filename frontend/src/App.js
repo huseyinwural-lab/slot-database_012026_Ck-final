@@ -11,6 +11,7 @@ import BonusManagement from './pages/BonusManagement';
 import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
 import FeatureFlags from './pages/FeatureFlags';
+import Simulator from './pages/Simulator';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/fraud" element={<FraudCheck />} />
           <Route path="/support" element={<Support />} />
           <Route path="/features" element={<FeatureFlags />} />
+          <Route path="/simulator" element={<Simulator />} />
           <Route path="/settings" element={<div className="p-10 text-xl font-bold">Settings Panel (Multi-Tenant Config)</div>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
