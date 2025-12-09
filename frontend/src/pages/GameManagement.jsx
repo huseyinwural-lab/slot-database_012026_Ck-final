@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 
+import { Progress } from '@/components/ui/progress';
 const GameManagement = () => {
   const [games, setGames] = useState([]);
   const [tables, setTables] = useState([]);
