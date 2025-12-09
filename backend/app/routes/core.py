@@ -313,7 +313,11 @@ async def get_games():
     enhanced_games = []
     for g in games:
         # Check if should be suggested as VIP
-        if g['configuration']['min_bet'] > 10 and not g.get('is_special_game'):
+        config = g.get('configuration', {})
+        # Handle case where configuration is a dict or model dump
+        min_bet = config.get('min_bet', 0) if isinstance(config, dict) else 0
+        
+        if min_bet > 10 and not g.get('is_special_game'):
             g['suggestion_reason'] = "High min bet detected - Candidate for VIP"
         enhanced_games.append(Game(**g))
         
