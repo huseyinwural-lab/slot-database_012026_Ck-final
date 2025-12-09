@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Settings2, Upload, Server, Table as TableIcon, LayoutGrid, Database, List } from 'lucide-react';
+import { Plus, Settings2, Upload, Server, Table as TableIcon, LayoutGrid, Database, List, Star, Lock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -27,6 +27,7 @@ const GameManagement = () => {
   
   // Forms
   const [configForm, setConfigForm] = useState({});
+  const [statusForm, setStatusForm] = useState({});
   const [tableForm, setTableForm] = useState({ name: '', provider: '', min_bet: 5, max_bet: 500, game_type: 'Blackjack', table_type: 'standard' });
   const [uploadForm, setUploadForm] = useState({ provider: 'Pragmatic Play', method: 'fetch_api' });
 
@@ -52,12 +53,22 @@ const GameManagement = () => {
   const openConfig = (game) => {
     setSelectedGame(game);
     setConfigForm(game.configuration || { rtp: 96.0, volatility: 'medium' });
+    setStatusForm({
+        business_status: game.business_status || 'draft',
+        runtime_status: game.runtime_status || 'offline',
+        is_special_game: game.is_special_game,
+        special_type: game.special_type || 'none'
+    });
     setIsConfigOpen(true);
   };
 
   const handleSaveConfig = async () => {
     try {
+        // Save Config
         await api.put(`/v1/games/${selectedGame.id}`, configForm);
+        // Save Details
+        await api.put(`/v1/games/${selectedGame.id}/details`, statusForm);
+        
         setIsConfigOpen(false);
         fetchAll();
         toast.success("Configuration Saved");
@@ -98,17 +109,28 @@ const GameManagement = () => {
                 <Card>
                     <CardContent className="pt-6">
                         <Table>
-                            <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Provider</TableHead><TableHead>RTP</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                            <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Provider</TableHead><TableHead>RTP</TableHead><TableHead>Lifecycle</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
                             <TableBody>
                                 {games.map(game => (
                                     <TableRow key={game.id}>
-                                        <TableCell className="font-medium">{game.name}</TableCell>
+                                        <TableCell>
+                                            <div className="font-medium flex items-center gap-2">
+                                                {game.is_special_game && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                                                {game.name}
+                                            </div>
+                                            {game.suggestion_reason && <div className="text-[10px] text-orange-500">{game.suggestion_reason}</div>}
+                                        </TableCell>
                                         <TableCell>{game.provider}</TableCell>
                                         <TableCell>{game.configuration?.rtp}%</TableCell>
-                                        <TableCell><Badge variant={game.status==='active'?'default':'secondary'}>{game.status}</Badge></TableCell>
+                                        <TableCell><Badge variant="outline" className="uppercase text-[10px]">{game.business_status}</Badge></TableCell>
+                                        <TableCell>
+                                            <Badge variant={game.runtime_status==='online'?'default':game.runtime_status==='maintenance'?'destructive':'secondary'}>
+                                                {game.runtime_status}
+                                            </Badge>
+                                        </TableCell>
                                         <TableCell className="text-right flex justify-end gap-2">
                                             <Button size="sm" variant="outline" onClick={() => openConfig(game)}><Settings2 className="w-4 h-4 mr-1" /> Config</Button>
-                                            <Switch checked={game.status==='active'} onCheckedChange={() => handleToggleGame(game.id)} />
+                                            <Switch checked={game.business_status==='active'} onCheckedChange={() => handleToggleGame(game.id)} />
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -200,21 +222,65 @@ const GameManagement = () => {
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Game Settings: {selectedGame?.name}</DialogTitle>
-                    <CardDescription>Advanced Configuration & Math</CardDescription>
+                    <CardDescription>Advanced Configuration & Lifecycle</CardDescription>
                 </DialogHeader>
                 
                 <Tabs defaultValue="general" className="w-full mt-4">
                     <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="general">General</TabsTrigger>
+                        <TabsTrigger value="general">Lifecycle</TabsTrigger>
                         <TabsTrigger value="math">Math & RTP</TabsTrigger>
                         <TabsTrigger value="jackpot">Jackpots</TabsTrigger>
                         <TabsTrigger value="visuals">Assets</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="general" className="space-y-4 py-4">
-                        <div className="space-y-2"><Label>Game ID (Readonly)</Label><Input value={selectedGame?.id} disabled /></div>
-                        <div className="space-y-2"><Label>Category</Label><Input value={selectedGame?.category} disabled /></div>
-                        <div className="space-y-2"><Label>Game Version</Label><Badge variant="outline">{configForm.version || "1.0.0"}</Badge></div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Business Status (Lifecycle)</Label>
+                                <Select value={statusForm.business_status} onValueChange={v => setStatusForm({...statusForm, business_status: v})}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="draft">Draft</SelectItem>
+                                        <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                                        <SelectItem value="active">Active</SelectItem>
+                                        <SelectItem value="suspended">Suspended</SelectItem>
+                                        <SelectItem value="archived">Archived</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Runtime Status (Live)</Label>
+                                <Select value={statusForm.runtime_status} onValueChange={v => setStatusForm({...statusForm, runtime_status: v})}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="online">Online</SelectItem>
+                                        <SelectItem value="offline">Offline</SelectItem>
+                                        <SelectItem value="maintenance">Maintenance</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        
+                        <div className="p-4 border rounded bg-secondary/20 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="flex items-center gap-2"><Star className="w-4 h-4 text-yellow-500" /> Special Game / VIP</Label>
+                                <Switch checked={statusForm.is_special_game} onCheckedChange={c => setStatusForm({...statusForm, is_special_game: c})} />
+                            </div>
+                            {statusForm.is_special_game && (
+                                <div className="space-y-2">
+                                    <Label>Special Type</Label>
+                                    <Select value={statusForm.special_type} onValueChange={v => setStatusForm({...statusForm, special_type: v})}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="vip">VIP Only</SelectItem>
+                                            <SelectItem value="private">Private / Invite</SelectItem>
+                                            <SelectItem value="branded">Branded / Sponsored</SelectItem>
+                                            <SelectItem value="event">Event Exclusive</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+                        </div>
                     </TabsContent>
 
                     <TabsContent value="math" className="space-y-4 py-4">

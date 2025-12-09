@@ -32,6 +32,28 @@ class TransactionStatus(str, Enum):
     WAITING_SECOND_APPROVAL = "waiting_second_approval" 
     FRAUD_FLAGGED = "fraud_flagged"
 
+# --- NEW GAME STATUS ENUMS ---
+class BusinessStatus(str, Enum):
+    DRAFT = "draft"
+    PENDING_APPROVAL = "pending_approval"
+    SCHEDULED = "scheduled"
+    ACTIVE = "active"
+    SUSPENDED = "suspended"
+    ARCHIVED = "archived"
+
+class RuntimeStatus(str, Enum):
+    ONLINE = "online"
+    OFFLINE = "offline"
+    MAINTENANCE = "maintenance"
+    IN_EVENT = "in_event"
+
+class SpecialType(str, Enum):
+    NONE = "none"
+    VIP = "vip"
+    PRIVATE = "private"
+    BRANDED = "branded"
+    EVENT = "event"
+
 # Core Models
 class Player(BaseModel):
     id: str = Field(..., description="Player ID")
@@ -109,22 +131,38 @@ class Game(BaseModel):
     name: str
     provider: str
     category: str 
-    status: str = "active" # active, maintenance, draft
+    
+    # New Status Fields
+    business_status: BusinessStatus = BusinessStatus.DRAFT
+    runtime_status: RuntimeStatus = RuntimeStatus.OFFLINE
+    
+    # New Special Fields
+    is_special_game: bool = False
+    special_type: SpecialType = SpecialType.NONE
+    
     image_url: Optional[str] = None
     configuration: GameConfig = Field(default_factory=GameConfig)
     tags: List[str] = []
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # Auto-Suggestion Flags (Transient)
+    suggestion_reason: Optional[str] = None
 
 class CustomTable(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     game_type: str # Blackjack, Roulette
     provider: str
-    table_type: str # standard, vip, brand
+    
+    # Updated Fields
+    business_status: BusinessStatus = BusinessStatus.DRAFT
+    runtime_status: RuntimeStatus = RuntimeStatus.OFFLINE
+    is_special_game: bool = False
+    special_type: SpecialType = SpecialType.NONE
+    
     currency: str = "USD"
     min_bet: float
     max_bet: float
-    status: str = "offline" # online, offline, scheduled, maintenance
     seats: int = 7
     dealer_language: str = "EN"
     schedule_start: Optional[str] = None # "18:00"

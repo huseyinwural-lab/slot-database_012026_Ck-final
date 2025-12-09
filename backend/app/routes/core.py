@@ -7,7 +7,8 @@ from app.models.core import (
     Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus, 
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
     FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric, LoginLog,
-    FinancialReport, CustomTable, GameUploadLog, Paytable, JackpotConfig
+    FinancialReport, CustomTable, GameUploadLog, Paytable, JackpotConfig,
+    BusinessStatus, RuntimeStatus, SpecialType
 )
 from app.models.modules import KYCDocument
 from config import settings
@@ -307,7 +308,16 @@ async def update_table_status(table_id: str, status: str = Body(..., embed=True)
 async def get_games():
     db = get_db()
     games = await db.games.find().limit(100).to_list(100)
-    return [Game(**g) for g in games]
+    
+    # Auto-Suggestion Logic (Mock)
+    enhanced_games = []
+    for g in games:
+        # Check if should be suggested as VIP
+        if g['configuration']['min_bet'] > 10 and not g.get('is_special_game'):
+            g['suggestion_reason'] = "High min bet detected - Candidate for VIP"
+        enhanced_games.append(Game(**g))
+        
+    return enhanced_games
 
 @router.post("/games")
 async def add_game(game: Game):
@@ -341,7 +351,8 @@ async def update_game_details(game_id: str, details: Dict[str, Any] = Body(...))
         "timestamp": datetime.now(timezone.utc)
     })
     
-    allowed = ["name", "category", "provider", "image_url", "tags", "status"]
+    allowed = ["name", "category", "provider", "image_url", "tags", 
+               "business_status", "runtime_status", "is_special_game", "special_type"]
     update_data = {k: v for k, v in details.items() if k in allowed}
     
     if not update_data:
@@ -358,8 +369,9 @@ async def toggle_game_status(game_id: str):
     db = get_db()
     game = await db.games.find_one({"id": game_id})
     if game:
-        new_status = "inactive" if game.get("status") == "active" else "active"
-        await db.games.update_one({"id": game_id}, {"$set": {"status": new_status}})
+        # Default behavior: Toggle Business Status Active/Suspended
+        new_status = BusinessStatus.SUSPENDED if game.get("business_status") == BusinessStatus.ACTIVE else BusinessStatus.ACTIVE
+        await db.games.update_one({"id": game_id}, {"$set": {"business_status": new_status}})
         return {"status": new_status}
     raise HTTPException(404, "Game not found")
 
@@ -432,11 +444,12 @@ async def seed_mock_data(db):
         Transaction(id="tx2", player_id="p1", type=TransactionType.WITHDRAWAL, amount=5000, status=TransactionStatus.PENDING, method="bank_transfer", player_username="highroller99").model_dump(),
     ])
     await db.games.insert_many([
-        Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", status="active", configuration=GameConfig(rtp=96.5).model_dump()).model_dump(),
+        Game(name="Sweet Bonanza", provider="Pragmatic Play", category="Slot", business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE, configuration=GameConfig(rtp=96.5).model_dump()).model_dump(),
+        Game(name="VIP Roulette", provider="Evolution", category="Live", is_special_game=True, special_type=SpecialType.VIP, business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE, configuration=GameConfig(min_bet=100).model_dump()).model_dump(),
     ])
     await db.bonuses.insert_many([
         Bonus(name="Welcome Offer", type="welcome", auto_apply=True, rules=BonusRule(reward_percentage=100).model_dump()).model_dump(),
     ])
     await db.tables.insert_many([
-        CustomTable(name="VIP Blackjack TR", game_type="Blackjack", provider="Evolution", table_type="vip", min_bet=100, max_bet=10000).model_dump()
+        CustomTable(name="VIP Blackjack TR", game_type="Blackjack", provider="Evolution", table_type="vip", min_bet=100, max_bet=10000, business_status=BusinessStatus.ACTIVE, runtime_status=RuntimeStatus.ONLINE).model_dump()
     ])
