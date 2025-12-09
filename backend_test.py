@@ -259,6 +259,63 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3
 
+    def test_simulator_endpoints(self):
+        """Test Simulator Module endpoints"""
+        print("\n🧪 SIMULATOR MODULE TESTS")
+        
+        # Test get simulation logs
+        success1, logs_response = self.run_test("Get Simulation Logs", "GET", "api/v1/simulator/logs", 200)
+        
+        # Test player simulation
+        player_sim_config = {
+            "count": 5,
+            "delay_ms": 50,
+            "country_code": "TR",
+            "risk_profile": "low"
+        }
+        success2, _ = self.run_test("Start Player Simulation", "POST", "api/v1/simulator/players/start", 200, player_sim_config)
+        
+        # Test game simulation
+        game_sim_config = {
+            "count": 10,
+            "delay_ms": 50,
+            "game_provider": "Pragmatic Play",
+            "win_rate": 0.3
+        }
+        success3, _ = self.run_test("Start Game Simulation", "POST", "api/v1/simulator/games/start", 200, game_sim_config)
+        
+        # Test finance simulation
+        finance_sim_config = {
+            "type": "deposit",
+            "amount_range": [100, 1000],
+            "success_rate": 0.9
+        }
+        success4, finance_response = self.run_test("Test Finance Callback", "POST", "api/v1/simulator/finance/test", 200, finance_sim_config)
+        
+        # Test time travel
+        time_travel_config = {
+            "days_offset": 7
+        }
+        success5, time_response = self.run_test("Time Travel", "POST", "api/v1/simulator/time-travel", 200, time_travel_config)
+        
+        # Validate finance response structure
+        if success4 and isinstance(finance_response, dict):
+            required_fields = ['transaction', 'provider_response']
+            if all(field in finance_response for field in required_fields):
+                print("✅ Finance simulation response structure is correct")
+            else:
+                print(f"⚠️  Finance simulation missing fields: {[f for f in required_fields if f not in finance_response]}")
+        
+        # Validate time travel response
+        if success5 and isinstance(time_response, dict):
+            required_fields = ['message', 'virtual_time']
+            if all(field in time_response for field in required_fields):
+                print("✅ Time travel response structure is correct")
+            else:
+                print(f"⚠️  Time travel missing fields: {[f for f in required_fields if f not in time_response]}")
+        
+        return success1 and success2 and success3 and success4 and success5
+
     def test_nonexistent_endpoints(self):
         """Test some endpoints that should return 404"""
         success1, _ = self.run_test("Non-existent Player", "GET", "api/v1/players/nonexistent", 404)
