@@ -237,6 +237,21 @@ class CrashMathSaveRequest(BaseModel):
     grace_period_seconds: int
     min_bet_per_round: Optional[float] = None
     max_bet_per_round: Optional[float] = None
+
+    # Advanced safety limits (global, optional)
+    max_loss_per_round: Optional[float] = None
+    max_win_per_round: Optional[float] = None
+    max_rounds_per_session: Optional[int] = None
+    max_total_loss_per_session: Optional[float] = None
+    max_total_win_per_session: Optional[float] = None
+
+    enforcement_mode: Optional[str] = None
+
+    # Country specific overrides keyed by ISO 3166-1 alpha-2 country code
+    # Example:
+    # {"TR": {"max_total_loss_per_session": 1000, "max_total_win_per_session": 5000}}
+    country_overrides: Optional[Dict[str, Dict[str, Any]]] = None
+
     provably_fair_enabled: bool
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
