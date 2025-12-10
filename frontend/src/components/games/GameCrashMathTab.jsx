@@ -392,6 +392,21 @@ const GameCrashMathTab = ({ game }) => {
                 onChange={(e) => handleNumberChange('min_bet_per_round', e.target.value)}
                 disabled={loading}
                 placeholder="(optional)"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Bet per Round</Label>
+              <Input
+                type="number"
+                value={form.max_bet_per_round}
+                onChange={(e) => handleNumberChange('max_bet_per_round', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Advanced Safety (global)</CardTitle>
