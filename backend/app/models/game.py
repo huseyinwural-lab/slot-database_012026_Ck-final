@@ -189,6 +189,28 @@ class JackpotConfig(BaseModel):
     source: str = "manual"  # "manual" | "import" | "provider"
 
 
+
+class GameAsset(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    schema_version: str = "1.0.0"
+    asset_type: str  # "logo" | "thumbnail" | "banner" | "background" etc.
+    url: str
+    filename: str
+    mime_type: str
+    size_bytes: int
+    language: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+    tags: List[str] = []
+    is_deleted: bool = False
+
+
+class GameAssetsResponse(BaseModel):
+    assets: List[GameAsset] = []
+
+
 class JackpotConfigResponse(BaseModel):
     config: Optional[JackpotConfig] = None
     pools: List[JackpotPool] = []
