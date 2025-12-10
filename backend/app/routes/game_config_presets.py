@@ -71,6 +71,24 @@ async def _ensure_seed_presets(db) -> None:
     )
   )
 
+  seed_presets.append(
+    ConfigPreset(
+      id="slot_rtp_92_aggressive",
+      game_type="SLOT",
+      config_type="rtp",
+      name="Slot – 92% RTP Aggressive",
+      description="Lower RTP (92%) aggressive profile for high-volatility slots.",
+      values={
+        "code": "RTP_92",
+        "rtp_value": 92.0,
+        "is_default": False,
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+
   # --- SLOT BETS ---
   seed_presets.append(
     ConfigPreset(
