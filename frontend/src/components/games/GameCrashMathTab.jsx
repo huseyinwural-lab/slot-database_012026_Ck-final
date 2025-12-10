@@ -149,6 +149,28 @@ const GameCrashMathTab = ({ game }) => {
           form.max_bet_per_round === '' || form.max_bet_per_round == null
             ? null
             : Number(form.max_bet_per_round),
+        max_loss_per_round:
+          form.max_loss_per_round === '' || form.max_loss_per_round == null
+            ? null
+            : Number(form.max_loss_per_round),
+        max_win_per_round:
+          form.max_win_per_round === '' || form.max_win_per_round == null
+            ? null
+            : Number(form.max_win_per_round),
+        max_rounds_per_session:
+          form.max_rounds_per_session === '' || form.max_rounds_per_session == null
+            ? null
+            : Number(form.max_rounds_per_session),
+        max_total_loss_per_session:
+          form.max_total_loss_per_session === '' || form.max_total_loss_per_session == null
+            ? null
+            : Number(form.max_total_loss_per_session),
+        max_total_win_per_session:
+          form.max_total_win_per_session === '' || form.max_total_win_per_session == null
+            ? null
+            : Number(form.max_total_win_per_session),
+        enforcement_mode: form.enforcement_mode || 'log_only',
+        country_overrides: form.country_overrides || {},
         provably_fair_enabled: !!form.provably_fair_enabled,
         rng_algorithm: form.rng_algorithm,
         seed_rotation_interval_rounds:
