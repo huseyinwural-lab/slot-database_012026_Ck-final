@@ -22,6 +22,8 @@ from app.models.game import (
     GameLog,
     GameLogsResponse,
     PaytableRecord,
+logger = logging.getLogger(__name__)
+
     PaytableHistoryItem,
     PaytableResponse,
 )
