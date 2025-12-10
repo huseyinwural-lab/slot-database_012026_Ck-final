@@ -367,7 +367,7 @@ const GameDiceMathTab = ({ game }) => {
                 placeholder="(optional)"
               />
               <p className="text-[10px] text-muted-foreground mt-1">
-                Bir session'da atılabilecek maksimum bet sayısı. Yüksek velocity'yi sınırlamak için kullanılabilir.
+                Bir session&#39;da atılabilecek maksimum bet sayısı. Yüksek velocity&#39;yi sınırlamak için kullanılabilir.
               </p>
             </div>
           </div>
