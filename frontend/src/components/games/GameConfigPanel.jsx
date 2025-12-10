@@ -778,6 +778,26 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
                     Dice Math sadece DICE oyunları için geçerlidir.
                   </p>
                 </CardContent>
+        {/* BLACKJACK RULES TAB */}
+        {visibleTabs.includes('blackjack_rules') && (
+          <TabsContent value="blackjack_rules" className="space-y-4 pt-4">
+            {resolvedCoreType === 'TABLE_BLACKJACK' ? (
+              <div className="text-xs text-muted-foreground">
+                {/* TODO: GameBlackjackRulesTab bileşeni burada render edilecek */}
+                Blackjack Rules &amp; Side Bets sekmesi henüz UI tarafında tamamlanmadı.
+              </div>
+            ) : (
+              <Card>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">
+                    Blackjack Rules &amp; Side Bets sadece TABLE_BLACKJACK oyunları için geçerlidir.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
+
               </Card>
             )}
           </TabsContent>
