@@ -32,7 +32,7 @@ const defaultVisibility = {
 // Burada ana türler için SLOT / TABLE_POKER / CRASH / DICE / TABLE_BLACKJACK kullanıyoruz.
 // REEL_LINES / WAYS / MEGAWAYS vb. engine tipleri SLOT ile aynı şemayı kullanacak.
 const TAB_SCHEMA = {
-  SLOT: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
+  SLOT: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs', 'slot_advanced'],
   REEL_LINES: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
   WAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
   MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
