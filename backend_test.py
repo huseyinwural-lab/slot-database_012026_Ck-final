@@ -6731,6 +6731,318 @@ TX-MISSING-LOW,25.50,EUR"""
             success6 and log_validation
         ])
 
+    def test_crash_advanced_safety_backend_validation(self):
+        """Test Crash Advanced Safety Backend Validation - Turkish Review Request"""
+        print("\n💥 CRASH ADVANCED SAFETY BACKEND VALIDATION TESTS")
+        
+        # Ön koşul: /api/v1/games endpoint'inden mevcut oyun listesini alın
+        print(f"\n🔍 Ön koşul: Get games list to find CRASH games")
+        success1, games_response = self.run_test("Get Games List for CRASH Test", "GET", "api/v1/games", 200)
+        
+        crash_game_id = None
+        if success1 and isinstance(games_response, list):
+            # core_type="CRASH" veya category="CRASH" olan bir oyun arayın
+            for game in games_response:
+                core_type = game.get('core_type') or game.get('coreType')
+                category = game.get('category', '').upper()
+                
+                if core_type == "CRASH" or category == "CRASH":
+                    crash_game_id = game.get('id')
+                    print(f"   🎯 Found CRASH game: {game.get('name')} (ID: {crash_game_id}, core_type: {core_type}, category: {category})")
+                    break
+        
+        if not crash_game_id:
+            print("❌ CRASH oyunu bulunamadı. Bu durumu raporlayın ve gerçek save işlemlerini atlayın, sadece beklenen 404 davranışını kontrol edin.")
+            
+            # Non-CRASH oyunda 404 davranışını test et
+            if success1 and isinstance(games_response, list) and len(games_response) > 0:
+                non_crash_game_id = games_response[0].get('id')
+                print(f"\n🔍 Testing 404 behavior on non-CRASH game: {non_crash_game_id}")
+                
+                success_404, response_404 = self.run_test(f"GET crash-math on non-CRASH game", "GET", f"api/v1/games/{non_crash_game_id}/config/crash-math", 404)
+                
+                if success_404 and isinstance(response_404, dict):
+                    error_code = response_404.get('error_code')
+                    if error_code == "CRASH_MATH_NOT_AVAILABLE_FOR_GAME":
+                        print("   ✅ Non-CRASH game correctly returns 404 with CRASH_MATH_NOT_AVAILABLE_FOR_GAME")
+                        return True
+                    else:
+                        print(f"   ❌ Expected error_code='CRASH_MATH_NOT_AVAILABLE_FOR_GAME', got '{error_code}'")
+                        return False
+                else:
+                    print("   ❌ Failed to get proper 404 response for non-CRASH game")
+                    return False
+            else:
+                print("❌ No games found at all to test 404 behavior")
+                return False
+        
+        # CRASH oyunu varsa, aşağıdaki adımları uygulayın
+        print(f"\n🔍 CRASH oyunu bulundu, tüm senaryoları test ediyoruz...")
+        
+        # Senaryo 1: GET default template
+        print(f"\n🔍 Senaryo 1: GET default template")
+        success2, default_response = self.run_test(f"GET Default Template - {crash_game_id}", "GET", f"api/v1/games/{crash_game_id}/config/crash-math", 200)
+        
+        default_validation_success = True
+        if success2 and isinstance(default_response, dict):
+            print("   🔍 Validating default template response:")
+            
+            # Advanced alanlar mevcut ve default değerler taşıyor mu kontrol et
+            advanced_fields_check = {
+                'max_loss_per_round': None,
+                'max_win_per_round': None,
+                'max_rounds_per_session': None,
+                'max_total_loss_per_session': None,
+                'max_total_win_per_session': None,
+                'enforcement_mode': 'log_only',
+                'country_overrides': {}
+            }
+            
+            for field, expected_value in advanced_fields_check.items():
+                actual_value = default_response.get(field)
+                if actual_value == expected_value:
+                    print(f"   ✅ {field}: {actual_value} (expected: {expected_value})")
+                else:
+                    print(f"   ❌ {field}: {actual_value} (expected: {expected_value})")
+                    default_validation_success = False
+            
+            # Response CrashMathConfigResponse şemasıyla uyumlu mu kontrol et
+            required_fields = [
+                'config_version_id', 'schema_version', 'base_rtp', 'volatility_profile',
+                'min_multiplier', 'max_multiplier', 'max_auto_cashout', 'round_duration_seconds',
+                'bet_phase_seconds', 'grace_period_seconds', 'provably_fair_enabled', 'rng_algorithm'
+            ]
+            
+            missing_fields = [field for field in required_fields if field not in default_response]
+            if not missing_fields:
+                print("   ✅ All required CrashMathConfigResponse fields present")
+            else:
+                print(f"   ❌ Missing required fields: {missing_fields}")
+                default_validation_success = False
+        else:
+            print("   ❌ Failed to get valid default template response")
+            default_validation_success = False
+        
+        # Senaryo 2: Pozitif POST – full global + country_overrides
+        print(f"\n🔍 Senaryo 2: Pozitif POST – full global + country_overrides")
+        
+        full_payload = {
+            "base_rtp": 96.0,
+            "volatility_profile": "medium",
+            "min_multiplier": 1.0,
+            "max_multiplier": 500.0,
+            "max_auto_cashout": 100.0,
+            "round_duration_seconds": 12,
+            "bet_phase_seconds": 6,
+            "grace_period_seconds": 2,
+            "min_bet_per_round": None,
+            "max_bet_per_round": None,
+            "max_loss_per_round": 50.0,
+            "max_win_per_round": 500.0,
+            "max_rounds_per_session": 200,
+            "max_total_loss_per_session": 1000.0,
+            "max_total_win_per_session": 5000.0,
+            "enforcement_mode": "hard_block",
+            "country_overrides": {
+                "TR": {
+                    "max_total_loss_per_session": 800.0,
+                    "max_total_win_per_session": 4000.0,
+                    "max_loss_per_round": 40.0
+                }
+            },
+            "provably_fair_enabled": True,
+            "rng_algorithm": "sha256_chain",
+            "seed_rotation_interval_rounds": 10000,
+            "summary": "Crash advanced safety test"
+        }
+        
+        success3, full_response = self.run_test(f"POST Full Advanced Settings - {crash_game_id}", "POST", f"api/v1/games/{crash_game_id}/config/crash-math", 200, full_payload)
+        
+        full_validation_success = True
+        if success3 and isinstance(full_response, dict):
+            print("   🔍 Validating full POST response:")
+            
+            # Response CrashMathConfig (id, game_id, config_version_id, tüm alanlar) ile uyumlu
+            required_response_fields = ['id', 'game_id', 'config_version_id', 'base_rtp', 'volatility_profile', 
+                                      'max_loss_per_round', 'max_win_per_round', 'enforcement_mode', 'country_overrides']
+            
+            missing_fields = [field for field in required_response_fields if field not in full_response]
+            if not missing_fields:
+                print("   ✅ All required CrashMathConfig response fields present")
+                
+                # Validate specific values
+                if full_response.get('max_loss_per_round') == 50.0:
+                    print(f"   ✅ max_loss_per_round correctly saved: {full_response.get('max_loss_per_round')}")
+                else:
+                    print(f"   ❌ max_loss_per_round mismatch: expected 50.0, got {full_response.get('max_loss_per_round')}")
+                    full_validation_success = False
+                
+                if full_response.get('enforcement_mode') == 'hard_block':
+                    print(f"   ✅ enforcement_mode correctly saved: {full_response.get('enforcement_mode')}")
+                else:
+                    print(f"   ❌ enforcement_mode mismatch: expected 'hard_block', got {full_response.get('enforcement_mode')}")
+                    full_validation_success = False
+                
+                # Validate country_overrides
+                country_overrides = full_response.get('country_overrides', {})
+                if 'TR' in country_overrides:
+                    tr_overrides = country_overrides['TR']
+                    if tr_overrides.get('max_total_loss_per_session') == 800.0:
+                        print(f"   ✅ TR country override correctly saved: {tr_overrides}")
+                    else:
+                        print(f"   ❌ TR country override mismatch: {tr_overrides}")
+                        full_validation_success = False
+                else:
+                    print(f"   ❌ TR country override missing in response")
+                    full_validation_success = False
+            else:
+                print(f"   ❌ Missing required response fields: {missing_fields}")
+                full_validation_success = False
+        else:
+            print("   ❌ Failed to get valid full POST response")
+            full_validation_success = False
+        
+        # DB'ye gerçekten yazıldığı GET ile teyit et
+        if success3:
+            print(f"\n🔍 DB'ye yazıldığını GET ile teyit et")
+            success_verify, verify_response = self.run_test(f"Verify POST via GET - {crash_game_id}", "GET", f"api/v1/games/{crash_game_id}/config/crash-math", 200)
+            
+            if success_verify and isinstance(verify_response, dict):
+                if (verify_response.get('max_loss_per_round') == 50.0 and 
+                    verify_response.get('enforcement_mode') == 'hard_block'):
+                    print("   ✅ DB'ye yazılan değerler GET ile teyit edildi")
+                else:
+                    print("   ❌ DB'ye yazılan değerler GET ile teyit edilemedi")
+                    full_validation_success = False
+            else:
+                print("   ❌ GET verification failed")
+                full_validation_success = False
+        
+        # Senaryo 3: Negatif – invalid enforcement_mode
+        print(f"\n🔍 Senaryo 3: Negatif – invalid enforcement_mode")
+        
+        invalid_enforcement_payload = full_payload.copy()
+        invalid_enforcement_payload['enforcement_mode'] = "invalid_mode"
+        
+        success4, error_response4 = self.run_test(f"Invalid enforcement_mode - {crash_game_id}", "POST", f"api/v1/games/{crash_game_id}/config/crash-math", 400, invalid_enforcement_payload)
+        
+        enforcement_validation_success = True
+        if success4 and isinstance(error_response4, dict):
+            error_code = error_response4.get('error_code')
+            details = error_response4.get('details', {})
+            
+            if (error_code == "CRASH_MATH_VALIDATION_FAILED" and 
+                details.get('field') == 'enforcement_mode' and 
+                details.get('reason') == 'unsupported_enforcement_mode'):
+                print("   ✅ Invalid enforcement_mode correctly rejected with proper error structure")
+            else:
+                print(f"   ❌ Invalid enforcement_mode error structure incorrect: error_code={error_code}, field={details.get('field')}, reason={details.get('reason')}")
+                enforcement_validation_success = False
+        else:
+            print("   ❌ Invalid enforcement_mode test failed")
+            enforcement_validation_success = False
+        
+        # Senaryo 4: Negatif – max_loss_per_round = 0
+        print(f"\n🔍 Senaryo 4: Negatif – max_loss_per_round = 0")
+        
+        zero_loss_payload = full_payload.copy()
+        zero_loss_payload['max_loss_per_round'] = 0
+        
+        success5, error_response5 = self.run_test(f"max_loss_per_round = 0 - {crash_game_id}", "POST", f"api/v1/games/{crash_game_id}/config/crash-math", 400, zero_loss_payload)
+        
+        zero_loss_validation_success = True
+        if success5 and isinstance(error_response5, dict):
+            error_code = error_response5.get('error_code')
+            details = error_response5.get('details', {})
+            
+            if (error_code == "CRASH_MATH_VALIDATION_FAILED" and 
+                details.get('field') == 'max_loss_per_round' and 
+                details.get('reason') == 'must_be_positive'):
+                print("   ✅ max_loss_per_round = 0 correctly rejected with proper error structure")
+            else:
+                print(f"   ❌ max_loss_per_round = 0 error structure incorrect: error_code={error_code}, field={details.get('field')}, reason={details.get('reason')}")
+                zero_loss_validation_success = False
+        else:
+            print("   ❌ max_loss_per_round = 0 test failed")
+            zero_loss_validation_success = False
+        
+        # Senaryo 5: Negatif – invalid country code
+        print(f"\n🔍 Senaryo 5: Negatif – invalid country code")
+        
+        invalid_country_payload = full_payload.copy()
+        invalid_country_payload['country_overrides'] = {"TUR": {"max_total_loss_per_session": 800.0}}
+        
+        success6, error_response6 = self.run_test(f"Invalid country code - {crash_game_id}", "POST", f"api/v1/games/{crash_game_id}/config/crash-math", 400, invalid_country_payload)
+        
+        country_validation_success = True
+        if success6 and isinstance(error_response6, dict):
+            error_code = error_response6.get('error_code')
+            details = error_response6.get('details', {})
+            
+            if (error_code == "CRASH_MATH_VALIDATION_FAILED" and 
+                details.get('field') == 'country_overrides' and 
+                details.get('reason') == 'invalid_country_code'):
+                print("   ✅ Invalid country code correctly rejected with proper error structure")
+            else:
+                print(f"   ❌ Invalid country code error structure incorrect: error_code={error_code}, field={details.get('field')}, reason={details.get('reason')}")
+                country_validation_success = False
+        else:
+            print("   ❌ Invalid country code test failed")
+            country_validation_success = False
+        
+        # Senaryo 6: Negatif – negative country override value
+        print(f"\n🔍 Senaryo 6: Negatif – negative country override value")
+        
+        negative_override_payload = full_payload.copy()
+        negative_override_payload['country_overrides'] = {"TR": {"max_total_loss_per_session": -10}}
+        
+        success7, error_response7 = self.run_test(f"Negative country override - {crash_game_id}", "POST", f"api/v1/games/{crash_game_id}/config/crash-math", 400, negative_override_payload)
+        
+        negative_override_validation_success = True
+        if success7 and isinstance(error_response7, dict):
+            error_code = error_response7.get('error_code')
+            details = error_response7.get('details', {})
+            
+            if (error_code == "CRASH_MATH_VALIDATION_FAILED" and 
+                details.get('field') == 'country_overrides.TR.max_total_loss_per_session' and 
+                details.get('reason') == 'must_be_positive'):
+                print("   ✅ Negative country override correctly rejected with proper error structure")
+            else:
+                print(f"   ❌ Negative country override error structure incorrect: error_code={error_code}, field={details.get('field')}, reason={details.get('reason')}")
+                negative_override_validation_success = False
+        else:
+            print("   ❌ Negative country override test failed")
+            negative_override_validation_success = False
+        
+        # Overall test result
+        overall_success = (success1 and success2 and default_validation_success and 
+                          success3 and full_validation_success and 
+                          enforcement_validation_success and zero_loss_validation_success and 
+                          country_validation_success and negative_override_validation_success)
+        
+        if overall_success:
+            print("\n✅ CRASH ADVANCED SAFETY BACKEND VALIDATION - ALL TESTS PASSED")
+            print("   ✅ CRASH game found and all scenarios tested successfully")
+            print("   ✅ GET default template working with correct advanced fields")
+            print("   ✅ POST with full global + country_overrides working")
+            print("   ✅ All negative validation scenarios working correctly")
+        else:
+            print("\n❌ CRASH ADVANCED SAFETY BACKEND VALIDATION - SOME TESTS FAILED")
+            if not success2 or not default_validation_success:
+                print("   ❌ GET default template failed or response invalid")
+            if not success3 or not full_validation_success:
+                print("   ❌ POST with full settings failed or response invalid")
+            if not enforcement_validation_success:
+                print("   ❌ Invalid enforcement_mode validation failed")
+            if not zero_loss_validation_success:
+                print("   ❌ max_loss_per_round = 0 validation failed")
+            if not country_validation_success:
+                print("   ❌ Invalid country code validation failed")
+            if not negative_override_validation_success:
+                print("   ❌ Negative country override validation failed")
+        
+        return overall_success
+
 
 def main():
     def test_crash_dice_math_endpoints(self):
