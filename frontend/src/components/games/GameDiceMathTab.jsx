@@ -1,0 +1,335 @@
+import React, { useEffect, useState } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
+import api from '../../services/api';
+
+const GameDiceMathTab = ({ game }) => {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [form, setForm] = useState({
+    range_min: 0.0,
+    range_max: 99.99,
+    step: 0.01,
+    house_edge_percent: 1.0,
+    min_payout_multiplier: 1.01,
+    max_payout_multiplier: 990.0,
+    allow_over: true,
+    allow_under: true,
+    min_target: 1.0,
+    max_target: 98.0,
+    round_duration_seconds: 5,
+    bet_phase_seconds: 3,
+    provably_fair_enabled: true,
+    rng_algorithm: 'sha256_chain',
+    seed_rotation_interval_rounds: 20000,
+    summary: '',
+  });
+
+  useEffect(() => {
+    if (!game) return;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get(`/v1/games/${game.id}/config/dice-math`);
+        const data = res.data;
+        setForm((prev) => ({
+          ...prev,
+          ...data,
+          summary: '',
+        }));
+      } catch (err) {
+        console.error(err);
+        const apiError = err?.response?.data;
+        if (apiError?.error_code) {
+          setError(apiError.message || 'Dice math config yüklenemedi.');
+        } else {
+          toast.error('Dice math config yüklenemedi.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [game?.id]);
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleNumberChange = (field, value) => {
+    const num = value === '' ? '' : Number(value);
+    setForm((prev) => ({ ...prev, [field]: num }));
+  };
+
+  const handleSave = async () => {
+    if (!game) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const payload = {
+        range_min: Number(form.range_min),
+        range_max: Number(form.range_max),
+        step: Number(form.step),
+        house_edge_percent: Number(form.house_edge_percent),
+        min_payout_multiplier: Number(form.min_payout_multiplier),
+        max_payout_multiplier: Number(form.max_payout_multiplier),
+        allow_over: !!form.allow_over,
+        allow_under: !!form.allow_under,
+        min_target: Number(form.min_target),
+        max_target: Number(form.max_target),
+        round_duration_seconds: Number(form.round_duration_seconds),
+        bet_phase_seconds: Number(form.bet_phase_seconds),
+        provably_fair_enabled: !!form.provably_fair_enabled,
+        rng_algorithm: form.rng_algorithm,
+        seed_rotation_interval_rounds:
+          form.seed_rotation_interval_rounds === '' ||
+          form.seed_rotation_interval_rounds == null
+            ? null
+            : Number(form.seed_rotation_interval_rounds),
+        summary: form.summary || undefined,
+      };
+
+      const res = await api.post(`/v1/games/${game.id}/config/dice-math`, payload);
+      toast.success('Dice math config kaydedildi.');
+      const updated = res.data;
+      setForm((prev) => ({
+        ...prev,
+        ...updated,
+        summary: '',
+      }));
+    } catch (err) {
+      console.error(err);
+      const apiError = err?.response?.data;
+      if (apiError?.message) {
+        toast.error(apiError.message);
+        setError(apiError.message);
+      } else {
+        toast.error('Dice math config kaydedilemedi.');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Range &amp; Step</CardTitle>
+          <CardDescription>Dice oyununun sayı aralığı ve step çözünürlüğü.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Range Min</Label>
+              <Input
+                type="number"
+                value={form.range_min}
+                onChange={(e) => handleNumberChange('range_min', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Range Max</Label>
+              <Input
+                type="number"
+                value={form.range_max}
+                onChange={(e) => handleNumberChange('range_max', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Step</Label>
+              <Input
+                type="number"
+                value={form.step}
+                onChange={(e) => handleNumberChange('step', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">House Edge &amp; Payouts</CardTitle>
+          <CardDescription>
+            House edge yüzdesi ve minimum/maksimum payout multiplier sınırlarını ayarla.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>House Edge (%)</Label>
+              <Input
+                type="number"
+                value={form.house_edge_percent}
+                onChange={(e) => handleNumberChange('house_edge_percent', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Min Payout Multiplier</Label>
+              <Input
+                type="number"
+                value={form.min_payout_multiplier}
+                onChange={(e) => handleNumberChange('min_payout_multiplier', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Payout Multiplier</Label>
+              <Input
+                type="number"
+                value={form.max_payout_multiplier}
+                onChange={(e) => handleNumberChange('max_payout_multiplier', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            Gerçek payout hesaplaması engine tarafından yapılacak; burada sadece sınırlar belirlenir.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Target Rules</CardTitle>
+          <CardDescription>Over/Under modları ve izin verilen hedef aralığı.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={!!form.allow_over}
+                onCheckedChange={(v) => handleChange('allow_over', v)}
+                disabled={loading}
+              />
+              <span className="text-xs text-muted-foreground">Allow Over</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={!!form.allow_under}
+                onCheckedChange={(v) => handleChange('allow_under', v)}
+                disabled={loading}
+              />
+              <span className="text-xs text-muted-foreground">Allow Under</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Min Target</Label>
+              <Input
+                type="number"
+                value={form.min_target}
+                onChange={(e) => handleNumberChange('min_target', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Target</Label>
+              <Input
+                type="number"
+                value={form.max_target}
+                onChange={(e) => handleNumberChange('max_target', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Timing &amp; Fairness</CardTitle>
+          <CardDescription>Round süresi, bet phase ve provably fair parametreleri.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Round Duration (sec)</Label>
+              <Input
+                type="number"
+                value={form.round_duration_seconds}
+                onChange={(e) => handleNumberChange('round_duration_seconds', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Bet Phase (sec)</Label>
+              <Input
+                type="number"
+                value={form.bet_phase_seconds}
+                onChange={(e) => handleNumberChange('bet_phase_seconds', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={!!form.provably_fair_enabled}
+              onCheckedChange={(v) => handleChange('provably_fair_enabled', v)}
+              disabled={loading}
+            />
+            <span className="text-xs text-muted-foreground">Provably fair enabled</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>RNG Algorithm</Label>
+              <Input
+                value={form.rng_algorithm}
+                onChange={(e) => handleChange('rng_algorithm', e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Seed Rotation Interval (rounds)</Label>
+              <Input
+                type="number"
+                value={form.seed_rotation_interval_rounds}
+                onChange={(e) => handleNumberChange('seed_rotation_interval_rounds', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div>
+        <Label>Change Summary (optional)</Label>
+        <Input
+          value={form.summary}
+          onChange={(e) => handleChange('summary', e.target.value)}
+          placeholder="Standard 1% house edge dice config."
+          disabled={loading}
+          className="mt-1"
+        />
+      </div>
+
+      <Button onClick={handleSave} disabled={saving || loading}>
+        {saving ? 'Saving...' : 'Save Dice Math'}
+      </Button>
+    </div>
+  );
+};
+
+export default GameDiceMathTab;
