@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import logging
 from config import settings
-from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, admin, game_config, game_import
+from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, admin, game_config, game_import, game_config_presets
 
 # Configure logging
 logging.basicConfig(
@@ -55,7 +55,7 @@ app.include_router(email_notification.router)
 app.include_router(simulator.router)
 app.include_router(game_config.router)
 app.include_router(game_import.router)
-
+app.include_router(game_config_presets.router)
 
 
 # Finance Advanced

@@ -1,0 +1,379 @@
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse
+from typing import Dict, Any, List
+from datetime import datetime, timezone
+import logging
+
+from motor.motor_asyncio import AsyncIOMotorClient
+
+from config import settings
+from app.models.game_config_presets import ConfigPreset
+from app.models.game import GameLog
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/v1/game-config", tags=["game_config_presets"])
+
+
+def get_db():
+  client = AsyncIOMotorClient(settings.mongo_url)
+  return client[settings.db_name]
+
+
+async def _append_game_log(db, game_id: str, admin_id: str, action: str, details: Dict[str, Any]):
+  log = GameLog(game_id=game_id, admin_id=admin_id, action=action, details=details)
+  await db.game_logs.insert_one(log.model_dump())
+
+
+async def _ensure_seed_presets(db) -> None:
+  """Seed minimum viable preset set if not present.
+
+  Bu fonksiyon production ortamında da idempotent çalışacak şekilde tasarlandı.
+  Yalnızca tanımlı id'ler yoksa insert eder.
+  """
+  seed_presets: List[ConfigPreset] = []
+
+  now = datetime.now(timezone.utc)
+
+  # --- CRASH ---
+  seed_presets.append(
+    ConfigPreset(
+      id="crash_96_medium",
+      game_type="CRASH",
+      config_type="crash_math",
+      name="Crash – 96% Medium Volatility",
+      description="Standard medium volatility crash configuration with 96% target RTP.",
+      values={
+        "base_rtp": 96.0,
+        "volatility_profile": "medium",
+        "min_multiplier": 1.0,
+        "max_multiplier": 500.0,
+        "max_auto_cashout": 200.0,
+        "round_duration_seconds": 12,
+        "bet_phase_seconds": 6,
+        "grace_period_seconds": 2,
+        "min_bet_per_round": None,
+        "max_bet_per_round": None,
+        "provably_fair_enabled": True,
+        "rng_algorithm": "sha256_chain",
+        "seed_rotation_interval_rounds": 10000,
+        "summary": "Crash 96% RTP medium volatility preset.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="crash_97_high",
+      game_type="CRASH",
+      config_type="crash_math",
+      name="Crash – 97% High Volatility Turbo",
+      description="Higher RTP and higher max multiplier for aggressive crash profile.",
+      values={
+        "base_rtp": 97.0,
+        "volatility_profile": "high",
+        "min_multiplier": 1.0,
+        "max_multiplier": 1000.0,
+        "max_auto_cashout": 500.0,
+        "round_duration_seconds": 14,
+        "bet_phase_seconds": 7,
+        "grace_period_seconds": 2,
+        "min_bet_per_round": None,
+        "max_bet_per_round": None,
+        "provably_fair_enabled": True,
+        "rng_algorithm": "sha256_chain",
+        "seed_rotation_interval_rounds": 8000,
+        "summary": "Crash 97% RTP high volatility turbo preset.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  # --- DICE ---
+  seed_presets.append(
+    ConfigPreset(
+      id="dice_standard_1percent",
+      game_type="DICE",
+      config_type="dice_math",
+      name="Dice – 1% House Edge Standard",
+      description="Standard dice config with 1% house edge and full over/under.",
+      values={
+        "range_min": 0.0,
+        "range_max": 99.99,
+        "step": 0.01,
+        "house_edge_percent": 1.0,
+        "min_payout_multiplier": 1.01,
+        "max_payout_multiplier": 990.0,
+        "allow_over": True,
+        "allow_under": True,
+        "min_target": 1.0,
+        "max_target": 98.0,
+        "round_duration_seconds": 5,
+        "bet_phase_seconds": 3,
+        "provably_fair_enabled": True,
+        "rng_algorithm": "sha256_chain",
+        "seed_rotation_interval_rounds": 20000,
+        "summary": "Standard 1% house edge dice config.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="dice_over_only_low_risk",
+      game_type="DICE",
+      config_type="dice_math",
+      name="Dice – Over-Only Low Risk",
+      description="Lower variance dice profile allowing only over bets in safer target band.",
+      values={
+        "range_min": 0.0,
+        "range_max": 99.99,
+        "step": 0.01,
+        "house_edge_percent": 1.5,
+        "min_payout_multiplier": 1.01,
+        "max_payout_multiplier": 100.0,
+        "allow_over": True,
+        "allow_under": False,
+        "min_target": 50.0,
+        "max_target": 95.0,
+        "round_duration_seconds": 5,
+        "bet_phase_seconds": 3,
+        "provably_fair_enabled": True,
+        "rng_algorithm": "sha256_chain",
+        "seed_rotation_interval_rounds": 15000,
+        "summary": "Over-only low risk dice config.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="dice_under_only_high_risk",
+      game_type="DICE",
+      config_type="dice_math",
+      name="Dice – Under-Only High Risk",
+      description="High risk dice profile allowing only under bets near low edge of range.",
+      values={
+        "range_min": 0.0,
+        "range_max": 99.99,
+        "step": 0.01,
+        "house_edge_percent": 2.0,
+        "min_payout_multiplier": 2.0,
+        "max_payout_multiplier": 990.0,
+        "allow_over": False,
+        "allow_under": True,
+        "min_target": 1.0,
+        "max_target": 20.0,
+        "round_duration_seconds": 5,
+        "bet_phase_seconds": 3,
+        "provably_fair_enabled": True,
+        "rng_algorithm": "sha256_chain",
+        "seed_rotation_interval_rounds": 25000,
+        "summary": "Under-only high risk dice config.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  # --- POKER ---
+  seed_presets.append(
+    ConfigPreset(
+      id="poker_6max_nlh_eu",
+      game_type="TABLE_POKER",
+      config_type="poker_rules",
+      name="Poker – 6-max NLH EU Standard",
+      description="6-max No Limit Hold'em cash table with standard EU rake.",
+      values={
+        "variant": "texas_holdem",
+        "limit_type": "no_limit",
+        "min_players": 2,
+        "max_players": 6,
+        "min_buyin_bb": 40,
+        "max_buyin_bb": 100,
+        "rake_type": "percentage",
+        "rake_percent": 5.0,
+        "rake_cap_currency": 8.0,
+        "rake_applies_from_pot": 1.0,
+        "use_antes": False,
+        "ante_bb": None,
+        "small_blind_bb": 0.5,
+        "big_blind_bb": 1.0,
+        "allow_straddle": True,
+        "run_it_twice_allowed": False,
+        "min_players_to_start": 2,
+        "summary": "6-max NLH EU standard rake preset.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="poker_9max_nlh_classic",
+      game_type="TABLE_POKER",
+      config_type="poker_rules",
+      name="Poker – 9-max NLH Classic",
+      description="Full ring No Limit Hold'em cash table.",
+      values={
+        "variant": "texas_holdem",
+        "limit_type": "no_limit",
+        "min_players": 2,
+        "max_players": 9,
+        "min_buyin_bb": 20,
+        "max_buyin_bb": 100,
+        "rake_type": "percentage",
+        "rake_percent": 5.0,
+        "rake_cap_currency": 10.0,
+        "rake_applies_from_pot": 1.0,
+        "use_antes": False,
+        "ante_bb": None,
+        "small_blind_bb": 0.5,
+        "big_blind_bb": 1.0,
+        "allow_straddle": False,
+        "run_it_twice_allowed": False,
+        "min_players_to_start": 3,
+        "summary": "9-max NLH classic rake preset.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="poker_omaha_potlimit_default",
+      game_type="TABLE_POKER",
+      config_type="poker_rules",
+      name="Poker – Omaha Pot Limit Default",
+      description="Standard 6-max Pot Limit Omaha cash table.",
+      values={
+        "variant": "omaha",
+        "limit_type": "pot_limit",
+        "min_players": 2,
+        "max_players": 6,
+        "min_buyin_bb": 40,
+        "max_buyin_bb": 100,
+        "rake_type": "percentage",
+        "rake_percent": 5.0,
+        "rake_cap_currency": 8.0,
+        "rake_applies_from_pot": 1.0,
+        "use_antes": False,
+        "ante_bb": None,
+        "small_blind_bb": 0.5,
+        "big_blind_bb": 1.0,
+        "allow_straddle": True,
+        "run_it_twice_allowed": False,
+        "min_players_to_start": 2,
+        "summary": "Omaha PLO default cash table preset.",
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  # Insert if missing
+  for preset in seed_presets:
+    exists = await db.config_presets.find_one({"id": preset.id}, {"_id": 0})
+    if not exists:
+      await db.config_presets.insert_one(preset.model_dump())
+
+
+@router.get("/presets")
+async def list_presets(game_type: str, config_type: str):
+  """Listele: belirli game_type + config_type için preset başlıkları."""
+  db = get_db()
+  await _ensure_seed_presets(db)
+
+  cursor = db.config_presets.find(
+    {"game_type": game_type, "config_type": config_type}, {"_id": 0, "id": 1, "name": 1}
+  ).sort("name", 1)
+  presets = await cursor.to_list(100)
+
+  return {"presets": presets}
+
+
+@router.get("/presets/{preset_id}")
+async def get_preset(preset_id: str):
+  db = get_db()
+  await _ensure_seed_presets(db)
+
+  doc = await db.config_presets.find_one({"id": preset_id}, {"_id": 0})
+  if not doc:
+    return JSONResponse(
+      status_code=404,
+      content={
+        "error_code": "PRESET_NOT_FOUND",
+        "message": f"Preset {preset_id} not found.",
+      },
+    )
+
+  return doc
+
+
+@router.post("/presets/{preset_id}/apply")
+async def apply_preset(preset_id: str, payload: Dict[str, Any], request: Request):
+  """Sadece preset uygulama log'u yazar. Config'i değiştirmez/versiyon yaratmaz."""
+  db = get_db()
+
+  doc = await db.config_presets.find_one({"id": preset_id}, {"_id": 0})
+  if not doc:
+    return JSONResponse(
+      status_code=404,
+      content={
+        "error_code": "PRESET_NOT_FOUND",
+        "message": f"Preset {preset_id} not found.",
+      },
+    )
+
+  game_id = payload.get("game_id")
+  game_type = payload.get("game_type")
+  config_type = payload.get("config_type")
+
+  if not game_id or not game_type or not config_type:
+    return JSONResponse(
+      status_code=400,
+      content={
+        "error_code": "PRESET_APPLY_INVALID_PAYLOAD",
+        "message": "game_id, game_type and config_type are required.",
+      },
+    )
+
+  admin_id = "current_admin"  # TODO: real auth integration
+  request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+  await _append_game_log(
+    db,
+    game_id,
+    admin_id,
+    "preset_applied",
+    {
+      "preset_id": preset_id,
+      "preset_game_type": doc.get("game_type"),
+      "preset_config_type": doc.get("config_type"),
+      "applied_game_type": game_type,
+      "config_type": config_type,
+      "request_id": request_id,
+    },
+  )
+
+  logger.info(
+    "preset_applied",
+    extra={
+      "game_id": game_id,
+      "preset_id": preset_id,
+      "game_type": game_type,
+      "config_type": config_type,
+      "request_id": request_id,
+    },
+  )
+
+  return {"message": "Preset apply logged."}
