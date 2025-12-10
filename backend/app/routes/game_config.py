@@ -121,6 +121,8 @@ async def update_game_general_config(game_id: str, payload: GameGeneralConfig):
     db = get_db()
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
     if not game_doc:
+    # TODO: game_level lock for general config can be added similarly to paytable/reel strips if needed
+
         raise HTTPException(status_code=404, detail="Game not found")
 
     admin_id = "current_admin"  # TODO: hook into auth when available
