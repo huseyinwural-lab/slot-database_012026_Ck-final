@@ -305,6 +305,8 @@ async def save_feature_flags(game_id: str, payload: GameFeatureFlagsUpdate):
         raise HTTPException(status_code=404, detail="Game not found")
 
     admin_id = "current_admin"
+    # NOTE: paytable-specific validation and errors live below
+
     version = await _generate_new_version(db, game_id, admin_id, notes="Feature flags change")
 
     flags = GameFeatureFlags(
