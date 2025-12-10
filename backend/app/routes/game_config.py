@@ -14,6 +14,7 @@ from app.models.game import (
     GameConfigVersionStatus,
     RtpProfile,
     RtpConfigResponse,
+    RtpCountryOverride,
     BetConfig,
     BetConfigResponse,
     GameFeatureFlags,
