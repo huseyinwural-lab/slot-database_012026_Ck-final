@@ -880,7 +880,7 @@ async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, requ
 
 
 # ---------------------------------------------------------------------------
-# SLOT ADVANCED CONFIG
+# BLACKJACK RULES CONFIG
 # ---------------------------------------------------------------------------
 
 
