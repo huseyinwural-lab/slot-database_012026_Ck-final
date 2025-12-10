@@ -1089,7 +1089,7 @@ class RtpProfileCreate(BaseModel):
     code: str
     rtp_value: float
     is_default: bool = False
-    country_overrides: List[CountryRtpOverride] = []
+    country_overrides: List[RtpCountryOverride] = []
 
 
 @router.post("/{game_id}/config/rtp", response_model=RtpProfile)
