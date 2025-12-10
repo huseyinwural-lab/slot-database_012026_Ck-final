@@ -18,6 +18,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import GameReelStripsTab from './GameReelStripsTab';
 import GameAssetsTab from './GameAssetsTab';
 import GamePokerRulesTab from './GamePokerRulesTab';
+import GameCrashMathTab from './GameCrashMathTab';
+import GameDiceMathTab from './GameDiceMathTab';
 
 const defaultVisibility = {
   countries: [],
