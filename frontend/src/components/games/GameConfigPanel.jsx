@@ -31,14 +31,14 @@ const defaultVisibility = {
 // Burada ana türler için SLOT / TABLE_POKER / CRASH / DICE / TABLE_BLACKJACK kullanıyoruz.
 // REEL_LINES / WAYS / MEGAWAYS vb. engine tipleri SLOT ile aynı şemayı kullanacak.
 const TAB_SCHEMA = {
-  SLOT: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
-  REEL_LINES: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
-  WAYS: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
-  MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
-  TABLE_POKER: ['general', 'bets', 'features', 'poker_rules', 'assets', 'logs'],
-  CRASH: ['general', 'crash_math', 'assets', 'logs'],
-  DICE: ['general', 'dice_math', 'assets', 'logs'],
-  TABLE_BLACKJACK: ['general', 'bets', 'features', 'blackjack_rules', 'assets', 'logs'],
+  SLOT: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
+  REEL_LINES: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
+  WAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
+  MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
+  TABLE_POKER: ['general', 'poker_rules', 'assets', 'logs'],
+  CRASH: ['general', 'crash_math', 'bets', 'assets', 'logs'],
+  DICE: ['general', 'dice_math', 'bets', 'assets', 'logs'],
+  TABLE_BLACKJACK: ['general', 'blackjack_rules', 'assets', 'logs'],
 };
 
 const GameConfigPanel = ({ game, onClose, onSaved }) => {
@@ -87,6 +87,12 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
 
   const visibleTabs = TAB_SCHEMA[resolvedCoreType] || [];
 
+  const [rtpPresets, setRtpPresets] = useState([]);
+  const [selectedRtpPreset, setSelectedRtpPreset] = useState('');
+
+  const [betsPresets, setBetsPresets] = useState([]);
+  const [selectedBetsPreset, setSelectedBetsPreset] = useState('');
+
   useEffect(() => {
     if (!game) return;
 
@@ -96,16 +102,28 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
         const generalRes = await api.get(`/v1/games/${game.id}/config/general`);
         setGeneral(generalRes.data);
 
-        // RTP
+        // RTP + RTP presets (slot türü için)
         if (visibleTabs.includes('rtp')) {
-          const rtpRes = await api.get(`/v1/games/${game.id}/config/rtp`);
+          const [rtpRes, presetRes] = await Promise.all([
+            api.get(`/v1/games/${game.id}/config/rtp`),
+            api.get('/v1/game-config/presets', {
+              params: { game_type: resolvedCoreType || 'SLOT', config_type: 'rtp' },
+            }),
+          ]);
           setRtpConfig(rtpRes.data);
+          setRtpPresets(presetRes.data?.presets || []);
         }
 
-        // Bets
+        // Bets + Bets presets (slot/crash/dice türleri için)
         if (visibleTabs.includes('bets')) {
-          const betRes = await api.get(`/v1/games/${game.id}/config/bets`);
+          const [betRes, betPresetRes] = await Promise.all([
+            api.get(`/v1/games/${game.id}/config/bets`),
+            api.get('/v1/game-config/presets', {
+              params: { game_type: resolvedCoreType || 'SLOT', config_type: 'bets' },
+            }),
+          ]);
           if (betRes.data?.config) setBets(betRes.data.config);
+          setBetsPresets(betPresetRes.data?.presets || []);
         }
 
         // Features
@@ -132,7 +150,7 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
     };
 
     loadAll();
-  }, [game, visibleTabs]);
+  }, [game, visibleTabs, resolvedCoreType]);
 
   const reloadPaytable = async () => {
     if (!game) return;
@@ -180,6 +198,30 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
     }
   };
 
+  const handleApplyRtpPreset = async () => {
+    if (!selectedRtpPreset || !game) return;
+    try {
+      const res = await api.get(`/v1/game-config/presets/${selectedRtpPreset}`);
+      const preset = res.data;
+      if (preset?.values) {
+        setNewRtp((prev) => ({
+          ...prev,
+          ...preset.values,
+        }));
+      }
+      await api.post(`/v1/game-config/presets/${selectedRtpPreset}/apply`, {
+        game_id: game.id,
+        game_type: resolvedCoreType || 'SLOT',
+        config_type: 'rtp',
+      });
+      toast.success('RTP preset uygulandı. Değerler forma yansıtıldı.');
+    } catch (err) {
+      console.error(err);
+      const apiError = err?.response?.data;
+      toast.error(apiError?.message || 'RTP preset uygulanamadı.');
+    }
+  };
+
   const handleSaveBets = async () => {
     if (!game) return;
     setLoading(true);
@@ -193,6 +235,30 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
       toast.error(err.response?.data?.detail || 'Failed to save bets');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApplyBetsPreset = async () => {
+    if (!selectedBetsPreset || !game) return;
+    try {
+      const res = await api.get(`/v1/game-config/presets/${selectedBetsPreset}`);
+      const preset = res.data;
+      if (preset?.values) {
+        setBets((prev) => ({
+          ...prev,
+          ...preset.values,
+        }));
+      }
+      await api.post(`/v1/game-config/presets/${selectedBetsPreset}/apply`, {
+        game_id: game.id,
+        game_type: resolvedCoreType || game.core_type,
+        config_type: 'bets',
+      });
+      toast.success('Bets preset uygulandı. Değerler forma yansıtıldı.');
+    } catch (err) {
+      console.error(err);
+      const apiError = err?.response?.data;
+      toast.error(apiError?.message || 'Bets preset uygulanamadı.');
     }
   };
 
@@ -235,11 +301,11 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           {visibleTabs.includes('features') && (
             <TabsTrigger value="features">Features</TabsTrigger>
           )}
-          {visibleTabs.includes('reels') && (
-            <TabsTrigger value="reels">Reel Strips</TabsTrigger>
-          )}
           {visibleTabs.includes('paytable') && (
             <TabsTrigger value="paytable">Paytable</TabsTrigger>
+          )}
+          {visibleTabs.includes('reels') && (
+            <TabsTrigger value="reels">Reel Strips</TabsTrigger>
           )}
           {visibleTabs.includes('poker_rules') && (
             <TabsTrigger value="poker_rules">Poker Rules &amp; Rake</TabsTrigger>
@@ -392,6 +458,47 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
         {/* RTP TAB */}
         {visibleTabs.includes('rtp') && (
           <TabsContent value="rtp" className="space-y-4 pt-4">
+            {/* Preset bar */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Preset</CardTitle>
+                <CardDescription>
+                  RTP profili için hazır preset&apos;leri uygula, ardından manuel olarak düzenleyebilirsin.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+                <div className="flex-1 space-y-1">
+                  <Label>Preset seç</Label>
+                  <Select
+                    value={selectedRtpPreset}
+                    onValueChange={setSelectedRtpPreset}
+                    disabled={loading || rtpPresets.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={rtpPresets.length ? 'Seçiniz' : 'Preset bulunamadı'}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rtpPresets.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleApplyRtpPreset}
+                  disabled={loading || !selectedRtpPreset}
+                  className="whitespace-nowrap"
+                >
+                  Apply Preset
+                </Button>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>RTP Profiles</CardTitle>
@@ -479,6 +586,47 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
         {/* BETS TAB */}
         {visibleTabs.includes('bets') && (
           <TabsContent value="bets" className="space-y-4 pt-4">
+            {/* Preset bar */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Preset</CardTitle>
+                <CardDescription>
+                  Bet &amp; limits için hazır preset&apos;leri uygula, ardından manuel olarak düzenleyebilirsin.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+                <div className="flex-1 space-y-1">
+                  <Label>Preset seç</Label>
+                  <Select
+                    value={selectedBetsPreset}
+                    onValueChange={setSelectedBetsPreset}
+                    disabled={loading || betsPresets.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={betsPresets.length ? 'Seçiniz' : 'Preset bulunamadı'}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {betsPresets.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleApplyBetsPreset}
+                  disabled={loading || !selectedBetsPreset}
+                  className="whitespace-nowrap"
+                >
+                  Apply Preset
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Min Bet</Label>
@@ -592,7 +740,7 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
         {/* CRASH MATH TAB */}
         {visibleTabs.includes('crash_math') && (
           <TabsContent value="crash_math" className="space-y-4 pt-4">
-            {game?.core_type === 'CRASH' ? (
+            {resolvedCoreType === 'CRASH' ? (
               <GameCrashMathTab game={game} />
             ) : (
               <Card>
@@ -609,7 +757,7 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
         {/* DICE MATH TAB */}
         {visibleTabs.includes('dice_math') && (
           <TabsContent value="dice_math" className="space-y-4 pt-4">
-            {game?.core_type === 'DICE' ? (
+            {resolvedCoreType === 'DICE' ? (
               <GameDiceMathTab game={game} />
             ) : (
               <Card>
