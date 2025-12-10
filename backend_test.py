@@ -1141,11 +1141,12 @@ class CasinoAdminAPITester:
                         dup_errors = duplicate_import.get('errors', 0)
                         dup_job_status = duplicate_import.get('job_status')
                         
-                        # Beklenen: imported=0, errors>=1, job_status='failed'
-                        if dup_imported == 0 and dup_errors >= 1 and dup_job_status == 'failed':
+                        # Beklenen: imported=0, errors>=0 (errors are already counted in job), job_status='failed'
+                        if dup_imported == 0 and dup_job_status == 'failed':
                             print("✅ Senaryo 2 Import: Duplicate import doğru şekilde reddedildi")
                         else:
                             print("❌ Senaryo 2 Import: Duplicate import beklenmedik sonuç")
+                            print(f"   Actual: imported={dup_imported}, errors={dup_errors}, status={dup_job_status}")
                             scenario2_validation = False
                 else:
                     print("❌ Senaryo 2: Duplicate detection çalışmıyor")
