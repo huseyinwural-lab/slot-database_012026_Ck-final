@@ -217,6 +217,103 @@ class JackpotConfigResponse(BaseModel):
 
 
 
+class CrashMathConfig(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    schema_version: str = "1.0.0"
+
+    base_rtp: float
+    volatility_profile: str  # "low" | "medium" | "high"
+    min_multiplier: float
+    max_multiplier: float
+    max_auto_cashout: float
+
+    round_duration_seconds: int
+    bet_phase_seconds: int
+    grace_period_seconds: int
+
+    min_bet_per_round: Optional[float] = None
+    max_bet_per_round: Optional[float] = None
+
+    provably_fair_enabled: bool = False
+    rng_algorithm: str
+    seed_rotation_interval_rounds: Optional[int] = None
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+
+
+class CrashMathConfigResponse(BaseModel):
+    config_version_id: Optional[str] = None
+    schema_version: str = "1.0.0"
+    base_rtp: float
+    volatility_profile: str
+    min_multiplier: float
+    max_multiplier: float
+    max_auto_cashout: float
+    round_duration_seconds: int
+    bet_phase_seconds: int
+    grace_period_seconds: int
+    min_bet_per_round: Optional[float] = None
+    max_bet_per_round: Optional[float] = None
+    provably_fair_enabled: bool
+    rng_algorithm: str
+    seed_rotation_interval_rounds: Optional[int] = None
+
+
+class DiceMathConfig(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    schema_version: str = "1.0.0"
+
+    range_min: float
+    range_max: float
+    step: float
+
+    house_edge_percent: float
+    min_payout_multiplier: float
+    max_payout_multiplier: float
+
+    allow_over: bool
+    allow_under: bool
+
+    min_target: float
+    max_target: float
+
+    round_duration_seconds: int
+    bet_phase_seconds: int
+
+    provably_fair_enabled: bool = False
+    rng_algorithm: str
+    seed_rotation_interval_rounds: Optional[int] = None
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+
+
+class DiceMathConfigResponse(BaseModel):
+    config_version_id: Optional[str] = None
+    schema_version: str = "1.0.0"
+    range_min: float
+    range_max: float
+    step: float
+    house_edge_percent: float
+    min_payout_multiplier: float
+    max_payout_multiplier: float
+    allow_over: bool
+    allow_under: bool
+    min_target: float
+    max_target: float
+    round_duration_seconds: int
+    bet_phase_seconds: int
+    provably_fair_enabled: bool
+    rng_algorithm: str
+    seed_rotation_interval_rounds: Optional[int] = None
+
+
+
 class PokerRules(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     game_id: str
