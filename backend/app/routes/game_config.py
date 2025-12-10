@@ -1362,13 +1362,6 @@ def _blackjack_rules_error(message: str, field: str, value: Any = None, reason: 
     return {"error_code": "BLACKJACK_RULES_VALIDATION_FAILED", "message": message, "details": details}
 
 
-def _blackjack_rules_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
-    details: Dict[str, Any] = {"field": field, "reason": reason}
-    if value is not None:
-        details["value"] = value
-    return {"error_code": "BLACKJACK_RULES_VALIDATION_FAILED", "message": message, "details": details}
-
-
 @router.get("/{game_id}/config/blackjack-rules", response_model=BlackjackRulesResponse)
 async def get_blackjack_rules(game_id: str, request: Request):
     """Aktif blackjack kurallarını döndür veya default 6-deck S17 3:2 template üretir."""
