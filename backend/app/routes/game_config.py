@@ -680,6 +680,17 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
 
     logger.info(
         "crash_math_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "core_type": "CRASH",
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "crash_math_saved",
+        },
+    )
+
+    return cfg
 
 
 def _validate_enforcement_mode(value: Optional[str], error_builder) -> Optional[Dict[str, Any]]:
