@@ -291,6 +291,8 @@ class DiceMathSaveRequest(BaseModel):
     # Country specific overrides keyed by ISO 3166-1 alpha-2 country code
     country_overrides: Optional[Dict[str, Dict[str, Any]]] = None
 
+    seed_rotation_interval_rounds: Optional[int] = None
+
 
 class SlotAdvancedSaveRequest(BaseModel):
     spin_speed: str
