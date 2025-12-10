@@ -22,11 +22,11 @@ from app.models.game import (
     GameLog,
     GameLogsResponse,
     PaytableRecord,
-logger = logging.getLogger(__name__)
-
     PaytableHistoryItem,
     PaytableResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/games", tags=["games_config"])
 
