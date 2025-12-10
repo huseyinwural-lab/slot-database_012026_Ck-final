@@ -189,6 +189,13 @@ const GameCrashMathTab = ({ game }) => {
         ...updated,
         min_bet_per_round: updated.min_bet_per_round ?? '',
         max_bet_per_round: updated.max_bet_per_round ?? '',
+        max_loss_per_round: updated.max_loss_per_round ?? '',
+        max_win_per_round: updated.max_win_per_round ?? '',
+        max_rounds_per_session: updated.max_rounds_per_session ?? '',
+        max_total_loss_per_session: updated.max_total_loss_per_session ?? '',
+        max_total_win_per_session: updated.max_total_win_per_session ?? '',
+        enforcement_mode: updated.enforcement_mode || 'log_only',
+        country_overrides: updated.country_overrides || {},
         summary: '',
       }));
     } catch (err) {
