@@ -835,21 +835,6 @@ async def save_jackpot_config(game_id: str, payload: JackpotConfigSaveRequest, r
 
     return cfg
 
-        },
-    )
-
-    # Optional approval hook
-    approval = ApprovalRequest(
-        category=ApprovalCategory.GAME,
-        action_type="reel_strips_change",
-        related_entity_id=game_id,
-        requester_admin=admin_id,
-        details={"config_version_id": version.id, "summary": payload.summary},
-    )
-    await db.approvals.insert_one(approval.model_dump())
-
-    return record
-
 
 class ReelStripsImportRequest(BaseModel):
     format: str  # "json" | "csv"
