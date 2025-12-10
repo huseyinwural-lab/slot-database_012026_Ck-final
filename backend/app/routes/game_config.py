@@ -992,8 +992,9 @@ async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, requ
             _dice_math_error,
             parent_field="country_overrides",
         )
-    except JSONResponse as jr:
-        return jr
+    except TypeError:
+        # _validate_country_overrides will raise a JSONResponse directly; FastAPI will handle it
+        raise
 
     if payload.min_payout_multiplier < 1.0 or payload.min_payout_multiplier > payload.max_payout_multiplier:
         return JSONResponse(
