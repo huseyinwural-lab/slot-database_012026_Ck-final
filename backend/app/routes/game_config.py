@@ -786,18 +786,6 @@ def _validate_country_overrides(
 
     return normalized
 
-        extra={
-            "game_id": game_id,
-            "config_version_id": version.id,
-            "core_type": "CRASH",
-            "admin_id": admin_id,
-            "request_id": request_id,
-            "action_type": "crash_math_saved",
-        },
-    )
-
-    return cfg
-
 
 # ---------------------------------------------------------------------------
 # DICE MATH CONFIG
