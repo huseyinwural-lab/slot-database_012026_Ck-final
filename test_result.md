@@ -220,8 +220,10 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus: []
-  stuck_tasks: []
+  current_focus: 
+    - "Poker Rules & Rake Backend Endpoints"
+  stuck_tasks: 
+    - "Poker Rules & Rake Backend Endpoints"
   test_all: false
   test_priority: "high_first"
 
