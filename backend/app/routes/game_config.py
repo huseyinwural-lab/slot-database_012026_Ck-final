@@ -736,6 +736,101 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
 
     logger.info(
         "crash_math_saved",
+
+
+def _validate_enforcement_mode(value: Optional[str], error_builder) -> Optional[Dict[str, Any]]:
+    normalized = (value or "log_only").lower()
+    if normalized not in {"hard_block", "log_only"}:
+        # error_builder: callable(message, field, value, reason) -> Dict
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=400,
+            content=error_builder(
+                "enforcement_mode must be one of: hard_block, log_only.",
+                "enforcement_mode",
+                normalized,
+                ValidationReason.UNSUPPORTED_ENFORCEMENT_MODE.value,
+            ),
+        )
+    return normalized
+
+
+def _validate_positive_or_none(field_name: str, value: Optional[float], error_builder) -> Optional[Dict[str, Any]]:
+    if value is not None and value <= 0:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=400,
+            content=error_builder(
+                f"{field_name} must be > 0 when provided.",
+                field_name,
+                value,
+                ValidationReason.MUST_BE_POSITIVE.value,
+            ),
+        )
+    return None
+
+
+def _validate_country_overrides(
+    raw_overrides: Optional[Dict[str, Dict[str, Any]]],
+    allowed_keys: List[str],
+    error_builder,
+    parent_field: str = "country_overrides",
+) -> Dict[str, Dict[str, Any]]:
+    """Shared validation for Crash/Dice country_overrides.
+
+    - Ensures ISO 3166-1 alpha-2 country codes
+    - Ensures all numeric fields in allowed_keys are > 0 (or positive int for *_rounds / *_bets)
+    """
+    from fastapi.responses import JSONResponse
+
+    normalized: Dict[str, Dict[str, Any]] = {}
+    if not raw_overrides:
+        return normalized
+
+    for country_code, overrides in raw_overrides.items():
+        if not isinstance(country_code, str) or len(country_code) != 2 or not country_code.isalpha():
+            raise JSONResponse(
+                status_code=400,
+                content=error_builder(
+                    "country code must be ISO 3166-1 alpha-2 (2 letters).",
+                    parent_field,
+                    country_code,
+                    ValidationReason.INVALID_COUNTRY_CODE.value,
+                ),
+            )
+        upper_code = country_code.upper()
+
+        for key in allowed_keys:
+            if key in overrides and overrides[key] is not None:
+                val = overrides[key]
+                is_int_like = key.endswith("_rounds") or key.endswith("_bets")
+                if is_int_like:
+                    if not isinstance(val, (int, float)) or int(val) <= 0:
+                        raise JSONResponse(
+                            status_code=400,
+                            content=error_builder(
+                                f"{key} must be a positive integer when provided.",
+                                f"{parent_field}.{upper_code}.{key}",
+                                val,
+                                ValidationReason.MUST_BE_POSITIVE.value,
+                            ),
+                        )
+                else:
+                    if not isinstance(val, (int, float)) or float(val) <= 0:
+                        raise JSONResponse(
+                            status_code=400,
+                            content=error_builder(
+                                f"{key} must be > 0 when provided.",
+                                f"{parent_field}.{upper_code}.{key}",
+                                val,
+                                ValidationReason.MUST_BE_POSITIVE.value,
+                            ),
+                        )
+
+        normalized[upper_code] = overrides
+
+    return normalized
+
         extra={
             "game_id": game_id,
             "config_version_id": version.id,
