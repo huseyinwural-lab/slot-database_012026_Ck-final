@@ -178,13 +178,14 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="rtp">Math &amp; RTP</TabsTrigger>
           <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="reels">Reel Strips</TabsTrigger>
           <TabsTrigger value="paytable">Paytable</TabsTrigger>
+          <TabsTrigger value="poker_rules">Poker Rules &amp; Rake</TabsTrigger>
           <TabsTrigger value="assets">Assets</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
