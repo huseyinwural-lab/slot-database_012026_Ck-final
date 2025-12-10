@@ -4264,7 +4264,7 @@ TX-MISSING-LOW,25.50,EUR"""
             if core_type == "TABLE_POKER" and not poker_game_id:
                 poker_game_id = game.get('id')
                 print(f"✅ Found TABLE_POKER game: {game.get('name', 'Unknown')} (ID: {poker_game_id})")
-            elif core_type != "TABLE_POKER" and not non_poker_game_id:
+            elif core_type and core_type != "TABLE_POKER" and not non_poker_game_id:
                 non_poker_game_id = game.get('id')
                 print(f"✅ Found non-poker game: {game.get('name', 'Unknown')} (ID: {non_poker_game_id})")
         
