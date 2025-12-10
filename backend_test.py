@@ -1229,6 +1229,339 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_dice_advanced_limits_backend_validation(self):
+        """Test Dice Advanced Limits Backend Validation - Turkish Review Request Phase C"""
+        print("\n🎲 DICE ADVANCED LIMITS BACKEND VALIDATION TESTS")
+        
+        # Step 1: Get games and check for DICE games
+        success1, games_response = self.run_test("Get Games for DICE Test", "GET", "api/v1/games", 200)
+        
+        dice_game_id = None
+        if success1 and isinstance(games_response, list):
+            # Look for a DICE game (core_type='DICE' or category='DICE')
+            for game in games_response:
+                core_type = game.get('core_type') or game.get('category')
+                if core_type == 'DICE':
+                    dice_game_id = game.get('id')
+                    print(f"   🎯 Found DICE game: {game.get('name')} (ID: {dice_game_id})")
+                    break
+        
+        if not dice_game_id:
+            print("❌ No DICE games found in system (core_type='DICE' or category='DICE')")
+            print("   Testing 404 behavior for non-DICE games...")
+            
+            # Test 404 behavior with a non-DICE game
+            if success1 and isinstance(games_response, list) and len(games_response) > 0:
+                non_dice_game_id = games_response[0].get('id')
+                success_404, response_404 = self.run_test(
+                    f"GET dice-math on non-DICE game - {non_dice_game_id}", 
+                    "GET", 
+                    f"api/v1/games/{non_dice_game_id}/config/dice-math", 
+                    404
+                )
+                
+                if success_404 and isinstance(response_404, dict):
+                    error_code = response_404.get('error_code')
+                    if error_code == 'DICE_MATH_NOT_AVAILABLE_FOR_GAME':
+                        print("   ✅ 404 behavior correct for non-DICE games")
+                        print(f"      error_code: {error_code}")
+                        print(f"      message: {response_404.get('message')}")
+                        return True
+                    else:
+                        print(f"   ❌ Wrong error_code: expected 'DICE_MATH_NOT_AVAILABLE_FOR_GAME', got '{error_code}'")
+                        return False
+                else:
+                    print("   ❌ 404 response structure invalid")
+                    return False
+            else:
+                print("   ❌ No games found to test 404 behavior")
+                return False
+        
+        # Step 2: GET default Dice Math template (DICE game exists)
+        print(f"\n🔍 Step 2: GET default Dice Math template")
+        success2, template_response = self.run_test(
+            f"Get Dice Math Template - {dice_game_id}", 
+            "GET", 
+            f"api/v1/games/{dice_game_id}/config/dice-math", 
+            200
+        )
+        
+        # Validate default template structure
+        template_validation_success = True
+        if success2 and isinstance(template_response, dict):
+            print("   🔍 Validating default template structure:")
+            
+            # Check for new advanced fields with default values
+            expected_defaults = {
+                'max_win_per_bet': None,
+                'max_loss_per_bet': None,
+                'max_session_loss': None,
+                'max_session_bets': None,
+                'enforcement_mode': 'log_only',
+                'country_overrides': {}
+            }
+            
+            for field, expected_value in expected_defaults.items():
+                actual_value = template_response.get(field)
+                if actual_value == expected_value:
+                    print(f"   ✅ {field}: {actual_value} (correct default)")
+                else:
+                    print(f"   ❌ {field}: expected {expected_value}, got {actual_value}")
+                    template_validation_success = False
+            
+            # Check basic required fields
+            basic_fields = ['range_min', 'range_max', 'step', 'house_edge_percent', 
+                          'min_payout_multiplier', 'max_payout_multiplier', 'allow_over', 
+                          'allow_under', 'min_target', 'max_target', 'round_duration_seconds', 
+                          'bet_phase_seconds', 'provably_fair_enabled', 'rng_algorithm', 
+                          'seed_rotation_interval_rounds']
+            
+            missing_fields = [field for field in basic_fields if field not in template_response]
+            if not missing_fields:
+                print("   ✅ All basic fields present in template")
+            else:
+                print(f"   ❌ Missing basic fields: {missing_fields}")
+                template_validation_success = False
+        else:
+            template_validation_success = False
+            print("   ❌ GET template failed or returned invalid response")
+        
+        # Step 3: Positive POST - Full advanced limits
+        print(f"\n🔍 Step 3: POST full advanced limits configuration")
+        
+        full_payload = {
+            "range_min": 0.0,
+            "range_max": 99.99,
+            "step": 0.01,
+            "house_edge_percent": 1.0,
+            "min_payout_multiplier": 1.01,
+            "max_payout_multiplier": 990.0,
+            "allow_over": True,
+            "allow_under": True,
+            "min_target": 1.0,
+            "max_target": 98.0,
+            "round_duration_seconds": 5,
+            "bet_phase_seconds": 3,
+            "max_win_per_bet": 200.0,
+            "max_loss_per_bet": 100.0,
+            "max_session_loss": 1000.0,
+            "max_session_bets": 500,
+            "enforcement_mode": "hard_block",
+            "country_overrides": {
+                "TR": {
+                    "max_session_loss": 800.0,
+                    "max_win_per_bet": 150.0
+                }
+            },
+            "provably_fair_enabled": True,
+            "rng_algorithm": "sha256_chain",
+            "seed_rotation_interval_rounds": 20000,
+            "summary": "Dice advanced limits test"
+        }
+        
+        success3, full_response = self.run_test(
+            f"POST Full Advanced Limits - {dice_game_id}", 
+            "POST", 
+            f"api/v1/games/{dice_game_id}/config/dice-math", 
+            200, 
+            full_payload
+        )
+        
+        # Validate full response structure
+        full_validation_success = True
+        if success3 and isinstance(full_response, dict):
+            print("   🔍 Validating full advanced limits response:")
+            
+            # Check that advanced fields are saved correctly
+            advanced_checks = {
+                'max_win_per_bet': 200.0,
+                'max_loss_per_bet': 100.0,
+                'max_session_loss': 1000.0,
+                'max_session_bets': 500,
+                'enforcement_mode': 'hard_block'
+            }
+            
+            for field, expected_value in advanced_checks.items():
+                actual_value = full_response.get(field)
+                if actual_value == expected_value:
+                    print(f"   ✅ {field}: {actual_value}")
+                else:
+                    print(f"   ❌ {field}: expected {expected_value}, got {actual_value}")
+                    full_validation_success = False
+            
+            # Check country overrides
+            country_overrides = full_response.get('country_overrides', {})
+            if 'TR' in country_overrides:
+                tr_overrides = country_overrides['TR']
+                if (tr_overrides.get('max_session_loss') == 800.0 and 
+                    tr_overrides.get('max_win_per_bet') == 150.0):
+                    print("   ✅ country_overrides.TR: correct values")
+                else:
+                    print(f"   ❌ country_overrides.TR: incorrect values {tr_overrides}")
+                    full_validation_success = False
+            else:
+                print("   ❌ country_overrides.TR: missing")
+                full_validation_success = False
+        else:
+            full_validation_success = False
+            print("   ❌ POST full advanced limits failed")
+        
+        # Step 4: Verify persistence - GET again to check saved values
+        if success3:
+            print(f"\n🔍 Step 4: Verify persistence - GET after POST")
+            success4, verify_response = self.run_test(
+                f"Verify Saved Config - {dice_game_id}", 
+                "GET", 
+                f"api/v1/games/{dice_game_id}/config/dice-math", 
+                200
+            )
+            
+            verify_success = True
+            if success4 and isinstance(verify_response, dict):
+                # Check that values persist correctly
+                for field in ['max_win_per_bet', 'max_loss_per_bet', 'max_session_loss', 'max_session_bets', 'enforcement_mode']:
+                    if verify_response.get(field) == full_payload[field]:
+                        print(f"   ✅ {field} persisted correctly")
+                    else:
+                        print(f"   ❌ {field} not persisted: expected {full_payload[field]}, got {verify_response.get(field)}")
+                        verify_success = False
+            else:
+                verify_success = False
+                print("   ❌ Verification GET failed")
+        else:
+            verify_success = False
+        
+        # Step 5: Negative validation tests
+        print(f"\n🔍 Step 5: Negative validation scenarios")
+        
+        validation_tests = []
+        
+        # 5a: Invalid enforcement_mode
+        test_5a = full_payload.copy()
+        test_5a['enforcement_mode'] = "invalid_mode"
+        test_5a['summary'] = "Test invalid enforcement_mode"
+        
+        success_5a, response_5a = self.run_test(
+            "Validation: invalid enforcement_mode", 
+            "POST", 
+            f"api/v1/games/{dice_game_id}/config/dice-math", 
+            400, 
+            test_5a
+        )
+        validation_tests.append(("5a_invalid_enforcement", success_5a, response_5a, "enforcement_mode", "unsupported_enforcement_mode"))
+        
+        # 5b: max_session_loss = 0
+        test_5b = full_payload.copy()
+        test_5b['max_session_loss'] = 0
+        test_5b['summary'] = "Test max_session_loss zero"
+        
+        success_5b, response_5b = self.run_test(
+            "Validation: max_session_loss=0", 
+            "POST", 
+            f"api/v1/games/{dice_game_id}/config/dice-math", 
+            400, 
+            test_5b
+        )
+        validation_tests.append(("5b_session_loss_zero", success_5b, response_5b, "max_session_loss", "must_be_positive"))
+        
+        # 5c: max_session_bets = 0
+        test_5c = full_payload.copy()
+        test_5c['max_session_bets'] = 0
+        test_5c['summary'] = "Test max_session_bets zero"
+        
+        success_5c, response_5c = self.run_test(
+            "Validation: max_session_bets=0", 
+            "POST", 
+            f"api/v1/games/{dice_game_id}/config/dice-math", 
+            400, 
+            test_5c
+        )
+        validation_tests.append(("5c_session_bets_zero", success_5c, response_5c, "max_session_bets", "must_be_positive"))
+        
+        # 5d: Invalid country code
+        test_5d = full_payload.copy()
+        test_5d['country_overrides'] = {"TUR": {"max_session_loss": 800.0}}  # Should be "TR", not "TUR"
+        test_5d['summary'] = "Test invalid country code"
+        
+        success_5d, response_5d = self.run_test(
+            "Validation: invalid country code", 
+            "POST", 
+            f"api/v1/games/{dice_game_id}/config/dice-math", 
+            400, 
+            test_5d
+        )
+        validation_tests.append(("5d_invalid_country", success_5d, response_5d, "country_overrides", "invalid_country_code"))
+        
+        # 5e: Negative country override value
+        test_5e = full_payload.copy()
+        test_5e['country_overrides'] = {"TR": {"max_session_loss": -10}}
+        test_5e['summary'] = "Test negative country override"
+        
+        success_5e, response_5e = self.run_test(
+            "Validation: negative country override", 
+            "POST", 
+            f"api/v1/games/{dice_game_id}/config/dice-math", 
+            400, 
+            test_5e
+        )
+        validation_tests.append(("5e_negative_override", success_5e, response_5e, "country_overrides.TR.max_session_loss", "must_be_positive"))
+        
+        # Analyze validation results
+        print(f"\n🔍 Analyzing validation test results:")
+        validation_success_count = 0
+        validation_total_count = len(validation_tests)
+        
+        for test_name, success, response, expected_field, expected_reason in validation_tests:
+            if success and isinstance(response, dict):
+                error_code = response.get('error_code')
+                details = response.get('details', {})
+                field = details.get('field')
+                reason = details.get('reason')
+                
+                print(f"   ✅ {test_name}: HTTP 400, error_code='{error_code}', field='{field}', reason='{reason}'")
+                
+                # Validate expected error structure
+                if (error_code == 'DICE_MATH_VALIDATION_FAILED' and 
+                    field == expected_field and 
+                    reason == expected_reason):
+                    validation_success_count += 1
+                else:
+                    print(f"      ⚠️  Expected field='{expected_field}', reason='{expected_reason}'")
+            else:
+                print(f"   ❌ {test_name}: Failed to return proper 400 error response")
+        
+        validation_overall_success = validation_success_count == validation_total_count
+        
+        if validation_overall_success:
+            print(f"✅ All {validation_total_count} validation scenarios passed correctly")
+        else:
+            print(f"❌ Only {validation_success_count}/{validation_total_count} validation scenarios passed")
+        
+        # Overall test result
+        overall_success = (success1 and success2 and template_validation_success and 
+                          success3 and full_validation_success and verify_success and 
+                          validation_overall_success)
+        
+        if overall_success:
+            print("\n✅ DICE ADVANCED LIMITS BACKEND VALIDATION - ALL TESTS PASSED")
+            print("   ✅ GET dice-math template returns correct default advanced fields")
+            print("   ✅ POST with full advanced limits working correctly")
+            print("   ✅ Advanced fields properly saved and persisted")
+            print("   ✅ All negative validation scenarios working correctly")
+            print("   ✅ Country overrides validation working")
+        else:
+            print("\n❌ DICE ADVANCED LIMITS BACKEND VALIDATION - SOME TESTS FAILED")
+            if not success2 or not template_validation_success:
+                print("   ❌ GET template or default values incorrect")
+            if not success3 or not full_validation_success:
+                print("   ❌ POST with advanced limits failed")
+            if not verify_success:
+                print("   ❌ Values not persisted correctly")
+            if not validation_overall_success:
+                print("   ❌ Some validation scenarios not working correctly")
+        
+        return overall_success
+
     def test_slot_advanced_backend_validation(self):
         """Test Slot Advanced Backend Validation - Turkish Review Request"""
         print("\n🎰 SLOT ADVANCED BACKEND VALIDATION TESTS")
