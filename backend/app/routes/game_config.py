@@ -257,6 +257,35 @@ class DiceMathSaveRequest(BaseModel):
     provably_fair_enabled: bool
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
+
+
+class BlackjackRulesSaveRequest(BaseModel):
+    deck_count: int
+    dealer_hits_soft_17: bool
+    blackjack_payout: float
+    double_allowed: bool
+    double_after_split_allowed: bool
+    split_max_hands: int
+    resplit_aces_allowed: bool
+    surrender_allowed: bool
+    insurance_allowed: bool
+    min_bet: float
+    max_bet: float
+    side_bets_enabled: bool = False
+    side_bets: Optional[List[Dict[str, Any]]] = None
+    table_label: Optional[str] = None
+    theme: Optional[str] = None
+    avatar_url: Optional[str] = None
+    banner_url: Optional[str] = None
+    auto_seat_enabled: Optional[bool] = False
+    sitout_time_limit_seconds: Optional[int] = 120
+    disconnect_wait_seconds: Optional[int] = 30
+    max_same_country_seats: Optional[int] = None
+    block_vpn_flagged_players: Optional[bool] = False
+    session_max_duration_minutes: Optional[int] = None
+    max_daily_buyin_limit: Optional[float] = None
+    summary: Optional[str] = None
+
     summary: Optional[str] = None
 
 
