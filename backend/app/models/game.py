@@ -142,8 +142,6 @@ class PaytableResponse(BaseModel):
     history: List[PaytableHistoryItem] = []
 
 
-
-
 class ReelStripsRecord(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     game_id: str
@@ -169,7 +167,6 @@ class ReelStripsResponse(BaseModel):
     history: List[ReelStripsHistoryItem] = []
 
 
-
 class JackpotPool(BaseModel):
     jackpot_name: str
     game_id: Optional[str] = None
@@ -187,7 +184,6 @@ class JackpotConfig(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_by: str
     source: str = "manual"  # "manual" | "import" | "provider"
-
 
 
 class GameAsset(BaseModel):
@@ -214,7 +210,6 @@ class GameAssetsResponse(BaseModel):
 class JackpotConfigResponse(BaseModel):
     config: Optional[JackpotConfig] = None
     pools: List[JackpotPool] = []
-
 
 
 class CrashMathConfig(BaseModel):
@@ -313,7 +308,6 @@ class DiceMathConfigResponse(BaseModel):
     seed_rotation_interval_rounds: Optional[int] = None
 
 
-
 class PokerRules(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     game_id: str
@@ -347,6 +341,26 @@ class PokerRules(BaseModel):
     allow_straddle: bool = False
     run_it_twice_allowed: bool = False
     min_players_to_start: int
+
+    # --- Branding ---
+    table_label: Optional[str] = None
+    theme: Optional[str] = None
+    avatar_url: Optional[str] = None
+    banner_url: Optional[str] = None
+
+    # --- Behavior ---
+    auto_muck_enabled: Optional[bool] = False
+    auto_rebuy_enabled: Optional[bool] = False
+    auto_rebuy_threshold_bb: Optional[int] = None
+    sitout_time_limit_seconds: Optional[int] = 120
+    disconnect_wait_seconds: Optional[int] = 30
+    late_entry_enabled: Optional[bool] = False
+
+    # --- Anti-Collusion & Safety ---
+    max_same_country_seats: Optional[int] = None
+    block_vpn_flagged_players: Optional[bool] = False
+    session_max_duration_minutes: Optional[int] = None
+    max_daily_buyin_limit_bb: Optional[int] = None
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_by: str
