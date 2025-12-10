@@ -416,6 +416,340 @@ def _validate_paytable_payload(data: Dict[str, Any]):
                         f"{code} için {k}x ödemesi 0'dan küçük olamaz.",
     # --- REEL STRIPS CONFIG ---
 
+class ReelStripsValidationError(Exception):
+    def __init__(self, payload: Dict[str, Any]):
+        self.payload = payload
+
+
+def _reel_error(message: str, field: str, reason: str, extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    base: Dict[str, Any] = {
+        "error_code": "REEL_STRIPS_VALIDATION_FAILED",
+        "message": message,
+        "details": {
+            "field": field,
+            "reason": reason,
+        },
+    }
+    if extra:
+        base["details"].update(extra)
+    return base
+
+
+def _validate_reel_strips_payload(data: Dict[str, Any]):
+    layout = data.get("layout") or {}
+    reels_count = layout.get("reels")
+    if not isinstance(reels_count, int) or reels_count < 1:
+        raise ReelStripsValidationError(
+            _reel_error("layout.reels en az 1 olmalıdır.", "data.layout.reels", "invalid"),
+        )
+
+    reels = data.get("reels")
+    if not isinstance(reels, list) or not reels:
+        raise ReelStripsValidationError(
+            _reel_error("data.reels zorunludur ve boş olamaz.", "data.reels", "missing"),
+        )
+
+    if len(reels) != reels_count:
+        raise ReelStripsValidationError(
+            _reel_error(
+                "Reel sayısı ile layout.reels eşleşmiyor.",
+                "data.reels",
+                "count_mismatch",
+                {"expected": reels_count, "actual": len(reels)},
+            ),
+        )
+
+    for idx, reel in enumerate(reels):
+        if not isinstance(reel, list) or not reel:
+            raise ReelStripsValidationError(
+                _reel_error(
+                    "Her reel non-empty array olmalıdır.",
+                    f"data.reels[{idx}]",
+                    "invalid",
+                ),
+            )
+        for sym in reel:
+            if not isinstance(sym, str) or not sym.strip():
+                raise ReelStripsValidationError(
+                    _reel_error(
+                        "Tüm semboller non-empty string olmalıdır.",
+                        f"data.reels[{idx}]",
+                        "invalid_symbol",
+                    ),
+                )
+
+
+@router.get("/{game_id}/config/reel-strips", response_model=ReelStripsResponse)
+async def get_reel_strips(game_id: str, request: Request):
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    latest_docs = (
+        await db.reel_strips
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    current = ReelStripsRecord(**latest_docs[0]) if latest_docs else None
+
+    history_docs = (
+        await db.reel_strips
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(10)
+        .to_list(10)
+    )
+    history_items = [
+        ReelStripsHistoryItem(
+            config_version_id=d["config_version_id"],
+            schema_version=d.get("schema_version", "1.0.0"),
+            source=d.get("source", "manual"),
+            created_at=d["created_at"],
+            created_by=d.get("created_by", "system"),
+            summary=d.get("summary"),
+        )
+        for d in history_docs
+    ]
+
+    if current:
+        logger.info(
+            "reel_strips_read",
+            extra={
+                "game_id": game_id,
+                "config_version_id": current.config_version_id,
+                "admin_id": "n/a",
+                "request_id": request_id,
+                "action_type": "reel_strips_read",
+            },
+        )
+
+    return ReelStripsResponse(current=current, history=history_items)
+
+
+class ReelStripsSaveRequest(BaseModel):
+    data: Dict[str, Any]
+    source: str = "manual"
+    summary: Optional[str] = None
+
+
+@router.post("/{game_id}/config/reel-strips", response_model=ReelStripsRecord)
+async def save_reel_strips(game_id: str, payload: ReelStripsSaveRequest, request: Request):
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    # Hook for future math lock
+    if game_doc.get("is_locked_for_math_changes"):
+        from fastapi.responses import JSONResponse
+
+        error_payload = _reel_error(
+            "Bu oyun için math değişiklikleri kilitlidir.",
+            "game.is_locked_for_math_changes",
+            "locked",
+        )
+        return JSONResponse(status_code=403, content=error_payload)
+
+    try:
+        _validate_reel_strips_payload(payload.data)
+    except ReelStripsValidationError as exc:
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(status_code=400, content=exc.payload)
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+    version = await _generate_new_version(db, game_id, admin_id, notes="Reel strips change")
+
+    record = ReelStripsRecord(
+        game_id=game_id,
+        config_version_id=version.id,
+        data=payload.data,
+        schema_version="1.0.0",
+        created_by=admin_id,
+        source=payload.source or "manual",
+    )
+
+    doc = record.model_dump()
+    doc["summary"] = payload.summary or "Reel strips saved"
+    await db.reel_strips.insert_one(doc)
+
+    details = {
+        "config_version_id": version.id,
+        "summary": payload.summary,
+        "game_id": game_id,
+        "admin_id": admin_id,
+        "request_id": request_id,
+        "action_type": "reel_strips_saved",
+    }
+
+    await _append_game_log(db, game_id, admin_id, "reel_strips_saved", details)
+
+    logger.info(
+        "reel_strips_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "reel_strips_saved",
+        },
+    )
+
+    # Optional approval hook
+    approval = ApprovalRequest(
+        category=ApprovalCategory.GAME,
+        action_type="reel_strips_change",
+        related_entity_id=game_id,
+        requester_admin=admin_id,
+        details={"config_version_id": version.id, "summary": payload.summary},
+    )
+    await db.approvals.insert_one(approval.model_dump())
+
+    return record
+
+
+class ReelStripsImportRequest(BaseModel):
+    format: str  # "json" | "csv"
+    content: str
+
+
+@router.post("/{game_id}/config/reel-strips/import", response_model=ReelStripsRecord)
+async def import_reel_strips(game_id: str, payload: ReelStripsImportRequest, request: Request):
+    """Basic import hook for JSON/CSV; currently supports JSON and a very simple CSV format."""
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    # Future math lock
+    if game_doc.get("is_locked_for_math_changes"):
+        error_payload = _reel_error(
+            "Bu oyun için math değişiklikleri kilitlidir.",
+            "game.is_locked_for_math_changes",
+            "locked",
+        )
+        return JSONResponse(status_code=403, content=error_payload)
+
+    fmt = (payload.format or "json").lower()
+    parsed_data: Dict[str, Any]
+
+    try:
+        if fmt == "json":
+            parsed_data = __import__("json").loads(payload.content)
+        elif fmt == "csv":
+            # Very naive CSV parser: each line is a reel, symbols separated by commas
+            lines = [line.strip() for line in payload.content.splitlines() if line.strip()]
+            reels = [line.split(",") for line in lines]
+            parsed_data = {
+                "layout": {"reels": len(reels), "rows": None},
+                "reels": reels,
+            }
+        else:
+            error_payload = _reel_error("Unsupported format", "format", "unsupported", {"supported": ["json", "csv"]})
+            return JSONResponse(status_code=400, content=error_payload)
+    except Exception:
+        error_payload = _reel_error("Import içeriği parse edilemedi.", "content", "parse_error")
+        return JSONResponse(status_code=400, content=error_payload)
+
+    try:
+        _validate_reel_strips_payload(parsed_data)
+    except ReelStripsValidationError as exc:
+        return JSONResponse(status_code=400, content=exc.payload)
+
+    # Reuse save logic by directly inserting
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+    version = await _generate_new_version(db, game_id, admin_id, notes="Reel strips import")
+
+    record = ReelStripsRecord(
+        game_id=game_id,
+        config_version_id=version.id,
+        data=parsed_data,
+        schema_version="1.0.0",
+        created_by=admin_id,
+        source="import",
+    )
+
+    doc = record.model_dump()
+    doc["summary"] = "Imported via API"
+    await db.reel_strips.insert_one(doc)
+
+    details = {
+        "config_version_id": version.id,
+        "game_id": game_id,
+        "admin_id": admin_id,
+        "request_id": request_id,
+        "action_type": "reel_strips_imported",
+    }
+
+    await _append_game_log(db, game_id, admin_id, "reel_strips_imported", details)
+
+    logger.info(
+        "reel_strips_imported",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "reel_strips_imported",
+        },
+    )
+
+    return record
+
+
+class ReelStripsSimulateRequest(BaseModel):
+    rounds: int = 10000
+    bet: float = 1.0
+
+
+@router.post("/{game_id}/config/reel-strips/simulate")
+async def simulate_reel_strips(game_id: str, payload: ReelStripsSimulateRequest, request: Request):
+    """Stub endpoint for triggering math simulation based on current reel strips."""
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+    admin_id = "current_admin"
+
+    # In future this would enqueue a job to a simulation service
+    simulation_id = str(uuid4())
+
+    details = {
+        "simulation_id": simulation_id,
+        "rounds": payload.rounds,
+        "bet": payload.bet,
+        "game_id": game_id,
+        "admin_id": admin_id,
+        "request_id": request_id,
+        "action_type": "reel_strips_simulate_triggered",
+    }
+
+    await _append_game_log(db, game_id, admin_id, "reel_strips_simulate_triggered", details)
+
+    logger.info(
+        "reel_strips_simulate_triggered",
+        extra=details,
+    )
+
+    return JSONResponse(
+        status_code=200,
+        content={"status": "queued", "simulation_id": simulation_id},
+    )
+
+
                         f"data.symbols[].pays.{k}",
                         "negative",
                     )
