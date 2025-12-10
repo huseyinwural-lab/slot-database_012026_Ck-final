@@ -1126,6 +1126,258 @@ TX-MISSING,75.25"""
         
         return success1 and success2 and success3 and success4
 
+    def test_game_paytable_endpoints(self):
+        """Test Game Paytable backend endpoints as per review request"""
+        print("\n🎮 GAME PAYTABLE ENDPOINTS TESTS")
+        
+        # First get an existing game to test with
+        success_games, games_response = self.run_test("Get Games for Paytable Test", "GET", "api/v1/games", 200)
+        
+        if not success_games or not isinstance(games_response, list) or len(games_response) == 0:
+            print("❌ No games found to test paytable endpoints")
+            return False
+        
+        game_id = games_response[0].get('id')
+        game_name = games_response[0].get('name', 'Unknown Game')
+        print(f"✅ Using game: {game_name} (ID: {game_id})")
+        
+        # 1. Test GET /api/v1/games/{game_id}/config/paytable
+        print(f"\n📊 Testing GET Paytable for game {game_id}")
+        success1, paytable_response = self.run_test(f"Get Paytable - {game_id}", "GET", f"api/v1/games/{game_id}/config/paytable", 200)
+        
+        paytable_validation = True
+        if success1 and isinstance(paytable_response, dict):
+            print("✅ Paytable GET endpoint working")
+            
+            # Validate response structure
+            required_fields = ['current', 'history']
+            missing_fields = [field for field in required_fields if field not in paytable_response]
+            
+            if not missing_fields:
+                print("✅ Paytable response structure complete")
+                current = paytable_response.get('current')
+                history = paytable_response.get('history', [])
+                
+                if current is None:
+                    print("ℹ️  No current paytable (expected for new game)")
+                else:
+                    print(f"✅ Current paytable found: source={current.get('source', 'unknown')}")
+                
+                print(f"ℹ️  History entries: {len(history)}")
+            else:
+                print(f"❌ Paytable response missing fields: {missing_fields}")
+                paytable_validation = False
+        else:
+            print("❌ Failed to get paytable")
+            paytable_validation = False
+        
+        # 2. Test POST /api/v1/games/{game_id}/config/paytable/override
+        print(f"\n🔧 Testing POST Paytable Override for game {game_id}")
+        
+        override_data = {
+            "data": {
+                "symbols": [
+                    {"code": "A", "pays": {"3": 5, "4": 10, "5": 20}},
+                    {"code": "K", "pays": {"3": 4, "4": 8, "5": 16}}
+                ],
+                "lines": 20
+            },
+            "summary": "Test override via backend tests"
+        }
+        
+        success2, override_response = self.run_test(f"Create Paytable Override - {game_id}", "POST", f"api/v1/games/{game_id}/config/paytable/override", 200, override_data)
+        
+        override_validation = True
+        if success2 and isinstance(override_response, dict):
+            print("✅ Paytable override creation successful")
+            
+            # Validate override response structure
+            required_override_fields = ['id', 'game_id', 'config_version_id', 'data', 'source', 'created_by']
+            missing_override_fields = [field for field in required_override_fields if field not in override_response]
+            
+            if not missing_override_fields:
+                print("✅ Override response structure complete")
+                print(f"   📝 ID: {override_response['id']}")
+                print(f"   🎮 Game ID: {override_response['game_id']}")
+                print(f"   📋 Source: {override_response['source']}")
+                print(f"   👤 Created by: {override_response['created_by']}")
+                
+                if override_response.get('source') == 'override':
+                    print("✅ Source correctly set to 'override'")
+                else:
+                    print(f"❌ Expected source='override', got '{override_response.get('source')}'")
+                    override_validation = False
+            else:
+                print(f"❌ Override response missing fields: {missing_override_fields}")
+                override_validation = False
+        else:
+            print("❌ Failed to create paytable override")
+            override_validation = False
+        
+        # 3. Test GET paytable again to verify override was saved
+        print(f"\n🔍 Testing GET Paytable after override for game {game_id}")
+        success3, updated_paytable_response = self.run_test(f"Get Updated Paytable - {game_id}", "GET", f"api/v1/games/{game_id}/config/paytable", 200)
+        
+        updated_validation = True
+        if success3 and isinstance(updated_paytable_response, dict):
+            current = updated_paytable_response.get('current')
+            history = updated_paytable_response.get('history', [])
+            
+            if current and current.get('source') == 'override':
+                print("✅ Current paytable is now the override")
+                print(f"   📋 Source: {current['source']}")
+                
+                # Check if history contains the override
+                override_in_history = any(h.get('source') == 'override' for h in history)
+                if override_in_history:
+                    print("✅ Override found in history")
+                else:
+                    print("❌ Override not found in history")
+                    updated_validation = False
+            else:
+                print("❌ Current paytable is not the override or missing")
+                updated_validation = False
+        else:
+            print("❌ Failed to get updated paytable")
+            updated_validation = False
+        
+        # 4. Test validation negative cases for override
+        print(f"\n❌ Testing Paytable Override Validation (Negative Cases)")
+        
+        # Missing symbols
+        invalid_data1 = {
+            "data": {},
+            "summary": "invalid"
+        }
+        success4, _ = self.run_test(f"Invalid Override - Missing Symbols", "POST", f"api/v1/games/{game_id}/config/paytable/override", 400, invalid_data1)
+        
+        # Negative pay amount
+        invalid_data2 = {
+            "data": {
+                "symbols": [
+                    {"code": "A", "pays": {"3": -1}}
+                ],
+                "lines": 20
+            },
+            "summary": "invalid negative pay"
+        }
+        success5, _ = self.run_test(f"Invalid Override - Negative Pay", "POST", f"api/v1/games/{game_id}/config/paytable/override", 400, invalid_data2)
+        
+        # Invalid lines
+        invalid_data3 = {
+            "data": {
+                "symbols": [
+                    {"code": "A", "pays": {"3": 5}}
+                ],
+                "lines": 0
+            },
+            "summary": "invalid lines"
+        }
+        success6, _ = self.run_test(f"Invalid Override - Invalid Lines", "POST", f"api/v1/games/{game_id}/config/paytable/override", 400, invalid_data3)
+        
+        validation_tests_passed = success4 and success5 and success6
+        if validation_tests_passed:
+            print("✅ All validation negative cases passed (returned 400 as expected)")
+        else:
+            print("❌ Some validation tests failed to return 400")
+        
+        # 5. Test POST /api/v1/games/{game_id}/config/paytable/refresh-from-provider
+        print(f"\n🔄 Testing Refresh from Provider for game {game_id}")
+        success7, refresh_response = self.run_test(f"Refresh from Provider - {game_id}", "POST", f"api/v1/games/{game_id}/config/paytable/refresh-from-provider", 200)
+        
+        refresh_validation = True
+        if success7 and isinstance(refresh_response, dict):
+            print("✅ Refresh from provider successful")
+            
+            required_refresh_fields = ['message', 'config_version_id']
+            missing_refresh_fields = [field for field in required_refresh_fields if field not in refresh_response]
+            
+            if not missing_refresh_fields:
+                print("✅ Refresh response structure complete")
+                print(f"   📝 Message: {refresh_response['message']}")
+                print(f"   🆔 Config Version ID: {refresh_response['config_version_id']}")
+            else:
+                print(f"❌ Refresh response missing fields: {missing_refresh_fields}")
+                refresh_validation = False
+        else:
+            print("❌ Failed to refresh from provider")
+            refresh_validation = False
+        
+        # 6. Test GET paytable again to verify provider refresh
+        print(f"\n🔍 Testing GET Paytable after provider refresh for game {game_id}")
+        success8, final_paytable_response = self.run_test(f"Get Final Paytable - {game_id}", "GET", f"api/v1/games/{game_id}/config/paytable", 200)
+        
+        final_validation = True
+        if success8 and isinstance(final_paytable_response, dict):
+            current = final_paytable_response.get('current')
+            history = final_paytable_response.get('history', [])
+            
+            if current and current.get('source') == 'provider':
+                print("✅ Current paytable is now from provider")
+                print(f"   📋 Source: {current['source']}")
+                
+                # Check history length increased
+                if len(history) > len(updated_paytable_response.get('history', [])):
+                    print("✅ History length increased after provider refresh")
+                else:
+                    print("⚠️  History length may not have increased")
+            else:
+                print("❌ Current paytable is not from provider or missing")
+                final_validation = False
+        else:
+            print("❌ Failed to get final paytable")
+            final_validation = False
+        
+        # 7. Test GET /api/v1/games/{game_id}/config/logs
+        print(f"\n📋 Testing Game Config Logs for game {game_id}")
+        success9, logs_response = self.run_test(f"Get Game Config Logs - {game_id}", "GET", f"api/v1/games/{game_id}/config/logs?limit=10", 200)
+        
+        logs_validation = True
+        if success9 and isinstance(logs_response, dict):
+            items = logs_response.get('items', [])
+            print(f"✅ Game logs retrieved: {len(items)} entries")
+            
+            # Check for paytable-related log entries
+            paytable_actions = ['paytable_override_saved', 'paytable_refreshed_from_provider']
+            found_actions = []
+            
+            for log in items:
+                action = log.get('action', '')
+                if action in paytable_actions:
+                    found_actions.append(action)
+                    print(f"   ✅ Found log: {action} at {log.get('created_at', 'unknown time')}")
+            
+            if len(found_actions) >= 2:
+                print("✅ Both paytable actions found in logs")
+            elif len(found_actions) >= 1:
+                print("⚠️  Only one paytable action found in logs")
+            else:
+                print("❌ No paytable actions found in logs")
+                logs_validation = False
+        else:
+            print("❌ Failed to get game config logs")
+            logs_validation = False
+        
+        # Summary
+        print(f"\n📊 GAME PAYTABLE ENDPOINTS SUMMARY:")
+        print(f"   📊 GET Paytable: {'✅ PASS' if success1 and paytable_validation else '❌ FAIL'}")
+        print(f"   🔧 POST Override: {'✅ PASS' if success2 and override_validation else '❌ FAIL'}")
+        print(f"   🔍 Verify Override: {'✅ PASS' if success3 and updated_validation else '❌ FAIL'}")
+        print(f"   ❌ Validation Tests: {'✅ PASS' if validation_tests_passed else '❌ FAIL'}")
+        print(f"   🔄 Refresh Provider: {'✅ PASS' if success7 and refresh_validation else '❌ FAIL'}")
+        print(f"   🔍 Verify Refresh: {'✅ PASS' if success8 and final_validation else '❌ FAIL'}")
+        print(f"   📋 Config Logs: {'✅ PASS' if success9 and logs_validation else '❌ FAIL'}")
+        
+        return all([
+            success1 and paytable_validation,
+            success2 and override_validation,
+            success3 and updated_validation,
+            validation_tests_passed,
+            success7 and refresh_validation,
+            success8 and final_validation,
+            success9 and logs_validation
+        ])
+
     def test_review_request_specific(self):
         """Test specific finance endpoints mentioned in the review request"""
         print("\n🎯 REVIEW REQUEST SPECIFIC TESTS - UPDATED FINANCE ENDPOINTS")
