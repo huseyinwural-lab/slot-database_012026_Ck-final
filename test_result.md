@@ -260,7 +260,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "blackjack_rules_backend_validation"
+    - "slot_rtp_bets_presets_backend_integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
