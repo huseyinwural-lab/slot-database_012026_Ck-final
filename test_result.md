@@ -206,7 +206,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus: ["game_poker_preset_bar"]
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
