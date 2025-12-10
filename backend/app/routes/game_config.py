@@ -336,8 +336,6 @@ class BlackjackRulesSaveRequest(BaseModel):
     max_daily_buyin_limit: Optional[float] = None
     summary: Optional[str] = None
 
-    summary: Optional[str] = None
-
 
 # ---------------------------------------------------------------------------
 # CRASH MATH CONFIG
