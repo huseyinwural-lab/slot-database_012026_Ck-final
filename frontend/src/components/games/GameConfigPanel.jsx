@@ -321,6 +321,10 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           {visibleTabs.includes('crash_math') && (
             <TabsTrigger value="crash_math">Crash Math</TabsTrigger>
           )}
+          {visibleTabs.includes('blackjack_rules') && (
+            <TabsTrigger value="blackjack_rules">Blackjack Rules &amp; Side Bets</TabsTrigger>
+          )}
+
           {visibleTabs.includes('dice_math') && (
             <TabsTrigger value="dice_math">Dice Math</TabsTrigger>
           )}
