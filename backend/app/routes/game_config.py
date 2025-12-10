@@ -68,6 +68,22 @@ async def _append_game_log(db, game_id: str, admin_id: str, action: str, details
     await db.game_logs.insert_one(log.model_dump())
 
 
+def _paytable_error(message: str, field: str, reason: str, code: str = "PAYTABLE_VALIDATION_FAILED") -> Dict[str, Any]:
+    return {
+        "error_code": code,
+        "message": message,
+        "details": {
+            "field": field,
+            "reason": reason,
+        },
+    }
+
+
+class PaytableValidationError(Exception):
+    def __init__(self, payload: Dict[str, Any]):
+        self.payload = payload
+
+
 @router.get("/{game_id}/config/general", response_model=GameGeneralConfig)
 async def get_game_general_config(game_id: str):
     db = get_db()
@@ -300,12 +316,14 @@ async def save_feature_flags(game_id: str, payload: GameFeatureFlagsUpdate):
 
 
 @router.get("/{game_id}/config/paytable", response_model=PaytableResponse)
-async def get_paytable(game_id: str):
+async def get_paytable(game_id: str, request: Request):
     """Return current paytable and short history for a game."""
     db = get_db()
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
     if not game_doc:
         raise HTTPException(status_code=404, detail="Game not found")
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
 
     # Latest as current
     latest_docs = (
@@ -336,6 +354,18 @@ async def get_paytable(game_id: str):
         for d in history_docs
     ]
 
+    if current:
+        logger.info(
+            "paytable_get",
+            extra={
+                "game_id": game_id,
+                "config_version_id": current.config_version_id,
+                "admin_id": "n/a",
+                "request_id": request_id,
+                "action_type": "paytable_get",
+            },
+        )
+
     return PaytableResponse(current=current, history=history_items)
 
 
@@ -347,26 +377,42 @@ class PaytableOverrideRequest(BaseModel):
 def _validate_paytable_payload(data: Dict[str, Any]):
     symbols = data.get("symbols")
     if not isinstance(symbols, list) or not symbols:
-        raise HTTPException(status_code=400, detail="data.symbols must be a non-empty array")
+        raise PaytableValidationError(_paytable_error("symbols alanı zorunludur.", "data.symbols", "missing"))
 
     for sym in symbols:
         code = sym.get("code")
         pays = sym.get("pays")
         if not code:
-            raise HTTPException(status_code=400, detail="Each symbol must have a 'code'")
+            raise PaytableValidationError(_paytable_error("Her sembol için 'code' zorunludur.", "data.symbols[].code", "missing"))
         if not isinstance(pays, dict):
-            raise HTTPException(status_code=400, detail="Each symbol.pays must be an object")
+            raise PaytableValidationError(
+                _paytable_error("Her sembol için pays objesi zorunludur.", "data.symbols[].pays", "invalid_type"),
+            )
         for k, v in pays.items():
             try:
                 val = float(v)
             except Exception:
-                raise HTTPException(status_code=400, detail=f"Invalid pay amount for {code} at {k}x")
+                raise PaytableValidationError(
+                    _paytable_error(
+                        f"{code} için {k}x değeri sayısal olmalıdır.",
+                        f"data.symbols[].pays.{k}",
+                        "invalid_number",
+                    )
+                )
             if val < 0:
-                raise HTTPException(status_code=400, detail=f"Pay amount for {code} at {k}x must be >= 0")
+                raise PaytableValidationError(
+                    _paytable_error(
+                        f"{code} için {k}x ödemesi 0'dan küçük olamaz.",
+                        f"data.symbols[].pays.{k}",
+                        "negative",
+                    )
+                )
 
     lines = data.get("lines")
     if lines is not None and (not isinstance(lines, int) or lines < 1):
-        raise HTTPException(status_code=400, detail="lines must be >= 1 if provided")
+        raise PaytableValidationError(
+            _paytable_error("lines en az 1 olmalıdır.", "data.lines", "invalid"),
+        )
 
 
 @router.post("/{game_id}/config/paytable/override", response_model=PaytableRecord)
@@ -377,7 +423,22 @@ async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest,
     if not game_doc:
         raise HTTPException(status_code=404, detail="Game not found")
 
-    _validate_paytable_payload(payload.data)
+    # Hook for future lock logic
+    if game_doc.get("is_locked_for_math_changes"):
+        error_payload = _paytable_error(
+            "Bu oyun için math değişiklikleri kilitlidir.",
+            "game.is_locked_for_math_changes",
+            "locked",
+        )
+        return Body(content=error_payload, status_code=403)
+
+    try:
+        _validate_paytable_payload(payload.data)
+    except PaytableValidationError as exc:
+        # Standard error format for validation
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(status_code=400, content=exc.payload)
 
     admin_id = "current_admin"
     request_id = request.headers.get("X-Request-ID") or str(uuid4())
@@ -443,6 +504,18 @@ async def refresh_paytable_from_provider(game_id: str, request: Request):
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
     if not game_doc:
         raise HTTPException(status_code=404, detail="Game not found")
+
+    # Hook for future lock logic
+    if game_doc.get("is_locked_for_math_changes"):
+        from fastapi.responses import JSONResponse
+
+        error_payload = _paytable_error(
+            "Bu oyun için math değişiklikleri kilitlidir.",
+            "game.is_locked_for_math_changes",
+            "locked",
+            code="PAYTABLE_LOCKED",
+        )
+        return JSONResponse(status_code=403, content=error_payload)
 
     admin_id = "system_provider_stub"
     request_id = request.headers.get("X-Request-ID") or str(uuid4())

@@ -22,11 +22,7 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
 
   const symbols = current?.data?.symbols || [];
   const allMultiplierKeys = Array.from(
-    new Set(
-      symbols.flatMap((s) =>
-        s.pays ? Object.keys(s.pays) : []
-      )
-    )
+    new Set(symbols.flatMap((s) => (s.pays ? Object.keys(s.pays) : [])))
   ).sort((a, b) => Number(a) - Number(b));
 
   const handleOpenOverride = () => {
@@ -59,7 +55,9 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
       await onReload?.();
     } catch (err) {
       console.error(err);
-      toast.error(err?.response?.data?.detail || 'Override kaydedilemedi');
+      const apiError = err?.response?.data;
+      const msg = apiError?.message || apiError?.detail || 'Override kaydedilemedi';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -73,7 +71,9 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
       await onReload?.();
     } catch (err) {
       console.error(err);
-      toast.error('Provider\'dan yenileme başarısız');
+      const apiError = err?.response?.data;
+      const msg = apiError?.message || apiError?.detail || "Provider'dan yenileme başarısız";
+      toast.error(msg);
     } finally {
       setRefreshing(false);
     }
@@ -115,7 +115,7 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Symbol Payout Grid</CardTitle>
-          <CardDescription>Aktif paytable\'daki semboller ve ödeme katsayıları.</CardDescription>
+          <CardDescription>Aktif paytable'daki semboller ve ödeme katsayıları.</CardDescription>
         </CardHeader>
         <CardContent>
           {symbols.length === 0 ? (
