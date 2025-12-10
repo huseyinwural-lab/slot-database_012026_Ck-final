@@ -31,6 +31,20 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "✅ AuditLogEntry model working correctly - Used in chargeback creation endpoint with proper structure (id, admin_id, action, target_id, target_type, details, timestamp)."
+  - task: "Game Paytable Backend Endpoints"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented paytable endpoints: GET /api/v1/games/{id}/config/paytable, POST /api/v1/games/{id}/config/paytable/override, POST /api/v1/games/{id}/config/paytable/refresh-from-provider, and game config logs endpoint."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ALL GAME PAYTABLE ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/paytable returns proper structure with current paytable (null initially) and empty history array. 2) POST /api/v1/games/{game_id}/config/paytable/override successfully validates symbols/pays/lines, creates new paytable record with source='override', proper response structure (id, game_id, config_version_id, data, source, created_by). 3) Validation works correctly - returns 400 for missing symbols, negative pay amounts, and invalid lines. 4) POST /api/v1/games/{game_id}/config/paytable/refresh-from-provider creates stub provider paytable with source='provider' and returns proper message + config_version_id. 5) GET /api/v1/games/{game_id}/config/logs shows paytable actions (paytable_override_saved, paytable_refreshed_from_provider) with correct timestamps. All endpoints return 200 OK with proper data structures and validation."
 
 frontend:
   - task: "Finance Page Tabs"
