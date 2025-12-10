@@ -616,6 +616,18 @@ async def save_reel_strips(game_id: str, payload: ReelStripsSaveRequest, request
         },
     )
 
+    # Optional approval hook
+    approval = ApprovalRequest(
+        category=ApprovalCategory.GAME,
+        action_type="reel_strips_change",
+        related_entity_id=game_id,
+        requester_admin=admin_id,
+        details={"config_version_id": version.id, "summary": payload.summary},
+    )
+    await db.approvals.insert_one(approval.model_dump())
+
+    return record
+
 
 # --- JACKPOTS CONFIG ---
 
