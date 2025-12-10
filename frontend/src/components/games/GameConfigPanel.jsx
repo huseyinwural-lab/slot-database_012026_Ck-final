@@ -472,6 +472,22 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </Button>
         </TabsContent>
 
+
+        {/* POKER RULES TAB - only for TABLE_POKER games (guard FE seviyesinde yapılır) */}
+        <TabsContent value="poker_rules" className="space-y-4 pt-4">
+          {game?.core_type === 'TABLE_POKER' ? (
+            <GamePokerRulesTab game={game} />
+          ) : (
+            <Card>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">
+                  Poker Rules &amp; Rake sadece TABLE_POKER oyunları için geçerlidir.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
         {/* REEL STRIPS TAB */}
         <TabsContent value="reels" className="space-y-4 pt-4">
           <GameReelStripsTab game={game} />
