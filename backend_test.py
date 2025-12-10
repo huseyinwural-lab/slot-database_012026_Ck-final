@@ -7014,6 +7014,9 @@ def main():
     print("\n🃏 BLACKJACK RULES BACKEND VALIDATION TESTS (REVIEW REQUEST)")
     test_results.append(("Blackjack Rules Backend Validation", tester.test_blackjack_rules_backend_validation()))
     
+    print("\n🎰 SLOT RTP & BETS PRESETS BACKEND INTEGRATION TESTS (REVIEW REQUEST)")
+    test_results.append(("Slot RTP & Bets Presets Backend Integration", tester.test_slot_rtp_bets_presets_backend_integration()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
