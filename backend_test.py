@@ -3260,6 +3260,9 @@ def main():
     print("\n🎮 GAME PAYTABLE TESTS (REVIEW REQUEST)")
     test_results.append(("Game Paytable Endpoints", tester.test_game_paytable_endpoints()))
     
+    print("\n🎰 REEL STRIPS TESTS (REVIEW REQUEST)")
+    test_results.append(("Reel Strips Endpoints", tester.test_reel_strips_endpoints()))
+    
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
