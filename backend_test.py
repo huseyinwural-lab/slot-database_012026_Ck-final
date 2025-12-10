@@ -4256,6 +4256,9 @@ def main():
     print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
     test_results.append(("Review Request Specific", tester.test_review_request_specific()))
     
+    print("\n🃏 POKER RULES ENDPOINTS TESTS")
+    test_results.append(("Poker Rules Endpoints", tester.test_poker_rules_endpoints()))
+    
     print("\n📊 CORE API TESTS")
     test_results.append(("Health Check", tester.test_health_check()))
     
