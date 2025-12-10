@@ -420,4 +420,41 @@ class BlackjackRulesResponse(BaseModel):
 class PokerRulesResponse(BaseModel):
     rules: PokerRules
 
+
+class SlotAdvancedConfig(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    schema_version: str = "1.0.0"
+
+    spin_speed: str = "normal"  # "slow" | "normal" | "fast"
+    turbo_spin_allowed: bool = False
+
+    autoplay_enabled: bool = True
+    autoplay_default_spins: int = 50
+    autoplay_max_spins: int = 100
+    autoplay_stop_on_big_win: bool = True
+    autoplay_stop_on_balance_drop_percent: Optional[float] = None
+
+    big_win_animation_enabled: bool = True
+    gamble_feature_allowed: bool = False
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+
+
+class SlotAdvancedConfigResponse(BaseModel):
+    config_version_id: Optional[str] = None
+    schema_version: str = "1.0.0"
+    spin_speed: str
+    turbo_spin_allowed: bool
+    autoplay_enabled: bool
+    autoplay_default_spins: int
+    autoplay_max_spins: int
+    autoplay_stop_on_big_win: bool
+    autoplay_stop_on_balance_drop_percent: Optional[float] = None
+    big_win_animation_enabled: bool
+    gamble_feature_allowed: bool
+
+
     rules: PokerRules
