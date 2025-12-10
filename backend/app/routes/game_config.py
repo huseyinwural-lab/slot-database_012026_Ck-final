@@ -81,6 +81,8 @@ def _paytable_error(message: str, field: str, reason: str, code: str = "PAYTABLE
         },
     }
 
+    # NOTE: game_config specific helper errors are standardised per domain (paytable, reel_strips, etc.)
+
 
 class PaytableValidationError(Exception):
     def __init__(self, payload: Dict[str, Any]):
