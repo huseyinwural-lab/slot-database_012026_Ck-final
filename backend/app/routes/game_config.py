@@ -395,14 +395,31 @@ async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest,
     doc["summary"] = payload.summary or "Paytable override saved"
     await db.paytables.insert_one(doc)
 
+    details = {
+        "config_version_id": version.id,
+        "summary": payload.summary,
+        "request_id": request_id,
+        "action_type": "paytable_override",
+        "game_id": game_id,
+        "admin_id": admin_id,
+    }
+
     await _append_game_log(
         db,
         game_id,
         admin_id,
         "paytable_override_saved",
-        {
+        details,
+    )
+
+    logger.info(
+        "paytable_override_saved",
+        extra={
+            "game_id": game_id,
             "config_version_id": version.id,
-            "summary": payload.summary,
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "paytable_override",
         },
     )
 
