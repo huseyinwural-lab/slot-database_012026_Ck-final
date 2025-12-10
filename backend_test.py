@@ -4335,6 +4335,9 @@ def main():
     print("\n🎰 JACKPOT CONFIG TESTS (REVIEW REQUEST)")
     test_results.append(("Jackpot Config Endpoints", tester.test_game_jackpot_config_endpoints()))
     
+    print("\n🖼️ GAME ASSETS TESTS (REVIEW REQUEST)")
+    test_results.append(("Game Assets Endpoints", tester.test_game_assets_endpoints()))
+    
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
