@@ -41,7 +41,6 @@ const GameAssetsTab = ({ game }) => {
 
   useEffect(() => {
     loadAssets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id]);
 
   const openUploadFor = (assetType, language = null) => {
