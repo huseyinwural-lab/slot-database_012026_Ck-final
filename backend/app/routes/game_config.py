@@ -34,6 +34,10 @@ from app.models.game import (
     GameAssetsResponse,
     PokerRules,
     PokerRulesResponse,
+    CrashMathConfig,
+    CrashMathConfigResponse,
+    DiceMathConfig,
+    DiceMathConfigResponse,
 )
 
 
