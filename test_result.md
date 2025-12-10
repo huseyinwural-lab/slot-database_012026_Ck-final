@@ -132,6 +132,17 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "✅ ALL MANUAL GAME IMPORT PIPELINE SCENARIOS WORKING PERFECTLY: 1) Senaryo 1 - Geçerli slot JSON yükleme: POST /api/v1/game-import/manual/upload successfully processes valid slot JSON files, returns status='fetched' with total_found=1 and total_errors=0. GET /api/v1/game-import/jobs/{job_id} returns proper job structure with items array, raw_payload excluded but has_raw_payload=true. POST /api/v1/game-import/jobs/{job_id}/import successfully imports slot games with imported=1, errors=0, job_status='completed'. Creates proper game records in games collection with paytables and reel_strips. 2) Senaryo 2 - Duplicate detection: Correctly detects existing games and returns status='failed' with total_errors=1. Import job properly handles duplicates with imported=0 and job_status='failed'. 3) Senaryo 3 - Hatalı JSON syntax: Returns 400 with error_code='GAME_IMPORT_VALIDATION_FAILED' and field='file' for malformed JSON. 4) Senaryo 4 - ZIP upload: Successfully processes ZIP files containing game.json with same behavior as direct JSON upload (status='fetched', total_errors=0). 5) Senaryo 5 - Non-slot category: Upload phase accepts crash games (status='fetched'), but import phase correctly rejects with error 'Manual import pipeline currently supports only slot games' (imported=0, job_status='failed'). 6) All endpoints return proper status codes and data structures as specified in Turkish review request. DB collections (game_import_jobs, game_import_items, games, game_config_versions, paytables, reel_strips) properly populated."
+  - task: "Blackjack Rules Backend Validation"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ ALL BLACKJACK RULES BACKEND VALIDATION TESTS PASSED: 1) GET /api/v1/games/{game_id}/config/blackjack-rules returns proper default template for TABLE_BLACKJACK games (deck_count=6, dealer_hits_soft_17=false, blackjack_payout=1.5, min_bet=5.0, max_bet=500.0, side_bets_enabled=false, sitout_time_limit_seconds=120, disconnect_wait_seconds=30) - 200 OK. 2) POST /api/v1/games/{game_id}/config/blackjack-rules successfully creates blackjack rules with complete response structure (id, game_id, config_version_id, all blackjack fields including advanced branding/behavior/safety settings, created_by='current_admin') - 200 OK. 3) All 23 negative validation scenarios work correctly: deck_count (1-8), blackjack_payout (1.2-1.6), split_max_hands (1-4), min_bet > 0 and < max_bet, side_bets validation (code required, numeric min/max, min<max, payout_table dict), sitout_time_limit_seconds >= 30, disconnect_wait_seconds (5-300), max_same_country_seats (1-10), session_max_duration_minutes (10-1440), max_daily_buyin_limit > 0, table_label <= 50 chars, theme <= 30 chars - all return 400 with error_code='BLACKJACK_RULES_VALIDATION_FAILED' and proper details structure. 4) Non-TABLE_BLACKJACK games correctly return 404 with error_code='BLACKJACK_RULES_NOT_AVAILABLE_FOR_GAME' for both GET and POST endpoints. All endpoints return proper status codes and data structures exactly as specified in the Turkish review request."
 
 frontend:
   - task: "Game Poker Rules & Rake Preset Flow"
