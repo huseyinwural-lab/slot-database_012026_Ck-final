@@ -767,12 +767,6 @@ async def simulate_reel_strips(game_id: str, payload: ReelStripsSimulateRequest,
                     )
                 )
 
-    lines = data.get("lines")
-    if lines is not None and (not isinstance(lines, int) or lines < 1):
-        raise PaytableValidationError(
-            _paytable_error("lines en az 1 olmalıdır.", "data.lines", "invalid"),
-        )
-
 
 @router.post("/{game_id}/config/paytable/override", response_model=PaytableRecord)
 async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest, request: Request):
