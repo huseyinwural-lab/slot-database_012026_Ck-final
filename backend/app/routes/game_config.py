@@ -419,6 +419,12 @@ def _validate_paytable_payload(data: Dict[str, Any]):
                     )
                 )
 
+    lines = data.get("lines")
+    if lines is not None and (not isinstance(lines, int) or lines < 1):
+        raise PaytableValidationError(
+            _paytable_error("lines en az 1 olmalıdır.", "data.lines", "invalid"),
+        )
+
 
 # --- REEL STRIPS CONFIG ---
 
