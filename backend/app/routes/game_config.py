@@ -733,7 +733,7 @@ def _validate_country_overrides(
 
     for country_code, overrides in raw_overrides.items():
         if not isinstance(country_code, str) or len(country_code) != 2 or not country_code.isalpha():
-            raise JSONResponse(
+            return JSONResponse(
                 status_code=400,
                 content=error_builder(
                     "country code must be ISO 3166-1 alpha-2 (2 letters).",
