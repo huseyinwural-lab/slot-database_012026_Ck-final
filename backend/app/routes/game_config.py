@@ -41,6 +41,8 @@ from app.models.game import (
     DiceMathConfigResponse,
     BlackjackRules,
     BlackjackRulesResponse,
+    SlotAdvancedConfig,
+    SlotAdvancedConfigResponse,
 )
 
 
