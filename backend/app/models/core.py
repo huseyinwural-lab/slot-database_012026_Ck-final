@@ -307,6 +307,7 @@ class Game(BaseModel):
     name: str
     provider: str
     category: str 
+    core_type: Optional[str] = None  # Added for crash/dice math config support
     business_status: BusinessStatus = BusinessStatus.DRAFT
     runtime_status: RuntimeStatus = RuntimeStatus.OFFLINE
     is_special_game: bool = False
