@@ -167,3 +167,28 @@ class ReelStripsHistoryItem(BaseModel):
 class ReelStripsResponse(BaseModel):
     current: Optional[ReelStripsRecord] = None
     history: List[ReelStripsHistoryItem] = []
+
+
+
+class JackpotPool(BaseModel):
+    jackpot_name: str
+    game_id: Optional[str] = None
+    currency: str
+    current_balance: float
+    last_hit_at: Optional[datetime] = None
+
+
+class JackpotConfig(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    schema_version: str = "1.0.0"
+    jackpots: List[Dict[str, Any]]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+    source: str = "manual"  # "manual" | "import" | "provider"
+
+
+class JackpotConfigResponse(BaseModel):
+    config: Optional[JackpotConfig] = None
+    pools: List[JackpotPool] = []
