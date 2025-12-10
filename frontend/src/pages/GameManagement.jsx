@@ -354,13 +354,7 @@ const GameManagement = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          variant={table.status === 'online' ? 'destructive' : 'default'}
-                          onClick={() => handleToggleTable(table.id, table.status)}
-                        >
-                          {table.status === 'online' ? 'Go Maintenance' : 'Go Online'}
-                        </Button>
+                        {/* TODO: implement handleToggleTable when Live Tables management is in scope */}
                       </TableCell>
                     </TableRow>
                   ))}
