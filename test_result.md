@@ -286,7 +286,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "slot_advanced_backend_validation"
+    - "slot_advanced_ui_flow_complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
