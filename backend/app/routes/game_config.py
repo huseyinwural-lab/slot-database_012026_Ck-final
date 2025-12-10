@@ -51,6 +51,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/games", tags=["games_config"])
 
 
+
+class ValidationReason(str, Enum):
+    MUST_BE_POSITIVE = "must_be_positive"
+    INVALID_COUNTRY_CODE = "invalid_country_code"
+    UNSUPPORTED_ENFORCEMENT_MODE = "unsupported_enforcement_mode"
+
+
 def get_db():
     client = AsyncIOMotorClient(settings.mongo_url)
     return client[settings.db_name]
