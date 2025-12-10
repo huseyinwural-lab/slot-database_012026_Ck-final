@@ -1229,6 +1229,233 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_slot_rtp_bets_presets_backend_integration(self):
+        """Test Slot RTP & Bets Presets Backend Integration - Turkish Review Request"""
+        print("\n🎰 SLOT RTP & BETS PRESETS BACKEND INTEGRATION TESTS")
+        
+        # Step 1: Find a SLOT game for testing
+        success1, games_response = self.run_test("Get Games for Slot Preset Test", "GET", "api/v1/games", 200)
+        
+        slot_game_id = None
+        if success1 and isinstance(games_response, list):
+            # Look for a SLOT game
+            for game in games_response:
+                if (game.get('core_type') == 'SLOT' or 
+                    game.get('category', '').lower() == 'slot' or
+                    'slot' in game.get('name', '').lower()):
+                    slot_game_id = game.get('id')
+                    print(f"   🎯 Found SLOT game: {game.get('name')} (ID: {slot_game_id})")
+                    break
+        
+        if not slot_game_id:
+            print("❌ No SLOT game found. Cannot test slot presets.")
+            return False
+        
+        # Step 2: Test RTP preset list
+        print(f"\n🔍 Step 2: Test RTP preset list")
+        success2, rtp_presets_response = self.run_test("Get RTP Presets for SLOT", "GET", "api/v1/game-config/presets?game_type=SLOT&config_type=rtp", 200)
+        
+        rtp_validation_success = True
+        expected_rtp_presets = ["slot_rtp_96_standard", "slot_rtp_94_low", "slot_rtp_92_aggressive"]
+        
+        if success2 and isinstance(rtp_presets_response, dict) and 'presets' in rtp_presets_response:
+            presets = rtp_presets_response['presets']
+            print(f"   ✅ Found {len(presets)} RTP presets")
+            
+            # Check for expected preset IDs
+            preset_ids = [p.get('id') for p in presets if isinstance(p, dict)]
+            missing_presets = [pid for pid in expected_rtp_presets if pid not in preset_ids]
+            
+            if not missing_presets:
+                print(f"   ✅ All expected RTP presets found: {expected_rtp_presets}")
+            else:
+                print(f"   ❌ Missing RTP presets: {missing_presets}")
+                rtp_validation_success = False
+                
+            # Display found presets
+            for preset in presets:
+                if isinstance(preset, dict):
+                    print(f"      - {preset.get('id')}: {preset.get('name')}")
+        else:
+            print("   ❌ Failed to get RTP presets or invalid response structure")
+            rtp_validation_success = False
+        
+        # Step 3: Test individual RTP preset details
+        print(f"\n🔍 Step 3: Test individual RTP preset details")
+        rtp_detail_success = True
+        
+        for preset_id in expected_rtp_presets:
+            success_detail, detail_response = self.run_test(f"Get RTP Preset Detail - {preset_id}", "GET", f"api/v1/game-config/presets/{preset_id}", 200)
+            
+            if success_detail and isinstance(detail_response, dict):
+                values = detail_response.get('values', {})
+                
+                # Validate required fields
+                required_fields = ['code', 'rtp_value', 'is_default']
+                missing_fields = [field for field in required_fields if field not in values]
+                
+                if not missing_fields:
+                    print(f"   ✅ {preset_id}: code={values.get('code')}, rtp_value={values.get('rtp_value')}, is_default={values.get('is_default')}")
+                    
+                    # Validate specific values
+                    if preset_id == "slot_rtp_96_standard":
+                        if values.get('code') == 'RTP_96' and values.get('rtp_value') == 96.0 and values.get('is_default') == True:
+                            print(f"      ✅ Standard preset values correct")
+                        else:
+                            print(f"      ❌ Standard preset values incorrect")
+                            rtp_detail_success = False
+                    elif preset_id == "slot_rtp_94_low":
+                        if values.get('code') == 'RTP_94' and values.get('rtp_value') == 94.0 and values.get('is_default') == False:
+                            print(f"      ✅ Low preset values correct")
+                        else:
+                            print(f"      ❌ Low preset values incorrect")
+                            rtp_detail_success = False
+                    elif preset_id == "slot_rtp_92_aggressive":
+                        if values.get('code') == 'RTP_92' and values.get('rtp_value') == 92.0 and values.get('is_default') == False:
+                            print(f"      ✅ Aggressive preset values correct")
+                        else:
+                            print(f"      ❌ Aggressive preset values incorrect")
+                            rtp_detail_success = False
+                else:
+                    print(f"   ❌ {preset_id}: Missing fields in values: {missing_fields}")
+                    rtp_detail_success = False
+            else:
+                print(f"   ❌ Failed to get detail for {preset_id}")
+                rtp_detail_success = False
+        
+        # Step 4: Test Bets preset list
+        print(f"\n🔍 Step 4: Test Bets preset list")
+        success4, bets_presets_response = self.run_test("Get Bets Presets for SLOT", "GET", "api/v1/game-config/presets?game_type=SLOT&config_type=bets", 200)
+        
+        bets_validation_success = True
+        expected_bets_presets = ["slot_bets_lowstakes", "slot_bets_standard", "slot_bets_highroller"]
+        
+        if success4 and isinstance(bets_presets_response, dict) and 'presets' in bets_presets_response:
+            presets = bets_presets_response['presets']
+            print(f"   ✅ Found {len(presets)} Bets presets")
+            
+            # Check for expected preset IDs
+            preset_ids = [p.get('id') for p in presets if isinstance(p, dict)]
+            missing_presets = [pid for pid in expected_bets_presets if pid not in preset_ids]
+            
+            if not missing_presets:
+                print(f"   ✅ All expected Bets presets found: {expected_bets_presets}")
+            else:
+                print(f"   ❌ Missing Bets presets: {missing_presets}")
+                bets_validation_success = False
+                
+            # Display found presets
+            for preset in presets:
+                if isinstance(preset, dict):
+                    print(f"      - {preset.get('id')}: {preset.get('name')}")
+        else:
+            print("   ❌ Failed to get Bets presets or invalid response structure")
+            bets_validation_success = False
+        
+        # Step 5: Test individual Bets preset details
+        print(f"\n🔍 Step 5: Test individual Bets preset details")
+        bets_detail_success = True
+        
+        expected_bets_values = {
+            "slot_bets_lowstakes": {
+                "min_bet": 0.1, "max_bet": 5.0, "step": 0.1, 
+                "presets": [0.1, 0.2, 0.5, 1.0, 2.0]
+            },
+            "slot_bets_standard": {
+                "min_bet": 0.2, "max_bet": 20.0, "step": 0.2, 
+                "presets": [0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
+            },
+            "slot_bets_highroller": {
+                "min_bet": 1.0, "max_bet": 100.0, "step": 1.0, 
+                "presets": [1.0, 2.0, 5.0, 10.0, 25.0, 50.0]
+            }
+        }
+        
+        for preset_id in expected_bets_presets:
+            success_detail, detail_response = self.run_test(f"Get Bets Preset Detail - {preset_id}", "GET", f"api/v1/game-config/presets/{preset_id}", 200)
+            
+            if success_detail and isinstance(detail_response, dict):
+                values = detail_response.get('values', {})
+                expected = expected_bets_values.get(preset_id, {})
+                
+                # Validate required fields
+                required_fields = ['min_bet', 'max_bet', 'step', 'presets']
+                missing_fields = [field for field in required_fields if field not in values]
+                
+                if not missing_fields:
+                    print(f"   ✅ {preset_id}: min_bet={values.get('min_bet')}, max_bet={values.get('max_bet')}, step={values.get('step')}")
+                    print(f"      presets={values.get('presets')}")
+                    
+                    # Validate specific values
+                    values_correct = True
+                    for field in required_fields:
+                        if values.get(field) != expected.get(field):
+                            print(f"      ❌ {field} mismatch: expected {expected.get(field)}, got {values.get(field)}")
+                            values_correct = False
+                            bets_detail_success = False
+                    
+                    if values_correct:
+                        print(f"      ✅ All values match specification")
+                else:
+                    print(f"   ❌ {preset_id}: Missing fields in values: {missing_fields}")
+                    bets_detail_success = False
+            else:
+                print(f"   ❌ Failed to get detail for {preset_id}")
+                bets_detail_success = False
+        
+        # Step 6: Test preset apply functionality
+        print(f"\n🔍 Step 6: Test preset apply functionality")
+        
+        # Test applying a bets preset
+        apply_payload = {
+            "game_id": slot_game_id,
+            "game_type": "SLOT",
+            "config_type": "bets"
+        }
+        
+        success6, apply_response = self.run_test("Apply Bets Preset - slot_bets_lowstakes", "POST", "api/v1/game-config/presets/slot_bets_lowstakes/apply", 200, apply_payload)
+        
+        apply_success = True
+        if success6 and isinstance(apply_response, dict):
+            message = apply_response.get('message', '')
+            if 'preset apply logged' in message.lower():
+                print(f"   ✅ Preset apply successful: {message}")
+            else:
+                print(f"   ⚠️  Unexpected apply response: {message}")
+        else:
+            print(f"   ❌ Preset apply failed")
+            apply_success = False
+        
+        # Overall test result
+        overall_success = (success1 and success2 and rtp_validation_success and 
+                          rtp_detail_success and success4 and bets_validation_success and 
+                          bets_detail_success and success6 and apply_success)
+        
+        if overall_success:
+            print("\n✅ SLOT RTP & BETS PRESETS BACKEND INTEGRATION - ALL TESTS PASSED")
+            print("   ✅ Found SLOT game for testing")
+            print("   ✅ RTP preset list contains all 3 expected presets")
+            print("   ✅ All RTP preset details match specification")
+            print("   ✅ Bets preset list contains all 3 expected presets")
+            print("   ✅ All Bets preset details match specification")
+            print("   ✅ Preset apply functionality working")
+        else:
+            print("\n❌ SLOT RTP & BETS PRESETS BACKEND INTEGRATION - SOME TESTS FAILED")
+            if not success1:
+                print("   ❌ Failed to find SLOT game for testing")
+            if not success2 or not rtp_validation_success:
+                print("   ❌ RTP preset list test failed")
+            if not rtp_detail_success:
+                print("   ❌ RTP preset details validation failed")
+            if not success4 or not bets_validation_success:
+                print("   ❌ Bets preset list test failed")
+            if not bets_detail_success:
+                print("   ❌ Bets preset details validation failed")
+            if not success6 or not apply_success:
+                print("   ❌ Preset apply functionality failed")
+        
+        return overall_success
+
     def test_blackjack_rules_backend_validation(self):
         """Test Blackjack Rules Backend Validation - Turkish Review Request"""
         print("\n🃏 BLACKJACK RULES BACKEND VALIDATION TESTS")
