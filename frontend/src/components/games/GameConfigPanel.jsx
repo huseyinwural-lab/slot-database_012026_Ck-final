@@ -22,6 +22,8 @@ import GameCrashMathTab from './GameCrashMathTab';
 import GameDiceMathTab from './GameDiceMathTab';
 import GameBlackjackRulesTab from './GameBlackjackRulesTab';
 
+import GameSlotAdvancedTab from './GameSlotAdvancedTab';
+
 const defaultVisibility = {
   countries: [],
   segments: [],
