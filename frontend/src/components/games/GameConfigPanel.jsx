@@ -27,6 +27,17 @@ const defaultVisibility = {
   vip_min_level: 1,
 };
 
+// core_type bazlı görünür tab şeması
+const TAB_SCHEMA = {
+  REEL_LINES: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
+  WAYS: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
+  MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
+  TABLE_POKER: ['general', 'bets', 'features', 'poker_rules', 'assets', 'logs'],
+  CRASH: ['general', 'crash_math', 'assets', 'logs'],
+  DICE: ['general', 'dice_math', 'assets', 'logs'],
+  TABLE_BLACKJACK: ['general', 'bets', 'features', 'blackjack_rules', 'assets', 'logs'],
+};
+
 const GameConfigPanel = ({ game, onClose, onSaved }) => {
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(false);
@@ -57,6 +68,8 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   const [logs, setLogs] = useState([]);
   const [paytable, setPaytable] = useState({ current: null, history: [] });
 
+  const visibleTabs = TAB_SCHEMA[game?.core_type] || [];
+
   useEffect(() => {
     if (!game) return;
 
@@ -67,24 +80,34 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
         setGeneral(generalRes.data);
 
         // RTP
-        const rtpRes = await api.get(`/v1/games/${game.id}/config/rtp`);
-        setRtpConfig(rtpRes.data);
+        if (visibleTabs.includes('rtp')) {
+          const rtpRes = await api.get(`/v1/games/${game.id}/config/rtp`);
+          setRtpConfig(rtpRes.data);
+        }
 
         // Bets
-        const betRes = await api.get(`/v1/games/${game.id}/config/bets`);
-        if (betRes.data?.config) setBets(betRes.data.config);
+        if (visibleTabs.includes('bets')) {
+          const betRes = await api.get(`/v1/games/${game.id}/config/bets`);
+          if (betRes.data?.config) setBets(betRes.data.config);
+        }
 
         // Features
-        const featRes = await api.get(`/v1/games/${game.id}/config/features`);
-        setFeatures(featRes.data.features || {});
+        if (visibleTabs.includes('features')) {
+          const featRes = await api.get(`/v1/games/${game.id}/config/features`);
+          setFeatures(featRes.data.features || {});
+        }
 
         // Paytable
-        const payRes = await api.get(`/v1/games/${game.id}/config/paytable`);
-        setPaytable(payRes.data);
+        if (visibleTabs.includes('paytable')) {
+          const payRes = await api.get(`/v1/games/${game.id}/config/paytable`);
+          setPaytable(payRes.data);
+        }
 
         // Logs
-        const logsRes = await api.get(`/v1/games/${game.id}/config/logs?limit=50`);
-        setLogs(logsRes.data.items || []);
+        if (visibleTabs.includes('logs')) {
+          const logsRes = await api.get(`/v1/games/${game.id}/config/logs?limit=50`);
+          setLogs(logsRes.data.items || []);
+        }
       } catch (err) {
         console.error(err);
         toast.error('Failed to load game config');
@@ -92,7 +115,7 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
     };
 
     loadAll();
-  }, [game]);
+  }, [game, visibleTabs]);
 
   const reloadPaytable = async () => {
     if (!game) return;
@@ -180,411 +203,478 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-12">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="rtp">Math &amp; RTP</TabsTrigger>
-          <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="reels">Reel Strips</TabsTrigger>
-          <TabsTrigger value="paytable">Paytable</TabsTrigger>
-          <TabsTrigger value="poker_rules">Poker Rules &amp; Rake</TabsTrigger>
-          <TabsTrigger value="crash_math">Crash Math</TabsTrigger>
-          <TabsTrigger value="dice_math">Dice Math</TabsTrigger>
-          <TabsTrigger value="assets">Assets</TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
+        <TabsList
+          className="flex flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin items-center"
+        >
+          {visibleTabs.includes('general') && (
+            <TabsTrigger value="general">General</TabsTrigger>
+          )}
+          {visibleTabs.includes('rtp') && (
+            <TabsTrigger value="rtp">Math &amp; RTP</TabsTrigger>
+          )}
+          {visibleTabs.includes('bets') && (
+            <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
+          )}
+          {visibleTabs.includes('features') && (
+            <TabsTrigger value="features">Features</TabsTrigger>
+          )}
+          {visibleTabs.includes('reels') && (
+            <TabsTrigger value="reels">Reel Strips</TabsTrigger>
+          )}
+          {visibleTabs.includes('paytable') && (
+            <TabsTrigger value="paytable">Paytable</TabsTrigger>
+          )}
+          {visibleTabs.includes('poker_rules') && (
+            <TabsTrigger value="poker_rules">Poker Rules &amp; Rake</TabsTrigger>
+          )}
+          {visibleTabs.includes('crash_math') && (
+            <TabsTrigger value="crash_math">Crash Math</TabsTrigger>
+          )}
+          {visibleTabs.includes('dice_math') && (
+            <TabsTrigger value="dice_math">Dice Math</TabsTrigger>
+          )}
+          {visibleTabs.includes('assets') && (
+            <TabsTrigger value="assets">Assets</TabsTrigger>
+          )}
+          {visibleTabs.includes('logs') && (
+            <TabsTrigger value="logs">Logs</TabsTrigger>
+          )}
         </TabsList>
 
         {/* GENERAL TAB */}
-        <TabsContent value="general" className="space-y-4 pt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Name</Label>
-              <Input value={general.name} onChange={(e) => setGeneral({ ...general, name: e.target.value })} />
+        {visibleTabs.includes('general') && (
+          <TabsContent value="general" className="space-y-4 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input
+                  value={general.name}
+                  onChange={(e) => setGeneral({ ...general, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Provider</Label>
+                <Input
+                  value={general.provider}
+                  onChange={(e) => setGeneral({ ...general, provider: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={general.category}
+                  onValueChange={(val) => setGeneral({ ...general, category: val })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="slot">Slot</SelectItem>
+                    <SelectItem value="live">Live</SelectItem>
+                    <SelectItem value="crash">Crash</SelectItem>
+                    <SelectItem value="table">Table</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Default Language</Label>
+                <Input
+                  value={general.default_language}
+                  onChange={(e) => setGeneral({ ...general, default_language: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label>Lobby Sort Order</Label>
+                <Input
+                  type="number"
+                  value={general.lobby_sort_order}
+                  onChange={(e) =>
+                    setGeneral({ ...general, lobby_sort_order: Number(e.target.value) })
+                  }
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Provider</Label>
-              <Input value={general.provider} onChange={(e) => setGeneral({ ...general, provider: e.target.value })} />
+              <Label>Tags (comma separated)</Label>
+              <Input
+                value={general.tags.join(', ')}
+                onChange={(e) => setGeneral({ ...general, tags: parseTags(e.target.value) })}
+                placeholder="new, popular, feature_buy"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Visibility Countries (comma separated)</Label>
+                <Input
+                  value={general.visibility_rules.countries.join(', ')}
+                  onChange={(e) =>
+                    setGeneral({
+                      ...general,
+                      visibility_rules: {
+                        ...general.visibility_rules,
+                        countries: parseTags(e.target.value),
+                      },
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Segments (comma separated)</Label>
+                <Input
+                  value={general.visibility_rules.segments.join(', ')}
+                  onChange={(e) =>
+                    setGeneral({
+                      ...general,
+                      visibility_rules: {
+                        ...general.visibility_rules,
+                        segments: parseTags(e.target.value),
+                      },
+                    })
+                  }
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Category</Label>
+              <Label>VIP Min Level</Label>
+              <Input
+                type="number"
+                value={general.visibility_rules.vip_min_level}
+                onChange={(e) =>
+                  setGeneral({
+                    ...general,
+                    visibility_rules: {
+                      ...general.visibility_rules,
+                      vip_min_level: Number(e.target.value) || 1,
+                    },
+                  })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Status</Label>
               <Select
-                value={general.category}
-                onValueChange={(val) => setGeneral({ ...general, category: val })}
+                value={general.status}
+                onValueChange={(val) => setGeneral({ ...general, status: val })}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="slot">Slot</SelectItem>
-                  <SelectItem value="live">Live</SelectItem>
-                  <SelectItem value="crash">Crash</SelectItem>
-                  <SelectItem value="table">Table</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="maintenance">Maintenance</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Default Language</Label>
-              <Input
-                value={general.default_language}
-                onChange={(e) => setGeneral({ ...general, default_language: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label>Lobby Sort Order</Label>
-              <Input
-                type="number"
-                value={general.lobby_sort_order}
-                onChange={(e) => setGeneral({ ...general, lobby_sort_order: Number(e.target.value) })}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Tags (comma separated)</Label>
-            <Input
-              value={general.tags.join(', ')}
-              onChange={(e) => setGeneral({ ...general, tags: parseTags(e.target.value) })}
-              placeholder="new, popular, feature_buy"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Visibility Countries (comma separated)</Label>
-              <Input
-                value={general.visibility_rules.countries.join(', ')}
-                onChange={(e) =>
-                  setGeneral({
-                    ...general,
-                    visibility_rules: {
-                      ...general.visibility_rules,
-                      countries: parseTags(e.target.value),
-                    },
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Segments (comma separated)</Label>
-              <Input
-                value={general.visibility_rules.segments.join(', ')}
-                onChange={(e) =>
-                  setGeneral({
-                    ...general,
-                    visibility_rules: {
-                      ...general.visibility_rules,
-                      segments: parseTags(e.target.value),
-                    },
-                  })
-                }
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>VIP Min Level</Label>
-            <Input
-              type="number"
-              value={general.visibility_rules.vip_min_level}
-              onChange={(e) =>
-                setGeneral({
-                  ...general,
-                  visibility_rules: {
-                    ...general.visibility_rules,
-                    vip_min_level: Number(e.target.value) || 1,
-                  },
-                })
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select value={general.status} onValueChange={(val) => setGeneral({ ...general, status: val })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button onClick={handleSaveGeneral} disabled={loading} className="mt-2">
-            Save General
-          </Button>
-        </TabsContent>
+            <Button onClick={handleSaveGeneral} disabled={loading} className="mt-2">
+              Save General
+            </Button>
+          </TabsContent>
+        )}
 
         {/* RTP TAB */}
-        <TabsContent value="rtp" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>RTP Profiles</CardTitle>
-              <CardDescription>
-                Any RTP change will be logged and can require dual approval in production.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Code</Label>
-                  <Input
-                    placeholder="RTP_96"
-                    value={newRtp.code}
-                    onChange={(e) => setNewRtp({ ...newRtp, code: e.target.value })}
-                  />
+        {visibleTabs.includes('rtp') && (
+          <TabsContent value="rtp" className="space-y-4 pt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>RTP Profiles</CardTitle>
+                <CardDescription>
+                  Any RTP change will be logged and can require dual approval in production.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Code</Label>
+                    <Input
+                      placeholder="RTP_96"
+                      value={newRtp.code}
+                      onChange={(e) => setNewRtp({ ...newRtp, code: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>RTP Value</Label>
+                    <Input
+                      type="number"
+                      value={newRtp.rtp_value}
+                      onChange={(e) =>
+                        setNewRtp({ ...newRtp, rtp_value: Number(e.target.value) })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <Switch
+                      checked={newRtp.is_default}
+                      onCheckedChange={(v) => setNewRtp({ ...newRtp, is_default: v })}
+                    />
+                    <span className="text-xs text-muted-foreground">Set as default</span>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>RTP Value</Label>
-                  <Input
-                    type="number"
-                    value={newRtp.rtp_value}
-                    onChange={(e) => setNewRtp({ ...newRtp, rtp_value: Number(e.target.value) })}
-                  />
-                </div>
-                <div className="flex items-end gap-2">
-                  <Switch
-                    checked={newRtp.is_default}
-                    onCheckedChange={(v) => setNewRtp({ ...newRtp, is_default: v })}
-                  />
-                  <span className="text-xs text-muted-foreground">Set as default</span>
-                </div>
-              </div>
-              <Button onClick={handleAddRtpProfile} disabled={loading || !newRtp.code}>
-                Create RTP Profile
-              </Button>
+                <Button onClick={handleAddRtpProfile} disabled={loading || !newRtp.code}>
+                  Create RTP Profile
+                </Button>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>RTP</TableHead>
-                    <TableHead>Default</TableHead>
-                    <TableHead>Created At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(rtpConfig.profiles || []).map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell>{p.code}</TableCell>
-                      <TableCell>{p.rtp_value}%</TableCell>
-                      <TableCell>
-                        {rtpConfig.default_profile_id === p.id ? (
-                          <Badge variant="default">Default</Badge>
-                        ) : p.is_default ? (
-                          <Badge variant="outline">Default</Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {new Date(p.created_at).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(!rtpConfig.profiles || rtpConfig.profiles.length === 0) && (
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-xs text-muted-foreground">
-                        No RTP profiles yet.
-                      </TableCell>
+                      <TableHead>Code</TableHead>
+                      <TableHead>RTP</TableHead>
+                      <TableHead>Default</TableHead>
+                      <TableHead>Created At</TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </TableHeader>
+                  <TableBody>
+                    {(rtpConfig.profiles || []).map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>{p.code}</TableCell>
+                        <TableCell>{p.rtp_value}%</TableCell>
+                        <TableCell>
+                          {rtpConfig.default_profile_id === p.id ? (
+                            <Badge variant="default">Default</Badge>
+                          ) : p.is_default ? (
+                            <Badge variant="outline">Default</Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(p.created_at).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {(!rtpConfig.profiles || rtpConfig.profiles.length === 0) && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={4}
+                          className="text-center text-xs text-muted-foreground"
+                        >
+                          No RTP profiles yet.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         {/* BETS TAB */}
-        <TabsContent value="bets" className="space-y-4 pt-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Min Bet</Label>
-              <Input
-                type="number"
-                value={bets.min_bet}
-                onChange={(e) => setBets({ ...bets, min_bet: Number(e.target.value) })}
-              />
+        {visibleTabs.includes('bets') && (
+          <TabsContent value="bets" className="space-y-4 pt-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Min Bet</Label>
+                <Input
+                  type="number"
+                  value={bets.min_bet}
+                  onChange={(e) => setBets({ ...bets, min_bet: Number(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Max Bet</Label>
+                <Input
+                  type="number"
+                  value={bets.max_bet}
+                  onChange={(e) => setBets({ ...bets, max_bet: Number(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Step</Label>
+                <Input
+                  type="number"
+                  value={bets.step}
+                  onChange={(e) => setBets({ ...bets, step: Number(e.target.value) })}
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Max Bet</Label>
+              <Label>Presets (comma separated)</Label>
               <Input
-                type="number"
-                value={bets.max_bet}
-                onChange={(e) => setBets({ ...bets, max_bet: Number(e.target.value) })}
+                value={(bets.presets || []).join(', ')}
+                onChange={(e) =>
+                  setBets({
+                    ...bets,
+                    presets: parseTags(e.target.value)
+                      .map((v) => Number(v))
+                      .filter((v) => !Number.isNaN(v)),
+                  })
+                }
               />
             </div>
-            <div className="space-y-2">
-              <Label>Step</Label>
-              <Input
-                type="number"
-                value={bets.step}
-                onChange={(e) => setBets({ ...bets, step: Number(e.target.value) })}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Presets (comma separated)</Label>
-            <Input
-              value={(bets.presets || []).join(', ')}
-              onChange={(e) =>
-                setBets({
-                  ...bets,
-                  presets: parseTags(e.target.value).map((v) => Number(v)).filter((v) => !Number.isNaN(v)),
-                })
-              }
-            />
-          </div>
-          <Button onClick={handleSaveBets} disabled={loading} className="mt-2">
-            Save Bets &amp; Limits
-          </Button>
-        </TabsContent>
+            <Button onClick={handleSaveBets} disabled={loading} className="mt-2">
+              Save Bets &amp; Limits
+            </Button>
+          </TabsContent>
+        )}
 
         {/* FEATURES TAB */}
-        <TabsContent value="features" className="space-y-4 pt-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 border rounded-md">
-              <div>
-                <p className="font-medium text-sm">Bonus Buy</p>
-                <p className="text-xs text-muted-foreground">Allow players to purchase bonus rounds directly.</p>
+        {visibleTabs.includes('features') && (
+          <TabsContent value="features" className="space-y-4 pt-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 border rounded-md">
+                <div>
+                  <p className="font-medium text-sm">Bonus Buy</p>
+                  <p className="text-xs text-muted-foreground">
+                    Allow players to purchase bonus rounds directly.
+                  </p>
+                </div>
+                <Switch
+                  checked={!!features.bonus_buy}
+                  onCheckedChange={(v) => setFeatures({ ...features, bonus_buy: v })}
+                />
               </div>
-              <Switch
-                checked={!!features.bonus_buy}
-                onCheckedChange={(v) => setFeatures({ ...features, bonus_buy: v })}
-              />
-            </div>
-            <div className="flex items-center justify-between p-3 border rounded-md">
-              <div>
-                <p className="font-medium text-sm">Turbo Spin</p>
-                <p className="text-xs text-muted-foreground">Faster spin animations for high-velocity players.</p>
+              <div className="flex items-center justify-between p-3 border rounded-md">
+                <div>
+                  <p className="font-medium text-sm">Turbo Spin</p>
+                  <p className="text-xs text-muted-foreground">
+                    Faster spin animations for high-velocity players.
+                  </p>
+                </div>
+                <Switch
+                  checked={!!features.turbo_spin}
+                  onCheckedChange={(v) => setFeatures({ ...features, turbo_spin: v })}
+                />
               </div>
-              <Switch
-                checked={!!features.turbo_spin}
-                onCheckedChange={(v) => setFeatures({ ...features, turbo_spin: v })}
-              />
-            </div>
-            <div className="flex items-center justify-between p-3 border rounded-md">
-              <div>
-                <p className="font-medium text-sm">Autoplay</p>
-                <p className="text-xs text-muted-foreground">Automatically play multiple spins in sequence.</p>
+              <div className="flex items-center justify-between p-3 border rounded-md">
+                <div>
+                  <p className="font-medium text-sm">Autoplay</p>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically play multiple spins in sequence.
+                  </p>
+                </div>
+                <Switch
+                  checked={!!features.autoplay}
+                  onCheckedChange={(v) => setFeatures({ ...features, autoplay: v })}
+                />
               </div>
-              <Switch
-                checked={!!features.autoplay}
-                onCheckedChange={(v) => setFeatures({ ...features, autoplay: v })}
-              />
             </div>
-          </div>
-          <Button onClick={handleSaveFeatures} disabled={loading} className="mt-2">
-            Save Features
-          </Button>
-        </TabsContent>
+            <Button onClick={handleSaveFeatures} disabled={loading} className="mt-2">
+              Save Features
+            </Button>
+          </TabsContent>
+        )}
 
-
-        {/* POKER RULES TAB - only for TABLE_POKER games (guard FE seviyesinde yapılır) */}
-        <TabsContent value="poker_rules" className="space-y-4 pt-4">
-          {game?.core_type === 'TABLE_POKER' ? (
-            <GamePokerRulesTab game={game} />
-          ) : (
-            <Card>
-              <CardContent>
+        {/* POKER RULES TAB */}
+        {visibleTabs.includes('poker_rules') && (
+          <TabsContent value="poker_rules" className="space-y-4 pt-4">
+            {game?.core_type === 'TABLE_POKER' ? (
+              <GamePokerRulesTab game={game} />
+            ) : (
+              <Card>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">
+                    Poker Rules &amp; Rake sadece TABLE_POKER oyunları için geçerlidir.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
 
         {/* CRASH MATH TAB */}
-        <TabsContent value="crash_math" className="space-y-4 pt-4">
-          {game?.core_type === 'CRASH' ? (
-            <GameCrashMathTab game={game} />
-          ) : (
-            <Card>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">
-                  Crash Math sadece CRASH oyunları için geçerlidir.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+        {visibleTabs.includes('crash_math') && (
+          <TabsContent value="crash_math" className="space-y-4 pt-4">
+            {game?.core_type === 'CRASH' ? (
+              <GameCrashMathTab game={game} />
+            ) : (
+              <Card>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">
+                    Crash Math sadece CRASH oyunları için geçerlidir.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
 
         {/* DICE MATH TAB */}
-        <TabsContent value="dice_math" className="space-y-4 pt-4">
-          {game?.core_type === 'DICE' ? (
-            <GameDiceMathTab game={game} />
-          ) : (
-            <Card>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">
-                  Dice Math sadece DICE oyunları için geçerlidir.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-                <p className="text-xs text-muted-foreground">
-                  Poker Rules &amp; Rake sadece TABLE_POKER oyunları için geçerlidir.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+        {visibleTabs.includes('dice_math') && (
+          <TabsContent value="dice_math" className="space-y-4 pt-4">
+            {game?.core_type === 'DICE' ? (
+              <GameDiceMathTab game={game} />
+            ) : (
+              <Card>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">
+                    Dice Math sadece DICE oyunları için geçerlidir.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
 
         {/* REEL STRIPS TAB */}
-        <TabsContent value="reels" className="space-y-4 pt-4">
-          <GameReelStripsTab game={game} />
-        </TabsContent>
+        {visibleTabs.includes('reels') && (
+          <TabsContent value="reels" className="space-y-4 pt-4">
+            <GameReelStripsTab game={game} />
+          </TabsContent>
+        )}
 
         {/* PAYTABLE TAB */}
-        <TabsContent value="paytable" className="space-y-4 pt-4">
-          <GamePaytableTab
-            game={game}
-            paytable={paytable}
-            onReload={reloadPaytable}
-          />
-        </TabsContent>
+        {visibleTabs.includes('paytable') && (
+          <TabsContent value="paytable" className="space-y-4 pt-4">
+            <GamePaytableTab game={game} paytable={paytable} onReload={reloadPaytable} />
+          </TabsContent>
+        )}
 
         {/* ASSETS TAB */}
-        <TabsContent value="assets" className="space-y-4 pt-4">
-          <GameAssetsTab game={game} />
-        </TabsContent>
+        {visibleTabs.includes('assets') && (
+          <TabsContent value="assets" className="space-y-4 pt-4">
+            <GameAssetsTab game={game} />
+          </TabsContent>
+        )}
 
         {/* LOGS TAB */}
-        <TabsContent value="logs" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Activity className="w-4 h-4" /> Config Change Logs
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="max-h-64 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>When</TableHead>
-                    <TableHead>Admin</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Details</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {logs.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {new Date(log.created_at).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-xs">{log.admin_id}</TableCell>
-                      <TableCell className="text-xs">{log.action}</TableCell>
-                      <TableCell className="text-xs font-mono truncate max-w-xs">
-                        {JSON.stringify(log.details)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {logs.length === 0 && (
+        {visibleTabs.includes('logs') && (
+          <TabsContent value="logs" className="space-y-4 pt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Activity className="w-4 h-4" /> Config Change Logs
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="max-h-64 overflow-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-xs text-muted-foreground">
-                        No config changes logged yet.
-                      </TableCell>
+                      <TableHead>When</TableHead>
+                      <TableHead>Admin</TableHead>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Details</TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </TableHeader>
+                  <TableBody>
+                    {logs.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(log.created_at).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-xs">{log.admin_id}</TableCell>
+                        <TableCell className="text-xs">{log.action}</TableCell>
+                        <TableCell className="text-xs font-mono truncate max-w-xs">
+                          {JSON.stringify(log.details)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {logs.length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={4}
+                          className="text-center text-xs text-muted-foreground"
+                        >
+                          No config changes logged yet.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
