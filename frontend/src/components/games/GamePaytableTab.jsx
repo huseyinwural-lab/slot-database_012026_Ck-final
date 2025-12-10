@@ -115,7 +115,7 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Symbol Payout Grid</CardTitle>
-          <CardDescription>Aktif paytable'daki semboller ve ödeme katsayıları.</CardDescription>
+          <CardDescription>Aktif paytable&apos;daki semboller ve ödeme katsayıları.</CardDescription>
         </CardHeader>
         <CardContent>
           {symbols.length === 0 ? (
