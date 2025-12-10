@@ -1,127 +1,173 @@
 <analysis>**original_problem_statement:**
-The user's goal is to build a comprehensive, feature-rich admin panel for a casino operation. The current focus is on expanding the Game Management module with professional-grade features, including detailed configuration options for various game types, and a robust game import system.
+The user's goal is to build a comprehensive, feature-rich admin panel for a casino operation. The initial focus was on expanding the Game Management module. During this session, the scope was significantly expanded with several new, detailed feature requests.
 
 **PRODUCT REQUIREMENTS (New/Updated in this session):**
-*   **Game Config - Paytable, Reel Strips, Jackpots, Assets:** Implement dedicated configuration tabs for these features with advanced requirements such as versioning, structured logging, standardized error handling, schema versioning, and operational locks.
-*   **Game Import - Provider Auto-Fetch:** A new workflow to automatically fetch game lists from providers, display them in a preview table with validation results, and import selected games into the system. The process must be logged and tracked via import jobs.
-*   **Game Config - Blackjack Rules:** For games of type , add a specific configuration tab to manage detailed rules (decks, dealer behavior, payouts) and side bets (Perfect Pairs, 21+3).
+*   **Game Config - Poker Rules & Rake:** For games of , implement a new tab to configure game rules (variant, limits, players), buy-in/blinds, and rake structure.
+*   **Game Config - Crash & Dice Math:** For games of  and , implement dedicated tabs to configure their core mathematical parameters (RTP, volatility, multipliers, round timing, house edge, etc.).
+*   **Game Import - Manual JSON/ZIP Upload:** Implement a workflow for admins to manually upload game configurations via a  or  file. This includes parsing, validation, preview, and a final import step that populates all relevant database tables.
+*   **GameConfig Preset System:** Implement a platform-wide system for applying predefined configuration templates (presets) to all game configuration screens (Poker, Crash, Dice, Slots, etc.). This should feature a Preset Apply bar on each relevant tab, allowing admins to auto-fill forms with standard values and then manually override them before saving.
 
 **User's preferred language**: **Turkish**. The next agent MUST respond in Turkish.
 
 **what currently exists?**
-A full-stack application (React/FastAPI/MongoDB). The backend is structured with separate files for different domains (, , ). The frontend features a multi-tab  within the Game Management page. The implementation for the **General, Math & RTP, Bets & Limits, Features, Logs, Paytable, Reel Strips, Jackpots,** and **Assets** tabs is complete on both the backend and frontend, incorporating the user's advanced requirements for production-grade features. A documentation file for the Paytable configuration was also created.
+A full-stack application (React/FastAPI/MongoDB). The Game Management module has been significantly expanded.
+- **Completed Tabs:** General, Math & RTP, Bets & Limits, Features, Logs, Paytable, Reel Strips, Jackpots, Assets.
+- **New Feature Tabs (Backend + Frontend):**
+    -  for  games.
+    -  for  games.
+    -  for  games.
+- **Game Import System:** A manual upload feature is partially implemented. Backend models (, ) and the file upload/validation endpoint () are created. The import execution pipeline () is partially complete, supporting only basic  game imports. The frontend has a basic upload form and preview mechanism.
+- **Preset System:** The backend architecture is in place with a  collection and APIs to list, get, and log the application of presets. Seed data for Crash, Dice, Poker, RTP, and Bets presets has been created. The frontend Preset Bar is implemented and functional on the **Crash Math**, **Dice Math**, **RTP**, and **Bets & Limits** tabs.
+- **UI Improvements:** The  now dynamically shows/hides tabs based on the game's  (with a fallback to  for older data), and the layout has been fixed to prevent overflow. A bug causing the game name to repeat in the modal header has also been fixed.
 
 **Last working item**:
-*   **Last item agent was working:** The agent was resolving a linting error in the newly created  component. The error, , was caused by a misplaced  comment.
-*   **Status:** **RESOLVED**
-*   **Agent Testing Done:** Y (The agent confirmed the fix by removing the problematic comment and proposing to re-run lint checks.)
-*   **Which testing method agent to use?** NA (The fix was a minor code cleanup.)
-*   **User Testing Done:** N
+    - **Last item agent was working:** Implementing the Preset Apply Bar for the Poker Rules & Rake configuration tab.
+    - **Status:** NOT STARTED
+    - **Agent Testing Done:** N
+    - **Which testing method agent to use?** Frontend testing agent. The agent should verify that: 1. The preset dropdown on  populates correctly. 2. Applying a preset fills the form with the correct values. 3. The  endpoint is called. 4. Manual overrides are possible after applying a preset. 5. Saving the form works as expected.
+    - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- None. There are no known critical bugs or issues.
+  - **Issue 1:** ESLint warnings for  persist across several frontend components (, , , etc.). This is a low-priority technical debt item that does not block functionality.
+    - **Status:** NOT STARTED
+    - **Is recurring issue?** Y
 
 **In progress Task List**:
-- **Task 1: Implement Game Management Features (P0)**
-    - **Description:** Continue building out the Game Management module based on the user's detailed specifications. The user has provided full specs for the Game Import and Blackjack Rules features. The agent has created a detailed implementation plan for the Game Import feature.
-    - **Where to resume:** The agent should seek confirmation from the user to proceed with the proposed plan for the Game Import – Provider Auto-Fetch Flow (from message #308). The user's last message provided new specs for Blackjack Rules, so clarifying the immediate priority is essential before starting implementation.
-    - **What will be achieved with this?** A fully-featured, production-grade Game Management module that supports automated game ingestion and specific configurations for different game types.
-    - **Status:** IN PROGRESS
-    - **Should Test frontend/backend/both after fix?** Both.
-    - **Blocked on something:** User confirmation on the next priority (Game Import vs. Blackjack Rules).
+  - **Task 1: Complete GameConfig Preset System (P0)**
+     - **Where to resume:** Implement the Preset Apply Bar on  as confirmed by the user. After that, continue implementing the preset bar for the remaining slot-related tabs: , , and the future .
+     - **What will be achieved with this?** A standardized, user-friendly way to configure all game types, reducing manual data entry and errors.
+     - **Status:** IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Both. Frontend testing is needed for each new preset bar. Backend testing is needed to ensure seed presets are correct.
+     - **Blocked on something:** No.
+
+  - **Task 2: Complete Manual Game Import Feature (P1)**
+     - **Where to resume:** The backend import pipeline () needs to be expanded. Currently, it only handles basic  imports (paytable, reels). It must be updated to handle , , , and other config types from the . The frontend preview panel in  also needs to be enhanced to provide more detailed feedback from the job.
+     - **What will be achieved with this?** A fully functional manual import system that allows admins to onboard games from any source using a standard JSON/ZIP format.
+     - **Status:** IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Both.
+     - **Blocked on something:** No.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P0: Game Import – Provider Auto-Fetch Flow:** Implement the provider auto-fetch feature as per user spec in message #303 and agent's plan in message #308.
-    *   **P1: Game Settings – Blackjack Rules & Side Bets:** Implement the Blackjack-specific rules and side-bets configuration tab as per user spec in message #317.
-    *   **P2: Live Tables Management:** Full implementation as per user spec in message #62.
+    *   **P2: Slot Config Preset Integration:** Complete the preset system for all slot-specific tabs: , , .
+    *   **P3: Game Import – Provider Auto-Fetch Flow:** Implement the provider auto-fetch feature as per user spec in the previous handoff.
+    *   **P4: Game Settings – Blackjack Rules & Side Bets:** Implement the Blackjack-specific rules and side-bets configuration tab, including its own preset system.
+    *   **P5: Live Tables Management:** Full implementation as per user spec in the previous handoff.
 *   **Future Tasks:**
-    *   **P3: Player Management Overhaul:** This major feature has been deferred multiple times.
-    *   **P3: Complete Backend Refactoring:** Continue breaking down monolithic  files (e.g., for Player Management).
-    - **P3: Update User Manual:** Update  with documentation for all the new Game Management features.
+    *   **Player Management Overhaul:** Major feature, deferred.
+    *   **Complete Backend Refactoring:** Continue breaking down monolithic  files.
+    *   **Update User Manual:** Update  with all the new Game Management features.
 
 **Completed work in this session**
-- **Finance Module Frontend:** Fixed the critical runtime error and connected the  and  components to the backend.
-- **Game Settings Panel (Phase A - Deep Dive):**
-    - **Paytable Tab:** Implemented backend/frontend with advanced features (structured logging, error handling, schema versioning, lock hooks, documentation).
-    - **Reel Strips Tab:** Implemented backend/frontend with similar advanced features.
-    - **Jackpots Tab:** Implemented backend/frontend with versioning, logging, and validation.
-    - **Assets Tab:** Implemented backend/frontend for multipart file uploads (logo, thumbnail, banner) with soft-delete, versioning, and logging.
-- **Linting Fix:** Resolved a  error in .
+- **Poker Rules & Rake:** Implemented  with a full backend (models, endpoints, validation, logging).
+- **Crash & Dice Math Config:** Implemented  and  with full backend support.
+- **Manual Game Import (Phase 1):**
+    - Created backend models (, ) and router ().
+    - Implemented the  endpoint for JSON/ZIP parsing and validation.
+    - Implemented a partial import pipeline () that supports basic slot game creation.
+    - Integrated the upload flow into the  frontend page.
+- **GameConfig Preset System (Phase 1):**
+    - Created backend models () and a dedicated router for managing presets ().
+    - Implemented APIs to list, get, and log the application of presets.
+    - Seeded initial presets for Crash, Dice, Poker, RTP, and Bets.
+    - Integrated the Preset Apply Bar into the , , , and  tabs.
+- **UI & Bug Fixes:**
+    -  tabs are now dynamically rendered based on  (with a fallback to ), fixing the empty slots issue.
+    - Fixed a React runtime error (Objects are not valid as a React child) caused by improper rendering of Pydantic v2 error details.
+    - Fixed a bug causing the game name to be duplicated in the modal header.
+    - Fixed a backend validation bug in the  endpoint.
+    - Fixed an initial  linting error.
 
 **Earlier issues found/mentioned but not fixed**
-- The **Player Management** overhaul remains unstarted.
-- The **User Manual** () update is pending.
+   - The **Player Management** overhaul remains unstarted.
+   - The **User Manual** () update is pending.
 
 **Known issue recurrence from previous fork**
-- None.
+  - None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Backend:** FastAPI, Pydantic, Structured Logging, Standardized JSON Error Handling.
-- **Frontend:** React.js,  for API calls, Shadcn/UI components, Tailwind CSS.
-- **Database:** MongoDB.
-- **File Handling:** Multipart form data for uploads.
+- **Preset System Architecture:** A new, centralized system for managing configuration templates. It uses a dedicated  MongoDB collection and a set of APIs () to list, fetch, and log the application of presets. The frontend uses this to populate a Preset Bar on relevant tabs.
+- **Dynamic UI Rendering:** The  now uses a  object to dynamically render tabs based on the game's . A fallback mechanism resolves  from  for legacy data, ensuring backward compatibility.
+- **Multi-step Manual Import:** A file import process involving: 1) Upload & server-side validation, 2) creation of a , and 3) a separate execution step that runs the import pipeline. This decouples validation from execution.
 
 **key DB schema**
-- **:** , , , , , , , , .
-- **Planned for :** , .
-- **Planned for :** , .
+  - **:** , ,  added.
+  - **:** , .
+  - **:** .
 
 **changes in tech stack**
-- No changes to the core technology stack.
+  - No changes.
 
 **All files of reference**
--  (Heavily modified)
--  (Heavily modified)
--  (Modified for new tabs)
--  (Contains all new  components)
--  (New documentation file)
+- **New Backend:**
+    - 
+    - 
+    - 
+    - 
+- **New Frontend:**
+    - 
+    - 
+    - 
+- **Heavily Modified:**
+    - 
+    - 
+    - 
+    - 
+    - 
 
 **Areas that need refactoring**:
-- The  files in  and  still contain logic (e.g., Player Management) that should be extracted into dedicated files, continuing the refactoring pattern.
+- The  page now handles both the game list/grid and the entire manual import UI flow. The import-related state and logic could be extracted into a dedicated child component to improve separation of concerns.
 
 **key api endpoints**
--  (Multipart upload)
 - 
-- A large suite of endpoints under  for , , , , , , , and .
-- **Planned:** Endpoints under .
+- 
+- 
+- 
+- 
+- 
+- 
+- 
 
 **Critical Info for New Agent**
 - **You MUST interact with the user exclusively in Turkish.**
-- The user is providing very detailed, professional-grade specifications. Adherence to these specs (structured logging, error formats, versioning, etc.) is critical.
-- **Clarify Priority:** The agent created a plan for the **Game Import** feature (message #308) and was awaiting user approval. However, the user's next message (#317) provided specs for a different feature, **Blackjack Rules**. You must ask the user which feature to implement first before proceeding. Start by presenting the plan for Game Import again for confirmation.
+- The project is in a multi-tasking state. The primary focus is completing the **GameConfig Preset System**. The immediate next step is to implement the preset bar on the  component.
+- The **Manual Game Import** feature is also in progress and is the next major priority after the preset system's current phase.
+- A critical fix was implemented in  to normalize the . The component now derives a  from  if  is null. This is essential for ensuring tabs appear correctly for older slot games.
+- Pydantic v2 validation errors now return an array of objects. The agent fixed a React runtime crash by correctly parsing this array into a string for  messages. Be mindful of this pattern for future error handling.
 
 **documents created in this job**
-- : Contains API documentation for the paytable configuration feature.
+  - None.
 
 **Last 10 User Messages and any pending user messages**
-- **(msg 296):** Agent provides a summary of the implemented  tab and asks for the next steps. (Status: Completed)
-- **(msg 297):** User reports a linting error in . (Status: Addressed)
-- **(msg 302):** Agent explains the fix for the linting error. (Status: Completed)
-- **(msg 303):** User provides detailed specs for the **Game Import – Provider Auto-Fetch** feature. (Status: Pending Implementation)
-- **(msg 308):** Agent creates a detailed implementation plan for the Game Import feature and asks for approval. (Status: Pending User Approval)
-- **(msg 309):** User asks if the frontend test should be run. (Status: Addressed)
-- **(msg 316):** Agent confirms the test ran but showed the old UI, which is expected before implementation. Asks again for approval to start. (Status: Pending User Approval)
-- **(msg 317):** User provides detailed specs for the **Game Settings – Blackjack Rules & Side Bets** feature, without directly responding to the agent's request for approval on the previous task. (Status: Pending Implementation, Priority unclear)
+- **(msg 287):** User provides detailed specs for a large task: Fix tab visibility, add preset bars to ALL tabs, ensure all math parameters are on the forms, and fix a UI bug. (Status: Partially Completed)
+- **(msg 302):** Agent summarizes the work done on the user's large request. (Status: Completed)
+- **(msg 303):** User reports rtp değeri değişmiyor (RTP value isn't changing) and suggests parça parça ilerleyelim (let's proceed piece by piece). (Status: Addressed)
+- **(msg 332):** Agent confirms the RTP endpoint bug is fixed and asks the user to test. (Status: Completed)
+- **(msg 333):** User posts a frontend runtime error: Objects are not valid as a React child. (Status: Addressed)
+- **(msg 342):** Agent explains the fix for the runtime error and asks the user to test the Bets & RTP tabs again. (Status: Completed)
+- **(msg 343):** User asks şimdi sırada ne var? (what's next?). (Status: Pending)
+- **(msg 344):** Agent provides a detailed summary of completed work and proposes the next micro-step: implementing the Preset Bar for the Poker Rules tab. (Status: Completed)
+- **(msg 345):** User confirms the plan: 1. adım uygun yapalım (Step 1 is appropriate, let's do it). (Status: Pending Implementation)
+- **(msg 347):** User shares a screenshot of the current UI, which looks correct. (Status: Informational)
 
 **Project Health Check:**
-*   **Healthy:** The application is stable. The last known critical issue on the Finance page was resolved. Development is progressing on new features without reported regressions.
+- **Healthy:** The application is stable. The agent is actively implementing large new features and addressing bugs as they arise. The codebase is expanding with new, modular files for presets and imports.
 
 **3rd Party Integrations**
-*   **OpenAI GPT-4o:** Used for fraud detection risk analysis via the  library. Uses Emergent LLM Key.
-*   **recharts:** Used for data visualization.
+- **OpenAI GPT-4o:** Used for fraud detection risk analysis via the  library. Uses Emergent LLM Key.
+- **recharts:** Used for data visualization.
 
 **Testing status**
-- **Testing agent used after significant changes:** YES,  has been used extensively for all new backend endpoints. The frontend has been smoke-tested with the , but a full FE agent run is pending for the latest features.
-- **Troubleshoot agent used after agent stuck in loop:** NO.
-- **Test files created:** None.
-- **Known regressions:** None.
+  - **Testing agent used after significant changes:** YES,  was used to validate the new manual import pipeline ().
+  - **Troubleshoot agent used after agent stuck in loop:** NO.
+  - **Test files created:** None.
+  - **Known regressions:** None.
 
 **Credentials to test flow:**
-- None required for the current scope of work.
+- None required.
 
 **What agent forgot to execute**
-- The agent has not forgotten to execute anything but is at a critical decision point. The user sent specs for a new feature () immediately after the agent requested approval to start working on the previously discussed feature (). The agent must now re-confirm the priority with the user before starting any new implementation to avoid working on the wrong task.</analysis>
+- The agent is following the user's guidance and priorities closely. The user requested a large set of features, and the agent is breaking them down and tackling them iteratively, as requested. No major tasks have been forgotten, but many are in a partially completed state as part of the phased implementation plan.</analysis>
