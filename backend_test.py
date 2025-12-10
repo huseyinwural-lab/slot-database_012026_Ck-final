@@ -1,6 +1,8 @@
 import requests
 import sys
 import json
+import zipfile
+import io
 from datetime import datetime
 
 class CasinoAdminAPITester:
