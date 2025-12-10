@@ -767,7 +767,6 @@ async def simulate_reel_strips(game_id: str, payload: ReelStripsSimulateRequest,
                     )
                 )
 
-
 @router.post("/{game_id}/config/paytable/override", response_model=PaytableRecord)
 async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest, request: Request):
     """Save a new override paytable version for a game."""
