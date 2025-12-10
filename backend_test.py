@@ -1198,7 +1198,7 @@ class CasinoAdminAPITester:
         with zipfile.ZipFile(zip_buffer, 'w') as zf:
             # Farklı game_id kullan
             zip_payload = slot_payload.copy()
-            zip_payload['game_id'] = 'test_manual_slot_zip_001'
+            zip_payload['game_id'] = f'test_manual_slot_zip_{int(time.time())}'
             zf.writestr('game.json', json.dumps(zip_payload))
         
         zip_content = zip_buffer.getvalue()
