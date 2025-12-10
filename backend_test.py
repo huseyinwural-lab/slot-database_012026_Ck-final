@@ -7308,6 +7308,9 @@ def main():
     print("\n🃏 BLACKJACK RULES BACKEND VALIDATION TESTS (REVIEW REQUEST)")
     test_results.append(("Blackjack Rules Backend Validation", tester.test_blackjack_rules_backend_validation()))
     
+    print("\n🎰 SLOT ADVANCED BACKEND VALIDATION TESTS (REVIEW REQUEST)")
+    test_results.append(("Slot Advanced Backend Validation", tester.test_slot_advanced_backend_validation()))
+    
     print("\n🎰 SLOT RTP & BETS PRESETS BACKEND INTEGRATION TESTS (REVIEW REQUEST)")
     test_results.append(("Slot RTP & Bets Presets Backend Integration", tester.test_slot_rtp_bets_presets_backend_integration()))
     
