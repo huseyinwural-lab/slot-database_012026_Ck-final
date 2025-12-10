@@ -1229,6 +1229,299 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_slot_advanced_backend_validation(self):
+        """Test Slot Advanced Backend Validation - Turkish Review Request"""
+        print("\n🎰 SLOT ADVANCED BACKEND VALIDATION TESTS")
+        
+        # Step 1: Get a valid SLOT game_id
+        success1, games_response = self.run_test("Get Games for Slot Advanced Test", "GET", "api/v1/games", 200)
+        
+        slot_game_id = None
+        if success1 and isinstance(games_response, list):
+            # Look for a SLOT game
+            for game in games_response:
+                if (game.get('core_type') == 'SLOT' or 
+                    game.get('category', '').lower() == 'slot' or
+                    'slot' in game.get('name', '').lower()):
+                    slot_game_id = game.get('id')
+                    print(f"   🎯 Found SLOT game: {game.get('name')} (ID: {slot_game_id})")
+                    break
+        
+        if not slot_game_id:
+            print("❌ No SLOT game found. Cannot test slot advanced endpoints.")
+            return False
+        
+        # Step 2: GET /api/v1/games/{game_id}/config/slot-advanced (first call - should return default template)
+        print(f"\n🔍 Step 2: GET slot-advanced config (first call - expect default template)")
+        success2, default_response = self.run_test(f"Get Slot Advanced Config (Default) - {slot_game_id}", "GET", f"api/v1/games/{slot_game_id}/config/slot-advanced", 200)
+        
+        # Validate default template values
+        default_validation_success = True
+        if success2 and isinstance(default_response, dict):
+            print("   🔍 Validating default template values:")
+            expected_defaults = {
+                'spin_speed': 'normal',
+                'turbo_spin_allowed': False,
+                'autoplay_enabled': True,
+                'autoplay_default_spins': 50,
+                'autoplay_max_spins': 100,
+                'autoplay_stop_on_big_win': True,
+                'autoplay_stop_on_balance_drop_percent': None,
+                'big_win_animation_enabled': True,
+                'gamble_feature_allowed': False
+            }
+            
+            for field, expected_value in expected_defaults.items():
+                actual_value = default_response.get(field)
+                if actual_value == expected_value:
+                    print(f"   ✅ {field}: {actual_value}")
+                else:
+                    print(f"   ❌ {field}: expected {expected_value}, got {actual_value}")
+                    default_validation_success = False
+        else:
+            default_validation_success = False
+            print("❌ Failed to get valid default template response")
+        
+        # Step 3: POST successful payload
+        print(f"\n🔍 Step 3: POST successful slot advanced config")
+        
+        successful_payload = {
+            "spin_speed": "fast",
+            "turbo_spin_allowed": True,
+            "autoplay_enabled": True,
+            "autoplay_default_spins": 25,
+            "autoplay_max_spins": 200,
+            "autoplay_stop_on_big_win": True,
+            "autoplay_stop_on_balance_drop_percent": 50,
+            "big_win_animation_enabled": True,
+            "gamble_feature_allowed": True,
+            "provably_fair_enabled": True,
+            "rng_algorithm": "sha256",
+            "summary": "VIP fast spin autoplay config"
+        }
+        
+        success3, post_response = self.run_test(f"POST Slot Advanced Config - {slot_game_id}", "POST", f"api/v1/games/{slot_game_id}/config/slot-advanced", 200, successful_payload)
+        
+        # Validate POST response structure
+        post_validation_success = True
+        if success3 and isinstance(post_response, dict):
+            print("   🔍 Validating POST response structure:")
+            required_fields = ['id', 'game_id', 'config_version_id', 'spin_speed', 'turbo_spin_allowed', 'autoplay_enabled', 'created_by']
+            missing_fields = [field for field in required_fields if field not in post_response]
+            
+            if not missing_fields:
+                print("   ✅ All required fields present in POST response")
+                # Validate specific values
+                if post_response.get('spin_speed') == 'fast':
+                    print("   ✅ spin_speed correctly saved as 'fast'")
+                else:
+                    print(f"   ❌ spin_speed mismatch: expected 'fast', got '{post_response.get('spin_speed')}'")
+                    post_validation_success = False
+                    
+                if post_response.get('autoplay_default_spins') == 25:
+                    print("   ✅ autoplay_default_spins correctly saved as 25")
+                else:
+                    print(f"   ❌ autoplay_default_spins mismatch: expected 25, got '{post_response.get('autoplay_default_spins')}'")
+                    post_validation_success = False
+                    
+                if post_response.get('autoplay_stop_on_balance_drop_percent') == 50:
+                    print("   ✅ autoplay_stop_on_balance_drop_percent correctly saved as 50")
+                else:
+                    print(f"   ❌ autoplay_stop_on_balance_drop_percent mismatch: expected 50, got '{post_response.get('autoplay_stop_on_balance_drop_percent')}'")
+                    post_validation_success = False
+            else:
+                print(f"   ❌ Missing required fields in POST response: {missing_fields}")
+                post_validation_success = False
+        else:
+            post_validation_success = False
+            print("❌ Failed to get valid POST response")
+        
+        # Step 4: GET again to verify state persistence
+        print(f"\n🔍 Step 4: GET slot-advanced config again (verify state persistence)")
+        success4, persistence_response = self.run_test(f"Get Slot Advanced Config (After POST) - {slot_game_id}", "GET", f"api/v1/games/{slot_game_id}/config/slot-advanced", 200)
+        
+        persistence_validation_success = True
+        if success4 and isinstance(persistence_response, dict):
+            print("   🔍 Validating state persistence:")
+            expected_values = {
+                'spin_speed': 'fast',
+                'autoplay_default_spins': 25,
+                'autoplay_max_spins': 200,
+                'autoplay_stop_on_balance_drop_percent': 50,
+                'gamble_feature_allowed': True
+            }
+            
+            for field, expected_value in expected_values.items():
+                actual_value = persistence_response.get(field)
+                if actual_value == expected_value:
+                    print(f"   ✅ {field}: {actual_value} (persisted correctly)")
+                else:
+                    print(f"   ❌ {field}: expected {expected_value}, got {actual_value} (persistence failed)")
+                    persistence_validation_success = False
+        else:
+            persistence_validation_success = False
+            print("❌ Failed to get valid persistence response")
+        
+        # Step 5: Negative validation scenarios
+        print(f"\n🔍 Step 5: Testing negative validation scenarios")
+        
+        validation_tests = []
+        
+        # 5a: Invalid spin_speed
+        test_5a = successful_payload.copy()
+        test_5a['spin_speed'] = 'ultra_fast'
+        test_5a['summary'] = 'Test invalid spin_speed'
+        
+        success_5a, response_5a = self.run_test("Validation: spin_speed='ultra_fast'", "POST", f"api/v1/games/{slot_game_id}/config/slot-advanced", 400, test_5a)
+        validation_tests.append(("5a_invalid_spin_speed", success_5a, response_5a))
+        
+        # 5b: autoplay_default_spins=0
+        test_5b = successful_payload.copy()
+        test_5b['autoplay_default_spins'] = 0
+        test_5b['summary'] = 'Test autoplay_default_spins=0'
+        
+        success_5b, response_5b = self.run_test("Validation: autoplay_default_spins=0", "POST", f"api/v1/games/{slot_game_id}/config/slot-advanced", 400, test_5b)
+        validation_tests.append(("5b_autoplay_default_zero", success_5b, response_5b))
+        
+        # 5c: autoplay_max_spins=0
+        test_5c = successful_payload.copy()
+        test_5c['autoplay_max_spins'] = 0
+        test_5c['summary'] = 'Test autoplay_max_spins=0'
+        
+        success_5c, response_5c = self.run_test("Validation: autoplay_max_spins=0", "POST", f"api/v1/games/{slot_game_id}/config/slot-advanced", 400, test_5c)
+        validation_tests.append(("5c_autoplay_max_zero", success_5c, response_5c))
+        
+        # 5d: autoplay_default_spins > autoplay_max_spins
+        test_5d = successful_payload.copy()
+        test_5d['autoplay_default_spins'] = 300
+        test_5d['autoplay_max_spins'] = 100
+        test_5d['summary'] = 'Test autoplay_default > autoplay_max'
+        
+        success_5d, response_5d = self.run_test("Validation: autoplay_default_spins > autoplay_max_spins", "POST", f"api/v1/games/{slot_game_id}/config/slot-advanced", 400, test_5d)
+        validation_tests.append(("5d_autoplay_range_invalid", success_5d, response_5d))
+        
+        # 5e: autoplay_stop_on_balance_drop_percent=-10
+        test_5e = successful_payload.copy()
+        test_5e['autoplay_stop_on_balance_drop_percent'] = -10
+        test_5e['summary'] = 'Test balance_drop_percent negative'
+        
+        success_5e, response_5e = self.run_test("Validation: autoplay_stop_on_balance_drop_percent=-10", "POST", f"api/v1/games/{slot_game_id}/config/slot-advanced", 400, test_5e)
+        validation_tests.append(("5e_balance_drop_negative", success_5e, response_5e))
+        
+        # 5f: autoplay_stop_on_balance_drop_percent=150
+        test_5f = successful_payload.copy()
+        test_5f['autoplay_stop_on_balance_drop_percent'] = 150
+        test_5f['summary'] = 'Test balance_drop_percent > 100'
+        
+        success_5f, response_5f = self.run_test("Validation: autoplay_stop_on_balance_drop_percent=150", "POST", f"api/v1/games/{slot_game_id}/config/slot-advanced", 400, test_5f)
+        validation_tests.append(("5f_balance_drop_high", success_5f, response_5f))
+        
+        # Analyze validation test results
+        print(f"\n🔍 Analyzing validation test results:")
+        validation_success_count = 0
+        validation_total_count = len(validation_tests)
+        
+        for test_name, success, response in validation_tests:
+            if success and isinstance(response, dict):
+                error_code = response.get('error_code')
+                message = response.get('message', '')
+                details = response.get('details', {})
+                
+                print(f"   ✅ {test_name}: HTTP 400, error_code='{error_code}'")
+                print(f"      Message: {message}")
+                if details:
+                    print(f"      Details: {details}")
+                
+                # Validate expected error code
+                if error_code == 'SLOT_ADVANCED_VALIDATION_FAILED':
+                    validation_success_count += 1
+                else:
+                    print(f"      ⚠️  Expected error_code='SLOT_ADVANCED_VALIDATION_FAILED', got '{error_code}'")
+            else:
+                print(f"   ❌ {test_name}: Failed to return proper 400 error response")
+        
+        validation_overall_success = validation_success_count == validation_total_count
+        
+        if validation_overall_success:
+            print(f"✅ All {validation_total_count} validation scenarios passed correctly")
+        else:
+            print(f"❌ Only {validation_success_count}/{validation_total_count} validation scenarios passed")
+        
+        # Step 6: Test non-slot game (should return 404)
+        print(f"\n🔍 Step 6: Test non-slot game (expect 404)")
+        
+        # Find a non-slot game
+        non_slot_game_id = None
+        if success1 and isinstance(games_response, list):
+            for game in games_response:
+                core_type = game.get('core_type', '').upper()
+                if core_type not in ['SLOT', 'SLOTS'] and 'slot' not in game.get('name', '').lower():
+                    non_slot_game_id = game.get('id')
+                    print(f"   🎯 Found non-SLOT game: {game.get('name')} (ID: {non_slot_game_id}, Type: {core_type})")
+                    break
+        
+        non_slot_validation_success = True
+        if non_slot_game_id:
+            # Test GET on non-slot game
+            success6a, response_6a = self.run_test(f"GET Slot Advanced on Non-Slot Game", "GET", f"api/v1/games/{non_slot_game_id}/config/slot-advanced", 404)
+            
+            # Test POST on non-slot game
+            success6b, response_6b = self.run_test(f"POST Slot Advanced on Non-Slot Game", "POST", f"api/v1/games/{non_slot_game_id}/config/slot-advanced", 404, successful_payload)
+            
+            # Validate error responses
+            if success6a and isinstance(response_6a, dict):
+                error_code = response_6a.get('error_code')
+                if error_code == 'SLOT_ADVANCED_NOT_AVAILABLE_FOR_GAME':
+                    print(f"   ✅ GET on non-slot game correctly returns 404 with error_code='{error_code}'")
+                else:
+                    print(f"   ❌ GET on non-slot game: expected error_code='SLOT_ADVANCED_NOT_AVAILABLE_FOR_GAME', got '{error_code}'")
+                    non_slot_validation_success = False
+            else:
+                print(f"   ❌ GET on non-slot game: failed to return proper 404 response")
+                non_slot_validation_success = False
+                
+            if success6b and isinstance(response_6b, dict):
+                error_code = response_6b.get('error_code')
+                if error_code == 'SLOT_ADVANCED_NOT_AVAILABLE_FOR_GAME':
+                    print(f"   ✅ POST on non-slot game correctly returns 404 with error_code='{error_code}'")
+                else:
+                    print(f"   ❌ POST on non-slot game: expected error_code='SLOT_ADVANCED_NOT_AVAILABLE_FOR_GAME', got '{error_code}'")
+                    non_slot_validation_success = False
+            else:
+                print(f"   ❌ POST on non-slot game: failed to return proper 404 response")
+                non_slot_validation_success = False
+        else:
+            print("   ⚠️  No non-slot game found to test 404 scenario")
+            non_slot_validation_success = True  # Skip this test
+        
+        # Overall test result
+        overall_success = (success1 and success2 and default_validation_success and 
+                          success3 and post_validation_success and 
+                          success4 and persistence_validation_success and 
+                          validation_overall_success and non_slot_validation_success)
+        
+        if overall_success:
+            print("\n✅ SLOT ADVANCED BACKEND VALIDATION - ALL TESTS PASSED")
+            print("   ✅ GET slot-advanced returns proper default template")
+            print("   ✅ POST slot-advanced saves configuration correctly")
+            print("   ✅ State persistence working correctly")
+            print("   ✅ All negative validation scenarios working")
+            print("   ✅ Non-slot games correctly return 404")
+        else:
+            print("\n❌ SLOT ADVANCED BACKEND VALIDATION - SOME TESTS FAILED")
+            if not success2 or not default_validation_success:
+                print("   ❌ GET default template failed")
+            if not success3 or not post_validation_success:
+                print("   ❌ POST configuration failed")
+            if not success4 or not persistence_validation_success:
+                print("   ❌ State persistence failed")
+            if not validation_overall_success:
+                print("   ❌ Some validation scenarios failed")
+            if not non_slot_validation_success:
+                print("   ❌ Non-slot game 404 test failed")
+        
+        return overall_success
+
     def test_slot_rtp_bets_presets_backend_integration(self):
         """Test Slot RTP & Bets Presets Backend Integration - Turkish Review Request"""
         print("\n🎰 SLOT RTP & BETS PRESETS BACKEND INTEGRATION TESTS")
