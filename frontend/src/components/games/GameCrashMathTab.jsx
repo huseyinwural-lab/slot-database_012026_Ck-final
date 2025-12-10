@@ -363,6 +363,150 @@ const GameCrashMathTab = ({ game }) => {
                 onChange={(e) => handleNumberChange('min_bet_per_round', e.target.value)}
                 disabled={loading}
                 placeholder="(optional)"
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Advanced Safety (global)</CardTitle>
+          <CardDescription>
+            Round ve session bazlı global limitler. Boş bırakırsanız sınırsız kabul edilir.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Max Loss per Round</Label>
+              <Input
+                type="number"
+                value={form.max_loss_per_round}
+                onChange={(e) => handleNumberChange('max_loss_per_round', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Tek elde kaybedilebilecek maksimum tutar. Genelde masadaki max bet ile uyumlu seçilir.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Max Win per Round</Label>
+              <Input
+                type="number"
+                value={form.max_win_per_round}
+                onChange={(e) => handleNumberChange('max_win_per_round', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Tek elde kazanılabilecek maksimum tutar. Hr / risk politikası ile uyumlu olmalı.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Max Rounds per Session</Label>
+              <Input
+                type="number"
+                value={form.max_rounds_per_session}
+                onChange={(e) => handleNumberChange('max_rounds_per_session', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Bir oyuncunun tek oturumda oynayabileceği maksimum round sayısı.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Max Total Loss per Session</Label>
+              <Input
+                type="number"
+                value={form.max_total_loss_per_session}
+                onChange={(e) => handleNumberChange('max_total_loss_per_session', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Tek oturumda kaybedilebilecek toplam maksimum tutar. Responsible gaming için kritik.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Max Total Win per Session</Label>
+              <Input
+                type="number"
+                value={form.max_total_win_per_session}
+                onChange={(e) => handleNumberChange('max_total_win_per_session', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Tek oturumda kazanılabilecek toplam maksimum tutar. Limit üstü kazançlar risk departmanına gidebilir.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Advanced Safety Enforcement</CardTitle>
+          <CardDescription>
+            Limit aşımlarında sistemin nasıl davranacağını seç.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-2 max-w-xs">
+            <Label>Enforcement Mode</Label>
+            <Select
+              value={form.enforcement_mode}
+              onValueChange={(v) => handleChange('enforcement_mode', v)}
+              disabled={loading}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="log_only">Log only</SelectItem>
+                <SelectItem value="hard_block">Hard block</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <ul className="list-disc list-inside text-[10px] text-muted-foreground space-y-1">
+            <li><strong>log_only</strong>: Limit aşımlarını sadece loglar, round akışını kesmez.</li>
+            <li><strong>hard_block</strong>: Limit aşıldığında round/işlem engellenir ve loglanır.</li>
+            <li>İleride istenirse ek bir <code>warn_only</code> modu eklenebilir.</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Country Overrides</CardTitle>
+          <CardDescription>
+            Ülke bazlı daha sıkı veya daha gevşek limitler tanımla (ISO 3166-1 alpha-2 kodlarıyla).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Alert variant="default">
+            <AlertDescription className="text-[10px]">
+              Örnek: {`{"TR": { "max_total_loss_per_session": 1000, "max_total_win_per_session": 5000 }}`}
+            </AlertDescription>
+          </Alert>
+          <div className="space-y-2">
+            <Label>Country Overrides (JSON)</Label>
+            <textarea
+              className="w-full border rounded-md p-2 text-xs font-mono min-h-[120px] bg-background"
+              disabled={loading}
+              value={JSON.stringify(form.country_overrides || {}, null, 2)}
+              onChange={(e) => {
+                try {
+                  const parsed = e.target.value.trim() ? JSON.parse(e.target.value) : {};
+                  setForm((prev) => ({ ...prev, country_overrides: parsed }));
+                  setError(null);
+                } catch (parseErr) {
+                  // sadece local error ver, backend'e gitmeden
+                  setError('Country overrides JSON formatı geçersiz.');
+                }
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
               />
             </div>
             <div className="space-y-2">
