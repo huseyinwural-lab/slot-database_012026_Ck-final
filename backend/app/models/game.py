@@ -214,3 +214,46 @@ class GameAssetsResponse(BaseModel):
 class JackpotConfigResponse(BaseModel):
     config: Optional[JackpotConfig] = None
     pools: List[JackpotPool] = []
+
+
+
+class PokerRules(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    schema_version: str = "1.0.0"
+
+    # Temel oyun bilgisi
+    variant: str  # "texas_holdem", "omaha", "omaha_hi_lo", "3card_poker", "caribbean_stud"
+    limit_type: str  # "no_limit", "pot_limit", "fixed_limit"
+
+    min_players: int
+    max_players: int
+
+    # Buy-in / stack (BB cinsinden)
+    min_buyin_bb: float
+    max_buyin_bb: float
+
+    # Rake
+    rake_type: str  # "percentage", "time", "none"
+    rake_percent: Optional[float] = None
+    rake_cap_currency: Optional[float] = None
+    rake_applies_from_pot: Optional[float] = None
+
+    # Ante / Blinds
+    use_antes: bool = False
+    ante_bb: Optional[float] = None
+    small_blind_bb: float
+    big_blind_bb: float
+
+    # Diğer kurallar
+    allow_straddle: bool = False
+    run_it_twice_allowed: bool = False
+    min_players_to_start: int
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+
+
+class PokerRulesResponse(BaseModel):
+    rules: PokerRules
