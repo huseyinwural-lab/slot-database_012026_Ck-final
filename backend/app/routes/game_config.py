@@ -175,6 +175,57 @@ class PokerRulesSaveRequest(BaseModel):
     rake_type: str
     rake_percent: Optional[float] = None
     rake_cap_currency: Optional[float] = None
+
+
+class CrashMathSaveRequest(BaseModel):
+    base_rtp: float
+    volatility_profile: str
+    min_multiplier: float
+    max_multiplier: float
+    max_auto_cashout: float
+    round_duration_seconds: int
+    bet_phase_seconds: int
+    grace_period_seconds: int
+    min_bet_per_round: Optional[float] = None
+    max_bet_per_round: Optional[float] = None
+    provably_fair_enabled: bool
+    rng_algorithm: str
+    seed_rotation_interval_rounds: Optional[int] = None
+    summary: Optional[str] = None
+
+
+class DiceMathSaveRequest(BaseModel):
+    range_min: float
+    range_max: float
+    step: float
+    house_edge_percent: float
+    min_payout_multiplier: float
+    max_payout_multiplier: float
+    allow_over: bool
+    allow_under: bool
+    min_target: float
+    max_target: float
+    round_duration_seconds: int
+    bet_phase_seconds: int
+    provably_fair_enabled: bool
+    rng_algorithm: str
+    seed_rotation_interval_rounds: Optional[int] = None
+    summary: Optional[str] = None
+
+
+def _crash_math_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
+    details: Dict[str, Any] = {"field": field, "reason": reason}
+    if value is not None:
+        details["value"] = value
+    return {"error_code": "CRASH_MATH_VALIDATION_FAILED", "message": message, "details": details}
+
+
+def _dice_math_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
+    details: Dict[str, Any] = {"field": field, "reason": reason}
+    if value is not None:
+        details["value"] = value
+    return {"error_code": "DICE_MATH_VALIDATION_FAILED", "message": message, "details": details}
+
     rake_applies_from_pot: Optional[float] = None
     use_antes: bool
     ante_bb: Optional[float] = None
