@@ -1236,7 +1236,7 @@ class CasinoAdminAPITester:
         print(f"\n📤 Senaryo 5: Non-slot category (crash)")
         
         crash_payload = {
-            "game_id": "test_manual_crash_001",
+            "game_id": f"test_manual_crash_{int(time.time())}",
             "name": "Test Manual Crash",
             "category": "crash",
             "rtp": 96.0,
