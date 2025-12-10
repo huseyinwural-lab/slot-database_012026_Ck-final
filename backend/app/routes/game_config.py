@@ -414,7 +414,13 @@ def _validate_paytable_payload(data: Dict[str, Any]):
                 raise PaytableValidationError(
                     _paytable_error(
                         f"{code} için {k}x ödemesi 0'dan küçük olamaz.",
-    # --- REEL STRIPS CONFIG ---
+                        f"data.symbols[].pays.{k}",
+                        "negative",
+                    )
+                )
+
+
+# --- REEL STRIPS CONFIG ---
 
 class ReelStripsValidationError(Exception):
     def __init__(self, payload: Dict[str, Any]):
