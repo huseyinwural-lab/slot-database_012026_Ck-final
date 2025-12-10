@@ -830,6 +830,272 @@ async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, requ
     version = await _generate_new_version(db, game_id, admin_id, notes=payload.summary or "Dice math change")
 
     cfg = DiceMathConfig(
+        game_id=game_id,
+        config_version_id=version.id,
+        range_min=payload.range_min,
+        range_max=payload.range_max,
+        step=payload.step,
+        house_edge_percent=payload.house_edge_percent,
+        min_payout_multiplier=payload.min_payout_multiplier,
+        max_payout_multiplier=payload.max_payout_multiplier,
+        allow_over=payload.allow_over,
+        allow_under=payload.allow_under,
+        min_target=payload.min_target,
+        max_target=payload.max_target,
+        round_duration_seconds=payload.round_duration_seconds,
+        bet_phase_seconds=payload.bet_phase_seconds,
+        provably_fair_enabled=payload.provably_fair_enabled,
+        rng_algorithm=payload.rng_algorithm,
+        seed_rotation_interval_rounds=payload.seed_rotation_interval_rounds,
+        created_by=admin_id,
+    )
+
+    await db.dice_math_configs.insert_one(cfg.model_dump())
+
+    log_details: Dict[str, Any] = {
+        "config_version_id": version.id,
+        "summary": payload.summary,
+        "request_id": request_id,
+        "game_id": game_id,
+        "core_type": "DICE",
+        "old_value": prev_cfg.model_dump() if prev_cfg else None,
+        "new_value": cfg.model_dump(),
+    }
+
+    await _append_game_log(db, game_id, admin_id, "dice_math_saved", log_details)
+
+    logger.info(
+        "dice_math_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "core_type": "DICE",
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "dice_math_saved",
+        },
+    )
+
+    return cfg
+
+
+# ---------------------------------------------------------------------------
+# SLOT ADVANCED CONFIG
+# ---------------------------------------------------------------------------
+
+
+def _slot_advanced_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
+    details: Dict[str, Any] = {"field": field, "reason": reason}
+    if value is not None:
+        details["value"] = value
+    return {"error_code": "SLOT_ADVANCED_VALIDATION_FAILED", "message": message, "details": details}
+
+
+@router.get("/{game_id}/config/slot-advanced", response_model=SlotAdvancedConfigResponse)
+async def get_slot_advanced_config(game_id: str, request: Request):
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType") or game_doc.get("category")
+    if core_type not in {"SLOT", "REEL_LINES", "WAYS", "MEGAWAYS", "slot", "slots"}:
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "SLOT_ADVANCED_NOT_AVAILABLE_FOR_GAME",
+                "message": "Slot advanced configuration is only available for slot-type games.",
+            },
+        )
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    docs = (
+        await db.slot_advanced_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+
+    if docs:
+        cfg = SlotAdvancedConfig(**docs[0])
+        response = SlotAdvancedConfigResponse(
+            config_version_id=cfg.config_version_id,
+            schema_version=cfg.schema_version,
+            spin_speed=cfg.spin_speed,
+            turbo_spin_allowed=cfg.turbo_spin_allowed,
+            autoplay_enabled=cfg.autoplay_enabled,
+            autoplay_default_spins=cfg.autoplay_default_spins,
+            autoplay_max_spins=cfg.autoplay_max_spins,
+            autoplay_stop_on_big_win=cfg.autoplay_stop_on_big_win,
+            autoplay_stop_on_balance_drop_percent=cfg.autoplay_stop_on_balance_drop_percent,
+            big_win_animation_enabled=cfg.big_win_animation_enabled,
+            gamble_feature_allowed=cfg.gamble_feature_allowed,
+        )
+    else:
+        # Default advanced settings template
+        response = SlotAdvancedConfigResponse(
+            config_version_id=None,
+            schema_version="1.0.0",
+            spin_speed="normal",
+            turbo_spin_allowed=False,
+            autoplay_enabled=True,
+            autoplay_default_spins=50,
+            autoplay_max_spins=100,
+            autoplay_stop_on_big_win=True,
+            autoplay_stop_on_balance_drop_percent=None,
+            big_win_animation_enabled=True,
+            gamble_feature_allowed=False,
+        )
+
+    logger.info(
+        "slot_advanced_read",
+        extra={
+            "game_id": game_id,
+            "config_version_id": response.config_version_id,
+            "core_type": core_type,
+            "admin_id": "n/a",
+            "request_id": request_id,
+            "action_type": "slot_advanced_read",
+        },
+    )
+
+    return response
+
+
+@router.post("/{game_id}/config/slot-advanced", response_model=SlotAdvancedConfig)
+async def save_slot_advanced_config(game_id: str, payload: SlotAdvancedSaveRequest, request: Request):
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType") or game_doc.get("category")
+    if core_type not in {"SLOT", "REEL_LINES", "WAYS", "MEGAWAYS", "slot", "slots"}:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "SLOT_ADVANCED_NOT_AVAILABLE_FOR_GAME",
+                "message": "Slot advanced configuration is only available for slot-type games.",
+            },
+        )
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    if payload.spin_speed not in {"slow", "normal", "fast"}:
+        return JSONResponse(
+            status_code=400,
+            content=_slot_advanced_error(
+                "spin_speed must be one of: slow, normal, fast.",
+                "spin_speed",
+                payload.spin_speed,
+                "unsupported_value",
+            ),
+        )
+
+    if payload.autoplay_default_spins <= 0 or payload.autoplay_max_spins <= 0:
+        return JSONResponse(
+            status_code=400,
+            content=_slot_advanced_error(
+                "autoplay_default_spins and autoplay_max_spins must be > 0.",
+                "autoplay_spins",
+                {
+                    "autoplay_default_spins": payload.autoplay_default_spins,
+                    "autoplay_max_spins": payload.autoplay_max_spins,
+                },
+                "invalid_range",
+            ),
+        )
+
+    if payload.autoplay_default_spins > payload.autoplay_max_spins:
+        return JSONResponse(
+            status_code=400,
+            content=_slot_advanced_error(
+                "autoplay_default_spins must be <= autoplay_max_spins.",
+                "autoplay_default_spins",
+                {
+                    "autoplay_default_spins": payload.autoplay_default_spins,
+                    "autoplay_max_spins": payload.autoplay_max_spins,
+                },
+                "invalid_range",
+            ),
+        )
+
+    if (
+        payload.autoplay_stop_on_balance_drop_percent is not None
+        and (payload.autoplay_stop_on_balance_drop_percent <= 0
+             or payload.autoplay_stop_on_balance_drop_percent > 100)
+    ):
+        return JSONResponse(
+            status_code=400,
+            content=_slot_advanced_error(
+                "autoplay_stop_on_balance_drop_percent must be between 0 and 100.",
+                "autoplay_stop_on_balance_drop_percent",
+                payload.autoplay_stop_on_balance_drop_percent,
+                "out_of_range",
+            ),
+        )
+
+    # Fetch previous config for logging
+    prev_docs = (
+        await db.slot_advanced_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    prev_cfg = SlotAdvancedConfig(**prev_docs[0]) if prev_docs else None
+
+    version = await _generate_new_version(db, game_id, admin_id, notes=payload.summary or "Slot advanced change")
+
+    cfg = SlotAdvancedConfig(
+        game_id=game_id,
+        config_version_id=version.id,
+        spin_speed=payload.spin_speed,
+        turbo_spin_allowed=payload.turbo_spin_allowed,
+        autoplay_enabled=payload.autoplay_enabled,
+        autoplay_default_spins=payload.autoplay_default_spins,
+        autoplay_max_spins=payload.autoplay_max_spins,
+        autoplay_stop_on_big_win=payload.autoplay_stop_on_big_win,
+        autoplay_stop_on_balance_drop_percent=payload.autoplay_stop_on_balance_drop_percent,
+        big_win_animation_enabled=payload.big_win_animation_enabled,
+        gamble_feature_allowed=payload.gamble_feature_allowed,
+        created_by=admin_id,
+    )
+
+    await db.slot_advanced_configs.insert_one(cfg.model_dump())
+
+    log_details: Dict[str, Any] = {
+        "config_version_id": version.id,
+        "summary": payload.summary,
+        "request_id": request_id,
+        "game_id": game_id,
+        "core_type": "SLOT",
+        "old_value": prev_cfg.model_dump() if prev_cfg else None,
+        "new_value": cfg.model_dump(),
+    }
+
+    await _append_game_log(db, game_id, admin_id, "slot_advanced_saved", log_details)
+
+    logger.info(
+        "slot_advanced_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "core_type": "SLOT",
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "slot_advanced_saved",
+        },
+    )
+
+    return cfg
 
 # ---------------------------------------------------------------------------
 # SLOT ADVANCED CONFIG
