@@ -28,6 +28,15 @@ const GameCrashMathTab = ({ game }) => {
     grace_period_seconds: 2,
     min_bet_per_round: '',
     max_bet_per_round: '',
+    // Advanced safety (global)
+    max_loss_per_round: '',
+    max_win_per_round: '',
+    max_rounds_per_session: '',
+    max_total_loss_per_session: '',
+    max_total_win_per_session: '',
+    enforcement_mode: 'log_only',
+    // Country overrides: { TR: { ... }, BR: { ... } }
+    country_overrides: {},
     provably_fair_enabled: true,
     rng_algorithm: 'sha256_chain',
     seed_rotation_interval_rounds: 10000,
