@@ -219,6 +219,556 @@ def _crash_math_error(message: str, field: str, value: Any = None, reason: str =
         details["value"] = value
     return {"error_code": "CRASH_MATH_VALIDATION_FAILED", "message": message, "details": details}
 
+@router.get("/{game_id}/config/crash-math", response_model=CrashMathConfigResponse)
+async def get_crash_math_config(game_id: str, request: Request):
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType")
+    if core_type != "CRASH":
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "CRASH_MATH_NOT_AVAILABLE_FOR_GAME",
+                "message": "Crash math configuration is only available for CRASH games.",
+            },
+        )
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    docs = (
+        await db.crash_math_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+
+    if docs:
+        cfg = CrashMathConfig(**docs[0])
+        response = CrashMathConfigResponse(
+            config_version_id=cfg.config_version_id,
+            schema_version=cfg.schema_version,
+            base_rtp=cfg.base_rtp,
+            volatility_profile=cfg.volatility_profile,
+            min_multiplier=cfg.min_multiplier,
+            max_multiplier=cfg.max_multiplier,
+            max_auto_cashout=cfg.max_auto_cashout,
+            round_duration_seconds=cfg.round_duration_seconds,
+            bet_phase_seconds=cfg.bet_phase_seconds,
+            grace_period_seconds=cfg.grace_period_seconds,
+            min_bet_per_round=cfg.min_bet_per_round,
+            max_bet_per_round=cfg.max_bet_per_round,
+            provably_fair_enabled=cfg.provably_fair_enabled,
+            rng_algorithm=cfg.rng_algorithm,
+            seed_rotation_interval_rounds=cfg.seed_rotation_interval_rounds,
+        )
+    else:
+        # Default template (config_version_id is null)
+        response = CrashMathConfigResponse(
+            config_version_id=None,
+            schema_version="1.0.0",
+            base_rtp=96.0,
+            volatility_profile="medium",
+            min_multiplier=1.0,
+            max_multiplier=500.0,
+            max_auto_cashout=100.0,
+            round_duration_seconds=12,
+            bet_phase_seconds=6,
+            grace_period_seconds=2,
+            min_bet_per_round=None,
+            max_bet_per_round=None,
+            provably_fair_enabled=True,
+            rng_algorithm="sha256_chain",
+            seed_rotation_interval_rounds=10000,
+        )
+
+    logger.info(
+        "crash_math_read",
+        extra={
+            "game_id": game_id,
+            "config_version_id": response.config_version_id,
+            "core_type": "CRASH",
+            "admin_id": "n/a",
+            "request_id": request_id,
+            "action_type": "crash_math_read",
+        },
+    )
+
+    return response
+
+
+@router.post("/{game_id}/config/crash-math", response_model=CrashMathConfig)
+async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, request: Request):
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType")
+    if core_type != "CRASH":
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "CRASH_MATH_NOT_AVAILABLE_FOR_GAME",
+                "message": "Crash math configuration is only available for CRASH games.",
+            },
+        )
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    # Validation
+    if payload.base_rtp < 90 or payload.base_rtp > 99.9:
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "base_rtp must be between 90 and 99.9.",
+                "base_rtp",
+                payload.base_rtp,
+                "out_of_range",
+            ),
+        )
+
+    if payload.volatility_profile not in {"low", "medium", "high"}:
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "Invalid volatility_profile. Allowed: low, medium, high.",
+                "volatility_profile",
+                payload.volatility_profile,
+                "unsupported_volatility",
+            ),
+        )
+
+    if payload.min_multiplier < 1.0 or payload.min_multiplier >= payload.max_multiplier:
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "min_multiplier must be >= 1.0 and < max_multiplier.",
+                "min_multiplier",
+                {
+                    "min_multiplier": payload.min_multiplier,
+                    "max_multiplier": payload.max_multiplier,
+                },
+                "invalid_multiplier_range",
+            ),
+        )
+
+    if payload.max_multiplier > 10000:
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "max_multiplier must be <= 10000.",
+                "max_multiplier",
+                payload.max_multiplier,
+                "too_large",
+            ),
+        )
+
+    if payload.round_duration_seconds < payload.bet_phase_seconds + payload.grace_period_seconds:
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "round_duration_seconds must be >= bet_phase_seconds + grace_period_seconds.",
+                "round_duration_seconds",
+                {
+                    "round_duration_seconds": payload.round_duration_seconds,
+                    "bet_phase_seconds": payload.bet_phase_seconds,
+                    "grace_period_seconds": payload.grace_period_seconds,
+                },
+                "invalid_round_timing",
+            ),
+        )
+
+    if payload.bet_phase_seconds < 2:
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "bet_phase_seconds must be >= 2.",
+                "bet_phase_seconds",
+                payload.bet_phase_seconds,
+                "too_short",
+            ),
+        )
+
+    if (
+        payload.min_bet_per_round is not None
+        and payload.max_bet_per_round is not None
+        and payload.min_bet_per_round > payload.max_bet_per_round
+    ):
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "min_bet_per_round must be <= max_bet_per_round.",
+                "bet_per_round",
+                {
+                    "min_bet_per_round": payload.min_bet_per_round,
+                    "max_bet_per_round": payload.max_bet_per_round,
+                },
+                "invalid_bet_range",
+            ),
+        )
+
+    if payload.seed_rotation_interval_rounds is not None and payload.seed_rotation_interval_rounds <= 0:
+        return JSONResponse(
+            status_code=400,
+            content=_crash_math_error(
+                "seed_rotation_interval_rounds must be positive when provided.",
+                "seed_rotation_interval_rounds",
+                payload.seed_rotation_interval_rounds,
+                "invalid_seed_rotation_interval",
+            ),
+        )
+
+    # Fetch previous config for logging
+    prev_docs = (
+        await db.crash_math_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    prev_cfg = CrashMathConfig(**prev_docs[0]) if prev_docs else None
+
+    version = await _generate_new_version(db, game_id, admin_id, notes=payload.summary or "Crash math change")
+
+    cfg = CrashMathConfig(
+        game_id=game_id,
+        config_version_id=version.id,
+        base_rtp=payload.base_rtp,
+        volatility_profile=payload.volatility_profile,
+        min_multiplier=payload.min_multiplier,
+        max_multiplier=payload.max_multiplier,
+        max_auto_cashout=payload.max_auto_cashout,
+        round_duration_seconds=payload.round_duration_seconds,
+        bet_phase_seconds=payload.bet_phase_seconds,
+        grace_period_seconds=payload.grace_period_seconds,
+        min_bet_per_round=payload.min_bet_per_round,
+        max_bet_per_round=payload.max_bet_per_round,
+        provably_fair_enabled=payload.provably_fair_enabled,
+        rng_algorithm=payload.rng_algorithm,
+        seed_rotation_interval_rounds=payload.seed_rotation_interval_rounds,
+        created_by=admin_id,
+    )
+
+    await db.crash_math_configs.insert_one(cfg.model_dump())
+
+    log_details: Dict[str, Any] = {
+        "config_version_id": version.id,
+        "summary": payload.summary,
+        "request_id": request_id,
+        "game_id": game_id,
+        "core_type": "CRASH",
+        "old_value": prev_cfg.model_dump() if prev_cfg else None,
+        "new_value": cfg.model_dump(),
+    }
+
+    await _append_game_log(db, game_id, admin_id, "crash_math_saved", log_details)
+
+    logger.info(
+        "crash_math_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "core_type": "CRASH",
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "crash_math_saved",
+        },
+    )
+
+    return cfg
+
+
+@router.get("/{game_id}/config/dice-math", response_model=DiceMathConfigResponse)
+async def get_dice_math_config(game_id: str, request: Request):
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType")
+    if core_type != "DICE":
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "DICE_MATH_NOT_AVAILABLE_FOR_GAME",
+                "message": "Dice math configuration is only available for DICE games.",
+            },
+        )
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    docs = (
+        await db.dice_math_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+
+    if docs:
+        cfg = DiceMathConfig(**docs[0])
+        response = DiceMathConfigResponse(
+            config_version_id=cfg.config_version_id,
+            schema_version=cfg.schema_version,
+            range_min=cfg.range_min,
+            range_max=cfg.range_max,
+            step=cfg.step,
+            house_edge_percent=cfg.house_edge_percent,
+            min_payout_multiplier=cfg.min_payout_multiplier,
+            max_payout_multiplier=cfg.max_payout_multiplier,
+            allow_over=cfg.allow_over,
+            allow_under=cfg.allow_under,
+            min_target=cfg.min_target,
+            max_target=cfg.max_target,
+            round_duration_seconds=cfg.round_duration_seconds,
+            bet_phase_seconds=cfg.bet_phase_seconds,
+            provably_fair_enabled=cfg.provably_fair_enabled,
+            rng_algorithm=cfg.rng_algorithm,
+            seed_rotation_interval_rounds=cfg.seed_rotation_interval_rounds,
+        )
+    else:
+        response = DiceMathConfigResponse(
+            config_version_id=None,
+            schema_version="1.0.0",
+            range_min=0.0,
+            range_max=99.99,
+            step=0.01,
+            house_edge_percent=1.0,
+            min_payout_multiplier=1.01,
+            max_payout_multiplier=990.0,
+            allow_over=True,
+            allow_under=True,
+            min_target=1.0,
+            max_target=98.0,
+            round_duration_seconds=5,
+            bet_phase_seconds=3,
+            provably_fair_enabled=True,
+            rng_algorithm="sha256_chain",
+            seed_rotation_interval_rounds=20000,
+        )
+
+    logger.info(
+        "dice_math_read",
+        extra={
+            "game_id": game_id,
+            "config_version_id": response.config_version_id,
+            "core_type": "DICE",
+            "admin_id": "n/a",
+            "request_id": request_id,
+            "action_type": "dice_math_read",
+        },
+    )
+
+    return response
+
+
+@router.post("/{game_id}/config/dice-math", response_model=DiceMathConfig)
+async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, request: Request):
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType")
+    if core_type != "DICE":
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "DICE_MATH_NOT_AVAILABLE_FOR_GAME",
+                "message": "Dice math configuration is only available for DICE games.",
+            },
+        )
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    # Validation
+    if payload.range_min >= payload.range_max:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "range_min must be < range_max.",
+                "range",
+                {"range_min": payload.range_min, "range_max": payload.range_max},
+                "invalid_range",
+            ),
+        )
+
+    if payload.step <= 0:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "step must be > 0.",
+                "step",
+                payload.step,
+                "invalid_step",
+            ),
+        )
+
+    steps_count = (payload.range_max - payload.range_min) / payload.step
+    if steps_count > 100000:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "(range_max - range_min) / step must be <= 100000.",
+                "step",
+                steps_count,
+                "too_many_steps",
+            ),
+        )
+
+    if payload.house_edge_percent <= 0 or payload.house_edge_percent > 5.0:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "house_edge_percent must be between 0 and 5.",
+                "house_edge_percent",
+                payload.house_edge_percent,
+                "out_of_range",
+            ),
+        )
+
+    if payload.min_payout_multiplier < 1.0 or payload.min_payout_multiplier > payload.max_payout_multiplier:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "min_payout_multiplier must be >= 1.0 and <= max_payout_multiplier.",
+                "payout_multiplier",
+                {
+                    "min_payout_multiplier": payload.min_payout_multiplier,
+                    "max_payout_multiplier": payload.max_payout_multiplier,
+                },
+                "invalid_payout_range",
+            ),
+        )
+
+    if payload.min_target < payload.range_min or payload.max_target > payload.range_max:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "min_target and max_target must be within [range_min, range_max].",
+                "target_range",
+                {
+                    "min_target": payload.min_target,
+                    "max_target": payload.max_target,
+                    "range_min": payload.range_min,
+                    "range_max": payload.range_max,
+                },
+                "invalid_target_range",
+            ),
+        )
+
+    if payload.round_duration_seconds < payload.bet_phase_seconds:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "round_duration_seconds must be >= bet_phase_seconds.",
+                "round_duration_seconds",
+                {
+                    "round_duration_seconds": payload.round_duration_seconds,
+                    "bet_phase_seconds": payload.bet_phase_seconds,
+                },
+                "invalid_round_timing",
+            ),
+        )
+
+    if not (payload.allow_over or payload.allow_under):
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "At least one of allow_over or allow_under must be true.",
+                "allow_over_under",
+                {"allow_over": payload.allow_over, "allow_under": payload.allow_under},
+                "invalid_mode",
+            ),
+        )
+
+    if payload.seed_rotation_interval_rounds is not None and payload.seed_rotation_interval_rounds <= 0:
+        return JSONResponse(
+            status_code=400,
+            content=_dice_math_error(
+                "seed_rotation_interval_rounds must be positive when provided.",
+                "seed_rotation_interval_rounds",
+                payload.seed_rotation_interval_rounds,
+                "invalid_seed_rotation_interval",
+            ),
+        )
+
+    # Fetch previous config for logging
+    prev_docs = (
+        await db.dice_math_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    prev_cfg = DiceMathConfig(**prev_docs[0]) if prev_docs else None
+
+    version = await _generate_new_version(db, game_id, admin_id, notes=payload.summary or "Dice math change")
+
+    cfg = DiceMathConfig(
+        game_id=game_id,
+        config_version_id=version.id,
+        range_min=payload.range_min,
+        range_max=payload.range_max,
+        step=payload.step,
+        house_edge_percent=payload.house_edge_percent,
+        min_payout_multiplier=payload.min_payout_multiplier,
+        max_payout_multiplier=payload.max_payout_multiplier,
+        allow_over=payload.allow_over,
+        allow_under=payload.allow_under,
+        min_target=payload.min_target,
+        max_target=payload.max_target,
+        round_duration_seconds=payload.round_duration_seconds,
+        bet_phase_seconds=payload.bet_phase_seconds,
+        provably_fair_enabled=payload.provably_fair_enabled,
+        rng_algorithm=payload.rng_algorithm,
+        seed_rotation_interval_rounds=payload.seed_rotation_interval_rounds,
+        created_by=admin_id,
+    )
+
+    await db.dice_math_configs.insert_one(cfg.model_dump())
+
+    log_details: Dict[str, Any] = {
+        "config_version_id": version.id,
+        "summary": payload.summary,
+        "request_id": request_id,
+        "game_id": game_id,
+        "core_type": "DICE",
+        "old_value": prev_cfg.model_dump() if prev_cfg else None,
+        "new_value": cfg.model_dump(),
+    }
+
+    await _append_game_log(db, game_id, admin_id, "dice_math_saved", log_details)
+
+    logger.info(
+        "dice_math_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "core_type": "DICE",
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "dice_math_saved",
+        },
+    )
+
+    return cfg
+
+
 
 def _dice_math_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
     details: Dict[str, Any] = {"field": field, "reason": reason}
