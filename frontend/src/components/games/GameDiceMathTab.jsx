@@ -13,6 +13,9 @@ const GameDiceMathTab = ({ game }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  const [presets, setPresets] = useState([]);
+  const [selectedPreset, setSelectedPreset] = useState('');
+
   const [form, setForm] = useState({
     range_min: 0.0,
     range_max: 99.99,
@@ -39,13 +42,21 @@ const GameDiceMathTab = ({ game }) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await api.get(`/v1/games/${game.id}/config/dice-math`);
-        const data = res.data;
+        const [cfgRes, presetRes] = await Promise.all([
+          api.get(`/v1/games/${game.id}/config/dice-math`),
+          api.get('/v1/game-config/presets', {
+            params: { game_type: game.core_type, config_type: 'dice_math' },
+          }),
+        ]);
+
+        const data = cfgRes.data;
         setForm((prev) => ({
           ...prev,
           ...data,
           summary: '',
         }));
+
+        setPresets(presetRes.data?.presets || []);
       } catch (err) {
         console.error(err);
         const apiError = err?.response?.data;
@@ -60,7 +71,7 @@ const GameDiceMathTab = ({ game }) => {
     };
 
     load();
-  }, [game?.id]);
+  }, [game?.id, game?.core_type]);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -69,6 +80,31 @@ const GameDiceMathTab = ({ game }) => {
   const handleNumberChange = (field, value) => {
     const num = value === '' ? '' : Number(value);
     setForm((prev) => ({ ...prev, [field]: num }));
+  };
+
+  const handleApplyPreset = async () => {
+    if (!selectedPreset || !game) return;
+    try {
+      const res = await api.get(`/v1/game-config/presets/${selectedPreset}`);
+      const preset = res.data;
+      if (preset?.values) {
+        setForm((prev) => ({
+          ...prev,
+          ...preset.values,
+          summary: preset.values.summary || prev.summary,
+        }));
+      }
+      await api.post(`/v1/game-config/presets/${selectedPreset}/apply`, {
+        game_id: game.id,
+        game_type: game.core_type,
+        config_type: 'dice_math',
+      });
+      toast.success('Preset uygulandı. Değerler forma yansıtıldı.');
+    } catch (err) {
+      console.error(err);
+      const apiError = err?.response?.data;
+      toast.error(apiError?.message || 'Preset uygulanamadı.');
+    }
   };
 
   const handleSave = async () => {
@@ -128,6 +164,45 @@ const GameDiceMathTab = ({ game }) => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      {/* Preset bar */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Preset</CardTitle>
+          <CardDescription>
+            Dice math için hazır profilleri uygula, ardından gerekirse manuel olarak düzenle.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+          <div className="flex-1 space-y-1">
+            <Label>Preset seç</Label>
+            <Select
+              value={selectedPreset}
+              onValueChange={setSelectedPreset}
+              disabled={loading || presets.length === 0}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={presets.length ? 'Seçiniz' : 'Preset bulunamadı'} />
+              </SelectTrigger>
+              <SelectContent>
+                {presets.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            type="button"
+            onClick={handleApplyPreset}
+            disabled={loading || !selectedPreset}
+            className="whitespace-nowrap"
+          >
+            Apply Preset
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
