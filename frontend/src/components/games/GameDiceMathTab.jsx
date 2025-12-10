@@ -139,6 +139,24 @@ const GameDiceMathTab = ({ game }) => {
         max_target: Number(form.max_target),
         round_duration_seconds: Number(form.round_duration_seconds),
         bet_phase_seconds: Number(form.bet_phase_seconds),
+        max_win_per_bet:
+          form.max_win_per_bet === '' || form.max_win_per_bet == null
+            ? null
+            : Number(form.max_win_per_bet),
+        max_loss_per_bet:
+          form.max_loss_per_bet === '' || form.max_loss_per_bet == null
+            ? null
+            : Number(form.max_loss_per_bet),
+        max_session_loss:
+          form.max_session_loss === '' || form.max_session_loss == null
+            ? null
+            : Number(form.max_session_loss),
+        max_session_bets:
+          form.max_session_bets === '' || form.max_session_bets == null
+            ? null
+            : Number(form.max_session_bets),
+        enforcement_mode: form.enforcement_mode || 'log_only',
+        country_overrides: form.country_overrides || {},
         provably_fair_enabled: !!form.provably_fair_enabled,
         rng_algorithm: form.rng_algorithm,
         seed_rotation_interval_rounds:
