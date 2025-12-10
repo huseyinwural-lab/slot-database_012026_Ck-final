@@ -61,6 +61,12 @@ const GameDiceMathTab = ({ game }) => {
         setForm((prev) => ({
           ...prev,
           ...data,
+          max_win_per_bet: data.max_win_per_bet ?? '',
+          max_loss_per_bet: data.max_loss_per_bet ?? '',
+          max_session_loss: data.max_session_loss ?? '',
+          max_session_bets: data.max_session_bets ?? '',
+          enforcement_mode: data.enforcement_mode || 'log_only',
+          country_overrides: data.country_overrides || {},
           summary: '',
         }));
 
