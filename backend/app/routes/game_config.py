@@ -613,6 +613,11 @@ async def save_reel_strips(game_id: str, payload: ReelStripsSaveRequest, request
             "admin_id": admin_id,
             "request_id": request_id,
             "action_type": "reel_strips_saved",
+        },
+    )
+
+
+# --- JACKPOTS CONFIG ---
 
 
 # --- JACKPOTS CONFIG ---
