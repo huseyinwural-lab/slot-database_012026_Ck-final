@@ -45,6 +45,20 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "✅ ALL GAME PAYTABLE ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/paytable returns proper structure with current paytable (null initially) and empty history array. 2) POST /api/v1/games/{game_id}/config/paytable/override successfully validates symbols/pays/lines, creates new paytable record with source='override', proper response structure (id, game_id, config_version_id, data, source, created_by). 3) Validation works correctly - returns 400 for missing symbols, negative pay amounts, and invalid lines. 4) POST /api/v1/games/{game_id}/config/paytable/refresh-from-provider creates stub provider paytable with source='provider' and returns proper message + config_version_id. 5) GET /api/v1/games/{game_id}/config/logs shows paytable actions (paytable_override_saved, paytable_refreshed_from_provider) with correct timestamps. All endpoints return 200 OK with proper data structures and validation."
+  - task: "Game Reel Strips Backend Endpoints"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented reel strips endpoints: GET /api/v1/games/{id}/config/reel-strips, POST /api/v1/games/{id}/config/reel-strips, POST /api/v1/games/{id}/config/reel-strips/import, POST /api/v1/games/{id}/config/reel-strips/simulate, and game config logs endpoint."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ALL REEL STRIPS ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/reel-strips returns proper structure with current=null and empty history array on first run. 2) POST /api/v1/games/{game_id}/config/reel-strips successfully validates manual reel strips data, creates new record with schema_version='1.0.0' and source='manual', proper response structure (id, game_id, config_version_id, data, schema_version, source, created_by). 3) Validation works correctly - returns 400 with error_code='REEL_STRIPS_VALIDATION_FAILED' for wrong reel count, empty reel arrays, and non-string/empty symbols. 4) POST /api/v1/games/{game_id}/config/reel-strips/import supports both JSON and CSV formats with source='import' and schema_version='1.0.0'. CSV parsing correctly creates 3 reels from 3-line input. 5) POST /api/v1/games/{game_id}/config/reel-strips/simulate returns proper response with status='queued' and simulation_id UUID. 6) GET /api/v1/games/{game_id}/config/logs shows reel strips actions (reel_strips_saved, reel_strips_imported, reel_strips_simulate_triggered) with correct details including game_id, config_version_id, action_type, and request_id. All endpoints return proper status codes and data structures as specified."
 
 frontend:
   - task: "Finance Page Tabs"
