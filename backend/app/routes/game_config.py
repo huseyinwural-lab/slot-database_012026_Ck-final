@@ -776,16 +776,6 @@ def _dice_math_error(message: str, field: str, value: Any = None, reason: str = 
         details["value"] = value
     return {"error_code": "DICE_MATH_VALIDATION_FAILED", "message": message, "details": details}
 
-    rake_applies_from_pot: Optional[float] = None
-    use_antes: bool
-    ante_bb: Optional[float] = None
-    small_blind_bb: float
-    big_blind_bb: float
-    allow_straddle: bool
-    run_it_twice_allowed: bool
-    min_players_to_start: int
-    summary: Optional[str] = None
-
 
 def _poker_rules_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
     details: Dict[str, Any] = {
