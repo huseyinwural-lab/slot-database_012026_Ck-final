@@ -139,6 +139,317 @@ async def update_game_general_config(game_id: str, payload: GameGeneralConfig):
     # Map simple status back to BusinessStatus enum string
     new_business_status = "active" if payload.status == "active" else "suspended"
 
+
+
+class PokerRulesSaveRequest(BaseModel):
+    variant: str
+    limit_type: str
+    min_players: int
+    max_players: int
+    min_buyin_bb: float
+    max_buyin_bb: float
+    rake_type: str
+    rake_percent: Optional[float] = None
+    rake_cap_currency: Optional[float] = None
+    rake_applies_from_pot: Optional[float] = None
+    use_antes: bool
+    ante_bb: Optional[float] = None
+    small_blind_bb: float
+    big_blind_bb: float
+    allow_straddle: bool
+    run_it_twice_allowed: bool
+    min_players_to_start: int
+    summary: Optional[str] = None
+
+
+def _poker_rules_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
+    details: Dict[str, Any] = {
+        "field": field,
+        "reason": reason,
+    }
+    if value is not None:
+        details["value"] = value
+    return {
+        "error_code": "POKER_RULES_VALIDATION_FAILED",
+        "message": message,
+        "details": details,
+    }
+
+
+@router.get("/{game_id}/config/poker-rules", response_model=PokerRulesResponse)
+async def get_poker_rules(game_id: str, request: Request):
+    """Aktif poker kurallarını döndür veya default 6-max NLH template üretir."""
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType")
+    if core_type != "TABLE_POKER":
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "POKER_RULES_NOT_AVAILABLE_FOR_GAME",
+                "message": "Poker rules configuration is only available for TABLE_POKER games.",
+            },
+        )
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    docs = (
+        await db.poker_rules
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+
+    if docs:
+        rules = PokerRules(**docs[0])
+    else:
+        # Default 6-max NLH cash table template
+        rules = PokerRules(
+            game_id=game_id,
+            config_version_id=game_doc.get("current_config_version_id") or str(uuid4()),
+            variant="texas_holdem",
+            limit_type="no_limit",
+            min_players=2,
+            max_players=6,
+            min_buyin_bb=40,
+            max_buyin_bb=100,
+            rake_type="percentage",
+            rake_percent=5.0,
+            rake_cap_currency=10.0,
+            rake_applies_from_pot=1.0,
+            use_antes=False,
+            ante_bb=None,
+            small_blind_bb=0.5,
+            big_blind_bb=1.0,
+            allow_straddle=True,
+            run_it_twice_allowed=False,
+            min_players_to_start=2,
+            created_by="system_default",
+        )
+
+    logger.info(
+        "poker_rules_read",
+        extra={
+            "game_id": game_id,
+            "config_version_id": rules.config_version_id,
+            "core_type": "TABLE_POKER",
+            "admin_id": "n/a",
+            "request_id": request_id,
+            "action_type": "poker_rules_read",
+        },
+    )
+
+    return PokerRulesResponse(rules=rules)
+
+
+@router.post("/{game_id}/config/poker-rules", response_model=PokerRules)
+async def save_poker_rules(game_id: str, payload: PokerRulesSaveRequest, request: Request):
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    core_type = game_doc.get("core_type") or game_doc.get("coreType")
+    if core_type != "TABLE_POKER":
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error_code": "POKER_RULES_NOT_AVAILABLE_FOR_GAME",
+                "message": "Poker rules configuration is only available for TABLE_POKER games.",
+            },
+        )
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    # Validation
+    allowed_variants = {"texas_holdem", "omaha", "omaha_hi_lo", "3card_poker", "caribbean_stud"}
+    if payload.variant not in allowed_variants:
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "Invalid poker variant.",
+                "variant",
+                payload.variant,
+                "unsupported_variant",
+            ),
+        )
+
+    allowed_limits = {"no_limit", "pot_limit", "fixed_limit"}
+    if payload.limit_type not in allowed_limits:
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "Invalid limit type.",
+                "limit_type",
+                payload.limit_type,
+                "unsupported_limit_type",
+            ),
+        )
+
+    if payload.min_players < 2 or payload.min_players > payload.max_players or payload.max_players > 10:
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "min_players and max_players must be between 2 and 10, and min_players <= max_players.",
+                "players",
+                {"min_players": payload.min_players, "max_players": payload.max_players},
+                "invalid_players_range",
+            ),
+        )
+
+    if payload.min_buyin_bb <= 0 or payload.min_buyin_bb > payload.max_buyin_bb:
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "min_buyin_bb must be > 0 and <= max_buyin_bb.",
+                "buyin_bb",
+                {"min_buyin_bb": payload.min_buyin_bb, "max_buyin_bb": payload.max_buyin_bb},
+                "invalid_buyin_range",
+            ),
+        )
+
+    if payload.rake_type == "percentage":
+        if payload.rake_percent is None or payload.rake_percent <= 0 or payload.rake_percent > 10:
+            return JSONResponse(
+                status_code=400,
+                content=_poker_rules_error(
+                    "rake_percent must be between 0 and 10.",
+                    "rake_percent",
+                    payload.rake_percent,
+                    "out_of_range",
+                ),
+            )
+        if payload.rake_cap_currency is not None and payload.rake_cap_currency < 0:
+            return JSONResponse(
+                status_code=400,
+                content=_poker_rules_error(
+                    "rake_cap_currency must be >= 0.",
+                    "rake_cap_currency",
+                    payload.rake_cap_currency,
+                    "negative_cap",
+                ),
+            )
+    elif payload.rake_type == "time":
+        # Şimdilik sadece tipe izin veriyoruz, detaylı time rake config bir sonraki fazda eklenecek.
+        pass
+    elif payload.rake_type == "none":
+        pass
+    else:
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "Invalid rake_type. Allowed: percentage, time, none.",
+                "rake_type",
+                payload.rake_type,
+                "unsupported_rake_type",
+            ),
+        )
+
+    if payload.small_blind_bb <= 0 or payload.big_blind_bb <= payload.small_blind_bb:
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "small_blind_bb must be > 0 and big_blind_bb must be > small_blind_bb.",
+                "blinds",
+                {"small_blind_bb": payload.small_blind_bb, "big_blind_bb": payload.big_blind_bb},
+                "invalid_blinds",
+            ),
+        )
+
+    if payload.use_antes and (payload.ante_bb is None or payload.ante_bb <= 0):
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "ante_bb must be > 0 when use_antes is true.",
+                "ante_bb",
+                payload.ante_bb,
+                "invalid_ante",
+            ),
+        )
+
+    if payload.min_players_to_start < payload.min_players or payload.min_players_to_start > payload.max_players:
+        return JSONResponse(
+            status_code=400,
+            content=_poker_rules_error(
+                "min_players_to_start must be within [min_players, max_players] range.",
+                "min_players_to_start",
+                payload.min_players_to_start,
+                "invalid_min_players_to_start",
+            ),
+        )
+
+    # Fetch previous rules for diff logging
+    prev_docs = (
+        await db.poker_rules
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    prev_rules = PokerRules(**prev_docs[0]) if prev_docs else None
+
+    version = await _generate_new_version(db, game_id, admin_id, notes=payload.summary or "Poker rules change")
+
+    rules = PokerRules(
+        game_id=game_id,
+        config_version_id=version.id,
+        variant=payload.variant,
+        limit_type=payload.limit_type,
+        min_players=payload.min_players,
+        max_players=payload.max_players,
+        min_buyin_bb=payload.min_buyin_bb,
+        max_buyin_bb=payload.max_buyin_bb,
+        rake_type=payload.rake_type,
+        rake_percent=payload.rake_percent,
+        rake_cap_currency=payload.rake_cap_currency,
+        rake_applies_from_pot=payload.rake_applies_from_pot,
+        use_antes=payload.use_antes,
+        ante_bb=payload.ante_bb,
+        small_blind_bb=payload.small_blind_bb,
+        big_blind_bb=payload.big_blind_bb,
+        allow_straddle=payload.allow_straddle,
+        run_it_twice_allowed=payload.run_it_twice_allowed,
+        min_players_to_start=payload.min_players_to_start,
+        created_by=admin_id,
+    )
+
+    await db.poker_rules.insert_one(rules.model_dump())
+
+    log_details: Dict[str, Any] = {
+        "config_version_id": version.id,
+        "summary": payload.summary,
+        "request_id": request_id,
+        "game_id": game_id,
+        "core_type": "TABLE_POKER",
+        "old_value": prev_rules.model_dump() if prev_rules else None,
+        "new_value": rules.model_dump(),
+    }
+
+    await _append_game_log(db, game_id, admin_id, "poker_rules_saved", log_details)
+
+    logger.info(
+        "poker_rules_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "core_type": "TABLE_POKER",
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "poker_rules_saved",
+        },
+    )
+
+    return rules
+
     update_data: Dict[str, Any] = {
         "name": payload.name,
         "provider": payload.provider,
