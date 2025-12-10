@@ -124,6 +124,7 @@ class PaytableRecord(BaseModel):
     config_version_id: str
     data: Dict[str, Any]
     source: str  # "provider" or "override"
+    schema_version: str = "1.0.0"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_by: str
 
