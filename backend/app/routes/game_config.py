@@ -256,6 +256,20 @@ class DiceMathSaveRequest(BaseModel):
     max_target: float
     round_duration_seconds: int
     bet_phase_seconds: int
+
+
+class SlotAdvancedSaveRequest(BaseModel):
+    spin_speed: str
+    turbo_spin_allowed: bool = False
+    autoplay_enabled: bool = True
+    autoplay_default_spins: int
+    autoplay_max_spins: int
+    autoplay_stop_on_big_win: bool = True
+    autoplay_stop_on_balance_drop_percent: Optional[float] = None
+    big_win_animation_enabled: bool = True
+    gamble_feature_allowed: bool = False
+    summary: Optional[str] = None
+
     provably_fair_enabled: bool
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
