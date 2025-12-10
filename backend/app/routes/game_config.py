@@ -910,6 +910,177 @@ async def import_reel_strips(game_id: str, payload: ReelStripsImportRequest, req
         config_version_id=version.id,
         data=parsed_data,
         schema_version="1.0.0",
+
+
+# --- ASSETS CONFIG ---
+
+class AssetUploadError(Exception):
+    def __init__(self, payload: Dict[str, Any]):
+        self.payload = payload
+
+
+def _asset_error(message: str, reason: str, details: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "error_code": "ASSET_UPLOAD_FAILED",
+        "message": message,
+        "details": {"reason": reason, **details},
+    }
+
+
+@router.get("/{game_id}/config/assets", response_model=GameAssetsResponse)
+async def get_game_assets(game_id: str, request: Request):
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    docs = (
+        await db.game_assets
+        .find({"game_id": game_id, "is_deleted": {"$ne": True}}, {"_id": 0})
+        .sort("created_at", -1)
+        .to_list(200)
+    )
+    assets = [GameAsset(**d) for d in docs]
+
+    logger.info(
+        "asset_read",
+        extra={
+            "game_id": game_id,
+            "config_version_id": None,
+            "admin_id": "n/a",
+            "request_id": request_id,
+            "action_type": "asset_read",
+        },
+    )
+
+    return GameAssetsResponse(assets=assets)
+
+
+@router.post("/{game_id}/config/assets/upload", response_model=GameAsset)
+async def upload_game_asset(game_id: str, request: Request):
+    from fastapi import UploadFile, File, Form
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    # Parse multipart form manually because we're in a generic router file
+    form = await request.form()
+    file: UploadFile = form.get("file")
+    asset_type = form.get("asset_type")
+    language = form.get("language") or None
+    tags_raw = form.get("tags") or ""
+    tags = [t.strip() for t in tags_raw.split(",") if t.strip()]
+
+    if not file:
+        err = _asset_error("file alanı zorunludur.", "missing_file", {})
+        return JSONResponse(status_code=400, content=err)
+
+    if asset_type not in {"logo", "thumbnail", "banner", "background"}:
+        err = _asset_error("Geçersiz asset_type.", "invalid_type", {"asset_type": asset_type})
+        return JSONResponse(status_code=400, content=err)
+
+    content_type = file.content_type or ""
+    if content_type not in {"image/png", "image/jpeg"}:
+        err = _asset_error(
+            "Unsupported file type. Only PNG/JPEG allowed.",
+            "unsupported_mime_type",
+            {"mime_type": content_type},
+        )
+        return JSONResponse(status_code=400, content=err)
+
+    # In a real system we would stream this to S3 or another storage.
+    # For now, we simulate by writing to a local path and constructing a URL-like path.
+    data = await file.read()
+    size_bytes = len(data)
+
+    safe_filename = file.filename or "asset.bin"
+    storage_path = f"/static/uploads/games/{game_id}/{safe_filename}"
+    # NOTE: we don't actually persist to disk in this environment to keep things simple
+    url = storage_path
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    version = await _generate_new_version(db, game_id, admin_id, notes="Asset uploaded")
+
+    asset = GameAsset(
+        game_id=game_id,
+        config_version_id=version.id,
+        asset_type=asset_type,
+        url=url,
+        filename=safe_filename,
+        mime_type=content_type,
+        size_bytes=size_bytes,
+        language=language,
+        created_by=admin_id,
+        tags=tags,
+    )
+
+    await db.game_assets.insert_one(asset.model_dump())
+
+    details = {
+        "asset_id": asset.id,
+        "asset_type": asset_type,
+        "filename": safe_filename,
+        "config_version_id": version.id,
+        "game_id": game_id,
+        "admin_id": admin_id,
+        "request_id": request_id,
+        "action_type": "asset_uploaded",
+    }
+
+    await _append_game_log(db, game_id, admin_id, "asset_uploaded", details)
+
+    logger.info(
+        "asset_uploaded",
+        extra=details,
+    )
+
+    return asset
+
+
+@router.delete("/{game_id}/config/assets/{asset_id}")
+async def delete_game_asset(game_id: str, asset_id: str, request: Request):
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    asset_doc = await db.game_assets.find_one({"id": asset_id, "game_id": game_id}, {"_id": 0})
+    if not asset_doc:
+        return JSONResponse(status_code=404, content={"detail": "Asset not found"})
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    await db.game_assets.update_one({"id": asset_id}, {"$set": {"is_deleted": True}})
+
+    details = {
+        "asset_id": asset_id,
+        "asset_type": asset_doc.get("asset_type"),
+        "config_version_id": asset_doc.get("config_version_id"),
+        "game_id": game_id,
+        "admin_id": admin_id,
+        "request_id": request_id,
+        "action_type": "asset_deleted",
+    }
+
+    await _append_game_log(db, game_id, admin_id, "asset_deleted", details)
+
+    logger.info(
+        "asset_deleted",
+        extra=details,
+    )
+
+    return JSONResponse(status_code=200, content={"message": "Asset deleted"})
+
         created_by=admin_id,
         source="import",
     )
