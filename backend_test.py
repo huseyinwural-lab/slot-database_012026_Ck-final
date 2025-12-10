@@ -1229,6 +1229,390 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_blackjack_rules_backend_validation(self):
+        """Test Blackjack Rules Backend Validation - Turkish Review Request"""
+        print("\n🃏 BLACKJACK RULES BACKEND VALIDATION TESTS")
+        
+        # Step 1: Find or create a TABLE_BLACKJACK game for testing
+        success1, games_response = self.run_test("Get Games for Blackjack Test", "GET", "api/v1/games", 200)
+        
+        blackjack_game_id = None
+        if success1 and isinstance(games_response, list):
+            # Look for a TABLE_BLACKJACK game
+            for game in games_response:
+                if game.get('core_type') == 'TABLE_BLACKJACK':
+                    blackjack_game_id = game.get('id')
+                    print(f"   🎯 Found TABLE_BLACKJACK game: {game.get('name')} (ID: {blackjack_game_id})")
+                    break
+        
+        # If no TABLE_BLACKJACK game found, create one temporarily
+        if not blackjack_game_id:
+            print("   🔧 No TABLE_BLACKJACK game found, creating test game...")
+            test_game = {
+                "id": f"test_blackjack_{int(datetime.now().timestamp())}",
+                "name": "Test Blackjack Table",
+                "core_type": "TABLE_BLACKJACK",
+                "provider": "TestProvider",
+                "category": "Table Games"
+            }
+            success_create, create_response = self.run_test("Create Test Blackjack Game", "POST", "api/v1/games", 200, test_game)
+            if success_create and isinstance(create_response, dict):
+                blackjack_game_id = create_response.get('id') or test_game['id']
+                print(f"   ✅ Created test TABLE_BLACKJACK game: {blackjack_game_id}")
+            else:
+                print("   ❌ Failed to create test blackjack game. Cannot proceed with tests.")
+                return False
+        
+        # Step 2: Test GET endpoint - should return default template when no config exists
+        print(f"\n🔍 Step 2: Test GET default template")
+        success2, template_response = self.run_test(f"GET Blackjack Rules Default Template - {blackjack_game_id}", "GET", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 200)
+        
+        # Validate default template structure
+        template_validation_success = True
+        if success2 and isinstance(template_response, dict):
+            rules = template_response.get('rules', {})
+            expected_defaults = {
+                'deck_count': 6,
+                'dealer_hits_soft_17': False,
+                'blackjack_payout': 1.5,
+                'double_allowed': True,
+                'double_after_split_allowed': True,
+                'split_max_hands': 4,
+                'surrender_allowed': True,
+                'insurance_allowed': True,
+                'min_bet': 5.0,
+                'max_bet': 500.0,
+                'side_bets_enabled': False,
+                'sitout_time_limit_seconds': 120,
+                'disconnect_wait_seconds': 30
+            }
+            
+            print("   🔍 Validating default template values:")
+            for field, expected_value in expected_defaults.items():
+                actual_value = rules.get(field)
+                if actual_value == expected_value:
+                    print(f"      ✅ {field}: {actual_value}")
+                else:
+                    print(f"      ❌ {field}: expected {expected_value}, got {actual_value}")
+                    template_validation_success = False
+        else:
+            template_validation_success = False
+            print("   ❌ Failed to get valid default template response")
+        
+        # Step 3: Test successful POST with valid payload
+        print(f"\n🔍 Step 3: Test successful POST with valid payload")
+        
+        valid_payload = {
+            "deck_count": 6,
+            "dealer_hits_soft_17": False,
+            "blackjack_payout": 1.5,
+            "double_allowed": True,
+            "double_after_split_allowed": True,
+            "split_max_hands": 4,
+            "resplit_aces_allowed": False,
+            "surrender_allowed": True,
+            "insurance_allowed": True,
+            "min_bet": 10,
+            "max_bet": 1000,
+            "side_bets_enabled": True,
+            "side_bets": [
+                {
+                    "code": "perfect_pairs",
+                    "min_bet": 2,
+                    "max_bet": 50,
+                    "payout_table": {"mixed": 5, "colored": 10, "perfect": 25}
+                }
+            ],
+            "table_label": "BJ Vegas H17 VIP",
+            "theme": "bj_vegas_vip",
+            "avatar_url": "https://example.com/avatar.png",
+            "banner_url": "https://example.com/banner.png",
+            "auto_seat_enabled": True,
+            "sitout_time_limit_seconds": 180,
+            "disconnect_wait_seconds": 45,
+            "max_same_country_seats": 2,
+            "block_vpn_flagged_players": True,
+            "session_max_duration_minutes": 240,
+            "max_daily_buyin_limit": 5000,
+            "summary": "VIP Vegas blackjack table"
+        }
+        
+        success3, valid_response = self.run_test(f"POST Valid Blackjack Rules - {blackjack_game_id}", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 200, valid_payload)
+        
+        # Validate successful response structure
+        valid_response_success = True
+        if success3 and isinstance(valid_response, dict):
+            print("   🔍 Validating successful POST response:")
+            required_fields = ['id', 'game_id', 'config_version_id', 'created_by', 'deck_count', 'blackjack_payout', 'side_bets']
+            for field in required_fields:
+                if field in valid_response:
+                    print(f"      ✅ {field}: {valid_response[field]}")
+                else:
+                    print(f"      ❌ Missing field: {field}")
+                    valid_response_success = False
+            
+            # Validate specific values
+            if valid_response.get('table_label') == 'BJ Vegas H17 VIP':
+                print(f"      ✅ table_label correctly saved: {valid_response['table_label']}")
+            else:
+                print(f"      ❌ table_label mismatch: expected 'BJ Vegas H17 VIP', got '{valid_response.get('table_label')}'")
+                valid_response_success = False
+        else:
+            valid_response_success = False
+            print("   ❌ Failed to get valid POST response")
+        
+        # Step 4: Test negative validation scenarios
+        print(f"\n🔍 Step 4: Testing negative validation scenarios")
+        
+        validation_tests = []
+        
+        # 4a: deck_count=0 (invalid)
+        test_4a = valid_payload.copy()
+        test_4a['deck_count'] = 0
+        success_4a, response_4a = self.run_test("Validation: deck_count=0", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4a)
+        validation_tests.append(("deck_count_zero", success_4a, response_4a))
+        
+        # 4a: deck_count=9 (invalid)
+        test_4a2 = valid_payload.copy()
+        test_4a2['deck_count'] = 9
+        success_4a2, response_4a2 = self.run_test("Validation: deck_count=9", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4a2)
+        validation_tests.append(("deck_count_nine", success_4a2, response_4a2))
+        
+        # 4b: blackjack_payout=1.0 (invalid)
+        test_4b = valid_payload.copy()
+        test_4b['blackjack_payout'] = 1.0
+        success_4b, response_4b = self.run_test("Validation: blackjack_payout=1.0", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4b)
+        validation_tests.append(("blackjack_payout_low", success_4b, response_4b))
+        
+        # 4b: blackjack_payout=2.0 (invalid)
+        test_4b2 = valid_payload.copy()
+        test_4b2['blackjack_payout'] = 2.0
+        success_4b2, response_4b2 = self.run_test("Validation: blackjack_payout=2.0", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4b2)
+        validation_tests.append(("blackjack_payout_high", success_4b2, response_4b2))
+        
+        # 4c: split_max_hands=0 (invalid)
+        test_4c = valid_payload.copy()
+        test_4c['split_max_hands'] = 0
+        success_4c, response_4c = self.run_test("Validation: split_max_hands=0", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4c)
+        validation_tests.append(("split_max_hands_zero", success_4c, response_4c))
+        
+        # 4c: split_max_hands=5 (invalid)
+        test_4c2 = valid_payload.copy()
+        test_4c2['split_max_hands'] = 5
+        success_4c2, response_4c2 = self.run_test("Validation: split_max_hands=5", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4c2)
+        validation_tests.append(("split_max_hands_five", success_4c2, response_4c2))
+        
+        # 4d: min_bet=0 (invalid)
+        test_4d = valid_payload.copy()
+        test_4d['min_bet'] = 0
+        success_4d, response_4d = self.run_test("Validation: min_bet=0", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4d)
+        validation_tests.append(("min_bet_zero", success_4d, response_4d))
+        
+        # 4d: min_bet >= max_bet (invalid)
+        test_4d2 = valid_payload.copy()
+        test_4d2['min_bet'] = 1000
+        test_4d2['max_bet'] = 500
+        success_4d2, response_4d2 = self.run_test("Validation: min_bet >= max_bet", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4d2)
+        validation_tests.append(("min_bet_gte_max_bet", success_4d2, response_4d2))
+        
+        # 4e: side_bets_enabled=true but side_bets empty
+        test_4e = valid_payload.copy()
+        test_4e['side_bets_enabled'] = True
+        test_4e['side_bets'] = []
+        success_4e, response_4e = self.run_test("Validation: side_bets_enabled=true, side_bets=[]", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 200, test_4e)  # This might be allowed
+        validation_tests.append(("side_bets_empty", success_4e, response_4e))
+        
+        # 4e: side_bets with code=null
+        test_4e2 = valid_payload.copy()
+        test_4e2['side_bets'] = [{"code": None, "min_bet": 1, "max_bet": 10}]
+        success_4e2, response_4e2 = self.run_test("Validation: side_bet code=null", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4e2)
+        validation_tests.append(("side_bet_code_null", success_4e2, response_4e2))
+        
+        # 4f: side_bet min_bet/max_bet not numeric
+        test_4f = valid_payload.copy()
+        test_4f['side_bets'] = [{"code": "test", "min_bet": "invalid", "max_bet": 10}]
+        success_4f, response_4f = self.run_test("Validation: side_bet min_bet not numeric", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4f)
+        validation_tests.append(("side_bet_min_bet_invalid", success_4f, response_4f))
+        
+        # 4f: side_bet min >= max
+        test_4f2 = valid_payload.copy()
+        test_4f2['side_bets'] = [{"code": "test", "min_bet": 10, "max_bet": 5}]
+        success_4f2, response_4f2 = self.run_test("Validation: side_bet min >= max", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4f2)
+        validation_tests.append(("side_bet_min_gte_max", success_4f2, response_4f2))
+        
+        # 4g: payout_table string instead of dict
+        test_4g = valid_payload.copy()
+        test_4g['side_bets'] = [{"code": "test", "min_bet": 1, "max_bet": 10, "payout_table": "invalid"}]
+        success_4g, response_4g = self.run_test("Validation: payout_table string", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4g)
+        validation_tests.append(("payout_table_string", success_4g, response_4g))
+        
+        # 4h: sitout_time_limit_seconds=10 (<30)
+        test_4h = valid_payload.copy()
+        test_4h['sitout_time_limit_seconds'] = 10
+        success_4h, response_4h = self.run_test("Validation: sitout_time_limit_seconds=10", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4h)
+        validation_tests.append(("sitout_time_low", success_4h, response_4h))
+        
+        # 4i: disconnect_wait_seconds=3 (<5)
+        test_4i = valid_payload.copy()
+        test_4i['disconnect_wait_seconds'] = 3
+        success_4i, response_4i = self.run_test("Validation: disconnect_wait_seconds=3", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4i)
+        validation_tests.append(("disconnect_wait_low", success_4i, response_4i))
+        
+        # 4i: disconnect_wait_seconds=400 (>300)
+        test_4i2 = valid_payload.copy()
+        test_4i2['disconnect_wait_seconds'] = 400
+        success_4i2, response_4i2 = self.run_test("Validation: disconnect_wait_seconds=400", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4i2)
+        validation_tests.append(("disconnect_wait_high", success_4i2, response_4i2))
+        
+        # 4j: max_same_country_seats=0
+        test_4j = valid_payload.copy()
+        test_4j['max_same_country_seats'] = 0
+        success_4j, response_4j = self.run_test("Validation: max_same_country_seats=0", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4j)
+        validation_tests.append(("country_seats_zero", success_4j, response_4j))
+        
+        # 4j: max_same_country_seats=20 (>10)
+        test_4j2 = valid_payload.copy()
+        test_4j2['max_same_country_seats'] = 20
+        success_4j2, response_4j2 = self.run_test("Validation: max_same_country_seats=20", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4j2)
+        validation_tests.append(("country_seats_high", success_4j2, response_4j2))
+        
+        # 4k: session_max_duration_minutes=5 (<10)
+        test_4k = valid_payload.copy()
+        test_4k['session_max_duration_minutes'] = 5
+        success_4k, response_4k = self.run_test("Validation: session_max_duration_minutes=5", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4k)
+        validation_tests.append(("session_duration_low", success_4k, response_4k))
+        
+        # 4k: session_max_duration_minutes=2000 (>1440)
+        test_4k2 = valid_payload.copy()
+        test_4k2['session_max_duration_minutes'] = 2000
+        success_4k2, response_4k2 = self.run_test("Validation: session_max_duration_minutes=2000", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4k2)
+        validation_tests.append(("session_duration_high", success_4k2, response_4k2))
+        
+        # 4l: max_daily_buyin_limit=0
+        test_4l = valid_payload.copy()
+        test_4l['max_daily_buyin_limit'] = 0
+        success_4l, response_4l = self.run_test("Validation: max_daily_buyin_limit=0", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4l)
+        validation_tests.append(("daily_buyin_zero", success_4l, response_4l))
+        
+        # 4l: max_daily_buyin_limit=-10
+        test_4l2 = valid_payload.copy()
+        test_4l2['max_daily_buyin_limit'] = -10
+        success_4l2, response_4l2 = self.run_test("Validation: max_daily_buyin_limit=-10", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4l2)
+        validation_tests.append(("daily_buyin_negative", success_4l2, response_4l2))
+        
+        # 4m: table_label 60 characters (>50)
+        test_4m = valid_payload.copy()
+        test_4m['table_label'] = "A" * 60
+        success_4m, response_4m = self.run_test("Validation: table_label 60 chars", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4m)
+        validation_tests.append(("table_label_long", success_4m, response_4m))
+        
+        # 4m: theme 40 characters (>30)
+        test_4m2 = valid_payload.copy()
+        test_4m2['theme'] = "B" * 40
+        success_4m2, response_4m2 = self.run_test("Validation: theme 40 chars", "POST", f"api/v1/games/{blackjack_game_id}/config/blackjack-rules", 400, test_4m2)
+        validation_tests.append(("theme_long", success_4m2, response_4m2))
+        
+        # Analyze validation test results
+        print(f"\n🔍 Analyzing validation test results:")
+        validation_success_count = 0
+        validation_total_count = len([t for t in validation_tests if t[0] != "side_bets_empty"])  # Exclude side_bets_empty as it might be allowed
+        
+        for test_name, success, response in validation_tests:
+            if test_name == "side_bets_empty":
+                continue  # Skip this test as empty side_bets might be allowed
+                
+            if success and isinstance(response, dict):
+                error_code = response.get('error_code')
+                details = response.get('details', {})
+                field = details.get('field')
+                value = details.get('value')
+                reason = details.get('reason')
+                
+                print(f"   ✅ {test_name}: HTTP 400, error_code='{error_code}', field='{field}', value='{value}', reason='{reason}'")
+                
+                # Validate expected error code
+                if error_code == 'BLACKJACK_RULES_VALIDATION_FAILED':
+                    validation_success_count += 1
+                else:
+                    print(f"      ⚠️  Expected error_code='BLACKJACK_RULES_VALIDATION_FAILED', got '{error_code}'")
+            else:
+                print(f"   ❌ {test_name}: Failed to return proper 400 error response")
+        
+        validation_overall_success = validation_success_count == validation_total_count
+        
+        # Step 5: Test non-TABLE_BLACKJACK game returns 404
+        print(f"\n🔍 Step 5: Test non-TABLE_BLACKJACK game returns 404")
+        
+        # Find a non-blackjack game or create one
+        non_blackjack_game_id = None
+        if success1 and isinstance(games_response, list):
+            for game in games_response:
+                if game.get('core_type') != 'TABLE_BLACKJACK':
+                    non_blackjack_game_id = game.get('id')
+                    print(f"   🎯 Found non-blackjack game: {game.get('name')} (core_type: {game.get('core_type')})")
+                    break
+        
+        if not non_blackjack_game_id:
+            # Create a non-blackjack test game
+            test_slot_game = {
+                "id": f"test_slot_{int(datetime.now().timestamp())}",
+                "name": "Test Slot Game",
+                "core_type": "REEL_LINES",
+                "provider": "TestProvider",
+                "category": "Slots"
+            }
+            success_create_slot, create_slot_response = self.run_test("Create Test Slot Game", "POST", "api/v1/games", 200, test_slot_game)
+            if success_create_slot:
+                non_blackjack_game_id = test_slot_game['id']
+                print(f"   ✅ Created test non-blackjack game: {non_blackjack_game_id}")
+        
+        success5_get = success5_post = False
+        if non_blackjack_game_id:
+            # Test GET on non-blackjack game
+            success5_get, response5_get = self.run_test(f"GET Blackjack Rules on Non-Blackjack Game", "GET", f"api/v1/games/{non_blackjack_game_id}/config/blackjack-rules", 404)
+            
+            # Test POST on non-blackjack game
+            success5_post, response5_post = self.run_test(f"POST Blackjack Rules on Non-Blackjack Game", "POST", f"api/v1/games/{non_blackjack_game_id}/config/blackjack-rules", 404, valid_payload)
+            
+            # Validate 404 responses have correct error code
+            if success5_get and isinstance(response5_get, dict):
+                if response5_get.get('error_code') == 'BLACKJACK_RULES_NOT_AVAILABLE_FOR_GAME':
+                    print(f"   ✅ GET 404 response correct: {response5_get.get('error_code')}")
+                else:
+                    print(f"   ❌ GET 404 response incorrect error_code: {response5_get.get('error_code')}")
+                    success5_get = False
+            
+            if success5_post and isinstance(response5_post, dict):
+                if response5_post.get('error_code') == 'BLACKJACK_RULES_NOT_AVAILABLE_FOR_GAME':
+                    print(f"   ✅ POST 404 response correct: {response5_post.get('error_code')}")
+                else:
+                    print(f"   ❌ POST 404 response incorrect error_code: {response5_post.get('error_code')}")
+                    success5_post = False
+        
+        # Overall test result
+        overall_success = (success1 and success2 and template_validation_success and 
+                          success3 and valid_response_success and validation_overall_success and 
+                          success5_get and success5_post)
+        
+        if overall_success:
+            print("\n✅ BLACKJACK RULES BACKEND VALIDATION - ALL TESTS PASSED")
+            print("   ✅ GET blackjack rules default template working")
+            print("   ✅ POST with valid payload working with correct response structure")
+            print(f"   ✅ All {validation_success_count}/{validation_total_count} negative validation scenarios working correctly")
+            print("   ✅ Non-TABLE_BLACKJACK games correctly return 404 with proper error code")
+        else:
+            print("\n❌ BLACKJACK RULES BACKEND VALIDATION - SOME TESTS FAILED")
+            if not success2 or not template_validation_success:
+                print("   ❌ GET blackjack rules default template failed")
+            if not success3 or not valid_response_success:
+                print("   ❌ POST with valid payload failed or response structure invalid")
+            if not validation_overall_success:
+                print(f"   ❌ Only {validation_success_count}/{validation_total_count} validation scenarios working correctly")
+            if not success5_get or not success5_post:
+                print("   ❌ Non-TABLE_BLACKJACK games 404 handling failed")
+        
+        return overall_success
+
     def test_manual_game_import_pipeline(self):
         """Test Manual Game Import Pipeline - Turkish Review Request"""
         print("\n🎮 MANUAL GAME IMPORT PIPELINE TESTS")
