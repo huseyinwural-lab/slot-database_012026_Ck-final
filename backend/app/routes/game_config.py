@@ -1111,9 +1111,12 @@ async def delete_game_asset(game_id: str, asset_id: str, request: Request):
 
     await _append_game_log(db, game_id, admin_id, "asset_deleted", details)
 
+    # Create a copy of details without conflicting keys for logging
+    log_details = {k: v for k, v in details.items()}
+    
     logger.info(
         "asset_deleted",
-        extra=details,
+        extra=log_details,
     )
 
     return JSONResponse(status_code=200, content={"message": "Asset deleted"})
