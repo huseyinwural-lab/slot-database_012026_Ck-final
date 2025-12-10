@@ -370,7 +370,7 @@ def _validate_paytable_payload(data: Dict[str, Any]):
 
 
 @router.post("/{game_id}/config/paytable/override", response_model=PaytableRecord)
-async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest):
+async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest, request: Request):
     """Save a new override paytable version for a game."""
     db = get_db()
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
