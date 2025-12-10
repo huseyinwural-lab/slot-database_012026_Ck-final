@@ -7645,6 +7645,9 @@ def main():
     print("\n🎰 SLOT RTP & BETS PRESETS BACKEND INTEGRATION TESTS (REVIEW REQUEST)")
     test_results.append(("Slot RTP & Bets Presets Backend Integration", tester.test_slot_rtp_bets_presets_backend_integration()))
     
+    print("\n💥 CRASH ADVANCED SAFETY BACKEND VALIDATION TESTS (REVIEW REQUEST)")
+    test_results.append(("Crash Advanced Safety Backend Validation", tester.test_crash_advanced_safety_backend_validation()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
