@@ -963,6 +963,272 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_poker_advanced_settings_validation(self):
+        """Test Poker Advanced Settings Backend Validation - Turkish Review Request"""
+        print("\n🎰 POKER ADVANCED SETTINGS VALIDATION TESTS")
+        
+        # Step 1: Get a valid TABLE_POKER game_id (use existing Texas Hold'em test game)
+        success1, games_response = self.run_test("Get Games for Poker Test", "GET", "api/v1/games", 200)
+        
+        poker_game_id = None
+        if success1 and isinstance(games_response, list):
+            # Look for a TABLE_POKER game or Texas Hold'em game
+            for game in games_response:
+                if (game.get('core_type') == 'TABLE_POKER' or 
+                    'texas' in game.get('name', '').lower() or 
+                    'hold' in game.get('name', '').lower() or
+                    'poker' in game.get('name', '').lower()):
+                    poker_game_id = game.get('id')
+                    print(f"   🎯 Found poker game: {game.get('name')} (ID: {poker_game_id})")
+                    break
+        
+        if not poker_game_id:
+            print("❌ No TABLE_POKER game found. Cannot test poker rules endpoints.")
+            return False
+        
+        # Step 2: GET current poker rules template
+        print(f"\n🔍 Step 2: GET current poker rules template")
+        success2, template_response = self.run_test(f"Get Poker Rules Template - {poker_game_id}", "GET", f"api/v1/games/{poker_game_id}/config/poker-rules", 200)
+        
+        if not success2:
+            print("❌ GET poker rules endpoint not working. Cannot proceed with validation tests.")
+            return False
+        
+        # Step 3: Test successful POST with advanced settings
+        print(f"\n🔍 Step 3: Test successful POST with full advanced settings")
+        
+        full_payload = {
+            "variant": "texas_holdem",
+            "limit_type": "no_limit",
+            "min_players": 2,
+            "max_players": 6,
+            "min_buyin_bb": 40,
+            "max_buyin_bb": 100,
+            "rake_type": "percentage",
+            "rake_percent": 5.0,
+            "rake_cap_currency": 8.0,
+            "rake_applies_from_pot": 1.0,
+            "use_antes": False,
+            "ante_bb": None,
+            "small_blind_bb": 0.5,
+            "big_blind_bb": 1.0,
+            "allow_straddle": True,
+            "run_it_twice_allowed": False,
+            "min_players_to_start": 2,
+            "table_label": "VIP Ruby Table",
+            "theme": "dark_luxe",
+            "avatar_url": "https://example.com/avatar.png",
+            "banner_url": "https://example.com/banner.png",
+            "auto_muck_enabled": True,
+            "auto_rebuy_enabled": True,
+            "auto_rebuy_threshold_bb": 40,
+            "sitout_time_limit_seconds": 180,
+            "disconnect_wait_seconds": 45,
+            "late_entry_enabled": True,
+            "max_same_country_seats": 2,
+            "block_vpn_flagged_players": True,
+            "session_max_duration_minutes": 240,
+            "max_daily_buyin_limit_bb": 1000,
+            "summary": "Full VIP advanced settings test"
+        }
+        
+        success3, full_response = self.run_test(f"POST Full Advanced Settings - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 200, full_payload)
+        
+        # Validate response structure
+        full_validation_success = True
+        if success3 and isinstance(full_response, dict):
+            print("\n🔍 Validating full advanced settings response:")
+            
+            # Check for all advanced fields in response
+            advanced_fields = [
+                'table_label', 'theme', 'avatar_url', 'banner_url',
+                'auto_muck_enabled', 'auto_rebuy_enabled', 'auto_rebuy_threshold_bb',
+                'sitout_time_limit_seconds', 'disconnect_wait_seconds', 'late_entry_enabled',
+                'max_same_country_seats', 'block_vpn_flagged_players', 
+                'session_max_duration_minutes', 'max_daily_buyin_limit_bb'
+            ]
+            
+            missing_fields = []
+            for field in advanced_fields:
+                if field not in full_response:
+                    missing_fields.append(field)
+                else:
+                    print(f"   ✅ {field}: {full_response[field]}")
+            
+            if missing_fields:
+                print(f"   ❌ Missing advanced fields in response: {missing_fields}")
+                full_validation_success = False
+            else:
+                print("   ✅ All advanced fields present in response")
+                
+            # Validate specific values
+            if full_response.get('table_label') == 'VIP Ruby Table':
+                print("   ✅ table_label correctly saved")
+            else:
+                print(f"   ❌ table_label mismatch: expected 'VIP Ruby Table', got '{full_response.get('table_label')}'")
+                full_validation_success = False
+                
+            if full_response.get('auto_rebuy_threshold_bb') == 40:
+                print("   ✅ auto_rebuy_threshold_bb correctly saved")
+            else:
+                print(f"   ❌ auto_rebuy_threshold_bb mismatch: expected 40, got '{full_response.get('auto_rebuy_threshold_bb')}'")
+                full_validation_success = False
+        else:
+            full_validation_success = False
+            print("❌ Full advanced settings POST failed or returned invalid response")
+        
+        # Step 4: Test negative validation scenarios
+        print(f"\n🔍 Step 4: Testing negative validation scenarios")
+        
+        validation_tests = []
+        
+        # 4a: auto_rebuy_enabled=true, auto_rebuy_threshold_bb=null
+        test_4a = full_payload.copy()
+        test_4a['auto_rebuy_enabled'] = True
+        test_4a['auto_rebuy_threshold_bb'] = None
+        test_4a['summary'] = "Test auto_rebuy validation"
+        
+        success_4a, response_4a = self.run_test("Validation: auto_rebuy_enabled=true, threshold=null", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4a)
+        validation_tests.append(("4a_auto_rebuy", success_4a, response_4a))
+        
+        # 4b: sitout_time_limit_seconds=10 (<30)
+        test_4b = full_payload.copy()
+        test_4b['sitout_time_limit_seconds'] = 10
+        test_4b['summary'] = "Test sitout time validation"
+        
+        success_4b, response_4b = self.run_test("Validation: sitout_time_limit_seconds=10", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4b)
+        validation_tests.append(("4b_sitout_time", success_4b, response_4b))
+        
+        # 4c: disconnect_wait_seconds=3 (<5)
+        test_4c = full_payload.copy()
+        test_4c['disconnect_wait_seconds'] = 3
+        test_4c['summary'] = "Test disconnect wait validation low"
+        
+        success_4c, response_4c = self.run_test("Validation: disconnect_wait_seconds=3", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4c)
+        validation_tests.append(("4c_disconnect_low", success_4c, response_4c))
+        
+        # 4c: disconnect_wait_seconds=400 (>300)
+        test_4c2 = full_payload.copy()
+        test_4c2['disconnect_wait_seconds'] = 400
+        test_4c2['summary'] = "Test disconnect wait validation high"
+        
+        success_4c2, response_4c2 = self.run_test("Validation: disconnect_wait_seconds=400", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4c2)
+        validation_tests.append(("4c_disconnect_high", success_4c2, response_4c2))
+        
+        # 4d: max_same_country_seats=0
+        test_4d = full_payload.copy()
+        test_4d['max_same_country_seats'] = 0
+        test_4d['summary'] = "Test country seats validation low"
+        
+        success_4d, response_4d = self.run_test("Validation: max_same_country_seats=0", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4d)
+        validation_tests.append(("4d_country_seats_low", success_4d, response_4d))
+        
+        # 4d: max_same_country_seats=15
+        test_4d2 = full_payload.copy()
+        test_4d2['max_same_country_seats'] = 15
+        test_4d2['summary'] = "Test country seats validation high"
+        
+        success_4d2, response_4d2 = self.run_test("Validation: max_same_country_seats=15", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4d2)
+        validation_tests.append(("4d_country_seats_high", success_4d2, response_4d2))
+        
+        # 4e: session_max_duration_minutes=5
+        test_4e = full_payload.copy()
+        test_4e['session_max_duration_minutes'] = 5
+        test_4e['summary'] = "Test session duration validation low"
+        
+        success_4e, response_4e = self.run_test("Validation: session_max_duration_minutes=5", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4e)
+        validation_tests.append(("4e_session_duration_low", success_4e, response_4e))
+        
+        # 4e: session_max_duration_minutes=2000
+        test_4e2 = full_payload.copy()
+        test_4e2['session_max_duration_minutes'] = 2000
+        test_4e2['summary'] = "Test session duration validation high"
+        
+        success_4e2, response_4e2 = self.run_test("Validation: session_max_duration_minutes=2000", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4e2)
+        validation_tests.append(("4e_session_duration_high", success_4e2, response_4e2))
+        
+        # 4f: max_daily_buyin_limit_bb=0
+        test_4f = full_payload.copy()
+        test_4f['max_daily_buyin_limit_bb'] = 0
+        test_4f['summary'] = "Test daily buyin validation zero"
+        
+        success_4f, response_4f = self.run_test("Validation: max_daily_buyin_limit_bb=0", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4f)
+        validation_tests.append(("4f_daily_buyin_zero", success_4f, response_4f))
+        
+        # 4f: max_daily_buyin_limit_bb=-10
+        test_4f2 = full_payload.copy()
+        test_4f2['max_daily_buyin_limit_bb'] = -10
+        test_4f2['summary'] = "Test daily buyin validation negative"
+        
+        success_4f2, response_4f2 = self.run_test("Validation: max_daily_buyin_limit_bb=-10", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4f2)
+        validation_tests.append(("4f_daily_buyin_negative", success_4f2, response_4f2))
+        
+        # 4g: table_label too long (60 chars)
+        test_4g = full_payload.copy()
+        test_4g['table_label'] = "A" * 60  # 60 characters, should exceed 50 limit
+        test_4g['summary'] = "Test table label length validation"
+        
+        success_4g, response_4g = self.run_test("Validation: table_label 60 chars", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4g)
+        validation_tests.append(("4g_table_label_long", success_4g, response_4g))
+        
+        # 4g: theme too long (40 chars)
+        test_4g2 = full_payload.copy()
+        test_4g2['theme'] = "B" * 40  # 40 characters, should exceed 30 limit
+        test_4g2['summary'] = "Test theme length validation"
+        
+        success_4g2, response_4g2 = self.run_test("Validation: theme 40 chars", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, test_4g2)
+        validation_tests.append(("4g_theme_long", success_4g2, response_4g2))
+        
+        # Analyze validation test results
+        print(f"\n🔍 Analyzing validation test results:")
+        validation_success_count = 0
+        validation_total_count = len(validation_tests)
+        
+        for test_name, success, response in validation_tests:
+            if success and isinstance(response, dict):
+                error_code = response.get('error_code')
+                details = response.get('details', {})
+                field = details.get('field')
+                value = details.get('value')
+                reason = details.get('reason')
+                
+                print(f"   ✅ {test_name}: HTTP 400, error_code='{error_code}', field='{field}', value='{value}', reason='{reason}'")
+                
+                # Validate expected error code
+                if error_code == 'POKER_RULES_VALIDATION_FAILED':
+                    validation_success_count += 1
+                else:
+                    print(f"      ⚠️  Expected error_code='POKER_RULES_VALIDATION_FAILED', got '{error_code}'")
+            else:
+                print(f"   ❌ {test_name}: Failed to return proper 400 error response")
+        
+        validation_overall_success = validation_success_count == validation_total_count
+        
+        if validation_overall_success:
+            print(f"✅ All {validation_total_count} validation scenarios passed correctly")
+        else:
+            print(f"❌ Only {validation_success_count}/{validation_total_count} validation scenarios passed")
+        
+        # Overall test result
+        overall_success = success1 and success2 and success3 and full_validation_success and validation_overall_success
+        
+        if overall_success:
+            print("\n✅ POKER ADVANCED SETTINGS VALIDATION - ALL TESTS PASSED")
+            print("   ✅ GET poker rules template working")
+            print("   ✅ POST with full advanced settings working")
+            print("   ✅ All advanced fields properly saved and returned")
+            print("   ✅ All negative validation scenarios working correctly")
+        else:
+            print("\n❌ POKER ADVANCED SETTINGS VALIDATION - SOME TESTS FAILED")
+            if not success2:
+                print("   ❌ GET poker rules endpoint not working")
+            if not success3 or not full_validation_success:
+                print("   ❌ POST with advanced settings failed or response invalid")
+            if not validation_overall_success:
+                print("   ❌ Some validation scenarios not working correctly")
+        
+        return overall_success
+
     def test_manual_game_import_pipeline(self):
         """Test Manual Game Import Pipeline - Turkish Review Request"""
         print("\n🎮 MANUAL GAME IMPORT PIPELINE TESTS")
