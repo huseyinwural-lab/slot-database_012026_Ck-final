@@ -471,12 +471,31 @@ async def refresh_paytable_from_provider(game_id: str, request: Request):
     doc["summary"] = "Refreshed from provider (stub)"
     await db.paytables.insert_one(doc)
 
+    details = {
+        "config_version_id": version.id,
+        "request_id": request_id,
+        "action_type": "paytable_refresh",
+        "game_id": game_id,
+        "admin_id": admin_id,
+    }
+
     await _append_game_log(
         db,
         game_id,
         admin_id,
         "paytable_refreshed_from_provider",
-        {"config_version_id": version.id},
+        details,
+    )
+
+    logger.info(
+        "paytable_refreshed_from_provider",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "paytable_refresh",
+        },
     )
 
     return {"message": "Paytable refreshed from provider (stub)", "config_version_id": version.id}
