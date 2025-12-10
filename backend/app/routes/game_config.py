@@ -910,6 +910,39 @@ async def import_reel_strips(game_id: str, payload: ReelStripsImportRequest, req
         config_version_id=version.id,
         data=parsed_data,
         schema_version="1.0.0",
+        created_by=admin_id,
+        source="import",
+    )
+
+    doc = record.model_dump()
+    doc["summary"] = "Imported via API"
+    await db.reel_strips.insert_one(doc)
+
+    details = {
+        "config_version_id": version.id,
+        "game_id": game_id,
+        "admin_id": admin_id,
+        "request_id": request_id,
+        "action_type": "reel_strips_imported",
+    }
+
+    await _append_game_log(db, game_id, admin_id, "reel_strips_imported", details)
+
+    logger.info(
+        "reel_strips_imported",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "reel_strips_imported",
+        },
+    )
+
+    return record
+
+
+# --- ASSETS CONFIG ---
 
 
 # --- ASSETS CONFIG ---
