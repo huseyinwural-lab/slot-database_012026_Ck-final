@@ -27,6 +27,9 @@ from app.models.game import (
     ReelStripsRecord,
     ReelStripsHistoryItem,
     ReelStripsResponse,
+    JackpotConfig,
+    JackpotConfigResponse,
+    JackpotPool,
 )
 
 logger = logging.getLogger(__name__)
