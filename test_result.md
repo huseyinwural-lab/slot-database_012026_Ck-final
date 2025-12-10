@@ -87,6 +87,20 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "✅ ALL GAME ASSETS ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/assets returns proper structure with assets array (200 OK). On first run, assets array may be empty as expected. 2) POST /api/v1/games/{game_id}/config/assets/upload successfully processes multipart/form-data with file (PNG image), asset_type='logo', language='tr', tags='desktop,lobby' - returns proper GameAsset response structure (id, game_id, config_version_id, asset_type, url, filename, mime_type, size_bytes, language, tags, created_by, is_deleted=false) - 200 OK. 3) After upload, GET assets shows uploaded asset in the list with correct properties. 4) All 3 validation negative cases work correctly: Missing file returns 400 with error_code='ASSET_UPLOAD_FAILED' and reason='missing_file', Invalid asset_type='unknown' returns 400 with error_code='ASSET_UPLOAD_FAILED' and reason='invalid_type', Unsupported mime_type='application/pdf' returns 400 with error_code='ASSET_UPLOAD_FAILED' and reason='unsupported_mime_type'. 5) DELETE /api/v1/games/{game_id}/config/assets/{asset_id} returns 200 OK with message='Asset deleted'. 6) After deletion, GET assets confirms deleted asset is not in list (is_deleted flag honored in query). 7) GET /api/v1/games/{game_id}/config/logs shows both asset_uploaded and asset_deleted actions with correct details including asset_id, asset_type, config_version_id, game_id, admin_id, request_id, and action_type. Fixed logging conflict issue with 'filename' field. All endpoints return proper status codes and data structures exactly as specified in the review request."
+  - task: "Poker Rules & Rake Backend Endpoints"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented poker rules endpoints: GET /api/v1/games/{game_id}/config/poker-rules, POST /api/v1/games/{game_id}/config/poker-rules with comprehensive validation for TABLE_POKER games only."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ALL POKER RULES ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/poker-rules returns proper default template for TABLE_POKER games (variant='texas_holdem', limit_type='no_limit', min_players=2, max_players=6, rake_type='percentage', schema_version='1.0.0', created_by='system_default') - 200 OK. 2) Non-poker games correctly return 404 with error_code='POKER_RULES_NOT_AVAILABLE_FOR_GAME' and proper message. 3) POST /api/v1/games/{game_id}/config/poker-rules successfully creates poker rules with correct response structure (id, game_id, config_version_id, variant, limit_type, rake settings, blinds, created_by='current_admin') - 200 OK. 4) All 7 validation scenarios work correctly: Invalid variant, invalid player counts (1-12), invalid buy-in ranges, rake % out of range (>10%), invalid blinds (equal values), invalid antes (use_antes=true but ante_bb<=0), invalid min_players_to_start (outside min/max range) - all return 400 with error_code='POKER_RULES_VALIDATION_FAILED' and proper details.field structure. 5) Different rake types work correctly: rake_type='time' and rake_type='none' both accepted (200 OK). 6) GET /api/v1/games/{game_id}/config/logs shows poker_rules_saved actions with complete details including old_value, new_value, config_version_id, and request_id. All endpoints return proper status codes and data structures exactly as specified in the Turkish review request."
 
 frontend:
   - task: "Finance Page Tabs"
