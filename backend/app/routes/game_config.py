@@ -24,6 +24,9 @@ from app.models.game import (
     PaytableRecord,
     PaytableHistoryItem,
     PaytableResponse,
+    ReelStripsRecord,
+    ReelStripsHistoryItem,
+    ReelStripsResponse,
 )
 
 logger = logging.getLogger(__name__)
