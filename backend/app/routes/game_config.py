@@ -899,7 +899,7 @@ async def get_slot_advanced_config(game_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Game not found")
 
     core_type = game_doc.get("core_type") or game_doc.get("coreType") or game_doc.get("category")
-    if core_type not in {"SLOT", "REEL_LINES", "WAYS", "MEGAWAYS", "slot", "slots"}:
+    if core_type not in {"SLOT", "REEL_LINES", "WAYS", "MEGAWAYS", "slot", "slots", "Slot"}:
         from fastapi.responses import JSONResponse
 
         return JSONResponse(
@@ -976,7 +976,7 @@ async def save_slot_advanced_config(game_id: str, payload: SlotAdvancedSaveReque
         raise HTTPException(status_code=404, detail="Game not found")
 
     core_type = game_doc.get("core_type") or game_doc.get("coreType") or game_doc.get("category")
-    if core_type not in {"SLOT", "REEL_LINES", "WAYS", "MEGAWAYS", "slot", "slots"}:
+    if core_type not in {"SLOT", "REEL_LINES", "WAYS", "MEGAWAYS", "slot", "slots", "Slot"}:
         return JSONResponse(
             status_code=404,
             content={
