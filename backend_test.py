@@ -6,7 +6,7 @@ import io
 from datetime import datetime
 
 class CasinoAdminAPITester:
-    def __init__(self, base_url="https://casino-admin-panel-2.preview.emergentagent.com"):
+    def __init__(self, base_url="https://casinopanel.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
