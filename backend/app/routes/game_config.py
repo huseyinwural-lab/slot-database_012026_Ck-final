@@ -210,6 +210,8 @@ async def create_rtp_profile(game_id: str, payload: RtpProfileCreate):
         related_entity_id=game_id,
         requester_admin=admin_id,
         amount=None,
+    # Validation for bet config errors could be normalised as well if needed
+
         details={"rtp_code": profile.code, "rtp_value": profile.rtp_value},
     )
     db_ = get_db()
