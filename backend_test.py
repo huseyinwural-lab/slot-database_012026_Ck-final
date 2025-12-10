@@ -3969,6 +3969,9 @@ def main():
     print("\n🎰 REEL STRIPS TESTS (REVIEW REQUEST)")
     test_results.append(("Reel Strips Endpoints", tester.test_reel_strips_endpoints()))
     
+    print("\n🎰 JACKPOT CONFIG TESTS (REVIEW REQUEST)")
+    test_results.append(("Jackpot Config Endpoints", tester.test_game_jackpot_config_endpoints()))
+    
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
