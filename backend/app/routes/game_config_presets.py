@@ -36,6 +36,101 @@ async def _ensure_seed_presets(db) -> None:
 
   now = datetime.now(timezone.utc)
 
+  # --- SLOT RTP ---
+  seed_presets.append(
+    ConfigPreset(
+      id="slot_rtp_96_standard",
+      game_type="SLOT",
+      config_type="rtp",
+      name="Slot – 96% RTP Standard",
+      description="Standard 96% RTP profile for slots.",
+      values={
+        "code": "RTP_96",
+        "rtp_value": 96.0,
+        "is_default": True,
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="slot_rtp_94_low",
+      game_type="SLOT",
+      config_type="rtp",
+      name="Slot – 94% RTP Low",
+      description="Lower RTP profile (94%) for high-margin markets.",
+      values={
+        "code": "RTP_94",
+        "rtp_value": 94.0,
+        "is_default": False,
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  # --- SLOT BETS ---
+  seed_presets.append(
+    ConfigPreset(
+      id="slot_bets_standard",
+      game_type="SLOT",
+      config_type="bets",
+      name="Slot – Standard Bet Ladder",
+      description="Standard bet ladder for slots.",
+      values={
+        "min_bet": 0.1,
+        "max_bet": 100.0,
+        "step": 0.1,
+        "presets": [0.2, 0.5, 1, 2, 5, 10, 25, 50],
+        "country_overrides": [],
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  # --- CRASH BETS ---
+  seed_presets.append(
+    ConfigPreset(
+      id="crash_bets_standard",
+      game_type="CRASH",
+      config_type="bets",
+      name="Crash – Standard Bet Ladder",
+      description="Standard bet ladder for crash games.",
+      values={
+        "min_bet": 0.5,
+        "max_bet": 500.0,
+        "step": 0.5,
+        "presets": [1, 2, 5, 10, 25, 50, 100],
+        "country_overrides": [],
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  # --- DICE BETS ---
+  seed_presets.append(
+    ConfigPreset(
+      id="dice_bets_standard",
+      game_type="DICE",
+      config_type="bets",
+      name="Dice – Standard Bet Ladder",
+      description="Standard bet ladder for dice games.",
+      values={
+        "min_bet": 0.1,
+        "max_bet": 200.0,
+        "step": 0.1,
+        "presets": [0.5, 1, 2, 5, 10, 25, 50],
+        "country_overrides": [],
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
   # --- CRASH ---
   seed_presets.append(
     ConfigPreset(
