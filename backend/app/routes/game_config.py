@@ -39,6 +39,8 @@ from app.models.game import (
     CrashMathConfigResponse,
     DiceMathConfig,
     DiceMathConfigResponse,
+    BlackjackRules,
+    BlackjackRulesResponse,
 )
 
 
