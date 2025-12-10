@@ -484,6 +484,37 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           ) : (
             <Card>
               <CardContent>
+
+        {/* CRASH MATH TAB */}
+        <TabsContent value="crash_math" className="space-y-4 pt-4">
+          {game?.core_type === 'CRASH' ? (
+            <GameCrashMathTab game={game} />
+          ) : (
+            <Card>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">
+                  Crash Math sadece CRASH oyunları için geçerlidir.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* DICE MATH TAB */}
+        <TabsContent value="dice_math" className="space-y-4 pt-4">
+          {game?.core_type === 'DICE' ? (
+            <GameDiceMathTab game={game} />
+          ) : (
+            <Card>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">
+                  Dice Math sadece DICE oyunları için geçerlidir.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
                 <p className="text-xs text-muted-foreground">
                   Poker Rules &amp; Rake sadece TABLE_POKER oyunları için geçerlidir.
                 </p>
