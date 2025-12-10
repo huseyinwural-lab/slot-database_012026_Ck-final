@@ -92,16 +92,54 @@ async def _ensure_seed_presets(db) -> None:
   # --- SLOT BETS ---
   seed_presets.append(
     ConfigPreset(
+      id="slot_bets_lowstakes",
+      game_type="SLOT",
+      config_type="bets",
+      name="Slot – Lowstakes",
+      description="Lowstakes slot bet structure for entry-level players.",
+      values={
+        "min_bet": 0.1,
+        "max_bet": 5.0,
+        "step": 0.1,
+        "presets": [0.1, 0.2, 0.5, 1.0, 2.0],
+        "country_overrides": [],
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
       id="slot_bets_standard",
       game_type="SLOT",
       config_type="bets",
-      name="Slot – Standard Bet Ladder",
-      description="Standard bet ladder for slots.",
+      name="Slot – Standard",
+      description="Standard slot bet ladder for mid-stakes.",
       values={
-        "min_bet": 0.1,
+        "min_bet": 0.2,
+        "max_bet": 20.0,
+        "step": 0.2,
+        "presets": [0.2, 0.5, 1.0, 2.0, 5.0, 10.0],
+        "country_overrides": [],
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="slot_bets_highroller",
+      game_type="SLOT",
+      config_type="bets",
+      name="Slot – Highroller",
+      description="Highroller slot bet ladder for VIP players.",
+      values={
+        "min_bet": 1.0,
         "max_bet": 100.0,
-        "step": 0.1,
-        "presets": [0.2, 0.5, 1, 2, 5, 10, 25, 50],
+        "step": 1.0,
+        "presets": [1.0, 2.0, 5.0, 10.0, 25.0, 50.0],
         "country_overrides": [],
       },
       created_at=now,
