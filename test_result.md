@@ -274,7 +274,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "slot_rtp_bets_presets_backend_integration"
+    - "slot_advanced_backend_validation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
