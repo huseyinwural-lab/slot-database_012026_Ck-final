@@ -30,6 +30,13 @@ const GameDiceMathTab = ({ game }) => {
     max_target: 98.0,
     round_duration_seconds: 5,
     bet_phase_seconds: 3,
+    // Advanced limits (global)
+    max_win_per_bet: '',
+    max_loss_per_bet: '',
+    max_session_loss: '',
+    max_session_bets: '',
+    enforcement_mode: 'log_only',
+    country_overrides: {},
     provably_fair_enabled: true,
     rng_algorithm: 'sha256_chain',
     seed_rotation_interval_rounds: 20000,
