@@ -6129,6 +6129,9 @@ def main():
     print("\n🎯 CRASH & DICE MATH TESTS (REVIEW REQUEST)")
     test_results.append(("Crash & Dice Math Endpoints", tester.test_crash_dice_math_endpoints()))
     
+    print("\n🎮 MANUAL GAME IMPORT PIPELINE TESTS (REVIEW REQUEST)")
+    test_results.append(("Manual Game Import Pipeline", tester.test_manual_game_import_pipeline()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
