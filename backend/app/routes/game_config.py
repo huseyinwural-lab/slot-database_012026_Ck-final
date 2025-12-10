@@ -583,39 +583,18 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
         )
 
     # Normalize enforcement_mode
-    normalized_enforcement_mode = (payload.enforcement_mode or "log_only").lower()
-    if normalized_enforcement_mode not in {"hard_block", "log_only"}:
-        return JSONResponse(
-            status_code=400,
-            content=_crash_math_error(
-                "enforcement_mode must be one of: hard_block, log_only.",
-                "enforcement_mode",
-                normalized_enforcement_mode,
-                "unsupported_enforcement_mode",
-            ),
-        )
+    normalized_enforcement_mode = _validate_enforcement_mode(payload.enforcement_mode, _crash_math_error)
+    if isinstance(normalized_enforcement_mode, dict):
+        return normalized_enforcement_mode
 
     # Validate advanced safety limits (simple sanity checks)
-    def _validate_positive_or_none(field_name: str, value: Optional[float]):
-        if value is not None and value <= 0:
-            return JSONResponse(
-                status_code=400,
-                content=_crash_math_error(
-                    f"{field_name} must be > 0 when provided.",
-                    field_name,
-                    value,
-                    "must_be_positive",
-                ),
-            )
-        return None
-
     for fname in [
         "max_loss_per_round",
         "max_win_per_round",
         "max_total_loss_per_session",
         "max_total_win_per_session",
     ]:
-        resp = _validate_positive_or_none(fname, getattr(payload, fname))
+        resp = _validate_positive_or_none(fname, getattr(payload, fname), _crash_math_error)
         if resp is not None:
             return resp
 
@@ -626,61 +605,26 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
                 "max_rounds_per_session must be > 0 when provided.",
                 "max_rounds_per_session",
                 payload.max_rounds_per_session,
-                "must_be_positive",
+                ValidationReason.MUST_BE_POSITIVE.value,
             ),
         )
 
     # Country overrides validation
-    normalized_country_overrides: Dict[str, Dict[str, Any]] = {}
-    if payload.country_overrides:
-        for country_code, overrides in payload.country_overrides.items():
-            # ISO 3166-1 alpha-2 basic sanity (2 uppercase letters)
-            if not isinstance(country_code, str) or len(country_code) != 2 or not country_code.isalpha():
-                return JSONResponse(
-                    status_code=400,
-                    content=_crash_math_error(
-                        "country code must be ISO 3166-1 alpha-2 (2 letters).",
-                        "country_overrides",
-                        country_code,
-                        "invalid_country_code",
-                    ),
-                )
-            upper_code = country_code.upper()
-
-            # Same checks per override field
-            for key in [
+    try:
+        normalized_country_overrides: Dict[str, Dict[str, Any]] = _validate_country_overrides(
+            payload.country_overrides,
+            [
                 "max_loss_per_round",
                 "max_win_per_round",
                 "max_rounds_per_session",
                 "max_total_loss_per_session",
                 "max_total_win_per_session",
-            ]:
-                if key in overrides and overrides[key] is not None:
-                    val = overrides[key]
-                    if key == "max_rounds_per_session":
-                        if not isinstance(val, (int, float)) or int(val) <= 0:
-                            return JSONResponse(
-                                status_code=400,
-                                content=_crash_math_error(
-                                    f"{key} must be a positive integer when provided.",
-                                    f"country_overrides.{upper_code}.{key}",
-                                    val,
-                                    "must_be_positive",
-                                ),
-                            )
-                    else:
-                        if not isinstance(val, (int, float)) or float(val) <= 0:
-                            return JSONResponse(
-                                status_code=400,
-                                content=_crash_math_error(
-                                    f"{key} must be > 0 when provided.",
-                                    f"country_overrides.{upper_code}.{key}",
-                                    val,
-                                    "must_be_positive",
-                                ),
-                            )
-
-            normalized_country_overrides[upper_code] = overrides
+            ],
+            _crash_math_error,
+            parent_field="country_overrides",
+        )
+    except JSONResponse as jr:
+        return jr
 
     # Fetch previous config for logging
     prev_docs = (
