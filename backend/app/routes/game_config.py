@@ -30,6 +30,8 @@ from app.models.game import (
     JackpotConfig,
     JackpotConfigResponse,
     JackpotPool,
+    GameAsset,
+    GameAssetsResponse,
 )
 
 logger = logging.getLogger(__name__)
