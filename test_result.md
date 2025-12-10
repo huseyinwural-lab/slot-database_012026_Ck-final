@@ -73,6 +73,20 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "✅ ALL JACKPOT CONFIG ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/jackpots returns proper structure with config=null and empty pools array on first run (200 OK). 2) POST /api/v1/games/{game_id}/config/jackpots successfully creates jackpot config with correct response structure (id, game_id, config_version_id, schema_version='1.0.0', jackpots, created_by, source='manual') - 200 OK. 3) After config creation, GET jackpots shows current config with source='manual' and pools array populated with proper structure (jackpot_name, currency, current_balance, last_hit_at). 4) All 6 validation negative cases work correctly: Empty jackpots array, empty name, negative seed, cap < seed, contribution_percent > 10, hit_frequency_param <= 0 - all return 400 with error_code='JACKPOT_CONFIG_VALIDATION_FAILED' and proper details.index/details.field structure. 5) GET /api/v1/games/{game_id}/config/logs shows jackpot_config_saved action with correct details including old_config_version_id, new_config_version_id, request_id, and action_type='jackpot_config_saved'. Lock hook functionality verified through code review (would return 403 when is_locked_for_math_changes=true). All endpoints return proper status codes and data structures exactly as specified in the review request."
+  - task: "Game Assets Backend Endpoints"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented Game Assets endpoints: GET /api/v1/games/{id}/config/assets, POST /api/v1/games/{id}/config/assets/upload, DELETE /api/v1/games/{id}/config/assets/{asset_id}, and game config logs endpoint."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ALL GAME ASSETS ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/assets returns proper structure with assets array (200 OK). On first run, assets array may be empty as expected. 2) POST /api/v1/games/{game_id}/config/assets/upload successfully processes multipart/form-data with file (PNG image), asset_type='logo', language='tr', tags='desktop,lobby' - returns proper GameAsset response structure (id, game_id, config_version_id, asset_type, url, filename, mime_type, size_bytes, language, tags, created_by, is_deleted=false) - 200 OK. 3) After upload, GET assets shows uploaded asset in the list with correct properties. 4) All 3 validation negative cases work correctly: Missing file returns 400 with error_code='ASSET_UPLOAD_FAILED' and reason='missing_file', Invalid asset_type='unknown' returns 400 with error_code='ASSET_UPLOAD_FAILED' and reason='invalid_type', Unsupported mime_type='application/pdf' returns 400 with error_code='ASSET_UPLOAD_FAILED' and reason='unsupported_mime_type'. 5) DELETE /api/v1/games/{game_id}/config/assets/{asset_id} returns 200 OK with message='Asset deleted'. 6) After deletion, GET assets confirms deleted asset is not in list (is_deleted flag honored in query). 7) GET /api/v1/games/{game_id}/config/logs shows both asset_uploaded and asset_deleted actions with correct details including asset_id, asset_type, config_version_id, game_id, admin_id, request_id, and action_type. Fixed logging conflict issue with 'filename' field. All endpoints return proper status codes and data structures exactly as specified in the review request."
 
 frontend:
   - task: "Finance Page Tabs"
