@@ -10,9 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Activity, RefreshCcw, Pencil } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import api from '../../services/api';
 import GamePaytableTab from './GamePaytableTab';
+import GameReelStripsTab from './GameReelStripsTab';
 
 const defaultVisibility = {
   countries: [],
@@ -173,11 +174,12 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="rtp">Math &amp; RTP</TabsTrigger>
           <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="reels">Reel Strips</TabsTrigger>
           <TabsTrigger value="paytable">Paytable</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
@@ -462,6 +464,11 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           <Button onClick={handleSaveFeatures} disabled={loading} className="mt-2">
             Save Features
           </Button>
+        </TabsContent>
+
+        {/* REEL STRIPS TAB */}
+        <TabsContent value="reels" className="space-y-4 pt-4">
+          <GameReelStripsTab game={game} />
         </TabsContent>
 
         {/* PAYTABLE TAB */}
