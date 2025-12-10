@@ -819,6 +819,23 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
+        {/* SLOT ADVANCED TAB */}
+        {visibleTabs.includes('slot_advanced') && (
+          <TabsContent value="slot_advanced" className="space-y-4 pt-4">
+            {['SLOT', 'REEL_LINES', 'WAYS', 'MEGAWAYS'].includes(resolvedCoreType) ? (
+              <GameSlotAdvancedTab game={game} />
+            ) : (
+              <Card>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">
+                    Advanced slot settings sadece slot tipi oyunlar için geçerlidir.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
+
         {/* ASSETS TAB */}
         {visibleTabs.includes('assets') && (
           <TabsContent value="assets" className="space-y-4 pt-4">
