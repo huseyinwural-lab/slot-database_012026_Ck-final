@@ -141,3 +141,29 @@ class PaytableResponse(BaseModel):
     current: Optional[PaytableRecord] = None
     history: List[PaytableHistoryItem] = []
 
+
+
+
+class ReelStripsRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    data: Dict[str, Any]
+    schema_version: str = "1.0.0"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+    source: str  # "manual" | "import" | "provider"
+
+
+class ReelStripsHistoryItem(BaseModel):
+    config_version_id: str
+    schema_version: str
+    source: str
+    created_at: datetime
+    created_by: str
+    summary: Optional[str] = None
+
+
+class ReelStripsResponse(BaseModel):
+    current: Optional[ReelStripsRecord] = None
+    history: List[ReelStripsHistoryItem] = []
