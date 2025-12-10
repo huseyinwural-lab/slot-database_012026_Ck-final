@@ -4244,6 +4244,415 @@ TX-MISSING-LOW,25.50,EUR"""
             success9 and logs_validation
         ])
 
+    def test_poker_rules_endpoints(self):
+        """Test Poker Rules backend endpoints as per review request"""
+        print("\n🃏 POKER RULES ENDPOINTS TESTS")
+        
+        # First get games to find or create a TABLE_POKER game
+        success_games, games_response = self.run_test("Get Games for Poker Rules Test", "GET", "api/v1/games", 200)
+        
+        if not success_games or not isinstance(games_response, list):
+            print("❌ Failed to get games list")
+            return False
+        
+        # Look for a TABLE_POKER game
+        poker_game_id = None
+        non_poker_game_id = None
+        
+        for game in games_response:
+            core_type = game.get('core_type') or game.get('coreType')
+            if core_type == "TABLE_POKER" and not poker_game_id:
+                poker_game_id = game.get('id')
+                print(f"✅ Found TABLE_POKER game: {game.get('name', 'Unknown')} (ID: {poker_game_id})")
+            elif core_type != "TABLE_POKER" and not non_poker_game_id:
+                non_poker_game_id = game.get('id')
+                print(f"✅ Found non-poker game: {game.get('name', 'Unknown')} (ID: {non_poker_game_id})")
+        
+        # If no TABLE_POKER game found, manually update one for testing
+        if not poker_game_id and len(games_response) > 0:
+            # Use first game and manually set it as TABLE_POKER for testing
+            poker_game_id = games_response[0].get('id')
+            print(f"⚠️  No TABLE_POKER game found, using {games_response[0].get('name', 'Unknown')} (ID: {poker_game_id}) for testing")
+            print("   Note: Assuming this game has core_type=TABLE_POKER for test purposes")
+        
+        if not poker_game_id:
+            print("❌ No games available for testing")
+            return False
+        
+        # Senaryo 1 - Default template GET for TABLE_POKER game
+        print(f"\n📊 Senaryo 1: Testing GET Poker Rules (Default Template) for game {poker_game_id}")
+        success1, poker_rules_response = self.run_test(f"Get Poker Rules Default - {poker_game_id}", "GET", f"api/v1/games/{poker_game_id}/config/poker-rules", 200)
+        
+        default_validation = True
+        if success1 and isinstance(poker_rules_response, dict):
+            print("✅ Poker Rules GET endpoint working")
+            
+            # Validate response structure
+            if 'rules' in poker_rules_response:
+                rules = poker_rules_response['rules']
+                print("✅ Response contains 'rules' object")
+                
+                # Check default template values
+                expected_defaults = {
+                    'variant': 'texas_holdem',
+                    'limit_type': 'no_limit',
+                    'min_players': 2,
+                    'max_players': 6,
+                    'min_buyin_bb': 40,
+                    'max_buyin_bb': 100,
+                    'rake_type': 'percentage',
+                    'rake_percent': 5.0,
+                    'rake_cap_currency': 10.0,
+                    'rake_applies_from_pot': 1.0,
+                    'use_antes': False,
+                    'small_blind_bb': 0.5,
+                    'big_blind_bb': 1.0,
+                    'allow_straddle': True,
+                    'run_it_twice_allowed': False,
+                    'min_players_to_start': 2
+                }
+                
+                print("🔍 Validating default template values:")
+                for field, expected_value in expected_defaults.items():
+                    actual_value = rules.get(field)
+                    if actual_value == expected_value:
+                        print(f"   ✅ {field}: {actual_value}")
+                    else:
+                        print(f"   ❌ {field}: expected {expected_value}, got {actual_value}")
+                        default_validation = False
+                
+                # Check schema_version and created_by
+                if rules.get('schema_version') == '1.0.0':
+                    print(f"   ✅ schema_version: {rules['schema_version']}")
+                else:
+                    print(f"   ❌ schema_version: expected '1.0.0', got {rules.get('schema_version')}")
+                    default_validation = False
+                
+                created_by = rules.get('created_by')
+                if created_by in ['system_default', 'current_admin']:
+                    print(f"   ✅ created_by: {created_by}")
+                else:
+                    print(f"   ⚠️  created_by: {created_by} (unexpected but not critical)")
+            else:
+                print("❌ Response missing 'rules' object")
+                default_validation = False
+        else:
+            print("❌ Failed to get poker rules")
+            default_validation = False
+        
+        # Senaryo 2 - Non-poker game GET (if we have one)
+        success2 = True
+        if non_poker_game_id:
+            print(f"\n📊 Senaryo 2: Testing GET Poker Rules for non-poker game {non_poker_game_id}")
+            success2, non_poker_response = self.run_test(f"Get Poker Rules Non-Poker Game - {non_poker_game_id}", "GET", f"api/v1/games/{non_poker_game_id}/config/poker-rules", 404)
+            
+            if success2 and isinstance(non_poker_response, dict):
+                expected_error = {
+                    "error_code": "POKER_RULES_NOT_AVAILABLE_FOR_GAME",
+                    "message": "Poker rules configuration is only available for TABLE_POKER games."
+                }
+                
+                if (non_poker_response.get('error_code') == expected_error['error_code'] and 
+                    expected_error['message'] in non_poker_response.get('message', '')):
+                    print("✅ Non-poker game correctly returns 404 with proper error")
+                else:
+                    print(f"❌ Unexpected error response: {non_poker_response}")
+                    success2 = False
+        else:
+            print("⚠️  Senaryo 2 skipped: No non-poker game available")
+        
+        # Senaryo 3 - Valid POST
+        print(f"\n📊 Senaryo 3: Testing POST Poker Rules (Valid Data) for game {poker_game_id}")
+        
+        valid_poker_data = {
+            "variant": "texas_holdem",
+            "limit_type": "no_limit",
+            "min_players": 2,
+            "max_players": 6,
+            "min_buyin_bb": 40,
+            "max_buyin_bb": 100,
+            "rake_type": "percentage",
+            "rake_percent": 5.0,
+            "rake_cap_currency": 8.0,
+            "rake_applies_from_pot": 1.0,
+            "use_antes": False,
+            "ante_bb": None,
+            "small_blind_bb": 0.5,
+            "big_blind_bb": 1.0,
+            "allow_straddle": True,
+            "run_it_twice_allowed": False,
+            "min_players_to_start": 2,
+            "summary": "6-max NLH rake 5% cap 8 EUR."
+        }
+        
+        success3, post_response = self.run_test(f"Create Poker Rules - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 200, valid_poker_data)
+        
+        post_validation = True
+        if success3 and isinstance(post_response, dict):
+            print("✅ Poker Rules POST endpoint working")
+            
+            # Validate response structure
+            required_fields = ['id', 'game_id', 'config_version_id', 'variant', 'limit_type', 'schema_version', 'created_by']
+            missing_fields = [field for field in required_fields if field not in post_response]
+            
+            if not missing_fields:
+                print("✅ POST response structure complete")
+                print(f"   📝 ID: {post_response['id']}")
+                print(f"   🎮 Game ID: {post_response['game_id']}")
+                print(f"   📋 Config Version ID: {post_response['config_version_id']}")
+                print(f"   🃏 Variant: {post_response['variant']}")
+                print(f"   💰 Rake Cap: {post_response.get('rake_cap_currency', 'N/A')}")
+                
+                # Verify values match what we sent
+                for field in ['variant', 'limit_type', 'rake_percent', 'rake_cap_currency']:
+                    if post_response.get(field) == valid_poker_data.get(field):
+                        print(f"   ✅ {field}: {post_response[field]}")
+                    else:
+                        print(f"   ❌ {field}: expected {valid_poker_data[field]}, got {post_response.get(field)}")
+                        post_validation = False
+                
+                if post_response.get('schema_version') == '1.0.0':
+                    print(f"   ✅ schema_version: {post_response['schema_version']}")
+                else:
+                    print(f"   ❌ schema_version: expected '1.0.0', got {post_response.get('schema_version')}")
+                    post_validation = False
+                
+                if post_response.get('created_by') == 'current_admin':
+                    print(f"   ✅ created_by: {post_response['created_by']}")
+                else:
+                    print(f"   ⚠️  created_by: {post_response.get('created_by')} (expected 'current_admin')")
+            else:
+                print(f"❌ POST response missing fields: {missing_fields}")
+                post_validation = False
+        else:
+            print("❌ Failed to create poker rules")
+            post_validation = False
+        
+        # Verify GET after POST shows updated rules
+        print(f"\n🔍 Verifying GET after POST for game {poker_game_id}")
+        success3b, updated_rules_response = self.run_test(f"Get Updated Poker Rules - {poker_game_id}", "GET", f"api/v1/games/{poker_game_id}/config/poker-rules", 200)
+        
+        if success3b and isinstance(updated_rules_response, dict):
+            rules = updated_rules_response.get('rules', {})
+            if rules.get('rake_cap_currency') == 8.0:
+                print("✅ GET after POST shows updated rules (rake_cap_currency = 8.0)")
+            else:
+                print(f"❌ GET after POST shows incorrect rake_cap_currency: {rules.get('rake_cap_currency')}")
+                post_validation = False
+        
+        # Senaryo 4 - Validation errors
+        print(f"\n📊 Senaryo 4: Testing Validation Errors for game {poker_game_id}")
+        
+        validation_tests = []
+        
+        # 4a) Invalid variant
+        invalid_variant_data = valid_poker_data.copy()
+        invalid_variant_data['variant'] = 'invalid_variant'
+        success4a, error_response_4a = self.run_test(f"Invalid Variant Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, invalid_variant_data)
+        
+        if success4a and isinstance(error_response_4a, dict):
+            if (error_response_4a.get('error_code') == 'POKER_RULES_VALIDATION_FAILED' and 
+                error_response_4a.get('details', {}).get('field') == 'variant'):
+                print("✅ Invalid variant validation working")
+                validation_tests.append(True)
+            else:
+                print(f"❌ Invalid variant validation failed: {error_response_4a}")
+                validation_tests.append(False)
+        else:
+            print("❌ Invalid variant test failed")
+            validation_tests.append(False)
+        
+        # 4b) Invalid player count
+        invalid_players_data = valid_poker_data.copy()
+        invalid_players_data.update({'min_players': 1, 'max_players': 12})
+        success4b, error_response_4b = self.run_test(f"Invalid Players Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, invalid_players_data)
+        
+        if success4b and isinstance(error_response_4b, dict):
+            if (error_response_4b.get('error_code') == 'POKER_RULES_VALIDATION_FAILED' and 
+                error_response_4b.get('details', {}).get('field') == 'players'):
+                print("✅ Invalid players validation working")
+                validation_tests.append(True)
+            else:
+                print(f"❌ Invalid players validation failed: {error_response_4b}")
+                validation_tests.append(False)
+        else:
+            print("❌ Invalid players test failed")
+            validation_tests.append(False)
+        
+        # 4c) Invalid buy-in
+        invalid_buyin_data = valid_poker_data.copy()
+        invalid_buyin_data.update({'min_buyin_bb': 200, 'max_buyin_bb': 100})
+        success4c, error_response_4c = self.run_test(f"Invalid Buy-in Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, invalid_buyin_data)
+        
+        if success4c and isinstance(error_response_4c, dict):
+            if (error_response_4c.get('error_code') == 'POKER_RULES_VALIDATION_FAILED' and 
+                error_response_4c.get('details', {}).get('field') == 'buyin_bb'):
+                print("✅ Invalid buy-in validation working")
+                validation_tests.append(True)
+            else:
+                print(f"❌ Invalid buy-in validation failed: {error_response_4c}")
+                validation_tests.append(False)
+        else:
+            print("❌ Invalid buy-in test failed")
+            validation_tests.append(False)
+        
+        # 4d) Rake % out of range
+        invalid_rake_data = valid_poker_data.copy()
+        invalid_rake_data.update({'rake_type': 'percentage', 'rake_percent': 25.0})
+        success4d, error_response_4d = self.run_test(f"Invalid Rake % Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, invalid_rake_data)
+        
+        if success4d and isinstance(error_response_4d, dict):
+            if (error_response_4d.get('error_code') == 'POKER_RULES_VALIDATION_FAILED' and 
+                error_response_4d.get('details', {}).get('field') == 'rake_percent'):
+                print("✅ Invalid rake % validation working")
+                validation_tests.append(True)
+            else:
+                print(f"❌ Invalid rake % validation failed: {error_response_4d}")
+                validation_tests.append(False)
+        else:
+            print("❌ Invalid rake % test failed")
+            validation_tests.append(False)
+        
+        # 4e) Invalid blinds
+        invalid_blinds_data = valid_poker_data.copy()
+        invalid_blinds_data.update({'small_blind_bb': 1.0, 'big_blind_bb': 1.0})
+        success4e, error_response_4e = self.run_test(f"Invalid Blinds Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, invalid_blinds_data)
+        
+        if success4e and isinstance(error_response_4e, dict):
+            if (error_response_4e.get('error_code') == 'POKER_RULES_VALIDATION_FAILED' and 
+                error_response_4e.get('details', {}).get('field') == 'blinds'):
+                print("✅ Invalid blinds validation working")
+                validation_tests.append(True)
+            else:
+                print(f"❌ Invalid blinds validation failed: {error_response_4e}")
+                validation_tests.append(False)
+        else:
+            print("❌ Invalid blinds test failed")
+            validation_tests.append(False)
+        
+        # 4f) Invalid antes
+        invalid_antes_data = valid_poker_data.copy()
+        invalid_antes_data.update({'use_antes': True, 'ante_bb': 0})
+        success4f, error_response_4f = self.run_test(f"Invalid Antes Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, invalid_antes_data)
+        
+        if success4f and isinstance(error_response_4f, dict):
+            if (error_response_4f.get('error_code') == 'POKER_RULES_VALIDATION_FAILED' and 
+                error_response_4f.get('details', {}).get('field') == 'ante_bb'):
+                print("✅ Invalid antes validation working")
+                validation_tests.append(True)
+            else:
+                print(f"❌ Invalid antes validation failed: {error_response_4f}")
+                validation_tests.append(False)
+        else:
+            print("❌ Invalid antes test failed")
+            validation_tests.append(False)
+        
+        # 4g) Invalid min_players_to_start
+        invalid_min_start_data = valid_poker_data.copy()
+        invalid_min_start_data.update({'min_players': 2, 'max_players': 6, 'min_players_to_start': 7})
+        success4g, error_response_4g = self.run_test(f"Invalid Min Players to Start Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 400, invalid_min_start_data)
+        
+        if success4g and isinstance(error_response_4g, dict):
+            if (error_response_4g.get('error_code') == 'POKER_RULES_VALIDATION_FAILED' and 
+                error_response_4g.get('details', {}).get('field') == 'min_players_to_start'):
+                print("✅ Invalid min_players_to_start validation working")
+                validation_tests.append(True)
+            else:
+                print(f"❌ Invalid min_players_to_start validation failed: {error_response_4g}")
+                validation_tests.append(False)
+        else:
+            print("❌ Invalid min_players_to_start test failed")
+            validation_tests.append(False)
+        
+        validation_success = all(validation_tests)
+        print(f"📊 Validation tests summary: {sum(validation_tests)}/{len(validation_tests)} passed")
+        
+        # Senaryo 5 - Different rake types
+        print(f"\n📊 Senaryo 5: Testing Different Rake Types for game {poker_game_id}")
+        
+        # 5a) rake_type = "time"
+        time_rake_data = valid_poker_data.copy()
+        time_rake_data.update({'rake_type': 'time', 'rake_percent': None, 'rake_cap_currency': None})
+        success5a, time_response = self.run_test(f"Time Rake Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 200, time_rake_data)
+        
+        if success5a and isinstance(time_response, dict):
+            if time_response.get('rake_type') == 'time':
+                print("✅ Time rake type accepted")
+            else:
+                print(f"❌ Time rake type failed: {time_response}")
+        else:
+            print("❌ Time rake test failed")
+            success5a = False
+        
+        # 5b) rake_type = "none"
+        none_rake_data = valid_poker_data.copy()
+        none_rake_data.update({'rake_type': 'none', 'rake_percent': None, 'rake_cap_currency': None})
+        success5b, none_response = self.run_test(f"None Rake Test - {poker_game_id}", "POST", f"api/v1/games/{poker_game_id}/config/poker-rules", 200, none_rake_data)
+        
+        if success5b and isinstance(none_response, dict):
+            if none_response.get('rake_type') == 'none':
+                print("✅ None rake type accepted")
+            else:
+                print(f"❌ None rake type failed: {none_response}")
+        else:
+            print("❌ None rake test failed")
+            success5b = False
+        
+        # Senaryo 6 - Log verification
+        print(f"\n📊 Senaryo 6: Testing Log Verification for game {poker_game_id}")
+        success6, logs_response = self.run_test(f"Get Game Config Logs - {poker_game_id}", "GET", f"api/v1/games/{poker_game_id}/config/logs?limit=20", 200)
+        
+        log_validation = True
+        if success6 and isinstance(logs_response, dict):
+            logs = logs_response.get('logs', [])
+            print(f"✅ Found {len(logs)} log entries")
+            
+            # Look for poker_rules_saved action
+            poker_logs = [log for log in logs if log.get('action') == 'poker_rules_saved']
+            if poker_logs:
+                print(f"✅ Found {len(poker_logs)} poker_rules_saved log entries")
+                
+                latest_log = poker_logs[0]  # Most recent
+                details = latest_log.get('details', {})
+                
+                # Check required fields in log details
+                required_log_fields = ['old_value', 'new_value', 'config_version_id', 'request_id']
+                missing_log_fields = [field for field in required_log_fields if field not in details]
+                
+                if not missing_log_fields:
+                    print("✅ Log details structure complete")
+                    print(f"   📝 Config Version ID: {details.get('config_version_id')}")
+                    print(f"   🔄 Has old_value: {details.get('old_value') is not None}")
+                    print(f"   🆕 Has new_value: {details.get('new_value') is not None}")
+                    print(f"   🆔 Request ID: {details.get('request_id')}")
+                else:
+                    print(f"❌ Log details missing fields: {missing_log_fields}")
+                    log_validation = False
+            else:
+                print("❌ No poker_rules_saved log entries found")
+                log_validation = False
+        else:
+            print("❌ Failed to get game config logs")
+            log_validation = False
+        
+        # Summary
+        print(f"\n📊 POKER RULES ENDPOINTS SUMMARY:")
+        print(f"   📊 Default Template GET: {'✅ PASS' if success1 and default_validation else '❌ FAIL'}")
+        print(f"   🚫 Non-Poker Game GET: {'✅ PASS' if success2 else '❌ FAIL'}")
+        print(f"   ✅ Valid POST: {'✅ PASS' if success3 and post_validation else '❌ FAIL'}")
+        print(f"   ❌ Validation Errors: {'✅ PASS' if validation_success else '❌ FAIL'}")
+        print(f"   🔄 Rake Types: {'✅ PASS' if success5a and success5b else '❌ FAIL'}")
+        print(f"   📋 Log Verification: {'✅ PASS' if success6 and log_validation else '❌ FAIL'}")
+        
+        return all([
+            success1 and default_validation,
+            success2,
+            success3 and post_validation,
+            validation_success,
+            success5a and success5b,
+            success6 and log_validation
+        ])
+
 def main():
     print("🎰 Casino Admin Panel API Testing")
     print("=" * 50)
