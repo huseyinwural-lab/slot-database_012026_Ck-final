@@ -20,6 +20,7 @@ import GameAssetsTab from './GameAssetsTab';
 import GamePokerRulesTab from './GamePokerRulesTab';
 import GameCrashMathTab from './GameCrashMathTab';
 import GameDiceMathTab from './GameDiceMathTab';
+import GameBlackjackRulesTab from './GameBlackjackRulesTab';
 
 const defaultVisibility = {
   countries: [],
@@ -321,12 +322,11 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           {visibleTabs.includes('crash_math') && (
             <TabsTrigger value="crash_math">Crash Math</TabsTrigger>
           )}
-          {visibleTabs.includes('blackjack_rules') && (
-            <TabsTrigger value="blackjack_rules">Blackjack Rules &amp; Side Bets</TabsTrigger>
-          )}
-
           {visibleTabs.includes('dice_math') && (
             <TabsTrigger value="dice_math">Dice Math</TabsTrigger>
+          )}
+          {visibleTabs.includes('blackjack_rules') && (
+            <TabsTrigger value="blackjack_rules">Blackjack Rules &amp; Side Bets</TabsTrigger>
           )}
           {visibleTabs.includes('assets') && (
             <TabsTrigger value="assets">Assets</TabsTrigger>
@@ -778,14 +778,16 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
                     Dice Math sadece DICE oyunları için geçerlidir.
                   </p>
                 </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
+
         {/* BLACKJACK RULES TAB */}
         {visibleTabs.includes('blackjack_rules') && (
           <TabsContent value="blackjack_rules" className="space-y-4 pt-4">
             {resolvedCoreType === 'TABLE_BLACKJACK' ? (
-              <div className="text-xs text-muted-foreground">
-                {/* TODO: GameBlackjackRulesTab bileşeni burada render edilecek */}
-                Blackjack Rules &amp; Side Bets sekmesi henüz UI tarafında tamamlanmadı.
-              </div>
+              <GameBlackjackRulesTab game={game} />
             ) : (
               <Card>
                 <CardContent>
@@ -793,11 +795,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
                     Blackjack Rules &amp; Side Bets sadece TABLE_BLACKJACK oyunları için geçerlidir.
                   </p>
                 </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        )}
-
               </Card>
             )}
           </TabsContent>
