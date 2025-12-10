@@ -338,7 +338,7 @@ const GameAssetsTab = ({ game }) => {
       <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, asset: deleteDialog.asset })}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Asset'i kaldır</DialogTitle>
+            <DialogTitle>Asset&apos;i kaldır</DialogTitle>
           </DialogHeader>
           <p className="text-xs text-muted-foreground mt-2">
             Bu asset'i kaldırmak istediğine emin misin? Oyun loglarında asset_deleted olarak işaretlenecektir.
