@@ -5137,7 +5137,11 @@ def main():
             success8 and dice_post_validation,
             dice_validation_passed,
             success10 and dice_log_validation
-        ])    print("🎰 Casino Admin Panel API Testing")
+        ])
+
+def main():
+    """Main test runner"""
+    print("🎰 Casino Admin Panel API Testing")
     print("=" * 50)
     
     tester = CasinoAdminAPITester()
