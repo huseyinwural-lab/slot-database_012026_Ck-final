@@ -341,7 +341,7 @@ const GameAssetsTab = ({ game }) => {
             <DialogTitle>Asset&apos;i kaldır</DialogTitle>
           </DialogHeader>
           <p className="text-xs text-muted-foreground mt-2">
-            Bu asset'i kaldırmak istediğine emin misin? Oyun loglarında asset_deleted olarak işaretlenecektir.
+            Bu asset&apos;i kaldırmak istediğine emin misin? Oyun loglarında asset_deleted olarak işaretlenecektir.
           </p>
           {deleteDialog.asset && (
             <div className="mt-3 p-2 border border-slate-800 rounded bg-slate-950 text-xs font-mono break-all">
