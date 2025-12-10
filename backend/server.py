@@ -77,7 +77,7 @@ app.include_router(settings.router)
 async def health_check():
     return {
         "status": "healthy",
-        "environment": settings.environment,
+        "environment": "production",
         "db": "connected" if await db.command("ping") else "disconnected"
     }
 
