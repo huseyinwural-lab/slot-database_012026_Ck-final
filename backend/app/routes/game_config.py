@@ -1315,62 +1315,13 @@ async def save_slot_advanced_config(game_id: str, payload: SlotAdvancedSaveReque
 
     return cfg
 
-        game_id=game_id,
-        config_version_id=version.id,
-        range_min=payload.range_min,
-        range_max=payload.range_max,
-        step=payload.step,
-        house_edge_percent=payload.house_edge_percent,
-        min_payout_multiplier=payload.min_payout_multiplier,
-        max_payout_multiplier=payload.max_payout_multiplier,
-        allow_over=payload.allow_over,
-        allow_under=payload.allow_under,
-        min_target=payload.min_target,
-        max_target=payload.max_target,
-        round_duration_seconds=payload.round_duration_seconds,
-        bet_phase_seconds=payload.bet_phase_seconds,
-        provably_fair_enabled=payload.provably_fair_enabled,
-        rng_algorithm=payload.rng_algorithm,
-        seed_rotation_interval_rounds=payload.seed_rotation_interval_rounds,
-        created_by=admin_id,
-    )
-
-    await db.dice_math_configs.insert_one(cfg.model_dump())
-
-    log_details: Dict[str, Any] = {
-        "config_version_id": version.id,
-        "summary": payload.summary,
-        "request_id": request_id,
-        "game_id": game_id,
-        "core_type": "DICE",
-        "old_value": prev_cfg.model_dump() if prev_cfg else None,
-        "new_value": cfg.model_dump(),
-    }
-
-    await _append_game_log(db, game_id, admin_id, "dice_math_saved", log_details)
-
-    logger.info(
-        "dice_math_saved",
-        extra={
-            "game_id": game_id,
-            "config_version_id": version.id,
-            "core_type": "DICE",
-            "admin_id": admin_id,
-            "request_id": request_id,
-            "action_type": "dice_math_saved",
-        },
-    )
-
-    return cfg
-
-
 
 # ---------------------------------------------------------------------------
-# SLOT ADVANCED CONFIG
+# BLACKJACK RULES CONFIG
 # ---------------------------------------------------------------------------
 
 
-def _slot_advanced_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
+def _blackjack_rules_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
     details: Dict[str, Any] = {"field": field, "reason": reason}
     if value is not None:
         details["value"] = value
