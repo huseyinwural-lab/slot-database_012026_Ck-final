@@ -366,5 +366,56 @@ class PokerRules(BaseModel):
     created_by: str
 
 
+
+
+class BlackjackRules(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    schema_version: str = "1.0.0"
+
+    # Core rules
+    deck_count: int
+    dealer_hits_soft_17: bool
+    blackjack_payout: float  # 3/2 => 1.5, 6/5 => 1.2
+    double_allowed: bool
+    double_after_split_allowed: bool
+    split_max_hands: int
+    resplit_aces_allowed: bool
+    surrender_allowed: bool
+    insurance_allowed: bool
+
+    # Table limits (currency based)
+    min_bet: float
+    max_bet: float
+
+    # Side bets
+    side_bets_enabled: bool = False
+    side_bets: Optional[List[Dict[str, Any]]] = None
+
+    # --- Branding ---
+    table_label: Optional[str] = None
+    theme: Optional[str] = None
+    avatar_url: Optional[str] = None
+    banner_url: Optional[str] = None
+
+    # --- Behavior ---
+    auto_seat_enabled: Optional[bool] = False
+    sitout_time_limit_seconds: Optional[int] = 120
+    disconnect_wait_seconds: Optional[int] = 30
+
+    # --- Anti-Collusion & Safety ---
+    max_same_country_seats: Optional[int] = None
+    block_vpn_flagged_players: Optional[bool] = False
+    session_max_duration_minutes: Optional[int] = None
+    max_daily_buyin_limit: Optional[float] = None
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+
+
+class BlackjackRulesResponse(BaseModel):
+    rules: BlackjackRules
+
 class PokerRulesResponse(BaseModel):
     rules: PokerRules
