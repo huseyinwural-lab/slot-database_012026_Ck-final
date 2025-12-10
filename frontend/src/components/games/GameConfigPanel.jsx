@@ -71,7 +71,21 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   const [logs, setLogs] = useState([]);
   const [paytable, setPaytable] = useState({ current: null, history: [] });
 
-  const visibleTabs = TAB_SCHEMA[game?.core_type] || [];
+  // core_type bazı eski oyunlarda boş olabiliyor; category'den türeterek normalize ediyoruz.
+  const resolvedCoreType = React.useMemo(() => {
+    if (!game) return undefined;
+    if (game.core_type) return game.core_type;
+
+    const cat = (game.category || '').toLowerCase();
+    if (cat === 'slot' || cat === 'slots') return 'SLOT';
+    if (cat === 'crash') return 'CRASH';
+    if (cat === 'dice') return 'DICE';
+    if (cat.includes('poker')) return 'TABLE_POKER';
+    if (cat.includes('blackjack')) return 'TABLE_BLACKJACK';
+    return undefined;
+  }, [game]);
+
+  const visibleTabs = TAB_SCHEMA[resolvedCoreType] || [];
 
   useEffect(() => {
     if (!game) return;
