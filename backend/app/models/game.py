@@ -313,6 +313,19 @@ class DiceMathConfig(BaseModel):
     round_duration_seconds: int
     bet_phase_seconds: int
 
+    # Advanced limits (global)
+    max_win_per_bet: Optional[float] = None
+    max_loss_per_bet: Optional[float] = None
+    max_session_loss: Optional[float] = None
+    max_session_bets: Optional[int] = None
+
+    # Enforcement behavior for limit breaches
+    # Allowed values (API level): "hard_block" | "log_only"
+    enforcement_mode: str = "log_only"
+
+    # Country-specific overrides keyed by ISO 3166-1 alpha-2 country code
+    country_overrides: Dict[str, CrashSafetyCountryOverride] = {}
+
     provably_fair_enabled: bool = False
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
@@ -336,6 +349,16 @@ class DiceMathConfigResponse(BaseModel):
     max_target: float
     round_duration_seconds: int
     bet_phase_seconds: int
+
+    # Advanced limits (global)
+    max_win_per_bet: Optional[float] = None
+    max_loss_per_bet: Optional[float] = None
+    max_session_loss: Optional[float] = None
+    max_session_bets: Optional[int] = None
+
+    enforcement_mode: str = "log_only"
+    country_overrides: Dict[str, CrashSafetyCountryOverride] = {}
+
     provably_fair_enabled: bool
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
