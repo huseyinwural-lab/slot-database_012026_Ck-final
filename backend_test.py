@@ -4335,11 +4335,16 @@ TX-MISSING-LOW,25.50,EUR"""
             print("❌ Failed to get poker rules")
             default_validation = False
         
-        # Senaryo 2 - Non-poker game GET (if we have one)
+        # Senaryo 2 - Non-poker game GET (use a different game or known non-poker game)
+        # Use the second game in the list as non-poker game for testing
+        non_poker_test_id = None
+        if len(games_response) > 1:
+            non_poker_test_id = games_response[1].get('id')  # Use second game
+        
         success2 = True
-        if non_poker_game_id:
-            print(f"\n📊 Senaryo 2: Testing GET Poker Rules for non-poker game {non_poker_game_id}")
-            success2, non_poker_response = self.run_test(f"Get Poker Rules Non-Poker Game - {non_poker_game_id}", "GET", f"api/v1/games/{non_poker_game_id}/config/poker-rules", 404)
+        if non_poker_test_id and non_poker_test_id != poker_game_id:
+            print(f"\n📊 Senaryo 2: Testing GET Poker Rules for non-poker game {non_poker_test_id}")
+            success2, non_poker_response = self.run_test(f"Get Poker Rules Non-Poker Game - {non_poker_test_id}", "GET", f"api/v1/games/{non_poker_test_id}/config/poker-rules", 404)
             
             if success2 and isinstance(non_poker_response, dict):
                 expected_error = {
@@ -4354,7 +4359,7 @@ TX-MISSING-LOW,25.50,EUR"""
                     print(f"❌ Unexpected error response: {non_poker_response}")
                     success2 = False
         else:
-            print("⚠️  Senaryo 2 skipped: No non-poker game available")
+            print("⚠️  Senaryo 2 skipped: No suitable non-poker game available")
         
         # Senaryo 3 - Valid POST
         print(f"\n📊 Senaryo 3: Testing POST Poker Rules (Valid Data) for game {poker_game_id}")
