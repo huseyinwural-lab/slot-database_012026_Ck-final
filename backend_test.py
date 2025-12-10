@@ -1378,6 +1378,358 @@ TX-MISSING,75.25"""
             success9 and logs_validation
         ])
 
+    def test_reel_strips_endpoints(self):
+        """Test Reel Strips backend endpoints as per review request"""
+        print("\n🎰 REEL STRIPS ENDPOINTS TESTS")
+        
+        # Pre-step: Get a valid game_id from GET /api/v1/games
+        success_games, games_response = self.run_test("Get Games for Reel Strips Test", "GET", "api/v1/games", 200)
+        
+        if not success_games or not isinstance(games_response, list) or len(games_response) == 0:
+            print("❌ No games found to test reel strips endpoints")
+            return False
+        
+        # Prefer slot games, but any existing game is fine
+        game_id = None
+        game_name = "Unknown Game"
+        for game in games_response:
+            if game.get('category', '').lower() in ['slot', 'slots']:
+                game_id = game.get('id')
+                game_name = game.get('name', 'Unknown Slot Game')
+                break
+        
+        if not game_id:
+            # Use first available game if no slot found
+            game_id = games_response[0].get('id')
+            game_name = games_response[0].get('name', 'Unknown Game')
+        
+        print(f"✅ Using game: {game_name} (ID: {game_id})")
+        
+        # 1. GET /api/v1/games/{game_id}/config/reel-strips
+        print(f"\n📊 Testing GET Reel Strips for game {game_id}")
+        success1, reel_strips_response = self.run_test(f"Get Reel Strips - {game_id}", "GET", f"api/v1/games/{game_id}/config/reel-strips", 200)
+        
+        initial_validation = True
+        if success1 and isinstance(reel_strips_response, dict):
+            print("✅ Reel Strips GET endpoint working")
+            
+            # Validate response structure
+            required_fields = ['current', 'history']
+            missing_fields = [field for field in required_fields if field not in reel_strips_response]
+            
+            if not missing_fields:
+                print("✅ Reel Strips response structure complete")
+                current = reel_strips_response.get('current')
+                history = reel_strips_response.get('history', [])
+                
+                if current is None:
+                    print("ℹ️  No current reel strips (expected on first run)")
+                else:
+                    print(f"✅ Current reel strips found: source={current.get('source', 'unknown')}")
+                
+                print(f"ℹ️  History entries: {len(history)}")
+            else:
+                print(f"❌ Reel Strips response missing fields: {missing_fields}")
+                initial_validation = False
+        else:
+            print("❌ Failed to get reel strips")
+            initial_validation = False
+        
+        # 2. POST /api/v1/games/{game_id}/config/reel-strips with valid manual data
+        print(f"\n🔧 Testing POST Reel Strips Manual Data for game {game_id}")
+        
+        manual_data = {
+            "data": {
+                "layout": {"reels": 3, "rows": 3},
+                "reels": [
+                    ["A", "K", "Q", "J"],
+                    ["A", "K", "Q", "J"],
+                    ["A", "K", "Q", "J", "WILD"]
+                ]
+            },
+            "source": "manual",
+            "summary": "Test manual strips from backend tests"
+        }
+        
+        success2, manual_response = self.run_test(f"Create Manual Reel Strips - {game_id}", "POST", f"api/v1/games/{game_id}/config/reel-strips", 200, manual_data)
+        
+        manual_validation = True
+        created_config_version_id = None
+        if success2 and isinstance(manual_response, dict):
+            print("✅ Manual reel strips creation successful")
+            
+            # Validate response structure
+            required_fields = ['id', 'game_id', 'config_version_id', 'data', 'schema_version', 'source', 'created_by']
+            missing_fields = [field for field in required_fields if field not in manual_response]
+            
+            if not missing_fields:
+                print("✅ Manual response structure complete")
+                print(f"   📝 ID: {manual_response['id']}")
+                print(f"   🎮 Game ID: {manual_response['game_id']}")
+                print(f"   📋 Schema Version: {manual_response['schema_version']}")
+                print(f"   📋 Source: {manual_response['source']}")
+                print(f"   👤 Created by: {manual_response['created_by']}")
+                
+                # Verify schema_version is "1.0.0"
+                if manual_response.get('schema_version') == '1.0.0':
+                    print("✅ Schema version correctly set to '1.0.0'")
+                else:
+                    print(f"❌ Expected schema_version='1.0.0', got '{manual_response.get('schema_version')}'")
+                    manual_validation = False
+                
+                # Verify source is "manual"
+                if manual_response.get('source') == 'manual':
+                    print("✅ Source correctly set to 'manual'")
+                else:
+                    print(f"❌ Expected source='manual', got '{manual_response.get('source')}'")
+                    manual_validation = False
+                
+                created_config_version_id = manual_response.get('config_version_id')
+            else:
+                print(f"❌ Manual response missing fields: {missing_fields}")
+                manual_validation = False
+        else:
+            print("❌ Failed to create manual reel strips")
+            manual_validation = False
+        
+        # 3. GET /api/v1/games/{game_id}/config/reel-strips again to verify current is the new record
+        print(f"\n🔍 Testing GET Reel Strips after manual save for game {game_id}")
+        success3, updated_response = self.run_test(f"Get Updated Reel Strips - {game_id}", "GET", f"api/v1/games/{game_id}/config/reel-strips", 200)
+        
+        updated_validation = True
+        if success3 and isinstance(updated_response, dict):
+            current = updated_response.get('current')
+            history = updated_response.get('history', [])
+            
+            if current and current.get('config_version_id') == created_config_version_id:
+                print("✅ Current reel strips is now the new manual record")
+                print(f"   📋 Source: {current['source']}")
+                print(f"   📋 Config Version ID: {current['config_version_id']}")
+                
+                # Check if history contains the manual record
+                manual_in_history = any(h.get('config_version_id') == created_config_version_id for h in history)
+                if manual_in_history:
+                    print("✅ Manual record found in history")
+                else:
+                    print("❌ Manual record not found in history")
+                    updated_validation = False
+            else:
+                print("❌ Current reel strips is not the manual record or missing")
+                updated_validation = False
+        else:
+            print("❌ Failed to get updated reel strips")
+            updated_validation = False
+        
+        # 4. Test validation negative cases
+        print(f"\n❌ Testing Reel Strips Validation (Negative Cases)")
+        
+        # Wrong reel count: layout.reels=5 but provide only 3 reels
+        invalid_data1 = {
+            "data": {
+                "layout": {"reels": 5, "rows": 3},
+                "reels": [
+                    ["A", "K"],
+                    ["Q", "J"],
+                    ["WILD"]
+                ]
+            },
+            "source": "manual",
+            "summary": "Invalid - wrong reel count"
+        }
+        success4, error_response1 = self.run_test(f"Invalid Reel Strips - Wrong Count", "POST", f"api/v1/games/{game_id}/config/reel-strips", 400, invalid_data1)
+        
+        # Validate error response structure
+        if success4 and isinstance(error_response1, dict):
+            if error_response1.get('error_code') == 'REEL_STRIPS_VALIDATION_FAILED':
+                print("✅ Wrong reel count validation working - proper error code")
+            else:
+                print(f"⚠️  Expected error_code='REEL_STRIPS_VALIDATION_FAILED', got '{error_response1.get('error_code')}'")
+        
+        # Empty reel array
+        invalid_data2 = {
+            "data": {
+                "layout": {"reels": 1, "rows": 3},
+                "reels": [[]]
+            },
+            "source": "manual",
+            "summary": "Invalid - empty reel"
+        }
+        success5, error_response2 = self.run_test(f"Invalid Reel Strips - Empty Reel", "POST", f"api/v1/games/{game_id}/config/reel-strips", 400, invalid_data2)
+        
+        # Non-string/empty symbols
+        invalid_data3 = {
+            "data": {
+                "layout": {"reels": 2, "rows": 3},
+                "reels": [
+                    ["A", "K"],
+                    ["Q", "", "J"]  # Empty string symbol
+                ]
+            },
+            "source": "manual",
+            "summary": "Invalid - empty symbol"
+        }
+        success6, error_response3 = self.run_test(f"Invalid Reel Strips - Empty Symbol", "POST", f"api/v1/games/{game_id}/config/reel-strips", 400, invalid_data3)
+        
+        validation_tests_passed = success4 and success5 and success6
+        if validation_tests_passed:
+            print("✅ All validation negative cases passed (returned 400 as expected)")
+        
+        # 5. Test Import JSON
+        print(f"\n📥 Testing Reel Strips JSON Import for game {game_id}")
+        
+        json_import_data = {
+            "format": "json",
+            "content": '{"layout": {"reels": 2, "rows": 3}, "reels": [["A","K"],["Q","J"]]}'
+        }
+        
+        success7, json_import_response = self.run_test(f"Import JSON Reel Strips - {game_id}", "POST", f"api/v1/games/{game_id}/config/reel-strips/import", 200, json_import_data)
+        
+        json_import_validation = True
+        if success7 and isinstance(json_import_response, dict):
+            print("✅ JSON import successful")
+            
+            # Verify source is "import" and schema_version is "1.0.0"
+            if json_import_response.get('source') == 'import':
+                print("✅ JSON import source correctly set to 'import'")
+            else:
+                print(f"❌ Expected source='import', got '{json_import_response.get('source')}'")
+                json_import_validation = False
+            
+            if json_import_response.get('schema_version') == '1.0.0':
+                print("✅ JSON import schema version correctly set to '1.0.0'")
+            else:
+                print(f"❌ Expected schema_version='1.0.0', got '{json_import_response.get('schema_version')}'")
+                json_import_validation = False
+        else:
+            print("❌ Failed to import JSON reel strips")
+            json_import_validation = False
+        
+        # 6. Test Import CSV
+        print(f"\n📥 Testing Reel Strips CSV Import for game {game_id}")
+        
+        csv_import_data = {
+            "format": "csv",
+            "content": "A,K,Q,J\nA,K,Q,10\nA,K,Q,J,9"
+        }
+        
+        success8, csv_import_response = self.run_test(f"Import CSV Reel Strips - {game_id}", "POST", f"api/v1/games/{game_id}/config/reel-strips/import", 200, csv_import_data)
+        
+        csv_import_validation = True
+        if success8 and isinstance(csv_import_response, dict):
+            print("✅ CSV import successful")
+            
+            # Verify reels parsed properly (3 reels) with layout.reels=3
+            data = csv_import_response.get('data', {})
+            layout = data.get('layout', {})
+            reels = data.get('reels', [])
+            
+            if layout.get('reels') == 3:
+                print("✅ CSV import layout.reels correctly set to 3")
+            else:
+                print(f"❌ Expected layout.reels=3, got '{layout.get('reels')}'")
+                csv_import_validation = False
+            
+            if len(reels) == 3:
+                print("✅ CSV import parsed 3 reels correctly")
+                print(f"   Reel 1: {reels[0] if len(reels) > 0 else 'N/A'}")
+                print(f"   Reel 2: {reels[1] if len(reels) > 1 else 'N/A'}")
+                print(f"   Reel 3: {reels[2] if len(reels) > 2 else 'N/A'}")
+            else:
+                print(f"❌ Expected 3 reels, got {len(reels)}")
+                csv_import_validation = False
+        else:
+            print("❌ Failed to import CSV reel strips")
+            csv_import_validation = False
+        
+        # 7. Test Simulate hook
+        print(f"\n🧪 Testing Reel Strips Simulation for game {game_id}")
+        
+        simulate_data = {
+            "rounds": 10000,
+            "bet": 1.0
+        }
+        
+        success9, simulate_response = self.run_test(f"Simulate Reel Strips - {game_id}", "POST", f"api/v1/games/{game_id}/config/reel-strips/simulate", 200, simulate_data)
+        
+        simulate_validation = True
+        if success9 and isinstance(simulate_response, dict):
+            print("✅ Simulation trigger successful")
+            
+            # Verify response structure
+            if simulate_response.get('status') == 'queued':
+                print("✅ Simulation status correctly set to 'queued'")
+            else:
+                print(f"❌ Expected status='queued', got '{simulate_response.get('status')}'")
+                simulate_validation = False
+            
+            simulation_id = simulate_response.get('simulation_id')
+            if simulation_id:
+                print(f"✅ Simulation ID generated: {simulation_id}")
+            else:
+                print("❌ No simulation_id in response")
+                simulate_validation = False
+        else:
+            print("❌ Failed to trigger simulation")
+            simulate_validation = False
+        
+        # 8. Test Logs - Check for reel strips actions
+        print(f"\n📋 Testing Game Config Logs for game {game_id}")
+        
+        success10, logs_response = self.run_test(f"Get Game Config Logs - {game_id}", "GET", f"api/v1/games/{game_id}/config/logs?limit=20", 200)
+        
+        logs_validation = True
+        if success10 and isinstance(logs_response, dict):
+            items = logs_response.get('items', [])
+            print(f"✅ Retrieved {len(items)} log entries")
+            
+            # Check for expected log actions
+            expected_actions = ['reel_strips_saved', 'reel_strips_imported', 'reel_strips_simulate_triggered']
+            found_actions = []
+            
+            for log_entry in items:
+                action = log_entry.get('action', '')
+                if action in expected_actions:
+                    found_actions.append(action)
+                    details = log_entry.get('details', {})
+                    print(f"   ✅ Found log action: {action}")
+                    print(f"      Game ID: {details.get('game_id', 'N/A')}")
+                    print(f"      Config Version ID: {details.get('config_version_id', 'N/A')}")
+                    print(f"      Action Type: {details.get('action_type', 'N/A')}")
+                    print(f"      Request ID: {details.get('request_id', 'N/A')}")
+            
+            # Verify we found the expected actions
+            unique_found = list(set(found_actions))
+            if len(unique_found) >= 2:  # At least saved and one import/simulate
+                print(f"✅ Found {len(unique_found)} different reel strips actions in logs")
+            else:
+                print(f"⚠️  Only found {len(unique_found)} reel strips actions, expected at least 2")
+                logs_validation = False
+        else:
+            print("❌ Failed to get game config logs")
+            logs_validation = False
+        
+        # Summary
+        print(f"\n🎰 REEL STRIPS ENDPOINTS SUMMARY:")
+        print(f"   📊 GET Reel Strips (Initial): {'✅ PASS' if success1 and initial_validation else '❌ FAIL'}")
+        print(f"   🔧 POST Manual Data: {'✅ PASS' if success2 and manual_validation else '❌ FAIL'}")
+        print(f"   🔍 GET After Manual Save: {'✅ PASS' if success3 and updated_validation else '❌ FAIL'}")
+        print(f"   ❌ Validation Negative Cases: {'✅ PASS' if validation_tests_passed else '❌ FAIL'}")
+        print(f"   📥 Import JSON: {'✅ PASS' if success7 and json_import_validation else '❌ FAIL'}")
+        print(f"   📥 Import CSV: {'✅ PASS' if success8 and csv_import_validation else '❌ FAIL'}")
+        print(f"   🧪 Simulate Hook: {'✅ PASS' if success9 and simulate_validation else '❌ FAIL'}")
+        print(f"   📋 Config Logs: {'✅ PASS' if success10 and logs_validation else '❌ FAIL'}")
+        
+        return all([
+            success1 and initial_validation,
+            success2 and manual_validation,
+            success3 and updated_validation,
+            validation_tests_passed,
+            success7 and json_import_validation,
+            success8 and csv_import_validation,
+            success9 and simulate_validation,
+            success10 and logs_validation
+        ])
+
     def test_review_request_specific(self):
         """Test specific finance endpoints mentioned in the review request"""
         print("\n🎯 REVIEW REQUEST SPECIFIC TESTS - UPDATED FINANCE ENDPOINTS")
