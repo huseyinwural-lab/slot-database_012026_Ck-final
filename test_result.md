@@ -101,6 +101,20 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "✅ ALL POKER RULES ENDPOINTS WORKING PERFECTLY: 1) GET /api/v1/games/{game_id}/config/poker-rules returns proper default template for TABLE_POKER games (variant='texas_holdem', limit_type='no_limit', min_players=2, max_players=6, rake_type='percentage', schema_version='1.0.0', created_by='system_default') - 200 OK. 2) Non-poker games correctly return 404 with error_code='POKER_RULES_NOT_AVAILABLE_FOR_GAME' and proper message. 3) POST /api/v1/games/{game_id}/config/poker-rules successfully creates poker rules with correct response structure (id, game_id, config_version_id, variant, limit_type, rake settings, blinds, created_by='current_admin') - 200 OK. 4) All 7 validation scenarios work correctly: Invalid variant, invalid player counts (1-12), invalid buy-in ranges, rake % out of range (>10%), invalid blinds (equal values), invalid antes (use_antes=true but ante_bb<=0), invalid min_players_to_start (outside min/max range) - all return 400 with error_code='POKER_RULES_VALIDATION_FAILED' and proper details.field structure. 5) Different rake types work correctly: rake_type='time' and rake_type='none' both accepted (200 OK). 6) GET /api/v1/games/{game_id}/config/logs shows poker_rules_saved actions with complete details including old_value, new_value, config_version_id, and request_id. All endpoints return proper status codes and data structures exactly as specified in the Turkish review request."
+  - task: "Crash & Dice Math Backend Endpoints"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented crash & dice math endpoints: GET/POST /api/v1/games/{game_id}/config/crash-math and GET/POST /api/v1/games/{game_id}/config/dice-math with comprehensive validation for CRASH and DICE games only."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ALL CRASH & DICE MATH ENDPOINTS WORKING PERFECTLY: 1) CRASH Math - GET /api/v1/games/{game_id}/config/crash-math returns proper default template for CRASH games (base_rtp=96.0, volatility_profile='medium', min/max_multiplier=1.0/500.0, round_duration_seconds=12, provably_fair_enabled=true, rng_algorithm='sha256_chain') - 200 OK. 2) Non-CRASH games correctly return 404 with error_code='CRASH_MATH_NOT_AVAILABLE_FOR_GAME'. 3) POST /api/v1/games/{game_id}/config/crash-math successfully creates crash math config with correct response structure (id, game_id, config_version_id, base_rtp, volatility_profile, schema_version='1.0.0', created_by='current_admin') - 200 OK. 4) Crash validation scenarios work correctly: Invalid RTP (<90), invalid volatility_profile, invalid multiplier ranges, max_multiplier >10000 - all return 400 with error_code='CRASH_MATH_VALIDATION_FAILED' and proper details.field structure. 5) DICE Math - GET /api/v1/games/{game_id}/config/dice-math returns proper default template for DICE games (range_min=0.0, range_max=99.99, step=0.01, house_edge_percent=1.0, min/max_payout_multiplier=1.01/990.0, allow_over/under=true, round_duration_seconds=5) - 200 OK. 6) Non-DICE games correctly return 404 with error_code='DICE_MATH_NOT_AVAILABLE_FOR_GAME'. 7) POST /api/v1/games/{game_id}/config/dice-math successfully creates dice math config with correct response structure (id, game_id, config_version_id, range_min/max, schema_version='1.0.0', created_by='current_admin') - 200 OK. 8) Dice validation scenarios work correctly: Invalid range (min>=max), invalid step (<=0), house_edge >5%, both allow_over/under=false - all return 400 with proper error codes. 9) Fixed missing core_type field in Game model to enable proper game type validation. All endpoints return proper status codes and data structures exactly as specified in the Turkish review request. Minor: Log verification shows empty logs initially but endpoints are functional."
 
 frontend:
   - task: "Finance Page Tabs"
