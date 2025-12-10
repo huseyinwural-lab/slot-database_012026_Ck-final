@@ -437,7 +437,7 @@ async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest,
 
 
 @router.post("/{game_id}/config/paytable/refresh-from-provider")
-async def refresh_paytable_from_provider(game_id: str):
+async def refresh_paytable_from_provider(game_id: str, request: Request):
     """Stub endpoint to simulate fetching paytable from provider."""
     db = get_db()
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
