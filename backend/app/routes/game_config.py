@@ -173,9 +173,18 @@ class PokerRulesSaveRequest(BaseModel):
     max_players: int
     min_buyin_bb: float
     max_buyin_bb: float
-    rake_type: str
+    rake_type: str  # "percentage", "time", "none"
     rake_percent: Optional[float] = None
     rake_cap_currency: Optional[float] = None
+    rake_applies_from_pot: Optional[float] = None
+    use_antes: bool = False
+    ante_bb: Optional[float] = None
+    small_blind_bb: float
+    big_blind_bb: float
+    allow_straddle: bool = False
+    run_it_twice_allowed: bool = False
+    min_players_to_start: int
+    summary: Optional[str] = None
 
 
 class CrashMathSaveRequest(BaseModel):
