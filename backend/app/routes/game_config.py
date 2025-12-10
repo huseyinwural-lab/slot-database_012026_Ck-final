@@ -470,28 +470,6 @@ async def save_poker_rules(game_id: str, payload: PokerRulesSaveRequest, request
 
     return rules
 
-    update_data: Dict[str, Any] = {
-        "name": payload.name,
-        "provider": payload.provider,
-        "category": payload.category,
-        "default_language": payload.default_language,
-        "visibility_rules": payload.visibility_rules.model_dump(),
-        "lobby_sort_order": payload.lobby_sort_order,
-        "sort_order": payload.lobby_sort_order,
-        "tags": payload.tags,
-        "business_status": new_business_status,
-        "updated_at": datetime.now(timezone.utc),
-    }
-
-    await db.games.update_one({"id": game_id}, {"$set": update_data})
-
-    details = {"fields": list(update_data.keys())}
-    if old_status != new_business_status:
-        details["status_change"] = {"old": old_status, "new": new_business_status}
-
-    await _append_game_log(db, game_id, admin_id, "general_update", details)
-    return {"message": "Game general config updated"}
-
 
 @router.get("/{game_id}/config/rtp", response_model=RtpConfigResponse)
 async def get_game_rtp_config(game_id: str):
