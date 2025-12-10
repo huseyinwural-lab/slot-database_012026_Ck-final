@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Body, Query
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 
+from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from config import settings
