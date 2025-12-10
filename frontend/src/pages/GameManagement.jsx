@@ -121,23 +121,57 @@ const GameManagement = () => {
         setImportProgress(50);
 
         addLog('Found 35 new games. Starting synchronization...');
+
+        // TODO: Provider auto-fetch flow will be implemented in a separate task.
+        const res = await api.post('/v1/games/upload', uploadForm);
+        setImportProgress(90);
+        addLog('Finalizing database entries...');
+        await new Promise((r) => setTimeout(r, 500));
+        setImportProgress(100);
+        addLog('Import process completed successfully.');
+        fetchAll();
+        toast.success(res.data.message);
       } else {
-        addLog('Validating upload bundle...');
+        // Manual JSON/ZIP upload via game-import manual endpoint
+        addLog('Uploading bundle to server...');
         setImportProgress(30);
+
+        const formData = new FormData();
+        if (uploadForm.file) {
+          formData.append('file', uploadForm.file);
+        }
+        if (uploadForm.source_label) {
+          formData.append('source_label', uploadForm.source_label);
+        }
+        if (uploadForm.notes) {
+          formData.append('notes', uploadForm.notes);
+        }
+
+        const res = await api.post('/v1/game-import/manual/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        const { job_id, status, total_errors, total_warnings } = res.data;
+
+        addLog(`Manual upload analyzed. Job ${job_id}, status=${status}, errors=${total_errors}, warnings=${total_warnings}.`);
+        setImportProgress(70);
+
+        if (status === 'failed' || total_errors > 0) {
+          addLog('Import job has validation errors. Please review in Game Import Jobs.');
+          toast.error('Manual upload contains validation errors.');
+          setImportProgress(100);
+        } else {
+          // For MVP, directly import the single READY item
+          addLog('Importing validated game...');
+          const importRes = await api.post(`/v1/game-import/jobs/${job_id}/import`);
+          addLog('Import completed.');
+          setImportProgress(100);
+          toast.success(importRes.data.message || 'Game imported successfully.');
+          fetchAll();
+        }
       }
-
-      const res = await api.post('/v1/games/upload', uploadForm);
-
-      setImportProgress(90);
-      addLog('Finalizing database entries...');
-      await new Promise((r) => setTimeout(r, 500));
-
-      setImportProgress(100);
-      addLog('Import process completed successfully.');
-
-      fetchAll();
-      toast.success(res.data.message);
     } catch (err) {
+      console.error(err);
       addLog('ERROR: Import failed. Check console.');
       toast.error('Upload failed');
       setImportProgress(0);
