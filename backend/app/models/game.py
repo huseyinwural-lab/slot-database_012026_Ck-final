@@ -212,6 +212,14 @@ class JackpotConfigResponse(BaseModel):
     pools: List[JackpotPool] = []
 
 
+class CrashSafetyCountryOverride(BaseModel):
+    max_loss_per_round: Optional[float] = None
+    max_win_per_round: Optional[float] = None
+    max_rounds_per_session: Optional[int] = None
+    max_total_loss_per_session: Optional[float] = None
+    max_total_win_per_session: Optional[float] = None
+
+
 class CrashMathConfig(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     game_id: str
@@ -231,14 +239,19 @@ class CrashMathConfig(BaseModel):
     min_bet_per_round: Optional[float] = None
     max_bet_per_round: Optional[float] = None
 
-
-    # Advanced safety limits (optional)
+    # Advanced safety limits (global, optional)
     max_loss_per_round: Optional[float] = None
     max_win_per_round: Optional[float] = None
     max_rounds_per_session: Optional[int] = None
     max_total_loss_per_session: Optional[float] = None
     max_total_win_per_session: Optional[float] = None
-    enforcement_mode: str = "LOG_ONLY"  # "HARD_BLOCK" | "WARN_ONLY" | "LOG_ONLY"
+
+    # Enforcement behavior for limit breaches
+    # Allowed values (API level): "hard_block" | "log_only"
+    enforcement_mode: str = "log_only"
+
+    # Country-specific overrides keyed by ISO 3166-1 alpha-2 country code
+    country_overrides: Dict[str, CrashSafetyCountryOverride] = {}
 
     provably_fair_enabled: bool = False
     rng_algorithm: str
@@ -261,6 +274,17 @@ class CrashMathConfigResponse(BaseModel):
     grace_period_seconds: int
     min_bet_per_round: Optional[float] = None
     max_bet_per_round: Optional[float] = None
+
+    # Advanced safety limits (global)
+    max_loss_per_round: Optional[float] = None
+    max_win_per_round: Optional[float] = None
+    max_rounds_per_session: Optional[int] = None
+    max_total_loss_per_session: Optional[float] = None
+    max_total_win_per_session: Optional[float] = None
+
+    enforcement_mode: str = "log_only"
+    country_overrides: Dict[str, CrashSafetyCountryOverride] = {}
+
     provably_fair_enabled: bool
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
