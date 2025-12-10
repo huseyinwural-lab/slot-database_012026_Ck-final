@@ -4753,6 +4753,9 @@ def main():
     print("\n🚫 ERROR HANDLING TESTS")
     test_results.append(("404 Endpoints", tester.test_nonexistent_endpoints()))
     
+    print("\n🎯 CRASH & DICE MATH TESTS (REVIEW REQUEST)")
+    test_results.append(("Crash & Dice Math Endpoints", tester.test_crash_dice_math_endpoints()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
