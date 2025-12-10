@@ -347,12 +347,6 @@ class BlackjackRulesSaveRequest(BaseModel):
 from enum import Enum
 
 
-class ValidationReason(str, Enum):
-    MUST_BE_POSITIVE = "must_be_positive"
-    INVALID_COUNTRY_CODE = "invalid_country_code"
-    UNSUPPORTED_ENFORCEMENT_MODE = "unsupported_enforcement_mode"
-
-
 def _crash_math_error(message: str, field: str, value: Any = None, reason: str = "invalid") -> Dict[str, Any]:
     details: Dict[str, Any] = {"field": field, "reason": reason}
     if value is not None:
