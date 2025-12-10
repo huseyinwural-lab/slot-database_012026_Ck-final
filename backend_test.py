@@ -967,8 +967,9 @@ class CasinoAdminAPITester:
         """Test Manual Game Import Pipeline - Turkish Review Request"""
         print("\n🎮 MANUAL GAME IMPORT PIPELINE TESTS")
         
-        # Ön hazırlık - Test için ayrı game_id kullan
-        test_game_id = "test_manual_slot_001"
+        # Ön hazırlık - Test için ayrı game_id kullan (unique each time)
+        import time
+        test_game_id = f"test_manual_slot_{int(time.time())}"
         
         # Senaryo 1 - Geçerli slot JSON yükleme
         print(f"\n📤 Senaryo 1: Geçerli slot JSON yükleme")
