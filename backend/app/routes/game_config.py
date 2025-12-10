@@ -425,12 +425,15 @@ async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest,
 
     # Hook for future lock logic
     if game_doc.get("is_locked_for_math_changes"):
+        from fastapi.responses import JSONResponse
+
         error_payload = _paytable_error(
             "Bu oyun için math değişiklikleri kilitlidir.",
             "game.is_locked_for_math_changes",
             "locked",
+            code="PAYTABLE_LOCKED",
         )
-        return Body(content=error_payload, status_code=403)
+        return JSONResponse(status_code=403, content=error_payload)
 
     try:
         _validate_paytable_payload(payload.data)
