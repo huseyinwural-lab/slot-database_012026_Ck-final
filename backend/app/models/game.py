@@ -231,6 +231,15 @@ class CrashMathConfig(BaseModel):
     min_bet_per_round: Optional[float] = None
     max_bet_per_round: Optional[float] = None
 
+
+    # Advanced safety limits (optional)
+    max_loss_per_round: Optional[float] = None
+    max_win_per_round: Optional[float] = None
+    max_rounds_per_session: Optional[int] = None
+    max_total_loss_per_session: Optional[float] = None
+    max_total_win_per_session: Optional[float] = None
+    enforcement_mode: str = "LOG_ONLY"  # "HARD_BLOCK" | "WARN_ONLY" | "LOG_ONLY"
+
     provably_fair_enabled: bool = False
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
