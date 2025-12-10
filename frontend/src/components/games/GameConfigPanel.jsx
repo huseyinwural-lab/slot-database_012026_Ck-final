@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 import { Activity } from 'lucide-react';
 import api from '../../services/api';
 import GamePaytableTab from './GamePaytableTab';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
 import GameReelStripsTab from './GameReelStripsTab';
 import GameAssetsTab from './GameAssetsTab';
 
