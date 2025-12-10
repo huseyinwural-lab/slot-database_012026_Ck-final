@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
+from enum import Enum
 
 from config import settings
 from app.models.core import Game, GameConfig, ApprovalRequest, ApprovalCategory
