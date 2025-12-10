@@ -455,6 +455,3 @@ class SlotAdvancedConfigResponse(BaseModel):
     autoplay_stop_on_balance_drop_percent: Optional[float] = None
     big_win_animation_enabled: bool
     gamble_feature_allowed: bool
-
-
-    rules: PokerRules
