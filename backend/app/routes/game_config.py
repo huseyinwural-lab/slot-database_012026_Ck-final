@@ -32,9 +32,9 @@ from app.models.game import (
     JackpotPool,
     GameAsset,
     GameAssetsResponse,
-)
     PokerRules,
     PokerRulesResponse,
+)
 
 
 logger = logging.getLogger(__name__)
