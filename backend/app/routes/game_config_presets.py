@@ -279,6 +279,129 @@ async def _ensure_seed_presets(db) -> None:
     )
   )
 
+  # --- BLACKJACK ---
+  seed_presets.append(
+    ConfigPreset(
+      id="bj_european_s17_3to2_standard",
+      game_type="TABLE_BLACKJACK",
+      config_type="blackjack_rules",
+      name="Blackjack – European S17 3:2 Standard",
+      description="Standard 6-deck S17 3:2 blackjack table without side bets.",
+      values={
+        "deck_count": 6,
+        "dealer_hits_soft_17": False,
+        "blackjack_payout": 1.5,
+        "double_allowed": True,
+        "double_after_split_allowed": True,
+        "split_max_hands": 4,
+        "resplit_aces_allowed": False,
+        "surrender_allowed": True,
+        "insurance_allowed": True,
+        "min_bet": 5.0,
+        "max_bet": 500.0,
+        "side_bets_enabled": False,
+        "side_bets": None,
+        "table_label": "BJ European S17 Standard",
+        "theme": "bj_standard",
+        "auto_seat_enabled": True,
+        "sitout_time_limit_seconds": 120,
+        "disconnect_wait_seconds": 30,
+        "max_same_country_seats": None,
+        "block_vpn_flagged_players": False,
+        "session_max_duration_minutes": None,
+        "max_daily_buyin_limit": None,
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="bj_vegas_h17_3to2_sidebets_enabled",
+      game_type="TABLE_BLACKJACK",
+      config_type="blackjack_rules",
+      name="Blackjack – Vegas H17 3:2 + Side Bets",
+      description="Vegas style H17 3:2 blackjack table with popular side bets.",
+      values={
+        "deck_count": 6,
+        "dealer_hits_soft_17": True,
+        "blackjack_payout": 1.5,
+        "double_allowed": True,
+        "double_after_split_allowed": True,
+        "split_max_hands": 4,
+        "resplit_aces_allowed": False,
+        "surrender_allowed": True,
+        "insurance_allowed": True,
+        "min_bet": 10.0,
+        "max_bet": 1000.0,
+        "side_bets_enabled": True,
+        "side_bets": [
+          {
+            "code": "perfect_pairs",
+            "min_bet": 2.0,
+            "max_bet": 50.0,
+            "payout_table": {"mixed": 5, "colored": 10, "perfect": 25},
+          },
+          {
+            "code": "21_3",
+            "min_bet": 2.0,
+            "max_bet": 50.0,
+            "payout_table": {"flush": 5, "straight": 10, "three_of_a_kind": 30},
+          },
+        ],
+        "table_label": "BJ Vegas H17 VIP",
+        "theme": "bj_vegas_vip",
+        "auto_seat_enabled": True,
+        "sitout_time_limit_seconds": 120,
+        "disconnect_wait_seconds": 45,
+        "max_same_country_seats": 2,
+        "block_vpn_flagged_players": True,
+        "session_max_duration_minutes": 240,
+        "max_daily_buyin_limit": 5000.0,
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+  seed_presets.append(
+    ConfigPreset(
+      id="bj_lowstakes_beginner_friendly",
+      game_type="TABLE_BLACKJACK",
+      config_type="blackjack_rules",
+      name="Blackjack – Lowstakes Beginner Friendly",
+      description="Low minimum bet, beginner friendly blackjack configuration.",
+      values={
+        "deck_count": 4,
+        "dealer_hits_soft_17": False,
+        "blackjack_payout": 1.5,
+        "double_allowed": True,
+        "double_after_split_allowed": False,
+        "split_max_hands": 3,
+        "resplit_aces_allowed": False,
+        "surrender_allowed": False,
+        "insurance_allowed": True,
+        "min_bet": 1.0,
+        "max_bet": 50.0,
+        "side_bets_enabled": False,
+        "side_bets": None,
+        "table_label": "BJ Lowstakes Beginner",
+        "theme": "bj_beginner",
+        "auto_seat_enabled": False,
+        "sitout_time_limit_seconds": 180,
+        "disconnect_wait_seconds": 60,
+        "max_same_country_seats": None,
+        "block_vpn_flagged_players": False,
+        "session_max_duration_minutes": 120,
+        "max_daily_buyin_limit": 500.0,
+      },
+      created_at=now,
+      updated_at=now,
+    )
+  )
+
+
   # --- POKER ---
   seed_presets.append(
     ConfigPreset(
