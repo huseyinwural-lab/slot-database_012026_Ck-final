@@ -235,7 +235,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "poker_advanced_settings_backend_frontend"
+    - "blackjack_rules_backend_validation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
