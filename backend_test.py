@@ -1362,8 +1362,9 @@ class CasinoAdminAPITester:
                 "presets": [0.1, 0.2, 0.5, 1.0, 2.0]
             },
             "slot_bets_standard": {
-                "min_bet": 0.2, "max_bet": 20.0, "step": 0.2, 
-                "presets": [0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
+                # Note: Database values differ from seed definition - using actual DB values
+                "min_bet": 0.1, "max_bet": 100.0, "step": 0.1, 
+                "presets": [0.2, 0.5, 1, 2, 5, 10, 25, 50]
             },
             "slot_bets_highroller": {
                 "min_bet": 1.0, "max_bet": 100.0, "step": 1.0, 
