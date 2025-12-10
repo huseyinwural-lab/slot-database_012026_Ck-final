@@ -14,6 +14,7 @@ import { Activity } from 'lucide-react';
 import api from '../../services/api';
 import GamePaytableTab from './GamePaytableTab';
 import GameReelStripsTab from './GameReelStripsTab';
+import GameAssetsTab from './GameAssetsTab';
 
 const defaultVisibility = {
   countries: [],
@@ -174,13 +175,14 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="rtp">Math &amp; RTP</TabsTrigger>
           <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="reels">Reel Strips</TabsTrigger>
           <TabsTrigger value="paytable">Paytable</TabsTrigger>
+          <TabsTrigger value="assets">Assets</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
 
@@ -478,6 +480,11 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
             paytable={paytable}
             onReload={reloadPaytable}
           />
+        </TabsContent>
+
+        {/* ASSETS TAB */}
+        <TabsContent value="assets" className="space-y-4 pt-4">
+          <GameAssetsTab game={game} />
         </TabsContent>
 
         {/* LOGS TAB */}
