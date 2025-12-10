@@ -232,7 +232,15 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
       toast.success('Bet config saved');
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.detail || 'Failed to save bets');
+      const detail = err?.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        const msg = detail.map((d) => d?.msg || JSON.stringify(d)).join(' | ');
+        toast.error(msg);
+      } else if (typeof detail === 'string') {
+        toast.error(detail);
+      } else {
+        toast.error('Failed to save bets');
+      }
     } finally {
       setLoading(false);
     }
