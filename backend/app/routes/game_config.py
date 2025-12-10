@@ -129,8 +129,7 @@ async def update_game_general_config(game_id: str, payload: GameGeneralConfig):
     db = get_db()
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
     if not game_doc:
-    # TODO: game_level lock for general config can be added similarly to paytable/reel strips if needed
-
+        # TODO: game_level lock for general config can be added similarly to paytable/reel strips if needed
         raise HTTPException(status_code=404, detail="Game not found")
 
     admin_id = "current_admin"  # TODO: hook into auth when available
@@ -139,6 +138,27 @@ async def update_game_general_config(game_id: str, payload: GameGeneralConfig):
     # Map simple status back to BusinessStatus enum string
     new_business_status = "active" if payload.status == "active" else "suspended"
 
+    update_data: Dict[str, Any] = {
+        "name": payload.name,
+        "provider": payload.provider,
+        "category": payload.category,
+        "default_language": payload.default_language,
+        "visibility_rules": payload.visibility_rules.model_dump(),
+        "lobby_sort_order": payload.lobby_sort_order,
+        "sort_order": payload.lobby_sort_order,
+        "tags": payload.tags,
+        "business_status": new_business_status,
+        "updated_at": datetime.now(timezone.utc),
+    }
+
+    await db.games.update_one({"id": game_id}, {"$set": update_data})
+
+    details = {"fields": list(update_data.keys())}
+    if old_status != new_business_status:
+        details["status_change"] = {"old": old_status, "new": new_business_status}
+
+    await _append_game_log(db, game_id, admin_id, "general_update", details)
+    return {"message": "Game general config updated"}
 
 
 class PokerRulesSaveRequest(BaseModel):
