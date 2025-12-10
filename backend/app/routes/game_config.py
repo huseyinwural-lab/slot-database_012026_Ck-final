@@ -272,6 +272,17 @@ class DiceMathSaveRequest(BaseModel):
     round_duration_seconds: int
     bet_phase_seconds: int
 
+    # Advanced limits (global, optional)
+    max_win_per_bet: Optional[float] = None
+    max_loss_per_bet: Optional[float] = None
+    max_session_loss: Optional[float] = None
+    max_session_bets: Optional[int] = None
+
+    enforcement_mode: Optional[str] = None
+
+    # Country specific overrides keyed by ISO 3166-1 alpha-2 country code
+    country_overrides: Optional[Dict[str, Dict[str, Any]]] = None
+
 
 class SlotAdvancedSaveRequest(BaseModel):
     spin_speed: str
