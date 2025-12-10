@@ -69,7 +69,7 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
     setRefreshing(true);
     try {
       await api.post(`/v1/games/${game.id}/config/paytable/refresh-from-provider`);
-      toast.success('Paytable provider\'dan yenilendi (stub)');
+      toast.success("Paytable provider'dan yenilendi (stub)");
       await onReload?.();
     } catch (err) {
       console.error(err);
