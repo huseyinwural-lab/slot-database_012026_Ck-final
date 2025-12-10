@@ -354,7 +354,7 @@ const GameDiceMathTab = ({ game }) => {
                 placeholder="(optional)"
               />
               <p className="text-[10px] text-muted-foreground mt-1">
-                Bir oyuncunun tek session'da kaybedebileceği toplam maksimum tutar.
+                Bir oyuncunun tek session&#39;da kaybedebileceği toplam maksimum tutar.
               </p>
             </div>
             <div className="space-y-2">
