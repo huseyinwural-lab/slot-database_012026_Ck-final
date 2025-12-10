@@ -380,6 +380,7 @@ async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest,
     _validate_paytable_payload(payload.data)
 
     admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
     version = await _generate_new_version(db, game_id, admin_id, notes="Paytable override change")
 
     record = PaytableRecord(
