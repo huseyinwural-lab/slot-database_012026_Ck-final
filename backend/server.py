@@ -54,6 +54,8 @@ app.include_router(fraud_detection.router)
 app.include_router(email_notification.router)
 app.include_router(simulator.router)
 app.include_router(game_config.router)
+app.include_router(game_import.router)
+
 
 
 # Finance Advanced
