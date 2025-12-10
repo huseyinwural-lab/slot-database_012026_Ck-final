@@ -419,3 +419,5 @@ class BlackjackRulesResponse(BaseModel):
 
 class PokerRulesResponse(BaseModel):
     rules: PokerRules
+
+    rules: PokerRules
