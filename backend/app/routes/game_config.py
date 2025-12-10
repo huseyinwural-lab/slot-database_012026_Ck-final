@@ -613,6 +613,223 @@ async def save_reel_strips(game_id: str, payload: ReelStripsSaveRequest, request
             "admin_id": admin_id,
             "request_id": request_id,
             "action_type": "reel_strips_saved",
+
+
+# --- JACKPOTS CONFIG ---
+
+class JackpotConfigValidationError(Exception):
+    def __init__(self, payload: Dict[str, Any]):
+        self.payload = payload
+
+
+def _jackpot_error(message: str, index: int, field: str, reason: str, value: Any = None) -> Dict[str, Any]:
+    details: Dict[str, Any] = {
+        "index": index,
+        "field": field,
+        "reason": reason,
+    }
+    if value is not None:
+        details["value"] = value
+    return {
+        "error_code": "JACKPOT_CONFIG_VALIDATION_FAILED",
+        "message": message,
+        "details": details,
+    }
+
+
+def _validate_jackpots(jackpots: List[Dict[str, Any]]):
+    if not isinstance(jackpots, list) or not jackpots:
+        raise JackpotConfigValidationError(
+            _jackpot_error("En az bir jackpot tanımı gereklidir.", -1, "jackpots", "missing"),
+        )
+
+    for idx, jp in enumerate(jackpots):
+        name = jp.get("name")
+        if not isinstance(name, str) or not name.strip():
+            raise JackpotConfigValidationError(
+                _jackpot_error("Jackpot name boş olamaz.", idx, f"jackpots[{idx}].name", "missing", name),
+            )
+
+        currency = jp.get("currency")
+        if not isinstance(currency, str) or not currency.strip():
+            raise JackpotConfigValidationError(
+                _jackpot_error("Currency boş olamaz.", idx, f"jackpots[{idx}].currency", "missing", currency),
+            )
+
+        seed = float(jp.get("seed", 0))
+        cap = float(jp.get("cap", 0))
+        contrib = float(jp.get("contribution_percent", 0))
+        hit = float(jp.get("hit_frequency_param", 0))
+
+        if seed < 0:
+            raise JackpotConfigValidationError(
+                _jackpot_error("Seed 0'dan küçük olamaz.", idx, f"jackpots[{idx}].seed", "negative", seed),
+            )
+        if cap < seed:
+            raise JackpotConfigValidationError(
+                _jackpot_error("Cap seed değerinden küçük olamaz.", idx, f"jackpots[{idx}].cap", "cap_lt_seed", cap),
+            )
+        if contrib < 0 or contrib > 10:
+            raise JackpotConfigValidationError(
+                _jackpot_error(
+                    "Contribution percent 0 ile 10 arasında olmalıdır.",
+                    idx,
+                    f"jackpots[{idx}].contribution_percent",
+                    "out_of_range",
+                    contrib,
+                ),
+            )
+        if hit <= 0:
+            raise JackpotConfigValidationError(
+                _jackpot_error(
+                    "hit_frequency_param 0'dan büyük olmalıdır.",
+                    idx,
+                    f"jackpots[{idx}].hit_frequency_param",
+                    "invalid",
+                    hit,
+                ),
+            )
+
+
+@router.get("/{game_id}/config/jackpots", response_model=JackpotConfigResponse)
+async def get_jackpot_config(game_id: str, request: Request):
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    cfg_docs = (
+        await db.jackpot_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    cfg = JackpotConfig(**cfg_docs[0]) if cfg_docs else None
+
+    # Stub: pools read-only data; in future this should call external jackpot service
+    pools_docs = []
+    if cfg:
+        for jp in cfg.jackpots:
+            pools_docs.append(
+                JackpotPool(
+                    jackpot_name=jp.get("name", "JP"),
+                    game_id=game_id,
+                    currency=jp.get("currency", "EUR"),
+                    current_balance=jp.get("seed", 0.0),
+                    last_hit_at=None,
+                )
+            )
+
+    pools = pools_docs
+
+    if cfg:
+        logger.info(
+            "jackpot_config_read",
+            extra={
+                "game_id": game_id,
+                "config_version_id": cfg.config_version_id,
+                "admin_id": "n/a",
+                "request_id": request_id,
+                "action_type": "jackpot_config_read",
+            },
+        )
+
+    return JackpotConfigResponse(config=cfg, pools=pools)
+
+
+class JackpotConfigSaveRequest(BaseModel):
+    jackpots: List[Dict[str, Any]]
+    summary: Optional[str] = None
+
+
+@router.post("/{game_id}/config/jackpots", response_model=JackpotConfig)
+async def save_jackpot_config(game_id: str, payload: JackpotConfigSaveRequest, request: Request):
+    from fastapi.responses import JSONResponse
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    # Future lock hook
+    if game_doc.get("is_locked_for_math_changes"):
+        error_payload = _jackpot_error(
+            "Bu oyun için math/jackpot değişiklikleri kilitlidir.",
+            -1,
+            "game.is_locked_for_math_changes",
+            "locked",
+        )
+        return JSONResponse(status_code=403, content=error_payload)
+
+    try:
+        _validate_jackpots(payload.jackpots)
+    except JackpotConfigValidationError as exc:
+        return JSONResponse(status_code=400, content=exc.payload)
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    # Fetch previous config for logging
+    prev_cfg_docs = (
+        await db.jackpot_configs
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    prev_cfg = JackpotConfig(**prev_cfg_docs[0]) if prev_cfg_docs else None
+
+    version = await _generate_new_version(db, game_id, admin_id, notes="Jackpot config change")
+
+    cfg = JackpotConfig(
+        game_id=game_id,
+        config_version_id=version.id,
+        schema_version="1.0.0",
+        jackpots=payload.jackpots,
+        created_by=admin_id,
+        source="manual",
+    )
+
+    await db.jackpot_configs.insert_one(cfg.model_dump())
+
+    details = {
+        "old_config_version_id": prev_cfg.config_version_id if prev_cfg else None,
+        "new_config_version_id": version.id,
+        "summary": payload.summary,
+        "game_id": game_id,
+        "admin_id": admin_id,
+        "request_id": request_id,
+        "action_type": "jackpot_config_saved",
+    }
+
+    await _append_game_log(db, game_id, admin_id, "jackpot_config_saved", details)
+
+    logger.info(
+        "jackpot_config_saved",
+        extra={
+            "game_id": game_id,
+            "config_version_id": version.id,
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "jackpot_config_saved",
+        },
+    )
+
+    # Optional approval hook
+    approval = ApprovalRequest(
+        category=ApprovalCategory.GAME,
+        action_type="jackpot_change",
+        related_entity_id=game_id,
+        requester_admin=admin_id,
+        details={"config_version_id": version.id, "summary": payload.summary},
+    )
+    await db.approvals.insert_one(approval.model_dump())
+
+    return cfg
+
         },
     )
 
