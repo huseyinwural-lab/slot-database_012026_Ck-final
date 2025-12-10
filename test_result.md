@@ -144,6 +144,20 @@ backend:
         -agent: "testing"
         -comment: "✅ ALL BLACKJACK RULES BACKEND VALIDATION TESTS PASSED: 1) GET /api/v1/games/{game_id}/config/blackjack-rules returns proper default template for TABLE_BLACKJACK games (deck_count=6, dealer_hits_soft_17=false, blackjack_payout=1.5, min_bet=5.0, max_bet=500.0, side_bets_enabled=false, sitout_time_limit_seconds=120, disconnect_wait_seconds=30) - 200 OK. 2) POST /api/v1/games/{game_id}/config/blackjack-rules successfully creates blackjack rules with complete response structure (id, game_id, config_version_id, all blackjack fields including advanced branding/behavior/safety settings, created_by='current_admin') - 200 OK. 3) All 23 negative validation scenarios work correctly: deck_count (1-8), blackjack_payout (1.2-1.6), split_max_hands (1-4), min_bet > 0 and < max_bet, side_bets validation (code required, numeric min/max, min<max, payout_table dict), sitout_time_limit_seconds >= 30, disconnect_wait_seconds (5-300), max_same_country_seats (1-10), session_max_duration_minutes (10-1440), max_daily_buyin_limit > 0, table_label <= 50 chars, theme <= 30 chars - all return 400 with error_code='BLACKJACK_RULES_VALIDATION_FAILED' and proper details structure. 4) Non-TABLE_BLACKJACK games correctly return 404 with error_code='BLACKJACK_RULES_NOT_AVAILABLE_FOR_GAME' for both GET and POST endpoints. All endpoints return proper status codes and data structures exactly as specified in the Turkish review request."
 
+  - task: "Slot Advanced Backend Validation"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented Slot Advanced Config endpoints: GET/POST /api/v1/games/{game_id}/config/slot-advanced with comprehensive validation for SLOT games only."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ SLOT ADVANCED BACKEND VALIDATION - ALL TESTS PASSED: 1) GET /api/v1/games/{game_id}/config/slot-advanced returns proper default template for fresh SLOT games (spin_speed='normal', turbo_spin_allowed=false, autoplay_enabled=true, autoplay_default_spins=50, autoplay_max_spins=100, autoplay_stop_on_big_win=true, autoplay_stop_on_balance_drop_percent=null, big_win_animation_enabled=true, gamble_feature_allowed=false) - 200 OK. Returns existing configuration when one exists. 2) POST /api/v1/games/{game_id}/config/slot-advanced successfully creates slot advanced config with correct response structure (id, game_id, config_version_id, all slot advanced fields, created_by='current_admin') - 200 OK. 3) State persistence working correctly - GET after POST returns updated values. 4) All 6 negative validation scenarios work correctly: Invalid spin_speed='ultra_fast', autoplay_default_spins=0, autoplay_max_spins=0, autoplay_default_spins > autoplay_max_spins, autoplay_stop_on_balance_drop_percent=-10/150 - all return 400 with error_code='SLOT_ADVANCED_VALIDATION_FAILED' and proper details structure. 5) Non-SLOT games correctly return 404 with error_code='SLOT_ADVANCED_NOT_AVAILABLE_FOR_GAME' for both GET and POST endpoints. 6) Fixed SlotAdvancedConfigResponse model (removed incorrect PokerRules field) and added 'Slot' to core_type validation. All endpoints return proper status codes and data structures exactly as specified in the Turkish review request."
   - task: "Slot RTP & Bets Presets Backend Integration"
     implemented: true
     working: true
