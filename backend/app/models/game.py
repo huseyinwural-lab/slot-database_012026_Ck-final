@@ -117,3 +117,26 @@ class GameLog(BaseModel):
 class GameLogsResponse(BaseModel):
     items: List[GameLog]
 
+
+class PaytableRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    game_id: str
+    config_version_id: str
+    data: Dict[str, Any]
+    source: str  # "provider" or "override"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str
+
+
+class PaytableHistoryItem(BaseModel):
+    config_version_id: str
+    source: str
+    created_at: datetime
+    created_by: str
+    summary: Optional[str] = None
+
+
+class PaytableResponse(BaseModel):
+    current: Optional[PaytableRecord] = None
+    history: List[PaytableHistoryItem] = []
+

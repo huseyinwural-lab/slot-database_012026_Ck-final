@@ -18,6 +18,9 @@ from app.models.game import (
     GameGeneralConfig,
     GameLog,
     GameLogsResponse,
+    PaytableRecord,
+    PaytableHistoryItem,
+    PaytableResponse,
 )
 
 router = APIRouter(prefix="/api/v1/games", tags=["games_config"])
@@ -289,6 +292,170 @@ async def save_feature_flags(game_id: str, payload: GameFeatureFlagsUpdate):
 
     await _append_game_log(db, game_id, admin_id, "feature_flags_saved", {"features": payload.features})
     return GameFeatureFlagsResponse(game_id=game_id, features=payload.features)
+
+
+@router.get("/{game_id}/config/paytable", response_model=PaytableResponse)
+async def get_paytable(game_id: str):
+    """Return current paytable and short history for a game."""
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    # Latest as current
+    latest_docs = (
+        await db.paytables
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(1)
+        .to_list(1)
+    )
+    current = PaytableRecord(**latest_docs[0]) if latest_docs else None
+
+    # History (last 10)
+    history_docs = (
+        await db.paytables
+        .find({"game_id": game_id}, {"_id": 0})
+        .sort("created_at", -1)
+        .limit(10)
+        .to_list(10)
+    )
+    history_items = [
+        PaytableHistoryItem(
+            config_version_id=d["config_version_id"],
+            source=d.get("source", "provider"),
+            created_at=d["created_at"],
+            created_by=d.get("created_by", "system"),
+            summary=d.get("summary"),
+        )
+        for d in history_docs
+    ]
+
+    return PaytableResponse(current=current, history=history_items)
+
+
+class PaytableOverrideRequest(BaseModel):
+    data: Dict[str, Any]
+    summary: Optional[str] = None
+
+
+def _validate_paytable_payload(data: Dict[str, Any]):
+    symbols = data.get("symbols")
+    if not isinstance(symbols, list) or not symbols:
+        raise HTTPException(status_code=400, detail="data.symbols must be a non-empty array")
+
+    for sym in symbols:
+        code = sym.get("code")
+        pays = sym.get("pays")
+        if not code:
+            raise HTTPException(status_code=400, detail="Each symbol must have a 'code'")
+        if not isinstance(pays, dict):
+            raise HTTPException(status_code=400, detail="Each symbol.pays must be an object")
+        for k, v in pays.items():
+            try:
+                val = float(v)
+            except Exception:
+                raise HTTPException(status_code=400, detail=f"Invalid pay amount for {code} at {k}x")
+            if val < 0:
+                raise HTTPException(status_code=400, detail=f"Pay amount for {code} at {k}x must be >= 0")
+
+    lines = data.get("lines")
+    if lines is not None and (not isinstance(lines, int) or lines < 1):
+        raise HTTPException(status_code=400, detail="lines must be >= 1 if provided")
+
+
+@router.post("/{game_id}/config/paytable/override", response_model=PaytableRecord)
+async def save_paytable_override(game_id: str, payload: PaytableOverrideRequest):
+    """Save a new override paytable version for a game."""
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    _validate_paytable_payload(payload.data)
+
+    admin_id = "current_admin"
+    version = await _generate_new_version(db, game_id, admin_id, notes="Paytable override change")
+
+    record = PaytableRecord(
+        game_id=game_id,
+        config_version_id=version.id,
+        data=payload.data,
+        source="override",
+        created_by=admin_id,
+    )
+
+    doc = record.model_dump()
+    doc["summary"] = payload.summary or "Paytable override saved"
+    await db.paytables.insert_one(doc)
+
+    await _append_game_log(
+        db,
+        game_id,
+        admin_id,
+        "paytable_override_saved",
+        {
+            "config_version_id": version.id,
+            "summary": payload.summary,
+        },
+    )
+
+    # Optional: create approval request
+    approval = ApprovalRequest(
+        category=ApprovalCategory.GAME,
+        action_type="paytable_change",
+        related_entity_id=game_id,
+        requester_admin=admin_id,
+        details={"config_version_id": version.id, "summary": payload.summary},
+    )
+    await db.approvals.insert_one(approval.model_dump())
+
+    return record
+
+
+@router.post("/{game_id}/config/paytable/refresh-from-provider")
+async def refresh_paytable_from_provider(game_id: str):
+    """Stub endpoint to simulate fetching paytable from provider."""
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    admin_id = "system_provider_stub"
+
+    # Simple stub: create a mock provider paytable
+    mock_data = {
+        "symbols": [
+            {"code": "A", "pays": {"3": 5, "4": 10, "5": 20}},
+            {"code": "K", "pays": {"3": 4, "4": 8, "5": 16}},
+        ],
+        "lines": 20,
+        "specials": {"wild": "WILD", "scatter": "SCATTER"},
+    }
+
+    version = await _generate_new_version(db, game_id, admin_id, notes="Paytable refresh from provider (stub)")
+
+    record = PaytableRecord(
+        game_id=game_id,
+        config_version_id=version.id,
+        data=mock_data,
+        source="provider",
+        created_by="system",
+    )
+
+    doc = record.model_dump()
+    doc["summary"] = "Refreshed from provider (stub)"
+    await db.paytables.insert_one(doc)
+
+    await _append_game_log(
+        db,
+        game_id,
+        admin_id,
+        "paytable_refreshed_from_provider",
+        {"config_version_id": version.id},
+    )
+
+    return {"message": "Paytable refreshed from provider (stub)", "config_version_id": version.id}
 
 
 @router.get("/{game_id}/config/logs", response_model=GameLogsResponse)

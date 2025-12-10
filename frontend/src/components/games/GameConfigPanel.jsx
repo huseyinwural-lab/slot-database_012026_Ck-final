@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Activity } from 'lucide-react';
+import { Activity, RefreshCcw, Pencil } from 'lucide-react';
 import api from '../../services/api';
+import GamePaytableTab from './GamePaytableTab';
 
 const defaultVisibility = {
   countries: [],
@@ -47,6 +48,7 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
 
   const [features, setFeatures] = useState({ bonus_buy: false, turbo_spin: false, autoplay: true });
   const [logs, setLogs] = useState([]);
+  const [paytable, setPaytable] = useState({ current: null, history: [] });
 
   useEffect(() => {
     if (!game) return;
@@ -69,6 +71,10 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
         const featRes = await api.get(`/v1/games/${game.id}/config/features`);
         setFeatures(featRes.data.features || {});
 
+        // Paytable
+        const payRes = await api.get(`/v1/games/${game.id}/config/paytable`);
+        setPaytable(payRes.data);
+
         // Logs
         const logsRes = await api.get(`/v1/games/${game.id}/config/logs?limit=50`);
         setLogs(logsRes.data.items || []);
@@ -80,6 +86,17 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
 
     loadAll();
   }, [game]);
+
+  const reloadPaytable = async () => {
+    if (!game) return;
+    try {
+      const payRes = await api.get(`/v1/games/${game.id}/config/paytable`);
+      setPaytable(payRes.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to reload paytable');
+    }
+  };
 
   const handleSaveGeneral = async () => {
     if (!game) return;
@@ -156,11 +173,12 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="rtp">Math & RTP</TabsTrigger>
-          <TabsTrigger value="bets">Bets & Limits</TabsTrigger>
+          <TabsTrigger value="rtp">Math &amp; RTP</TabsTrigger>
+          <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="paytable">Paytable</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
 
@@ -403,7 +421,7 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
             />
           </div>
           <Button onClick={handleSaveBets} disabled={loading} className="mt-2">
-            Save Bets & Limits
+            Save Bets &amp; Limits
           </Button>
         </TabsContent>
 
@@ -444,6 +462,15 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           <Button onClick={handleSaveFeatures} disabled={loading} className="mt-2">
             Save Features
           </Button>
+        </TabsContent>
+
+        {/* PAYTABLE TAB */}
+        <TabsContent value="paytable" className="space-y-4 pt-4">
+          <GamePaytableTab
+            game={game}
+            paytable={paytable}
+            onReload={reloadPaytable}
+          />
         </TabsContent>
 
         {/* LOGS TAB */}
