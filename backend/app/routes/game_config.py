@@ -1085,9 +1085,11 @@ async def get_game_rtp_config(game_id: str):
     return RtpConfigResponse(game_id=game_id, default_profile_id=default_profile_id, profiles=profiles)
 
 
-class RtpProfileCreate(RtpProfile):
-    class Config:
-        extra = "ignore"
+class RtpProfileCreate(BaseModel):
+    code: str
+    rtp_value: float
+    is_default: bool = False
+    country_overrides: List[CountryRtpOverride] = []
 
 
 @router.post("/{game_id}/config/rtp", response_model=RtpProfile)
