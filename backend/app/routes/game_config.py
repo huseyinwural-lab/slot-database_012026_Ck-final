@@ -292,6 +292,7 @@ class DiceMathSaveRequest(BaseModel):
     country_overrides: Optional[Dict[str, Dict[str, Any]]] = None
 
     seed_rotation_interval_rounds: Optional[int] = None
+    summary: Optional[str] = None
 
 
 class SlotAdvancedSaveRequest(BaseModel):
