@@ -1565,38 +1565,6 @@ async def save_blackjack_rules(game_id: str, payload: BlackjackRulesSaveRequest,
 
     return rules
 
-        seed_rotation_interval_rounds=payload.seed_rotation_interval_rounds,
-        created_by=admin_id,
-    )
-
-    await db.dice_math_configs.insert_one(cfg.model_dump())
-
-    log_details: Dict[str, Any] = {
-        "config_version_id": version.id,
-        "summary": payload.summary,
-        "request_id": request_id,
-        "game_id": game_id,
-        "core_type": "DICE",
-        "old_value": prev_cfg.model_dump() if prev_cfg else None,
-        "new_value": cfg.model_dump(),
-    }
-
-    await _append_game_log(db, game_id, admin_id, "dice_math_saved", log_details)
-
-    logger.info(
-        "dice_math_saved",
-        extra={
-            "game_id": game_id,
-            "config_version_id": version.id,
-            "core_type": "DICE",
-            "admin_id": admin_id,
-            "request_id": request_id,
-            "action_type": "dice_math_saved",
-        },
-    )
-
-    return cfg
-
 
 # ---------------------------------------------------------------------------
 # POKER RULES CONFIG
