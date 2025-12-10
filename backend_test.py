@@ -963,6 +963,406 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_manual_game_import_pipeline(self):
+        """Test Manual Game Import Pipeline - Turkish Review Request"""
+        print("\n🎮 MANUAL GAME IMPORT PIPELINE TESTS")
+        
+        # Ön hazırlık - Test için ayrı game_id kullan
+        test_game_id = "test_manual_slot_001"
+        
+        # Senaryo 1 - Geçerli slot JSON yükleme
+        print(f"\n📤 Senaryo 1: Geçerli slot JSON yükleme")
+        
+        # JSON payload hazırla
+        slot_payload = {
+            "game_id": test_game_id,
+            "name": "Test Manual Slot",
+            "category": "slot",
+            "rtp": 96.5,
+            "provider": "CustomStudio",
+            "core_type": "REEL_LINES",
+            "config": {
+                "paytable": {
+                    "symbols": ["A", "K"],
+                    "pays": {"A": [0, 1, 2], "K": [0, 1.5, 3]}
+                },
+                "reels": {
+                    "strips": [["A", "K", "A", "K"]]
+                }
+            }
+        }
+        
+        # JSON dosyası olarak upload et
+        json_content = json.dumps(slot_payload)
+        files = {
+            'file': ('test_slot.json', json_content, 'application/json')
+        }
+        
+        url = f"{self.base_url}/api/v1/game-import/manual/upload"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Manual Upload - Valid Slot JSON...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.post(url, files=files, timeout=30)
+            
+            success1 = response.status_code == 200
+            if success1:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                upload_response = response.json()
+                print(f"   Response keys: {list(upload_response.keys())}")
+                
+                # Validate upload response
+                if isinstance(upload_response, dict):
+                    job_id = upload_response.get('job_id')
+                    status = upload_response.get('status')
+                    total_found = upload_response.get('total_found')
+                    total_errors = upload_response.get('total_errors')
+                    
+                    print(f"   📋 Job ID: {job_id}")
+                    print(f"   📊 Status: {status}")
+                    print(f"   🔢 Total Found: {total_found}")
+                    print(f"   ❌ Total Errors: {total_errors}")
+                    
+                    # Beklenen: 200 OK, status='fetched', total_found=1, total_errors=0
+                    scenario1_validation = (
+                        status == 'fetched' and 
+                        total_found == 1 and 
+                        total_errors == 0
+                    )
+                    
+                    if scenario1_validation:
+                        print("✅ Senaryo 1 Upload: Beklenen response yapısı doğru")
+                    else:
+                        print(f"❌ Senaryo 1 Upload: Beklenen değerler eşleşmiyor")
+                        print(f"   Expected: status='fetched', total_found=1, total_errors=0")
+                        print(f"   Actual: status='{status}', total_found={total_found}, total_errors={total_errors}")
+                else:
+                    scenario1_validation = False
+                    print("❌ Upload response is not a dict")
+            else:
+                scenario1_validation = False
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                print(f"   Response: {response.text[:200]}...")
+                
+        except Exception as e:
+            scenario1_validation = False
+            print(f"❌ Failed - Error: {str(e)}")
+        
+        if not success1:
+            print("❌ Senaryo 1 başarısız, diğer testleri atlıyorum")
+            return False
+        
+        # Senaryo 1 devam - GET /game-import/jobs/{job_id}
+        print(f"\n🔍 Senaryo 1 devam: GET job details")
+        success2, job_response = self.run_test(f"Get Import Job - {job_id}", "GET", f"api/v1/game-import/jobs/{job_id}", 200)
+        
+        job_validation = True
+        if success2 and isinstance(job_response, dict):
+            job = job_response.get('job')
+            items = job_response.get('items', [])
+            
+            print(f"   📋 Job found: {job.get('id') if job else 'None'}")
+            print(f"   📦 Items count: {len(items)}")
+            
+            if job and len(items) == 1:
+                item = items[0]
+                print(f"   📝 Item status: {item.get('status')}")
+                print(f"   🎮 Provider game ID: {item.get('provider_game_id')}")
+                print(f"   📊 Has raw payload: {item.get('has_raw_payload')}")
+                
+                # Validate: item'da raw_payload olmamalı ama has_raw_payload=true olmalı
+                if item.get('status') == 'ready' and item.get('has_raw_payload') == True and 'raw_payload' not in item:
+                    print("✅ Senaryo 1 Job Details: Item yapısı doğru")
+                else:
+                    print("❌ Senaryo 1 Job Details: Item yapısı beklenen gibi değil")
+                    job_validation = False
+            else:
+                print("❌ Senaryo 1 Job Details: Job veya items eksik")
+                job_validation = False
+        else:
+            job_validation = False
+        
+        # Senaryo 1 devam - POST /game-import/jobs/{job_id}/import
+        print(f"\n🔍 Senaryo 1 devam: POST import job")
+        success3, import_response = self.run_test(f"Import Job - {job_id}", "POST", f"api/v1/game-import/jobs/{job_id}/import", 200)
+        
+        import_validation = True
+        if success3 and isinstance(import_response, dict):
+            imported = import_response.get('imported', 0)
+            errors = import_response.get('errors', 0)
+            job_status = import_response.get('job_status')
+            
+            print(f"   ✅ Imported: {imported}")
+            print(f"   ❌ Errors: {errors}")
+            print(f"   📋 Job Status: {job_status}")
+            
+            # Beklenen: imported >=1, errors=0, job_status='completed'
+            if imported >= 1 and errors == 0 and job_status == 'completed':
+                print("✅ Senaryo 1 Import: Başarılı import")
+            else:
+                print("❌ Senaryo 1 Import: Beklenen sonuç alınamadı")
+                import_validation = False
+        else:
+            import_validation = False
+        
+        # Senaryo 2 - Aynı game_id ile ikinci upload (duplicate)
+        print(f"\n📤 Senaryo 2: Duplicate game_id upload")
+        
+        # Aynı JSON ile tekrar upload
+        try:
+            response = requests.post(url, files=files, timeout=30)
+            
+            success4 = response.status_code == 200
+            if success4:
+                duplicate_response = response.json()
+                duplicate_job_id = duplicate_response.get('job_id')
+                duplicate_status = duplicate_response.get('status')
+                duplicate_errors = duplicate_response.get('total_errors', 0)
+                
+                print(f"   📋 Duplicate Job ID: {duplicate_job_id}")
+                print(f"   📊 Status: {duplicate_status}")
+                print(f"   ❌ Errors: {duplicate_errors}")
+                
+                # Beklenen: 200 OK ama status='failed' veya total_errors>0
+                scenario2_validation = (duplicate_status == 'failed' or duplicate_errors > 0)
+                
+                if scenario2_validation:
+                    print("✅ Senaryo 2: Duplicate detection çalışıyor")
+                    
+                    # Import job'u da test et
+                    success5, duplicate_import = self.run_test(f"Import Duplicate Job - {duplicate_job_id}", "POST", f"api/v1/game-import/jobs/{duplicate_job_id}/import", 200)
+                    
+                    if success5 and isinstance(duplicate_import, dict):
+                        dup_imported = duplicate_import.get('imported', 0)
+                        dup_errors = duplicate_import.get('errors', 0)
+                        dup_job_status = duplicate_import.get('job_status')
+                        
+                        # Beklenen: imported=0, errors>=1, job_status='failed'
+                        if dup_imported == 0 and dup_errors >= 1 and dup_job_status == 'failed':
+                            print("✅ Senaryo 2 Import: Duplicate import doğru şekilde reddedildi")
+                        else:
+                            print("❌ Senaryo 2 Import: Duplicate import beklenmedik sonuç")
+                            scenario2_validation = False
+                else:
+                    print("❌ Senaryo 2: Duplicate detection çalışmıyor")
+            else:
+                scenario2_validation = False
+                print(f"❌ Senaryo 2 Failed - Status: {response.status_code}")
+        except Exception as e:
+            scenario2_validation = False
+            print(f"❌ Senaryo 2 Failed - Error: {str(e)}")
+        
+        # Senaryo 3 - Hatalı JSON (syntax)
+        print(f"\n📤 Senaryo 3: Hatalı JSON syntax")
+        
+        broken_json = '{"game_id": "test", "name": "broken", invalid_json}'
+        broken_files = {
+            'file': ('broken.json', broken_json, 'application/json')
+        }
+        
+        try:
+            response = requests.post(url, files=broken_files, timeout=30)
+            
+            success6 = response.status_code == 400
+            if success6:
+                error_response = response.json()
+                error_code = error_response.get('error_code')
+                field = error_response.get('details', {}).get('field')
+                
+                print(f"   ❌ Error Code: {error_code}")
+                print(f"   📝 Field: {field}")
+                
+                # Beklenen: 400 + GAME_IMPORT_VALIDATION_FAILED + field='file'
+                scenario3_validation = (error_code == 'GAME_IMPORT_VALIDATION_FAILED' and field == 'file')
+                
+                if scenario3_validation:
+                    print("✅ Senaryo 3: Hatalı JSON doğru şekilde reddedildi")
+                else:
+                    print("❌ Senaryo 3: Hatalı JSON validation beklenen gibi değil")
+            else:
+                scenario3_validation = False
+                print(f"❌ Senaryo 3 Failed - Expected 400, got {response.status_code}")
+        except Exception as e:
+            scenario3_validation = False
+            print(f"❌ Senaryo 3 Failed - Error: {str(e)}")
+        
+        # Senaryo 4 - ZIP içinden game.json yükleme
+        print(f"\n📤 Senaryo 4: ZIP içinden game.json yükleme")
+        
+        # ZIP dosyası oluştur
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zf:
+            # Farklı game_id kullan
+            zip_payload = slot_payload.copy()
+            zip_payload['game_id'] = 'test_manual_slot_zip_001'
+            zf.writestr('game.json', json.dumps(zip_payload))
+        
+        zip_content = zip_buffer.getvalue()
+        zip_files = {
+            'file': ('test_game.zip', zip_content, 'application/zip')
+        }
+        
+        try:
+            response = requests.post(url, files=zip_files, timeout=30)
+            
+            success7 = response.status_code == 200
+            if success7:
+                zip_response = response.json()
+                zip_status = zip_response.get('status')
+                zip_errors = zip_response.get('total_errors', 0)
+                
+                print(f"   📊 ZIP Status: {zip_status}")
+                print(f"   ❌ ZIP Errors: {zip_errors}")
+                
+                # Beklenen: Senaryo 1 ile aynı davranış (status='fetched', ready item)
+                scenario4_validation = (zip_status == 'fetched' and zip_errors == 0)
+                
+                if scenario4_validation:
+                    print("✅ Senaryo 4: ZIP upload başarılı")
+                else:
+                    print("❌ Senaryo 4: ZIP upload beklenen sonucu vermedi")
+            else:
+                scenario4_validation = False
+                print(f"❌ Senaryo 4 Failed - Status: {response.status_code}")
+        except Exception as e:
+            scenario4_validation = False
+            print(f"❌ Senaryo 4 Failed - Error: {str(e)}")
+        
+        # Senaryo 5 - Non-slot category
+        print(f"\n📤 Senaryo 5: Non-slot category (crash)")
+        
+        crash_payload = {
+            "game_id": "test_manual_crash_001",
+            "name": "Test Manual Crash",
+            "category": "crash",
+            "rtp": 96.0,
+            "provider": "CustomStudio",
+            "core_type": "CRASH",
+            "config": {
+                "math": {"base_rtp": 96.0}
+            }
+        }
+        
+        crash_json = json.dumps(crash_payload)
+        crash_files = {
+            'file': ('test_crash.json', crash_json, 'application/json')
+        }
+        
+        try:
+            response = requests.post(url, files=crash_files, timeout=30)
+            
+            success8 = response.status_code == 200
+            if success8:
+                crash_response = response.json()
+                crash_job_id = crash_response.get('job_id')
+                crash_status = crash_response.get('status')
+                
+                print(f"   📋 Crash Job ID: {crash_job_id}")
+                print(f"   📊 Status: {crash_status}")
+                
+                # manual/upload aşamasında sadece warnings olabilir, errors yoksa status='fetched'
+                if crash_status == 'fetched':
+                    print("✅ Senaryo 5 Upload: Crash game upload başarılı")
+                    
+                    # Import'u test et
+                    success9, crash_import = self.run_test(f"Import Crash Job - {crash_job_id}", "POST", f"api/v1/game-import/jobs/{crash_job_id}/import", 200)
+                    
+                    if success9 and isinstance(crash_import, dict):
+                        crash_imported = crash_import.get('imported', 0)
+                        crash_errors = crash_import.get('errors', 0)
+                        crash_job_status = crash_import.get('job_status')
+                        
+                        # Beklenen: imported=0, errors>=1, job_status='failed'
+                        scenario5_validation = (crash_imported == 0 and crash_errors >= 1 and crash_job_status == 'failed')
+                        
+                        if scenario5_validation:
+                            print("✅ Senaryo 5 Import: Non-slot game doğru şekilde reddedildi")
+                        else:
+                            print("❌ Senaryo 5 Import: Non-slot game beklenmedik sonuç")
+                    else:
+                        scenario5_validation = False
+                else:
+                    scenario5_validation = False
+                    print("❌ Senaryo 5 Upload: Crash game upload başarısız")
+            else:
+                scenario5_validation = False
+                print(f"❌ Senaryo 5 Failed - Status: {response.status_code}")
+        except Exception as e:
+            scenario5_validation = False
+            print(f"❌ Senaryo 5 Failed - Error: {str(e)}")
+        
+        # Senaryo 6 - Logging kontrolü (isteğe bağlı)
+        print(f"\n📤 Senaryo 6: Logging kontrolü")
+        
+        # game_logs koleksiyonunda action='game_import_manual_imported' kontrol et
+        # Bu direkt DB sorgusu gerektirdiği için API üzerinden yapamayız
+        # Bunun yerine başarılı import sonrası game config logs'u kontrol edelim
+        
+        if success1 and success3:  # İlk başarılı import varsa
+            # İlk import edilen oyunun ID'sini bulmaya çalış
+            success10, games_response = self.run_test("Get Games for Log Check", "GET", "api/v1/games", 200)
+            
+            scenario6_validation = True
+            if success10 and isinstance(games_response, list):
+                # test_manual_slot_001 provider_game_id'li oyunu bul
+                imported_game = None
+                for game in games_response:
+                    if game.get('provider_game_id') == test_game_id:
+                        imported_game = game
+                        break
+                
+                if imported_game:
+                    game_id = imported_game.get('id')
+                    print(f"   🎮 Found imported game: {game_id}")
+                    
+                    # Game config logs kontrol et
+                    success11, logs_response = self.run_test(f"Get Game Logs - {game_id}", "GET", f"api/v1/games/{game_id}/config/logs", 200)
+                    
+                    if success11 and isinstance(logs_response, list):
+                        # game_import_manual_imported action'ını ara
+                        import_log_found = any(
+                            log.get('action') == 'game_import_manual_imported' 
+                            for log in logs_response
+                        )
+                        
+                        if import_log_found:
+                            print("✅ Senaryo 6: Import log kaydı bulundu")
+                        else:
+                            print("⚠️  Senaryo 6: Import log kaydı bulunamadı (game_logs koleksiyonunda olabilir)")
+                            # Bu minor bir issue, test başarısızlığı sayılmaz
+                    else:
+                        print("⚠️  Senaryo 6: Game logs alınamadı")
+                else:
+                    print("⚠️  Senaryo 6: Import edilen oyun bulunamadı")
+            else:
+                print("⚠️  Senaryo 6: Games listesi alınamadı")
+        else:
+            scenario6_validation = False
+            print("❌ Senaryo 6: Önceki testler başarısız olduğu için log kontrolü yapılamadı")
+        
+        # Özet
+        print(f"\n📊 MANUAL GAME IMPORT PIPELINE SUMMARY:")
+        print(f"   📤 Senaryo 1 - Geçerli slot JSON: {'✅ PASS' if (scenario1_validation and job_validation and import_validation) else '❌ FAIL'}")
+        print(f"   🔄 Senaryo 2 - Duplicate detection: {'✅ PASS' if scenario2_validation else '❌ FAIL'}")
+        print(f"   💥 Senaryo 3 - Hatalı JSON syntax: {'✅ PASS' if scenario3_validation else '❌ FAIL'}")
+        print(f"   📦 Senaryo 4 - ZIP upload: {'✅ PASS' if scenario4_validation else '❌ FAIL'}")
+        print(f"   🚫 Senaryo 5 - Non-slot category: {'✅ PASS' if scenario5_validation else '❌ FAIL'}")
+        print(f"   📝 Senaryo 6 - Logging: {'✅ PASS' if scenario6_validation else '⚠️  PARTIAL'}")
+        
+        all_scenarios_passed = all([
+            scenario1_validation and job_validation and import_validation,
+            scenario2_validation,
+            scenario3_validation,
+            scenario4_validation,
+            scenario5_validation
+            # scenario6_validation is optional
+        ])
+        
+        return all_scenarios_passed
+
     def test_phase1_finance_features(self):
         """Test Phase 1 Finance Features: Reconciliation Upload, Chargebacks, Routing Rules"""
         print("\n💰 PHASE 1 FINANCE FEATURES TESTS")
