@@ -4604,7 +4604,7 @@ TX-MISSING-LOW,25.50,EUR"""
         
         log_validation = True
         if success6 and isinstance(logs_response, dict):
-            logs = logs_response.get('logs', [])
+            logs = logs_response.get('items', [])
             print(f"✅ Found {len(logs)} log entries")
             
             # Look for poker_rules_saved action
