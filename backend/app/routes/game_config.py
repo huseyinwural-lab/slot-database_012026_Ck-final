@@ -445,6 +445,7 @@ async def refresh_paytable_from_provider(game_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Game not found")
 
     admin_id = "system_provider_stub"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
 
     # Simple stub: create a mock provider paytable
     mock_data = {
