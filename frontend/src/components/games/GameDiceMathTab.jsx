@@ -285,6 +285,135 @@ const GameDiceMathTab = ({ game }) => {
             </div>
             <div className="space-y-2">
               <Label>Max Payout Multiplier</Label>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Advanced Limits (global)</CardTitle>
+          <CardDescription>
+            Tek bet ve session bazlı advanced limitler. Boş bırakırsan sınırsız kabul edilir.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Max Win per Bet</Label>
+              <Input
+                type="number"
+                value={form.max_win_per_bet}
+                onChange={(e) => handleNumberChange('max_win_per_bet', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Tek elde kazanılabilecek maksimum tutar. Özellikle VIP masalarda risk departmanıyla uyumlu seç.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Max Loss per Bet</Label>
+              <Input
+                type="number"
+                value={form.max_loss_per_bet}
+                onChange={(e) => handleNumberChange('max_loss_per_bet', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Tek elde kaybedilebilecek maksimum tutar. Responsible gaming limitleriyle uyumlu olmalı.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Max Session Loss</Label>
+              <Input
+                type="number"
+                value={form.max_session_loss}
+                onChange={(e) => handleNumberChange('max_session_loss', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Bir oyuncunun tek session'da kaybedebileceği toplam maksimum tutar.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Max Session Bets</Label>
+              <Input
+                type="number"
+                value={form.max_session_bets}
+                onChange={(e) => handleNumberChange('max_session_bets', e.target.value)}
+                disabled={loading}
+                placeholder="(optional)"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Bir session'da atılabilecek maksimum bet sayısı. Yüksek velocity'yi sınırlamak için kullanılabilir.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Advanced Limits Enforcement</CardTitle>
+          <CardDescription>
+            Limit aşımlarında sistemin nasıl davranacağını seç.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-2 max-w-xs">
+            <Label>Enforcement Mode</Label>
+            <Select
+              value={form.enforcement_mode}
+              onValueChange={(v) => handleChange('enforcement_mode', v)}
+              disabled={loading}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="log_only">Log only</SelectItem>
+                <SelectItem value="hard_block">Hard block</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <ul className="list-disc list-inside text-[10px] text-muted-foreground space-y-1">
+            <li><strong>log_only</strong>: Limit aşımlarını sadece loglar, bet akışını kesmez.</li>
+            <li><strong>hard_block</strong>: Limit aşıldığında bet/round engellenir ve loglanır.</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Country Overrides</CardTitle>
+          <CardDescription>
+            Ülke bazlı daha sıkı / gevşek Dice limitleri tanımla (ISO 3166-1 alpha-2 kodlarıyla).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Alert variant="default">
+            <AlertDescription className="text-[10px]">
+              Örnek: {`{"TR": { "max_session_loss": 1000, "max_win_per_bet": 200 }}`}
+            </AlertDescription>
+          </Alert>
+          <div className="space-y-2">
+            <Label>Country Overrides (JSON)</Label>
+            <textarea
+              className="w-full border rounded-md p-2 text-xs font-mono min-h-[120px] bg-background"
+              disabled={loading}
+              value={JSON.stringify(form.country_overrides || {}, null, 2)}
+              onChange={(e) => {
+                try {
+                  const parsed = e.target.value.trim() ? JSON.parse(e.target.value) : {};
+                  setForm((prev) => ({ ...prev, country_overrides: parsed }));
+                  setError(null);
+                } catch (parseErr) {
+                  setError('Country overrides JSON formatı geçersiz.');
+                }
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
               <Input
                 type="number"
                 value={form.max_payout_multiplier}
