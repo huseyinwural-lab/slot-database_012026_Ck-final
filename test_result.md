@@ -131,6 +131,20 @@ backend:
         -comment: "✅ ALL MANUAL GAME IMPORT PIPELINE SCENARIOS WORKING PERFECTLY: 1) Senaryo 1 - Geçerli slot JSON yükleme: POST /api/v1/game-import/manual/upload successfully processes valid slot JSON files, returns status='fetched' with total_found=1 and total_errors=0. GET /api/v1/game-import/jobs/{job_id} returns proper job structure with items array, raw_payload excluded but has_raw_payload=true. POST /api/v1/game-import/jobs/{job_id}/import successfully imports slot games with imported=1, errors=0, job_status='completed'. Creates proper game records in games collection with paytables and reel_strips. 2) Senaryo 2 - Duplicate detection: Correctly detects existing games and returns status='failed' with total_errors=1. Import job properly handles duplicates with imported=0 and job_status='failed'. 3) Senaryo 3 - Hatalı JSON syntax: Returns 400 with error_code='GAME_IMPORT_VALIDATION_FAILED' and field='file' for malformed JSON. 4) Senaryo 4 - ZIP upload: Successfully processes ZIP files containing game.json with same behavior as direct JSON upload (status='fetched', total_errors=0). 5) Senaryo 5 - Non-slot category: Upload phase accepts crash games (status='fetched'), but import phase correctly rejects with error 'Manual import pipeline currently supports only slot games' (imported=0, job_status='failed'). 6) All endpoints return proper status codes and data structures as specified in Turkish review request. DB collections (game_import_jobs, game_import_items, games, game_config_versions, paytables, reel_strips) properly populated."
 
 frontend:
+  - task: "Game Poker Rules & Rake Preset Flow"
+    implemented: true
+    working: true
+    file: "src/components/games/GamePokerRulesTab.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented Poker Rules & Rake tab with preset functionality in GameConfigPanel and GamePokerRulesTab components."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ POKER RULES & RAKE PRESET FLOW FULLY WORKING: 1) /games page loads correctly with Slots & Games tab active and 100 games listed. 2) Texas Hold'em TABLE_POKER game found and Config button opens Game Settings modal with proper title. 3) Poker Rules & Rake tab switches correctly and displays all required form fields (Variant, Limit Type, Players min/max, Buy-in BB, Blinds BB, Rake Type/%, switches for antes/straddle/run-it-twice, min players to start, change summary). 4) Preset Bar works perfectly: Found 3 presets including 'Poker – 6-max NLH EU Standard', preset selection and Apply Preset button functional. 5) Preset application successful: GET /api/v1/game-config/presets/{preset_id} and POST /api/v1/game-config/presets/{preset_id}/apply API calls work correctly, form fields update with preset values (max_players=6, rake_percent=5%, etc.), all fields remain editable after preset application. 6) Manual override and save working: Changed max_players from 6→5, min_players_to_start from 2→3, added change summary 'VIP 5-max table test', Save Poker Rules button triggers POST /api/v1/games/{game_id}/config/poker-rules successfully with 200 OK response, success toast 'Poker kuralları kaydedildi' appears, change summary field clears after save, manual values preserved correctly. All API endpoints working as expected with proper Turkish UI messages."
   - task: "Finance Page Tabs"
     implemented: true
     working: true
