@@ -6784,6 +6784,9 @@ def main():
     print("\n🎮 MANUAL GAME IMPORT PIPELINE TESTS (REVIEW REQUEST)")
     test_results.append(("Manual Game Import Pipeline", tester.test_manual_game_import_pipeline()))
     
+    print("\n🃏 BLACKJACK RULES BACKEND VALIDATION TESTS (REVIEW REQUEST)")
+    test_results.append(("Blackjack Rules Backend Validation", tester.test_blackjack_rules_backend_validation()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
