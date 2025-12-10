@@ -35,6 +35,9 @@ const GamePokerRulesTab = ({ game }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  const [presets, setPresets] = useState([]);
+  const [selectedPreset, setSelectedPreset] = useState('');
+
   const [form, setForm] = useState({
     variant: 'texas_holdem',
     limit_type: 'no_limit',
@@ -63,8 +66,14 @@ const GamePokerRulesTab = ({ game }) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await api.get(`/v1/games/${game.id}/config/poker-rules`);
-        const rules = res.data?.rules;
+        const [rulesRes, presetRes] = await Promise.all([
+          api.get(`/v1/games/${game.id}/config/poker-rules`),
+          api.get('/v1/game-config/presets', {
+            params: { game_type: game.core_type, config_type: 'poker_rules' },
+          }),
+        ]);
+
+        const rules = rulesRes.data?.rules;
         if (rules) {
           setForm((prev) => ({
             ...prev,
@@ -72,6 +81,8 @@ const GamePokerRulesTab = ({ game }) => {
             summary: '',
           }));
         }
+
+        setPresets(presetRes.data?.presets || []);
       } catch (err) {
         console.error(err);
         const apiError = err?.response?.data;
@@ -86,7 +97,7 @@ const GamePokerRulesTab = ({ game }) => {
     };
 
     load();
-  }, [game?.id]);
+  }, [game?.id, game?.core_type]);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({
@@ -101,6 +112,31 @@ const GamePokerRulesTab = ({ game }) => {
       ...prev,
       [field]: num,
     }));
+  };
+
+  const handleApplyPreset = async () => {
+    if (!selectedPreset || !game) return;
+    try {
+      const res = await api.get(`/v1/game-config/presets/${selectedPreset}`);
+      const preset = res.data;
+      if (preset?.values) {
+        setForm((prev) => ({
+          ...prev,
+          ...preset.values,
+          summary: preset.values.summary || prev.summary,
+        }));
+      }
+      await api.post(`/v1/game-config/presets/${selectedPreset}/apply`, {
+        game_id: game.id,
+        game_type: game.core_type,
+        config_type: 'poker_rules',
+      });
+      toast.success('Preset uygulandı. Değerler forma yansıtıldı.');
+    } catch (err) {
+      console.error(err);
+      const apiError = err?.response?.data;
+      toast.error(apiError?.message || 'Preset uygulanamadı.');
+    }
   };
 
   const handleSave = async () => {
@@ -169,6 +205,48 @@ const GamePokerRulesTab = ({ game }) => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      {/* Preset bar */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Preset</CardTitle>
+          <CardDescription>
+            Poker kuralları ve rake yapısı için hazır preset&apos;leri uygula, ardından manuel olarak
+            düzenleyebilirsin.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+          <div className="flex-1 space-y-1">
+            <Label>Preset seç</Label>
+            <Select
+              value={selectedPreset}
+              onValueChange={setSelectedPreset}
+              disabled={loading || presets.length === 0}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={presets.length ? 'Seçiniz' : 'Preset bulunamadı'}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {presets.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            type="button"
+            onClick={handleApplyPreset}
+            disabled={loading || !selectedPreset}
+            className="whitespace-nowrap"
+          >
+            Apply Preset
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
