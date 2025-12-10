@@ -159,6 +159,20 @@ frontend:
         -working: true
         -agent: "testing"
         -comment: "✅ POKER RULES & RAKE PRESET FLOW FULLY WORKING: 1) /games page loads correctly with Slots & Games tab active and 100 games listed. 2) Texas Hold'em TABLE_POKER game found and Config button opens Game Settings modal with proper title. 3) Poker Rules & Rake tab switches correctly and displays all required form fields (Variant, Limit Type, Players min/max, Buy-in BB, Blinds BB, Rake Type/%, switches for antes/straddle/run-it-twice, min players to start, change summary). 4) Preset Bar works perfectly: Found 3 presets including 'Poker – 6-max NLH EU Standard', preset selection and Apply Preset button functional. 5) Preset application successful: GET /api/v1/game-config/presets/{preset_id} and POST /api/v1/game-config/presets/{preset_id}/apply API calls work correctly, form fields update with preset values (max_players=6, rake_percent=5%, etc.), all fields remain editable after preset application. 6) Manual override and save working: Changed max_players from 6→5, min_players_to_start from 2→3, added change summary 'VIP 5-max table test', Save Poker Rules button triggers POST /api/v1/games/{game_id}/config/poker-rules successfully with 200 OK response, success toast 'Poker kuralları kaydedildi' appears, change summary field clears after save, manual values preserved correctly. All API endpoints working as expected with proper Turkish UI messages."
+  - task: "Blackjack Rules & Side Bets UI + Preset Flow"
+    implemented: true
+    working: true
+    file: "src/components/games/GameBlackjackRulesTab.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented GameBlackjackRulesTab.jsx and integrated into GameConfigPanel.jsx with TAB_SCHEMA for TABLE_BLACKJACK games."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ BLACKJACK RULES & SIDE BETS UI + PRESET FLOW FULLY WORKING: 1) Backend API Testing: Created TABLE_BLACKJACK test game successfully, GET /api/v1/games/{game_id}/config/blackjack-rules returns proper default template (deck_count=6, dealer_hits_soft_17=false S17, blackjack_payout=1.5 for 3:2, side_bets_enabled=false), all 3 expected presets found (bj_european_s17_3to2_standard, bj_vegas_h17_3to2_sidebets_enabled, bj_lowstakes_beginner_friendly). 2) Preset Application: GET /api/v1/game-config/presets/bj_vegas_h17_3to2_sidebets_enabled returns correct values with dealer_hits_soft_17=true, side_bets_enabled=true, 2 side bets (perfect_pairs, 21_3), POST preset apply works correctly. 3) Manual Override + Save: POST /api/v1/games/{game_id}/config/blackjack-rules successfully saves with manual changes (max_bet=2000, max_same_country_seats=3, session_max_duration=300, max_daily_buyin_limit=10000, summary='VIP Vegas H17 masası test'), returns 200 OK with complete response structure. 4) UI Regression Testing: TABLE_POKER games correctly show 'Poker Rules & Rake' tab but NOT 'Blackjack Rules & Side Bets' tab, TAB_SCHEMA working correctly. 5) GameBlackjackRulesTab.jsx component implemented with all required sections: Preset bar, Core Rules, Limits, Side Bets, Advanced Table Settings (Branding/Behavior/Anti-Collusion), Change summary. All backend endpoints and preset flow working perfectly as specified in Turkish review request. Minor: UI testing limited due to game visibility in frontend, but backend functionality fully verified."
   - task: "Finance Page Tabs"
     implemented: true
     working: true
