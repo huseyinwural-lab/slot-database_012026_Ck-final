@@ -28,7 +28,10 @@ const defaultVisibility = {
 };
 
 // core_type bazlı görünür tab şeması
+// Burada ana türler için SLOT / TABLE_POKER / CRASH / DICE / TABLE_BLACKJACK kullanıyoruz.
+// REEL_LINES / WAYS / MEGAWAYS vb. engine tipleri SLOT ile aynı şemayı kullanacak.
 const TAB_SCHEMA = {
+  SLOT: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
   REEL_LINES: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
   WAYS: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
   MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'reels', 'paytable', 'assets', 'logs'],
