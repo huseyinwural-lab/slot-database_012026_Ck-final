@@ -750,7 +750,7 @@ def _validate_country_overrides(
                 is_int_like = key.endswith("_rounds") or key.endswith("_bets")
                 if is_int_like:
                     if not isinstance(val, (int, float)) or int(val) <= 0:
-                        raise JSONResponse(
+                        return JSONResponse(
                             status_code=400,
                             content=error_builder(
                                 f"{key} must be a positive integer when provided.",
@@ -761,7 +761,7 @@ def _validate_country_overrides(
                         )
                 else:
                     if not isinstance(val, (int, float)) or float(val) <= 0:
-                        raise JSONResponse(
+                        return JSONResponse(
                             status_code=400,
                             content=error_builder(
                                 f"{key} must be > 0 when provided.",
