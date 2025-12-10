@@ -221,7 +221,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "Poker Rules & Rake Backend Endpoints"
+    - "poker_advanced_settings_backend_frontend"
   stuck_tasks: 
     - "Poker Rules & Rake Backend Endpoints"
   test_all: false
