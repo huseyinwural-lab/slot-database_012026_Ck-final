@@ -3415,7 +3415,7 @@ def _client_upload_error(message: str, reason: str, details: Dict[str, Any]) -> 
     }
 
 
-@router.post("/v1/games/{game_id}/client-upload")
+@router.post("/{game_id}/client-upload")
 async def upload_game_client(
     game_id: str,
     file: Optional[UploadFile] = File(None),
