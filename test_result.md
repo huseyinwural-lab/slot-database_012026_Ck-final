@@ -467,6 +467,20 @@ frontend:
         -working: true
         -agent: "testing"
         -comment: "✅ FRONTEND TENANT UI TESTING COMPLETE - ALL SCENARIOS PASSED (4/4 - 100% success rate): Senaryo 1) Sidebar/Layout Owner Context: ✅ All expected menu items visible (Dashboard, Players, Finance, Games, VIP Games, Bonuses, Support, Reports, Settings), ✅ Tenants menu item correctly NOT present in sidebar (as expected), ✅ Owner context properly simulated via useTenant hook selecting first owner tenant. Senaryo 2) Tenants Sayfası UI: ✅ Page loads with correct heading 'Tenants', ✅ Left side 'Existing Tenants' card displays default_casino (owner) and demo_renter (renter) with feature summaries (Robot: On/Off, Config: On/Off, Bonus: On/Off, Reports: On/Off), ✅ Right side 'Yeni Tenant / Kiracı Oluştur' form with Name input, Owner/Renter type buttons, 4 feature toggle switches (can_use_game_robot, can_edit_configs, can_manage_bonus, can_view_reports), Create Tenant button. Senaryo 3) Yeni Kiracı Oluşturma Akışı: ✅ Form filling works (Name: 'UI Test Renter Fixed', Type: Renter, Features configured: robot=false, edit_configs=false, manage_bonus=true, view_reports=true), ✅ API integration successful (POST /api/v1/tenants/ with trailing slash fix), ✅ Success toast 'Tenant created' appears, ✅ New tenant appears in list after creation, ✅ Multiple tenant creation tested successfully. Senaryo 4) Regresyon: ✅ All navigation working (Dashboard, Games, Bonuses, Reports load without critical errors), ✅ No breaking changes to existing functionality. FIXED ISSUE: Frontend API calls updated to use trailing slash (/v1/tenants/) to match backend endpoint requirements. The tenant frontend functionality is fully operational and ready for production use."
+  - task: "Admin Login Flow & JWT Protected Routes - Turkish Review Request"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Login.jsx, frontend/src/components/RequireAuth.jsx, frontend/src/components/Layout.jsx, frontend/src/services/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Admin login flow implemented with JWT authentication: Login.jsx with email/password form and password toggle, RequireAuth.jsx for route protection, Layout.jsx with admin info display and logout functionality, api.js with JWT token interceptor."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ADMIN LOGIN FLOW & JWT PROTECTED ROUTES - ALL TESTS PASSED (5/5 scenarios - 100% success rate): Senaryo 1) Login sayfası yüklenmesi: /login sayfası tüm gerekli elementleri içeriyor - 'Admin Girişi' başlığı, email ve şifre input alanları, demo kullanıcı metni (admin@casino.com / Admin123!), 'Giriş Yap' butonu, şifre göz ikonu (Eye/EyeOff) toggle çalışıyor (password ↔ text). Senaryo 2) Başarılı login akışı: admin@casino.com/Admin123! ile giriş başarılı - POST /api/v1/auth/login 200 OK response, localStorage'da admin_token ve admin_user set edildi, Dashboard'a (/) yönlendirme başarılı, sağ üstte admin bilgileri görünüyor (Super Admin / admin@casino.com). Senaryo 3) Korumalı rotalar: Token yokken /players, /games, /admins rotalarına erişim otomatik /login'e yönlendiriyor, login sonrası tüm korumalı rotalara erişim sağlanıyor ve içerik yükleniyor. Senaryo 4) Logout akışı: Logout butonu çalışıyor, localStorage'dan tokenlar siliniyor, /login'e yönlendirme başarılı, logout sonrası korumalı rotalara erişim tekrar /login'e yönlendiriyor. Senaryo 5) Hatalı login: Yanlış şifre (Admin123?) ile giriş 401 INVALID_CREDENTIALS döndürüyor, login sayfasında kalıyor, hata mesajı gösteriliyor, tokenlar set edilmiyor. Tüm JWT auth akışları, route protection, admin bilgileri gösterimi ve logout functionality mükemmel çalışıyor."
   - task: "Crash Advanced Safety UI Validation"
     implemented: true
     working: true
