@@ -209,6 +209,16 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
               >
                 {diffLoading ? 'Diff yükleniyor...' : 'Compare Selected'}
               </Button>
+
+      <ConfigDiffPanel
+        open={diffOpen}
+        onOpenChange={setDiffOpen}
+        configType="paytable"
+        fromVersion={diffMeta.from}
+        toVersion={diffMeta.to}
+        changes={diffChanges}
+      />
+
             )}
           </div>
         </CardHeader>
