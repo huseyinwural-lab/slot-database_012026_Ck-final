@@ -1582,11 +1582,11 @@ class CasinoAdminAPITester:
                     else:
                         print(f"   ❌ Response missing fields: {missing_fields}")
                         success_1 = False
-                                
-                        except Exception as e:
-                            print(f"   ❌ Response parsing error: {e}")
-                            success_1 = False
-                    else:
+                        
+                except Exception as e:
+                    print(f"   ❌ Response parsing error: {e}")
+                    success_1 = False
+            else:
                         print(f"❌ Senaryo 1 Failed - Status: {response.status_code}")
                         print(f"   Response: {response.text[:200]}...")
                         self.failed_tests.append({
