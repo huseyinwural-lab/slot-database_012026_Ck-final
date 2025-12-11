@@ -1648,7 +1648,7 @@ class CasinoAdminAPITester:
                     create_validation_success = False
                 
                 # Validate features
-                response_features = create_response.get('features', {})ponse.get('features', {})
+                response_features = create_response.get('features', {})
                 for feature, expected_value in new_renter_data['features'].items():
                     actual_value = response_features.get(feature)
                     if actual_value == expected_value:
