@@ -3467,7 +3467,9 @@ async def upload_game_client(
 
     # Basit bir path; gerçek ortamda CDN/storage'e yazılabilir.
     version = await _generate_new_version(db, game_id, admin_id, notes="Game client upload")
-    url = f"/static/game-clients/{game_id}/{version.id}/{file.filename}"
+    default_url = f"/static/game-clients/{game_id}/{version.id}/{file.filename}"
+    # launch_url parametresi geldiyse onu kullan, yoksa default'u koru
+    effective_launch_url = launch_url or default_url
 
     # Game doc'u Pydantic modele çevirerek client_variants ile çalışalım
     game = Game(**game_doc)
