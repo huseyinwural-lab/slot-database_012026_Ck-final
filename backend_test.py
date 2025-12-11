@@ -1264,6 +1264,65 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_robot_orchestrator_backend_endpoint_faz5(self):
+        """Test FAZ 5 – Robot Orchestrator Backend Endpoint - Turkish Review Request"""
+        print("\n🤖 FAZ 5 – ROBOT ORCHESTRATOR BACKEND ENDPOINT TESTS")
+        
+        # Hazırlık: Seed admin data and create API keys
+        print(f"\n🔍 Hazırlık: Admin seed ve API key oluşturma")
+        success_prep = self._prepare_robot_orchestrator_tests()
+        if not success_prep:
+            print("❌ Hazırlık başarısız. Testlere devam edilemiyor.")
+            return False
+        
+        # Test 1 – Mutlu path (geçerli API key + robot.run scope)
+        print(f"\n🔍 Test 1 – Mutlu path (geçerli API key + robot.run scope)")
+        success_test1 = self._test_robot_orchestrator_happy_path()
+        
+        # Test 2 – rounds limitleri
+        print(f"\n🔍 Test 2 – rounds limitleri")
+        success_test2 = self._test_robot_orchestrator_rounds_limits()
+        
+        # Test 3 – game_types whitelist & toplam iş yükü
+        print(f"\n🔍 Test 3 – game_types whitelist & toplam iş yükü")
+        success_test3 = self._test_robot_orchestrator_game_types_limits()
+        
+        # Test 4 – Scope eksik
+        print(f"\n🔍 Test 4 – Scope eksik")
+        success_test4 = self._test_robot_orchestrator_scope_missing()
+        
+        # Test 5 – Tenant mismatch
+        print(f"\n🔍 Test 5 – Tenant mismatch")
+        success_test5 = self._test_robot_orchestrator_tenant_mismatch()
+        
+        # Overall result
+        overall_success = success_prep and success_test1 and success_test2 and success_test3 and success_test4 and success_test5
+        
+        if overall_success:
+            print("\n✅ FAZ 5 – ROBOT ORCHESTRATOR BACKEND ENDPOINT - TÜM TESTLER BAŞARILI")
+            print("   ✅ Hazırlık: Admin seed ve API key oluşturma başarılı")
+            print("   ✅ Test 1: Mutlu path başarılı")
+            print("   ✅ Test 2: Rounds limitleri başarılı")
+            print("   ✅ Test 3: Game types whitelist & toplam iş yükü başarılı")
+            print("   ✅ Test 4: Scope eksik validation başarılı")
+            print("   ✅ Test 5: Tenant mismatch validation başarılı")
+        else:
+            print("\n❌ FAZ 5 – ROBOT ORCHESTRATOR BACKEND ENDPOINT - BAZI TESTLER BAŞARISIZ")
+            if not success_prep:
+                print("   ❌ Hazırlık başarısız")
+            if not success_test1:
+                print("   ❌ Test 1: Mutlu path başarısız")
+            if not success_test2:
+                print("   ❌ Test 2: Rounds limitleri başarısız")
+            if not success_test3:
+                print("   ❌ Test 3: Game types whitelist & toplam iş yükü başarısız")
+            if not success_test4:
+                print("   ❌ Test 4: Scope eksik validation başarısız")
+            if not success_test5:
+                print("   ❌ Test 5: Tenant mismatch validation başarısız")
+        
+        return overall_success
+
     def test_game_robot_tenant_aware(self):
         """Test Game Robot Tenant-Aware Functionality - Görev 2.2"""
         print("\n🤖 GAME ROBOT TENANT-AWARE TESTS - Görev 2.2")
