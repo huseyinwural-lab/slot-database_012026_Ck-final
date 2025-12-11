@@ -66,6 +66,7 @@ Para giriş çıkışlarının kontrol edildiği merkezdir.
 Casino lobisinin yönetildiği alandır.
 *   **Oyun Listesi:** Tüm oyunlar, sağlayıcılar, RTP oranları.
 *   **Oyun Düzenleme:** Oyunun adı, kategorisi, görselleri ve aktiflik durumu.
+*   **Oyun İstemcisi (Client) Yönetimi:** HTML5 ve Unity WebGL oyun istemcilerinin yüklenmesi ve güncellenmesi. Client upload ekranında girilen **launch_url** ve **min_version** alanları, ilgili `client_variants[client_type]` kaydına yazılır; daha önce manual import sırasında üretilmiş default değerler bu alanlarla override edilir.
 *   **Kategori Yönetimi:** "Popüler", "Yeni", "Slotlar" gibi lobi kategorilerini düzenleme.
 
 ---
