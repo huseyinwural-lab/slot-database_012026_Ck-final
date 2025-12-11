@@ -13,7 +13,7 @@ export function useTenant() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get('/v1/tenants');
+        const res = await api.get('/v1/tenants/');
         const items = res.data || [];
         // Geçici mantık: ilk owner'ı current tenant kabul et
         const owner = items.find((t) => t.type === 'owner');
