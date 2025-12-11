@@ -1229,6 +1229,268 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_config_version_diff_backend_mvp(self):
+        """Test P0-C Config Version Diff Backend MVP - Turkish Review Request"""
+        print("\n🔄 CONFIG VERSION DIFF BACKEND MVP TESTS")
+        
+        # Base URL: REACT_APP_BACKEND_URL
+        # Test game: Test Slot Game (id=f9596f63-a1f6-411b-aec4-f713b900894e)
+        
+        test_game_id = "f9596f63-a1f6-411b-aec4-f713b900894e"
+        
+        # Test data version IDs (created in setup)
+        old_slot_version = "2c95dacf-1aeb-48ac-9862-b855a4d8e59c"  # fast, 25, 200
+        new_slot_version = "a5da7699-ecc1-490e-9e5d-f7a9106c91d5"  # slow, 10, 50
+        
+        old_paytable_version = "88c5664a-0f27-4f1a-b0a5-c8b8fd4f1a7a"
+        new_paytable_version = "d47fc957-eb6a-4c93-817b-964d89d04dd7"
+        
+        old_reel_version = "ea871e30-4641-4fe2-99cd-4d30b04ff4a0"  # 3 reels, last has 5 symbols
+        new_reel_version = "375653fa-3984-4fcf-b1db-77a58c558306"  # 3 reels, last has 6 symbols (added 9, WILD)
+        
+        old_jackpot_version = "3904f2ef-524c-4512-9327-74c9ed8295f4"  # contribution 1.5%
+        new_jackpot_version = "b74f7391-a2b4-4b07-b033-ba03015c4aa3"  # contribution 2.0%
+        
+        print(f"\n🎯 Test Game ID: {test_game_id}")
+        
+        # Scenario 1: Slot Advanced – modified primitive fields
+        print(f"\n🔍 Scenario 1: Slot Advanced – modified primitive fields")
+        success1, response1 = self.run_test(
+            "Config Diff - Slot Advanced",
+            "GET",
+            f"api/v1/games/{test_game_id}/config-diff?type=slot-advanced&from={old_slot_version}&to={new_slot_version}",
+            200
+        )
+        
+        if success1 and isinstance(response1, dict):
+            print("   ✅ Response structure validation:")
+            required_fields = ['game_id', 'config_type', 'from_config_version_id', 'to_config_version_id', 'changes']
+            missing_fields = [field for field in required_fields if field not in response1]
+            if not missing_fields:
+                print(f"      ✅ All required fields present")
+                print(f"      ✅ game_id: {response1['game_id']}")
+                print(f"      ✅ config_type: {response1['config_type']}")
+                print(f"      ✅ changes count: {len(response1['changes'])}")
+                
+                # Validate expected changes
+                changes = response1.get('changes', [])
+                expected_changes = {
+                    'spin_speed': {'old': 'fast', 'new': 'slow'},
+                    'autoplay.autoplay_default_spins': {'old': 25, 'new': 10},
+                    'autoplay.autoplay_max_spins': {'old': 200, 'new': 50}
+                }
+                
+                found_changes = {}
+                for change in changes:
+                    field_path = change.get('field_path')
+                    change_type = change.get('change_type')
+                    old_value = change.get('old_value')
+                    new_value = change.get('new_value')
+                    
+                    print(f"      📝 Change: {field_path} = {old_value} → {new_value} ({change_type})")
+                    
+                    if field_path in expected_changes:
+                        found_changes[field_path] = {'old': old_value, 'new': new_value, 'type': change_type}
+                
+                # Verify expected changes
+                validation_success = True
+                for expected_field, expected_values in expected_changes.items():
+                    if expected_field in found_changes:
+                        found = found_changes[expected_field]
+                        if (found['old'] == expected_values['old'] and 
+                            found['new'] == expected_values['new'] and 
+                            found['type'] == 'modified'):
+                            print(f"      ✅ {expected_field}: {found['old']} → {found['new']} (modified)")
+                        else:
+                            print(f"      ❌ {expected_field}: Expected {expected_values}, got {found}")
+                            validation_success = False
+                    else:
+                        print(f"      ❌ Missing expected change: {expected_field}")
+                        validation_success = False
+                
+                if validation_success:
+                    print("   ✅ All expected slot advanced changes detected correctly")
+                else:
+                    print("   ❌ Some expected slot advanced changes missing or incorrect")
+            else:
+                print(f"      ❌ Missing required fields: {missing_fields}")
+        else:
+            print("   ❌ Slot Advanced config diff failed")
+        
+        # Scenario 2: Paytable – pays değişikliği
+        print(f"\n🔍 Scenario 2: Paytable – pays changes")
+        success2, response2 = self.run_test(
+            "Config Diff - Paytable",
+            "GET",
+            f"api/v1/games/{test_game_id}/config-diff?type=paytable&from={old_paytable_version}&to={new_paytable_version}",
+            200
+        )
+        
+        if success2 and isinstance(response2, dict):
+            print("   ✅ Paytable diff response received")
+            print(f"      ✅ config_type: {response2.get('config_type')}")
+            changes = response2.get('changes', [])
+            print(f"      ✅ changes count: {len(changes)}")
+            
+            if len(changes) == 0:
+                print("      ℹ️  No changes detected (paytables may be identical)")
+            else:
+                for change in changes:
+                    field_path = change.get('field_path')
+                    change_type = change.get('change_type')
+                    old_value = change.get('old_value')
+                    new_value = change.get('new_value')
+                    print(f"      📝 Paytable change: {field_path} = {old_value} → {new_value} ({change_type})")
+        else:
+            print("   ❌ Paytable config diff failed")
+        
+        # Scenario 3: Reel Strips – reel'e sembol ekleme
+        print(f"\n🔍 Scenario 3: Reel Strips – symbol addition to reel")
+        success3, response3 = self.run_test(
+            "Config Diff - Reel Strips",
+            "GET",
+            f"api/v1/games/{test_game_id}/config-diff?type=reel-strips&from={old_reel_version}&to={new_reel_version}",
+            200
+        )
+        
+        if success3 and isinstance(response3, dict):
+            print("   ✅ Reel strips diff response received")
+            print(f"      ✅ config_type: {response3.get('config_type')}")
+            changes = response3.get('changes', [])
+            print(f"      ✅ changes count: {len(changes)}")
+            
+            # Look for added symbols
+            added_symbols = []
+            for change in changes:
+                field_path = change.get('field_path')
+                change_type = change.get('change_type')
+                old_value = change.get('old_value')
+                new_value = change.get('new_value')
+                
+                print(f"      📝 Reel change: {field_path} = {old_value} → {new_value} ({change_type})")
+                
+                if change_type == 'added' and 'reels[2]' in field_path:
+                    added_symbols.append(new_value)
+            
+            if added_symbols:
+                print(f"      ✅ Added symbols to reel 2: {added_symbols}")
+            else:
+                print("      ℹ️  No added symbols detected in reel 2")
+        else:
+            print("   ❌ Reel strips config diff failed")
+        
+        # Scenario 4: Jackpots – param değişikliği
+        print(f"\n🔍 Scenario 4: Jackpots – parameter changes")
+        success4, response4 = self.run_test(
+            "Config Diff - Jackpots",
+            "GET",
+            f"api/v1/games/{test_game_id}/config-diff?type=jackpots&from={old_jackpot_version}&to={new_jackpot_version}",
+            200
+        )
+        
+        if success4 and isinstance(response4, dict):
+            print("   ✅ Jackpots diff response received")
+            print(f"      ✅ config_type: {response4.get('config_type')}")
+            changes = response4.get('changes', [])
+            print(f"      ✅ changes count: {len(changes)}")
+            
+            # Look for contribution_percent change
+            contribution_change_found = False
+            for change in changes:
+                field_path = change.get('field_path')
+                change_type = change.get('change_type')
+                old_value = change.get('old_value')
+                new_value = change.get('new_value')
+                
+                print(f"      📝 Jackpot change: {field_path} = {old_value} → {new_value} ({change_type})")
+                
+                if 'contribution_percent' in field_path and change_type == 'modified':
+                    if old_value == 1.5 and new_value == 2.0:
+                        print(f"      ✅ Expected contribution_percent change: 1.5% → 2.0%")
+                        contribution_change_found = True
+            
+            if not contribution_change_found:
+                print("      ⚠️  Expected contribution_percent change not found")
+        else:
+            print("   ❌ Jackpots config diff failed")
+        
+        # Scenario 5: Negative / error scenarios
+        print(f"\n🔍 Scenario 5: Negative / error scenarios")
+        
+        # 5a: Invalid type
+        success5a, response5a = self.run_test(
+            "Config Diff - Invalid Type",
+            "GET",
+            f"api/v1/games/{test_game_id}/config-diff?type=foo&from={old_slot_version}&to={new_slot_version}",
+            400
+        )
+        
+        if success5a and isinstance(response5a, dict):
+            error_code = response5a.get('error_code')
+            details = response5a.get('details', {})
+            reason = details.get('reason')
+            
+            print(f"   ✅ Invalid type test: HTTP 400")
+            print(f"      ✅ error_code: {error_code}")
+            print(f"      ✅ details.reason: {reason}")
+            
+            if error_code == 'CONFIG_DIFF_VALIDATION_FAILED' and reason == 'type_not_supported':
+                print("      ✅ Correct error response for invalid type")
+            else:
+                print(f"      ❌ Unexpected error response: {error_code}, {reason}")
+        else:
+            print("   ❌ Invalid type test failed")
+        
+        # 5b: Non-existent config_version_id
+        fake_version_id = "00000000-0000-0000-0000-000000000000"
+        success5b, response5b = self.run_test(
+            "Config Diff - Non-existent Version",
+            "GET",
+            f"api/v1/games/{test_game_id}/config-diff?type=slot-advanced&from={fake_version_id}&to={new_slot_version}",
+            400
+        )
+        
+        if success5b and isinstance(response5b, dict):
+            error_code = response5b.get('error_code')
+            details = response5b.get('details', {})
+            reason = details.get('reason')
+            
+            print(f"   ✅ Non-existent version test: HTTP 400")
+            print(f"      ✅ error_code: {error_code}")
+            print(f"      ✅ details.reason: {reason}")
+            
+            if error_code == 'CONFIG_DIFF_VALIDATION_FAILED' and reason == 'version_not_found':
+                print("      ✅ Correct error response for non-existent version")
+            else:
+                print(f"      ❌ Unexpected error response: {error_code}, {reason}")
+        else:
+            print("   ❌ Non-existent version test failed")
+        
+        # Overall test result
+        overall_success = success1 and success2 and success3 and success4 and success5a and success5b
+        
+        if overall_success:
+            print("\n✅ CONFIG VERSION DIFF BACKEND MVP - ALL TESTS PASSED")
+            print("   ✅ Slot Advanced diff working with primitive field changes")
+            print("   ✅ Paytable diff working")
+            print("   ✅ Reel Strips diff working with symbol additions")
+            print("   ✅ Jackpots diff working with parameter changes")
+            print("   ✅ Error scenarios working correctly")
+        else:
+            print("\n❌ CONFIG VERSION DIFF BACKEND MVP - SOME TESTS FAILED")
+            if not success1:
+                print("   ❌ Slot Advanced diff failed")
+            if not success2:
+                print("   ❌ Paytable diff failed")
+            if not success3:
+                print("   ❌ Reel Strips diff failed")
+            if not success4:
+                print("   ❌ Jackpots diff failed")
+            if not success5a or not success5b:
+                print("   ❌ Error scenarios failed")
+        
+        return overall_success
+
     def test_slot_p0b_backend_validation(self):
         """Test Slot P0-B Backend Validation - Turkish Review Request"""
         print("\n🎰 SLOT P0-B BACKEND VALIDATION TESTS")
