@@ -3440,24 +3440,27 @@ async def upload_game_client(
     admin_id = "current_admin"
     request_id = request.headers.get("X-Request-ID") or str(uuid4())
 
-    if not file:
-        raise ClientUploadError(_client_upload_error("File is required.", "missing_file", {}))
-
-    client_type_norm = (client_type or "").lower()
-    allowed_client_types = {"html5", "unity"}
-    if client_type_norm not in allowed_client_types:
-        raise ClientUploadError(
-            _client_upload_error(
-                "Invalid client_type.",
-                "invalid_client_type",
-                {"client_type": client_type, "allowed_types": sorted(list(allowed_client_types))},
-            )
-        )
-
     try:
-        content = await file.read()
-    except Exception:
-        raise ClientUploadError(_client_upload_error("File upload failed.", "read_error", {}))
+        if not file:
+            raise ClientUploadError(_client_upload_error("File is required.", "missing_file", {}))
+
+        client_type_norm = (client_type or "").lower()
+        allowed_client_types = {"html5", "unity"}
+        if client_type_norm not in allowed_client_types:
+            raise ClientUploadError(
+                _client_upload_error(
+                    "Invalid client_type.",
+                    "invalid_client_type",
+                    {"client_type": client_type, "allowed_types": sorted(list(allowed_client_types))},
+                )
+            )
+
+        try:
+            content = await file.read()
+        except Exception:
+            raise ClientUploadError(_client_upload_error("File upload failed.", "read_error", {}))
+    except ClientUploadError as exc:
+        return JSONResponse(status_code=400, content=exc.payload)
 
     size_bytes = len(content)
 
