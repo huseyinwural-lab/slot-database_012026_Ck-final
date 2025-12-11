@@ -3420,7 +3420,8 @@ async def upload_game_client(
     game_id: str,
     file: Optional[UploadFile] = File(None),
     client_type: str = Form(...),
-    params: Optional[str] = Form(None),
+    launch_url: Optional[str] = Form(None),
+    min_version: Optional[str] = Form(None),
     request: Request = None,
 ):
     """Oyun client upload endpoint'i.
