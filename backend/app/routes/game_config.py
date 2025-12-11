@@ -3536,11 +3536,15 @@ async def upload_game_client(
 
     response_game = updated_doc or game_doc
 
+    # Get the actual launch_url from the updated game document
+    updated_variants = response_game.get("client_variants", {})
+    actual_launch_url = updated_variants.get(client_type_norm, {}).get("launch_url", effective_launch_url)
+    
     return {
         "game": response_game,
         "game_id": game_id,
         "client_type": client_type_norm,
-        "launch_url": effective_launch_url,
+        "launch_url": actual_launch_url,
         "size_bytes": size_bytes,
         "primary_client_type": primary.value if primary else None,
     }
