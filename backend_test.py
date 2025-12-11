@@ -1614,20 +1614,6 @@ class CasinoAdminAPITester:
                 print("   ❌ Senaryo 5: Missing file validation failed")
         
         return overall_success
-                            
-                            if not missing_fields:
-                                print("   ✅ Response structure complete")
-                                print(f"   ✅ game_id: {response_data['game_id']}")
-                                print(f"   ✅ client_type: {response_data['client_type']}")
-                                print(f"   ✅ launch_url: {response_data['launch_url']}")
-                                print(f"   ✅ primary_client_type: {response_data['primary_client_type']}")
-                                
-                                # Validate expected values
-                                if (response_data['game_id'] == test_game_id and 
-                                    response_data['client_type'] == 'html5' and
-                                    'test-html5.zip' in response_data['launch_url'] and
-                                    response_data['primary_client_type'] == 'html5'):
-                                    print("   ✅ All response values correct")
                                     html5_response = response_data
                                 else:
                                     print("   ❌ Some response values incorrect")
