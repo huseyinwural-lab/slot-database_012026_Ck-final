@@ -59,8 +59,6 @@ async def create_api_key(
     payload: APIKeyCreateRequest,
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    from pydantic import BaseModel
-
     db = get_db()
 
     validate_scopes(payload.scopes)
