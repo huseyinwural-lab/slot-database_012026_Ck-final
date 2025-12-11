@@ -47,8 +47,8 @@ const GameManagement = () => {
   };
 
   useEffect(() => {
-    fetchAll();
-  }, []);
+    fetchAll(gameCategory);
+  }, [gameCategory]);
 
   const handleToggleGame = async (gameId) => {
     try {
