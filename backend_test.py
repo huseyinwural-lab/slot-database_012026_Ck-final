@@ -1545,43 +1545,43 @@ class CasinoAdminAPITester:
                     missing_fields = [field for field in required_fields if field not in response_data]
                     
                     if not missing_fields:
-                                print("   ✅ Response structure complete")
-                                
-                                # Validate specific values
-                                if response_data.get('client_type') == 'html5':
-                                    print("   ✅ client_type == 'html5'")
-                                else:
-                                    print(f"   ❌ client_type mismatch: expected 'html5', got '{response_data.get('client_type')}'")
-                                
-                                if response_data.get('launch_url') == '/static/test-overridden.html':
-                                    print("   ✅ launch_url == '/static/test-overridden.html'")
-                                else:
-                                    print(f"   ❌ launch_url mismatch: expected '/static/test-overridden.html', got '{response_data.get('launch_url')}'")
-                                
-                                if response_data.get('primary_client_type') == 'html5':
-                                    print("   ✅ primary_client_type == 'html5' (first client)")
-                                else:
-                                    print(f"   ❌ primary_client_type mismatch: expected 'html5', got '{response_data.get('primary_client_type')}'")
-                                
-                                # Validate game.client_variants structure
-                                game = response_data.get('game', {})
-                                client_variants = game.get('client_variants', {})
-                                html5_variant = client_variants.get('html5', {})
-                                
-                                if html5_variant.get('launch_url') == '/static/test-overridden.html':
-                                    print("   ✅ game.client_variants.html5.launch_url == '/static/test-overridden.html'")
-                                else:
-                                    print(f"   ❌ game.client_variants.html5.launch_url mismatch")
-                                
-                                html5_extra = html5_variant.get('extra', {})
-                                if html5_extra.get('min_version') == '1.2.3':
-                                    print("   ✅ game.client_variants.html5.extra.min_version == '1.2.3'")
-                                else:
-                                    print(f"   ❌ game.client_variants.html5.extra.min_version mismatch")
-                                    
-                            else:
-                                print(f"   ❌ Response missing fields: {missing_fields}")
-                                success_1 = False
+                        print("   ✅ Response structure complete")
+                        
+                        # Validate specific values
+                        if response_data.get('client_type') == 'html5':
+                            print("   ✅ client_type == 'html5'")
+                        else:
+                            print(f"   ❌ client_type mismatch: expected 'html5', got '{response_data.get('client_type')}'")
+                        
+                        if response_data.get('launch_url') == '/static/test-overridden.html':
+                            print("   ✅ launch_url == '/static/test-overridden.html'")
+                        else:
+                            print(f"   ❌ launch_url mismatch: expected '/static/test-overridden.html', got '{response_data.get('launch_url')}'")
+                        
+                        if response_data.get('primary_client_type') == 'html5':
+                            print("   ✅ primary_client_type == 'html5' (first client)")
+                        else:
+                            print(f"   ❌ primary_client_type mismatch: expected 'html5', got '{response_data.get('primary_client_type')}'")
+                        
+                        # Validate game.client_variants structure
+                        game = response_data.get('game', {})
+                        client_variants = game.get('client_variants', {})
+                        html5_variant = client_variants.get('html5', {})
+                        
+                        if html5_variant.get('launch_url') == '/static/test-overridden.html':
+                            print("   ✅ game.client_variants.html5.launch_url == '/static/test-overridden.html'")
+                        else:
+                            print(f"   ❌ game.client_variants.html5.launch_url mismatch")
+                        
+                        html5_extra = html5_variant.get('extra', {})
+                        if html5_extra.get('min_version') == '1.2.3':
+                            print("   ✅ game.client_variants.html5.extra.min_version == '1.2.3'")
+                        else:
+                            print(f"   ❌ game.client_variants.html5.extra.min_version mismatch")
+                            
+                    else:
+                        print(f"   ❌ Response missing fields: {missing_fields}")
+                        success_1 = False
                                 
                         except Exception as e:
                             print(f"   ❌ Response parsing error: {e}")
