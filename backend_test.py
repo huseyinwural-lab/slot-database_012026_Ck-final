@@ -1614,9 +1614,8 @@ class CasinoAdminAPITester:
                 print("   ❌ Senaryo 5: Missing file validation failed")
         
         return overall_success
-            
-            try:
-                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+
+    def test_config_version_diff_backend_mvp(self):
                 
                 with open(unity_file.name, 'rb') as f:
                     files = {'file': ('test-unity.zip', f, 'application/zip')}
