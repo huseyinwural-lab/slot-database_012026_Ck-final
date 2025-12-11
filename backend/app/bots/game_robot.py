@@ -284,11 +284,34 @@ def main(argv: Optional[List[str]] = None) -> int:
         # argparse zaten mesajı bastı
         return int(e.code) if isinstance(e.code, int) else 1
 
-    client = HttpClient(BASE_URL)
+    tenant_id: str = parsed["tenant_id"]
+    api_key: Optional[str] = parsed["api_key"]
+
+    # Tenant kullanma yetkisini kontrol et
+    from motor.motor_asyncio import AsyncIOMotorClient
+    from config import settings
+
+    client_db = AsyncIOMotorClient(settings.mongo_url)[settings.db_name]
+
+    tenant = client_db.tenants.find_one({"id": tenant_id})
+    if not tenant:
+        print(f"TENANT_NOT_FOUND: {tenant_id}", file=sys.stderr)
+        return 1
+
+    features = tenant.get("features") or {}
+    if not features.get("can_use_game_robot", False):
+        print(f"TENANT_CANNOT_USE_GAME_ROBOT: {tenant_id}", file=sys.stderr)
+        return 1
+
+    print(f"TENANT_CAN_USE_GAME_ROBOT: {tenant_id}")
+
+    client = HttpClient(BASE_URL, tenant_id=tenant_id, api_key=api_key)
     game_types: List[str] = parsed["game_types"]
     rounds: int = parsed["rounds"]
 
-    print(f"[GameRobot] BASE_URL={BASE_URL} | game_types={game_types} | rounds={rounds}")
+    print(
+        f"[GameRobot] BASE_URL={BASE_URL} | tenant_id={tenant_id} | game_types={game_types} | rounds={rounds}"
+    )
 
     results: List[ScenarioResult] = []
 
