@@ -115,6 +115,24 @@ const GameSlotAdvancedTab = ({ game }) => {
       const updated = res.data;
       toast.success('Slot advanced settings kaydedildi.');
       setForm((prev) => ({
+        ...prev,
+        ...updated,
+        autoplay_stop_on_balance_drop_percent:
+          updated.autoplay_stop_on_balance_drop_percent ?? '',
+        summary: '',
+      }));
+    } catch (err) {
+      console.error(err);
+      const apiError = err?.response?.data;
+      if (apiError?.message) {
+        toast.error(apiError.message);
+      } else {
+        toast.error('Slot advanced settings kaydedilemedi.');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const toggleVersion = (configVersionId) => {
     setSelectedVersions((prev) => {
