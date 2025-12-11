@@ -1038,7 +1038,7 @@ async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, requ
         parent_field="country_overrides",
     )
     if err is not None:
-        return JSONResponse(status_code=400, content=err)
+        return err
 
     if payload.min_payout_multiplier < 1.0 or payload.min_payout_multiplier > payload.max_payout_multiplier:
         return JSONResponse(
