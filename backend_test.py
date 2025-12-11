@@ -1263,10 +1263,10 @@ class CasinoAdminAPITester:
             
             print(f"   📤 Uploading HTML5 client with launch_url + min_version to: {url}")
             response = requests.post(url, files=files, data=data, timeout=30)
-                    
-                    success_1 = response.status_code == 200
-                    self.tests_run += 1
-                    if success_1:
+            
+            success_1 = response.status_code == 200
+            self.tests_run += 1
+            if success_1:
                         self.tests_passed += 1
                         print(f"✅ Senaryo 1 - Status: {response.status_code}")
                         
