@@ -170,9 +170,9 @@ const AdminManagement = () => {
                                     <Select value={newUser.role} onValueChange={v=>setNewUser({...newUser, role: v})}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                          <SelectItem value="support">Destek</SelectItem>
-                                          <SelectItem value="manager">Yönetici</SelectItem>
-                                          <SelectItem value="admin">Süper Admin</SelectItem>
+                                          <SelectItem value="Support">Destek</SelectItem>
+                                          <SelectItem value="Manager">Yönetici</SelectItem>
+                                          <SelectItem value="Super Admin">Süper Admin</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

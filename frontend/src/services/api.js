@@ -9,4 +9,20 @@ const api = axios.create({
   },
 });
 
+// Attach JWT token if available
+api.interceptors.request.use((config) => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    if (token) {
+      // eslint-disable-next-line no-param-reassign
+      config.headers = config.headers || {};
+      // eslint-disable-next-line no-param-reassign
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {
+    // localStorage not available; ignore
+  }
+  return config;
+});
+
 export default api;

@@ -1,0 +1,98 @@
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import api from '../services/api';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Shield } from 'lucide-react';
+
+const Login = () => {
+  const [email, setEmail] = useState('admin@casino.com');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = (location.state && location.state.from && location.state.from.pathname) || '/';
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.post('/v1/auth/login', { email, password });
+      const { access_token, admin } = res.data;
+      if (access_token) {
+        localStorage.setItem('admin_token', access_token);
+      }
+      if (admin) {
+        try {
+          localStorage.setItem('admin_user', JSON.stringify(admin));
+        } catch (err) {
+          console.error('Failed to store admin_user', err);
+        }
+      }
+      toast.success('Giriş başarılı');
+      navigate(from === '/login' ? '/' : from, { replace: true });
+    } catch (err) {
+      console.error(err);
+      const detail = err?.response?.data?.detail || 'Giriş başarısız';
+      toast.error(typeof detail === 'string' ? detail : 'Giriş başarısız');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="space-y-2 text-center">
+          <div className="flex justify-center mb-2">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Shield className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <CardTitle>Admin Girişi</CardTitle>
+          <CardDescription>
+            CasinoAdmin kontrol paneline erişmek için bilgilerinizi girin.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-posta</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Şifre</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full mt-2" disabled={loading}>
+              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground text-center">
+              Demo kullanıcı: <span className="font-mono">admin@casino.com / Admin123!</span>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Login;
