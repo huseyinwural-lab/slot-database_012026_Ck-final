@@ -189,6 +189,28 @@ const GameManagement = () => {
   };
 
   return (
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Category filter:</span>
+          <Select
+            value={gameCategory}
+            onValueChange={(v) => setGameCategory(v)}
+          >
+            <SelectTrigger className="w-32 h-7 text-xs">
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="Slot">Slot</SelectItem>
+              <SelectItem value="Crash">Crash</SelectItem>
+              <SelectItem value="Dice">Dice</SelectItem>
+              <SelectItem value="TABLE_POKER">Table Poker</SelectItem>
+              <SelectItem value="TABLE_BLACKJACK">Table Blackjack</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
     <div className="space-y-6">
       <h2 className="text-3xl font-bold tracking-tight">Game Operations</h2>
 
