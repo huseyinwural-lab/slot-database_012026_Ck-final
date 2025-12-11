@@ -1495,9 +1495,20 @@ class CasinoAdminAPITester:
             success_db = db_response.status_code == 200
             if success_db:
                 try:
-                    game_data = db_response.json()
-                    client_variants = game_data.get('client_variants', {})
-                    primary_client_type = game_data.get('primary_client_type')
+                    games_list = db_response.json()
+                    # Find our test game in the list
+                    game_data = None
+                    for game in games_list:
+                        if game.get('id') == test_game_id:
+                            game_data = game
+                            break
+                    
+                    if not game_data:
+                        print(f"   ❌ Test game {test_game_id} not found in games list")
+                        success_db = False
+                    else:
+                        client_variants = game_data.get('client_variants', {})
+                        primary_client_type = game_data.get('primary_client_type')
                     
                     print(f"   📊 DB Validation Results:")
                     print(f"   ✅ client_variants keys: {list(client_variants.keys())}")
