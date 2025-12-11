@@ -175,8 +175,10 @@ async def get_transactions(
         
     if min_amount or max_amount:
         query["amount"] = {}
-        if min_amount: query["amount"]["$gte"] = min_amount
-        if max_amount: query["amount"]["$lte"] = max_amount
+        if min_amount:
+            query["amount"]["$gte"] = min_amount
+        if max_amount:
+            query["amount"]["$lte"] = max_amount
     if start_date:
         query["created_at"] = {"$gte": start_date}
     if player_search:
