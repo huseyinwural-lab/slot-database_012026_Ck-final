@@ -23,6 +23,7 @@ import GameDiceMathTab from './GameDiceMathTab';
 import GameBlackjackRulesTab from './GameBlackjackRulesTab';
 
 import GameSlotAdvancedTab from './GameSlotAdvancedTab';
+import GameClientTab from './GameClientTab';
 
 const defaultVisibility = {
   countries: [],
