@@ -11657,6 +11657,367 @@ TX-MISSING-LOW,25.50,EUR"""
         
         return success1 and success2
 
+    def _prepare_api_key_robot_tests(self):
+        """Prepare API key robot tests: seed admin and get JWT token"""
+        print("   🔧 Admin seed ve JWT token alma...")
+        
+        # Step 1: Seed admin data
+        success1, seed_response = self.run_test("Admin Seed", "POST", "api/v1/admin/seed", 200)
+        if not success1:
+            print("   ❌ Admin seed başarısız")
+            return False
+        
+        print("   ✅ Admin seed başarılı")
+        
+        # Step 2: Login to get JWT token
+        login_data = {
+            "email": "admin@casino.com",
+            "password": "Admin123!"
+        }
+        success2, login_response = self.run_test("Admin Login", "POST", "api/v1/auth/login", 200, login_data)
+        if not success2 or not isinstance(login_response, dict):
+            print("   ❌ Admin login başarısız")
+            return False
+        
+        # Store JWT token for authenticated requests
+        self.access_token = login_response.get('access_token')
+        if not self.access_token:
+            print("   ❌ JWT token alınamadı")
+            return False
+        
+        print(f"   ✅ JWT token alındı: {self.access_token[:20]}...")
+        return True
+
+    def _test_robot_endpoint_happy_path(self):
+        """Test 1: API key ile robot endpoint (mutlu path)"""
+        print("   🎯 API key oluşturma ve robot endpoint testi...")
+        
+        # Create API key with robot.run and games.read scopes
+        api_key_data = {
+            "name": "Robot Key #Test",
+            "scopes": ["robot.run", "games.read"]
+        }
+        success1, create_response = self.run_test("Create API Key for Robot", "POST", "api/v1/api-keys", 201, api_key_data, auth_token=self.access_token)
+        
+        if not success1 or not isinstance(create_response, dict):
+            print("   ❌ API key oluşturulamadı")
+            return False, None
+        
+        api_key = create_response.get('api_key')
+        if not api_key:
+            print("   ❌ API key response'da bulunamadı")
+            return False, None
+        
+        print(f"   ✅ API key oluşturuldu: {api_key[:20]}...")
+        
+        # Test robot endpoint with API key
+        robot_data = {
+            "game_types": ["slot", "crash"],
+            "rounds": 10
+        }
+        
+        # Use custom headers for API key auth
+        url = f"{self.base_url}/api/v1/robot/round"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}'
+        }
+        
+        try:
+            response = requests.post(url, json=robot_data, headers=headers, timeout=30)
+            success2 = response.status_code == 200
+            
+            if success2:
+                robot_response = response.json()
+                print(f"   ✅ Robot endpoint başarılı - Status: {response.status_code}")
+                
+                # Validate response structure
+                expected_fields = ['status', 'tenant_id', 'scopes']
+                missing_fields = [field for field in expected_fields if field not in robot_response]
+                
+                if not missing_fields:
+                    print(f"      ✅ Response yapısı tam: status={robot_response.get('status')}")
+                    print(f"      ✅ tenant_id: {robot_response.get('tenant_id')}")
+                    print(f"      ✅ scopes: {robot_response.get('scopes')}")
+                    
+                    # Check if robot.run scope is present
+                    if 'robot.run' in robot_response.get('scopes', []):
+                        print("      ✅ robot.run scope mevcut")
+                        return True, api_key
+                    else:
+                        print("      ❌ robot.run scope eksik")
+                        return False, api_key
+                else:
+                    print(f"      ❌ Response eksik alanlar: {missing_fields}")
+                    return False, api_key
+            else:
+                print(f"   ❌ Robot endpoint başarısız - Status: {response.status_code}")
+                print(f"      Response: {response.text[:200]}")
+                return False, api_key
+                
+        except Exception as e:
+            print(f"   ❌ Robot endpoint hatası: {str(e)}")
+            return False, api_key
+
+    def _test_robot_endpoint_scope_missing(self):
+        """Test 2: Scope eksik (robot.run yok)"""
+        print("   🎯 Scope eksik API key testi...")
+        
+        # Create API key with only games.read scope (missing robot.run)
+        api_key_data = {
+            "name": "Limited Key #Test",
+            "scopes": ["games.read"]
+        }
+        success1, create_response = self.run_test("Create Limited API Key", "POST", "api/v1/api-keys", 201, api_key_data, auth_token=self.access_token)
+        
+        if not success1 or not isinstance(create_response, dict):
+            print("   ❌ Limited API key oluşturulamadı")
+            return False
+        
+        limited_api_key = create_response.get('api_key')
+        if not limited_api_key:
+            print("   ❌ Limited API key response'da bulunamadı")
+            return False
+        
+        print(f"   ✅ Limited API key oluşturuldu: {limited_api_key[:20]}...")
+        
+        # Test robot endpoint with limited API key (should fail with 403)
+        robot_data = {
+            "game_types": ["slot", "crash"],
+            "rounds": 10
+        }
+        
+        url = f"{self.base_url}/api/v1/robot/round"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {limited_api_key}'
+        }
+        
+        try:
+            response = requests.post(url, json=robot_data, headers=headers, timeout=30)
+            success2 = response.status_code == 403
+            
+            if success2:
+                error_response = response.json()
+                print(f"   ✅ Scope eksik validation başarılı - Status: {response.status_code}")
+                
+                # Check error structure
+                if isinstance(error_response, dict) and 'detail' in error_response:
+                    detail = error_response['detail']
+                    if isinstance(detail, dict):
+                        error_code = detail.get('error_code')
+                        scope = detail.get('scope')
+                        
+                        if error_code == 'API_KEY_SCOPE_FORBIDDEN' and scope == 'robot.run':
+                            print(f"      ✅ Doğru hata kodu: {error_code}")
+                            print(f"      ✅ Doğru scope: {scope}")
+                            return True
+                        else:
+                            print(f"      ❌ Beklenmeyen hata yapısı: error_code={error_code}, scope={scope}")
+                            return False
+                    else:
+                        print(f"      ❌ Detail dict değil: {detail}")
+                        return False
+                else:
+                    print(f"      ❌ Response yapısı beklenmeyen: {error_response}")
+                    return False
+            else:
+                print(f"   ❌ Scope validation başarısız - Expected 403, got {response.status_code}")
+                print(f"      Response: {response.text[:200]}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Scope validation hatası: {str(e)}")
+            return False
+
+    def _test_robot_endpoint_tenant_mismatch(self, api_key):
+        """Test 3: Tenant mismatch"""
+        print("   🎯 Tenant mismatch testi...")
+        
+        if not api_key:
+            print("   ❌ API key mevcut değil")
+            return False
+        
+        # Test robot endpoint with different tenant_id in body
+        robot_data = {
+            "game_types": ["slot", "crash"],
+            "rounds": 10,
+            "tenant_id": "some_other_tenant"  # Different from API key's tenant_id
+        }
+        
+        url = f"{self.base_url}/api/v1/robot/round"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}'
+        }
+        
+        try:
+            response = requests.post(url, json=robot_data, headers=headers, timeout=30)
+            success = response.status_code == 403
+            
+            if success:
+                error_response = response.json()
+                print(f"   ✅ Tenant mismatch validation başarılı - Status: {response.status_code}")
+                
+                # Check error structure
+                if isinstance(error_response, dict) and 'detail' in error_response:
+                    detail = error_response['detail']
+                    if isinstance(detail, dict):
+                        error_code = detail.get('error_code')
+                        api_key_tenant = detail.get('api_key_tenant')
+                        requested_tenant = detail.get('requested_tenant')
+                        
+                        if (error_code == 'TENANT_MISMATCH' and 
+                            api_key_tenant == 'default_casino' and 
+                            requested_tenant == 'some_other_tenant'):
+                            print(f"      ✅ Doğru hata kodu: {error_code}")
+                            print(f"      ✅ API key tenant: {api_key_tenant}")
+                            print(f"      ✅ Requested tenant: {requested_tenant}")
+                            return True
+                        else:
+                            print(f"      ❌ Beklenmeyen hata yapısı: error_code={error_code}")
+                            print(f"         api_key_tenant={api_key_tenant}, requested_tenant={requested_tenant}")
+                            return False
+                    else:
+                        print(f"      ❌ Detail dict değil: {detail}")
+                        return False
+                else:
+                    print(f"      ❌ Response yapısı beklenmeyen: {error_response}")
+                    return False
+            else:
+                print(f"   ❌ Tenant mismatch validation başarısız - Expected 403, got {response.status_code}")
+                print(f"      Response: {response.text[:200]}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Tenant mismatch hatası: {str(e)}")
+            return False
+
+    def _test_robot_endpoint_missing_invalid_key(self):
+        """Test 4: API key eksik / geçersiz"""
+        print("   🎯 API key eksik/geçersiz testi...")
+        
+        robot_data = {
+            "game_types": ["slot", "crash"],
+            "rounds": 10
+        }
+        
+        url = f"{self.base_url}/api/v1/robot/round"
+        
+        # Test 1: No Authorization header
+        headers1 = {'Content-Type': 'application/json'}
+        
+        try:
+            response1 = requests.post(url, json=robot_data, headers=headers1, timeout=30)
+            success1 = response1.status_code == 401
+            
+            if success1:
+                error_response1 = response1.json()
+                print(f"   ✅ API key eksik validation başarılı - Status: {response1.status_code}")
+                
+                # Check error structure
+                if isinstance(error_response1, dict) and 'detail' in error_response1:
+                    detail = error_response1['detail']
+                    if isinstance(detail, dict) and detail.get('error_code') == 'API_KEY_MISSING':
+                        print(f"      ✅ Doğru hata kodu: {detail.get('error_code')}")
+                    else:
+                        print(f"      ❌ Beklenmeyen hata yapısı: {detail}")
+                        success1 = False
+                else:
+                    print(f"      ❌ Response yapısı beklenmeyen: {error_response1}")
+                    success1 = False
+            else:
+                print(f"   ❌ API key eksik validation başarısız - Expected 401, got {response1.status_code}")
+                success1 = False
+                
+        except Exception as e:
+            print(f"   ❌ API key eksik hatası: {str(e)}")
+            success1 = False
+        
+        # Test 2: Invalid API key
+        headers2 = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer random_invalid_string'
+        }
+        
+        try:
+            response2 = requests.post(url, json=robot_data, headers=headers2, timeout=30)
+            success2 = response2.status_code == 401
+            
+            if success2:
+                error_response2 = response2.json()
+                print(f"   ✅ API key geçersiz validation başarılı - Status: {response2.status_code}")
+                
+                # Check error structure
+                if isinstance(error_response2, dict) and 'detail' in error_response2:
+                    detail = error_response2['detail']
+                    if isinstance(detail, dict) and detail.get('error_code') == 'API_KEY_INVALID':
+                        print(f"      ✅ Doğru hata kodu: {detail.get('error_code')}")
+                    else:
+                        print(f"      ❌ Beklenmeyen hata yapısı: {detail}")
+                        success2 = False
+                else:
+                    print(f"      ❌ Response yapısı beklenmeyen: {error_response2}")
+                    success2 = False
+            else:
+                print(f"   ❌ API key geçersiz validation başarısız - Expected 401, got {response2.status_code}")
+                success2 = False
+                
+        except Exception as e:
+            print(f"   ❌ API key geçersiz hatası: {str(e)}")
+            success2 = False
+        
+        return success1 and success2
+
+    def _test_game_robot_cli_api_key_required(self):
+        """Test 5: Game Robot CLI argüman zorunluluğu"""
+        print("   🎯 Game Robot CLI API key zorunluluğu testi...")
+        
+        # Test CLI without --api-key argument
+        try:
+            import subprocess
+            
+            # Run the game robot CLI without --api-key
+            cmd = [
+                "python", "-m", "backend.app.bots.game_robot",
+                "--tenant-id", "default_casino",
+                "--rounds", "1",
+                "--game-types", "slot"
+            ]
+            
+            result = subprocess.run(
+                cmd,
+                cwd="/app",
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            # Should fail with non-zero exit code
+            if result.returncode != 0:
+                print(f"   ✅ CLI API key zorunluluğu başarılı - Exit code: {result.returncode}")
+                
+                # Check if error message mentions --api-key is required
+                stderr_output = result.stderr.lower()
+                if 'api-key' in stderr_output and ('required' in stderr_output or 'argument' in stderr_output):
+                    print(f"      ✅ Doğru hata mesajı: --api-key is required")
+                    return True
+                else:
+                    print(f"      ❌ Beklenmeyen hata mesajı: {result.stderr}")
+                    return False
+            else:
+                print(f"   ❌ CLI API key zorunluluğu başarısız - Expected non-zero exit code, got {result.returncode}")
+                print(f"      Stdout: {result.stdout}")
+                print(f"      Stderr: {result.stderr}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            print("   ❌ CLI test timeout")
+            return False
+        except Exception as e:
+            print(f"   ❌ CLI test hatası: {str(e)}")
+            return False
+
 def main():
     def test_crash_dice_math_endpoints(self):
         """Test new Crash & Dice Math backend endpoints as per Turkish review request"""
