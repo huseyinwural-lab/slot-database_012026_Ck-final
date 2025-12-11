@@ -578,9 +578,9 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
         )
 
     # Normalize enforcement_mode
-    normalized_enforcement_mode = _validate_enforcement_mode(payload.enforcement_mode, _crash_math_error)
-    if isinstance(normalized_enforcement_mode, dict):
-        return normalized_enforcement_mode
+    normalized_enforcement_mode, err = _validate_enforcement_mode(payload.enforcement_mode, _crash_math_error)
+    if err is not None:
+        return JSONResponse(status_code=400, content=err)
 
     # Validate advanced safety limits (simple sanity checks)
     for fname in [
