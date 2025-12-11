@@ -39,6 +39,13 @@ const GameReelStripsTab = ({ game }) => {
   const [history, setHistory] = useState([]);
   const [reelText, setReelText] = useState('');
 
+  const [selectedVersions, setSelectedVersions] = useState([]);
+  const [diffOpen, setDiffOpen] = useState(false);
+  const [diffLoading, setDiffLoading] = useState(false);
+  const [diffChanges, setDiffChanges] = useState([]);
+  const [diffMeta, setDiffMeta] = useState({ from: null, to: null });
+
+
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importFormat, setImportFormat] = useState('json');
   const [importContent, setImportContent] = useState('');
