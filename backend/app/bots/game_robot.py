@@ -49,6 +49,10 @@ class HttpClient:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
 
+    def get(self, path: str) -> httpx.Response:
+        url = self._full_url(path)
+        return httpx.get(url, headers=self._headers(), timeout=self.timeout)
+
     def post(self, path: str, json: Optional[Dict[str, Any]] = None) -> httpx.Response:
         url = self._full_url(path)
         return httpx.post(url, json=json, headers=self._headers(), timeout=self.timeout)
