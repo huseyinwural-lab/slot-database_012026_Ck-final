@@ -4,10 +4,13 @@ from typing import List, Optional
 
 from fastapi import HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from passlib.context import CryptContext
 
 from app.constants.api_keys import API_KEY_SCOPES
 from app.models.domain.admin import AdminAPIKey
-from app.utils.auth import pwd_context
+
+# Create pwd_context locally to avoid circular import
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def generate_api_key() -> tuple[str, str, str]:
