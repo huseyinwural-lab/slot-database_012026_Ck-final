@@ -68,7 +68,7 @@ async def create_api_key(
 
     tenant_id = payload.tenant_id or current_admin.tenant_id
 
-    doc = AdminAPIKey(
+    api_key_obj = AdminAPIKey(
         owner_admin_id=current_admin.id,
         tenant_id=tenant_id,
         name=payload.name,
@@ -77,7 +77,8 @@ async def create_api_key(
         scopes=payload.scopes,
         active=True,
         created_at=datetime.now(timezone.utc),
-    ).model_dump()
+    )
+    doc = api_key_obj.model_dump()
 
     await db.admin_api_keys.insert_one(doc)
 
