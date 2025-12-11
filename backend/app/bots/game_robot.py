@@ -245,6 +245,18 @@ def parse_args(argv: List[str]) -> Dict[str, Any]:
         default=DEFAULT_ROUNDS,
         help=f"Her oyun tipi için tur sayısı (varsayılan: {DEFAULT_ROUNDS})",
     )
+    parser.add_argument(
+        "--tenant-id",
+        type=str,
+        default="default_casino",
+        help="Tenant ID (örn. default_casino, demo_renter)",
+    )
+    parser.add_argument(
+        "--api-key",
+        type=str,
+        default=None,
+        help="Opsiyonel API key (Authorization: Bearer ...)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -254,7 +266,12 @@ def parse_args(argv: List[str]) -> Dict[str, Any]:
         if g not in valid:
             raise SystemExit(f"Geçersiz game-type: {g}. Desteklenenler: slot,crash,dice")
 
-    return {"game_types": game_types, "rounds": args.rounds}
+    return {
+        "game_types": game_types,
+        "rounds": args.rounds,
+        "tenant_id": args.tenant_id,
+        "api_key": args.api_key,
+    }
 
 
 def main(argv: Optional[List[str]] = None) -> int:
