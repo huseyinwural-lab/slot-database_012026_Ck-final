@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Body, status
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel
 
 from config import settings
 from app.models.domain.admin import AdminUser, AdminAPIKey
