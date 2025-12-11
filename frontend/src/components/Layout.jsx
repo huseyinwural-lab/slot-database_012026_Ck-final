@@ -104,7 +104,16 @@ const Layout = ({ children }) => {
         </ScrollArea>
 
         <div className="p-4 border-t border-border mt-auto bg-card">
-          <button className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg w-full transition-colors">
+          <button
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg w-full transition-colors"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_user');
+                window.location.href = '/login';
+              }
+            }}
+          >
             <LogOut className="w-5 h-5" />
             Logout
           </button>
