@@ -3523,8 +3523,6 @@ async def upload_game_client(
         "primary_client_type": primary.value if primary else None,
     }
 
-from fastapi import UploadFile, File, Form
-
 
 @router.post("/{game_id}/config/assets/upload", response_model=GameAsset)
 async def upload_game_asset(
