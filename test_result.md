@@ -352,7 +352,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "slot_advanced_ui_flow_complete"
+    - "slot_p0b_slot_config_roundtrip"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
