@@ -183,8 +183,10 @@ async def get_transactions(
         query["created_at"] = {"$gte": start_date}
     if player_search:
         p = await db.players.find_one({"username": player_search})
-        if p: query["player_id"] = p['id']
-        else: query["id"] = player_search
+        if p:
+            query["player_id"] = p["id"]
+        else:
+            query["id"] = player_search
 
     txs = await db.transactions.find(query).sort("created_at", -1).limit(100).to_list(100)
     return [Transaction(**t) for t in txs]
