@@ -959,27 +959,25 @@ async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, requ
             ),
         )
 
-    # enforcement_mode validation
-    normalized_enforcement_mode = _validate_enforcement_mode(payload.enforcement_mode, _dice_math_error)
-    if isinstance(normalized_enforcement_mode, dict):
-        return normalized_enforcement_mode
+    # Normalize enforcement_mode
+    normalized_enforcement_mode, err = _validate_enforcement_mode(payload.enforcement_mode, _dice_math_error)
+    if err is not None:
+        return JSONResponse(status_code=400, content=err)
 
     # Country overrides validation
-    try:
-        normalized_country_overrides: Dict[str, Dict[str, Any]] = _validate_country_overrides(
-            payload.country_overrides,
-            [
-                "max_win_per_bet",
-                "max_loss_per_bet",
-                "max_session_loss",
-                "max_session_bets",
-            ],
-            _dice_math_error,
-            parent_field="country_overrides",
-        )
-    except TypeError:
-        # _validate_country_overrides will raise a JSONResponse directly; FastAPI will handle it
-        raise
+    normalized_country_overrides, err = _validate_country_overrides(
+        payload.country_overrides,
+        [
+            "max_win_per_bet",
+            "max_loss_per_bet",
+            "max_session_loss",
+            "max_session_bets",
+        ],
+        _dice_math_error,
+        parent_field="country_overrides",
+    )
+    if err is not None:
+        return JSONResponse(status_code=400, content=err)
 
     if payload.min_payout_multiplier < 1.0 or payload.min_payout_multiplier > payload.max_payout_multiplier:
         return JSONResponse(
