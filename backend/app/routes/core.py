@@ -623,10 +623,13 @@ async def get_bonuses(request: Request, current_admin: AdminUser = Depends(get_c
     return [Bonus(**b) for b in bonuses]
 
 @router.post("/bonuses")
-async def create_bonus(request: Request, bonus: Bonus):
+async def create_bonus(
+    request: Request,
+    bonus: Bonus,
+    current_admin: AdminUser = Depends(get_current_admin),
+):
     db = get_db()
-    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
-    tenant_id = get_current_tenant_id(request, dummy_admin)
+    tenant_id = get_current_tenant_id(request, current_admin)
 
     doc = bonus.model_dump()
     doc["tenant_id"] = tenant_id
