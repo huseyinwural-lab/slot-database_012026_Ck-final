@@ -1,0 +1,51 @@
+suites:
+  - id: jackpots_edge_cases
+    enabled: false
+    description: "Jackpot validation edge cases (contribution, seed/cap)."
+    scenarios:
+      - id: contribution_percent_too_high
+        game: "Test Reel Lines Game (Config QA)"
+        game_id: "1c75a140-c6a1-42eb-9394-ec5293f4ab4a"
+        endpoint: "/api/v1/games/{game_id}/config/jackpots"
+        method: "POST"
+        description: "contribution_percent > 100"
+      - id: seed_greater_than_cap
+        game: "Test Slot Game"
+        game_id: "f9596f63-a1f6-411b-aec4-f713b900894e"
+        endpoint: "/api/v1/games/{game_id}/config/jackpots"
+        method: "POST"
+        description: "seed > cap"
+
+  - id: blackjack_limits_edge_cases
+    enabled: false
+    description: "Blackjack table limits & payout edge cases."
+    scenarios:
+      - id: invalid_blackjack_payout
+        game: "Test Blackjack Game (Config QA)"
+        game_id: "c533cd14-2ba4-425e-8213-3ea69f55ba7f"
+        endpoint: "/api/v1/games/{game_id}/config/blackjack-rules"
+        method: "POST"
+        description: "blackjack_payout out of allowed range"
+      - id: min_bet_greater_than_max_bet
+        game: "Test Blackjack Game (Config QA)"
+        game_id: "c533cd14-2ba4-425e-8213-3ea69f55ba7f"
+        endpoint: "/api/v1/games/{game_id}/config/blackjack-rules"
+        method: "POST"
+        description: "min_bet > max_bet"
+
+  - id: poker_rake_edge_cases
+    enabled: false
+    description: "Poker rake / fee / cap edge cases."
+    scenarios:
+      - id: rake_percent_too_high
+        game: "Test Poker Game (Config QA)"
+        game_id: "6280959b-5dad-40be-8cd0-8a41d721d261"
+        endpoint: "/api/v1/games/{game_id}/config/poker-rules"
+        method: "POST"
+        description: "rake_percent greater than allowed maximum"
+      - id: negative_rake_cap
+        game: "Test Poker Game (Config QA)"
+        game_id: "6280959b-5dad-40be-8cd0-8a41d721d261"
+        endpoint: "/api/v1/games/{game_id}/config/poker-rules"
+        method: "POST"
+        description: "rake_cap_currency < 0"
