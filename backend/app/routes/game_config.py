@@ -685,31 +685,47 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
     return cfg
 
 
-def _validate_enforcement_mode(value: Optional[str], error_builder) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
-    """Normalize enforcement_mode or return structured error content.
+from fastapi.responses import JSONResponse
 
-    Returns (normalized_value, error_content_dict).
+
+def _validate_enforcement_mode(
+    value: Optional[str],
+    error_builder,
+) -> Tuple[Optional[str], Optional[JSONResponse]]:
+    """Normalize enforcement_mode or return JSONResponse error.
+
+    Returns (normalized_value, error_response).
     """
     normalized = (value or "log_only").lower()
     if normalized not in {"hard_block", "log_only"}:
-        return None, error_builder(
-            "enforcement_mode must be one of: hard_block, log_only.",
-            "enforcement_mode",
-            normalized,
-            ValidationReason.UNSUPPORTED_ENFORCEMENT_MODE.value,
+        return None, JSONResponse(
+            status_code=400,
+            content=error_builder(
+                "enforcement_mode must be one of: hard_block, log_only.",
+                "enforcement_mode",
+                normalized,
+                ValidationReason.UNSUPPORTED_ENFORCEMENT_MODE.value,
+            ),
         )
     return normalized, None
 
 
-def _validate_positive_or_none(field_name: str, value: Optional[float], error_builder) -> Optional[Dict[str, Any]]:
+def _validate_positive_or_none(
+    field_name: str,
+    value: Optional[float],
+    error_builder,
+) -> Tuple[Optional[float], Optional[JSONResponse]]:
     if value is not None and value <= 0:
-        return error_builder(
-            f"{field_name} must be > 0 when provided.",
-            field_name,
-            value,
-            ValidationReason.MUST_BE_POSITIVE.value,
+        return None, JSONResponse(
+            status_code=400,
+            content=error_builder(
+                f"{field_name} must be > 0 when provided.",
+                field_name,
+                value,
+                ValidationReason.MUST_BE_POSITIVE.value,
+            ),
         )
-    return None
+    return value, None
 
 
 def _validate_country_overrides(
@@ -717,10 +733,10 @@ def _validate_country_overrides(
     allowed_keys: List[str],
     error_builder,
     parent_field: str = "country_overrides",
-) -> Tuple[Optional[Dict[str, Dict[str, Any]]], Optional[Dict[str, Any]]]:
+) -> Tuple[Dict[str, Dict[str, Any]], Optional[JSONResponse]]:
     """Shared validation for Crash/Dice country_overrides.
 
-    Returns (normalized_dict, error_content_dict).
+    Returns (normalized_dict, error_response).
     - Ensures ISO 3166-1 alpha-2 country codes
     - Ensures all numeric fields in allowed_keys are > 0 (or positive int for *_rounds / *_bets)
     """
@@ -730,36 +746,73 @@ def _validate_country_overrides(
 
     for country_code, overrides in raw_overrides.items():
         if not isinstance(country_code, str) or len(country_code) != 2 or not country_code.isalpha():
-            return None, error_builder(
-                "country code must be ISO 3166-1 alpha-2 (2 letters).",
-                parent_field,
-                country_code,
-                ValidationReason.INVALID_COUNTRY_CODE.value,
+            return {}, JSONResponse(
+                status_code=400,
+                content=error_builder(
+                    "country code must be ISO 3166-1 alpha-2 (2 letters).",
+                    parent_field,
+                    country_code,
+                    ValidationReason.INVALID_COUNTRY_CODE.value,
+                ),
             )
+
         upper_code = country_code.upper()
+        normalized[upper_code] = dict(overrides) if overrides is not None else {}
 
         for key in allowed_keys:
-            if key in overrides and overrides[key] is not None:
-                val = overrides[key]
+            if key in normalized[upper_code] and normalized[upper_code][key] is not None:
+                val = normalized[upper_code][key]
                 is_int_like = key.endswith("_rounds") or key.endswith("_bets")
-                if is_int_like:
-                    if not isinstance(val, (int, float)) or int(val) <= 0:
-                        return None, error_builder(
-                            f"{key} must be a positive integer when provided.",
-                            f"{parent_field}.{upper_code}.{key}",
-                            val,
-                            ValidationReason.MUST_BE_POSITIVE.value,
-                        )
-                else:
-                    if not isinstance(val, (int, float)) or float(val) <= 0:
-                        return None, error_builder(
-                            f"{key} must be > 0 when provided.",
-                            f"{parent_field}.{upper_code}.{key}",
-                            val,
-                            ValidationReason.MUST_BE_POSITIVE.value,
-                        )
+                field_path = f"{parent_field}.{upper_code}.{key}"
 
-        normalized[upper_code] = overrides
+                if is_int_like:
+                    try:
+                        int_val = int(val)
+                    except (TypeError, ValueError):
+                        return {}, JSONResponse(
+                            status_code=400,
+                            content=error_builder(
+                                f"{key} must be a positive integer when provided.",
+                                field_path,
+                                val,
+                                ValidationReason.MUST_BE_POSITIVE.value,
+                            ),
+                        )
+                    if int_val <= 0:
+                        return {}, JSONResponse(
+                            status_code=400,
+                            content=error_builder(
+                                f"{key} must be a positive integer when provided.",
+                                field_path,
+                                val,
+                                ValidationReason.MUST_BE_POSITIVE.value,
+                            ),
+                        )
+                    normalized[upper_code][key] = int_val
+                else:
+                    try:
+                        float_val = float(val)
+                    except (TypeError, ValueError):
+                        return {}, JSONResponse(
+                            status_code=400,
+                            content=error_builder(
+                                f"{key} must be > 0 when provided.",
+                                field_path,
+                                val,
+                                ValidationReason.MUST_BE_POSITIVE.value,
+                            ),
+                        )
+                    if float_val <= 0:
+                        return {}, JSONResponse(
+                            status_code=400,
+                            content=error_builder(
+                                f"{key} must be > 0 when provided.",
+                                field_path,
+                                val,
+                                ValidationReason.MUST_BE_POSITIVE.value,
+                            ),
+                        )
+                    normalized[upper_code][key] = float_val
 
     return normalized, None
 
