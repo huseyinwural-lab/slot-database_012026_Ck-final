@@ -366,8 +366,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus: 
-    - "slot_p0b_slot_config_roundtrip"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
