@@ -7,6 +7,14 @@ from typing import List, Dict, Any, Optional
 import httpx
 
 
+@dataclass
+class ScenarioResult:
+    game_type: str
+    rounds: int
+    success_count: int
+    errors: List[Dict[str, Any]]
+
+
 # --- Sabitler (manuel güncellenebilir) ---
 DEFAULT_ROUNDS = 50
 
