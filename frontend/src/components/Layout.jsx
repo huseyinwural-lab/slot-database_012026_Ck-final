@@ -126,11 +126,56 @@ const Layout = ({ children }) => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-sm text-right hidden md:block">
-              <p className="font-medium">Super Admin</p>
-              <p className="text-xs text-muted-foreground">admin@casino.com</p>
+              <p className="font-medium">
+                {(() => {
+                  if (typeof window === 'undefined') return 'Admin';
+                  try {
+                    const raw = localStorage.getItem('admin_user');
+                    if (!raw) return 'Admin';
+                    const admin = JSON.parse(raw);
+                    return admin.full_name || 'Admin';
+                  } catch {
+                    return 'Admin';
+                  }
+                })()}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {(() => {
+                  if (typeof window === 'undefined') return '';
+                  try {
+                    const raw = localStorage.getItem('admin_user');
+                    if (!raw) return '';
+                    const admin = JSON.parse(raw);
+                    return admin.email || '';
+                  } catch {
+                    return '';
+                  }
+                })()}
+              </p>
             </div>
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-              SA
+              {(() => {
+                if (typeof window === 'undefined') return 'A';
+                try {
+                  const raw = localStorage.getItem('admin_user');
+                  if (!raw) return 'A';
+                  const admin = JSON.parse(raw);
+                  if (admin.full_name) {
+                    return admin.full_name
+                      .split(' ')
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((p) => p[0]?.toUpperCase())
+                      .join('');
+                  }
+                  if (admin.email) {
+                    return admin.email[0]?.toUpperCase();
+                  }
+                  return 'A';
+                } catch {
+                  return 'A';
+                }
+              })()}
             </div>
           </div>
         </header>
