@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import api from '../../services/api';
+import ConfigDiffPanel from './ConfigDiffPanel';
 
 const GameSlotAdvancedTab = ({ game }) => {
   const [loading, setLoading] = useState(true);
