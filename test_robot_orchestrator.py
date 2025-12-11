@@ -335,7 +335,7 @@ class RobotOrchestratorTester:
             
             success, response = self.run_test("Robot Round - tenant mismatch", "POST", "api/v1/robot/round", 403, payload, auth_token=self.api_key_a)
             
-            if not success:  # Expecting 403
+            if success:  # Expecting 403 - success means we got the expected status code
                 try:
                     error_data = json.loads(response) if isinstance(response, str) else response
                     if isinstance(error_data, dict):
@@ -352,7 +352,7 @@ class RobotOrchestratorTester:
                 except:
                     print(f"   ❌ Tenant mismatch rejected but couldn't parse error: {response}")
             else:
-                print(f"   ❌ Tenant mismatch should have been rejected but got 200")
+                print(f"   ❌ Tenant mismatch should have been rejected but got unexpected status")
             
             return False
             
