@@ -3063,6 +3063,239 @@ async def save_jackpot_config(game_id: str, payload: JackpotConfigSaveRequest, r
         .sort("created_at", -1)
         .limit(1)
         .to_list(1)
+
+
+# ---------------------------------------------------------------------------
+# CONFIG VERSION DIFF (P0-C MVP)
+# ---------------------------------------------------------------------------
+
+
+class ConfigDiffValidationReason(str, Enum):
+    TYPE_NOT_SUPPORTED = "type_not_supported"
+    VERSION_NOT_FOUND = "version_not_found"
+    MISMATCHED_GAME_ID = "mismatched_game_id"
+
+
+def _config_diff_error(reason: ConfigDiffValidationReason, message: str) -> Dict[str, Any]:
+    return {
+        "error_code": "CONFIG_DIFF_VALIDATION_FAILED",
+        "message": "Config diff parameters are invalid",
+        "details": {"reason": reason.value, "message": message},
+    }
+
+
+def _flatten_diff(prefix: str, old: Any, new: Any, changes: List[ConfigDiffChange]):
+    """Recursive JSON diff that fills changes list with ConfigDiffChange items.
+
+    prefix: current field path ('' for root), dot-notation with [index] for arrays.
+    """
+
+    # Exact equality -> no change
+    if old == new:
+        return
+
+    # If types are both dict, diff by keys
+    if isinstance(old, dict) and isinstance(new, dict):
+        all_keys = set(old.keys()) | set(new.keys())
+        for key in sorted(all_keys):
+            sub_path = f"{prefix}.{key}" if prefix else str(key)
+            in_old = key in old
+            in_new = key in new
+            if in_old and not in_new:
+                changes.append(
+                    ConfigDiffChange(
+                        field_path=sub_path,
+                        old_value=old[key],
+                        new_value=None,
+                        change_type=ConfigDiffChangeType.REMOVED,
+                    )
+                )
+            elif not in_old and in_new:
+                changes.append(
+                    ConfigDiffChange(
+                        field_path=sub_path,
+                        old_value=None,
+                        new_value=new[key],
+                        change_type=ConfigDiffChangeType.ADDED,
+                    )
+                )
+            else:
+                _flatten_diff(sub_path, old[key], new[key], changes)
+        return
+
+    # If types are both list, diff by index
+    if isinstance(old, list) and isinstance(new, list):
+        max_len = max(len(old), len(new))
+        for idx in range(max_len):
+            sub_path = f"{prefix}[{idx}]" if prefix else f"[{idx}]"
+            in_old = idx < len(old)
+            in_new = idx < len(new)
+            if in_old and not in_new:
+                changes.append(
+                    ConfigDiffChange(
+                        field_path=sub_path,
+                        old_value=old[idx],
+                        new_value=None,
+                        change_type=ConfigDiffChangeType.REMOVED,
+                    )
+                )
+            elif not in_old and in_new:
+                changes.append(
+                    ConfigDiffChange(
+                        field_path=sub_path,
+                        old_value=None,
+                        new_value=new[idx],
+                        change_type=ConfigDiffChangeType.ADDED,
+                    )
+                )
+            else:
+                _flatten_diff(sub_path, old[idx], new[idx], changes)
+        return
+
+    # Primitive or type-changed value: mark as modified
+    changes.append(
+        ConfigDiffChange(
+            field_path=prefix or "",
+            old_value=old,
+            new_value=new,
+            change_type=ConfigDiffChangeType.MODIFIED,
+        )
+    )
+
+
+async def _load_config_payload_for_diff(
+    db,
+    game_id: str,
+    config_type: str,
+    config_version_id: str,
+):
+    """Return (payload_dict, error_response) for given config_type/version.
+
+    payload_dict is the JSON subtree we will diff (e.g. SlotAdvancedConfig fields or paytable.data).
+    """
+
+    # Slot Advanced
+    if config_type == "slot-advanced":
+        doc = await db.slot_advanced_configs.find_one(
+            {"game_id": game_id, "config_version_id": config_version_id}, {"_id": 0}
+        )
+        if not doc:
+            return None, _config_diff_error(
+                ConfigDiffValidationReason.VERSION_NOT_FOUND,
+                "Slot advanced config version not found",
+            )
+        cfg = SlotAdvancedConfig(**doc)
+        return (
+            {
+                "spin_speed": cfg.spin_speed,
+                "turbo_spin_allowed": cfg.turbo_spin_allowed,
+                "autoplay": {
+                    "autoplay_enabled": cfg.autoplay_enabled,
+                    "autoplay_default_spins": cfg.autoplay_default_spins,
+                    "autoplay_max_spins": cfg.autoplay_max_spins,
+                    "autoplay_stop_on_big_win": cfg.autoplay_stop_on_big_win,
+                    "autoplay_stop_on_balance_drop_percent": cfg.autoplay_stop_on_balance_drop_percent,
+                },
+                "big_win_animation_enabled": cfg.big_win_animation_enabled,
+                "gamble_feature_allowed": cfg.gamble_feature_allowed,
+            },
+            None,
+        )
+
+    # Paytable
+    if config_type == "paytable":
+        doc = await db.paytables.find_one(
+            {"game_id": game_id, "config_version_id": config_version_id}, {"_id": 0}
+        )
+        if not doc:
+            return None, _config_diff_error(
+                ConfigDiffValidationReason.VERSION_NOT_FOUND,
+                "Paytable config version not found",
+            )
+        return doc.get("data") or {}, None
+
+    # Reel strips
+    if config_type == "reel-strips":
+        doc = await db.reel_strips.find_one(
+            {"game_id": game_id, "config_version_id": config_version_id}, {"_id": 0}
+        )
+        if not doc:
+            return None, _config_diff_error(
+                ConfigDiffValidationReason.VERSION_NOT_FOUND,
+                "Reel strips config version not found",
+            )
+        return doc.get("data") or {}, None
+
+    # Jackpots
+    if config_type == "jackpots":
+        doc = await db.jackpot_configs.find_one(
+            {"game_id": game_id, "config_version_id": config_version_id}, {"_id": 0}
+        )
+        if not doc:
+            return None, _config_diff_error(
+                ConfigDiffValidationReason.VERSION_NOT_FOUND,
+                "Jackpot config version not found",
+            )
+        # For diffing, focus on jackpots array
+        return {"jackpots": doc.get("jackpots") or []}, None
+
+    return None, _config_diff_error(
+        ConfigDiffValidationReason.TYPE_NOT_SUPPORTED,
+        f"Config type '{config_type}' is not supported for diff",
+    )
+
+
+@router.get("/{game_id}/config-diff", response_model=ConfigDiffResponse)
+async def get_game_config_diff(
+    game_id: str,
+    request: Request,
+    type: str = Query(..., alias="type"),
+    from_config_version_id: str = Query(..., alias="from"),
+    to_config_version_id: str = Query(..., alias="to"),
+):
+    """Compute minimal JSON diff between two config versions for a given game.
+
+    Supported types: slot-advanced, paytable, reel-strips, jackpots.
+    """
+
+    db = get_db()
+
+    # Validate game exists
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    # Normalize type
+    config_type = type
+
+    # Load both payloads
+    old_payload, err = await _load_config_payload_for_diff(
+        db, game_id, config_type, from_config_version_id
+    )
+    if err is not None:
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(status_code=400, content=err)
+
+    new_payload, err = await _load_config_payload_for_diff(
+        db, game_id, config_type, to_config_version_id
+    )
+    if err is not None:
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(status_code=400, content=err)
+
+    changes: List[ConfigDiffChange] = []
+    _flatten_diff("", old_payload, new_payload, changes)
+
+    return ConfigDiffResponse(
+        game_id=game_id,
+        config_type=config_type,
+        from_config_version_id=from_config_version_id,
+        to_config_version_id=to_config_version_id,
+        changes=changes,
+    )
+
     )
     prev_cfg = JackpotConfig(**prev_cfg_docs[0]) if prev_cfg_docs else None
 
