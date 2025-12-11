@@ -16,6 +16,7 @@ const NewMemberManualBonusCard = () => {
     total_budget_cap: 0,
     validity_days: 7,
   });
+
   const summary = React.useMemo(() => {
     const gameCount = (config.allowed_game_ids || []).length;
     const parts = [];
