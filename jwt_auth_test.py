@@ -430,7 +430,7 @@ class JWTAuthTester:
         # Test POST WITH Authorization - should return 200 OK and tenant_id should be auto-set
         bonus_data = {
             "name": "Test JWT Auth Bonus",
-            "type": "deposit",
+            "type": "deposit_match",
             "amount": 100,
             "wager_req": 30
         }
