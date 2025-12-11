@@ -277,75 +277,71 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     tenant_id: str = parsed["tenant_id"]
     api_key: Optional[str] = parsed["api_key"]
+    base_url: str = parsed["base_url"]
 
-    # Tenant kullanma yetkisini kontrol et
-    import asyncio
-    from motor.motor_asyncio import AsyncIOMotorClient
-    from config import settings
-
-    async def check_tenant_permission():
-        client_db = AsyncIOMotorClient(settings.mongo_url)
-        db = client_db[settings.db_name]
-        
-        tenant = await db.tenants.find_one({"id": tenant_id})
-        client_db.close()
-        
-        if not tenant:
-            print(f"TENANT_NOT_FOUND: {tenant_id}", file=sys.stderr)
-            return False, None
-        
-        features = tenant.get("features") or {}
-        if not features.get("can_use_game_robot", False):
-            print(f"TENANT_CANNOT_USE_GAME_ROBOT: {tenant_id}", file=sys.stderr)
-            return False, None
-        
-        print(f"TENANT_CAN_USE_GAME_ROBOT: {tenant_id}")
-        return True, tenant
-
-    # Run the async tenant check
-    can_use, tenant = asyncio.run(check_tenant_permission())
-    if not can_use:
-        return 1
-
-    client = HttpClient(BASE_URL, tenant_id=tenant_id, api_key=api_key)
     game_types: List[str] = parsed["game_types"]
     rounds: int = parsed["rounds"]
 
+    client = HttpClient(base_url, api_key=api_key)
+
     print(
-        f"[GameRobot] BASE_URL={BASE_URL} | tenant_id={tenant_id} | game_types={game_types} | rounds={rounds}"
+        f"[GameRobot] BASE_URL={base_url} | tenant_id={tenant_id} | game_types={game_types} | rounds={rounds}"
     )
 
-    results: List[ScenarioResult] = []
+    payload = {
+        "game_types": game_types,
+        "rounds": rounds,
+        "tenant_id": tenant_id,
+    }
 
-    if "slot" in game_types:
-        print("[GameRobot] SLOT senaryosu başlıyor...")
-        results.append(run_slot_scenario(client, rounds))
-
-    if "crash" in game_types:
-        print("[GameRobot] CRASH senaryosu başlıyor...")
-        results.append(run_crash_scenario(client, rounds))
-
-    if "dice" in game_types:
-        print("[GameRobot] DICE senaryosu başlıyor...")
-        results.append(run_dice_scenario(client, rounds))
-
-    total_errors = 0
-    for res in results:
-        err_count = len(res.errors)
-        total_errors += err_count
-        status = "OK" if err_count == 0 else "FAIL"
-        print(f"[{res.game_type.upper()}] {status} ({res.success_count}/{res.rounds}) - errors={err_count}")
-        if err_count > 0:
-            print("  İlk birkaç hata (en fazla 3):")
-            for e in res.errors[:3]:
-                print(f"    round={e.get('round')} status={e.get('status')} body={e.get('body')}")
-
-    if total_errors == 0:
-        print("[GameRobot] Tüm senaryolar başarıyla tamamlandı.")
-        return 0
-    else:
-        print(f"[GameRobot] Toplam hata sayısı: {total_errors}")
+    try:
+        response = client.post("/api/v1/robot/round", json=payload)
+    except Exception as exc:
+        print(f"[GameRobot][ERROR] HTTP request failed: {exc}", file=sys.stderr)
         return 1
+
+    if response.status_code == 401:
+        print(f"[GameRobot][ERROR] Unauthorized (401) - API key geçersiz veya eksik", file=sys.stderr)
+        return 1
+    if response.status_code == 403:
+        print(f"[GameRobot][ERROR] Forbidden (403) - Yetki veya scope yetersiz", file=sys.stderr)
+        print(response.text, file=sys.stderr)
+        return 1
+    if response.status_code == 400:
+        print(f"[GameRobot][ERROR] Bad Request (400) - Payload veya limit hatası", file=sys.stderr)
+        print(response.text, file=sys.stderr)
+        return 1
+    if not (200 <= response.status_code < 300):
+        print(f"[GameRobot][ERROR] Unexpected status code: {response.status_code}", file=sys.stderr)
+        print(response.text, file=sys.stderr)
+        return 1
+
+    try:
+        data = response.json()
+    except Exception:
+        print("[GameRobot][ERROR] Response JSON parse edilemedi", file=sys.stderr)
+        print(response.text, file=sys.stderr)
+        return 1
+
+    results = data.get("results", [])
+    total_rounds = data.get("total_rounds")
+    tenant_id_from_api = data.get("tenant_id")
+
+    print(
+        f"[Robot] tenant={tenant_id_from_api} | rounds={total_rounds} | game_types={','.join(game_types)}"
+    )
+
+    for res in results:
+        gt = res.get("game_type")
+        r = res.get("rounds")
+        errors = res.get("errors")
+        avg_rtp = res.get("avg_rtp")
+        avg_ms = res.get("avg_duration_ms")
+        print(
+            f"[Robot][{gt}] rounds={r} | errors={errors} | avg_rtp={avg_rtp} | avg_ms={avg_ms}"
+        )
+
+    return 0
 
 
 if __name__ == "__main__":
