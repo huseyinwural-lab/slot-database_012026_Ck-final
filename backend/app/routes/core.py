@@ -616,10 +616,15 @@ async def get_bonuses(request: Request):
     return [Bonus(**b) for b in bonuses]
 
 @router.post("/bonuses")
-async def create_bonus(bonus: Bonus):
+async def create_bonus(request: Request, bonus: Bonus):
     db = get_db()
-    await db.bonuses.insert_one(bonus.model_dump())
-    return bonus
+    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
+    tenant_id = get_current_tenant_id(request, dummy_admin)
+
+    doc = bonus.model_dump()
+    doc["tenant_id"] = tenant_id
+    await db.bonuses.insert_one(doc)
+    return Bonus(**doc)
 
 # --- SUPPORT TICKETS ---
 @router.get("/tickets", response_model=List[Ticket])
