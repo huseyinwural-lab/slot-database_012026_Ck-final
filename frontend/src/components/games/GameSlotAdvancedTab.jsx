@@ -13,6 +13,8 @@ const GameSlotAdvancedTab = ({ game }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [history, setHistory] = useState([]);
+
 
   const [form, setForm] = useState({
     spin_speed: 'normal',
