@@ -60,6 +60,7 @@ async def get_dashboard_stats():
 # --- PLAYERS ---
 @router.get("/players", response_model=List[Player])
 async def get_players(
+    request: Request,
     status: Optional[str] = None, 
     search: Optional[str] = None,
     vip_level: Optional[int] = None,
