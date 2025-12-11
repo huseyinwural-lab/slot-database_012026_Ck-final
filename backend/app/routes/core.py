@@ -68,7 +68,10 @@ async def get_players(
     country: Optional[str] = None
 ):
     db = get_db()
-    query = {}
+    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
+    tenant_id = get_current_tenant_id(request, dummy_admin)
+
+    query = {"tenant_id": tenant_id}
     if status and status != "all":
         query["status"] = status
     if vip_level:
