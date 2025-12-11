@@ -1251,23 +1251,18 @@ class CasinoAdminAPITester:
         # Scenario 1: launch_url + min_version ile HTML5 upload
         print(f"\n🔍 Senaryo 1: launch_url + min_version ile HTML5 upload")
         
-        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as client1_file:
-            client1_file.write(html5_file_content)
-            client1_file.flush()
+        try:
+            url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
             
-            try:
-                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
-                
-                with open(client1_file.name, 'rb') as f:
-                    files = {'file': ('client1.txt', f, 'text/plain')}
-                    data = {
-                        'client_type': 'html5',
-                        'launch_url': '/static/test-overridden.html',
-                        'min_version': '1.2.3'
-                    }
-                    
-                    print(f"   📤 Uploading HTML5 client with launch_url + min_version to: {url}")
-                    response = requests.post(url, files=files, data=data, timeout=30)
+            files = {'file': ('client1.txt', html5_file_content, 'text/plain')}
+            data = {
+                'client_type': 'html5',
+                'launch_url': '/static/test-overridden.html',
+                'min_version': '1.2.3'
+            }
+            
+            print(f"   📤 Uploading HTML5 client with launch_url + min_version to: {url}")
+            response = requests.post(url, files=files, data=data, timeout=30)
                     
                     success_1 = response.status_code == 200
                     self.tests_run += 1
