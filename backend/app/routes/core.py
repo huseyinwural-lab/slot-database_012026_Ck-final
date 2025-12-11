@@ -704,19 +704,6 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
             "spin_count": cfg.spin_count,
             "fixed_bet_amount": cfg.fixed_bet_amount,
             "total_budget_cap": cfg.total_budget_cap,
-
-
-@router.post("/players/{player_id}/events/registered")
-async def player_registered_event(player_id: str):
-    await maybe_grant_new_member_manual_bonus(player_id)
-    return {"message": "Player registration event processed"}
-
-
-@router.post("/players/{player_id}/events/first-login")
-async def player_first_login_event(player_id: str):
-    await maybe_grant_new_member_manual_bonus(player_id)
-    return {"message": "Player first-login event processed"}
-
         },
     )
 
