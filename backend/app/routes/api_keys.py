@@ -54,6 +54,7 @@ async def list_api_keys(current_admin: AdminUser = Depends(get_current_admin)):
     return [APIKeyMetaResponse(**d) for d in docs]
 
 
+@router.post("", status_code=201)
 @router.post("/", status_code=201)
 async def create_api_key(
     payload: APIKeyCreateRequest,
