@@ -1247,6 +1247,258 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def _prepare_api_key_tests(self):
+        """Prepare API key tests: seed admin and get JWT token"""
+        print("   🔧 Admin seed ve JWT token alma...")
+        
+        # Step 1: Seed admin data
+        success1, seed_response = self.run_test("Admin Seed", "POST", "api/v1/admin/seed", 200)
+        if not success1:
+            print("   ❌ Admin seed başarısız")
+            return False
+        
+        print("   ✅ Admin seed başarılı")
+        
+        # Step 2: Login to get JWT token
+        login_data = {
+            "email": "admin@casino.com",
+            "password": "Admin123!"
+        }
+        success2, login_response = self.run_test("Admin Login", "POST", "api/v1/auth/login", 200, login_data)
+        if not success2 or not isinstance(login_response, dict):
+            print("   ❌ Admin login başarısız")
+            return False
+        
+        # Store JWT token for authenticated requests
+        self.access_token = login_response.get('access_token')
+        if not self.access_token:
+            print("   ❌ JWT token alınamadı")
+            return False
+        
+        print(f"   ✅ JWT token alındı: {self.access_token[:20]}...")
+        return True
+
+    def _test_api_key_scopes(self):
+        """Test 1: GET /api/v1/api-keys/scopes"""
+        print("   🎯 Scope listesi testi...")
+        
+        success, response = self.run_test("API Key Scopes", "GET", "api/v1/api-keys/scopes", 200, auth_token=self.access_token)
+        
+        if success and isinstance(response, list):
+            expected_scopes = ["robot.run", "robot.configure", "games.read", "reports.read"]
+            
+            # Check if all expected scopes are present
+            missing_scopes = [scope for scope in expected_scopes if scope not in response]
+            extra_scopes = [scope for scope in response if scope not in expected_scopes]
+            
+            if not missing_scopes and not extra_scopes:
+                print(f"      ✅ Scope listesi doğru: {response}")
+                return True
+            else:
+                if missing_scopes:
+                    print(f"      ❌ Eksik scope'lar: {missing_scopes}")
+                if extra_scopes:
+                    print(f"      ⚠️  Fazla scope'lar: {extra_scopes}")
+                return False
+        else:
+            print("      ❌ Scope listesi alınamadı veya format hatalı")
+            return False
+
+    def _test_api_key_create_valid(self):
+        """Test 2: POST /api/v1/api-keys (geçerli)"""
+        print("   🎯 Geçerli API key oluşturma testi...")
+        
+        create_data = {
+            "name": "Robot Key #1",
+            "scopes": ["robot.run", "games.read"]
+        }
+        
+        success, response = self.run_test("Create Valid API Key", "POST", "api/v1/api-keys", 201, create_data, auth_token=self.access_token)
+        
+        if success and isinstance(response, dict):
+            # Check response structure
+            required_fields = ["api_key", "key"]
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"      ❌ Response eksik alanlar: {missing_fields}")
+                return False, None
+            
+            # Validate api_key field (full secret)
+            api_key = response.get("api_key")
+            if not api_key or not isinstance(api_key, str) or len(api_key) < 20:
+                print(f"      ❌ api_key geçersiz: {api_key}")
+                return False, None
+            
+            print(f"      ✅ Full API key alındı: {api_key[:8]}...")
+            
+            # Validate key object structure
+            key_obj = response.get("key")
+            if not isinstance(key_obj, dict):
+                print(f"      ❌ key objesi geçersiz")
+                return False, None
+            
+            required_key_fields = ["id", "owner_admin_id", "tenant_id", "name", "key_prefix", "scopes", "active", "created_at"]
+            missing_key_fields = [field for field in required_key_fields if field not in key_obj]
+            
+            if missing_key_fields:
+                print(f"      ❌ key objesi eksik alanlar: {missing_key_fields}")
+                return False, None
+            
+            # Ensure key_hash is NOT in response (security check)
+            if "key_hash" in key_obj:
+                print(f"      ❌ GÜVENLIK SORUNU: key_hash response'ta görünüyor!")
+                return False, None
+            
+            print(f"      ✅ Key objesi yapısı doğru:")
+            print(f"         - id: {key_obj['id']}")
+            print(f"         - name: {key_obj['name']}")
+            print(f"         - key_prefix: {key_obj['key_prefix']}")
+            print(f"         - scopes: {key_obj['scopes']}")
+            print(f"         - active: {key_obj['active']}")
+            print(f"         - tenant_id: {key_obj['tenant_id']}")
+            
+            # Validate specific values
+            if key_obj['name'] != "Robot Key #1":
+                print(f"      ❌ name yanlış: {key_obj['name']}")
+                return False, None
+            
+            if set(key_obj['scopes']) != {"robot.run", "games.read"}:
+                print(f"      ❌ scopes yanlış: {key_obj['scopes']}")
+                return False, None
+            
+            if not key_obj['active']:
+                print(f"      ❌ active false olmamalı")
+                return False, None
+            
+            print(f"      ✅ Tüm alanlar doğru validate edildi")
+            return True, key_obj['id']
+        else:
+            print("      ❌ API key oluşturulamadı")
+            return False, None
+
+    def _test_api_key_create_invalid_scope(self):
+        """Test 3: POST /api/v1/api-keys (geçersiz scope)"""
+        print("   🎯 Geçersiz scope validation testi...")
+        
+        create_data = {
+            "name": "Bad Key",
+            "scopes": ["invalid.scope"]
+        }
+        
+        success, response = self.run_test("Create Invalid Scope API Key", "POST", "api/v1/api-keys", 400, create_data, auth_token=self.access_token)
+        
+        if not success and isinstance(response, dict):
+            # Check for proper error structure
+            detail = response.get("detail", {})
+            if isinstance(detail, dict):
+                error_code = detail.get("error_code")
+                invalid_scopes = detail.get("invalid_scopes", [])
+                
+                if error_code == "INVALID_API_KEY_SCOPE" and "invalid.scope" in invalid_scopes:
+                    print(f"      ✅ Geçersiz scope doğru şekilde reddedildi:")
+                    print(f"         - error_code: {error_code}")
+                    print(f"         - invalid_scopes: {invalid_scopes}")
+                    return True
+                else:
+                    print(f"      ❌ Hata yapısı beklenen gibi değil: {detail}")
+                    return False
+            else:
+                print(f"      ❌ Detail yapısı dict değil: {detail}")
+                return False
+        else:
+            print("      ❌ 400 hatası bekleniyor ama alınamadı")
+            return False
+
+    def _test_api_key_listing(self):
+        """Test 4: GET /api/v1/api-keys/"""
+        print("   🎯 API key listeleme testi...")
+        
+        success, response = self.run_test("List API Keys", "GET", "api/v1/api-keys/", 200, auth_token=self.access_token)
+        
+        if success and isinstance(response, list):
+            if len(response) >= 1:
+                print(f"      ✅ {len(response)} API key listelendi")
+                
+                # Check first key structure
+                key = response[0]
+                required_fields = ["id", "owner_admin_id", "tenant_id", "name", "key_prefix", "scopes", "active", "created_at"]
+                missing_fields = [field for field in required_fields if field not in key]
+                
+                if missing_fields:
+                    print(f"      ❌ Key eksik alanlar: {missing_fields}")
+                    return False
+                
+                # Ensure key_hash is NOT in response (security check)
+                if "key_hash" in key:
+                    print(f"      ❌ GÜVENLIK SORUNU: key_hash listeleme response'ında görünüyor!")
+                    return False
+                
+                print(f"      ✅ Key yapısı doğru, key_hash gizli")
+                print(f"         - Sample key: {key['name']} ({key['key_prefix']})")
+                return True
+            else:
+                print(f"      ❌ Hiç API key bulunamadı (en az 1 bekleniyor)")
+                return False
+        else:
+            print("      ❌ API key listesi alınamadı")
+            return False
+
+    def _test_api_key_toggle(self, key_id):
+        """Test 5: PATCH /api/v1/api-keys/{id} (active/pasif toggle)"""
+        print("   🎯 API key active/pasif toggle testi...")
+        
+        if not key_id:
+            print("      ❌ Test için key_id bulunamadı")
+            return False
+        
+        # Test 1: Set to inactive
+        print("      🔄 Key'i pasif yapma...")
+        update_data = {"active": False}
+        success1, response1 = self.run_test(f"Deactivate API Key {key_id}", "PATCH", f"api/v1/api-keys/{key_id}", 200, update_data, auth_token=self.access_token)
+        
+        if success1 and isinstance(response1, dict):
+            if response1.get("active") == False:
+                print(f"         ✅ Key başarıyla pasif yapıldı")
+            else:
+                print(f"         ❌ Key pasif yapılamadı: active={response1.get('active')}")
+                return False
+        else:
+            print("         ❌ Key pasif yapma işlemi başarısız")
+            return False
+        
+        # Test 2: Set back to active
+        print("      🔄 Key'i tekrar aktif yapma...")
+        update_data = {"active": True}
+        success2, response2 = self.run_test(f"Activate API Key {key_id}", "PATCH", f"api/v1/api-keys/{key_id}", 200, update_data, auth_token=self.access_token)
+        
+        if success2 and isinstance(response2, dict):
+            if response2.get("active") == True:
+                print(f"         ✅ Key başarıyla aktif yapıldı")
+            else:
+                print(f"         ❌ Key aktif yapılamadı: active={response2.get('active')}")
+                return False
+        else:
+            print("         ❌ Key aktif yapma işlemi başarısız")
+            return False
+        
+        # Test 3: Try to access another admin's key (if possible)
+        print("      🔒 Yetki kontrolü testi (başka admin'in key'ine erişim)...")
+        # This is a conceptual test - in real scenario we'd need another admin's key
+        # For now, we'll test with a non-existent key ID to verify 404 handling
+        fake_key_id = "non-existent-key-id"
+        update_data = {"active": False}
+        success3, response3 = self.run_test(f"Access Non-existent Key", "PATCH", f"api/v1/api-keys/{fake_key_id}", 404, update_data, auth_token=self.access_token)
+        
+        if not success3:  # We expect 404, so success3 should be False
+            print(f"         ✅ Var olmayan key için doğru şekilde 404 döndü")
+        else:
+            print(f"         ❌ Var olmayan key için 404 dönmedi")
+            return False
+        
+        print(f"      ✅ Tüm toggle testleri başarılı")
+        return True
+
     def _setup_tenant_test_data(self):
         """Setup tenant test data for 2.1.3-2.1.5 tests"""
         print("   🔧 Setting up tenant test data...")
