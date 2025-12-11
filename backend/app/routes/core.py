@@ -553,6 +553,39 @@ async def upload_games(
         
         return {"message": f"Successfully imported {imported_count} games from {provider}", "imported_count": imported_count}
     
+
+
+# --- BONUS CONFIG: NEW MEMBER MANUAL BONUS ---
+from app.models.domain.settings import NewMemberManualBonusConfig
+
+
+@router.get("/bonus/config/new-member-manual", response_model=NewMemberManualBonusConfig)
+async def get_new_member_manual_bonus_config():
+    db = get_db()
+    doc = await db.platform_settings.find_one({"key": "new_member_manual_bonus"}, {"_id": 0})
+    if not doc:
+        return NewMemberManualBonusConfig()
+    return NewMemberManualBonusConfig(**doc.get("config", {}))
+
+
+@router.put("/bonus/config/new-member-manual", response_model=NewMemberManualBonusConfig)
+async def update_new_member_manual_bonus_config(cfg: NewMemberManualBonusConfig):
+    # Validation guardrails
+    if not (1 <= cfg.spin_count <= 1000):
+        raise HTTPException(400, detail="spin_count must be between 1 and 1000")
+    if cfg.fixed_bet_amount <= 0 or cfg.fixed_bet_amount > 1000:
+        raise HTTPException(400, detail="fixed_bet_amount must be > 0 and <= 1000")
+    if cfg.total_budget_cap < 0 or cfg.total_budget_cap > 1000000:
+        raise HTTPException(400, detail="total_budget_cap must be >= 0 and <= 1,000,000")
+
+    db = get_db()
+    await db.platform_settings.update_one(
+        {"key": "new_member_manual_bonus"},
+        {"$set": {"key": "new_member_manual_bonus", "config": cfg.model_dump()}},
+        upsert=True,
+    )
+    return cfg
+
     return {"message": "Invalid method"}
 
 # --- BONUSES ---
