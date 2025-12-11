@@ -62,6 +62,13 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
       await onReload?.();
     } catch (err) {
       console.error(err);
+      const apiError = err?.response?.data;
+      const msg = apiError?.message || apiError?.detail || 'Override kaydedilemedi';
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const toggleVersion = (configVersionId) => {
     setSelectedVersions((prev) => {
