@@ -608,7 +608,7 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
         )
 
     # Country overrides validation
-    normalized_country_overrides: Dict[str, Dict[str, Any]] = _validate_country_overrides(
+    normalized_country_overrides, err = _validate_country_overrides(
         payload.country_overrides,
         [
             "max_loss_per_round",
@@ -620,6 +620,8 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
         _crash_math_error,
         parent_field="country_overrides",
     )
+    if err is not None:
+        return err
 
     # Fetch previous config for logging
     prev_docs = (
