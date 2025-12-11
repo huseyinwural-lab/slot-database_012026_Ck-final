@@ -238,6 +238,21 @@ p1_hardening:
         -agent: "testing"
         -comment: "✅ DICE ADVANCED LIMITS UI ROUND-TRIP VE E2E DOĞRULAMA COMPLETE - All Turkish review request scenarios successfully tested and working: Ön koşul: Test Dice Game (Advanced Limits QA) successfully found and accessible via Dice category filter in /games page. Senaryo 1 - Global limits happy-path round-trip: Advanced Limits (global) fields (max_win_per_bet=200, max_loss_per_bet=100, max_session_loss=1000, max_session_bets=500, enforcement_mode=hard_block) successfully filled and saved with 'Dice math config kaydedildi' success toast. Round-trip verification confirmed all values preserved correctly after modal close/reopen. Senaryo 2 - TR override round-trip: Country Overrides JSON textarea accepts TR-specific limits (max_session_loss=800, max_win_per_bet=150) correctly, saves successfully, and preserves values in prettified JSON format after round-trip test. Senaryo 3 - Bozuk JSON davranışı: Invalid JSON (missing closing brace) properly handled with client-side validation showing error message, preventing malformed data submission. All UI components functional: GameDiceMathTab.jsx properly integrated with GameConfigPanel.jsx, Dice Math tab appears correctly for DICE games, all form fields editable and responsive, API integrations working (GET/POST /api/v1/games/{game_id}/config/dice-math), data persistence verified through multiple round-trip tests. The Dice Advanced Limits UI flow is fully operational and ready for production use."
 
+  - task: "Client Upload Flow Backend Validation"
+    implemented: true
+    working: true
+    file: "backend/app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented POST /api/v1/games/{game_id}/client-upload endpoint for HTML5 and Unity client uploads with multipart/form-data support, client_variants and primary_client_type management."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ CLIENT UPLOAD FLOW BACKEND VALIDATION - ALL TESTS PASSED: Test game used: Test Slot Game (id=f9596f63-a1f6-411b-aec4-f713b900894e). Senaryo A - HTML5 upload (first client): POST /api/v1/games/{game_id}/client-upload with multipart form-data (file=test-html5.zip, client_type=html5, params={}) returns 200 OK with proper response structure (game_id, client_type=html5, launch_url=/static/game-clients/{game_id}/{config_version_id}/test-html5.zip, primary_client_type=html5). Senaryo B - Unity upload (second client): POST with Unity client (file=test-unity.zip, client_type=unity) returns 200 OK, primary_client_type remains html5 (first client preserved). Senaryo C - Invalid client_type: POST with client_type=desktop returns 400 with error_code=CLIENT_UPLOAD_FAILED, details.reason=invalid_client_type, allowed_types=[html5,unity]. Senaryo D - Missing file: POST without file parameter returns 400 with error_code=CLIENT_UPLOAD_FAILED, details.reason=missing_file. DB Validation: Game document correctly updated with client_variants.html5.enabled=true, client_variants.html5.launch_url contains test-html5.zip, client_variants.html5.runtime=html5, client_variants.unity.enabled=true, client_variants.unity.launch_url contains test-unity.zip, client_variants.unity.runtime=unity, primary_client_type=html5 (unchanged from first client). Fixed endpoint error handling by adding try-catch block around ClientUploadError exceptions and returning JSONResponse with status_code=400. Made file parameter optional to enable proper missing file validation. All scenarios working exactly as specified in Turkish review request."
+
   - task: "Implement MVP config version diff backend for game configs"
     implemented: true
     working: true
