@@ -2482,8 +2482,8 @@ asyncio.run(update_tenant())
                     "response": response.text[:200]
                 })
                         
-            finally:
-                os.unlink(client1_file.name)
+        finally:
+            os.unlink(client1_file.name)
         
         # Scenario 3: Unity client için ayrı upload
         print(f"\n🔍 Senaryo 3: Unity client için ayrı upload")
