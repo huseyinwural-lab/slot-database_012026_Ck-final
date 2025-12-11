@@ -1614,8 +1614,8 @@ class CasinoAdminAPITester:
             
             print(f"   📤 Uploading HTML5 client with only min_version update")
             response = requests.post(url, files=files, data=data, timeout=30)
-                    
-                    success_2 = response.status_code == 200
+            
+            success_2 = response.status_code == 200
                     self.tests_run += 1
                     if success_2:
                         self.tests_passed += 1
