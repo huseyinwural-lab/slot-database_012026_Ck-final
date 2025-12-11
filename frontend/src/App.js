@@ -26,6 +26,7 @@ import { AdminManagement } from './pages/AdminManagement';
 import SettingsPanel from './pages/SettingsPanel';
 import TenantsPage from './pages/TenantsPage';
 import Login from './pages/Login';
+import APIKeysPage from './pages/APIKeysPage';
 import { Toaster } from 'sonner';
 
 function App() {
@@ -214,6 +215,14 @@ function App() {
             )}
           />
           
+          <Route
+            path="/api-keys"
+            element={(
+              <RequireAuth>
+                <APIKeysPage />
+              </RequireAuth>
+            )}
+          />
           <Route
             path="/settings"
             element={(
