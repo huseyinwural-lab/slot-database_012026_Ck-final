@@ -18,6 +18,10 @@ from app.models.game import (
     RtpCountryOverride,
     BetConfig,
     BetConfigResponse,
+from fastapi import Depends
+from app.models.domain.admin import AdminUser
+from app.utils.auth import get_current_admin
+
     GameFeatureFlags,
     GameFeatureFlagsResponse,
     GameGeneralConfig,
