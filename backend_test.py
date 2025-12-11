@@ -11280,6 +11280,9 @@ def main():
     print("\n🎁 YENİ ÜYE MANUEL BONUS TRIGGER BACKEND TESTS (TURKISH REVIEW REQUEST)")
     test_results.append(("Yeni Üye Manuel Bonus Trigger", tester.test_new_member_manual_bonus_trigger()))
     
+    print("\n🤖 GAME ROBOT TENANT-AWARE TESTS (GÖREV 2.2)")
+    test_results.append(("Game Robot Tenant-Aware", tester.test_game_robot_tenant_aware()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
