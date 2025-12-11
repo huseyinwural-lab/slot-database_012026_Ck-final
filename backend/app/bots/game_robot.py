@@ -288,22 +288,33 @@ def main(argv: Optional[List[str]] = None) -> int:
     api_key: Optional[str] = parsed["api_key"]
 
     # Tenant kullanma yetkisini kontrol et
+    import asyncio
     from motor.motor_asyncio import AsyncIOMotorClient
     from config import settings
 
-    client_db = AsyncIOMotorClient(settings.mongo_url)[settings.db_name]
+    async def check_tenant_permission():
+        client_db = AsyncIOMotorClient(settings.mongo_url)
+        db = client_db[settings.db_name]
+        
+        tenant = await db.tenants.find_one({"id": tenant_id})
+        client_db.close()
+        
+        if not tenant:
+            print(f"TENANT_NOT_FOUND: {tenant_id}", file=sys.stderr)
+            return False, None
+        
+        features = tenant.get("features") or {}
+        if not features.get("can_use_game_robot", False):
+            print(f"TENANT_CANNOT_USE_GAME_ROBOT: {tenant_id}", file=sys.stderr)
+            return False, None
+        
+        print(f"TENANT_CAN_USE_GAME_ROBOT: {tenant_id}")
+        return True, tenant
 
-    tenant = client_db.tenants.find_one({"id": tenant_id})
-    if not tenant:
-        print(f"TENANT_NOT_FOUND: {tenant_id}", file=sys.stderr)
+    # Run the async tenant check
+    can_use, tenant = asyncio.run(check_tenant_permission())
+    if not can_use:
         return 1
-
-    features = tenant.get("features") or {}
-    if not features.get("can_use_game_robot", False):
-        print(f"TENANT_CANNOT_USE_GAME_ROBOT: {tenant_id}", file=sys.stderr)
-        return 1
-
-    print(f"TENANT_CAN_USE_GAME_ROBOT: {tenant_id}")
 
     client = HttpClient(BASE_URL, tenant_id=tenant_id, api_key=api_key)
     game_types: List[str] = parsed["game_types"]
