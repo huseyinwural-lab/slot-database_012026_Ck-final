@@ -14,18 +14,6 @@ DEFAULT_ROUNDS = 50
 BASE_URL = os.getenv("GAME_ROBOT_BASE_URL", "http://localhost:8001")
 
 
-@dataclass
-class ScenarioResult:
-    game_type: str
-    rounds: int
-    success_count: int
-    errors: List[Dict[str, Any]]
-
-    @property
-    def has_errors(self) -> bool:
-        return len(self.errors) > 0
-
-
 class HttpClient:
     def __init__(self, base_url: str, api_key: str, timeout: float = 10.0):
         self.base_url = base_url.rstrip("/")
