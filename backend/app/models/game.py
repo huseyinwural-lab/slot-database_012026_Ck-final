@@ -364,7 +364,7 @@ class DiceMathConfigResponse(BaseModel):
     max_session_bets: Optional[int] = None
 
     enforcement_mode: str = "log_only"
-    country_overrides: Dict[str, CrashSafetyCountryOverride] = {}
+    country_overrides: Dict[str, DiceSafetyCountryOverride] = {}
 
     provably_fair_enabled: bool
     rng_algorithm: str
