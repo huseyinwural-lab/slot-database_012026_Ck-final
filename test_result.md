@@ -1,4 +1,5 @@
-user_problem_statement: "Phase 1: Financial Integrity & Security Update"
+user_problem_statement:
+  summary: "Phase 1: Financial Integrity & Security Update"
 backend:
   - task: "Finance Refactor & New Routes"
     implemented: true
