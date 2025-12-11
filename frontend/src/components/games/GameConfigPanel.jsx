@@ -337,6 +337,9 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           {visibleTabs.includes('assets') && (
             <TabsTrigger value="assets">Assets</TabsTrigger>
           )}
+          {visibleTabs.includes('client') && (
+            <TabsTrigger value="client">Client Upload</TabsTrigger>
+          )}
           {visibleTabs.includes('logs') && (
             <TabsTrigger value="logs">Logs</TabsTrigger>
           )}
