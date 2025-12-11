@@ -331,7 +331,7 @@ class DiceMathConfig(BaseModel):
     enforcement_mode: str = "log_only"
 
     # Country-specific overrides keyed by ISO 3166-1 alpha-2 country code
-    country_overrides: Dict[str, CrashSafetyCountryOverride] = {}
+    country_overrides: Dict[str, DiceSafetyCountryOverride] = {}
 
     provably_fair_enabled: bool = False
     rng_algorithm: str
