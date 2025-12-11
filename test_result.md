@@ -780,7 +780,8 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus: []
+  current_focus: 
+    - "FAZ 4 API Keys UI Frontend Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
