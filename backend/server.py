@@ -76,8 +76,8 @@ from app.routes import simulation_lab
 app.include_router(simulation_lab.router)
 
 # Settings Panel
-from app.routes import settings
-app.include_router(settings.router)
+from app.routes import settings as settings_router
+app.include_router(settings_router.router)
 
 @app.get("/api/health")
 async def health_check():
