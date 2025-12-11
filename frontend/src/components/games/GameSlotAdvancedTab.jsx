@@ -252,6 +252,82 @@ const GameSlotAdvancedTab = ({ game }) => {
               />
             </div>
             <div className="space-y-2">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-sm">Advanced History</CardTitle>
+              <CardDescription>Slot advanced kayıtlarının özeti.</CardDescription>
+            </div>
+            {history.length >= 2 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCompare}
+                disabled={diffLoading || selectedVersions.length !== 2}
+              >
+                {diffLoading ? 'Diff yükleniyor...' : 'Compare Selected'}
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {history.length === 0 ? (
+            <div className="text-xs text-muted-foreground">Henüz advanced geçmişi yok.</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[40px] text-center text-xs">Seç</TableHead>
+                  <TableHead>Version</TableHead>
+                  <TableHead>Admin</TableHead>
+                  <TableHead>Tarih</TableHead>
+                  <TableHead>Summary</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {history.map((e) => {
+                  const id = e.metadata?.config_version_id;
+                  const checked = selectedVersions.includes(id);
+                  return (
+                    <TableRow
+                      key={e.id}
+                      className={checked ? 'bg-muted/50' : ''}
+                      onClick={() => toggleVersion(id)}
+                    >
+                      <TableCell className="text-center">
+                        <input
+                          type="checkbox"
+                          className="h-3 w-3 cursor-pointer"
+                          checked={checked}
+                          onChange={() => toggleVersion(id)}
+                          onClick={(ev) => ev.stopPropagation()}
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{id?.slice(0, 8)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{e.admin_id}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {new Date(e.created_at).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-xs max-w-xs truncate">{e.details?.summary || '-'}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <ConfigDiffPanel
+        open={diffOpen}
+        onOpenChange={setDiffOpen}
+        configType="slot-advanced"
+        fromVersion={diffMeta.from}
+        toVersion={diffMeta.to}
+        changes={diffChanges}
+      />
+
               <Label>Stop on big win</Label>
               <div className="flex items-center gap-2">
                 <Switch
