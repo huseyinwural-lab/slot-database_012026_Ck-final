@@ -615,10 +615,9 @@ async def update_new_member_manual_bonus_config(
 
 # --- BONUSES ---
 @router.get("/bonuses", response_model=List[Bonus])
-async def get_bonuses(request: Request):
+async def get_bonuses(request: Request, current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
-    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
-    tenant_id = get_current_tenant_id(request, dummy_admin)
+    tenant_id = get_current_tenant_id(request, current_admin)
 
     bonuses = await db.bonuses.find({"tenant_id": tenant_id}).to_list(100)
     return [Bonus(**b) for b in bonuses]
