@@ -1229,6 +1229,370 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_slot_p0b_backend_validation(self):
+        """Test Slot P0-B Backend Validation - Turkish Review Request"""
+        print("\n🎰 SLOT P0-B BACKEND VALIDATION TESTS")
+        
+        # Bağlam: Base URL kullanımdaki REACT_APP_BACKEND_URL
+        # Test oyunu: GET /api/v1/games içinden core_type='SLOT' olan ve adı 'Test Slot Game' olan oyun (ID: f9596f63-a1f6-411b-aec4-f713b900894e)
+        
+        test_game_id = "f9596f63-a1f6-411b-aec4-f713b900894e"
+        
+        # Verify the test game exists
+        print(f"\n🔍 Verifying test game exists: {test_game_id}")
+        success_verify, game_response = self.run_test("Verify Test Slot Game", "GET", f"api/v1/games/{test_game_id}", 200)
+        
+        if not success_verify:
+            print("❌ Test Slot Game not found. Trying to find it from games list...")
+            success_list, games_response = self.run_test("Get All Games", "GET", "api/v1/games", 200)
+            
+            if success_list and isinstance(games_response, list):
+                for game in games_response:
+                    if (game.get('name') == 'Test Slot Game' and 
+                        game.get('core_type') == 'SLOT'):
+                        test_game_id = game.get('id')
+                        print(f"   🎯 Found Test Slot Game: ID = {test_game_id}")
+                        break
+                else:
+                    print("❌ Test Slot Game with core_type='SLOT' not found")
+                    return False
+            else:
+                print("❌ Could not retrieve games list")
+                return False
+        
+        # Senaryo 1: Slot Advanced – Pozitif round-trip
+        print(f"\n🔍 Senaryo 1: Slot Advanced – Pozitif round-trip")
+        
+        # GET /api/v1/games/{game_id}/config/slot-advanced
+        success_get1, get_response1 = self.run_test(
+            "GET Slot Advanced Config (Initial)", 
+            "GET", 
+            f"api/v1/games/{test_game_id}/config/slot-advanced", 
+            200
+        )
+        
+        if not success_get1:
+            print("❌ GET slot-advanced endpoint failed")
+            return False
+        
+        # POST with positive payload
+        positive_payload = {
+            "spin_speed": "slow",
+            "turbo_spin_allowed": False,
+            "autoplay_enabled": True,
+            "autoplay_default_spins": 10,
+            "autoplay_max_spins": 50,
+            "autoplay_stop_on_big_win": False,
+            "autoplay_stop_on_balance_drop_percent": 25,
+            "big_win_animation_enabled": False,
+            "gamble_feature_allowed": False,
+            "summary": "Slot advanced QA positive"
+        }
+        
+        success_post1, post_response1 = self.run_test(
+            "POST Slot Advanced Config (Positive)",
+            "POST",
+            f"api/v1/games/{test_game_id}/config/slot-advanced",
+            200,
+            positive_payload
+        )
+        
+        if not success_post1:
+            print("❌ POST slot-advanced positive test failed")
+            return False
+        
+        # GET again to verify round-trip
+        success_get2, get_response2 = self.run_test(
+            "GET Slot Advanced Config (After POST)",
+            "GET",
+            f"api/v1/games/{test_game_id}/config/slot-advanced",
+            200
+        )
+        
+        # Validate round-trip data
+        roundtrip_success = True
+        if success_get2 and isinstance(get_response2, dict):
+            print("\n🔍 Validating round-trip data:")
+            for key, expected_value in positive_payload.items():
+                if key == "summary":  # Summary is not returned in GET response
+                    continue
+                actual_value = get_response2.get(key)
+                if actual_value == expected_value:
+                    print(f"   ✅ {key}: {actual_value}")
+                else:
+                    print(f"   ❌ {key}: expected {expected_value}, got {actual_value}")
+                    roundtrip_success = False
+        else:
+            roundtrip_success = False
+            print("❌ GET after POST failed or returned invalid response")
+        
+        # Senaryo 2: Slot Advanced – Negatif validasyon
+        print(f"\n🔍 Senaryo 2: Slot Advanced – Negatif validasyon")
+        
+        negative_payload = {
+            "spin_speed": "fast",
+            "turbo_spin_allowed": True,
+            "autoplay_enabled": True,
+            "autoplay_default_spins": 100,  # > autoplay_max_spins (50)
+            "autoplay_max_spins": 50,
+            "autoplay_stop_on_big_win": True,
+            "autoplay_stop_on_balance_drop_percent": -10,  # negative value
+            "big_win_animation_enabled": True,
+            "gamble_feature_allowed": True,
+            "summary": "Slot advanced QA negative"
+        }
+        
+        success_post2, post_response2 = self.run_test(
+            "POST Slot Advanced Config (Negative)",
+            "POST",
+            f"api/v1/games/{test_game_id}/config/slot-advanced",
+            400,
+            negative_payload
+        )
+        
+        # Validate error response
+        negative_validation_success = True
+        if success_post2 and isinstance(post_response2, dict):
+            print("\n🔍 Validating negative validation response:")
+            error_code = post_response2.get('error_code')
+            details = post_response2.get('details', {})
+            
+            if error_code == "SLOT_ADVANCED_VALIDATION_FAILED":
+                print(f"   ✅ error_code: {error_code}")
+            else:
+                print(f"   ❌ error_code: expected 'SLOT_ADVANCED_VALIDATION_FAILED', got '{error_code}'")
+                negative_validation_success = False
+            
+            # Check for meaningful reason about autoplay_default_spins > autoplay_max_spins
+            reason = details.get('reason')
+            if 'invalid_range' in str(reason) or 'autoplay' in str(details):
+                print(f"   ✅ details contain autoplay validation info: {details}")
+            else:
+                print(f"   ❌ details missing autoplay validation info: {details}")
+                negative_validation_success = False
+        else:
+            negative_validation_success = False
+            print("❌ Negative validation test failed or returned invalid response")
+        
+        # Senaryo 3: Paytable – Pozitif override round-trip
+        print(f"\n🔍 Senaryo 3: Paytable – Pozitif override round-trip")
+        
+        # GET initial paytable
+        success_get_pt1, get_pt_response1 = self.run_test(
+            "GET Paytable Config (Initial)",
+            "GET",
+            f"api/v1/games/{test_game_id}/config/paytable",
+            200
+        )
+        
+        # POST paytable override
+        paytable_payload = {
+            "data": {
+                "symbols": [
+                    {"code": "A", "pays": {"3": 5, "4": 10, "5": 20}},
+                    {"code": "K", "pays": {"3": 4, "4": 8, "5": 16}}
+                ],
+                "lines": 20
+            },
+            "summary": "UI paytable override QA"
+        }
+        
+        success_post_pt, post_pt_response = self.run_test(
+            "POST Paytable Override",
+            "POST",
+            f"api/v1/games/{test_game_id}/config/paytable/override",
+            200,
+            paytable_payload
+        )
+        
+        # GET paytable again to verify
+        success_get_pt2, get_pt_response2 = self.run_test(
+            "GET Paytable Config (After Override)",
+            "GET",
+            f"api/v1/games/{test_game_id}/config/paytable",
+            200
+        )
+        
+        # Validate paytable round-trip
+        paytable_roundtrip_success = True
+        if success_get_pt2 and isinstance(get_pt_response2, dict):
+            current_data = get_pt_response2.get('current', {}).get('data', {})
+            expected_data = paytable_payload['data']
+            
+            if current_data == expected_data:
+                print("   ✅ Paytable data round-trip successful")
+            else:
+                print(f"   ❌ Paytable data mismatch:")
+                print(f"      Expected: {expected_data}")
+                print(f"      Got: {current_data}")
+                paytable_roundtrip_success = False
+        else:
+            paytable_roundtrip_success = False
+        
+        # Senaryo 4: Reel Strips – Pozitif manual round-trip
+        print(f"\n🔍 Senaryo 4: Reel Strips – Pozitif manual round-trip")
+        
+        # GET initial reel strips
+        success_get_rs1, get_rs_response1 = self.run_test(
+            "GET Reel Strips Config (Initial)",
+            "GET",
+            f"api/v1/games/{test_game_id}/config/reel-strips",
+            200
+        )
+        
+        # POST reel strips
+        reel_strips_payload = {
+            "data": {
+                "layout": {"reels": 3, "rows": None},
+                "reels": [
+                    ["A","K","Q","J"],
+                    ["A","K","Q","10"],
+                    ["A","K","Q","J","9","WILD"]
+                ]
+            },
+            "source": "manual",
+            "summary": "UI reel QA"
+        }
+        
+        success_post_rs, post_rs_response = self.run_test(
+            "POST Reel Strips Manual",
+            "POST",
+            f"api/v1/games/{test_game_id}/config/reel-strips",
+            200,
+            reel_strips_payload
+        )
+        
+        # GET reel strips again to verify
+        success_get_rs2, get_rs_response2 = self.run_test(
+            "GET Reel Strips Config (After POST)",
+            "GET",
+            f"api/v1/games/{test_game_id}/config/reel-strips",
+            200
+        )
+        
+        # Validate reel strips round-trip
+        reel_strips_roundtrip_success = True
+        if success_get_rs2 and isinstance(get_rs_response2, dict):
+            current_reels = get_rs_response2.get('current', {}).get('data', {}).get('reels', [])
+            expected_reels = reel_strips_payload['data']['reels']
+            
+            if current_reels == expected_reels:
+                print("   ✅ Reel strips data round-trip successful")
+            else:
+                print(f"   ❌ Reel strips data mismatch:")
+                print(f"      Expected: {expected_reels}")
+                print(f"      Got: {current_reels}")
+                reel_strips_roundtrip_success = False
+        else:
+            reel_strips_roundtrip_success = False
+        
+        # Senaryo 5: Jackpots – Pozitif minimal round-trip
+        print(f"\n🔍 Senaryo 5: Jackpots – Pozitif minimal round-trip")
+        
+        # GET initial jackpots
+        success_get_jp1, get_jp_response1 = self.run_test(
+            "GET Jackpots Config (Initial)",
+            "GET",
+            f"api/v1/games/{test_game_id}/config/jackpots",
+            200
+        )
+        
+        # POST jackpots
+        jackpots_payload = {
+            "jackpots": [
+                {
+                    "name": "Mini JP",
+                    "currency": "EUR",
+                    "seed": 1000,
+                    "cap": 100000,
+                    "contribution_percent": 1.5,
+                    "hit_frequency_param": 0.05
+                }
+            ],
+            "summary": "UI jackpot QA"
+        }
+        
+        success_post_jp, post_jp_response = self.run_test(
+            "POST Jackpots Config",
+            "POST",
+            f"api/v1/games/{test_game_id}/config/jackpots",
+            200,
+            jackpots_payload
+        )
+        
+        # GET jackpots again to verify
+        success_get_jp2, get_jp_response2 = self.run_test(
+            "GET Jackpots Config (After POST)",
+            "GET",
+            f"api/v1/games/{test_game_id}/config/jackpots",
+            200
+        )
+        
+        # Validate jackpots round-trip
+        jackpots_roundtrip_success = True
+        if success_get_jp2 and isinstance(get_jp_response2, dict):
+            config_jackpots = get_jp_response2.get('config', {}).get('jackpots', [])
+            pools = get_jp_response2.get('pools', [])
+            expected_jackpot = jackpots_payload['jackpots'][0]
+            
+            # Check config.jackpots[0] matches POST body
+            if config_jackpots and len(config_jackpots) > 0:
+                actual_jackpot = config_jackpots[0]
+                match = True
+                for key, expected_value in expected_jackpot.items():
+                    if actual_jackpot.get(key) != expected_value:
+                        match = False
+                        break
+                
+                if match:
+                    print("   ✅ Jackpots config round-trip successful")
+                else:
+                    print(f"   ❌ Jackpots config mismatch:")
+                    print(f"      Expected: {expected_jackpot}")
+                    print(f"      Got: {actual_jackpot}")
+                    jackpots_roundtrip_success = False
+            else:
+                print("   ❌ No jackpots found in config")
+                jackpots_roundtrip_success = False
+            
+            # Check pools array has entry for the jackpot
+            if pools and len(pools) > 0:
+                print(f"   ✅ Jackpot pools created: {len(pools)} pool(s)")
+            else:
+                print("   ❌ No jackpot pools found")
+                jackpots_roundtrip_success = False
+        else:
+            jackpots_roundtrip_success = False
+        
+        # Overall result
+        overall_success = (success_get1 and success_post1 and success_get2 and roundtrip_success and
+                          success_post2 and negative_validation_success and
+                          success_get_pt1 and success_post_pt and success_get_pt2 and paytable_roundtrip_success and
+                          success_get_rs1 and success_post_rs and success_get_rs2 and reel_strips_roundtrip_success and
+                          success_get_jp1 and success_post_jp and success_get_jp2 and jackpots_roundtrip_success)
+        
+        if overall_success:
+            print("\n✅ SLOT P0-B BACKEND VALIDATION - ALL TESTS PASSED")
+            print("   ✅ Slot Advanced positive round-trip working")
+            print("   ✅ Slot Advanced negative validation working")
+            print("   ✅ Paytable override round-trip working")
+            print("   ✅ Reel Strips manual round-trip working")
+            print("   ✅ Jackpots minimal round-trip working")
+        else:
+            print("\n❌ SLOT P0-B BACKEND VALIDATION - SOME TESTS FAILED")
+            if not (success_get1 and success_post1 and success_get2 and roundtrip_success):
+                print("   ❌ Slot Advanced positive round-trip failed")
+            if not (success_post2 and negative_validation_success):
+                print("   ❌ Slot Advanced negative validation failed")
+            if not (success_get_pt1 and success_post_pt and success_get_pt2 and paytable_roundtrip_success):
+                print("   ❌ Paytable override round-trip failed")
+            if not (success_get_rs1 and success_post_rs and success_get_rs2 and reel_strips_roundtrip_success):
+                print("   ❌ Reel Strips manual round-trip failed")
+            if not (success_get_jp1 and success_post_jp and success_get_jp2 and jackpots_roundtrip_success):
+                print("   ❌ Jackpots minimal round-trip failed")
+        
+        return overall_success
+
     def test_dice_advanced_limits_backend_validation(self):
         """Test Dice Advanced Limits Backend Validation - Turkish Review Request"""
         print("\n🎲 DICE ADVANCED LIMITS BACKEND VALIDATION TESTS")
