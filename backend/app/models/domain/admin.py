@@ -40,6 +40,7 @@ class AdminUser(BaseModel):
     email: EmailStr
     full_name: str
     role: str # role_id or name
+    tenant_id: str = "default_casino"
     department: str = "General"
     status: AdminStatus = AdminStatus.ACTIVE
     is_2fa_enabled: bool = False
