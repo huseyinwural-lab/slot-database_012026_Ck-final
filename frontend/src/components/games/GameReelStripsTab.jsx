@@ -256,8 +256,22 @@ const GameReelStripsTab = ({ game }) => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Reel Strips History</CardTitle>
-          <CardDescription>Son değişikliklerin özeti.</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-sm">Reel Strips History</CardTitle>
+              <CardDescription>Son değişikliklerin özeti.</CardDescription>
+            </div>
+            {history.length >= 2 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCompare}
+                disabled={diffLoading || selectedVersions.length !== 2}
+              >
+                {diffLoading ? 'Diff yükleniyor...' : 'Compare Selected'}
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
@@ -266,6 +280,7 @@ const GameReelStripsTab = ({ game }) => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[40px] text-center text-xs">Seç</TableHead>
                   <TableHead>Version</TableHead>
                   <TableHead>Source</TableHead>
                   <TableHead>Schema</TableHead>
@@ -274,19 +289,36 @@ const GameReelStripsTab = ({ game }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {history.map((h) => (
-                  <TableRow key={h.config_version_id + h.created_at}>
-                    <TableCell className="font-mono text-xs">{h.config_version_id.slice(0, 8)}</TableCell>
-                    <TableCell className="text-xs">
-                      <Badge variant={h.source === 'import' ? 'secondary' : 'outline'}>{h.source}</Badge>
-                    </TableCell>
-                    <TableCell className="text-xs">{h.schema_version}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(h.created_at).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-xs max-w-xs truncate">{h.summary || '-'}</TableCell>
-                  </TableRow>
-                ))}
+                {history.map((h) => {
+                  const id = h.config_version_id;
+                  const checked = selectedVersions.includes(id);
+                  return (
+                    <TableRow
+                      key={id + h.created_at}
+                      className={checked ? 'bg-muted/50' : ''}
+                      onClick={() => toggleVersion(id)}
+                    >
+                      <TableCell className="text-center">
+                        <input
+                          type="checkbox"
+                          className="h-3 w-3 cursor-pointer"
+                          checked={checked}
+                          onChange={() => toggleVersion(id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{id.slice(0, 8)}</TableCell>
+                      <TableCell className="text-xs">
+                        <Badge variant={h.source === 'import' ? 'secondary' : 'outline'}>{h.source}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">{h.schema_version}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {new Date(h.created_at).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-xs max-w-xs truncate">{h.summary || '-'}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
