@@ -212,6 +212,28 @@ class JackpotConfigResponse(BaseModel):
     pools: List[JackpotPool] = []
 
 
+class ConfigDiffChangeType(str, Enum):
+    ADDED = "added"
+    REMOVED = "removed"
+    MODIFIED = "modified"
+
+
+class ConfigDiffChange(BaseModel):
+    field_path: str
+    old_value: Optional[Any] = None
+    new_value: Optional[Any] = None
+    change_type: ConfigDiffChangeType
+
+
+class ConfigDiffResponse(BaseModel):
+    game_id: str
+    config_type: str
+    from_config_version_id: str
+    to_config_version_id: str
+    changes: List[ConfigDiffChange] = []
+
+
+
 class CrashSafetyCountryOverride(BaseModel):
     max_loss_per_round: Optional[float] = None
     max_win_per_round: Optional[float] = None
