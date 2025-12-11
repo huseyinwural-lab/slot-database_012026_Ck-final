@@ -38,10 +38,6 @@ from app.models.game import (
     ConfigDiffChangeType,
     ConfigDiffResponse,
     PokerRules,
-from fastapi import Depends
-from app.models.domain.admin import AdminUser
-from app.utils.auth import get_current_admin
-
     PokerRulesResponse,
     CrashMathConfig,
     CrashMathConfigResponse,
@@ -52,6 +48,9 @@ from app.utils.auth import get_current_admin
     SlotAdvancedConfig,
     SlotAdvancedConfigResponse,
 )
+from fastapi import Depends
+from app.models.domain.admin import AdminUser
+from app.utils.auth import get_current_admin
 
 
 logger = logging.getLogger(__name__)
