@@ -3508,7 +3508,7 @@ async def upload_game_client(
         primary = runtime_enum
 
     # DB update
-    await db.games.update_one(
+    updated_doc = await db.games.find_one_and_update(
         {"id": game_id},
         {
             "$set": {
@@ -3517,6 +3517,8 @@ async def upload_game_client(
                 "updated_at": datetime.now(timezone.utc),
             }
         },
+        return_document=True,
+        projection={"_id": 0},
     )
 
     logger.info(
