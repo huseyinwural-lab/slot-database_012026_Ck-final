@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     environment: str = os.getenv("ENVIRONMENT", "development")
     debug: bool = os.getenv("DEBUG", "False").lower() == "true"
     cors_origins: str = os.getenv("CORS_ORIGINS", "*")
+
+    # Auth / JWT
+    jwt_secret: str = os.getenv("JWT_SECRET", "change-me-dev-secret")
+    jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
+    jwt_access_token_expires_minutes: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_MINUTES", "60"))
     
     # SendGrid
     sendgrid_from_email: str = os.getenv("SENDGRID_FROM_EMAIL", "noreply@casinoadmin.com")
