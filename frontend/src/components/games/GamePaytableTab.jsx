@@ -18,6 +18,12 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const [selectedVersions, setSelectedVersions] = useState([]);
+  const [diffOpen, setDiffOpen] = useState(false);
+  const [diffLoading, setDiffLoading] = useState(false);
+  const [diffChanges, setDiffChanges] = useState([]);
+  const [diffMeta, setDiffMeta] = useState({ from: null, to: null });
+
   const current = paytable?.current;
   const history = paytable?.history || [];
 
