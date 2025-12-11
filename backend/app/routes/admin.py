@@ -8,6 +8,7 @@ from app.models.modules import (
     AdminStatus, InviteStatus, SystemEvent, LogSeverity, AdminActivityLog, AdminLoginHistory,
     AdminPermissionMatrix, AdminIPRestriction, AdminDeviceRestriction
 )
+from app.utils.auth import get_password_hash
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
