@@ -211,15 +211,18 @@ backend:
 frontend:
   - task: "Crash Advanced Safety UI Validation"
     implemented: true
-    working: true
+    working: false
     file: "src/components/games/GameCrashMathTab.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "✅ CRASH ADVANCED SAFETY UI VALIDATION COMPLETE - Turkish review request scenarios tested: 1) GameManagement sayfası yüklenmesi: /games URL loads correctly, Game list grid renders without errors (100 games found). 2) Crash oyunu kontrolü: No CRASH games found in system (core_type='CRASH' or category='CRASH'), which matches backend test results. As per review request, Crash Math tab testing skipped when no CRASH games available. 3) Tab yapısı doğrulaması: Game Settings modal opens correctly, found 7 tabs without errors, tab structure works properly when Crash tab is not present (no 500/JS errors). 4) UI bileşenleri: GameCrashMathTab.jsx component implemented with all required sections (Advanced Safety global limits, enforcement_mode select, Country Overrides JSON textarea, validation logic). 5) Sistem durumu: Frontend UI ready for CRASH games when they are added to system. All UI components render correctly, no critical errors found. The Crash Advanced Safety UI flow is fully implemented and functional, waiting only for CRASH games to be present in the system for full end-to-end testing."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ CRITICAL UI ISSUE FOUND: Test Crash Game (Advanced Safety QA) exists in backend API (confirmed via /api/v1/games?category=Crash) but is NOT accessible through frontend UI. Search functionality returns 'No results found' when searching for 'Test Crash Game'. Game is not visible in any pagination or scrolling through 100+ games in the list. This is a critical frontend display/filtering issue that prevents testing the Crash Advanced Safety round-trip scenarios. The GameCrashMathTab.jsx component is properly implemented with all required fields (max_loss_per_round, max_win_per_round, max_total_loss_per_session, max_total_win_per_session, max_rounds_per_session, enforcement_mode, country_overrides JSON textarea) but cannot be accessed due to the game not appearing in the UI. Root cause: Frontend game list filtering/display logic is not properly showing CRASH games that exist in the backend."
 
   - task: "Game Poker Rules & Rake Preset Flow"
     implemented: true
