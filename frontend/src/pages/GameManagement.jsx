@@ -19,6 +19,7 @@ const GameManagement = () => {
   const [games, setGames] = useState([]);
   const [tables, setTables] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
+  const [gameCategory, setGameCategory] = useState('all');
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isTableOpen, setIsTableOpen] = useState(false);
   const [tableForm, setTableForm] = useState({ name: '', provider: '', min_bet: 1, max_bet: 100 });
