@@ -355,6 +355,22 @@ p1_hardening:
         -agent: "testing"
         -comment: "✅ DICE ADVANCED LIMITS UI ROUND-TRIP VE E2E DOĞRULAMA COMPLETE - All Turkish review request scenarios successfully tested and working: Ön koşul: Test Dice Game (Advanced Limits QA) successfully found and accessible via Dice category filter in /games page. Senaryo 1 - Global limits happy-path round-trip: Advanced Limits (global) fields (max_win_per_bet=200, max_loss_per_bet=100, max_session_loss=1000, max_session_bets=500, enforcement_mode=hard_block) successfully filled and saved with 'Dice math config kaydedildi' success toast. Round-trip verification confirmed all values preserved correctly after modal close/reopen. Senaryo 2 - TR override round-trip: Country Overrides JSON textarea accepts TR-specific limits (max_session_loss=800, max_win_per_bet=150) correctly, saves successfully, and preserves values in prettified JSON format after round-trip test. Senaryo 3 - Bozuk JSON davranışı: Invalid JSON (missing closing brace) properly handled with client-side validation showing error message, preventing malformed data submission. All UI components functional: GameDiceMathTab.jsx properly integrated with GameConfigPanel.jsx, Dice Math tab appears correctly for DICE games, all form fields editable and responsive, API integrations working (GET/POST /api/v1/games/{game_id}/config/dice-math), data persistence verified through multiple round-trip tests. The Dice Advanced Limits UI flow is fully operational and ready for production use."
 
+api_keys_backend:
+  - task: "FAZ 4 API Key Backend - Turkish Review Request"
+    implemented: true
+    working: false
+    file: "backend/app/routes/api_keys.py, backend/app/utils/api_keys.py, backend/app/constants/api_keys.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "API Keys backend implementation: GET /api/v1/api-keys/scopes, POST /api/v1/api-keys, GET /api/v1/api-keys/, PATCH /api/v1/api-keys/{id} endpoints with JWT authentication, scope validation, and security features."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ FAZ 4 API KEY BACKEND - CRITICAL ROUTING ISSUE DETECTED: Ön hazırlık başarılı (admin seed + JWT login çalışıyor). Test 1 ✅ Scope listesi: GET /api/v1/api-keys/scopes başarılı, doğru scope listesi döndürüyor ['robot.run', 'robot.configure', 'games.read', 'reports.read']. Test 4 ✅ Listeleme: GET /api/v1/api-keys/ başarılı (200 OK, boş liste döndürüyor). Test 2 ❌ API key oluşturma: POST /api/v1/api-keys → 307 Temporary Redirect → GET /api/v1/api-keys/ → 401 Unauthorized. Test 3 ❌ Geçersiz scope validation: Aynı routing sorunu. Test 5 ❌ Toggle: key_id bulunamadı (create çalışmadığı için). TEMEL SORUN: FastAPI/server POST isteklerini GET'e redirect ediyor, bu da Authorization header'ı ve request body'yi kaybettiriyor. JWT token doğru çalışıyor (manuel verification başarılı, diğer endpoints çalışıyor). Routing/middleware sorunu çözülmeli."
+
   - task: "Client Upload Flow Backend Validation"
     implemented: true
     working: true
