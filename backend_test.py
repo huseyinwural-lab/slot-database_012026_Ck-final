@@ -1138,6 +1138,48 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_game_robot_tenant_aware(self):
+        """Test Game Robot Tenant-Aware Functionality - Görev 2.2"""
+        print("\n🤖 GAME ROBOT TENANT-AWARE TESTS - Görev 2.2")
+        
+        # Test Scenario 1: default_casino tenant successful run
+        print(f"\n🔍 Senaryo 1: default_casino tenant ile başarılı koşu")
+        success1 = self._test_game_robot_default_casino()
+        
+        # Test Scenario 2: demo_renter tenant with can_use_game_robot=false
+        print(f"\n🔍 Senaryo 2: demo_renter tenant, can_use_game_robot=false")
+        success2 = self._test_game_robot_demo_renter_disabled()
+        
+        # Test Scenario 3: Unknown tenant
+        print(f"\n🔍 Senaryo 3: Tenant bulunamayan durum")
+        success3 = self._test_game_robot_unknown_tenant()
+        
+        # Test Scenario 4: API key stub test
+        print(f"\n🔍 Senaryo 4: API key stub testi")
+        success4 = self._test_game_robot_api_key()
+        
+        # Overall result
+        overall_success = success1 and success2 and success3 and success4
+        
+        if overall_success:
+            print("\n✅ GAME ROBOT TENANT-AWARE - ALL TESTS PASSED")
+            print("   ✅ default_casino tenant successful run")
+            print("   ✅ demo_renter tenant permission check working")
+            print("   ✅ Unknown tenant handling working")
+            print("   ✅ API key functionality working")
+        else:
+            print("\n❌ GAME ROBOT TENANT-AWARE - SOME TESTS FAILED")
+            if not success1:
+                print("   ❌ default_casino tenant test failed")
+            if not success2:
+                print("   ❌ demo_renter tenant permission test failed")
+            if not success3:
+                print("   ❌ Unknown tenant test failed")
+            if not success4:
+                print("   ❌ API key test failed")
+        
+        return overall_success
+
     def _setup_tenant_test_data(self):
         """Setup tenant test data for 2.1.3-2.1.5 tests"""
         print("   🔧 Setting up tenant test data...")
