@@ -310,10 +310,6 @@ class SlotAdvancedSaveRequest(BaseModel):
     gamble_feature_allowed: bool = False
     summary: Optional[str] = None
 
-    provably_fair_enabled: bool
-    rng_algorithm: str
-    seed_rotation_interval_rounds: Optional[int] = None
-
 
 class BlackjackRulesSaveRequest(BaseModel):
     deck_count: int
