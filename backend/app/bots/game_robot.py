@@ -27,10 +27,9 @@ class ScenarioResult:
 
 
 class HttpClient:
-    def __init__(self, base_url: str, tenant_id: str, api_key: Optional[str] = None, timeout: float = 10.0):
+    def __init__(self, base_url: str, api_key: str, timeout: float = 10.0):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
-        self.tenant_id = tenant_id
         self.api_key = api_key
 
     def _full_url(self, path: str) -> str:
@@ -39,16 +38,10 @@ class HttpClient:
         return f"{self.base_url}{path}"
 
     def _headers(self) -> Dict[str, str]:
-        headers = {
-            "X-Tenant-ID": self.tenant_id,
-        }
+        headers: Dict[str, str] = {}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
-
-    def get(self, path: str, params: Optional[Dict[str, Any]] = None) -> httpx.Response:
-        url = self._full_url(path)
-        return httpx.get(url, params=params, headers=self._headers(), timeout=self.timeout)
 
     def post(self, path: str, json: Optional[Dict[str, Any]] = None) -> httpx.Response:
         url = self._full_url(path)
