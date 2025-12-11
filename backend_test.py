@@ -10660,6 +10660,626 @@ TX-MISSING-LOW,25.50,EUR"""
         
         return overall_success
 
+    def test_jwt_auth_comprehensive(self):
+        """Test JWT-based Admin Auth & Password Management - Turkish Review Request"""
+        print("\n🔐 JWT ADMIN AUTH & PASSWORD MANAGEMENT COMPREHENSIVE TESTS")
+        
+        # Test all scenarios as requested in Turkish review
+        success1 = self._test_seed_and_basic_login()
+        success2 = self._test_failed_login_attempts()
+        success3 = self._test_password_change_flow()
+        success4 = self._test_password_policy_validation()
+        success5 = self._test_password_reset_flow()
+        success6 = self._test_unauthorized_access()
+        success7 = self._test_data_structure_and_security()
+        
+        overall_success = all([success1, success2, success3, success4, success5, success6, success7])
+        
+        if overall_success:
+            print("\n✅ JWT ADMIN AUTH & PASSWORD MANAGEMENT - ALL TESTS PASSED")
+            print("   ✅ Seed & Basic Login Flow")
+            print("   ✅ Failed Login Attempts & Tracking")
+            print("   ✅ Password Change Flow")
+            print("   ✅ Password Policy Validation")
+            print("   ✅ Password Reset Flow")
+            print("   ✅ Unauthorized Access Protection")
+            print("   ✅ Data Structure & Security Validation")
+        else:
+            print("\n❌ JWT ADMIN AUTH & PASSWORD MANAGEMENT - SOME TESTS FAILED")
+            if not success1:
+                print("   ❌ Seed & Basic Login Flow failed")
+            if not success2:
+                print("   ❌ Failed Login Attempts failed")
+            if not success3:
+                print("   ❌ Password Change Flow failed")
+            if not success4:
+                print("   ❌ Password Policy Validation failed")
+            if not success5:
+                print("   ❌ Password Reset Flow failed")
+            if not success6:
+                print("   ❌ Unauthorized Access Protection failed")
+            if not success7:
+                print("   ❌ Data Structure & Security Validation failed")
+        
+        return overall_success
+
+    def _test_seed_and_basic_login(self):
+        """Test Seed & Basic Login Flow - Scenario 1"""
+        print("\n🔍 Senaryo 1: Seed & temel login akışı")
+        
+        # Step 1: Seed admin data
+        print("   Adım 1: POST /api/v1/admin/seed")
+        success1, seed_response = self.run_test("Admin Seed", "POST", "api/v1/admin/seed", 200)
+        
+        if not success1:
+            print("   ❌ Admin seed failed")
+            return False
+        
+        if isinstance(seed_response, dict) and "message" in seed_response:
+            print(f"   ✅ Seed successful: {seed_response['message']}")
+        
+        # Step 2: Login with default credentials
+        print("   Adım 2: POST /api/v1/auth/login")
+        login_data = {
+            "email": "admin@casino.com",
+            "password": "Admin123!"
+        }
+        
+        url = f"{self.base_url}/api/v1/auth/login"
+        headers = {'Content-Type': 'application/json'}
+        
+        try:
+            response = requests.post(url, json=login_data, headers=headers, timeout=30)
+            success2 = response.status_code == 200
+            
+            if success2:
+                login_response = response.json()
+                print(f"   ✅ Login successful - Status: 200")
+                
+                # Validate response structure
+                required_fields = ['access_token', 'token_type', 'admin']
+                missing_fields = [field for field in required_fields if field not in login_response]
+                
+                if not missing_fields:
+                    print("   ✅ Login response structure complete")
+                    
+                    # Store token for subsequent tests
+                    self.access_token = login_response['access_token']
+                    
+                    # Validate token_type
+                    if login_response['token_type'] == 'bearer':
+                        print("   ✅ token_type = 'bearer'")
+                    else:
+                        print(f"   ❌ Expected token_type='bearer', got '{login_response['token_type']}'")
+                        return False
+                    
+                    # Validate admin structure
+                    admin = login_response['admin']
+                    admin_required_fields = ['id', 'email', 'role', 'tenant_id']
+                    admin_missing_fields = [field for field in admin_required_fields if field not in admin]
+                    
+                    if not admin_missing_fields:
+                        print("   ✅ Admin structure complete")
+                        print(f"      - email: {admin['email']}")
+                        print(f"      - role: {admin['role']}")
+                        print(f"      - tenant_id: {admin['tenant_id']}")
+                    else:
+                        print(f"   ❌ Admin missing fields: {admin_missing_fields}")
+                        return False
+                else:
+                    print(f"   ❌ Login response missing fields: {missing_fields}")
+                    return False
+            else:
+                print(f"   ❌ Login failed - Status: {response.status_code}")
+                print(f"      Response: {response.text[:200]}")
+                return False
+        except Exception as e:
+            print(f"   ❌ Login error: {str(e)}")
+            return False
+        
+        # Step 3: Test /me endpoint with token
+        print("   Adım 3: GET /api/v1/auth/me")
+        if not self.access_token:
+            print("   ❌ No access token available")
+            return False
+        
+        url = f"{self.base_url}/api/v1/auth/me"
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success3 = response.status_code == 200
+            
+            if success3:
+                me_response = response.json()
+                print(f"   ✅ /me endpoint successful - Status: 200")
+                
+                # Validate that /me returns same admin info
+                if 'email' in me_response and me_response['email'] == 'admin@casino.com':
+                    print("   ✅ /me returns correct admin information")
+                else:
+                    print("   ❌ /me response doesn't match expected admin")
+                    return False
+            else:
+                print(f"   ❌ /me endpoint failed - Status: {response.status_code}")
+                return False
+        except Exception as e:
+            print(f"   ❌ /me endpoint error: {str(e)}")
+            return False
+        
+        return success1 and success2 and success3
+
+    def _test_failed_login_attempts(self):
+        """Test Failed Login Attempts - Scenario 2"""
+        print("\n🔍 Senaryo 2: Hatalı login & failed_login_attempts")
+        
+        # Test with non-existent email
+        print("   Test 1: Var olmayan email ile login")
+        login_data = {
+            "email": "wrong@casino.com",
+            "password": "anypassword"
+        }
+        
+        url = f"{self.base_url}/api/v1/auth/login"
+        headers = {'Content-Type': 'application/json'}
+        
+        try:
+            response = requests.post(url, json=login_data, headers=headers, timeout=30)
+            success1 = response.status_code == 401
+            
+            if success1:
+                response_data = response.json()
+                if response_data.get('detail') == 'INVALID_CREDENTIALS':
+                    print("   ✅ Non-existent email returns 401 INVALID_CREDENTIALS")
+                else:
+                    print(f"   ❌ Expected INVALID_CREDENTIALS, got {response_data.get('detail')}")
+                    success1 = False
+            else:
+                print(f"   ❌ Expected 401, got {response.status_code}")
+                success1 = False
+        except Exception as e:
+            print(f"   ❌ Non-existent email test error: {str(e)}")
+            success1 = False
+        
+        # Test with valid email but wrong password
+        print("   Test 2: Geçerli email ama yanlış şifre")
+        login_data = {
+            "email": "admin@casino.com",
+            "password": "WrongPassword123!"
+        }
+        
+        try:
+            response = requests.post(url, json=login_data, headers=headers, timeout=30)
+            success2 = response.status_code == 401
+            
+            if success2:
+                response_data = response.json()
+                if response_data.get('detail') == 'INVALID_CREDENTIALS':
+                    print("   ✅ Wrong password returns 401 INVALID_CREDENTIALS")
+                else:
+                    print(f"   ❌ Expected INVALID_CREDENTIALS, got {response_data.get('detail')}")
+                    success2 = False
+            else:
+                print(f"   ❌ Expected 401, got {response.status_code}")
+                success2 = False
+        except Exception as e:
+            print(f"   ❌ Wrong password test error: {str(e)}")
+            success2 = False
+        
+        # Note: We can't easily verify failed_login_attempts increment without direct DB access
+        # But the endpoint behavior is validated
+        print("   ℹ️  failed_login_attempts increment requires DB verification (not tested here)")
+        
+        return success1 and success2
+
+    def _test_password_change_flow(self):
+        """Test Password Change Flow - Scenario 3"""
+        print("\n🔍 Senaryo 3: Şifre değiştirme akışı")
+        
+        if not self.access_token:
+            print("   ❌ No access token available for password change test")
+            return False
+        
+        # Step 1: Change password
+        print("   Adım 1: POST /api/v1/auth/change-password")
+        change_data = {
+            "current_password": "Admin123!",
+            "new_password": "Admin1234!"
+        }
+        
+        url = f"{self.base_url}/api/v1/auth/change-password"
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = requests.post(url, json=change_data, headers=headers, timeout=30)
+            success1 = response.status_code == 200
+            
+            if success1:
+                response_data = response.json()
+                if response_data.get('message') == 'PASSWORD_CHANGED':
+                    print("   ✅ Password change successful - PASSWORD_CHANGED")
+                else:
+                    print(f"   ❌ Expected PASSWORD_CHANGED, got {response_data.get('message')}")
+                    success1 = False
+            else:
+                print(f"   ❌ Password change failed - Status: {response.status_code}")
+                print(f"      Response: {response.text[:200]}")
+                success1 = False
+        except Exception as e:
+            print(f"   ❌ Password change error: {str(e)}")
+            success1 = False
+        
+        # Step 2: Try login with old password (should fail)
+        print("   Adım 2: Eski şifre ile login denemesi")
+        login_data = {
+            "email": "admin@casino.com",
+            "password": "Admin123!"  # Old password
+        }
+        
+        url = f"{self.base_url}/api/v1/auth/login"
+        headers = {'Content-Type': 'application/json'}
+        
+        try:
+            response = requests.post(url, json=login_data, headers=headers, timeout=30)
+            success2 = response.status_code == 401
+            
+            if success2:
+                response_data = response.json()
+                if response_data.get('detail') == 'INVALID_CREDENTIALS':
+                    print("   ✅ Old password rejected - 401 INVALID_CREDENTIALS")
+                else:
+                    print(f"   ❌ Expected INVALID_CREDENTIALS, got {response_data.get('detail')}")
+                    success2 = False
+            else:
+                print(f"   ❌ Expected 401, got {response.status_code}")
+                success2 = False
+        except Exception as e:
+            print(f"   ❌ Old password test error: {str(e)}")
+            success2 = False
+        
+        # Step 3: Login with new password (should succeed)
+        print("   Adım 3: Yeni şifre ile login")
+        login_data = {
+            "email": "admin@casino.com",
+            "password": "Admin1234!"  # New password
+        }
+        
+        try:
+            response = requests.post(url, json=login_data, headers=headers, timeout=30)
+            success3 = response.status_code == 200
+            
+            if success3:
+                response_data = response.json()
+                if 'access_token' in response_data:
+                    print("   ✅ New password login successful")
+                    # Update token for subsequent tests
+                    self.access_token = response_data['access_token']
+                else:
+                    print("   ❌ New password login missing access_token")
+                    success3 = False
+            else:
+                print(f"   ❌ New password login failed - Status: {response.status_code}")
+                success3 = False
+        except Exception as e:
+            print(f"   ❌ New password login error: {str(e)}")
+            success3 = False
+        
+        return success1 and success2 and success3
+
+    def _test_password_policy_validation(self):
+        """Test Password Policy Validation - Scenario 4"""
+        print("\n🔍 Senaryo 4: Şifre politikası negatif senaryoları")
+        
+        if not self.access_token:
+            print("   ❌ No access token available for password policy test")
+            return False
+        
+        url = f"{self.base_url}/api/v1/auth/change-password"
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Test cases for password policy
+        test_cases = [
+            {
+                "name": "Çok kısa şifre",
+                "password": "Ab1!",
+                "expected_detail": "PASSWORD_TOO_SHORT"
+            },
+            {
+                "name": "Büyük harf yok",
+                "password": "admin123!",
+                "expected_detail": "PASSWORD_MUST_CONTAIN_UPPERCASE"
+            },
+            {
+                "name": "Rakam yok",
+                "password": "Admin!!!",
+                "expected_detail": "PASSWORD_MUST_CONTAIN_DIGIT"
+            },
+            {
+                "name": "Özel karakter yok",
+                "password": "Admin1234",
+                "expected_detail": "PASSWORD_MUST_CONTAIN_SPECIAL"
+            }
+        ]
+        
+        all_success = True
+        
+        for i, test_case in enumerate(test_cases, 1):
+            print(f"   Test {i}: {test_case['name']}")
+            
+            change_data = {
+                "current_password": "Admin1234!",  # Current password
+                "new_password": test_case['password']
+            }
+            
+            try:
+                response = requests.post(url, json=change_data, headers=headers, timeout=30)
+                success = response.status_code == 400
+                
+                if success:
+                    response_data = response.json()
+                    if response_data.get('detail') == test_case['expected_detail']:
+                        print(f"      ✅ Correct validation: {test_case['expected_detail']}")
+                    else:
+                        print(f"      ❌ Expected {test_case['expected_detail']}, got {response_data.get('detail')}")
+                        success = False
+                        all_success = False
+                else:
+                    print(f"      ❌ Expected 400, got {response.status_code}")
+                    all_success = False
+            except Exception as e:
+                print(f"      ❌ Test error: {str(e)}")
+                all_success = False
+        
+        return all_success
+
+    def _test_password_reset_flow(self):
+        """Test Password Reset Flow - Scenario 5"""
+        print("\n🔍 Senaryo 5: Şifre reset akışı")
+        
+        # Step 1: Request password reset for valid email
+        print("   Adım 1: POST /api/v1/auth/request-password-reset (geçerli email)")
+        reset_request_data = {
+            "email": "admin@casino.com"
+        }
+        
+        url = f"{self.base_url}/api/v1/auth/request-password-reset"
+        headers = {'Content-Type': 'application/json'}
+        
+        try:
+            response = requests.post(url, json=reset_request_data, headers=headers, timeout=30)
+            success1 = response.status_code == 200
+            reset_token = None
+            
+            if success1:
+                response_data = response.json()
+                if (response_data.get('message') == 'RESET_REQUEST_ACCEPTED' and 
+                    'reset_token' in response_data):
+                    print("   ✅ Password reset request successful")
+                    reset_token = response_data['reset_token']
+                    print(f"      Reset token received: {reset_token[:20]}...")
+                else:
+                    print(f"   ❌ Unexpected response: {response_data}")
+                    success1 = False
+            else:
+                print(f"   ❌ Password reset request failed - Status: {response.status_code}")
+                success1 = False
+        except Exception as e:
+            print(f"   ❌ Password reset request error: {str(e)}")
+            success1 = False
+        
+        # Step 2: Request password reset for non-existent email
+        print("   Adım 2: POST /api/v1/auth/request-password-reset (var olmayan email)")
+        reset_request_data = {
+            "email": "noone@casino.com"
+        }
+        
+        try:
+            response = requests.post(url, json=reset_request_data, headers=headers, timeout=30)
+            success2 = response.status_code == 200
+            
+            if success2:
+                response_data = response.json()
+                if response_data.get('message') == 'RESET_REQUEST_ACCEPTED':
+                    print("   ✅ Non-existent email returns RESET_REQUEST_ACCEPTED (security)")
+                    # Should not have reset_token for non-existent email
+                    if 'reset_token' not in response_data or not response_data['reset_token']:
+                        print("   ✅ No reset_token for non-existent email (correct)")
+                    else:
+                        print("   ⚠️  Reset token provided for non-existent email")
+                else:
+                    print(f"   ❌ Unexpected response: {response_data}")
+                    success2 = False
+            else:
+                print(f"   ❌ Expected 200, got {response.status_code}")
+                success2 = False
+        except Exception as e:
+            print(f"   ❌ Non-existent email test error: {str(e)}")
+            success2 = False
+        
+        # Step 3: Reset password with valid token
+        print("   Adım 3: POST /api/v1/auth/reset-password (geçerli token)")
+        success3 = False
+        
+        if reset_token:
+            reset_password_data = {
+                "token": reset_token,
+                "new_password": "Admin1234!"
+            }
+            
+            url = f"{self.base_url}/api/v1/auth/reset-password"
+            
+            try:
+                response = requests.post(url, json=reset_password_data, headers=headers, timeout=30)
+                success3 = response.status_code == 200
+                
+                if success3:
+                    response_data = response.json()
+                    if response_data.get('message') == 'PASSWORD_RESET_SUCCESS':
+                        print("   ✅ Password reset successful - PASSWORD_RESET_SUCCESS")
+                    else:
+                        print(f"   ❌ Expected PASSWORD_RESET_SUCCESS, got {response_data.get('message')}")
+                        success3 = False
+                else:
+                    print(f"   ❌ Password reset failed - Status: {response.status_code}")
+                    success3 = False
+            except Exception as e:
+                print(f"   ❌ Password reset error: {str(e)}")
+                success3 = False
+        else:
+            print("   ❌ No reset token available for testing")
+        
+        # Step 4: Try reset with invalid token
+        print("   Adım 4: POST /api/v1/auth/reset-password (geçersiz token)")
+        reset_password_data = {
+            "token": "invalid_random_token_12345",
+            "new_password": "Admin1234!"
+        }
+        
+        try:
+            response = requests.post(url, json=reset_password_data, headers=headers, timeout=30)
+            success4 = response.status_code == 400
+            
+            if success4:
+                response_data = response.json()
+                if response_data.get('detail') == 'RESET_TOKEN_INVALID':
+                    print("   ✅ Invalid token returns 400 RESET_TOKEN_INVALID")
+                else:
+                    print(f"   ❌ Expected RESET_TOKEN_INVALID, got {response_data.get('detail')}")
+                    success4 = False
+            else:
+                print(f"   ❌ Expected 400, got {response.status_code}")
+                success4 = False
+        except Exception as e:
+            print(f"   ❌ Invalid token test error: {str(e)}")
+            success4 = False
+        
+        return success1 and success2 and success3 and success4
+
+    def _test_unauthorized_access(self):
+        """Test Unauthorized Access - Scenario 6"""
+        print("\n🔍 Senaryo 6: Yetkisiz erişim")
+        
+        # Test 1: /me endpoint without Authorization header
+        print("   Test 1: GET /api/v1/auth/me (Authorization header yok)")
+        url = f"{self.base_url}/api/v1/auth/me"
+        headers = {'Content-Type': 'application/json'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success1 = response.status_code == 401
+            
+            if success1:
+                response_data = response.json()
+                if 'Could not validate credentials' in response_data.get('detail', ''):
+                    print("   ✅ No auth header returns 401 'Could not validate credentials'")
+                else:
+                    print(f"   ❌ Unexpected error message: {response_data.get('detail')}")
+                    success1 = False
+            else:
+                print(f"   ❌ Expected 401, got {response.status_code}")
+                success1 = False
+        except Exception as e:
+            print(f"   ❌ No auth header test error: {str(e)}")
+            success1 = False
+        
+        # Test 2: /me endpoint with invalid token
+        print("   Test 2: GET /api/v1/auth/me (geçersiz token)")
+        headers = {
+            'Authorization': 'Bearer invalid_jwt_token_12345',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success2 = response.status_code == 401
+            
+            if success2:
+                print("   ✅ Invalid token returns 401")
+            else:
+                print(f"   ❌ Expected 401, got {response.status_code}")
+                success2 = False
+        except Exception as e:
+            print(f"   ❌ Invalid token test error: {str(e)}")
+            success2 = False
+        
+        return success1 and success2
+
+    def _test_data_structure_and_security(self):
+        """Test Data Structure and Security - Scenario 7"""
+        print("\n🔍 Senaryo 7: Veri yapısı ve güvenlik")
+        
+        if not self.access_token:
+            print("   ❌ No access token available for data structure test")
+            return False
+        
+        # Test 1: Verify AdminUser response doesn't contain _id
+        print("   Test 1: AdminUser response'da _id alanı kontrolü")
+        url = f"{self.base_url}/api/v1/auth/me"
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success1 = response.status_code == 200
+            
+            if success1:
+                admin_data = response.json()
+                if '_id' not in admin_data:
+                    print("   ✅ AdminUser response doesn't contain _id field")
+                    
+                    # Verify it has string id field instead
+                    if 'id' in admin_data and isinstance(admin_data['id'], str):
+                        print("   ✅ AdminUser has string id field")
+                    else:
+                        print("   ❌ AdminUser missing string id field")
+                        success1 = False
+                else:
+                    print("   ❌ AdminUser response contains _id field (should not)")
+                    success1 = False
+            else:
+                print(f"   ❌ /me endpoint failed - Status: {response.status_code}")
+                success1 = False
+        except Exception as e:
+            print(f"   ❌ AdminUser structure test error: {str(e)}")
+            success1 = False
+        
+        # Test 2: Verify JWT token structure
+        print("   Test 2: JWT token yapısı kontrolü")
+        success2 = False
+        
+        try:
+            # Decode JWT without verification to check structure
+            decoded = jwt.decode(self.access_token, options={"verify_signature": False})
+            
+            # Check for required fields
+            if 'exp' in decoded:
+                print("   ✅ JWT contains exp (expiration) field")
+                
+                # Check algorithm (should be HS256)
+                header = jwt.get_unverified_header(self.access_token)
+                if header.get('alg') == 'HS256':
+                    print("   ✅ JWT signed with HS256 algorithm")
+                    success2 = True
+                else:
+                    print(f"   ❌ JWT algorithm is {header.get('alg')}, expected HS256")
+            else:
+                print("   ❌ JWT missing exp field")
+        except Exception as e:
+            print(f"   ❌ JWT structure test error: {str(e)}")
+        
+        return success1 and success2
+
 def main():
     def test_crash_dice_math_endpoints(self):
         """Test new Crash & Dice Math backend endpoints as per Turkish review request"""
