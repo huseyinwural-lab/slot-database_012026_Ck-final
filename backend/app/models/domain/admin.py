@@ -39,7 +39,7 @@ class AdminUser(BaseModel):
     username: str
     email: EmailStr
     full_name: str
-    role: str # role_id or name
+    role: str  # role_id or name
     tenant_id: str = "default_casino"
     department: str = "General"
     status: AdminStatus = AdminStatus.ACTIVE
@@ -47,6 +47,14 @@ class AdminUser(BaseModel):
     last_login: Optional[datetime] = None
     last_ip: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    # Auth & security fields
+    password_hash: Optional[str] = None
+    is_active: bool = True
+    failed_login_attempts: int = 0
+    last_password_change_at: Optional[datetime] = None
+    password_reset_token: Optional[str] = None
+    password_reset_expires_at: Optional[datetime] = None
 
 class AdminSession(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
