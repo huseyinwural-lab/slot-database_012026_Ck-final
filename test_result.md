@@ -358,11 +358,11 @@ p1_hardening:
 api_keys_backend:
   - task: "FAZ 4 API Key Backend - Turkish Review Request"
     implemented: true
-    working: false
+    working: true
     file: "backend/app/routes/api_keys.py, backend/app/utils/api_keys.py, backend/app/constants/api_keys.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
@@ -370,6 +370,21 @@ api_keys_backend:
         -working: false
         -agent: "testing"
         -comment: "❌ FAZ 4 API KEY BACKEND - CRITICAL ROUTING ISSUE DETECTED: Ön hazırlık başarılı (admin seed + JWT login çalışıyor). Test 1 ✅ Scope listesi: GET /api/v1/api-keys/scopes başarılı, doğru scope listesi döndürüyor ['robot.run', 'robot.configure', 'games.read', 'reports.read']. Test 4 ✅ Listeleme: GET /api/v1/api-keys/ başarılı (200 OK, boş liste döndürüyor). Test 2 ❌ API key oluşturma: POST /api/v1/api-keys → 307 Temporary Redirect → GET /api/v1/api-keys/ → 401 Unauthorized. Test 3 ❌ Geçersiz scope validation: Aynı routing sorunu. Test 5 ❌ Toggle: key_id bulunamadı (create çalışmadığı için). TEMEL SORUN: FastAPI/server POST isteklerini GET'e redirect ediyor, bu da Authorization header'ı ve request body'yi kaybettiriyor. JWT token doğru çalışıyor (manuel verification başarılı, diğer endpoints çalışıyor). Routing/middleware sorunu çözülmeli."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ FAZ 4 API KEY BACKEND - CIRCULAR IMPORT ISSUE FIXED AND ALL TESTS PASSED: Fixed circular import between app.utils.auth and app.utils.api_keys by creating local pwd_context in api_keys.py. Fixed settings router conflict in server.py by using alias. All API key endpoints now working correctly: GET /api/v1/api-keys/scopes returns correct scopes ['robot.run', 'robot.configure', 'games.read', 'reports.read'], POST /api/v1/api-keys creates API keys successfully (201 Created), GET /api/v1/api-keys lists keys correctly, PATCH /api/v1/api-keys/{id} for toggle functionality working. JWT authentication working properly, scope validation working, all routing issues resolved."
+
+  - task: "API Key Auth Layer & Robot Backend Endpoint - Turkish Review Request"
+    implemented: true
+    working: true
+    file: "backend/app/routes/robot.py, backend/app/utils/auth.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ API KEY AUTH LAYER & ROBOT ENDPOINT - ALL TESTS PASSED (5/5 scenarios - 100% success rate): Hazırlık: POST /api/v1/admin/seed başarılı, POST /api/v1/auth/login ile admin@casino.com/Admin123! giriş başarılı, JWT token alındı. Test 1 ✅ API key ile robot endpoint (mutlu path): POST /api/v1/api-keys ile geçerli key oluşturuldu (scopes=['robot.run','games.read']), POST /api/v1/robot/round ile Authorization: Bearer <api_key> başarılı (200 OK, status='ok', tenant_id='default_casino', scopes içinde 'robot.run' mevcut). Test 2 ✅ Scope eksik (robot.run yok): Yeni API key oluşturuldu (scopes=['games.read']), robot endpoint çağrısı 403 döndürdü, detail.error_code='API_KEY_SCOPE_FORBIDDEN', detail.scope='robot.run'. Test 3 ✅ Tenant mismatch: Geçerli key ile farklı tenant_id ('some_other_tenant') gönderildi, 403 döndürdü, detail.error_code='TENANT_MISMATCH', detail.api_key_tenant='default_casino', detail.requested_tenant='some_other_tenant'. Test 4 ✅ API key eksik/geçersiz: Authorization header olmadan 401 döndürdü (detail.error_code='API_KEY_MISSING'), geçersiz key ile 401 döndürdü (detail.error_code='API_KEY_INVALID'). Test 5 ✅ Game Robot CLI argüman zorunluluğu: CLI --api-key olmadan çalıştırıldı, exit code 2 döndürdü, stderr'da 'api-key is required' mesajı mevcut. Tüm auth/scope/tenant enforcement çalışıyor."
 
   - task: "Client Upload Flow Backend Validation"
     implemented: true
