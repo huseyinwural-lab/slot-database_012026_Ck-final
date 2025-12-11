@@ -38,6 +38,10 @@ from app.models.game import (
     ConfigDiffChangeType,
     ConfigDiffResponse,
     PokerRules,
+from fastapi import Depends
+from app.models.domain.admin import AdminUser
+from app.utils.auth import get_current_admin
+
     PokerRulesResponse,
     CrashMathConfig,
     CrashMathConfigResponse,
