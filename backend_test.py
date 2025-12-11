@@ -7777,9 +7777,6 @@ TX-MISSING-LOW,25.50,EUR"""
             if not negative_override_validation_success:
                 print("   ❌ Negative country override validation failed")
         
-        return overall_success
-
-
 def main():
     def test_crash_dice_math_endpoints(self):
         """Test new Crash & Dice Math backend endpoints as per Turkish review request"""
