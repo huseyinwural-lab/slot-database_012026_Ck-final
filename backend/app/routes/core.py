@@ -405,7 +405,11 @@ async def get_games(
     feature_buy: Optional[bool] = None
 ):
     db = get_db()
-    query = {}
+    # TODO: gerçek admin context eklenince AdminUser instance'ı buradan gelmeli
+    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
+    tenant_id = get_current_tenant_id(request, dummy_admin)
+
+    query = {"tenant_id": tenant_id}
     if category and category != "all":
         query["category"] = category
     if provider and provider != "all":
