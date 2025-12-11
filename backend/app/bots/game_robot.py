@@ -227,19 +227,25 @@ def parse_args(argv: List[str]) -> Dict[str, Any]:
         "--rounds",
         type=int,
         default=DEFAULT_ROUNDS,
-        help=f"Her oyun tipi için tur sayısı (varsayılan: {DEFAULT_ROUNDS})",
+        help=f"Toplam tur sayısı (varsayılan: {DEFAULT_ROUNDS})",
     )
     parser.add_argument(
         "--tenant-id",
         type=str,
         default="default_casino",
-        help="Tenant ID (örn. default_casino, demo_renter)",
+        help="Tenant ID (örn. default_casino, demo_renter) - sadece log amaçlı, asıl tenant API key'ten gelir",
     )
     parser.add_argument(
         "--api-key",
         type=str,
         required=True,
         help="ZORUNLU API key (Authorization: Bearer ...)",
+    )
+    parser.add_argument(
+        "--base-url",
+        type=str,
+        default=BASE_URL,
+        help="Backend base URL (örn. https://panel.domain.com)",
     )
 
     args = parser.parse_args(argv)
