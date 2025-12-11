@@ -249,7 +249,7 @@ class RobotOrchestratorTester:
             success1, response1 = self.run_test("Robot Round - unsupported game type", "POST", "api/v1/robot/round", 400, payload1, auth_token=self.api_key_a)
             
             unsupported_game_valid = False
-            if not success1:  # Expecting 400
+            if success1:  # Expecting 400 - success means we got the expected status code
                 try:
                     error_data = json.loads(response1) if isinstance(response1, str) else response1
                     if isinstance(error_data, dict):
@@ -262,7 +262,7 @@ class RobotOrchestratorTester:
                 except:
                     print(f"   ❌ Unsupported game type rejected but couldn't parse error: {response1}")
             else:
-                print(f"   ❌ Unsupported game type should have been rejected but got 200")
+                print(f"   ❌ Unsupported game type should have been rejected but got unexpected status")
             
             # Test total work exceeded (3 types * 3000 rounds = 9000 > 5000)
             payload2 = {
