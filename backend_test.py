@@ -1267,18 +1267,18 @@ class CasinoAdminAPITester:
             success_1 = response.status_code == 200
             self.tests_run += 1
             if success_1:
-                        self.tests_passed += 1
-                        print(f"✅ Senaryo 1 - Status: {response.status_code}")
-                        
-                        try:
-                            response_data = response.json()
-                            print(f"   Response keys: {list(response_data.keys())}")
-                            
-                            # Validate response structure
-                            required_fields = ['game_id', 'client_type', 'launch_url', 'primary_client_type', 'game']
-                            missing_fields = [field for field in required_fields if field not in response_data]
-                            
-                            if not missing_fields:
+                self.tests_passed += 1
+                print(f"✅ Senaryo 1 - Status: {response.status_code}")
+                
+                try:
+                    response_data = response.json()
+                    print(f"   Response keys: {list(response_data.keys())}")
+                    
+                    # Validate response structure
+                    required_fields = ['game_id', 'client_type', 'launch_url', 'primary_client_type', 'game']
+                    missing_fields = [field for field in required_fields if field not in response_data]
+                    
+                    if not missing_fields:
                                 print("   ✅ Response structure complete")
                                 
                                 # Validate specific values
