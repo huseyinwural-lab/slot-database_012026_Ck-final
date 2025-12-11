@@ -311,14 +311,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 1
 
     if response.status_code == 401:
-        print(f"[GameRobot][ERROR] Unauthorized (401) - API key geçersiz veya eksik", file=sys.stderr)
+        print("[GameRobot][ERROR] Unauthorized (401) - API key geçersiz veya eksik", file=sys.stderr)
         return 1
     if response.status_code == 403:
-        print(f"[GameRobot][ERROR] Forbidden (403) - Yetki veya scope yetersiz", file=sys.stderr)
+        print("[GameRobot][ERROR] Forbidden (403) - Yetki veya scope yetersiz", file=sys.stderr)
         print(response.text, file=sys.stderr)
         return 1
     if response.status_code == 400:
-        print(f"[GameRobot][ERROR] Bad Request (400) - Payload veya limit hatası", file=sys.stderr)
+        print("[GameRobot][ERROR] Bad Request (400) - Payload veya limit hatası", file=sys.stderr)
         print(response.text, file=sys.stderr)
         return 1
     if not (200 <= response.status_code < 300):
