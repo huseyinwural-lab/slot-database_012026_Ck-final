@@ -62,37 +62,44 @@ const Layout = ({ children }) => {
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Core</div>
               <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" />
               <SidebarItem to="/players" icon={Users} label="Players" />
-              <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
+              {tenantType === 'owner' && (
+                <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
+              )}
               <SidebarItem to="/games" icon={Gamepad2} label="Games" />
-              <SidebarItem to="/vip-games" icon={Crown} label="VIP Games" activeClassName="bg-yellow-500/20 text-yellow-500 border border-yellow-500/50" />
+              <SidebarItem
+                to="/vip-games"
+                icon={Crown}
+                label="VIP Games"
+                activeClassName="bg-yellow-500/20 text-yellow-500 border border-yellow-500/50"
+              />
           </div>
 
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Operations</div>
-              <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" />
-              <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" />
+              {tenantType === 'owner' && <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" />}
+              {tenantType === 'owner' && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" />}
               <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" />
-              <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" />
+              {tenantType === 'owner' && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" />}
               <SidebarItem to="/support" icon={MessageSquare} label="Support" />
           </div>
 
            <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Risk & Compliance</div>
-              <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" />
-              <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />
-              <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />
-              <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" />
+              {tenantType === 'owner' && <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" />}
+              {tenantType === 'owner' && <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />}
+              {tenantType === 'owner' && <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />}
+              {tenantType === 'owner' && <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" />}
           </div>
 
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">System</div>
-              <SidebarItem to="/cms" icon={Globe} label="CMS" />
+              {tenantType === 'owner' && <SidebarItem to="/cms" icon={Globe} label="CMS" />}
               <SidebarItem to="/reports" icon={BarChart3} label="Reports" />
-              <SidebarItem to="/logs" icon={ScrollText} label="Logs" />
-              <SidebarItem to="/admins" icon={UserCog} label="Admin Users" />
-              <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />
-              <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" />
-              <SidebarItem to="/settings" icon={Settings} label="Settings" />
+              {tenantType === 'owner' && <SidebarItem to="/logs" icon={ScrollText} label="Logs" />}
+              {tenantType === 'owner' && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" />}
+              {tenantType === 'owner' && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />}
+              {tenantType === 'owner' && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" />}
+              {tenantType === 'owner' && <SidebarItem to="/settings" icon={Settings} label="Settings" />}
           </div>
         </ScrollArea>
 
