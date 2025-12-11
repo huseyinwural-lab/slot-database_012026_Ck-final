@@ -735,26 +735,6 @@ async def player_first_login_event(player_id: str):
     await maybe_grant_new_member_manual_bonus(player_id)
     return {"message": "Player first-login event processed"}
 
-    update_data = {
-        "risk_score_at_time": analysis.get("risk_level", "medium"),
-    }
-    
-    timeline_entry = TransactionTimeline(
-        status=tx['status'], 
-        description=f"AI Risk Analysis: Score {analysis.get('risk_score')} ({analysis.get('risk_level')}) - {analysis.get('reason')}", 
-        operator="AI_Bot"
-    ).model_dump()
-
-    await db.transactions.update_one(
-        {"id": tx_id}, 
-        {
-            "$set": update_data,
-            "$push": {"timeline": timeline_entry}
-        }
-    )
-    
-    return analysis
-
 async def seed_mock_data(db):
     # Players
     await db.players.insert_many([
