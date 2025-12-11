@@ -3,6 +3,7 @@ import sys
 import json
 import zipfile
 import io
+import jwt
 from datetime import datetime
 
 class CasinoAdminAPITester:
