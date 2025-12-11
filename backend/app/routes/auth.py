@@ -165,11 +165,6 @@ async def request_password_reset(payload: PasswordResetRequest):
 async def reset_password(payload: PasswordResetConfirmRequest):
     db = get_db()
 
-    try:
-        decoded = create_access_token  # placeholder to avoid unused import
-    except Exception:
-        pass
-
     from jose import jwt, JWTError
 
     try:
