@@ -1616,48 +1616,48 @@ class CasinoAdminAPITester:
             response = requests.post(url, files=files, data=data, timeout=30)
             
             success_2 = response.status_code == 200
-                    self.tests_run += 1
-                    if success_2:
-                        self.tests_passed += 1
-                        print(f"✅ Senaryo 2 - Status: {response.status_code}")
-                        
-                        try:
-                            response_data = response.json()
-                            
-                            # Validate that launch_url is preserved from previous upload
-                            if response_data.get('launch_url') == '/static/test-overridden.html':
-                                print("   ✅ launch_url preserved from previous upload")
-                            else:
-                                print(f"   ❌ launch_url not preserved: got '{response_data.get('launch_url')}'")
-                            
-                            # Validate game.client_variants structure
-                            game = response_data.get('game', {})
-                            client_variants = game.get('client_variants', {})
-                            html5_variant = client_variants.get('html5', {})
-                            
-                            if html5_variant.get('launch_url') == '/static/test-overridden.html':
-                                print("   ✅ game.client_variants.html5.launch_url still '/static/test-overridden.html'")
-                            else:
-                                print(f"   ❌ game.client_variants.html5.launch_url changed unexpectedly")
-                            
-                            html5_extra = html5_variant.get('extra', {})
-                            if html5_extra.get('min_version') == '2.0.0':
-                                print("   ✅ game.client_variants.html5.extra.min_version == '2.0.0' (updated)")
-                            else:
-                                print(f"   ❌ game.client_variants.html5.extra.min_version not updated correctly")
-                                
-                        except Exception as e:
-                            print(f"   ❌ Response parsing error: {e}")
-                            success_2 = False
+            self.tests_run += 1
+            if success_2:
+                self.tests_passed += 1
+                print(f"✅ Senaryo 2 - Status: {response.status_code}")
+                
+                try:
+                    response_data = response.json()
+                    
+                    # Validate that launch_url is preserved from previous upload
+                    if response_data.get('launch_url') == '/static/test-overridden.html':
+                        print("   ✅ launch_url preserved from previous upload")
                     else:
-                        print(f"❌ Senaryo 2 Failed - Status: {response.status_code}")
-                        print(f"   Response: {response.text[:200]}...")
-                        self.failed_tests.append({
-                            "name": "Senaryo 2 - min_version only update",
-                            "expected": 200,
-                            "actual": response.status_code,
-                            "response": response.text[:200]
-                        })
+                        print(f"   ❌ launch_url not preserved: got '{response_data.get('launch_url')}'")
+                    
+                    # Validate game.client_variants structure
+                    game = response_data.get('game', {})
+                    client_variants = game.get('client_variants', {})
+                    html5_variant = client_variants.get('html5', {})
+                    
+                    if html5_variant.get('launch_url') == '/static/test-overridden.html':
+                        print("   ✅ game.client_variants.html5.launch_url still '/static/test-overridden.html'")
+                    else:
+                        print(f"   ❌ game.client_variants.html5.launch_url changed unexpectedly")
+                    
+                    html5_extra = html5_variant.get('extra', {})
+                    if html5_extra.get('min_version') == '2.0.0':
+                        print("   ✅ game.client_variants.html5.extra.min_version == '2.0.0' (updated)")
+                    else:
+                        print(f"   ❌ game.client_variants.html5.extra.min_version not updated correctly")
+                        
+                except Exception as e:
+                    print(f"   ❌ Response parsing error: {e}")
+                    success_2 = False
+            else:
+                print(f"❌ Senaryo 2 Failed - Status: {response.status_code}")
+                print(f"   Response: {response.text[:200]}...")
+                self.failed_tests.append({
+                    "name": "Senaryo 2 - min_version only update",
+                    "expected": 200,
+                    "actual": response.status_code,
+                    "response": response.text[:200]
+                })
                         
             finally:
                 os.unlink(client1_file.name)
