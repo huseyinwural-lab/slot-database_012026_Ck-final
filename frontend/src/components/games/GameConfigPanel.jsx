@@ -35,14 +35,14 @@ const defaultVisibility = {
 // Burada ana türler için SLOT / TABLE_POKER / CRASH / DICE / TABLE_BLACKJACK kullanıyoruz.
 // REEL_LINES / WAYS / MEGAWAYS vb. engine tipleri SLOT ile aynı şemayı kullanacak.
 const TAB_SCHEMA = {
-  SLOT: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs', 'slot_advanced'],
-  REEL_LINES: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
-  WAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
-  MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'logs'],
-  TABLE_POKER: ['general', 'poker_rules', 'assets', 'logs'],
-  CRASH: ['general', 'crash_math', 'bets', 'assets', 'logs'],
-  DICE: ['general', 'dice_math', 'bets', 'assets', 'logs'],
-  TABLE_BLACKJACK: ['general', 'blackjack_rules', 'assets', 'logs'],
+  SLOT: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs', 'slot_advanced'],
+  REEL_LINES: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
+  WAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
+  MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
+  TABLE_POKER: ['general', 'poker_rules', 'assets', 'client', 'logs'],
+  CRASH: ['general', 'crash_math', 'bets', 'assets', 'client', 'logs'],
+  DICE: ['general', 'dice_math', 'bets', 'assets', 'client', 'logs'],
+  TABLE_BLACKJACK: ['general', 'blackjack_rules', 'assets', 'client', 'logs'],
 };
 
 const GameConfigPanel = ({ game, onClose, onSaved }) => {
