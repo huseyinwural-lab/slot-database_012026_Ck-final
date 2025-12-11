@@ -24,7 +24,16 @@ const GameManagement = () => {
   const [isTableOpen, setIsTableOpen] = useState(false);
   const [tableForm, setTableForm] = useState({ name: '', provider: '', min_bet: 1, max_bet: 100 });
 
-  const [uploadForm, setUploadForm] = useState({ method: 'fetch_api', provider: 'Pragmatic Play', file: null, source_label: '', notes: '' });
+  const [uploadForm, setUploadForm] = useState({
+    method: 'fetch_api',
+    provider: 'Pragmatic Play',
+    file: null,
+    source_label: '',
+    notes: '',
+    client_type: null,
+    launch_url: '',
+    min_version: '',
+  });
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [importLogs, setImportLogs] = useState([]);
@@ -111,7 +120,7 @@ const GameManagement = () => {
         fetchAll();
         toast.success(res.data.message);
       } else {
-        // Manual JSON/ZIP upload via game-import manual endpoint
+        // Manual JSON/ZIP upload via game-import manual endpoint (client-aware)
         addLog('Uploading bundle to server...');
         setImportProgress(30);
 
@@ -124,6 +133,15 @@ const GameManagement = () => {
         }
         if (uploadForm.notes) {
           formData.append('notes', uploadForm.notes);
+        }
+        if (uploadForm.client_type) {
+          formData.append('client_type', uploadForm.client_type);
+        }
+        if (uploadForm.launch_url) {
+          formData.append('launch_url', uploadForm.launch_url);
+        }
+        if (uploadForm.min_version) {
+          formData.append('min_version', uploadForm.min_version);
         }
 
         const res = await api.post('/v1/game-import/manual/upload', formData, {
@@ -401,14 +419,25 @@ const GameManagement = () => {
                 <Label>Method</Label>
                 <Select
                   value={uploadForm.method}
-                  onValueChange={(v) => setUploadForm({ ...uploadForm, method: v })}
+                  onValueChange={(v) =>
+                    setUploadForm({
+                      ...uploadForm,
+                      method: v,
+                      // method değişince client & bundle alanlarını resetle
+                      file: null,
+                      client_type: v === 'html5_upload' ? 'html5' : v === 'unity_upload' ? 'unity' : null,
+                      launch_url: '',
+                      min_version: '',
+                    })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="fetch_api">Auto-Fetch from Provider API</SelectItem>
-                    <SelectItem value="json_upload">Manual Bundle Upload (.zip / .json)</SelectItem>
+                    <SelectItem value="html5_upload">Upload HTML5 Game Bundle</SelectItem>
+                    <SelectItem value="unity_upload">Upload Unity WebGL Bundle</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -432,19 +461,73 @@ const GameManagement = () => {
                 </div>
               ) : (
                 <>
+                  {/* Client Model / Runtime */}
+                  <div className="space-y-2">
+                    <Label>Client Model / Runtime</Label>
+                    <div className="flex gap-4 text-xs">
+                      <button
+                        type="button"
+                        className={`px-2 py-1 rounded border ${
+                          uploadForm.client_type === 'html5'
+                            ? 'border-blue-500 text-blue-500'
+                            : 'border-slate-700 text-slate-300'
+                        }`}
+                        onClick={() => setUploadForm({ ...uploadForm, client_type: 'html5' })}
+                      >
+                        HTML5
+                      </button>
+                      <button
+                        type="button"
+                        className={`px-2 py-1 rounded border ${
+                          uploadForm.client_type === 'unity'
+                            ? 'border-blue-500 text-blue-500'
+                            : 'border-slate-700 text-slate-300'
+                        }`}
+                        onClick={() => setUploadForm({ ...uploadForm, client_type: 'unity' })}
+                      >
+                        Unity WebGL
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      Bu bilgi, import sonrası game.client_variants ve primary_client_type alanlarına yazılır.
+                    </p>
+                  </div>
+
+                  {/* Bundle file */}
                   <div className="space-y-2">
                     <Label>Game Bundle File</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         type="file"
                         accept=".zip,.json"
-                        onChange={(e) => setUploadForm({ ...uploadForm, file: e.target.files[0] })}
+                        onChange={(e) => setUploadForm({ ...uploadForm, file: e.target.files?.[0] || null })}
                       />
                     </div>
                     <p className="text-[10px] text-muted-foreground">
                       Supported: .json metadata or .zip asset bundle.
                     </p>
                   </div>
+
+                  {/* Optional launch_url */}
+                  <div className="space-y-2">
+                    <Label>Launch URL (optional)</Label>
+                    <Input
+                      value={uploadForm.launch_url}
+                      onChange={(e) => setUploadForm({ ...uploadForm, launch_url: e.target.value })}
+                      placeholder="https://cdn.example.com/games/slot123/index.html"
+                    />
+                  </div>
+
+                  {/* Optional min_version */}
+                  <div className="space-y-2">
+                    <Label>Min Client Version (optional)</Label>
+                    <Input
+                      value={uploadForm.min_version}
+                      onChange={(e) => setUploadForm({ ...uploadForm, min_version: e.target.value })}
+                      placeholder="1.0.0"
+                    />
+                  </div>
+
                   <div className="space-y-2">
                     <Label>Source / Studio (optional)</Label>
                     <Input
@@ -464,7 +547,14 @@ const GameManagement = () => {
                 </>
               )}
 
-              <Button onClick={handleUpload} className="w-full" disabled={isImporting}>
+              <Button
+                onClick={handleUpload}
+                className="w-full"
+                disabled={
+                  isImporting ||
+                  (uploadForm.method !== 'fetch_api' && (!uploadForm.file || !uploadForm.client_type))
+                }
+              >
                 {uploadForm.method === 'fetch_api' ? (
                   <Server className="w-4 h-4 mr-2" />
                 ) : (
