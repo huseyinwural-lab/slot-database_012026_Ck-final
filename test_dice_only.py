@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from backend_test import CasinoAdminAPITester
 
 def main():
-    print("🎲 DICE ADVANCED LIMITS BACKEND VALIDATION - PHASE C")
+    print("🎲 DICE ADVANCED LIMITS BACKEND VALIDATION TEST")
     print("=" * 60)
     
     tester = CasinoAdminAPITester()
@@ -16,7 +16,7 @@ def main():
     result = tester.test_dice_advanced_limits_backend_validation()
     
     print("\n" + "=" * 60)
-    print("📊 DICE TEST SUMMARY")
+    print("📊 TEST SUMMARY")
     print("=" * 60)
     
     status = "✅ PASS" if result else "❌ FAIL"
