@@ -12226,6 +12226,9 @@ def main():
     print("\n🤖 GAME ROBOT TENANT-AWARE TESTS (GÖREV 2.2)")
     test_results.append(("Game Robot Tenant-Aware", tester.test_game_robot_tenant_aware()))
     
+    print("\n🔑 FAZ 4 API KEY BACKEND TESTS (TURKISH REVIEW REQUEST)")
+    test_results.append(("FAZ 4 API Key Backend", tester.test_api_keys_backend_faz4()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
