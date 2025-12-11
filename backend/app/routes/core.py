@@ -675,7 +675,7 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
     expires_at = datetime.now(timezone.utc) + timedelta(days=cfg.validity_days)
 
     ticket = {
-        "id": str(uuid4()),
+        "id": str(uuid.uuid4()),
         "type": "new_member_manual",
         "user_id": user_id,
         "allowed_game_ids": cfg.allowed_game_ids,
