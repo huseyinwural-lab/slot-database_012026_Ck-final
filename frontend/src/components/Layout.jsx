@@ -34,6 +34,10 @@ const Layout = ({ children }) => {
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
+  const { tenant, loading: tenantLoading } = useTenant();
+  const tenantType = tenant?.type || 'owner';
+  const tenantFeatures = tenant?.features || {};
+
   const handleSearch = async (val) => {
     if (val.length > 2) {
       try {
