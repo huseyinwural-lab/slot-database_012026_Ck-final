@@ -197,7 +197,11 @@ async def reset_password(payload: PasswordResetConfirmRequest):
         if isinstance(expires_at, str):
             expires_dt = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
         else:
-            expires_dt = expires_at
+            # Handle datetime object from MongoDB
+            if expires_at.tzinfo is None:
+                expires_dt = expires_at.replace(tzinfo=timezone.utc)
+            else:
+                expires_dt = expires_at
         if expires_dt < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="RESET_TOKEN_EXPIRED")
 
