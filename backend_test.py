@@ -1336,23 +1336,18 @@ class CasinoAdminAPITester:
         # Scenario 2: Sadece min_version update
         print(f"\n🔍 Senaryo 2: Sadece min_version update")
         
-        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as client1_file:
-            client1_file.write(html5_file_content)
-            client1_file.flush()
+        try:
+            url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
             
-            try:
-                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
-                
-                with open(client1_file.name, 'rb') as f:
-                    files = {'file': ('client1.txt', f, 'text/plain')}
-                    data = {
-                        'client_type': 'html5',
-                        'min_version': '2.0.0'
-                        # launch_url intentionally omitted
-                    }
-                    
-                    print(f"   📤 Uploading HTML5 client with only min_version update")
-                    response = requests.post(url, files=files, data=data, timeout=30)
+            files = {'file': ('client1.txt', html5_file_content, 'text/plain')}
+            data = {
+                'client_type': 'html5',
+                'min_version': '2.0.0'
+                # launch_url intentionally omitted
+            }
+            
+            print(f"   📤 Uploading HTML5 client with only min_version update")
+            response = requests.post(url, files=files, data=data, timeout=30)
                     
                     success_2 = response.status_code == 200
                     self.tests_run += 1
