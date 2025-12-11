@@ -578,9 +578,12 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
         )
 
     # Normalize enforcement_mode
-    normalized_enforcement_mode, err = _validate_enforcement_mode(payload.enforcement_mode, _crash_math_error)
+    normalized_enforcement_mode, err = _validate_enforcement_mode(
+        payload.enforcement_mode,
+        _crash_math_error,
+    )
     if err is not None:
-        return JSONResponse(status_code=400, content=err)
+        return err
 
     # Validate advanced safety limits (simple sanity checks)
     for fname in [
@@ -589,9 +592,9 @@ async def save_crash_math_config(game_id: str, payload: CrashMathSaveRequest, re
         "max_total_loss_per_session",
         "max_total_win_per_session",
     ]:
-        resp = _validate_positive_or_none(fname, getattr(payload, fname), _crash_math_error)
-        if resp is not None:
-            return resp
+        _, err = _validate_positive_or_none(fname, getattr(payload, fname), _crash_math_error)
+        if err is not None:
+            return err
 
     if payload.max_rounds_per_session is not None and payload.max_rounds_per_session <= 0:
         return JSONResponse(
