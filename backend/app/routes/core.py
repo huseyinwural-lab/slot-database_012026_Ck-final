@@ -14,6 +14,7 @@ from app.models.core import (
 from app.models.modules import KYCDocument
 from app.models.domain.admin import AdminUser
 from app.utils.tenant import get_current_tenant_id
+from app.utils.auth import get_current_admin, require_permission
 from config import settings
 from app.services.ai_service import risk_analyzer
 from motor.motor_asyncio import AsyncIOMotorClient
