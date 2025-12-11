@@ -1,6 +1,47 @@
 user_problem_statement:
   summary: "Phase 1: Financial Integrity & Security Update"
 backend:
+
+p0_d_test_game_inventory:
+  - task: "Test Game Inventory Matrix"
+    implemented: true
+    working: true
+    note: "TEST_GAME_INVENTORY.md dosyasında core_type listesi ve canonical test oyunlar tablosu oluşturuldu."
+  - task: "Canonical test games per core_type"
+    implemented: true
+    working: true
+    note: "SLOT, CRASH, DICE, REEL_LINES, TABLE_BLACKJACK, TABLE_POKER için en az bir canonical is_test=true test oyunu tanımlı."
+  - task: "Test game config coverage"
+    implemented: true
+    working: true
+    note: "Test Game Config Coverage (P0-D) tablosu, her canonical test oyununun hangi config tipinde PRO olduğunu özetliyor."
+  - task: "Test game history + diff readiness"
+    implemented: true
+    working: true
+    note: "Test Game History & Diff Readiness (P0-D) tablosu Slot/Reel Lines için diff, Blackjack/Poker için history durumunu özetliyor."
+  - task: "Blackjack/Poker config diff API"
+    implemented: false
+    working: "NA"
+    note: "Out of P0-D scope, planned for P1 Hardening / diff extension."
+
+p1_hardening:
+  - task: "Jackpot config hardening – contribution/seed edge cases"
+    implemented: true
+    working: true
+    note: "hardening_suites.yaml içindeki jackpots_edge_cases suite'i altında contribution_percent_too_high ve seed_greater_than_cap senaryoları tanımlandı ve 400 JACKPOT_CONFIG_VALIDATION_FAILED ile doğrulandı."
+  - task: "BlackjackRules hardening – payout & table limits edge cases"
+    implemented: true
+    working: true
+    note: "hardening_suites.yaml içindeki blackjack_limits_edge_cases suite'i altında invalid_blackjack_payout ve min_bet_greater_than_max_bet senaryoları tanımlandı ve 400 BLACKJACK_RULES_VALIDATION_FAILED ile doğrulandı."
+  - task: "PokerRules hardening – rake/fee edge cases"
+    implemented: true
+    working: true
+    note: "hardening_suites.yaml içindeki poker_rake_edge_cases suite'i altında rake_percent_too_high ve negative_rake_cap senaryoları tanımlandı ve 400 POKER_RULES_VALIDATION_FAILED ile doğrulandı."
+  - task: "Bot registry skeleton"
+    implemented: true
+    working: true
+    note: "docs/BOT_REGISTRY.md içinde config-regression-bot, hardening-bot ve ui-e2e-bot tanımlandı; hardening-bot, hardening_suites.yaml içindeki edge case suite'lerini koşmak üzere enabled=false ile işaretli."
+
   - task: "Finance Refactor & New Routes"
     implemented: true
     working: true
