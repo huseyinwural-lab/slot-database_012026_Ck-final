@@ -98,7 +98,7 @@ const Layout = ({ children }) => {
               <SidebarItem to="/reports" icon={BarChart3} label="Reports" />
               {tenantType === 'owner' && <SidebarItem to="/logs" icon={ScrollText} label="Logs" />}
               {tenantType === 'owner' && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" />}
-              {tenantType === 'owner' && <SidebarItem to="/api-keys" icon={KeyRound} label="API Keys" />}
+              {tenantType === 'owner' && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" />}
               {tenantType === 'owner' && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />}
               {tenantType === 'owner' && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" />}
               {tenantType === 'owner' && <SidebarItem to="/settings" icon={Settings} label="Settings" />}

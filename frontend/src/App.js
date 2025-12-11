@@ -216,7 +216,7 @@ function App() {
           />
           
           <Route
-            path="/api-keys"
+            path="/keys"
             element={(
               <RequireAuth>
                 <APIKeysPage />
