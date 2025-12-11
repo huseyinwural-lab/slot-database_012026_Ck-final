@@ -48,6 +48,9 @@ const GameSlotAdvancedTab = ({ game }) => {
           ...cfg,
           autoplay_stop_on_balance_drop_percent:
             cfg.autoplay_stop_on_balance_drop_percent ?? '',
+          summary: '',
+        }));
+
         const logsRes = await api.get(`/v1/games/${game.id}/config/logs`, {
           params: { limit: 50 },
         });
@@ -55,9 +58,6 @@ const GameSlotAdvancedTab = ({ game }) => {
           (e) => e.action === 'slot_advanced_saved' && e.metadata?.config_version_id
         );
         setHistory(advHistory);
-
-          summary: '',
-        }));
       } catch (err) {
         console.error(err);
         const apiError = err?.response?.data;
