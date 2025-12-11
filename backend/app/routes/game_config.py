@@ -3400,6 +3400,129 @@ async def get_game_assets(game_id: str, request: Request):
     return GameAssetsResponse(assets=assets)
 
 
+
+
+class ClientUploadError(Exception):
+    def __init__(self, payload: Dict[str, Any]):
+        self.payload = payload
+
+
+def _client_upload_error(message: str, reason: str, details: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "error_code": "CLIENT_UPLOAD_FAILED",
+        "message": message,
+        "details": {"reason": reason, **details},
+    }
+
+
+@router.post("/{game_id}/client-upload")
+async def upload_game_client(
+    game_id: str,
+    file: UploadFile = File(...),
+    client_type: str = Form(...),
+    params: Optional[str] = Form(None),
+    request: Request = None,
+):
+    """Oyun client upload endpoint'i.
+
+    - client_type: "html5" | "unity"
+    - file: build/bundle zip veya benzeri
+    - params: opsiyonel JSON string (ek metadata)
+    """
+    from fastapi.responses import JSONResponse
+    from app.models.core import Game, ClientRuntimeType, ClientVariant
+
+    db = get_db()
+    game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
+    if not game_doc:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    admin_id = "current_admin"
+    request_id = request.headers.get("X-Request-ID") or str(uuid4())
+
+    if not file:
+        raise ClientUploadError(_client_upload_error("File is required.", "missing_file", {}))
+
+    client_type_norm = (client_type or "").lower()
+    allowed_client_types = {"html5", "unity"}
+    if client_type_norm not in allowed_client_types:
+        raise ClientUploadError(
+            _client_upload_error(
+                "Invalid client_type.",
+                "invalid_client_type",
+                {"client_type": client_type, "allowed_types": sorted(list(allowed_client_types))},
+            )
+        )
+
+    try:
+        content = await file.read()
+    except Exception:
+        raise ClientUploadError(_client_upload_error("File upload failed.", "read_error", {}))
+
+    size_bytes = len(content)
+
+    # Basit bir path; gerçek ortamda CDN/storage'e yazılabilir.
+    version = await _generate_new_version(db, game_id, admin_id, notes="Game client upload")
+    url = f"/static/game-clients/{game_id}/{version.id}/{file.filename}"
+
+    # Game doc'u Pydantic modele çevirerek client_variants ile çalışalım
+    game = Game(**game_doc)
+    variants = game.client_variants or {}
+
+    runtime_enum = ClientRuntimeType.HTML5 if client_type_norm == "html5" else ClientRuntimeType.UNITY
+
+    existing = variants.get(client_type_norm)
+    if existing is None:
+        variants[client_type_norm] = ClientVariant(
+            enabled=True,
+            launch_url=url,
+            runtime=runtime_enum,
+            extra={},
+        )
+    else:
+        existing.enabled = True
+        existing.launch_url = url
+        existing.runtime = runtime_enum
+        variants[client_type_norm] = existing
+
+    # primary_client_type boş ise ilk client'ı primary yap
+    primary = game.primary_client_type
+    if primary is None:
+        primary = runtime_enum
+
+    # DB update
+    await db.games.update_one(
+        {"id": game_id},
+        {
+            "$set": {
+                "client_variants": {k: v.model_dump() for k, v in variants.items()},
+                "primary_client_type": primary.value,
+                "updated_at": datetime.now(timezone.utc),
+            }
+        },
+    )
+
+    logger.info(
+        "client_uploaded",
+        extra={
+            "game_id": game_id,
+            "client_type": client_type_norm,
+            "launch_url": url,
+            "config_version_id": version.id,
+            "admin_id": admin_id,
+            "request_id": request_id,
+            "action_type": "client_uploaded",
+        },
+    )
+
+    return {
+        "game_id": game_id,
+        "client_type": client_type_norm,
+        "launch_url": url,
+        "size_bytes": size_bytes,
+        "primary_client_type": primary.value if primary else None,
+    }
+
 from fastapi import UploadFile, File, Form
 
 
