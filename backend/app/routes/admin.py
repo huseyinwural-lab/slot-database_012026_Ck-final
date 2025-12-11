@@ -292,6 +292,14 @@ async def seed_admin():
         ]
         for admin in admin_users:
             await db.admins.insert_one(admin.model_dump())
+    else:
+        # Ensure admin@casino.com has correct password for testing
+        password_hash = get_password_hash("Admin123!")
+        await db.admins.update_one(
+            {"email": "admin@casino.com"},
+            {"$set": {"password_hash": password_hash}},
+            upsert=True
+        )
         
         # Seed activity logs for all admins
         activity_logs = [
