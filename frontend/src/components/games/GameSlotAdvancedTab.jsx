@@ -15,7 +15,11 @@ const GameSlotAdvancedTab = ({ game }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [history, setHistory] = useState([]);
-
+  const [selectedVersions, setSelectedVersions] = useState([]);
+  const [diffOpen, setDiffOpen] = useState(false);
+  const [diffLoading, setDiffLoading] = useState(false);
+  const [diffChanges, setDiffChanges] = useState([]);
+  const [diffMeta, setDiffMeta] = useState({ from: null, to: null });
 
   const [form, setForm] = useState({
     spin_speed: 'normal',
@@ -26,12 +30,6 @@ const GameSlotAdvancedTab = ({ game }) => {
     autoplay_stop_on_big_win: true,
     autoplay_stop_on_balance_drop_percent: '',
     big_win_animation_enabled: true,
-  const [selectedVersions, setSelectedVersions] = useState([]);
-  const [diffOpen, setDiffOpen] = useState(false);
-  const [diffLoading, setDiffLoading] = useState(false);
-  const [diffChanges, setDiffChanges] = useState([]);
-  const [diffMeta, setDiffMeta] = useState({ from: null, to: null });
-
     gamble_feature_allowed: false,
     summary: '',
   });
