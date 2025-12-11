@@ -3526,7 +3526,7 @@ async def upload_game_client(
         extra={
             "game_id": game_id,
             "client_type": client_type_norm,
-            "launch_url": url,
+            "launch_url": effective_launch_url,
             "config_version_id": version.id,
             "admin_id": admin_id,
             "request_id": request_id,
@@ -3534,10 +3534,13 @@ async def upload_game_client(
         },
     )
 
+    response_game = updated_doc or game_doc
+
     return {
+        "game": response_game,
         "game_id": game_id,
         "client_type": client_type_norm,
-        "launch_url": url,
+        "launch_url": effective_launch_url,
         "size_bytes": size_bytes,
         "primary_client_type": primary.value if primary else None,
     }
