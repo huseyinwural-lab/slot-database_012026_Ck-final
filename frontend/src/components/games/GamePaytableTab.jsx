@@ -62,6 +62,45 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
       await onReload?.();
     } catch (err) {
       console.error(err);
+
+  const toggleVersion = (configVersionId) => {
+    setSelectedVersions((prev) => {
+      if (prev.includes(configVersionId)) {
+        return prev.filter((id) => id !== configVersionId);
+      }
+      // yeni ekleniyorsa
+      if (prev.length >= 2) {
+        // En basit kural: ilk seçileni at, son iki seçim kalsın
+        return [prev[1], configVersionId];
+      }
+      return [...prev, configVersionId];
+    });
+  };
+
+  const handleCompare = async () => {
+    if (selectedVersions.length !== 2) {
+      toast.error('Diff için tam olarak iki versiyon seçmelisiniz.');
+      return;
+    }
+    const [fromId, toId] = selectedVersions;
+    setDiffLoading(true);
+    try {
+      const res = await api.get(`/v1/games/${game.id}/config-diff`, {
+        params: { type: 'paytable', from: fromId, to: toId },
+      });
+      setDiffChanges(res.data.changes || []);
+      setDiffMeta({ from: res.data.from_config_version_id, to: res.data.to_config_version_id });
+      setDiffOpen(true);
+    } catch (err) {
+      console.error(err);
+      const apiError = err?.response?.data;
+      const msg = apiError?.message || 'Config diff yüklenemedi.';
+      toast.error(msg);
+    } finally {
+      setDiffLoading(false);
+    }
+  };
+
       const apiError = err?.response?.data;
       const msg = apiError?.message || apiError?.detail || 'Override kaydedilemedi';
       toast.error(msg);
