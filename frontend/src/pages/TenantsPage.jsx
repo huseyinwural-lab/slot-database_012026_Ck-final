@@ -69,7 +69,7 @@ const TenantsPage = () => {
         type: form.type,
         features: form.features,
       };
-      await api.post('/v1/tenants', payload);
+      await api.post('/v1/tenants/', payload);
       toast.success('Tenant created');
       setForm({
         name: '',
