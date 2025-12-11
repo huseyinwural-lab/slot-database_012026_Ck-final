@@ -847,6 +847,13 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
+        {/* CLIENT TAB */}
+        {visibleTabs.includes('client') && (
+          <TabsContent value="client" className="space-y-4 pt-4">
+            <GameClientTab game={game} onUpdated={onSaved} />
+          </TabsContent>
+        )}
+
         {/* LOGS TAB */}
         {visibleTabs.includes('logs') && (
           <TabsContent value="logs" className="space-y-4 pt-4">
