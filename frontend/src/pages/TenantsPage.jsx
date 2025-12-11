@@ -32,7 +32,7 @@ const TenantsPage = () => {
   const loadTenants = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/v1/tenants');
+      const res = await api.get('/v1/tenants/');
       setTenants(res.data || []);
     } catch (e) {
       console.error(e);
