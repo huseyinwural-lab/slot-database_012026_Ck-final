@@ -43,6 +43,10 @@ p0_e_game_robot:
     implemented: true
     working: true
     note: "Manual import'tan gelen default client_variants ile uyumlu; /api/v1/games/{id}/client-upload üzerinden launch_url ve extra.min_version alanları override edilebiliyor."
+  - task: "Yeni Üye Manuel Bonus – Trigger (register/first login)"
+    implemented: true
+    working: true
+    note: "user.is_new==true ve daha önce new_member_manual bonusu yoksa, hem register hem de ilk login event'inde NewMemberManualBonusConfig'ten bonus ticket üretiliyor; idempotent."
 
   - task: "Yeni Üye Manuel Bonus Mekaniği Backend"
     implemented: true
