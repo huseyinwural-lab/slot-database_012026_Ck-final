@@ -44,6 +44,21 @@ p0_e_game_robot:
     working: true
     note: "Manual import'tan gelen default client_variants ile uyumlu; /api/v1/games/{id}/client-upload üzerinden launch_url ve extra.min_version alanları override edilebiliyor."
 
+  - task: "Yeni Üye Manuel Bonus Mekaniği Backend"
+    implemented: true
+    working: true
+    file: "backend/app/routes/core.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "NewMemberManualBonusConfig modeli ve GET/PUT /api/v1/bonus/config/new-member-manual endpointleri core router altında eklendi."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ YENİ ÜYE MANUEL BONUS MEKANİĞİ - TÜM SENARYOLAR BAŞARILI: Senaryo A) Varsayılan config doğru değerlerle döndü (enabled=false, allowed_game_ids=[], spin_count=0, fixed_bet_amount=0.0, total_budget_cap=0.0, validity_days=7). Senaryo B) Geçerli config başarıyla kaydedildi ve MongoDB'da platform_settings koleksiyonunda key='new_member_manual_bonus' ile doğrulandı (enabled=true, allowed_game_ids=['f78ddf21-c759-4b8c-a5fb-28c90b3645ab'], spin_count=50, fixed_bet_amount=0.1, total_budget_cap=500, validity_days=10). Senaryo C) spin_count validasyonu çalışıyor (1-1000 arası) - spin_count=0 için 400 'spin_count must be between 1 and 1000' hatası döndü. Senaryo D) fixed_bet_amount validasyonu çalışıyor (>0 ve <=1000) - -1 ve 2000 değerleri için 400 'fixed_bet_amount must be > 0 and <= 1000' hatası döndü. Senaryo E) total_budget_cap validasyonu çalışıyor (>=0 ve <=1,000,000) - -5 ve 2000000 değerleri için 400 'total_budget_cap must be >= 0 and <= 1,000,000' hatası döndü. Tüm validation guardrail'leri çalışıyor ve kayıt/okuma akışı sağlıklı."
+
 p1_hardening:
   - task: "Jackpot config hardening – contribution/seed edge cases"
     implemented: true
