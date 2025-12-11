@@ -254,8 +254,8 @@ def parse_args(argv: List[str]) -> Dict[str, Any]:
     parser.add_argument(
         "--api-key",
         type=str,
-        default=None,
-        help="Opsiyonel API key (Authorization: Bearer ...)",
+        required=True,
+        help="ZORUNLU API key (Authorization: Bearer ...)",
     )
 
     args = parser.parse_args(argv)
