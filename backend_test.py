@@ -6,7 +6,7 @@ import io
 from datetime import datetime
 
 class CasinoAdminAPITester:
-    def __init__(self, base_url="https://gamemaster-26.preview.emergentagent.com"):
+    def __init__(self, base_url="https://admin-gamebot.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
@@ -1234,7 +1234,7 @@ class CasinoAdminAPITester:
         print("\n🔄 CONFIG VERSION DIFF BACKEND MVP TESTS")
         
         # Base URL: REACT_APP_BACKEND_URL
-        # Test game: Test Slot Game (id=f9596f63-a1f6-411b-aec4-f713b900894e)
+        # Test game: Test Slot Game (id=admin-gamebot)
         
         test_game_id = "f9596f63-a1f6-411b-aec4-f713b900894e"
         
