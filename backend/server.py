@@ -59,6 +59,7 @@ app.include_router(game_config_presets.router)
 from app.routes import tenant
 app.include_router(tenant.router)
 app.include_router(auth.router)
+app.include_router(api_keys.router)
 
 
 
