@@ -10,16 +10,7 @@ import httpx
 # --- Sabitler (manuel güncellenebilir) ---
 DEFAULT_ROUNDS = 50
 
-TEST_SLOT_ID = "f78ddf21-c759-4b8c-a5fb-28c90b3645ab"  # Test Slot Game (QA)
-TEST_CRASH_ID = "52ba0d07-58ab-43c1-8c6d-8a3b2675a7a8"  # Test Crash Game (Advanced Safety QA)
-TEST_DICE_ID = "137e8fbf-3f41-4407-b9a5-41efdd0dc78c"  # Test Dice Game (Advanced Limits QA)
-
-SLOT_BET_AMOUNT = 1.0
-CRASH_BETS = [1.0, 2.0]
-DICE_BETS = [1.0, 5.0]
-DICE_CHANCES = [50.0, 75.0]  # yüzde olarak
-
-# Backend base URL - env'den okunur, yoksa localhost fallback
+# Backend base URL - env'den okunur, yoksa preview panel URL'sine benzer bir default
 BASE_URL = os.getenv("GAME_ROBOT_BASE_URL", "http://localhost:8001")
 
 
