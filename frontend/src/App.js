@@ -33,32 +33,195 @@ function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/players" element={<PlayerList />} />
-          <Route path="/players/:id" element={<PlayerDetail />} />
-          <Route path="/finance" element={<Finance />} />
-          <Route path="/approvals" element={<ApprovalQueue />} />
-          <Route path="/games" element={<GameManagement />} />
-          <Route path="/vip-games" element={<VipGames />} />
-          <Route path="/bonuses" element={<BonusManagement />} />
-          <Route path="/fraud" element={<FraudCheck />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/features" element={<FeatureFlags />} />
-          <Route path="/simulator" element={<SimulationLab />} />
+          <Route path="/login" element={<Login />} />
+
+          <Route
+            path="/"
+            element={(
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/players"
+            element={(
+              <RequireAuth>
+                <PlayerList />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/players/:id"
+            element={(
+              <RequireAuth>
+                <PlayerDetail />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/finance"
+            element={(
+              <RequireAuth>
+                <Finance />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/approvals"
+            element={(
+              <RequireAuth>
+                <ApprovalQueue />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/games"
+            element={(
+              <RequireAuth>
+                <GameManagement />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/vip-games"
+            element={(
+              <RequireAuth>
+                <VipGames />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/bonuses"
+            element={(
+              <RequireAuth>
+                <BonusManagement />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/fraud"
+            element={(
+              <RequireAuth>
+                <FraudCheck />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/support"
+            element={(
+              <RequireAuth>
+                <Support />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/features"
+            element={(
+              <RequireAuth>
+                <FeatureFlags />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/simulator"
+            element={(
+              <RequireAuth>
+                <SimulationLab />
+              </RequireAuth>
+            )}
+          />
           
           {/* New Modules */}
-          <Route path="/kyc" element={<KYCManagement />} />
-          <Route path="/crm" element={<CRM />} />
-          <Route path="/cms" element={<CMSManagement />} />
-          <Route path="/affiliates" element={<AffiliateManagement />} />
-          <Route path="/risk" element={<RiskManagement />} />
-          <Route path="/admins" element={<AdminManagement />} />
-          <Route path="/logs" element={<SystemLogs />} />
-          <Route path="/rg" element={<ResponsibleGaming />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/tenants" element={<TenantsPage />} />
+          <Route
+            path="/kyc"
+            element={(
+              <RequireAuth>
+                <KYCManagement />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/crm"
+            element={(
+              <RequireAuth>
+                <CRM />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/cms"
+            element={(
+              <RequireAuth>
+                <CMSManagement />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/affiliates"
+            element={(
+              <RequireAuth>
+                <AffiliateManagement />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/risk"
+            element={(
+              <RequireAuth>
+                <RiskManagement />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/admins"
+            element={(
+              <RequireAuth>
+                <AdminManagement />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/logs"
+            element={(
+              <RequireAuth>
+                <SystemLogs />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/rg"
+            element={(
+              <RequireAuth>
+                <ResponsibleGaming />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/reports"
+            element={(
+              <RequireAuth>
+                <Reports />
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/tenants"
+            element={(
+              <RequireAuth>
+                <TenantsPage />
+              </RequireAuth>
+            )}
+          />
           
-          <Route path="/settings" element={<SettingsPanel />} />
+          <Route
+            path="/settings"
+            element={(
+              <RequireAuth>
+                <SettingsPanel />
+              </RequireAuth>
+            )}
+          />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <Toaster position="top-right" theme="dark" />
