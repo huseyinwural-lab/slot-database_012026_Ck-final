@@ -192,6 +192,21 @@ backend:
         -agent: "testing"
         -comment: "✅ DICE ADVANCED LIMITS UI ROUND-TRIP VE E2E DOĞRULAMA COMPLETE - All Turkish review request scenarios successfully tested and working: Ön koşul: Test Dice Game (Advanced Limits QA) successfully found and accessible via Dice category filter in /games page. Senaryo 1 - Global limits happy-path round-trip: Advanced Limits (global) fields (max_win_per_bet=200, max_loss_per_bet=100, max_session_loss=1000, max_session_bets=500, enforcement_mode=hard_block) successfully filled and saved with 'Dice math config kaydedildi' success toast. Round-trip verification confirmed all values preserved correctly after modal close/reopen. Senaryo 2 - TR override round-trip: Country Overrides JSON textarea accepts TR-specific limits (max_session_loss=800, max_win_per_bet=150) correctly, saves successfully, and preserves values in prettified JSON format after round-trip test. Senaryo 3 - Bozuk JSON davranışı: Invalid JSON (missing closing brace) properly handled with client-side validation showing error message, preventing malformed data submission. All UI components functional: GameDiceMathTab.jsx properly integrated with GameConfigPanel.jsx, Dice Math tab appears correctly for DICE games, all form fields editable and responsive, API integrations working (GET/POST /api/v1/games/{game_id}/config/dice-math), data persistence verified through multiple round-trip tests. The Dice Advanced Limits UI flow is fully operational and ready for production use."
 
+  - task: "Slot P0-B Backend Config Round-trip Validation"
+    implemented: true
+    working: true
+    file: "backend/app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Turkish review request for Slot P0-B backend validation testing - comprehensive round-trip tests for slot advanced, paytable, reel strips, and jackpots endpoints."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ SLOT P0-B BACKEND VALIDATION COMPLETE - All Turkish review request scenarios tested and working perfectly: 1) Senaryo 1 - Slot Advanced pozitif round-trip: GET /api/v1/games/{game_id}/config/slot-advanced returns proper template, POST with positive payload (spin_speed='slow', autoplay_default_spins=10, autoplay_max_spins=50, autoplay_stop_on_balance_drop_percent=25) saves successfully, GET after POST confirms all values preserved correctly in round-trip test. 2) Senaryo 2 - Slot Advanced negatif validasyon: POST with invalid payload (autoplay_default_spins=100 > autoplay_max_spins=50, autoplay_stop_on_balance_drop_percent=-10) returns 400 with error_code='SLOT_ADVANCED_VALIDATION_FAILED' and proper details containing autoplay validation info with reason='invalid_range'. 3) Senaryo 3 - Paytable pozitif override round-trip: GET /api/v1/games/{game_id}/config/paytable returns initial state, POST /api/v1/games/{game_id}/config/paytable/override with symbols data (A/K symbols with pays structure, lines=20) creates new paytable record, GET after POST confirms current.data matches POST payload exactly. 4) Senaryo 4 - Reel Strips pozitif manual round-trip: GET /api/v1/games/{game_id}/config/reel-strips returns initial state, POST with manual reel strips data (3 reels with symbol arrays including WILD) and source='manual' creates new record, GET after POST confirms current.data.reels matches POST payload exactly. 5) Senaryo 5 - Jackpots pozitif minimal round-trip: GET /api/v1/games/{game_id}/config/jackpots returns initial state, POST with jackpots array (Mini JP with EUR currency, seed=1000, cap=100000, contribution_percent=1.5, hit_frequency_param=0.05) creates new config, GET after POST confirms config.jackpots[0] matches POST body and pools array contains jackpot entry. All endpoints return proper HTTP status codes (200 OK for success, 400 for validation errors) and data structures exactly as specified in Turkish review request. Test game 'Test Slot Game' (ID: f9596f63-a1f6-411b-aec4-f713b900894e) with core_type='SLOT' successfully used for all scenarios."
+
   - task: "Slot Advanced Settings UI Flow"
     implemented: true
     working: true
