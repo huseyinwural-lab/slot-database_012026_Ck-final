@@ -1146,6 +1146,65 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_api_keys_backend_faz4(self):
+        """Test FAZ 4 API Key Backend - Turkish Review Request"""
+        print("\n🔑 FAZ 4 API KEY BACKEND TESTS - Turkish Review Request")
+        
+        # Ön hazırlık: Seed admin data and login
+        print(f"\n🔍 Ön hazırlık: Admin seed ve JWT login")
+        success_prep = self._prepare_api_key_tests()
+        if not success_prep:
+            print("❌ Ön hazırlık başarısız. Testlere devam edilemiyor.")
+            return False
+        
+        # Test 1: Scope listesi
+        print(f"\n🔍 Test 1: Scope listesi")
+        success_test1 = self._test_api_key_scopes()
+        
+        # Test 2: API key oluşturma (geçerli)
+        print(f"\n🔍 Test 2: API key oluşturma (geçerli)")
+        success_test2, created_key_id = self._test_api_key_create_valid()
+        
+        # Test 3: API key oluşturma (geçersiz scope)
+        print(f"\n🔍 Test 3: API key oluşturma (geçersiz scope)")
+        success_test3 = self._test_api_key_create_invalid_scope()
+        
+        # Test 4: Listeleme
+        print(f"\n🔍 Test 4: API key listeleme")
+        success_test4 = self._test_api_key_listing()
+        
+        # Test 5: Active/Pasif toggle
+        print(f"\n🔍 Test 5: Active/Pasif toggle")
+        success_test5 = self._test_api_key_toggle(created_key_id)
+        
+        # Overall result
+        overall_success = success_prep and success_test1 and success_test2 and success_test3 and success_test4 and success_test5
+        
+        if overall_success:
+            print("\n✅ FAZ 4 API KEY BACKEND - TÜM TESTLER BAŞARILI")
+            print("   ✅ Ön hazırlık: Admin seed ve JWT login başarılı")
+            print("   ✅ Test 1: Scope listesi başarılı")
+            print("   ✅ Test 2: Geçerli API key oluşturma başarılı")
+            print("   ✅ Test 3: Geçersiz scope validation başarılı")
+            print("   ✅ Test 4: API key listeleme başarılı")
+            print("   ✅ Test 5: Active/Pasif toggle başarılı")
+        else:
+            print("\n❌ FAZ 4 API KEY BACKEND - BAZI TESTLER BAŞARISIZ")
+            if not success_prep:
+                print("   ❌ Ön hazırlık başarısız")
+            if not success_test1:
+                print("   ❌ Test 1: Scope listesi başarısız")
+            if not success_test2:
+                print("   ❌ Test 2: Geçerli API key oluşturma başarısız")
+            if not success_test3:
+                print("   ❌ Test 3: Geçersiz scope validation başarısız")
+            if not success_test4:
+                print("   ❌ Test 4: API key listeleme başarısız")
+            if not success_test5:
+                print("   ❌ Test 5: Active/Pasif toggle başarısız")
+        
+        return overall_success
+
     def test_game_robot_tenant_aware(self):
         """Test Game Robot Tenant-Aware Functionality - Görev 2.2"""
         print("\n🤖 GAME ROBOT TENANT-AWARE TESTS - Görev 2.2")
