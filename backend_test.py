@@ -1230,53 +1230,384 @@ class CasinoAdminAPITester:
         return overall_success
 
     def test_client_upload_flow(self):
-        """Test Client Upload Flow - Turkish Review Request"""
-        print("\n📤 CLIENT UPLOAD FLOW TESTS")
+        """Test Client Upload Flow - Turkish Review Request P0-E"""
+        print("\n📤 CLIENT UPLOAD FLOW TESTS - P0-E")
         
-        # Test game: Test Slot Game (using existing game from API)
-        test_game_id = "f9596f63-a1f6-411b-aec4-f713b900894e"
-        print(f"🎯 Test Game ID: {test_game_id}")
+        # Use Test Slot Game (QA) from TEST_GAME_INVENTORY.md
+        test_game_id = "f78ddf21-c759-4b8c-a5fb-28c90b3645ab"
+        print(f"🎯 Test Game: Test Slot Game (QA) - ID: {test_game_id}")
         
         # Create test files for upload
         import tempfile
         import os
         
         # Create temporary test files
-        html5_file_content = b"Test HTML5 game content - this is a dummy file for testing"
-        unity_file_content = b"Test Unity game content - this is a dummy file for testing"
+        html5_file_content = b"hello"  # Simple dummy content as requested
+        unity_file_content = b"unity test content"
         
-        # Test A) Positive - HTML5 upload (first client)
-        print(f"\n🔍 Scenario A: HTML5 upload (first client)")
+        # Scenario 1: launch_url + min_version ile HTML5 upload
+        print(f"\n🔍 Senaryo 1: launch_url + min_version ile HTML5 upload")
         
-        with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as html5_file:
-            html5_file.write(html5_file_content)
-            html5_file.flush()
+        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as client1_file:
+            client1_file.write(html5_file_content)
+            client1_file.flush()
             
             try:
                 url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
                 
-                with open(html5_file.name, 'rb') as f:
-                    files = {'file': ('test-html5.zip', f, 'application/zip')}
+                with open(client1_file.name, 'rb') as f:
+                    files = {'file': ('client1.txt', f, 'text/plain')}
                     data = {
                         'client_type': 'html5',
-                        'params': '{}'
+                        'launch_url': '/static/test-overridden.html',
+                        'min_version': '1.2.3'
                     }
                     
-                    print(f"   📤 Uploading HTML5 client to: {url}")
+                    print(f"   📤 Uploading HTML5 client with launch_url + min_version to: {url}")
                     response = requests.post(url, files=files, data=data, timeout=30)
                     
-                    success_a = response.status_code == 200
-                    if success_a:
+                    success_1 = response.status_code == 200
+                    self.tests_run += 1
+                    if success_1:
                         self.tests_passed += 1
-                        print(f"✅ HTML5 Upload - Status: {response.status_code}")
+                        print(f"✅ Senaryo 1 - Status: {response.status_code}")
                         
                         try:
                             response_data = response.json()
                             print(f"   Response keys: {list(response_data.keys())}")
                             
                             # Validate response structure
-                            required_fields = ['game_id', 'client_type', 'launch_url', 'primary_client_type']
+                            required_fields = ['game_id', 'client_type', 'launch_url', 'primary_client_type', 'game']
                             missing_fields = [field for field in required_fields if field not in response_data]
+                            
+                            if not missing_fields:
+                                print("   ✅ Response structure complete")
+                                
+                                # Validate specific values
+                                if response_data.get('client_type') == 'html5':
+                                    print("   ✅ client_type == 'html5'")
+                                else:
+                                    print(f"   ❌ client_type mismatch: expected 'html5', got '{response_data.get('client_type')}'")
+                                
+                                if response_data.get('launch_url') == '/static/test-overridden.html':
+                                    print("   ✅ launch_url == '/static/test-overridden.html'")
+                                else:
+                                    print(f"   ❌ launch_url mismatch: expected '/static/test-overridden.html', got '{response_data.get('launch_url')}'")
+                                
+                                if response_data.get('primary_client_type') == 'html5':
+                                    print("   ✅ primary_client_type == 'html5' (first client)")
+                                else:
+                                    print(f"   ❌ primary_client_type mismatch: expected 'html5', got '{response_data.get('primary_client_type')}'")
+                                
+                                # Validate game.client_variants structure
+                                game = response_data.get('game', {})
+                                client_variants = game.get('client_variants', {})
+                                html5_variant = client_variants.get('html5', {})
+                                
+                                if html5_variant.get('launch_url') == '/static/test-overridden.html':
+                                    print("   ✅ game.client_variants.html5.launch_url == '/static/test-overridden.html'")
+                                else:
+                                    print(f"   ❌ game.client_variants.html5.launch_url mismatch")
+                                
+                                html5_extra = html5_variant.get('extra', {})
+                                if html5_extra.get('min_version') == '1.2.3':
+                                    print("   ✅ game.client_variants.html5.extra.min_version == '1.2.3'")
+                                else:
+                                    print(f"   ❌ game.client_variants.html5.extra.min_version mismatch")
+                                    
+                            else:
+                                print(f"   ❌ Response missing fields: {missing_fields}")
+                                success_1 = False
+                                
+                        except Exception as e:
+                            print(f"   ❌ Response parsing error: {e}")
+                            success_1 = False
+                    else:
+                        print(f"❌ Senaryo 1 Failed - Status: {response.status_code}")
+                        print(f"   Response: {response.text[:200]}...")
+                        self.failed_tests.append({
+                            "name": "Senaryo 1 - HTML5 upload with launch_url + min_version",
+                            "expected": 200,
+                            "actual": response.status_code,
+                            "response": response.text[:200]
+                        })
+                        
+            finally:
+                os.unlink(client1_file.name)
+        
+        # Scenario 2: Sadece min_version update
+        print(f"\n🔍 Senaryo 2: Sadece min_version update")
+        
+        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as client1_file:
+            client1_file.write(html5_file_content)
+            client1_file.flush()
+            
+            try:
+                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+                
+                with open(client1_file.name, 'rb') as f:
+                    files = {'file': ('client1.txt', f, 'text/plain')}
+                    data = {
+                        'client_type': 'html5',
+                        'min_version': '2.0.0'
+                        # launch_url intentionally omitted
+                    }
+                    
+                    print(f"   📤 Uploading HTML5 client with only min_version update")
+                    response = requests.post(url, files=files, data=data, timeout=30)
+                    
+                    success_2 = response.status_code == 200
+                    self.tests_run += 1
+                    if success_2:
+                        self.tests_passed += 1
+                        print(f"✅ Senaryo 2 - Status: {response.status_code}")
+                        
+                        try:
+                            response_data = response.json()
+                            
+                            # Validate that launch_url is preserved from previous upload
+                            if response_data.get('launch_url') == '/static/test-overridden.html':
+                                print("   ✅ launch_url preserved from previous upload")
+                            else:
+                                print(f"   ❌ launch_url not preserved: got '{response_data.get('launch_url')}'")
+                            
+                            # Validate game.client_variants structure
+                            game = response_data.get('game', {})
+                            client_variants = game.get('client_variants', {})
+                            html5_variant = client_variants.get('html5', {})
+                            
+                            if html5_variant.get('launch_url') == '/static/test-overridden.html':
+                                print("   ✅ game.client_variants.html5.launch_url still '/static/test-overridden.html'")
+                            else:
+                                print(f"   ❌ game.client_variants.html5.launch_url changed unexpectedly")
+                            
+                            html5_extra = html5_variant.get('extra', {})
+                            if html5_extra.get('min_version') == '2.0.0':
+                                print("   ✅ game.client_variants.html5.extra.min_version == '2.0.0' (updated)")
+                            else:
+                                print(f"   ❌ game.client_variants.html5.extra.min_version not updated correctly")
+                                
+                        except Exception as e:
+                            print(f"   ❌ Response parsing error: {e}")
+                            success_2 = False
+                    else:
+                        print(f"❌ Senaryo 2 Failed - Status: {response.status_code}")
+                        print(f"   Response: {response.text[:200]}...")
+                        self.failed_tests.append({
+                            "name": "Senaryo 2 - min_version only update",
+                            "expected": 200,
+                            "actual": response.status_code,
+                            "response": response.text[:200]
+                        })
+                        
+            finally:
+                os.unlink(client1_file.name)
+        
+        # Scenario 3: Unity client için ayrı upload
+        print(f"\n🔍 Senaryo 3: Unity client için ayrı upload")
+        
+        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as client1_file:
+            client1_file.write(unity_file_content)
+            client1_file.flush()
+            
+            try:
+                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+                
+                with open(client1_file.name, 'rb') as f:
+                    files = {'file': ('client1.txt', f, 'text/plain')}
+                    data = {
+                        'client_type': 'unity',
+                        'launch_url': '/static/unity-build/index.html'
+                    }
+                    
+                    print(f"   📤 Uploading Unity client")
+                    response = requests.post(url, files=files, data=data, timeout=30)
+                    
+                    success_3 = response.status_code == 200
+                    self.tests_run += 1
+                    if success_3:
+                        self.tests_passed += 1
+                        print(f"✅ Senaryo 3 - Status: {response.status_code}")
+                        
+                        try:
+                            response_data = response.json()
+                            
+                            # Validate Unity client response
+                            if response_data.get('client_type') == 'unity':
+                                print("   ✅ client_type == 'unity'")
+                            else:
+                                print(f"   ❌ client_type mismatch: expected 'unity', got '{response_data.get('client_type')}'")
+                            
+                            if response_data.get('launch_url') == '/static/unity-build/index.html':
+                                print("   ✅ launch_url == '/static/unity-build/index.html'")
+                            else:
+                                print(f"   ❌ launch_url mismatch for Unity client")
+                            
+                            # primary_client_type should remain html5 (first client)
+                            if response_data.get('primary_client_type') == 'html5':
+                                print("   ✅ primary_client_type remains 'html5' (first client preserved)")
+                            else:
+                                print(f"   ❌ primary_client_type changed unexpectedly: got '{response_data.get('primary_client_type')}'")
+                            
+                            # Validate game.client_variants structure
+                            game = response_data.get('game', {})
+                            client_variants = game.get('client_variants', {})
+                            unity_variant = client_variants.get('unity', {})
+                            
+                            if unity_variant.get('launch_url') == '/static/unity-build/index.html':
+                                print("   ✅ game.client_variants.unity.launch_url == '/static/unity-build/index.html'")
+                            else:
+                                print(f"   ❌ game.client_variants.unity.launch_url mismatch")
+                            
+                            if unity_variant.get('runtime') == 'unity':
+                                print("   ✅ game.client_variants.unity.runtime == 'unity'")
+                            else:
+                                print(f"   ❌ game.client_variants.unity.runtime mismatch")
+                                
+                        except Exception as e:
+                            print(f"   ❌ Response parsing error: {e}")
+                            success_3 = False
+                    else:
+                        print(f"❌ Senaryo 3 Failed - Status: {response.status_code}")
+                        print(f"   Response: {response.text[:200]}...")
+                        self.failed_tests.append({
+                            "name": "Senaryo 3 - Unity client upload",
+                            "expected": 200,
+                            "actual": response.status_code,
+                            "response": response.text[:200]
+                        })
+                        
+            finally:
+                os.unlink(client1_file.name)
+        
+        # Scenario 4: Geçersiz client_type
+        print(f"\n🔍 Senaryo 4: Geçersiz client_type")
+        
+        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as client1_file:
+            client1_file.write(html5_file_content)
+            client1_file.flush()
+            
+            try:
+                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+                
+                with open(client1_file.name, 'rb') as f:
+                    files = {'file': ('client1.txt', f, 'text/plain')}
+                    data = {
+                        'client_type': 'desktop'
+                    }
+                    
+                    print(f"   📤 Uploading with invalid client_type='desktop'")
+                    response = requests.post(url, files=files, data=data, timeout=30)
+                    
+                    success_4 = response.status_code == 400
+                    self.tests_run += 1
+                    if success_4:
+                        self.tests_passed += 1
+                        print(f"✅ Senaryo 4 - Status: {response.status_code}")
+                        
+                        try:
+                            response_data = response.json()
+                            
+                            # Validate error response structure
+                            if response_data.get('error_code') == 'CLIENT_UPLOAD_FAILED':
+                                print("   ✅ error_code == 'CLIENT_UPLOAD_FAILED'")
+                            else:
+                                print(f"   ❌ error_code mismatch: expected 'CLIENT_UPLOAD_FAILED', got '{response_data.get('error_code')}'")
+                            
+                            details = response_data.get('details', {})
+                            if details.get('reason') == 'invalid_client_type':
+                                print("   ✅ details.reason == 'invalid_client_type'")
+                            else:
+                                print(f"   ❌ details.reason mismatch: expected 'invalid_client_type', got '{details.get('reason')}'")
+                                
+                        except Exception as e:
+                            print(f"   ❌ Response parsing error: {e}")
+                            success_4 = False
+                    else:
+                        print(f"❌ Senaryo 4 Failed - Expected 400, got {response.status_code}")
+                        print(f"   Response: {response.text[:200]}...")
+                        self.failed_tests.append({
+                            "name": "Senaryo 4 - Invalid client_type",
+                            "expected": 400,
+                            "actual": response.status_code,
+                            "response": response.text[:200]
+                        })
+                        
+            finally:
+                os.unlink(client1_file.name)
+        
+        # Scenario 5: Eksik file
+        print(f"\n🔍 Senaryo 5: Eksik file")
+        
+        try:
+            url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+            
+            # Send request without file parameter
+            data = {
+                'client_type': 'html5'
+            }
+            
+            print(f"   📤 Sending request without file parameter")
+            response = requests.post(url, data=data, timeout=30)
+            
+            success_5 = response.status_code == 400
+            self.tests_run += 1
+            if success_5:
+                self.tests_passed += 1
+                print(f"✅ Senaryo 5 - Status: {response.status_code}")
+                
+                try:
+                    response_data = response.json()
+                    
+                    # Validate error response structure
+                    if response_data.get('error_code') == 'CLIENT_UPLOAD_FAILED':
+                        print("   ✅ error_code == 'CLIENT_UPLOAD_FAILED'")
+                    else:
+                        print(f"   ❌ error_code mismatch: expected 'CLIENT_UPLOAD_FAILED', got '{response_data.get('error_code')}'")
+                    
+                    details = response_data.get('details', {})
+                    if details.get('reason') == 'missing_file':
+                        print("   ✅ details.reason == 'missing_file'")
+                    else:
+                        print(f"   ❌ details.reason mismatch: expected 'missing_file', got '{details.get('reason')}'")
+                        
+                except Exception as e:
+                    print(f"   ❌ Response parsing error: {e}")
+                    success_5 = False
+            else:
+                print(f"❌ Senaryo 5 Failed - Expected 400, got {response.status_code}")
+                print(f"   Response: {response.text[:200]}...")
+                self.failed_tests.append({
+                    "name": "Senaryo 5 - Missing file",
+                    "expected": 400,
+                    "actual": response.status_code,
+                    "response": response.text[:200]
+                })
+        
+        # Overall result
+        overall_success = success_1 and success_2 and success_3 and success_4 and success_5
+        
+        if overall_success:
+            print("\n✅ CLIENT UPLOAD FLOW - ALL SCENARIOS PASSED")
+            print("   ✅ Senaryo 1: HTML5 upload with launch_url + min_version")
+            print("   ✅ Senaryo 2: min_version only update (launch_url preserved)")
+            print("   ✅ Senaryo 3: Unity client upload (primary_client_type preserved)")
+            print("   ✅ Senaryo 4: Invalid client_type validation")
+            print("   ✅ Senaryo 5: Missing file validation")
+        else:
+            print("\n❌ CLIENT UPLOAD FLOW - SOME SCENARIOS FAILED")
+            if not success_1:
+                print("   ❌ Senaryo 1: HTML5 upload failed")
+            if not success_2:
+                print("   ❌ Senaryo 2: min_version update failed")
+            if not success_3:
+                print("   ❌ Senaryo 3: Unity client upload failed")
+            if not success_4:
+                print("   ❌ Senaryo 4: Invalid client_type validation failed")
+            if not success_5:
+                print("   ❌ Senaryo 5: Missing file validation failed")
+        
+        return overall_success
                             
                             if not missing_fields:
                                 print("   ✅ Response structure complete")
