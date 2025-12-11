@@ -196,15 +196,6 @@ const GameReelStripsTab = ({ game }) => {
     }
   };
 
-      toast.success(`Simulation triggered (stub). ID: ${res.data?.simulation_id}`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Simulation tetiklenemedi');
-    } finally {
-      setSimulateLoading(false);
-    }
-  };
-
   const reelsCount = current?.data?.layout?.reels || (current?.data?.reels?.length ?? 0);
   const rows = current?.data?.layout?.rows ?? null;
 
