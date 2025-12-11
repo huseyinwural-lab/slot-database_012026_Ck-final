@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { RefreshCcw, Pencil } from 'lucide-react';
 import api from '../../services/api';
+import ConfigDiffPanel from './ConfigDiffPanel';
 
 const GamePaytableTab = ({ game, paytable, onReload }) => {
   const [overrideOpen, setOverrideOpen] = useState(false);
