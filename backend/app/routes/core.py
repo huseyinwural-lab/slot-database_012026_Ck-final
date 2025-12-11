@@ -638,23 +638,17 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
     cfg = NewMemberManualBonusConfig(**(cfg_doc.get("config", {}) if cfg_doc else {}))
 
     if not cfg.enabled:
-        logger.info(
-            "NEW_MEMBER_BONUS_SKIPPED",
-            extra={"user_id": user_id, "reason": "config_disabled"},
-        )
+        print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "config_disabled"})
         return
 
     if not cfg.allowed_game_ids:
-        logger.info(
-            "NEW_MEMBER_BONUS_SKIPPED",
-            extra={"user_id": user_id, "reason": "no_games_configured"},
-        )
+        print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "no_games_configured"})
         return
 
     if cfg.spin_count <= 0 or cfg.fixed_bet_amount <= 0:
-        logger.info(
+        print(
             "NEW_MEMBER_BONUS_SKIPPED",
-            extra={"user_id": user_id, "reason": "invalid_config_values"},
+            {"user_id": user_id, "reason": "invalid_config_values"},
         )
         return
 
