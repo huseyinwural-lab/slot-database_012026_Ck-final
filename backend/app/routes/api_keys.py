@@ -83,7 +83,11 @@ async def create_api_key(
 
     meta = {k: v for k, v in doc.items() if k not in {"key_hash"}}
 
-    return {"api_key": full_key, "key": meta}
+    # Response intentionally kept simple JSON-serializable types only
+    return {
+        "api_key": full_key,
+        "key": meta,
+    }
 
 
 @router.patch("/{key_id}", response_model=APIKeyMetaResponse)
