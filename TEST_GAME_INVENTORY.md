@@ -60,3 +60,15 @@ Aşağıda her core_type için en az bir "canonical" test oyununun varlığı ö
 ### canonical_missing
 
 - _(boş – tüm mevcut core_type'lar için en az bir canonical test game tanımlı)_
+
+## Test Game Config Coverage (P0-D)
+
+| Game Name                             | core_type       | Config Type           | Status | Notlar                                                |
+|---------------------------------------|-----------------|-----------------------|--------|-------------------------------------------------------|
+| Test Slot Game (QA)                   | SLOT            | Slot Advanced         | PRO    | pozitif + negatif validation (autoplay range)        |
+| Test Slot Game (QA)                   | SLOT            | Paytable/Reels/JP     | PRO    | P0-B/P0-C senaryoları (override, manual reels, JP)   |
+| Test Crash Game (Advanced Safety QA)  | CRASH           | Crash Advanced        | PRO    | limits + enforcement + country overrides             |
+| Test Dice Game (Advanced Limits QA)   | DICE            | Dice Advanced         | PRO    | limits + enforcement + country overrides             |
+| Test Reel Lines Game (Config QA)      | REEL_LINES      | Reel Strips/Paytable/JP | PRO | pozitif round-trip + Mini JP (API, UI henüz yok)     |
+| Test Blackjack Game (Config QA)       | TABLE_BLACKJACK | BlackjackRules        | PRO    | baseline QA + BLACKJACK_RULES_VALIDATION_FAILED testi|
+| Test Poker Game (Config QA)           | TABLE_POKER     | PokerRules            | PRO    | baseline QA + POKER_RULES_VALIDATION_FAILED testi    |
