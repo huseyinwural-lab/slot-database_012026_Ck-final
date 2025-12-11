@@ -282,10 +282,13 @@ async def seed_admin():
     
     # Create admin users
     if admin_count == 0:
+        # Default demo passwords (development/demo only):
+        # admin@casino.com / Admin123!
+        password_hash = get_password_hash("Admin123!")
         admin_users = [
-            AdminUser(username="superadmin", email="admin@casino.com", full_name="Super Admin", role="super_admin"),
-            AdminUser(username="manager1", email="manager@casino.com", full_name="Ahmet Yılmaz", role="manager"),
-            AdminUser(username="support1", email="support@casino.com", full_name="Ayşe Demir", role="support")
+            AdminUser(username="superadmin", email="admin@casino.com", full_name="Super Admin", role="Super Admin", password_hash=password_hash),
+            AdminUser(username="manager1", email="manager@casino.com", full_name="Ahmet Yılmaz", role="Manager", password_hash=password_hash),
+            AdminUser(username="support1", email="support@casino.com", full_name="Ayşe Demir", role="Support", password_hash=password_hash)
         ]
         for admin in admin_users:
             await db.admins.insert_one(admin.model_dump())
