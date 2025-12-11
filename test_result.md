@@ -389,6 +389,111 @@ frontend:
         -agent: "testing"
         -comment: "✅ GAME SETTINGS PANEL FULLY WORKING: 1) /games page loads with 100 games, Config button opens modal with proper title 'Game Settings: [Game Name]'. 2) All 5 tabs visible and functional (General, Math & RTP, Bets & Limits, Features, Logs). 3) General tab: Fields populate from GET /api/v1/games/{id}/config/general, Save General works with POST returning 200 OK and success toast. 4) Math & RTP tab: RTP profile creation form loads correctly. 5) Bets & Limits tab: Bet configuration form with min/max/step/presets inputs. 6) Features tab: Feature toggles load (103 switches detected). 7) Logs tab: Displays config change logs with timestamps showing recent general_update actions. All backend APIs working (GET/POST general, GET rtp/bets/features/logs all return 200 OK). Modal closes properly, returns to games list. Core functionality working perfectly."
 
+  - task: "Paytable diff UI happy path"
+    implemented: true
+    working: true
+    file: "src/components/games/GamePaytableTab.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "P0-C config diff UI testing task for paytable diff functionality."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ PAYTABLE DIFF UI HAPPY PATH WORKING: Test Slot Game Config modal açıldı, Paytable sekmesine geçildi, history tablosunda 8 kayıt bulundu, iki versiyon seçildi (checkbox selection), Compare Selected butonu aktif oldu, ConfigDiffPanel açıldı, paytable diff dialogu tespit edildi (Config Diff – paytable), 2 değişiklik görüntülendi (lines: 25→20, symbols[0].pays.4: 15→10), field paths doğru formatlanmış, backend API GET /api/v1/games/{game_id}/config-diff?type=paytable&from=...&to=... 200 OK döndü. ConfigDiffPanel.jsx component working correctly with proper diff visualization."
+
+  - task: "Diff selection rules"
+    implemented: true
+    working: true
+    file: "src/components/games/GamePaytableTab.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "P0-C config diff UI testing task for selection guard rules."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ DIFF SELECTION RULES WORKING: Selection guard kuralları doğru çalışıyor - 0 seçimde Compare Selected disabled=true, 1 seçimde disabled=true, 3 seçim yapıldığında sadece son 2 seçim kaldı (ilk seçim otomatik drop edildi). Checkbox selection logic ve Compare Selected button state management doğru implementasyonda. UI properly enforces exactly 2 selections for diff comparison."
+
+  - task: "No diff state for config-diff"
+    implemented: true
+    working: true
+    file: "src/components/games/ConfigDiffPanel.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "P0-C config diff UI testing task for empty diff state."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ NO DIFF STATE WORKING: ConfigDiffPanel içinde 'Bu iki versiyon arasında fark bulunamadı.' mesajı görüntüleniyor when no changes detected. Backend logic working correctly, UI properly handles empty diff scenarios, changes table render edilmiyor when no differences found."
+
+  - task: "Config diff UI error handling"
+    implemented: true
+    working: "NA"
+    file: "src/components/games/ConfigDiffPanel.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "P0-C config diff UI testing task for error handling scenarios."
+        -working: "NA"
+        -agent: "testing"
+        -comment: "ℹ️ ERROR HANDLING NOTED: Backend hatalarında toast mesajları görünmelidir (CONFIG_DIFF_VALIDATION_FAILED için 'Config diff parameters are invalid'), network hatalarında 'Config diff yüklenemedi.' genel mesajı görünmelidir. Error handling implementation present in code but not fully tested due to complexity of simulating network errors in current test environment."
+
+  - task: "Slot Advanced config diff UI"
+    implemented: true
+    working: "NA"
+    file: "src/components/games/GameSlotAdvancedTab.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "P0-C config diff UI testing task for slot advanced config diff."
+        -working: "NA"
+        -agent: "testing"
+        -comment: "⚠️ SLOT ADVANCED CONFIG DIFF PARTIAL: Advanced sekmesi mevcut, Advanced History kartı bulundu, GameSlotAdvancedTab.jsx component implemented with all required sections (Spin & Turbo, Autoplay, UX & Gamble, Advanced History), ConfigDiffPanel integration ready, ancak test sırasında yeterli advanced history oluşturulamadı (0 checkbox). Component structure correct for slot-advanced diff functionality."
+
+  - task: "Reel Strips config diff UI"
+    implemented: true
+    working: true
+    file: "src/components/games/GameReelStripsTab.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "P0-C config diff UI testing task for reel strips config diff."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ REEL STRIPS CONFIG DIFF UI WORKING: Reel Strips sekmesi çalışıyor, 10 checkbox bulundu (sufficient history), iki versiyon seçildi (force click to bypass overlay), Compare Selected aktif, ConfigDiffPanel açıldı, reel-strips diff dialogu tespit edildi (Config Diff – reel-strips), 1 değişiklik görüntülendi (reels[2][5]: WILD removed), field paths doğru formatlanmış (reels[2][5]), change types doğru (removed), backend API GET /api/v1/games/{game_id}/config-diff?type=reel-strips&from=...&to=... 200 OK. GameReelStripsTab.jsx and ConfigDiffPanel.jsx integration working perfectly."
+
+  - task: "Jackpots config diff UI"
+    implemented: false
+    working: "NA"
+    file: "src/components/games/GameJackpotsTab.jsx"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "P0-C config diff UI testing task for jackpots config diff (optional)."
+        -working: "NA"
+        -agent: "testing"
+        -comment: "ℹ️ JACKPOTS CONFIG DIFF UI NOT IMPLEMENTED: Jackpots sekmesi bulunamadı, Jackpots diff UI not implemented in this pass as noted in review request. Backend jackpots config-diff API available but frontend UI component not yet implemented."
+
 metadata:
   created_by: "main_agent"
   version: "2.1"
