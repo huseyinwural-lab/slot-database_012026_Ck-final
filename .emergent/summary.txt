@@ -1,30 +1,32 @@
 <analysis>**original_problem_statement:**
-The user's goal is to build a comprehensive, feature-rich admin panel for a casino operation. The primary focus is expanding the Game Management module with advanced configuration options for Poker, Blackjack, Slots, Crash, and Dice games.
+The user's goal is to build a comprehensive, feature-rich admin panel for a casino operation. The primary focus is on expanding the Game Management module, implementing a multi-tenant architecture, robust user authentication (RBAC), and automation tools like a Game Robot.
 
 **PRODUCT REQUIREMENTS (V1 Definition):**
-*   **P0-A: Crash & Dice Advanced Config Finalization (COMPLETED):** Fully implement, test (E2E), and document the Advanced Safety features for Crash and Advanced Limits for Dice.
-*   **P0-B: Slot Config Finalization (COMPLETED):** Ensure all Slot configuration tabs (General, RTP, Bets, Features, Paytable, Reels, Jackpots, Advanced) have a working E2E data round-trip (UI -> API -> DB -> UI).
-*   **P0-C: Minimum Version Diff Visibility (COMPLETED):** Implement a UI in the Logs/Versions view to show which configuration fields have changed between versions.
-*   **P0-D: Test Game Inventory (COMPLETED):** Ensure at least one test game exists for each core game type (Slot, Poker, Blackjack, Crash, Dice), marked with .
-*   **P0-E: Game Robot (MVP) (UPCOMING):** Create a minimal, script-based Game Robot to simulate gameplay on test games (Slot, Crash, Dice) to verify game logic and safety limits at the API level.
-*   **P0-F: Unity Integration Checklist (UPCOMING):** Create a markdown document outlining the step-by-step process for integrating a Unity game with the admin panel.
+*   **P0-A: Crash & Dice Advanced Config Finalization (COMPLETED):** Fully implement, test (E2E), and document Advanced Safety for Crash and Advanced Limits for Dice.
+*   **P0-B: Slot Config Finalization (COMPLETED):** Ensure all Slot configuration tabs have a working E2E data round-trip.
+*   **P0-C: Minimum Version Diff Visibility (COMPLETED):** Implement a UI to show which configuration fields have changed between versions.
+*   **P0-D: Test Game Inventory (COMPLETED):** Ensure at least one test game exists for each core game type.
+*   **P0-E: Game Robot (MVP) (COMPLETED):** Create a minimal, script-based Game Robot to simulate gameplay on test games (Slot, Crash, Dice).
+*   **P0-F: Unity Integration Checklist (UPCOMING):** Create a markdown document for integrating a Unity game.
 *   **P0-G: Admin Panel Runbook (UPCOMING):** Write a  (user manual) for operators.
-*   **P1: Hardening (DEFINED):** Define and validate a suite of negative edge-case tests for Jackpot, Blackjack, and Poker configurations.
+*   **P1: Hardening (DEFINED):** Define and validate a suite of negative edge-case tests.
+*   **NEW: FAZ 1/2/3... (Productization):** Implement multi-tenancy, granular RBAC, API key management, and full admin authentication.
 
 **User's preferred language**: **Turkish**. The next agent MUST respond in Turkish.
 
 **what currently exists?**
-A full-stack application (React/FastAPI/MongoDB) with a Game Management module.
-- **Advanced Configs:** Crash, Dice, and Slot advanced configurations are implemented with robust, centralized validation logic.
-- **Version Diffing:** A generic backend endpoint () and a reusable frontend component () have been implemented to show changes between configuration versions. This is integrated for Paytable, Reel Strips, and Slot Advanced tabs.
-- **Test Game Inventory:** Canonical test games ( and ) now exist for all core game types: SLOT, CRASH, DICE, REEL_LINES, TABLE_BLACKJACK, TABLE_POKER. This is documented in .
-- **Hardening Framework:** A declarative framework for running edge-case tests has been defined in  and a conceptual  has been created. The suites are defined but disabled by default.
+A full-stack application (React/FastAPI/MongoDB) with a Game Management module. Recent work has added significant new functionality:
+- **Game Robot:** A script () exists to simulate gameplay on test games. It is now tenant-aware.
+- **Client-Aware Imports:** A full-stack flow allows uploading and managing game clients (HTML5 vs. Unity), with dedicated backend models (), a new upload endpoint, and a frontend wizard.
+- **New Member Bonus:** A New Member Manual Bonus feature is fully implemented, including backend configuration models, GET/PUT endpoints, and a trigger mechanism that grants bonuses to new users. The frontend has a dedicated card in the Bonus Management section to configure this.
+- **Multi-Tenancy (Backend):** A  model (/ types, feature flags) and  endpoints are in place. Key data endpoints (, , ) now filter by tenant. A feature guard helper () has been implemented to restrict access based on tenant features.
+- **Multi-Tenancy (Frontend):** A  hook and a  have been created. The main layout () now conditionally renders menu items based on the tenant type (owner vs. renter).
 
 **Last working item**:
-    - **Last item agent was working:** The agent just completed two major user-defined phases: **P0-D (Test Game Inventory Finalization)** and **P1 (Hardening Suite Definition)**. This involved creating canonical test games for all missing s, ensuring they had baseline config coverage (including positive/negative tests), generating version history for them, and defining a series of  hardening test suites in a YAML file.
-    - **Status:** USER VERIFICATION PENDING
-    - **Agent Testing Done:** Y
-    - **Which testing method agent to use?** Manual verification by the user is required. The user should review the created documentation (, , ) and the updated  to confirm the completion of P0-D and the definition of P1.
+    - **Last item agent was working:** The agent was given a detailed roadmap and greenlit to begin implementation. The user approved the plan to start with **Görev 3 (RBAC - Role & Yetki Yönetimi)**, to be followed by **Görev 3b (Admin Auth & Şifre Yönetimi)**. The last user message was uygula (apply/implement), confirming this plan.
+    - **Status:** NOT STARTED
+    - **Agent Testing Done:** N/A
+    - **Which testing method agent to use?** Both (backend testing agent for APIs, frontend testing agent for UI flows). This is a large, critical feature.
     - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
@@ -34,104 +36,121 @@ A full-stack application (React/FastAPI/MongoDB) with a Game Management module.
     - **Is recurring issue?** Y
 
 **In progress Task List**:
-- None. The previous tasks (P0-D, P1) have been completed and are pending user review.
+- None.
 
 **Upcoming and Future Tasks**
-*   **Upcoming Tasks (P0-E, P0-F, P0-G):**
-    *   **P0-E: Game Robot (MVP):** Create a minimal script-based Game Robot to simulate gameplay on test games, using the  as a conceptual starting point.
-    *   **P0-F: Unity Integration Checklist:** Create the  document.
-    *   **P0-G: Admin Panel Runbook:** Create the  user manual.
-*   **Future Tasks (P1 / V1-After):**
-    *   **P1 - Enable Hardening Bot:** Implement the runner for the  defined in  to execute the tests defined in .
-    *   **Implement Blackjack/Poker Diff API:** The backend diff endpoint does not yet support  or . This was explicitly parked as future work.
-    *   **Safety UX v1:** Implement a preset bar (Conservative/Standard/Aggressive) and a risk indicator badge for Crash and Dice advanced settings.
-    -   **Slot - Paytable/Reels/Jackpots Preset Pattern:** Extend the preset system to these tabs.
-    -   **Manual Game Import expansion:** The import pipeline needs to be expanded to handle all new config types.
+*   **Upcoming Tasks (P0, Highest Priority):**
+    *   **Görev 3: RBAC (Rol & Yetki Yönetimi):** Implement a flexible Role-Based Access Control system.
+        *   **Backend:** Create  model, a  constant list, Role CRUD endpoints, and a  helper to guard routes.
+        *   **Frontend:** Create a Roller (Roles) management page with a creation form and permission checkboxes. Integrate role selection into the Admin Users page.
+    *   **Görev 3b: Admin Auth & Şifre Yönetimi:** Replace the dummy admin with a full authentication system.
+        *   **Auth Method:** JWT (Bearer token) with frontend storage.
+        *   **Password Policy:** Min. 8 chars, >=1 uppercase, >=1 number, >=1 special character.
+        *   **Backend:** Update  model (, etc.). Create all necessary auth endpoints (, , , ). Update the admin creation flow to support manual password and invite link modes.
+        - **Frontend:** Create login, change password, forgot password, and reset password pages.
+    *   **Görev 4: API Anahtarları (API Keys):** Implement a system for generating and managing scoped API keys, and integrate it with the Game Robot.
+    *   **Görev 5: Dokümantasyon (TR + EN + PDF):** Create comprehensive user manuals and technical checklists in Turkish and English, with PDF export capability.
+
+*   **Future Tasks (Backlog):**
+    *   P0-F: Unity Integration Checklist (creation failed, still pending).
+    *   P0-G: Admin Panel Runbook ( was updated but a full runbook is pending).
+    *   P1 - Enable Hardening Bot.
+    *   Implement Blackjack/Poker Diff API.
+    *   Refactor the large  and  files.
+    *   Player Management Overhaul.
+    *   Tenant-branding (logo, colors).
 
 **Completed work in this session**
-- **P0-B Finalized: Slot Configuration Tabs:** Ensured E2E data round-trip for Slot Advanced, Paytable, Reels, and Jackpots tabs, including fixing a minor UI overlay bug.
-- **P0-C Implemented: Version Diff UI:** Created a generic backend diff endpoint and a reusable frontend panel, and integrated it for Paytable, Reel Strips, and Slot Advanced history views.
-- **P0-D Implemented: Test Game Inventory:** Identified gaps and created canonical,  test games for , , and . Ensured all canonical games have baseline config coverage with positive/negative validation. Documented in .
-- **P1 Defined: Hardening Suites & Bot Skeleton:** Defined a declarative framework for edge-case tests in  and a conceptual bot runner registry in . Validated the edge cases via API calls.
+- **Görev 1 - Yeni Üye Manuel Bonus:** Implemented a full-stack feature for configuring and automatically triggering a manual bonus for new members.
+- **Görev 2 - Kiracı Yetkisi (Tenant / Renter Modeli):**
+  - **Backend (2.1, 2.2):** Implemented a multi-tenant architecture with  models, feature flags, data filtering on core endpoints, and a tenant-aware Game Robot.
+  - **Frontend (2.3):** Created a  for owner admins to manage tenants and updated the main layout to show/hide menus based on tenant type.
+- **Client-Aware Game Imports:** Added a full-stack flow to distinguish between HTML5 and Unity game clients during the import and upload process.
 
 **Earlier issues found/mentioned but not fixed**
-- **Jackpots Diff UI Integration:** The generic  has not been integrated into a Jackpots history view, as no such UI view exists yet. The backend API supports  for diffing.
-- **Manual Game Import expansion:** Remains unstarted.
-- **Player Management Overhaul:** Remains unstarted.
+   - **Jackpots Diff UI Integration:** The generic  has not been integrated into a Jackpots history view, as no such UI view exists yet.
+   - **Manual Game Import expansion:** While client-awareness was added, a broader expansion to handle all config types is unstarted.
+   - **Player Management Overhaul:** Unstarted.
 
 **Known issue recurrence from previous fork**
-  - **Fragile :** This large file was further expanded with the generic diffing logic, increasing the refactoring need. A full refactor into smaller, game-specific router files is still a future task.
+  - **Fragile :** This large file continues to grow, making it a prime candidate for refactoring into smaller, more focused routers.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Test Data as a Foundation (P0-D):** The principle of having a canonical, well-configured test game for every  is now fully implemented and documented. All future development and testing should leverage these games.
-- **Declarative Hardening Suites (P1):** A new pattern of defining test scenarios in a YAML file () with an  flag. This separates test *definition* from *execution*.
-- **Generic Diff Endpoint:** A single endpoint () now handles diffing for multiple configuration types, powered by a recursive diffing function.
-- **Type-Agnostic UI Component:**  is designed to display diffs for any config type, promoting reusability.
+- **Multi-Tenancy:** The application now supports  and  tenants. Data access is filtered by , and feature access is controlled by a  dictionary on the  model.
+- **Feature Guarding:** A backend helper () protects endpoints, raising a 403 error if a tenant's feature flag is disabled.
+- **Event-Driven Bonus Trigger:** A New Member Bonus is granted via event endpoints (, ), which call an idempotent trigger function.
+- **Client-Aware Asset Management:** The system can distinguish between  and  game clients during upload and stores this information in the  model's  field.
 
 **key DB schema**
-  - ** collection:** Now contains canonical test games for , , , , , and , all marked with  and .
-  - ** & :** Now have version history for their respective canonical test games.
+  - ** (NEW):** 
+  - **:** Now stores  configuration.
+  - **, , :** Now have a  field for data segregation.
+  - **:** Updated to include . Will be further extended for RBAC and Auth.
 
 **changes in tech stack**
-  - None.
+  -  will be added as a backend dependency for password hashing.
 
 **All files of reference**
--  (Definitive source for test games)
--  (Defines P1 hardening tests)
--  (Defines conceptual bot structure)
--  (Contains core logic for all configs and the new diff endpoint)
--  (Contains all game and config-related Pydantic models)
--  (The reusable diff UI)
-- 
-- 
-- 
+-  (New Tenant model)
+-  (New Tenant API)
+-  (Tenant ID helper)
+-  (Feature guard helper)
+-  (Heavily modified for filtering and bonus trigger)
+-  (Modified to be tenant-aware)
+-  (New Tenant management UI)
+-  (Modified for conditional menu rendering)
+-  (New Bonus UI)
 
 **Areas that need refactoring**:
--  is critically large and complex. It should be broken down into separate routers per game type or config module.
+-  is critically large.
+-  is also becoming bloated with bonus triggers and various list endpoints. It should be split into smaller, domain-specific routers (e.g., , ).
 
 **key api endpoints**
--  (NEW)
--  (Used for P0-D)
--  (Used for P0-D)
+- 
+- 
+- 
+- 
+- 
+- 
+-  (Modified to be client-aware)
 
 **Critical Info for New Agent**
 - **You MUST interact with the user exclusively in Turkish.**
-- The project is following a phased V1 plan. P0-A, P0-B, P0-C, and P0-D are complete. P1 has been defined.
-- The next tasks are **P0-E (Game Robot), P0-F (Unity Checklist), and P0-G (Runbook)**.
-- All testing and development **must** use the canonical test games defined in .
-- The user's last message () appears to be a duplicate of a previous instruction () that the agent already acted on. The agent should proceed based on the work already completed and summarized in , and move on to the next phase (P0-E, F, G).
+- The project is being developed in phases. Faz 1 (Bonus) and Faz 2 (Tenant Model) are now complete.
+- The next set of tasks are **Görev 3 (RBAC)** and **Görev 3b (Admin Auth & Şifre Yönetimi)**. These are the highest priorities.
+- The user has approved a **JWT-based** authentication model.
+- The password policy is strict: **min. 8 characters, >=1 uppercase, >=1 number, >=1 special character.**
+- Start by implementing the RBAC backend, then the Admin Auth backend, before moving to the frontend UI for both.
 
 **documents created in this job**
-  - 
-  - 
-  - 
+  - None. Attempts to create  failed due to tool usage errors. This remains a pending task.
 
 **Last 10 User Messages and any pending user messages**
-- **User (msg 340, 350):** Provides detailed instructions for Görev 3 (creating missing test games) and Görev 4 (ensuring config coverage for them). (Status: Completed)
-- **User (msg 380):** Provides detailed instructions for Görev 5 (creating history for test games) and Görev 6 (updating documentation to close out P0-D). Also defines the tasks for P1 Hardening. (Status: Completed)
-- **User (msg 413):** Provides a more detailed version of the P0-D and P1 tasks, seemingly re-iterating the previous instructions. (Status: Completed)
-- **User (msg 421):** Provides another, near-identical set of instructions for P1 Hardening. This is likely a re-submission or platform glitch and should be disregarded as the agent has already completed this work. (Status: Should be Ignored)
+- The user has been providing extremely detailed, multi-part Görev (Task) definitions.
+- The last several messages confirmed the roadmap, approved the plan for RBAC and Admin Auth, and provided the final uygula (apply) command to start work. There are no pending user questions.
 
 **Project Health Check:**
-- **Healthy:** The application is stable and the test data foundation is very strong.
-- **Mocked:** No components are mocked.
+- **Healthy:** Core features are functional and tested.
 - **Broken:** None.
+- **Mocked:** The  context is still mocked. The next major task (Admin Auth) will replace this.
 
 **3rd Party Integrations**
 - **OpenAI GPT-4o:** Used for fraud detection risk analysis via . Uses Emergent LLM Key.
 - **recharts:** Used for data visualization.
+- **bcrypt:** To be added for password hashing.
 
 **Testing status**
-  - **Testing agent used after significant changes:** YES, for the Slot config tabs (P0-B). The agent used extensive API and DB checks for P0-C and P0-D.
+  - **Testing agent used after significant changes:** YES.  and  were used extensively for the Bonus, Tenant, and Client-Aware features.
   - **Troubleshoot agent used after agent stuck in loop:** NO.
-  - **Test files created:** None.
+  - **Test files created:** None. Test execution was done via sub-agents interpreting test plans.
   - **Known regressions:** None.
 
 **Credentials to test flow:**
-- No credentials required. All testing should be performed on the canonical test games listed in .
+- None currently. After the Admin Auth task, new credentials will need to be created and used.
 
 **What agent forgot to execute**
-- The agent has been very thorough in executing the user's phased plan. No tasks have been forgotten. The explicit decision was made to defer the  and  diff API and the Jackpots diff UI to a future phase.</analysis>
+- The entire Admin Authentication flow (Görev 3b / FAZ X) was not implemented and was brought up by the user. It is now the next major priority after RBAC.
+- The creation of  failed and was not corrected.</analysis>
