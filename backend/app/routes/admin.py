@@ -280,11 +280,12 @@ async def seed_admin():
     # Always seed fresh data for demo
     admin_count = await db.admins.count_documents({})
     
+    # Default demo passwords (development/demo only):
+    # admin@casino.com / Admin123!
+    password_hash = get_password_hash("Admin123!")
+    
     # Create admin users
     if admin_count == 0:
-        # Default demo passwords (development/demo only):
-        # admin@casino.com / Admin123!
-        password_hash = get_password_hash("Admin123!")
         admin_users = [
             AdminUser(username="superadmin", email="admin@casino.com", full_name="Super Admin", role="Super Admin", password_hash=password_hash),
             AdminUser(username="manager1", email="manager@casino.com", full_name="Ahmet Yılmaz", role="Manager", password_hash=password_hash),
@@ -294,12 +295,14 @@ async def seed_admin():
             await db.admins.insert_one(admin.model_dump())
     else:
         # Ensure admin@casino.com has correct password for testing
-        password_hash = get_password_hash("Admin123!")
         await db.admins.update_one(
             {"email": "admin@casino.com"},
             {"$set": {"password_hash": password_hash}},
             upsert=True
         )
+        # Get existing admin users for activity logs
+        existing_admins = await db.admins.find().to_list(100)
+        admin_users = [AdminUser(**admin) for admin in existing_admins]
         
         # Seed activity logs for all admins
         activity_logs = [
