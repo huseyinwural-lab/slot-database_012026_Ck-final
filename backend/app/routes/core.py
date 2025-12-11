@@ -66,11 +66,11 @@ async def get_players(
     search: Optional[str] = None,
     vip_level: Optional[int] = None,
     risk_score: Optional[str] = None,
-    country: Optional[str] = None
+    country: Optional[str] = None,
+    current_admin: AdminUser = Depends(get_current_admin),
 ):
     db = get_db()
-    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
-    tenant_id = get_current_tenant_id(request, dummy_admin)
+    tenant_id = get_current_tenant_id(request, current_admin)
 
     query = {"tenant_id": tenant_id}
     if status and status != "all":
