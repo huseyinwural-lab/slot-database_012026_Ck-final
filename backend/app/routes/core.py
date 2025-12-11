@@ -416,8 +416,10 @@ async def get_games(
     
     if rtp_min or rtp_max:
         query["configuration.rtp"] = {}
-        if rtp_min: query["configuration.rtp"]["$gte"] = rtp_min
-        if rtp_max: query["configuration.rtp"]["$lte"] = rtp_max
+        if rtp_min:
+            query["configuration.rtp"]["$gte"] = rtp_min
+        if rtp_max:
+            query["configuration.rtp"]["$lte"] = rtp_max
         
     if country:
         # Check if country allowed (mock logic: if not in blocked)
