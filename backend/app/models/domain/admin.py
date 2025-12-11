@@ -86,12 +86,15 @@ class AdminInvite(BaseModel):
 
 class AdminAPIKey(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    owner_id: str # Admin or Team ID
-    key_prefix: str # "sk_..."
-    permissions: List[str] = []
-    status: str = "active"
+    owner_admin_id: str  # AdminUser.id
+    tenant_id: str
+    name: str
+    key_prefix: str
+    key_hash: str
+    scopes: List[str] = []
+    active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    last_used: Optional[datetime] = None
+    last_used_at: Optional[datetime] = None
 
 # --- NEW CRITICAL ADMIN MODELS ---
 
