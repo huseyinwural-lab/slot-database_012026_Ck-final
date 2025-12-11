@@ -67,6 +67,7 @@ Casino lobisinin yönetildiği alandır.
 *   **Oyun Listesi:** Tüm oyunlar, sağlayıcılar, RTP oranları.
 *   **Oyun Düzenleme:** Oyunun adı, kategorisi, görselleri ve aktiflik durumu.
 *   **Oyun İstemcisi (Client) Yönetimi:** HTML5 ve Unity WebGL oyun istemcilerinin yüklenmesi ve güncellenmesi. Client upload ekranında girilen **launch_url** ve **min_version** alanları, ilgili `client_variants[client_type]` kaydına yazılır; daha önce manual import sırasında üretilmiş default değerler bu alanlarla override edilir.
+*   **Yeni Üye Bonusları:** "Yeni Üye Manuel Bonus" kartı üzerinden, allowed_game_ids / spin_count / fixed_bet_amount / total_budget_cap / validity_days parametreleriyle yeni oyuncular için otomatik bonus kurgulayabilirsiniz. Bu bonus, kullanıcı ilk kayıt olduğunda veya ilk giriş yaptığında otomatik atanır ve aynı kullanıcıya birden fazla kez verilmez.
 *   **Kategori Yönetimi:** "Popüler", "Yeni", "Slotlar" gibi lobi kategorilerini düzenleme.
 
 ---
