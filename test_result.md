@@ -33,6 +33,21 @@ tenant_model_endpoints_seed:
         -agent: "testing"
         -comment: "✅ TENANT HELPER VALIDATION - ALL SMOKE TESTS PASSED: Test 1) GET /api/v1/games (header yok): 100 oyun döndü, tenant_id='default_casino' kullanıldı. Test 2) GET /api/v1/games (X-Tenant-ID: demo_renter): 0 oyun döndü, tenant_id='demo_renter' kullanıldı - tenant filtering çalışıyor (farklı sonuç sayıları). Test 3) GET /api/v1/players (header yok): 100 oyuncu döndü, tenant_id='default_casino' kullanıldı. Test 4) GET /api/v1/players (X-Tenant-ID: demo_renter): 0 oyuncu döndü, tenant_id='demo_renter' kullanıldı - tenant filtering çalışıyor (farklı sonuç sayıları). Test 5) GET /api/v1/tenants (regresyon): 3 tenant bulundu, default_casino ve demo_renter mevcut. get_current_tenant_id() helper fonksiyonu doğru çalışıyor: header X-Tenant-ID > admin.tenant_id > 'default_casino' öncelik sırası ile tenant_id seçimi yapıyor. Oyun ve oyuncu endpoint'leri tenant filtresi ile sorunsuz çalışıyor."
 
+  - task: "Tenant Backend Package 2.1.3-2.1.5 - Turkish Review Request"
+    implemented: true
+    working: true
+    file: "backend/app/routes/core.py, backend/app/utils/tenant.py, backend/app/utils/features.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "NewMemberManualBonus ticket'ları artık tenant_id içeriyor (player.tenant_id üzerinden). Bonus kampanyaları (/api/v1/bonuses GET/POST) tenant-aware: GET /api/v1/bonuses → tenant_id filtresi ile çalışıyor, POST /api/v1/bonuses → bonus dokümanına tenant_id ekleniyor. Games & Players endpoint'leri tenant-aware hale getirildi. Helper'lar: get_current_tenant_id(request, admin) (X-Tenant-ID > admin.tenant_id > default_casino), ensure_tenant_feature(request, admin, feature_key) → TENANT_NOT_FOUND veya TENANT_FEATURE_DISABLED döndürüyor. İzin kısıtları: PUT /api/v1/bonus/config/new-member-manual → can_manage_bonus zorunlu, POST /api/v1/games/{id}/config/slot-advanced → can_edit_configs zorunlu."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TENANT BACKEND PACKAGE 2.1.3-2.1.5 - ALL TESTS PASSED (15/15 - 100% success rate): Senaryo 1) Setup/Seed: Tenants (default_casino, demo_renter) mevcut ve doğru yapılandırılmış. Senaryo 2) default_casino context (header yok): GET /api/v1/games → 100 oyun, GET /api/v1/players → 100 oyuncu, GET /api/v1/bonuses → 0 bonus döndü. GET/PUT /api/v1/bonus/config/new-member-manual → 200 OK (can_manage_bonus=true). POST /api/v1/games/{id}/config/slot-advanced → 200 OK (can_edit_configs=true). Senaryo 3) demo_renter context (X-Tenant-ID: demo_renter): GET /api/v1/games → 0 oyun, GET /api/v1/players → 0 oyuncu, GET /api/v1/bonuses → 0 bonus döndü (tenant filtering çalışıyor). PUT /api/v1/bonus/config/new-member-manual → 200 OK (can_manage_bonus=true). Slot-advanced test edilemedi (demo_renter'da oyun yok). Senaryo 4) Regresyon: GET /api/v1/tenants → 3 tenant listeleniyor (default_casino, demo_renter mevcut). new_member_manual trigger akışı: config enabled, player registered/first-login events → 200 OK. TENANT_FEATURE_DISABLED durumunda doğru detail yapısı döndürülüyor. demo_renter context'inde default_casino verileri görünmüyor (tenant isolation çalışıyor). Tüm senaryolar PASS."
+
 p0_d_test_game_inventory:
   - task: "Test Game Inventory Matrix"
     implemented: true
