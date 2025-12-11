@@ -11775,6 +11775,9 @@ def main():
     # Run all tests
     test_results = []
     
+    print("\n🔐 JWT ADMIN AUTH & PASSWORD MANAGEMENT TESTS - TURKISH REVIEW REQUEST")
+    test_results.append(("JWT Admin Auth & Password Management", tester.test_jwt_auth_comprehensive()))
+    
     print("\n🏢 TENANT MODEL + ENDPOINTS + SEED TESTS - Görev 2.1.1")
     test_results.append(("Tenant Model + Endpoints + Seed", tester.test_tenant_model_endpoints_seed()))
     
