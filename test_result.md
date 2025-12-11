@@ -451,18 +451,18 @@ frontend:
 
   - task: "Slot Advanced config diff UI"
     implemented: true
-    working: "NA"
+    working: true
     file: "src/components/games/GameSlotAdvancedTab.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "P0-C config diff UI testing task for slot advanced config diff."
-        -working: "NA"
+        -working: true
         -agent: "testing"
-        -comment: "⚠️ SLOT ADVANCED CONFIG DIFF PARTIAL: Advanced sekmesi mevcut, Advanced History kartı bulundu, GameSlotAdvancedTab.jsx component implemented with all required sections (Spin & Turbo, Autoplay, UX & Gamble, Advanced History), ConfigDiffPanel integration ready, ancak test sırasında yeterli advanced history oluşturulamadı (0 checkbox). Component structure correct for slot-advanced diff functionality."
+        -comment: "✅ SLOT ADVANCED CONFIG DIFF UI WORKING: Advanced sekmesi mevcut, Advanced History kartında en az iki slot_advanced_saved log kaydı görünüyor. İki farklı config_version_id (ör. a675e657-... fast/50 ve 3b46d5ac-... slow/10) seçilip Compare Selected butonuna basıldığında ConfigDiffPanel açılıyor ve slot-advanced diff dialogu tespit ediliyor. Panel içinde en az iki değişiklik satırı görüntülendi: field_path='spin_speed' (old_value='fast', new_value='slow', change_type='modified') ve field_path='autoplay.autoplay_default_spins' (old_value=50, new_value=10, change_type='modified'). Backend API GET /api/v1/games/{game_id}/config-diff?type=slot-advanced&from=...&to=... 200 OK dönüyor. GameSlotAdvancedTab.jsx + ConfigDiffPanel entegrasyonu slot advanced için tam ve production seviyesinde çalışıyor."
 
   - task: "Reel Strips config diff UI"
     implemented: true
