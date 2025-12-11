@@ -14,7 +14,7 @@ def test_tenant_endpoints():
     print(f"\n🔍 Step 1: GET current tenants list")
     
     try:
-        response = requests.get(f"{base_url}/api/v1/tenants", timeout=30)
+        response = requests.get(f"{base_url}/api/v1/tenants/", timeout=30)
         print(f"GET /api/v1/tenants - Status: {response.status_code}")
         
         if response.status_code != 200:
