@@ -618,6 +618,100 @@ async def get_tickets():
 async def reply_ticket(ticket_id: str, message: TicketMessage):
     db = get_db()
     await db.tickets.update_one(
+
+
+# --- NEW MEMBER MANUAL BONUS SERVICE ---
+from app.models.domain.settings import NewMemberManualBonusConfig
+
+
+async def maybe_grant_new_member_manual_bonus(user_id: str):
+    db = get_db()
+
+    cfg_doc = await db.platform_settings.find_one({"key": "new_member_manual_bonus"}, {"_id": 0})
+    cfg = NewMemberManualBonusConfig(**(cfg_doc.get("config", {}) if cfg_doc else {}))
+
+    if not cfg.enabled:
+        logger.info(
+            "NEW_MEMBER_BONUS_SKIPPED",
+            extra={"user_id": user_id, "reason": "config_disabled"},
+        )
+        return
+
+    if not cfg.allowed_game_ids:
+        logger.info(
+            "NEW_MEMBER_BONUS_SKIPPED",
+            extra={"user_id": user_id, "reason": "no_games_configured"},
+        )
+        return
+
+    if cfg.spin_count <= 0 or cfg.fixed_bet_amount <= 0:
+        logger.info(
+            "NEW_MEMBER_BONUS_SKIPPED",
+            extra={"user_id": user_id, "reason": "invalid_config_values"},
+        )
+        return
+
+    player_doc = await db.players.find_one({"id": user_id})
+    if not player_doc:
+        logger.info(
+            "NEW_MEMBER_BONUS_SKIPPED",
+            extra={"user_id": user_id, "reason": "player_not_found"},
+        )
+        return
+
+    if not player_doc.get("is_new", True):
+        logger.info(
+            "NEW_MEMBER_BONUS_SKIPPED",
+            extra={"user_id": user_id, "reason": "not_new_user"},
+        )
+        return
+
+    existing = await db.bonus_tickets.count_documents(
+        {"user_id": user_id, "type": "new_member_manual", "status": {"$in": ["pending", "active"]}}
+    )
+    if existing > 0:
+        logger.info(
+            "NEW_MEMBER_BONUS_SKIPPED",
+            extra={"user_id": user_id, "reason": "already_granted"},
+        )
+        return
+
+    estimated_total = cfg.spin_count * cfg.fixed_bet_amount
+    if cfg.total_budget_cap > 0 and estimated_total > cfg.total_budget_cap:
+        estimated_total = cfg.total_budget_cap
+
+    expires_at = datetime.now(timezone.utc) + timedelta(days=cfg.validity_days)
+
+    ticket = {
+        "id": str(uuid4()),
+        "type": "new_member_manual",
+        "user_id": user_id,
+        "allowed_game_ids": cfg.allowed_game_ids,
+        "spin_count": cfg.spin_count,
+        "bet_amount": cfg.fixed_bet_amount,
+        "total_budget_cap": cfg.total_budget_cap,
+        "estimated_total_value": estimated_total,
+        "expires_at": expires_at,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc),
+    }
+
+    await db.bonus_tickets.insert_one(ticket)
+
+    # Kullanıcı artık yeni değil kabul edilebilir
+    await db.players.update_one({"id": user_id}, {"$set": {"is_new": False}})
+
+    logger.info(
+        "NEW_MEMBER_BONUS_GRANTED",
+        extra={
+            "user_id": user_id,
+            "ticket_id": ticket["id"],
+            "spin_count": cfg.spin_count,
+            "fixed_bet_amount": cfg.fixed_bet_amount,
+            "total_budget_cap": cfg.total_budget_cap,
+        },
+    )
+
         {"id": ticket_id}, 
         {
             "$push": {"messages": message.model_dump()},
