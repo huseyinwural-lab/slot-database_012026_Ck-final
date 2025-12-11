@@ -1002,9 +1002,9 @@ async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, requ
 
     # Advanced limits validation (global)
     for fname in ["max_win_per_bet", "max_loss_per_bet", "max_session_loss"]:
-        resp = _validate_positive_or_none(fname, getattr(payload, fname), _dice_math_error)
-        if resp is not None:
-            return resp
+        _, err = _validate_positive_or_none(fname, getattr(payload, fname), _dice_math_error)
+        if err is not None:
+            return err
 
     if payload.max_session_bets is not None and payload.max_session_bets <= 0:
         return JSONResponse(
