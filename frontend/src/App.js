@@ -25,6 +25,7 @@ import { SystemLogs } from './pages/SystemLogs';
 import { AdminManagement } from './pages/AdminManagement';
 import SettingsPanel from './pages/SettingsPanel';
 import TenantsPage from './pages/TenantsPage';
+import Login from './pages/Login';
 import { Toaster } from 'sonner';
 
 function App() {
