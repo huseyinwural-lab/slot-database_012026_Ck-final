@@ -31,10 +31,12 @@ const GameManagement = () => {
   const [importJob, setImportJob] = useState(null);
   const [importItems, setImportItems] = useState([]);
 
-  const fetchAll = async () => {
+  const fetchAll = async (category = 'all') => {
     try {
       const [gamesRes, tablesRes] = await Promise.all([
-        api.get('/v1/games'),
+        api.get('/v1/games', {
+          params: category && category !== 'all' ? { category } : {},
+        }),
         api.get('/v1/tables'),
       ]);
       setGames(gamesRes.data || []);
