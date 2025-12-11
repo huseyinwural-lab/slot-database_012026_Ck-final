@@ -180,6 +180,21 @@ backend:
         -agent: "testing"
         -comment: "✅ DICE ADVANCED LIMITS UI ROUND-TRIP VE E2E DOĞRULAMA COMPLETE - All Turkish review request scenarios successfully tested and working: Ön koşul: Test Dice Game (Advanced Limits QA) successfully found and accessible via Dice category filter in /games page. Senaryo 1 - Global limits happy-path round-trip: Advanced Limits (global) fields (max_win_per_bet=200, max_loss_per_bet=100, max_session_loss=1000, max_session_bets=500, enforcement_mode=hard_block) successfully filled and saved with 'Dice math config kaydedildi' success toast. Round-trip verification confirmed all values preserved correctly after modal close/reopen. Senaryo 2 - TR override round-trip: Country Overrides JSON textarea accepts TR-specific limits (max_session_loss=800, max_win_per_bet=150) correctly, saves successfully, and preserves values in prettified JSON format after round-trip test. Senaryo 3 - Bozuk JSON davranışı: Invalid JSON (missing closing brace) properly handled with client-side validation showing error message, preventing malformed data submission. All UI components functional: GameDiceMathTab.jsx properly integrated with GameConfigPanel.jsx, Dice Math tab appears correctly for DICE games, all form fields editable and responsive, API integrations working (GET/POST /api/v1/games/{game_id}/config/dice-math), data persistence verified through multiple round-trip tests. The Dice Advanced Limits UI flow is fully operational and ready for production use."
 
+  - task: "Implement MVP config version diff backend for game configs"
+    implemented: true
+    working: true
+    file: "app/routes/game_config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented config version diff endpoint: GET /api/v1/games/{game_id}/config-diff?type={slot-advanced|paytable|reel-strips|jackpots}&from={config_version_id}&to={config_version_id} with comprehensive diff logic for all supported config types."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ CONFIG VERSION DIFF BACKEND MVP - ALL TESTS PASSED: 1) Slot Advanced diff working perfectly - detected all expected primitive field changes: spin_speed (fast→slow), autoplay_default_spins (25→10), autoplay_max_spins (200→50), plus additional changes (autoplay_stop_on_balance_drop_percent, autoplay_stop_on_big_win, big_win_animation_enabled). All changes properly marked as 'modified' with correct old/new values. 2) Paytable diff working - detected 10 changes including lines (20→25), symbol structure changes (code→symbol field), and pays modifications for both A and K symbols. Field paths correctly formatted (symbols[0].pays.4, symbols[1].pays.5, etc.). 3) Reel Strips diff working - detected symbol additions to reel 2: reels[2][5] added 'WILD' symbol, plus layout structure changes. Change types correctly identified (added, modified, removed). 4) Jackpots diff working - detected contribution_percent change (1.5→2.0) plus field name changes (name→jackpot_name, seed→seed_amount, cap→cap_amount). All changes properly categorized with correct field paths. 5) Error scenarios working perfectly: Invalid type 'foo' returns 400 with error_code='CONFIG_DIFF_VALIDATION_FAILED' and reason='type_not_supported'. Non-existent config_version_id returns 400 with error_code='CONFIG_DIFF_VALIDATION_FAILED' and reason='version_not_found'. All response structures match specification with game_id, config_type, from_config_version_id, to_config_version_id, and changes array. The config-diff endpoint is fully functional and ready for production use."
+
   - task: "Dice Advanced Limits UI Round-trip & E2E Validation"
     implemented: true
     working: true
