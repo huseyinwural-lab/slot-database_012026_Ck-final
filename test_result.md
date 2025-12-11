@@ -2,6 +2,22 @@ user_problem_statement:
   summary: "Phase 1: Financial Integrity & Security Update"
 backend:
 
+tenant_model_endpoints_seed:
+  - task: "Tenant Model + Koleksiyon + Endpointler + Seed backend testi"
+    implemented: true
+    working: true
+    file: "backend/app/models/tenant.py, backend/app/routes/tenant.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Tenant model ve router eklendi: GET/POST /api/v1/tenants/ endpointleri, seed_default_tenants fonksiyonu ile default_casino (owner) ve demo_renter (renter) seed verileri."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TENANT MODEL + ENDPOINTS + SEED - ALL TESTS PASSED: Senaryo A) Seed sonrası listeleme: GET /api/v1/tenants/ endpoint çalışıyor, default_casino (id='default_casino', type='owner', tüm features=true) ve demo_renter (id='demo_renter', type='renter', can_use_game_robot=true, can_manage_bonus=true, can_edit_configs=false, can_view_reports=true) seed verileri doğru şekilde oluşturuldu ve listeleniyor. Senaryo B) Yeni renter create: POST /api/v1/tenants/ ile 'QA Renter 1' adında yeni renter başarıyla oluşturuldu (UUID id, type='renter', features doğru), response yapısı tam (id, name, type, features, created_at, updated_at), yeni tenant GET listesinde görünüyor. Tenant router'ın doğru şekilde çalıştığı, seed verilerinin beklendiği gibi oluştuğu, yeni renter oluşturmanın sorunsuz ve idempotent olduğu doğrulandı. Endpoint URL'leri trailing slash ile çalışıyor (/api/v1/tenants/)."
+
 p0_d_test_game_inventory:
   - task: "Test Game Inventory Matrix"
     implemented: true
