@@ -499,6 +499,21 @@ api_keys_backend:
         -agent: "testing"
         -comment: "✅ CRASH ADVANCED SAFETY BACKEND E2E TESTS COMPLETE - All Turkish review request scenarios verified and working perfectly: Ön koşul: Successfully found Test Crash Game (Advanced Safety QA) with ID 52ba0d07-58ab-43c1-8c6d-8a3b2675a7a8 from /api/v1/games?category=Crash. Senaryo 1: GET /api/v1/games/{game_id}/config/crash-math returns 200 OK with existing configuration (config_version_id present, all required fields present). Senaryo 2: POST crash-math with full payload including advanced safety fields (max_loss_per_round=50.0, max_win_per_round=500.0, max_total_loss_per_session=1000.0, max_total_win_per_session=5000.0, enforcement_mode='hard_block') and TR country overrides (max_total_loss_per_session=800.0, max_loss_per_round=40.0) returns 200 OK with proper CrashMathConfig response structure. Round-trip GET verification confirms all values preserved correctly. Senaryo 3: Invalid enforcement_mode='invalid_mode' returns 400 with error_code='CRASH_MATH_VALIDATION_FAILED', details.field='enforcement_mode', details.reason='unsupported_enforcement_mode'. Senaryo 4: max_total_loss_per_session=0 returns 400 with error_code='CRASH_MATH_VALIDATION_FAILED', details.field='max_total_loss_per_session', details.reason='must_be_positive'. Senaryo 5: Invalid country code 'TUR' returns 400 with error_code='CRASH_MATH_VALIDATION_FAILED', details.field='country_overrides', details.reason='invalid_country_code'. Senaryo 6: Negative override value (-10) returns 400 with error_code='CRASH_MATH_VALIDATION_FAILED', details.field='country_overrides.TR.max_total_loss_per_session', details.reason='must_be_positive'. All endpoints return proper status codes and error structures exactly as specified in the Turkish review request."
 frontend:
+  - task: "FAZ 4 API Keys UI Frontend Testing - Turkish Review Request"
+    implemented: true
+    working: false
+    file: "frontend/src/pages/APIKeysPage.jsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "API Keys frontend page implemented with full UI components for list rendering, creation dialog, scope selection, and toggle functionality."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ CRITICAL FRONTEND ISSUE: API Keys sayfası erişilebilir (/api-keys route çalışıyor) ancak sayfa içeriği yüklenmiyor. Sayfa {'detail':'Not Found'} JSON response döndürüyor, React component render olmuyor. Login başarılı (admin@casino.com/Admin123!), dashboard erişilebilir, diğer sayfalar (/players, /games, /bonuses) çalışıyor ancak /api-keys sayfasında sadece boş sayfa ve JSON error response görünüyor. Backend API Keys endpoints çalışıyor (test_result.md'de doğrulandı) ancak frontend component yüklenmesi sorunu var. Muhtemel nedenler: 1) APIKeysPage component import/export sorunu, 2) Route configuration sorunu, 3) Component render hatası, 4) Build/bundle sorunu. Test senaryoları (liste render, yeni key oluşturma, secret tek seferlik gösterim, toggle davranışı) component yüklenmediği için test edilemedi."
+
   - task: "Frontend Tenant Görünümü + Tenants Sayfası UI Testleri - Görev 2.3"
     implemented: true
     working: true
