@@ -23,6 +23,7 @@ import { Reports } from './pages/Reports';
 import { SystemLogs } from './pages/SystemLogs';
 import { AdminManagement } from './pages/AdminManagement';
 import SettingsPanel from './pages/SettingsPanel';
+import TenantsPage from './pages/TenantsPage';
 import { Toaster } from 'sonner';
 
 function App() {
