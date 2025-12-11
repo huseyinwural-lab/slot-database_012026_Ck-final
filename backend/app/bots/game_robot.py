@@ -216,7 +216,7 @@ def run_dice_scenario(client: HttpClient, rounds: int) -> ScenarioResult:
 def parse_args(argv: List[str]) -> Dict[str, Any]:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Deterministic Game Robot (Slot/Crash/Dice)")
+    parser = argparse.ArgumentParser(description="Casino Game Robot - Thin CLI (calls /api/v1/robot/round)")
     parser.add_argument(
         "--game-types",
         type=str,
