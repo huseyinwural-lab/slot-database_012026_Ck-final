@@ -9751,6 +9751,9 @@ def main():
     print("\n🔄 CONFIG VERSION DIFF BACKEND MVP TESTS (REVIEW REQUEST - P0-C)")
     test_results.append(("Config Version Diff Backend MVP", tester.test_config_version_diff_backend_mvp()))
     
+    print("\n📤 CLIENT UPLOAD FLOW TESTS (TURKISH REVIEW REQUEST)")
+    test_results.append(("Client Upload Flow", tester.test_client_upload_flow()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
