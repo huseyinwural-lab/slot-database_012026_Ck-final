@@ -1496,6 +1496,296 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4
 
+    def _test_game_robot_default_casino(self):
+        """Test Game Robot with default_casino tenant (successful run)"""
+        print("   🎯 Testing default_casino tenant successful run...")
+        
+        import subprocess
+        import os
+        
+        # Change to backend directory and run the game robot
+        cmd = [
+            "python", "-m", "app.bots.game_robot",
+            "--tenant-id", "default_casino",
+            "--rounds", "1",
+            "--game-types", "slot"
+        ]
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd="/app/backend",
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            print(f"      Exit code: {result.returncode}")
+            print(f"      STDOUT: {result.stdout}")
+            if result.stderr:
+                print(f"      STDERR: {result.stderr}")
+            
+            # Check expected outputs
+            success_checks = []
+            
+            # Check exit code (should be 0 for success)
+            if result.returncode == 0:
+                print("      ✅ Exit code 0 (success)")
+                success_checks.append(True)
+            else:
+                print(f"      ❌ Exit code {result.returncode} (expected 0)")
+                success_checks.append(False)
+            
+            # Check for tenant permission message
+            if "TENANT_CAN_USE_GAME_ROBOT: default_casino" in result.stdout:
+                print("      ✅ TENANT_CAN_USE_GAME_ROBOT message found")
+                success_checks.append(True)
+            else:
+                print("      ❌ TENANT_CAN_USE_GAME_ROBOT message not found")
+                success_checks.append(False)
+            
+            # Check for GameRobot base URL log
+            if "[GameRobot] BASE_URL=" in result.stdout and "tenant_id=default_casino" in result.stdout:
+                print("      ✅ GameRobot BASE_URL and tenant_id log found")
+                success_checks.append(True)
+            else:
+                print("      ❌ GameRobot BASE_URL and tenant_id log not found")
+                success_checks.append(False)
+            
+            # Check for SLOT scenario execution
+            if "[SLOT]" in result.stdout:
+                print("      ✅ SLOT scenario execution found")
+                success_checks.append(True)
+            else:
+                print("      ❌ SLOT scenario execution not found")
+                success_checks.append(False)
+            
+            return all(success_checks)
+            
+        except subprocess.TimeoutExpired:
+            print("      ❌ Game robot execution timed out")
+            return False
+        except Exception as e:
+            print(f"      ❌ Game robot execution error: {str(e)}")
+            return False
+
+    def _test_game_robot_demo_renter_disabled(self):
+        """Test Game Robot with demo_renter tenant (should fail due to can_use_game_robot=false)"""
+        print("   🎯 Testing demo_renter tenant with can_use_game_robot=false...")
+        
+        # First, ensure demo_renter has can_use_game_robot=false
+        import subprocess
+        import os
+        
+        # Update demo_renter to disable game robot
+        print("      🔧 Setting demo_renter.can_use_game_robot=false...")
+        update_cmd = [
+            "python", "-c", """
+import asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
+from config import settings
+
+async def update_tenant():
+    client = AsyncIOMotorClient(settings.mongo_url)
+    db = client[settings.db_name]
+    
+    result = await db.tenants.update_one(
+        {"id": "demo_renter"},
+        {"$set": {"features.can_use_game_robot": False}}
+    )
+    print(f"Updated {result.modified_count} tenant(s)")
+    client.close()
+
+asyncio.run(update_tenant())
+"""
+        ]
+        
+        try:
+            subprocess.run(update_cmd, cwd="/app/backend", capture_output=True, text=True, timeout=10)
+        except Exception as e:
+            print(f"      ⚠️  Failed to update tenant: {str(e)}")
+        
+        # Now test the game robot
+        cmd = [
+            "python", "-m", "app.bots.game_robot",
+            "--tenant-id", "demo_renter",
+            "--rounds", "1",
+            "--game-types", "slot"
+        ]
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd="/app/backend",
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            print(f"      Exit code: {result.returncode}")
+            print(f"      STDOUT: {result.stdout}")
+            if result.stderr:
+                print(f"      STDERR: {result.stderr}")
+            
+            # Check expected outputs
+            success_checks = []
+            
+            # Check exit code (should be 1 for failure)
+            if result.returncode == 1:
+                print("      ✅ Exit code 1 (expected failure)")
+                success_checks.append(True)
+            else:
+                print(f"      ❌ Exit code {result.returncode} (expected 1)")
+                success_checks.append(False)
+            
+            # Check for tenant cannot use game robot message
+            if "TENANT_CANNOT_USE_GAME_ROBOT: demo_renter" in result.stderr or "TENANT_CANNOT_USE_GAME_ROBOT: demo_renter" in result.stdout:
+                print("      ✅ TENANT_CANNOT_USE_GAME_ROBOT message found")
+                success_checks.append(True)
+            else:
+                print("      ❌ TENANT_CANNOT_USE_GAME_ROBOT message not found")
+                success_checks.append(False)
+            
+            # Check that no HTTP requests were made (no SLOT scenario should run)
+            if "[SLOT]" not in result.stdout:
+                print("      ✅ No SLOT scenario execution (as expected)")
+                success_checks.append(True)
+            else:
+                print("      ❌ SLOT scenario executed (should not happen)")
+                success_checks.append(False)
+            
+            return all(success_checks)
+            
+        except subprocess.TimeoutExpired:
+            print("      ❌ Game robot execution timed out")
+            return False
+        except Exception as e:
+            print(f"      ❌ Game robot execution error: {str(e)}")
+            return False
+
+    def _test_game_robot_unknown_tenant(self):
+        """Test Game Robot with unknown tenant (should fail with TENANT_NOT_FOUND)"""
+        print("   🎯 Testing unknown tenant...")
+        
+        import subprocess
+        
+        cmd = [
+            "python", "-m", "app.bots.game_robot",
+            "--tenant-id", "unknown_tenant",
+            "--rounds", "1",
+            "--game-types", "slot"
+        ]
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd="/app/backend",
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            print(f"      Exit code: {result.returncode}")
+            print(f"      STDOUT: {result.stdout}")
+            if result.stderr:
+                print(f"      STDERR: {result.stderr}")
+            
+            # Check expected outputs
+            success_checks = []
+            
+            # Check exit code (should be 1 for failure)
+            if result.returncode == 1:
+                print("      ✅ Exit code 1 (expected failure)")
+                success_checks.append(True)
+            else:
+                print(f"      ❌ Exit code {result.returncode} (expected 1)")
+                success_checks.append(False)
+            
+            # Check for tenant not found message
+            if "TENANT_NOT_FOUND: unknown_tenant" in result.stderr or "TENANT_NOT_FOUND: unknown_tenant" in result.stdout:
+                print("      ✅ TENANT_NOT_FOUND message found")
+                success_checks.append(True)
+            else:
+                print("      ❌ TENANT_NOT_FOUND message not found")
+                success_checks.append(False)
+            
+            return all(success_checks)
+            
+        except subprocess.TimeoutExpired:
+            print("      ❌ Game robot execution timed out")
+            return False
+        except Exception as e:
+            print(f"      ❌ Game robot execution error: {str(e)}")
+            return False
+
+    def _test_game_robot_api_key(self):
+        """Test Game Robot with API key (should include Authorization header)"""
+        print("   🎯 Testing API key functionality...")
+        
+        import subprocess
+        
+        cmd = [
+            "python", "-m", "app.bots.game_robot",
+            "--tenant-id", "default_casino",
+            "--api-key", "test-key-123",
+            "--rounds", "1",
+            "--game-types", "slot"
+        ]
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd="/app/backend",
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            print(f"      Exit code: {result.returncode}")
+            print(f"      STDOUT: {result.stdout}")
+            if result.stderr:
+                print(f"      STDERR: {result.stderr}")
+            
+            # Check expected outputs
+            success_checks = []
+            
+            # Check exit code (should be 0 for success)
+            if result.returncode == 0:
+                print("      ✅ Exit code 0 (success)")
+                success_checks.append(True)
+            else:
+                print(f"      ❌ Exit code {result.returncode} (expected 0)")
+                success_checks.append(False)
+            
+            # Check for GameRobot base URL log with tenant_id
+            if "[GameRobot] BASE_URL=" in result.stdout and "tenant_id=default_casino" in result.stdout:
+                print("      ✅ GameRobot BASE_URL and tenant_id log found")
+                success_checks.append(True)
+            else:
+                print("      ❌ GameRobot BASE_URL and tenant_id log not found")
+                success_checks.append(False)
+            
+            # Check for SLOT scenario execution
+            if "[SLOT]" in result.stdout:
+                print("      ✅ SLOT scenario execution found")
+                success_checks.append(True)
+            else:
+                print("      ❌ SLOT scenario execution not found")
+                success_checks.append(False)
+            
+            # Note: We can't easily verify the Authorization header from the command line output
+            # but we can verify that the robot ran successfully with the API key parameter
+            print("      ℹ️  API key parameter accepted (Authorization header verification requires backend logs)")
+            
+            return all(success_checks)
+            
+        except subprocess.TimeoutExpired:
+            print("      ❌ Game robot execution timed out")
+            return False
+        except Exception as e:
+            print(f"      ❌ Game robot execution error: {str(e)}")
+            return False
+
     def test_tenant_model_endpoints_seed(self):
         """Test Tenant Model + Endpoints + Seed - Turkish Review Request 2.1.1"""
         print("\n🏢 TENANT MODEL + ENDPOINTS + SEED TESTS - Görev 2.1.1")
