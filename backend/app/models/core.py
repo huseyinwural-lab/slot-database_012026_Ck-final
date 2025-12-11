@@ -165,6 +165,7 @@ class Player(BaseModel):
     id: str = Field(..., description="Player ID")
     tenant_id: str = "default_casino" 
     username: str
+    is_new: bool = True
     email: EmailStr
     phone: Optional[str] = None
     first_name: Optional[str] = None
