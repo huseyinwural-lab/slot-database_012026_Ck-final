@@ -108,14 +108,6 @@ const GamePaytableTab = ({ game, paytable, onReload }) => {
     }
   };
 
-      const apiError = err?.response?.data;
-      const msg = apiError?.message || apiError?.detail || 'Override kaydedilemedi';
-      toast.error(msg);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleRefreshFromProvider = async () => {
     setRefreshing(true);
     try {
