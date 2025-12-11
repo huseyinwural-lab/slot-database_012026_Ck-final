@@ -5,7 +5,8 @@ import {
   Gamepad2, Gift, MessageSquare, Settings, LogOut,
   ListChecks, ToggleRight, Search, FlaskConical,
   FileText, Megaphone, BarChart3, Globe, Handshake,
-  AlertOctagon, UserCog, ScrollText, Scale, Crown
+  AlertOctagon, UserCog, ScrollText, Scale, Crown,
+  KeyRound
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
