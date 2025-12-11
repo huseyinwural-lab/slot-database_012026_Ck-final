@@ -668,6 +668,8 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
         print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "player_not_found"})
         return
 
+    tenant_id = player_doc.get("tenant_id", "default_casino")
+
     if not player_doc.get("is_new", True):
         print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "not_new_user"})
         return
@@ -692,6 +694,7 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
         "id": str(uuid.uuid4()),
         "type": "new_member_manual",
         "user_id": user_id,
+        "tenant_id": tenant_id,
         "allowed_game_ids": cfg.allowed_game_ids,
         "spin_count": cfg.spin_count,
         "bet_amount": cfg.fixed_bet_amount,
