@@ -92,6 +92,9 @@ const BonusManagement = () => {
   return (
     <div className="space-y-6">
         <h2 className="text-3xl font-bold tracking-tight">Bonus Campaigns</h2>
+
+        {/* Yeni Üye Manuel Bonus */}
+        <NewMemberManualBonusCard />
         
         <div className="grid md:grid-cols-3 gap-6">
             {/* --- CONFIGURATION PANEL --- */}
