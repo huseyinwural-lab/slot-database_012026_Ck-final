@@ -63,12 +63,25 @@ Aşağıda her core_type için en az bir "canonical" test oyununun varlığı ö
 
 ## Test Game Config Coverage (P0-D)
 
-| Game Name                             | core_type       | Config Type           | Status | Notlar                                                |
-|---------------------------------------|-----------------|-----------------------|--------|-------------------------------------------------------|
-| Test Slot Game (QA)                   | SLOT            | Slot Advanced         | PRO    | pozitif + negatif validation (autoplay range)        |
-| Test Slot Game (QA)                   | SLOT            | Paytable/Reels/JP     | PRO    | P0-B/P0-C senaryoları (override, manual reels, JP)   |
-| Test Crash Game (Advanced Safety QA)  | CRASH           | Crash Advanced        | PRO    | limits + enforcement + country overrides             |
-| Test Dice Game (Advanced Limits QA)   | DICE            | Dice Advanced         | PRO    | limits + enforcement + country overrides             |
-| Test Reel Lines Game (Config QA)      | REEL_LINES      | Reel Strips/Paytable/JP | PRO | pozitif round-trip + Mini JP (API, UI henüz yok)     |
-| Test Blackjack Game (Config QA)       | TABLE_BLACKJACK | BlackjackRules        | PRO    | baseline QA + BLACKJACK_RULES_VALIDATION_FAILED testi|
-| Test Poker Game (Config QA)           | TABLE_POKER     | PokerRules            | PRO    | baseline QA + POKER_RULES_VALIDATION_FAILED testi    |
+| Game Name                             | core_type       | Config Type            | Status | Notlar                                                |
+|---------------------------------------|-----------------|------------------------|--------|-------------------------------------------------------|
+| Test Slot Game (QA)                   | SLOT            | Slot Advanced          | PRO    | pozitif + negatif validation (autoplay range)        |
+| Test Slot Game (QA)                   | SLOT            | Paytable/Reels/JP      | PRO    | P0-B/P0-C senaryoları (override, manual reels, JP)   |
+| Test Crash Game (Advanced Safety QA)  | CRASH           | Crash Advanced         | PRO    | limits + enforcement + country overrides             |
+| Test Dice Game (Advanced Limits QA)   | DICE            | Dice Advanced          | PRO    | limits + enforcement + country overrides             |
+| Test Reel Lines Game (Config QA)      | REEL_LINES      | Reel Strips/Paytable/JP| PRO    | pozitif round-trip + Mini JP (API, UI henüz yok)     |
+| Test Blackjack Game (Config QA)       | TABLE_BLACKJACK | BlackjackRules         | PRO    | baseline QA + BLACKJACK_RULES_VALIDATION_FAILED testi|
+| Test Poker Game (Config QA)           | TABLE_POKER     | PokerRules             | PRO    | baseline QA + POKER_RULES_VALIDATION_FAILED testi    |
+
+## Test Game History & Diff Readiness (P0-D)
+
+| Game Name                        | core_type       | Config Type           | History | Diff Support     | Notlar                                                      |
+|----------------------------------|-----------------|-----------------------|---------|------------------|-------------------------------------------------------------|
+| Test Slot Game (QA)              | SLOT            | Slot Adv/Pay/Reels/JP | VAR     | VAR (backend+UI) | P0-B/C senaryoları; slot-advanced/paytable/reels/JP diff   |
+| Test Reel Lines Game (Config QA) | REEL_LINES      | Paytable/Reels/JP     | VAR     | VAR (backend)    | Reels: reels[2][5] WILD removed; Paytable: lines 20→25; JP: contribution 1.5→2.0 |
+| Test Blackjack Game (Config QA)  | TABLE_BLACKJACK | BlackjackRules        | VAR     | YOK (future)     | >=2 versiyon; history dolu; diff API future scope          |
+| Test Poker Game (Config QA)      | TABLE_POKER     | PokerRules            | VAR     | YOK (future)     | >=2 versiyon; history dolu; diff API future scope          |
+
+## P0-D Summary
+
+P0-D kapsamında tüm mevcut core_type'lar için canonical test oyunlar tanımlanmış, temel config coverage PRO seviyeye çekilmiş ve history & diff readiness tablosu ile dokümante edilmiştir. Blackjack/Poker diff API sonraki fazda (P1: Hardening) ele alınacaktır.
