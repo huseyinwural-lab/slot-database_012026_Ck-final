@@ -3350,54 +3350,6 @@ async def get_game_config_diff(
         changes=changes,
     )
 
-    version = await _generate_new_version(db, game_id, admin_id, notes="Jackpot config change")
-
-    cfg = JackpotConfig(
-        game_id=game_id,
-        config_version_id=version.id,
-        schema_version="1.0.0",
-        jackpots=payload.jackpots,
-        created_by=admin_id,
-        source="manual",
-    )
-
-    await db.jackpot_configs.insert_one(cfg.model_dump())
-
-    details = {
-        "old_config_version_id": prev_cfg.config_version_id if prev_cfg else None,
-        "new_config_version_id": version.id,
-        "summary": payload.summary,
-        "game_id": game_id,
-        "admin_id": admin_id,
-        "request_id": request_id,
-        "action_type": "jackpot_config_saved",
-    }
-
-    await _append_game_log(db, game_id, admin_id, "jackpot_config_saved", details)
-
-    logger.info(
-        "jackpot_config_saved",
-        extra={
-            "game_id": game_id,
-            "config_version_id": version.id,
-            "admin_id": admin_id,
-            "request_id": request_id,
-            "action_type": "jackpot_config_saved",
-        },
-    )
-
-    # Optional approval hook
-    approval = ApprovalRequest(
-        category=ApprovalCategory.GAME,
-        action_type="jackpot_change",
-        related_entity_id=game_id,
-        requester_admin=admin_id,
-        details={"config_version_id": version.id, "summary": payload.summary},
-    )
-    await db.approvals.insert_one(approval.model_dump())
-
-    return cfg
-
 
 # ---------------------------------------------------------------------------
 # ASSETS CONFIG
