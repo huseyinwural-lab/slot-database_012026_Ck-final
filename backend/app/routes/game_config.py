@@ -3479,16 +3479,27 @@ async def upload_game_client(
 
     existing = variants.get(client_type_norm)
     if existing is None:
+        extra = {}
+        if min_version is not None:
+            extra["min_version"] = min_version
         variants[client_type_norm] = ClientVariant(
             enabled=True,
-            launch_url=url,
+            launch_url=effective_launch_url,
             runtime=runtime_enum,
-            extra={},
+            extra=extra,
         )
     else:
         existing.enabled = True
-        existing.launch_url = url
+        # launch_url override: sadece param geldiyse değiştir, yoksa mevcudu koru
+        if launch_url:
+            existing.launch_url = effective_launch_url
+        # runtime her zaman client_type ile senkron
         existing.runtime = runtime_enum
+        # extra içinde min_version'ı güncelle
+        extra = dict(getattr(existing, "extra", {}) or {})
+        if min_version is not None:
+            extra["min_version"] = min_version
+        existing.extra = extra
         variants[client_type_norm] = existing
 
     # primary_client_type boş ise ilk client'ı primary yap
