@@ -618,6 +618,13 @@ async def get_tickets():
 async def reply_ticket(ticket_id: str, message: TicketMessage):
     db = get_db()
     await db.tickets.update_one(
+        {"id": ticket_id},
+        {
+            "$push": {"messages": message.model_dump()},
+            "$set": {"status": "answered"},
+        },
+    )
+    return {"message": "Replied"}
 
 
 # --- NEW MEMBER MANUAL BONUS SERVICE ---
