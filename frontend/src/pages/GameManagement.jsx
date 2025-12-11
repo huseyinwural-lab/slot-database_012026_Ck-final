@@ -189,6 +189,7 @@ const GameManagement = () => {
   };
 
   return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between mt-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>Category filter:</span>
@@ -211,7 +212,6 @@ const GameManagement = () => {
         </div>
       </div>
 
-    <div className="space-y-6">
       <h2 className="text-3xl font-bold tracking-tight">Game Operations</h2>
 
       <Tabs defaultValue="games" className="w-full">
