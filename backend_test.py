@@ -1509,10 +1509,10 @@ class CasinoAdminAPITester:
                     else:
                         client_variants = game_data.get('client_variants', {})
                         primary_client_type = game_data.get('primary_client_type')
-                    
-                    print(f"   📊 DB Validation Results:")
-                    print(f"   ✅ client_variants keys: {list(client_variants.keys())}")
-                    print(f"   ✅ primary_client_type: {primary_client_type}")
+                        
+                        print(f"   📊 DB Validation Results:")
+                        print(f"   ✅ client_variants keys: {list(client_variants.keys())}")
+                        print(f"   ✅ primary_client_type: {primary_client_type}")
                     
                     # Validate HTML5 variant
                     html5_variant = client_variants.get('html5', {})
