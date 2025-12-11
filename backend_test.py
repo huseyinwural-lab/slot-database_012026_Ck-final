@@ -14,14 +14,20 @@ class CasinoAdminAPITester:
         self.failed_tests = []
         self.access_token = None  # Store JWT token for authenticated requests
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, timeout=30):
+    def run_test(self, name, method, endpoint, expected_status, data=None, timeout=30, auth_token=None):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
+        
+        # Add Authorization header if token provided
+        if auth_token:
+            headers['Authorization'] = f'Bearer {auth_token}'
 
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
         print(f"   URL: {url}")
+        if auth_token:
+            print(f"   Auth: Bearer {auth_token[:20]}...")
         
         try:
             response = None
