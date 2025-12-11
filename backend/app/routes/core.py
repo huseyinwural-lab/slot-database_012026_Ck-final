@@ -393,6 +393,7 @@ async def update_table_status(table_id: str, status: str = Body(..., embed=True)
 # --- GAMES & ADVANCED SETTINGS ---
 @router.get("/games", response_model=List[Game])
 async def get_games(
+    request: Request,
     category: Optional[str] = None,
     provider: Optional[str] = None,
     status: Optional[str] = None,
