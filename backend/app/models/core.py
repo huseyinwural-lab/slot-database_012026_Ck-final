@@ -301,6 +301,18 @@ class GameConfig(BaseModel):
     reel_strips: List[ReelStrip] = []
     version: str = "1.0.0"
 
+class ClientRuntimeType(str, Enum):
+    HTML5 = "html5"
+    UNITY = "unity"
+
+
+class ClientVariant(BaseModel):
+    enabled: bool = False
+    launch_url: Optional[str] = None
+    runtime: ClientRuntimeType = ClientRuntimeType.HTML5
+    extra: Dict[str, Any] = {}
+
+
 class Game(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     tenant_id: str = "default_casino"
@@ -314,6 +326,10 @@ class Game(BaseModel):
     special_type: SpecialType = SpecialType.NONE
     image_url: Optional[str] = None
     configuration: GameConfig = Field(default_factory=GameConfig)
+
+    # Client runtimes
+    client_variants: Dict[str, ClientVariant] = {}
+    primary_client_type: Optional[ClientRuntimeType] = None
     
     # Expanded Fields for Game Ops
     tags: List[str] = [] # "new", "trending", "feature_buy"
