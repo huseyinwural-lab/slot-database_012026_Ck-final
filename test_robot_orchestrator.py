@@ -272,7 +272,7 @@ class RobotOrchestratorTester:
             success2, response2 = self.run_test("Robot Round - total work exceeded", "POST", "api/v1/robot/round", 400, payload2, auth_token=self.api_key_a)
             
             total_work_valid = False
-            if not success2:  # Expecting 400
+            if success2:  # Expecting 400 - success means we got the expected status code
                 try:
                     error_data = json.loads(response2) if isinstance(response2, str) else response2
                     if isinstance(error_data, dict) and error_data.get('detail', {}).get('error_code') == 'ROBOT_TOTAL_WORK_EXCEEDED':
@@ -283,7 +283,7 @@ class RobotOrchestratorTester:
                 except:
                     print(f"   ❌ Total work exceeded rejected but couldn't parse error: {response2}")
             else:
-                print(f"   ❌ Total work exceeded should have been rejected but got 200")
+                print(f"   ❌ Total work exceeded should have been rejected but got unexpected status")
             
             return unsupported_game_valid and total_work_valid
             
