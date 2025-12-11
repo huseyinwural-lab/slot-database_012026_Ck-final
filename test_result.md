@@ -2,6 +2,22 @@ user_problem_statement:
   summary: "Phase 1: Financial Integrity & Security Update"
 backend:
 
+jwt_admin_auth:
+  - task: "JWT-based Admin Auth & Password Management - Turkish Review Request"
+    implemented: true
+    working: true
+    file: "backend/app/routes/auth.py, backend/app/utils/auth.py, backend/app/models/domain/admin.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "JWT tabanlı admin auth sistemi eklendi: /api/v1/auth/login, /api/v1/auth/me, /api/v1/auth/change-password, /api/v1/auth/request-password-reset, /api/v1/auth/reset-password endpointleri. AdminUser modelinde password_hash, is_active, failed_login_attempts, last_password_change_at, password_reset_token, password_reset_expires_at alanları eklendi. Admin seed endpoint'i admin@casino.com için default şifre 'Admin123!' olarak ayarlandı."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ JWT ADMIN AUTH & PASSWORD MANAGEMENT - ALL TESTS PASSED (7/7 scenarios): Senaryo 1) Seed & Basic Login: POST /api/v1/admin/seed başarılı, POST /api/v1/auth/login ile admin@casino.com/Admin123! giriş başarılı (200 OK, access_token, token_type='bearer', admin yapısı tam), GET /api/v1/auth/me doğru admin bilgilerini döndürüyor. Senaryo 2) Failed Login Attempts: Var olmayan email (wrong@casino.com) ve yanlış şifre ile login denemeleri 401 INVALID_CREDENTIALS döndürüyor. Senaryo 3) Password Change Flow: POST /api/v1/auth/change-password ile şifre Admin123! → Admin1234! değiştirildi (200 OK, PASSWORD_CHANGED), eski şifre ile login 401, yeni şifre ile login başarılı. Senaryo 4) Password Policy Validation: Çok kısa (Ab1!), büyük harf yok (admin123!), rakam yok (Admin!!!), özel karakter yok (Admin1234) şifreler için doğru validation hataları (400, PASSWORD_TOO_SHORT, PASSWORD_MUST_CONTAIN_UPPERCASE, PASSWORD_MUST_CONTAIN_DIGIT, PASSWORD_MUST_CONTAIN_SPECIAL). Senaryo 5) Password Reset Flow: POST /api/v1/auth/request-password-reset geçerli email için reset_token döndürüyor, var olmayan email için güvenlik nedeniyle aynı mesaj ama token yok, POST /api/v1/auth/reset-password geçerli token ile başarılı (PASSWORD_RESET_SUCCESS), geçersiz token ile 400 RESET_TOKEN_INVALID. Senaryo 6) Unauthorized Access: Authorization header olmadan GET /api/v1/auth/me → 401 'Not authenticated', geçersiz token ile 401. Senaryo 7) Data Structure & Security: AdminUser response'da _id alanı yok sadece string id var, JWT token HS256 ile imzalanmış ve exp alanı mevcut. Tüm JWT auth akışları çalışıyor."
+
 tenant_model_endpoints_seed:
   - task: "Tenant Model + Koleksiyon + Endpointler + Seed backend testi"
     implemented: true
