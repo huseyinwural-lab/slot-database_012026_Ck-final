@@ -1,14 +1,16 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from pydantic import BaseModel
 
 from config import settings
-from app.models.domain.admin import AdminUser
+from app.models.domain.admin import AdminUser, AdminAPIKey
 from motor.motor_asyncio import AsyncIOMotorClient
+from app.utils.api_keys import get_admin_api_key
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -95,5 +97,39 @@ def require_permission(permission: str):
             return current_admin
 
         raise HTTPException(status_code=403, detail="PERMISSION_DENIED")
+
+
+class AdminAPIKeyContext(BaseModel):
+    api_key: AdminAPIKey
+    tenant_id: str
+    scopes: list[str]
+
+
+async def get_api_key_context(authorization: str = Header(None)) -> AdminAPIKeyContext:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error_code": "API_KEY_MISSING", "message": "Authorization Bearer api-key required"},
+        )
+
+    raw_key = authorization.split(" ", 1)[1].strip()
+    db = get_db()
+    api_key = await get_admin_api_key(db, raw_key)
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error_code": "API_KEY_INVALID"},
+        )
+
+    return AdminAPIKeyContext(api_key=api_key, tenant_id=api_key.tenant_id, scopes=api_key.scopes)
+
+
+def require_scope(context: AdminAPIKeyContext, scope: str) -> None:
+    if scope not in context.scopes:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error_code": "API_KEY_SCOPE_FORBIDDEN", "scope": scope},
+        )
+
 
     return dependency
