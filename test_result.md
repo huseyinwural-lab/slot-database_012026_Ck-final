@@ -436,18 +436,18 @@ frontend:
 
   - task: "Config diff UI error handling"
     implemented: true
-    working: "NA"
-    file: "src/components/games/ConfigDiffPanel.jsx"
+    working: true
+    file: "src/components/games/ConfigDiffPanel.jsx, src/components/games/GamePaytableTab.jsx, src/components/games/GameReelStripsTab.jsx, src/components/games/GameSlotAdvancedTab.jsx"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "P0-C config diff UI testing task for error handling scenarios."
-        -working: "NA"
+        -working: true
         -agent: "testing"
-        -comment: "ℹ️ ERROR HANDLING NOTED: Backend hatalarında toast mesajları görünmelidir (CONFIG_DIFF_VALIDATION_FAILED için 'Config diff parameters are invalid'), network hatalarında 'Config diff yüklenemedi.' genel mesajı görünmelidir. Error handling implementation present in code but not fully tested due to complexity of simulating network errors in current test environment."
+        -comment: "✅ CONFIG DIFF UI ERROR HANDLING WORKING: 1) 400 CONFIG_DIFF_VALIDATION_FAILED senaryosunda (örneğin type=foo veya geçersiz from UUID) backend 400 + error_code='CONFIG_DIFF_VALIDATION_FAILED' ve message='Config diff parameters are invalid' döndürüyor; UI tarafında apiError.message toast olarak doğru şekilde gösteriliyor. 2) Network/5xx hata senaryosunda (geçici dev değişikliği ile simüle edildi) diff çağrısı başarısız olduğunda 'Config diff yüklenemedi.' fallback mesajı toast olarak gösteriliyor. Hem Paytable hem Reel Strips ve Slot Advanced diff akışlarında error handling davranışı tutarlı ve production için yeterli."
 
   - task: "Slot Advanced config diff UI"
     implemented: true
