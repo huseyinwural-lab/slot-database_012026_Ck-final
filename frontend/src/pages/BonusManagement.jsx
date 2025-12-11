@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Gift, Zap, DollarSign, RotateCcw, Clock } from 'lucide-react';
+import NewMemberManualBonusCard from '../components/bonus/NewMemberManualBonusCard';
+
 
 const BonusManagement = () => {
   const [bonuses, setBonuses] = useState([]);
