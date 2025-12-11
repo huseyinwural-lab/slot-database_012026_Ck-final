@@ -334,7 +334,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         status = "OK" if err_count == 0 else "FAIL"
         print(f"[{res.game_type.upper()}] {status} ({res.success_count}/{res.rounds}) - errors={err_count}")
         if err_count > 0:
-            print(f"  İlk birkaç hata (en fazla 3):")
+            print("  İlk birkaç hata (en fazla 3):")
             for e in res.errors[:3]:
                 print(f"    round={e.get('round')} status={e.get('status')} body={e.get('body')}")
 
