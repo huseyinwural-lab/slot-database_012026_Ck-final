@@ -9412,6 +9412,9 @@ def main():
     print("\n🎲 DICE ADVANCED LIMITS BACKEND VALIDATION TESTS (REVIEW REQUEST - PHASE C)")
     test_results.append(("Dice Advanced Limits Backend Validation", tester.test_dice_advanced_limits_backend_validation()))
     
+    print("\n🔄 CONFIG VERSION DIFF BACKEND MVP TESTS (REVIEW REQUEST - P0-C)")
+    test_results.append(("Config Version Diff Backend MVP", tester.test_config_version_diff_backend_mvp()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
