@@ -1614,40 +1614,6 @@ class CasinoAdminAPITester:
                 print("   ❌ Senaryo 5: Missing file validation failed")
         
         return overall_success
-                                    html5_response = response_data
-                                else:
-                                    print("   ❌ Some response values incorrect")
-                                    success_a = False
-                            else:
-                                print(f"   ❌ Missing response fields: {missing_fields}")
-                                success_a = False
-                                
-                        except Exception as e:
-                            print(f"   ❌ Failed to parse response: {e}")
-                            success_a = False
-                    else:
-                        print(f"❌ HTML5 Upload Failed - Expected 200, got {response.status_code}")
-                        print(f"   Response: {response.text[:200]}...")
-                        success_a = False
-                        
-            finally:
-                os.unlink(html5_file.name)
-        
-        self.tests_run += 1
-        if not success_a:
-            self.failed_tests.append({
-                "name": "HTML5 Client Upload",
-                "endpoint": f"api/v1/games/{test_game_id}/client-upload",
-                "expected": 200,
-                "actual": response.status_code if 'response' in locals() else 'No response'
-            })
-        
-        # Test B) Positive - UNITY upload (second client)
-        print(f"\n🔍 Scenario B: UNITY upload (second client)")
-        
-        with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as unity_file:
-            unity_file.write(unity_file_content)
-            unity_file.flush()
             
             try:
                 url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
