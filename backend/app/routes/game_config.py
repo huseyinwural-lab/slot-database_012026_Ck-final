@@ -291,6 +291,9 @@ class DiceMathSaveRequest(BaseModel):
     # Country specific overrides keyed by ISO 3166-1 alpha-2 country code
     country_overrides: Optional[Dict[str, Dict[str, Any]]] = None
 
+    # Provably fair settings
+    provably_fair_enabled: bool = True
+    rng_algorithm: str = "sha256_chain"
     seed_rotation_interval_rounds: Optional[int] = None
     summary: Optional[str] = None
 
