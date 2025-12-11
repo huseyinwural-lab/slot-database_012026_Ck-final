@@ -24,6 +24,12 @@ p0_d_test_game_inventory:
     working: "NA"
     note: "Out of P0-D scope, planned for P1 Hardening / diff extension."
 
+p0_e_game_robot:
+  - task: "Game Robot MVP – Slot/Crash/Dice deterministic rounds"
+    implemented: true
+    working: true
+    note: "backend/app/bots/game_robot.py altında deterministik Slot/Crash/Dice config round-trip robotu eklendi; canonical test oyun ID'lerini kullanarak GET/POST turlarını koşturuyor."
+
 p1_hardening:
   - task: "Jackpot config hardening – contribution/seed edge cases"
     implemented: true
