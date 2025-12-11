@@ -1266,6 +1266,11 @@ async def get_slot_advanced_config(game_id: str, request: Request):
 @router.post("/{game_id}/config/slot-advanced", response_model=SlotAdvancedConfig)
 async def save_slot_advanced_config(game_id: str, payload: SlotAdvancedSaveRequest, request: Request):
     from fastapi.responses import JSONResponse
+    from app.utils.features import ensure_tenant_feature
+    from app.models.domain.admin import AdminUser
+
+    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
+    await ensure_tenant_feature(request, dummy_admin, "can_edit_configs")
 
     db = get_db()
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
