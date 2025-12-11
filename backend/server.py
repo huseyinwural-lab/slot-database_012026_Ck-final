@@ -56,6 +56,9 @@ app.include_router(simulator.router)
 app.include_router(game_config.router)
 app.include_router(game_import.router)
 app.include_router(game_config_presets.router)
+from app.routes import tenant
+app.include_router(tenant.router)
+
 
 
 # Finance Advanced
