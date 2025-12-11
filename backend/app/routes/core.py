@@ -654,17 +654,11 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
 
     player_doc = await db.players.find_one({"id": user_id})
     if not player_doc:
-        logger.info(
-            "NEW_MEMBER_BONUS_SKIPPED",
-            extra={"user_id": user_id, "reason": "player_not_found"},
-        )
+        print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "player_not_found"})
         return
 
     if not player_doc.get("is_new", True):
-        logger.info(
-            "NEW_MEMBER_BONUS_SKIPPED",
-            extra={"user_id": user_id, "reason": "not_new_user"},
-        )
+        print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "not_new_user"})
         return
 
     existing = await db.bonus_tickets.count_documents(
