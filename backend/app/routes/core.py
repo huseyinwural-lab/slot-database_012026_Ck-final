@@ -665,10 +665,7 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
         {"user_id": user_id, "type": "new_member_manual", "status": {"$in": ["pending", "active"]}}
     )
     if existing > 0:
-        logger.info(
-            "NEW_MEMBER_BONUS_SKIPPED",
-            extra={"user_id": user_id, "reason": "already_granted"},
-        )
+        print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "already_granted"})
         return
 
     estimated_total = cfg.spin_count * cfg.fixed_bet_amount
