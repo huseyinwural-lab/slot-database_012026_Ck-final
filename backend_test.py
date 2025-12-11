@@ -1229,6 +1229,342 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_client_upload_flow(self):
+        """Test Client Upload Flow - Turkish Review Request"""
+        print("\n📤 CLIENT UPLOAD FLOW TESTS")
+        
+        # Test game: Test Slot Game (QA) from TEST_GAME_INVENTORY.md
+        test_game_id = "f78ddf21-c759-4b8c-a5fb-28c90b3645ab"
+        print(f"🎯 Test Game ID: {test_game_id}")
+        
+        # Create test files for upload
+        import tempfile
+        import os
+        
+        # Create temporary test files
+        html5_file_content = b"Test HTML5 game content - this is a dummy file for testing"
+        unity_file_content = b"Test Unity game content - this is a dummy file for testing"
+        
+        # Test A) Positive - HTML5 upload (first client)
+        print(f"\n🔍 Scenario A: HTML5 upload (first client)")
+        
+        with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as html5_file:
+            html5_file.write(html5_file_content)
+            html5_file.flush()
+            
+            try:
+                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+                
+                with open(html5_file.name, 'rb') as f:
+                    files = {'file': ('test-html5.zip', f, 'application/zip')}
+                    data = {
+                        'client_type': 'html5',
+                        'params': '{}'
+                    }
+                    
+                    print(f"   📤 Uploading HTML5 client to: {url}")
+                    response = requests.post(url, files=files, data=data, timeout=30)
+                    
+                    success_a = response.status_code == 200
+                    if success_a:
+                        self.tests_passed += 1
+                        print(f"✅ HTML5 Upload - Status: {response.status_code}")
+                        
+                        try:
+                            response_data = response.json()
+                            print(f"   Response keys: {list(response_data.keys())}")
+                            
+                            # Validate response structure
+                            required_fields = ['game_id', 'client_type', 'launch_url', 'primary_client_type']
+                            missing_fields = [field for field in required_fields if field not in response_data]
+                            
+                            if not missing_fields:
+                                print("   ✅ Response structure complete")
+                                print(f"   ✅ game_id: {response_data['game_id']}")
+                                print(f"   ✅ client_type: {response_data['client_type']}")
+                                print(f"   ✅ launch_url: {response_data['launch_url']}")
+                                print(f"   ✅ primary_client_type: {response_data['primary_client_type']}")
+                                
+                                # Validate expected values
+                                if (response_data['game_id'] == test_game_id and 
+                                    response_data['client_type'] == 'html5' and
+                                    'test-html5.zip' in response_data['launch_url'] and
+                                    response_data['primary_client_type'] == 'html5'):
+                                    print("   ✅ All response values correct")
+                                    html5_response = response_data
+                                else:
+                                    print("   ❌ Some response values incorrect")
+                                    success_a = False
+                            else:
+                                print(f"   ❌ Missing response fields: {missing_fields}")
+                                success_a = False
+                                
+                        except Exception as e:
+                            print(f"   ❌ Failed to parse response: {e}")
+                            success_a = False
+                    else:
+                        print(f"❌ HTML5 Upload Failed - Expected 200, got {response.status_code}")
+                        print(f"   Response: {response.text[:200]}...")
+                        success_a = False
+                        
+            finally:
+                os.unlink(html5_file.name)
+        
+        self.tests_run += 1
+        if not success_a:
+            self.failed_tests.append({
+                "name": "HTML5 Client Upload",
+                "endpoint": f"api/v1/games/{test_game_id}/client-upload",
+                "expected": 200,
+                "actual": response.status_code if 'response' in locals() else 'No response'
+            })
+        
+        # Test B) Positive - UNITY upload (second client)
+        print(f"\n🔍 Scenario B: UNITY upload (second client)")
+        
+        with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as unity_file:
+            unity_file.write(unity_file_content)
+            unity_file.flush()
+            
+            try:
+                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+                
+                with open(unity_file.name, 'rb') as f:
+                    files = {'file': ('test-unity.zip', f, 'application/zip')}
+                    data = {
+                        'client_type': 'unity',
+                        'params': '{}'
+                    }
+                    
+                    print(f"   📤 Uploading Unity client to: {url}")
+                    response = requests.post(url, files=files, data=data, timeout=30)
+                    
+                    success_b = response.status_code == 200
+                    if success_b:
+                        self.tests_passed += 1
+                        print(f"✅ Unity Upload - Status: {response.status_code}")
+                        
+                        try:
+                            response_data = response.json()
+                            print(f"   Response keys: {list(response_data.keys())}")
+                            
+                            # Validate response structure and values
+                            if (response_data.get('game_id') == test_game_id and 
+                                response_data.get('client_type') == 'unity' and
+                                'test-unity.zip' in response_data.get('launch_url', '') and
+                                response_data.get('primary_client_type') == 'html5'):  # Should remain html5
+                                print("   ✅ Unity upload successful, primary_client_type remains html5")
+                                unity_response = response_data
+                            else:
+                                print("   ❌ Unity response values incorrect")
+                                print(f"      primary_client_type: {response_data.get('primary_client_type')} (should be html5)")
+                                success_b = False
+                                
+                        except Exception as e:
+                            print(f"   ❌ Failed to parse Unity response: {e}")
+                            success_b = False
+                    else:
+                        print(f"❌ Unity Upload Failed - Expected 200, got {response.status_code}")
+                        print(f"   Response: {response.text[:200]}...")
+                        success_b = False
+                        
+            finally:
+                os.unlink(unity_file.name)
+        
+        self.tests_run += 1
+        if not success_b:
+            self.failed_tests.append({
+                "name": "Unity Client Upload",
+                "endpoint": f"api/v1/games/{test_game_id}/client-upload",
+                "expected": 200,
+                "actual": response.status_code if 'response' in locals() else 'No response'
+            })
+        
+        # Test C) Negative - Invalid client_type
+        print(f"\n🔍 Scenario C: Invalid client_type")
+        
+        with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as invalid_file:
+            invalid_file.write(b"test content")
+            invalid_file.flush()
+            
+            try:
+                url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+                
+                with open(invalid_file.name, 'rb') as f:
+                    files = {'file': ('test-invalid.zip', f, 'application/zip')}
+                    data = {
+                        'client_type': 'desktop',  # Invalid type
+                        'params': '{}'
+                    }
+                    
+                    print(f"   📤 Testing invalid client_type 'desktop'")
+                    response = requests.post(url, files=files, data=data, timeout=30)
+                    
+                    success_c = response.status_code == 400
+                    if success_c:
+                        self.tests_passed += 1
+                        print(f"✅ Invalid client_type - Status: {response.status_code}")
+                        
+                        try:
+                            response_data = response.json()
+                            error_code = response_data.get('error_code')
+                            details = response_data.get('details', {})
+                            reason = details.get('reason')
+                            
+                            if (error_code == 'CLIENT_UPLOAD_FAILED' and 
+                                reason == 'invalid_client_type'):
+                                print(f"   ✅ Correct error response: {error_code}, reason: {reason}")
+                            else:
+                                print(f"   ❌ Unexpected error format: {error_code}, reason: {reason}")
+                                success_c = False
+                                
+                        except Exception as e:
+                            print(f"   ❌ Failed to parse error response: {e}")
+                            success_c = False
+                    else:
+                        print(f"❌ Invalid client_type test failed - Expected 400, got {response.status_code}")
+                        success_c = False
+                        
+            finally:
+                os.unlink(invalid_file.name)
+        
+        self.tests_run += 1
+        if not success_c:
+            self.failed_tests.append({
+                "name": "Invalid client_type test",
+                "endpoint": f"api/v1/games/{test_game_id}/client-upload",
+                "expected": 400,
+                "actual": response.status_code if 'response' in locals() else 'No response'
+            })
+        
+        # Test D) Negative - Missing file
+        print(f"\n🔍 Scenario D: Missing file")
+        
+        url = f"{self.base_url}/api/v1/games/{test_game_id}/client-upload"
+        data = {
+            'client_type': 'html5',
+            'params': '{}'
+        }
+        # No files parameter - missing file
+        
+        print(f"   📤 Testing missing file scenario")
+        response = requests.post(url, data=data, timeout=30)
+        
+        success_d = response.status_code == 400
+        if success_d:
+            self.tests_passed += 1
+            print(f"✅ Missing file test - Status: {response.status_code}")
+            
+            try:
+                response_data = response.json()
+                error_code = response_data.get('error_code')
+                details = response_data.get('details', {})
+                reason = details.get('reason')
+                
+                if (error_code == 'CLIENT_UPLOAD_FAILED' and 
+                    reason == 'missing_file'):
+                    print(f"   ✅ Correct error response: {error_code}, reason: {reason}")
+                else:
+                    print(f"   ❌ Unexpected error format: {error_code}, reason: {reason}")
+                    success_d = False
+                    
+            except Exception as e:
+                print(f"   ❌ Failed to parse missing file error response: {e}")
+                success_d = False
+        else:
+            print(f"❌ Missing file test failed - Expected 400, got {response.status_code}")
+            success_d = False
+        
+        self.tests_run += 1
+        if not success_d:
+            self.failed_tests.append({
+                "name": "Missing file test",
+                "endpoint": f"api/v1/games/{test_game_id}/client-upload",
+                "expected": 400,
+                "actual": response.status_code if 'response' in locals() else 'No response'
+            })
+        
+        # Test DB validation if HTML5 and Unity uploads were successful
+        if success_a and success_b:
+            print(f"\n🔍 DB Validation: Checking game document in database")
+            
+            # Use the games API to check the updated game document
+            games_url = f"{self.base_url}/api/v1/games/{test_game_id}"
+            db_response = requests.get(games_url, timeout=30)
+            
+            success_db = db_response.status_code == 200
+            if success_db:
+                try:
+                    game_data = db_response.json()
+                    client_variants = game_data.get('client_variants', {})
+                    primary_client_type = game_data.get('primary_client_type')
+                    
+                    print(f"   📊 DB Validation Results:")
+                    print(f"   ✅ client_variants keys: {list(client_variants.keys())}")
+                    print(f"   ✅ primary_client_type: {primary_client_type}")
+                    
+                    # Validate HTML5 variant
+                    html5_variant = client_variants.get('html5', {})
+                    if (html5_variant.get('enabled') == True and
+                        html5_variant.get('runtime') == 'html5' and
+                        'test-html5.zip' in html5_variant.get('launch_url', '')):
+                        print(f"   ✅ HTML5 variant correctly saved in DB")
+                    else:
+                        print(f"   ❌ HTML5 variant incorrect in DB: {html5_variant}")
+                        success_db = False
+                    
+                    # Validate Unity variant
+                    unity_variant = client_variants.get('unity', {})
+                    if (unity_variant.get('enabled') == True and
+                        unity_variant.get('runtime') == 'unity' and
+                        'test-unity.zip' in unity_variant.get('launch_url', '')):
+                        print(f"   ✅ Unity variant correctly saved in DB")
+                    else:
+                        print(f"   ❌ Unity variant incorrect in DB: {unity_variant}")
+                        success_db = False
+                    
+                    # Validate primary_client_type remains html5
+                    if primary_client_type == 'html5':
+                        print(f"   ✅ primary_client_type correctly remains 'html5'")
+                    else:
+                        print(f"   ❌ primary_client_type incorrect: {primary_client_type} (should be html5)")
+                        success_db = False
+                        
+                except Exception as e:
+                    print(f"   ❌ Failed to parse game data for DB validation: {e}")
+                    success_db = False
+            else:
+                print(f"   ❌ Failed to fetch game for DB validation - Status: {db_response.status_code}")
+                success_db = False
+        else:
+            success_db = False
+            print(f"   ⚠️  Skipping DB validation due to upload failures")
+        
+        # Overall result
+        overall_success = success_a and success_b and success_c and success_d and success_db
+        
+        if overall_success:
+            print("\n✅ CLIENT UPLOAD FLOW - ALL TESTS PASSED")
+            print("   ✅ HTML5 upload working correctly")
+            print("   ✅ Unity upload working correctly") 
+            print("   ✅ Invalid client_type validation working")
+            print("   ✅ Missing file validation working")
+            print("   ✅ DB client_variants and primary_client_type correctly updated")
+        else:
+            print("\n❌ CLIENT UPLOAD FLOW - SOME TESTS FAILED")
+            if not success_a:
+                print("   ❌ HTML5 upload failed")
+            if not success_b:
+                print("   ❌ Unity upload failed")
+            if not success_c:
+                print("   ❌ Invalid client_type validation failed")
+            if not success_d:
+                print("   ❌ Missing file validation failed")
+            if not success_db:
+                print("   ❌ DB validation failed")
+        
+        return overall_success
+
     def test_config_version_diff_backend_mvp(self):
         """Test P0-C Config Version Diff Backend MVP - Turkish Review Request"""
         print("\n🔄 CONFIG VERSION DIFF BACKEND MVP TESTS")
