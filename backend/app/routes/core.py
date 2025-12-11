@@ -719,13 +719,6 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
         },
     )
 
-        {"id": ticket_id}, 
-        {
-            "$push": {"messages": message.model_dump()},
-            "$set": {"status": "answered"}
-        }
-    )
-    return {"message": "Replied"}
 
 # --- SEED DATA ---
 
