@@ -463,8 +463,25 @@ async def seed_admin():
     if await db.admin_roles.count_documents({}) == 0:
         roles = [
             AdminRole(name="Super Admin", description="Tam Yetkili", permissions=["*"], user_count=1),
-            AdminRole(name="Manager", description="Yönetici - Çoğu modüle erişim", permissions=["players:read", "players:write", "finance:read", "games:read"], user_count=1),
-            AdminRole(name="Support", description="Destek - Sadece okuma yetkisi", permissions=["players:read", "support:read", "support:write"], user_count=1)
+            AdminRole(
+                name="Manager",
+                description="Yönetici - Çoğu modüle erişim",
+                permissions=[
+                    "PLAYERS_READ",
+                    "PLAYERS_WRITE",
+                    "FINANCE_READ",
+                    "GAMES_READ",
+                    "BONUSES_MANAGE",
+                    "REPORTS_VIEW",
+                ],
+                user_count=1,
+            ),
+            AdminRole(
+                name="Support",
+                description="Destek - Sadece okuma yetkisi",
+                permissions=["PLAYERS_READ", "SUPPORT_READ", "SUPPORT_WRITE"],
+                user_count=1,
+            ),
         ]
         for role in roles:
             await db.admin_roles.insert_one(role.model_dump())
