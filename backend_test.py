@@ -12711,6 +12711,9 @@ def main():
     print("\n🔑 API KEY AUTH LAYER & ROBOT ENDPOINT TESTS (TURKISH REVIEW REQUEST)")
     test_results.append(("API Key Auth Layer & Robot Endpoint", tester.test_api_key_auth_layer_and_robot_endpoint()))
     
+    print("\n🤖 FAZ 5 – ROBOT ORCHESTRATOR BACKEND ENDPOINT TESTS (TURKISH REVIEW REQUEST)")
+    test_results.append(("FAZ 5 Robot Orchestrator Backend Endpoint", tester.test_robot_orchestrator_backend_endpoint_faz5()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
