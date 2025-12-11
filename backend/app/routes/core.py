@@ -407,12 +407,11 @@ async def get_games(
     rtp_max: Optional[float] = None,
     volatility: Optional[str] = None,
     country: Optional[str] = None,
-    feature_buy: Optional[bool] = None
+    feature_buy: Optional[bool] = None,
+    current_admin: AdminUser = Depends(get_current_admin),
 ):
     db = get_db()
-    # TODO: gerçek admin context eklenince AdminUser instance'ı buradan gelmeli
-    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
-    tenant_id = get_current_tenant_id(request, dummy_admin)
+    tenant_id = get_current_tenant_id(request, current_admin)
 
     query = {"tenant_id": tenant_id}
     if category and category != "all":
