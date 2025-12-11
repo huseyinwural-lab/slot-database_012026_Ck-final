@@ -708,9 +708,9 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
     # Kullanıcı artık yeni değil kabul edilebilir
     await db.players.update_one({"id": user_id}, {"$set": {"is_new": False}})
 
-    logger.info(
+    print(
         "NEW_MEMBER_BONUS_GRANTED",
-        extra={
+        {
             "user_id": user_id,
             "ticket_id": ticket["id"],
             "spin_count": cfg.spin_count,
