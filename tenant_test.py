@@ -51,7 +51,7 @@ def test_tenant_endpoints():
                 }
             }
             
-            response = requests.post(f"{base_url}/api/v1/tenants", 
+            response = requests.post(f"{base_url}/api/v1/tenants/", 
                                    json=default_casino_data, 
                                    headers={'Content-Type': 'application/json'},
                                    timeout=30)
