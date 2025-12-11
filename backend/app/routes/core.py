@@ -586,7 +586,12 @@ async def get_new_member_manual_bonus_config():
 
 
 @router.put("/bonus/config/new-member-manual", response_model=NewMemberManualBonusConfig)
-async def update_new_member_manual_bonus_config(cfg: NewMemberManualBonusConfig):
+async def update_new_member_manual_bonus_config(request: Request, cfg: NewMemberManualBonusConfig):
+    from app.utils.features import ensure_tenant_feature
+
+    dummy_admin = AdminUser(id="admin", username="admin", email="admin@casino.com", full_name="Super Admin", role="super_admin")
+    await ensure_tenant_feature(request, dummy_admin, "can_manage_bonus")
+
     # Validation guardrails
     if not (1 <= cfg.spin_count <= 1000):
         raise HTTPException(400, detail="spin_count must be between 1 and 1000")
