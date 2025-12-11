@@ -46,16 +46,6 @@ const NewMemberManualBonusCard = () => {
     load();
   }, []);
 
-  useEffect(() => {
-    const gameCount = (config.allowed_game_ids || []).length;
-    const parts = [];
-    parts.push(`${gameCount} oyun`);
-    if (config.spin_count) parts.push(`${config.spin_count} spin`);
-    if (config.fixed_bet_amount) parts.push(`${config.fixed_bet_amount} EUR/spin`);
-    if (config.total_budget_cap) parts.push(`limit ${config.total_budget_cap} EUR`);
-    setSummary(parts.join(' • '));
-  }, [config]);
-
   const handleSave = async () => {
     try {
       const payload = { ...config };
