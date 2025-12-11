@@ -386,6 +386,18 @@ api_keys_backend:
         -agent: "testing"
         -comment: "✅ API KEY AUTH LAYER & ROBOT ENDPOINT - ALL TESTS PASSED (5/5 scenarios - 100% success rate): Hazırlık: POST /api/v1/admin/seed başarılı, POST /api/v1/auth/login ile admin@casino.com/Admin123! giriş başarılı, JWT token alındı. Test 1 ✅ API key ile robot endpoint (mutlu path): POST /api/v1/api-keys ile geçerli key oluşturuldu (scopes=['robot.run','games.read']), POST /api/v1/robot/round ile Authorization: Bearer <api_key> başarılı (200 OK, status='ok', tenant_id='default_casino', scopes içinde 'robot.run' mevcut). Test 2 ✅ Scope eksik (robot.run yok): Yeni API key oluşturuldu (scopes=['games.read']), robot endpoint çağrısı 403 döndürdü, detail.error_code='API_KEY_SCOPE_FORBIDDEN', detail.scope='robot.run'. Test 3 ✅ Tenant mismatch: Geçerli key ile farklı tenant_id ('some_other_tenant') gönderildi, 403 döndürdü, detail.error_code='TENANT_MISMATCH', detail.api_key_tenant='default_casino', detail.requested_tenant='some_other_tenant'. Test 4 ✅ API key eksik/geçersiz: Authorization header olmadan 401 döndürdü (detail.error_code='API_KEY_MISSING'), geçersiz key ile 401 döndürdü (detail.error_code='API_KEY_INVALID'). Test 5 ✅ Game Robot CLI argüman zorunluluğu: CLI --api-key olmadan çalıştırıldı, exit code 2 döndürdü, stderr'da 'api-key is required' mesajı mevcut. Tüm auth/scope/tenant enforcement çalışıyor."
 
+  - task: "FAZ 5 – Robot Orchestrator Backend Endpoint Tests - Turkish Review Request"
+    implemented: true
+    working: true
+    file: "backend/app/routes/robot.py, backend/app/services/robot_orchestrator.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ FAZ 5 – ROBOT ORCHESTRATOR BACKEND ENDPOINT - ALL TESTS PASSED (5/5 scenarios - 100% success rate): Hazırlık: POST /api/v1/admin/seed başarılı, POST /api/v1/auth/login ile admin@casino.com/Admin123! giriş başarılı, JWT token alındı. İki API key oluşturuldu: Key A (scopes=['robot.run','games.read']) ve Key B (scopes=['games.read']). Test 1 ✅ Mutlu path (geçerli API key + robot.run scope): POST /api/v1/robot/round ile Key A kullanarak {'game_types':['slot','crash'],'rounds':10} gönderildi, 200 OK döndü, response yapısı tam (status='ok', tenant_id='default_casino', total_rounds=20, results array 2 summary içeriyor: slot rounds=10 errors=0, crash rounds=10 errors=0). Test 2 ✅ Rounds limitleri: rounds=0 ile 400 ROBOT_ROUNDS_LIMIT_EXCEEDED, rounds=2000 ile 400 ROBOT_ROUNDS_LIMIT_EXCEEDED döndü. Test 3 ✅ Game types whitelist & toplam iş yükü: ['slot','blackjack'] ile 400 ROBOT_GAME_TYPE_UNSUPPORTED game_type='blackjack', 6 duplicate game types * 900 rounds = 5400 > 5000 ile 400 ROBOT_TOTAL_WORK_EXCEEDED döndü. Test 4 ✅ Scope eksik: Key B (robot.run yok) ile 403 API_KEY_SCOPE_FORBIDDEN döndü. Test 5 ✅ Tenant mismatch: Key A ile tenant_id='some_other_tenant' gönderildi, 403 TENANT_MISMATCH döndü (api_key_tenant='default_casino', requested_tenant='some_other_tenant'). Tüm validation ve error handling çalışıyor, robot orchestrator backend endpoint production ready."
+
   - task: "Client Upload Flow Backend Validation"
     implemented: true
     working: true
