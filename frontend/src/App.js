@@ -54,6 +54,7 @@ function App() {
           <Route path="/logs" element={<SystemLogs />} />
           <Route path="/rg" element={<ResponsibleGaming />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/tenants" element={<TenantsPage />} />
           
           <Route path="/settings" element={<SettingsPanel />} />
           <Route path="*" element={<Navigate to="/" />} />
