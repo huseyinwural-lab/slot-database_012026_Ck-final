@@ -261,6 +261,7 @@ def parse_args(argv: List[str]) -> Dict[str, Any]:
         "rounds": args.rounds,
         "tenant_id": args.tenant_id,
         "api_key": args.api_key,
+        "base_url": args.base_url,
     }
 
 
