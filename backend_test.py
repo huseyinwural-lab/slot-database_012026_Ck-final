@@ -7467,7 +7467,7 @@ TX-MISSING-LOW,25.50,EUR"""
             success6 and log_validation
         ])
 
-    def test_crash_advanced_safety_backend_validation(self):
+    # Old crash test method removed - using new implementation above
         """Test Crash Advanced Safety Backend Validation - Turkish Review Request"""
         print("\n💥 CRASH ADVANCED SAFETY BACKEND VALIDATION TESTS")
         
