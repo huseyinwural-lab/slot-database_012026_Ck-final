@@ -151,6 +151,14 @@ const GameReelStripsTab = ({ game }) => {
         rounds: 10000,
         bet: 1.0,
       });
+      toast.success(`Simulation triggered (stub). ID: ${res.data?.simulation_id}`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Simulation tetiklenemedi');
+    } finally {
+      setSimulateLoading(false);
+    }
+  };
 
   const toggleVersion = (configVersionId) => {
     setSelectedVersions((prev) => {
