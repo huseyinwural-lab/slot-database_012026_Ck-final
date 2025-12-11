@@ -1488,8 +1488,8 @@ class CasinoAdminAPITester:
         if success_a and success_b:
             print(f"\n🔍 DB Validation: Checking game document in database")
             
-            # Use the games API to check the updated game document
-            games_url = f"{self.base_url}/api/v1/games/{test_game_id}"
+            # Use the games list API to check the updated game document
+            games_url = f"{self.base_url}/api/v1/games"
             db_response = requests.get(games_url, timeout=30)
             
             success_db = db_response.status_code == 200
