@@ -1233,8 +1233,8 @@ class CasinoAdminAPITester:
         """Test Client Upload Flow - Turkish Review Request"""
         print("\n📤 CLIENT UPLOAD FLOW TESTS")
         
-        # Test game: Test Slot Game (QA) from TEST_GAME_INVENTORY.md
-        test_game_id = "f78ddf21-c759-4b8c-a5fb-28c90b3645ab"
+        # Test game: Test Slot Game (using existing game from API)
+        test_game_id = "f9596f63-a1f6-411b-aec4-f713b900894e"
         print(f"🎯 Test Game ID: {test_game_id}")
         
         # Create test files for upload
