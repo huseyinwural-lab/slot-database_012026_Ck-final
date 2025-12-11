@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Upload, Save, FlaskConical } from 'lucide-react';
 import api from '../../services/api';
+import ConfigDiffPanel from './ConfigDiffPanel';
 
 const parseReelsFromText = (text) => {
   const lines = text
