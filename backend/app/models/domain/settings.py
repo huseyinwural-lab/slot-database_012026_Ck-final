@@ -147,6 +147,15 @@ class PlatformDefaults(BaseModel):
     api_rate_limit_per_minute: int = 60
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
+class NewMemberManualBonusConfig(BaseModel):
+    enabled: bool = False
+    allowed_game_ids: List[str] = []
+    spin_count: int = 0
+    fixed_bet_amount: float = 0.0
+    total_budget_cap: float = 0.0
+    validity_days: int = 7
+
 class APIKey(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     key_name: str
