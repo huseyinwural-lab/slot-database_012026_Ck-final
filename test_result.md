@@ -18,6 +18,21 @@ tenant_model_endpoints_seed:
         -agent: "testing"
         -comment: "✅ TENANT MODEL + ENDPOINTS + SEED - ALL TESTS PASSED: Senaryo A) Seed sonrası listeleme: GET /api/v1/tenants/ endpoint çalışıyor, default_casino (id='default_casino', type='owner', tüm features=true) ve demo_renter (id='demo_renter', type='renter', can_use_game_robot=true, can_manage_bonus=true, can_edit_configs=false, can_view_reports=true) seed verileri doğru şekilde oluşturuldu ve listeleniyor. Senaryo B) Yeni renter create: POST /api/v1/tenants/ ile 'QA Renter 1' adında yeni renter başarıyla oluşturuldu (UUID id, type='renter', features doğru), response yapısı tam (id, name, type, features, created_at, updated_at), yeni tenant GET listesinde görünüyor. Tenant router'ın doğru şekilde çalıştığı, seed verilerinin beklendiği gibi oluştuğu, yeni renter oluşturmanın sorunsuz ve idempotent olduğu doğrulandı. Endpoint URL'leri trailing slash ile çalışıyor (/api/v1/tenants/)."
 
+  - task: "Tenant Helper Validation - Games ve Players Endpoint Tenant-Aware Filtering"
+    implemented: true
+    working: true
+    file: "backend/app/utils/tenant.py, backend/app/routes/core.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "AdminUser modelinde tenant_id: str = 'default_casino' alanı eklendi. Helper: app/utils/tenant.py get_current_tenant_id(request, admin) fonksiyonu header X-Tenant-ID > admin.tenant_id > 'default_casino' öncelik sırasıyla çalışıyor. Oyun ve oyuncu listeleri tenant-aware hale getirildi: GET /api/v1/games ve GET /api/v1/players artık request: Request parametresi alıyor ve tenant_id filtresi ile çalışıyor."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TENANT HELPER VALIDATION - ALL SMOKE TESTS PASSED: Test 1) GET /api/v1/games (header yok): 100 oyun döndü, tenant_id='default_casino' kullanıldı. Test 2) GET /api/v1/games (X-Tenant-ID: demo_renter): 0 oyun döndü, tenant_id='demo_renter' kullanıldı - tenant filtering çalışıyor (farklı sonuç sayıları). Test 3) GET /api/v1/players (header yok): 100 oyuncu döndü, tenant_id='default_casino' kullanıldı. Test 4) GET /api/v1/players (X-Tenant-ID: demo_renter): 0 oyuncu döndü, tenant_id='demo_renter' kullanıldı - tenant filtering çalışıyor (farklı sonuç sayıları). Test 5) GET /api/v1/tenants (regresyon): 3 tenant bulundu, default_casino ve demo_renter mevcut. get_current_tenant_id() helper fonksiyonu doğru çalışıyor: header X-Tenant-ID > admin.tenant_id > 'default_casino' öncelik sırası ile tenant_id seçimi yapıyor. Oyun ve oyuncu endpoint'leri tenant filtresi ile sorunsuz çalışıyor."
+
 p0_d_test_game_inventory:
   - task: "Test Game Inventory Matrix"
     implemented: true
