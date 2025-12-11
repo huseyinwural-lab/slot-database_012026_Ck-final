@@ -1018,9 +1018,12 @@ async def save_dice_math_config(game_id: str, payload: DiceMathSaveRequest, requ
         )
 
     # Normalize enforcement_mode
-    normalized_enforcement_mode, err = _validate_enforcement_mode(payload.enforcement_mode, _dice_math_error)
+    normalized_enforcement_mode, err = _validate_enforcement_mode(
+        payload.enforcement_mode,
+        _dice_math_error,
+    )
     if err is not None:
-        return JSONResponse(status_code=400, content=err)
+        return err
 
     # Country overrides validation
     normalized_country_overrides, err = _validate_country_overrides(
