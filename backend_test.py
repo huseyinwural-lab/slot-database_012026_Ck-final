@@ -10062,6 +10062,9 @@ def main():
     print("\n📤 CLIENT UPLOAD FLOW TESTS (TURKISH REVIEW REQUEST)")
     test_results.append(("Client Upload Flow", tester.test_client_upload_flow()))
     
+    print("\n🎁 YENİ ÜYE MANUEL BONUS TRIGGER BACKEND TESTS (TURKISH REVIEW REQUEST)")
+    test_results.append(("Yeni Üye Manuel Bonus Trigger", tester.test_new_member_manual_bonus_trigger()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
