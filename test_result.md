@@ -18,6 +18,21 @@ jwt_admin_auth:
         -agent: "testing"
         -comment: "✅ JWT ADMIN AUTH & PASSWORD MANAGEMENT - ALL TESTS PASSED (7/7 scenarios): Senaryo 1) Seed & Basic Login: POST /api/v1/admin/seed başarılı, POST /api/v1/auth/login ile admin@casino.com/Admin123! giriş başarılı (200 OK, access_token, token_type='bearer', admin yapısı tam), GET /api/v1/auth/me doğru admin bilgilerini döndürüyor. Senaryo 2) Failed Login Attempts: Var olmayan email (wrong@casino.com) ve yanlış şifre ile login denemeleri 401 INVALID_CREDENTIALS döndürüyor. Senaryo 3) Password Change Flow: POST /api/v1/auth/change-password ile şifre Admin123! → Admin1234! değiştirildi (200 OK, PASSWORD_CHANGED), eski şifre ile login 401, yeni şifre ile login başarılı. Senaryo 4) Password Policy Validation: Çok kısa (Ab1!), büyük harf yok (admin123!), rakam yok (Admin!!!), özel karakter yok (Admin1234) şifreler için doğru validation hataları (400, PASSWORD_TOO_SHORT, PASSWORD_MUST_CONTAIN_UPPERCASE, PASSWORD_MUST_CONTAIN_DIGIT, PASSWORD_MUST_CONTAIN_SPECIAL). Senaryo 5) Password Reset Flow: POST /api/v1/auth/request-password-reset geçerli email için reset_token döndürüyor, var olmayan email için güvenlik nedeniyle aynı mesaj ama token yok, POST /api/v1/auth/reset-password geçerli token ile başarılı (PASSWORD_RESET_SUCCESS), geçersiz token ile 400 RESET_TOKEN_INVALID. Senaryo 6) Unauthorized Access: Authorization header olmadan GET /api/v1/auth/me → 401 'Not authenticated', geçersiz token ile 401. Senaryo 7) Data Structure & Security: AdminUser response'da _id alanı yok sadece string id var, JWT token HS256 ile imzalanmış ve exp alanı mevcut. Tüm JWT auth akışları çalışıyor."
 
+  - task: "JWT Auth Regression Test - Turkish Review Request"
+    implemented: true
+    working: false
+    file: "backend/app/routes/core.py, backend/app/routes/game_config.py, backend/app/routes/auth.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "JWT tabanlı auth ve gerçek current_admin kullanımı ile güncellenen core ve game_config endpoint'lerini hızlı bir regresyonla test et."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ JWT AUTH REGRESSION - PARTIAL FAILURE (13/15 tests passed): ✅ Auth setup: POST /api/v1/admin/seed ve POST /api/v1/auth/login başarılı, token alındı. ✅ Players endpoint: WITH auth 100 players döndü (200 OK), WITHOUT auth 401 Unauthorized. ✅ Games endpoint: WITH auth 100 games döndü (200 OK), WITHOUT auth 401 Unauthorized. ✅ Bonus config: GET/PUT WITH auth 200 OK, PUT WITHOUT auth 401 Unauthorized. ❌ Slot config: GET WITH auth 200 OK, POST WITH auth 200 OK, ancak GET WITHOUT auth 200 döndü (401 beklenen). ❌ Bonuses: GET WITH auth 0 bonuses döndü (200 OK), POST WITH auth 422 validation error (bonus type 'deposit' geçersiz). İki kritik sorun: 1) GET /api/v1/games/{game_id}/config/slot-advanced endpoint'i auth gerektirmiyor (get_current_admin dependency eksik). 2) Bonus POST endpoint'i için geçerli bonus type kullanılmalı (deposit_match, high_roller, vs.)."
+
 tenant_model_endpoints_seed:
   - task: "Tenant Model + Koleksiyon + Endpointler + Seed backend testi"
     implemented: true
