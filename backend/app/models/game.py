@@ -220,6 +220,13 @@ class CrashSafetyCountryOverride(BaseModel):
     max_total_win_per_session: Optional[float] = None
 
 
+class DiceSafetyCountryOverride(BaseModel):
+    max_win_per_bet: Optional[float] = None
+    max_loss_per_bet: Optional[float] = None
+    max_session_loss: Optional[float] = None
+    max_session_bets: Optional[int] = None
+
+
 class CrashMathConfig(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     game_id: str
