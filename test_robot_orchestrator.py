@@ -264,10 +264,10 @@ class RobotOrchestratorTester:
             else:
                 print(f"   ❌ Unsupported game type should have been rejected but got unexpected status")
             
-            # Test total work exceeded (3 types * 3000 rounds = 9000 > 5000)
+            # Test total work exceeded (6 types * 900 rounds = 5400 > 5000)
             payload2 = {
-                "game_types": ["slot", "crash", "dice"],
-                "rounds": 3000
+                "game_types": ["slot", "crash", "dice", "slot", "crash", "dice"],  # 6 types
+                "rounds": 900
             }
             success2, response2 = self.run_test("Robot Round - total work exceeded", "POST", "api/v1/robot/round", 400, payload2, auth_token=self.api_key_a)
             
