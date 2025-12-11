@@ -1245,6 +1245,9 @@ class CasinoAdminAPITester:
         html5_file_content = b"hello"  # Simple dummy content as requested
         unity_file_content = b"unity test content"
         
+        # Initialize success variables
+        success_1 = success_2 = success_3 = success_4 = success_5 = False
+        
         # Scenario 1: launch_url + min_version ile HTML5 upload
         print(f"\n🔍 Senaryo 1: launch_url + min_version ile HTML5 upload")
         
