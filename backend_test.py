@@ -1205,6 +1205,65 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_api_key_auth_layer_and_robot_endpoint(self):
+        """Test API Key Auth Layer and Robot Backend Endpoint - Turkish Review Request"""
+        print("\n🔑 API KEY AUTH LAYER & ROBOT ENDPOINT TESTS - Turkish Review Request")
+        
+        # Hazırlık: Seed admin data and get JWT token
+        print(f"\n🔍 Hazırlık: Admin seed ve JWT token alma")
+        success_prep = self._prepare_api_key_robot_tests()
+        if not success_prep:
+            print("❌ Hazırlık başarısız. Testlere devam edilemiyor.")
+            return False
+        
+        # Test 1: API key ile robot endpoint (mutlu path)
+        print(f"\n🔍 Test 1: API key ile robot endpoint (mutlu path)")
+        success_test1, api_key = self._test_robot_endpoint_happy_path()
+        
+        # Test 2: Scope eksik (robot.run yok)
+        print(f"\n🔍 Test 2: Scope eksik (robot.run yok)")
+        success_test2 = self._test_robot_endpoint_scope_missing()
+        
+        # Test 3: Tenant mismatch
+        print(f"\n🔍 Test 3: Tenant mismatch")
+        success_test3 = self._test_robot_endpoint_tenant_mismatch(api_key)
+        
+        # Test 4: API key eksik / geçersiz
+        print(f"\n🔍 Test 4: API key eksik / geçersiz")
+        success_test4 = self._test_robot_endpoint_missing_invalid_key()
+        
+        # Test 5: Game Robot CLI argüman zorunluluğu
+        print(f"\n🔍 Test 5: Game Robot CLI argüman zorunluluğu")
+        success_test5 = self._test_game_robot_cli_api_key_required()
+        
+        # Overall result
+        overall_success = success_prep and success_test1 and success_test2 and success_test3 and success_test4 and success_test5
+        
+        if overall_success:
+            print("\n✅ API KEY AUTH LAYER & ROBOT ENDPOINT - TÜM TESTLER BAŞARILI")
+            print("   ✅ Hazırlık: Admin seed ve JWT login başarılı")
+            print("   ✅ Test 1: API key ile robot endpoint (mutlu path) başarılı")
+            print("   ✅ Test 2: Scope eksik validation başarılı")
+            print("   ✅ Test 3: Tenant mismatch validation başarılı")
+            print("   ✅ Test 4: API key eksik/geçersiz validation başarılı")
+            print("   ✅ Test 5: CLI API key zorunluluğu başarılı")
+        else:
+            print("\n❌ API KEY AUTH LAYER & ROBOT ENDPOINT - BAZI TESTLER BAŞARISIZ")
+            if not success_prep:
+                print("   ❌ Hazırlık başarısız")
+            if not success_test1:
+                print("   ❌ Test 1: API key ile robot endpoint başarısız")
+            if not success_test2:
+                print("   ❌ Test 2: Scope eksik validation başarısız")
+            if not success_test3:
+                print("   ❌ Test 3: Tenant mismatch validation başarısız")
+            if not success_test4:
+                print("   ❌ Test 4: API key eksik/geçersiz validation başarısız")
+            if not success_test5:
+                print("   ❌ Test 5: CLI API key zorunluluğu başarısız")
+        
+        return overall_success
+
     def test_game_robot_tenant_aware(self):
         """Test Game Robot Tenant-Aware Functionality - Görev 2.2"""
         print("\n🤖 GAME ROBOT TENANT-AWARE TESTS - Görev 2.2")
