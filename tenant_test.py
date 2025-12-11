@@ -91,7 +91,7 @@ def test_tenant_endpoints():
         
         # Step 3: GET tenants again to validate seeded data
         print(f"\n🔍 Step 3: Validate seeded tenants")
-        response = requests.get(f"{base_url}/api/v1/tenants", timeout=30)
+        response = requests.get(f"{base_url}/api/v1/tenants/", timeout=30)
         
         if response.status_code != 200:
             print(f"❌ Failed to get updated tenants: {response.text}")
@@ -235,7 +235,7 @@ def test_tenant_endpoints():
         
         # Step 5: Verify new tenant appears in list
         print(f"\n🔍 Step 5: Verify new tenant in list")
-        response = requests.get(f"{base_url}/api/v1/tenants", timeout=30)
+        response = requests.get(f"{base_url}/api/v1/tenants/", timeout=30)
         
         if response.status_code != 200:
             print(f"❌ Failed to get final tenants list: {response.text}")
