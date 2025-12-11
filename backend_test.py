@@ -10330,6 +10330,9 @@ def main():
     # Run all tests
     test_results = []
     
+    print("\n🏢 TENANT MODEL + ENDPOINTS + SEED TESTS - Görev 2.1.1")
+    test_results.append(("Tenant Model + Endpoints + Seed", tester.test_tenant_model_endpoints_seed()))
+    
     print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
     test_results.append(("Review Request Specific", tester.test_review_request_specific()))
     
