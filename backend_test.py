@@ -1238,8 +1238,20 @@ class CasinoAdminAPITester:
         success_prereq, games_response = self.run_test("Get Crash Games", "GET", "api/v1/games?category=Crash", 200)
         
         crash_game_id = None
-        if success_prereq and isinstance(games_response, list):
-            for game in games_response:
+        if success_prereq:
+            # Handle both list and string responses
+            if isinstance(games_response, list):
+                games_list = games_response
+            elif isinstance(games_response, str):
+                try:
+                    import json
+                    games_list = json.loads(games_response)
+                except:
+                    games_list = []
+            else:
+                games_list = []
+            
+            for game in games_list:
                 if game.get('name') == "Test Crash Game (Advanced Safety QA)":
                     crash_game_id = game.get('id')
                     print(f"   🎯 Found Test Crash Game (Advanced Safety QA): ID = {crash_game_id}")
