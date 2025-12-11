@@ -193,8 +193,13 @@ async def reset_password(payload: PasswordResetConfirmRequest):
     if not stored_token or stored_token != payload.token:
         raise HTTPException(status_code=400, detail="RESET_TOKEN_INVALID")
 
-    if expires_at and datetime.fromisoformat(str(expires_at)) < datetime.now(timezone.utc):
-        raise HTTPException(status_code=400, detail="RESET_TOKEN_EXPIRED")
+    if expires_at:
+        if isinstance(expires_at, str):
+            expires_dt = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        else:
+            expires_dt = expires_at
+        if expires_dt < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="RESET_TOKEN_EXPIRED")
 
     _validate_password_policy(payload.new_password)
 
