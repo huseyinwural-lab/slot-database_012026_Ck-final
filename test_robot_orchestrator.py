@@ -217,7 +217,7 @@ class RobotOrchestratorTester:
             success2, response2 = self.run_test("Robot Round - rounds=2000", "POST", "api/v1/robot/round", 400, payload2, auth_token=self.api_key_a)
             
             rounds_2000_valid = False
-            if not success2:  # Expecting 400
+            if success2:  # Expecting 400 - success means we got the expected status code
                 try:
                     error_data = json.loads(response2) if isinstance(response2, str) else response2
                     if isinstance(error_data, dict) and error_data.get('detail', {}).get('error_code') == 'ROBOT_ROUNDS_LIMIT_EXCEEDED':
@@ -228,7 +228,7 @@ class RobotOrchestratorTester:
                 except:
                     print(f"   ❌ rounds=2000 rejected but couldn't parse error: {response2}")
             else:
-                print(f"   ❌ rounds=2000 should have been rejected but got 200")
+                print(f"   ❌ rounds=2000 should have been rejected but got unexpected status")
             
             return rounds_0_valid and rounds_2000_valid
             
