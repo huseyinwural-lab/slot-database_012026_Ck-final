@@ -1583,6 +1583,9 @@ class CasinoAdminAPITester:
                     "actual": response.status_code,
                     "response": response.text[:200]
                 })
+        except Exception as e:
+            print(f"❌ Senaryo 5 Exception: {e}")
+            success_5 = False
         
         # Overall result
         overall_success = success_1 and success_2 and success_3 and success_4 and success_5
