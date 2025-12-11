@@ -3347,9 +3347,6 @@ async def get_game_config_diff(
         changes=changes,
     )
 
-    )
-    prev_cfg = JackpotConfig(**prev_cfg_docs[0]) if prev_cfg_docs else None
-
     version = await _generate_new_version(db, game_id, admin_id, notes="Jackpot config change")
 
     cfg = JackpotConfig(
