@@ -21,6 +21,16 @@ DEFAULT_ROUNDS = 50
 # Backend base URL - env'den okunur, yoksa preview panel URL'sine benzer bir default
 BASE_URL = os.getenv("GAME_ROBOT_BASE_URL", "http://localhost:8001")
 
+# Test game IDs
+TEST_SLOT_ID = "test-slot-game"
+TEST_CRASH_ID = "test-crash-game"
+TEST_DICE_ID = "test-dice-game"
+
+# Test bet amounts and parameters
+CRASH_BETS = [10, 25, 50, 100, 200]
+DICE_BETS = [5, 15, 30, 75, 150]
+DICE_CHANCES = [50.0, 25.0, 75.0, 10.0, 90.0]
+
 
 class HttpClient:
     def __init__(self, base_url: str, api_key: str, timeout: float = 10.0):
