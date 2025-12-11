@@ -663,20 +663,10 @@ async def maybe_grant_new_member_manual_bonus(user_id: str):
 
     existing = await db.bonus_tickets.count_documents(
         {"user_id": user_id, "type": "new_member_manual", "status": {"$in": ["pending", "active"]}}
-
-
-@router.post("/players/{player_id}/events/registered")
-async def player_registered_event(player_id: str):
-    await maybe_grant_new_member_manual_bonus(player_id)
-    return {"message": "Player registration event processed"}
-
-
-@router.post("/players/{player_id}/events/first-login")
-async def player_first_login_event(player_id: str):
-    await maybe_grant_new_member_manual_bonus(player_id)
-    return {"message": "Player first-login event processed"}
-
     )
+    if existing > 0:
+        print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "already_granted"})
+        return
     if existing > 0:
         print("NEW_MEMBER_BONUS_SKIPPED", {"user_id": user_id, "reason": "already_granted"})
         return
