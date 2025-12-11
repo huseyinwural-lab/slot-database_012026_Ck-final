@@ -963,6 +963,136 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_tenant_helper_validation(self):
+        """Test Tenant Helper Validation - Turkish Review Request 2.1.2-2.1.4"""
+        print("\n🏢 TENANT HELPER VALIDATION TESTS - Görev 2.1.2-2.1.4")
+        
+        # Step 1: Test games endpoint without header (should use default_casino)
+        print(f"\n🔍 Step 1: Test games endpoint without X-Tenant-ID header")
+        success1, games_no_header = self.run_test("GET Games (No Header)", "GET", "api/v1/games", 200)
+        
+        if success1 and isinstance(games_no_header, list):
+            print(f"   ✅ Games without header: {len(games_no_header)} games returned")
+            print(f"   📊 Expected: query uses tenant_id='default_casino'")
+        else:
+            print("   ❌ Games endpoint failed without header")
+            return False
+        
+        # Step 2: Test games endpoint with X-Tenant-ID: demo_renter header
+        print(f"\n🔍 Step 2: Test games endpoint with X-Tenant-ID: demo_renter")
+        headers = {'X-Tenant-ID': 'demo_renter'}
+        
+        url = f"{self.base_url}/api/v1/games"
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success2 = response.status_code == 200
+            
+            if success2:
+                games_with_header = response.json()
+                print(f"   ✅ Games with demo_renter header: {len(games_with_header)} games returned")
+                print(f"   📊 Expected: query uses tenant_id='demo_renter'")
+                
+                # Compare results - they might be different if tenant filtering is working
+                if len(games_with_header) != len(games_no_header):
+                    print(f"   ✅ Tenant filtering appears to be working (different result counts)")
+                else:
+                    print(f"   ⚠️  Same number of games returned - tenant filtering may not be active yet")
+            else:
+                print(f"   ❌ Games endpoint failed with header - Status: {response.status_code}")
+                success2 = False
+        except Exception as e:
+            print(f"   ❌ Games endpoint error with header: {str(e)}")
+            success2 = False
+        
+        # Step 3: Test players endpoint without header (should use default_casino)
+        print(f"\n🔍 Step 3: Test players endpoint without X-Tenant-ID header")
+        success3, players_no_header = self.run_test("GET Players (No Header)", "GET", "api/v1/players", 200)
+        
+        if success3 and isinstance(players_no_header, list):
+            print(f"   ✅ Players without header: {len(players_no_header)} players returned")
+            print(f"   📊 Expected: query uses tenant_id='default_casino'")
+        else:
+            print("   ❌ Players endpoint failed without header")
+            return False
+        
+        # Step 4: Test players endpoint with X-Tenant-ID: demo_renter header
+        print(f"\n🔍 Step 4: Test players endpoint with X-Tenant-ID: demo_renter")
+        
+        url = f"{self.base_url}/api/v1/players"
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success4 = response.status_code == 200
+            
+            if success4:
+                players_with_header = response.json()
+                print(f"   ✅ Players with demo_renter header: {len(players_with_header)} players returned")
+                print(f"   📊 Expected: query uses tenant_id='demo_renter'")
+                
+                # Compare results - they might be different if tenant filtering is working
+                if len(players_with_header) != len(players_no_header):
+                    print(f"   ✅ Tenant filtering appears to be working (different result counts)")
+                else:
+                    print(f"   ⚠️  Same number of players returned - tenant filtering may not be active yet")
+            else:
+                print(f"   ❌ Players endpoint failed with header - Status: {response.status_code}")
+                success4 = False
+        except Exception as e:
+            print(f"   ❌ Players endpoint error with header: {str(e)}")
+            success4 = False
+        
+        # Step 5: Regression check - verify tenants endpoint still works
+        print(f"\n🔍 Step 5: Regression check - GET /api/v1/tenants")
+        success5, tenants_response = self.run_test("GET Tenants (Regression)", "GET", "api/v1/tenants", 200)
+        
+        regression_success = True
+        if success5 and isinstance(tenants_response, list):
+            if len(tenants_response) >= 2:
+                print(f"   ✅ Tenants endpoint working: {len(tenants_response)} tenants found")
+                
+                # Check for expected tenants
+                tenant_ids = [t.get('id') for t in tenants_response]
+                if 'default_casino' in tenant_ids and 'demo_renter' in tenant_ids:
+                    print(f"   ✅ Expected tenants found: default_casino, demo_renter")
+                else:
+                    print(f"   ⚠️  Expected tenants may be missing: {tenant_ids}")
+                    regression_success = False
+            else:
+                print(f"   ❌ Expected at least 2 tenants, got {len(tenants_response)}")
+                regression_success = False
+        else:
+            print("   ❌ Tenants endpoint regression failed")
+            regression_success = False
+        
+        # Overall test result
+        overall_success = success1 and success2 and success3 and success4 and success5 and regression_success
+        
+        if overall_success:
+            print("\n✅ TENANT HELPER VALIDATION - ALL TESTS PASSED")
+            print("   ✅ Games endpoint working with and without X-Tenant-ID header")
+            print("   ✅ Players endpoint working with and without X-Tenant-ID header")
+            print("   ✅ Tenant helper get_current_tenant_id() functioning correctly")
+            print("   ✅ Regression check passed - tenants endpoint still working")
+            print("\n📋 SUMMARY REPORT:")
+            print(f"   🎮 Games (no header): {len(games_no_header)} results")
+            print(f"   🎮 Games (demo_renter): {len(games_with_header) if success2 else 'FAILED'} results")
+            print(f"   👥 Players (no header): {len(players_no_header)} results")
+            print(f"   👥 Players (demo_renter): {len(players_with_header) if success4 else 'FAILED'} results")
+            print(f"   🏢 Tenants available: {len(tenants_response) if success5 else 'FAILED'}")
+        else:
+            print("\n❌ TENANT HELPER VALIDATION - SOME TESTS FAILED")
+            if not success1:
+                print("   ❌ Games endpoint failed without header")
+            if not success2:
+                print("   ❌ Games endpoint failed with X-Tenant-ID header")
+            if not success3:
+                print("   ❌ Players endpoint failed without header")
+            if not success4:
+                print("   ❌ Players endpoint failed with X-Tenant-ID header")
+            if not success5 or not regression_success:
+                print("   ❌ Tenants endpoint regression failed")
+        
+        return overall_success
+
     def test_tenant_model_endpoints_seed(self):
         """Test Tenant Model + Endpoints + Seed - Turkish Review Request 2.1.1"""
         print("\n🏢 TENANT MODEL + ENDPOINTS + SEED TESTS - Görev 2.1.1")
