@@ -722,6 +722,19 @@ async def analyze_transaction_risk(tx_id: str):
     analysis = await risk_analyzer.analyze_transaction(tx)
     
     # Update TX
+
+
+@router.post("/players/{player_id}/events/registered")
+async def player_registered_event(player_id: str):
+    await maybe_grant_new_member_manual_bonus(player_id)
+    return {"message": "Player registration event processed"}
+
+
+@router.post("/players/{player_id}/events/first-login")
+async def player_first_login_event(player_id: str):
+    await maybe_grant_new_member_manual_bonus(player_id)
+    return {"message": "Player first-login event processed"}
+
     update_data = {
         "risk_score_at_time": analysis.get("risk_level", "medium"),
     }
