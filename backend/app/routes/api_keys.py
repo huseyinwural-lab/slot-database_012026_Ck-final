@@ -82,7 +82,7 @@ async def create_api_key(
 
     await db.admin_api_keys.insert_one(doc)
 
-    meta = {k: v for k, v in doc.items() if k not in {"key_hash"}}
+    meta = {k: v for k, v in doc.items() if k not in {"key_hash", "_id"}}
 
     # Response intentionally kept simple JSON-serializable types only
     return {
