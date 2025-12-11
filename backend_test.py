@@ -12649,6 +12649,9 @@ def main():
     print("\n🔑 FAZ 4 API KEY BACKEND TESTS (TURKISH REVIEW REQUEST)")
     test_results.append(("FAZ 4 API Key Backend", tester.test_api_keys_backend_faz4()))
     
+    print("\n🔑 API KEY AUTH LAYER & ROBOT ENDPOINT TESTS (TURKISH REVIEW REQUEST)")
+    test_results.append(("API Key Auth Layer & Robot Endpoint", tester.test_api_key_auth_layer_and_robot_endpoint()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
