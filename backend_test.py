@@ -1514,32 +1514,32 @@ class CasinoAdminAPITester:
                         print(f"   ✅ client_variants keys: {list(client_variants.keys())}")
                         print(f"   ✅ primary_client_type: {primary_client_type}")
                     
-                    # Validate HTML5 variant
-                    html5_variant = client_variants.get('html5', {})
-                    if (html5_variant.get('enabled') == True and
-                        html5_variant.get('runtime') == 'html5' and
-                        'test-html5.zip' in html5_variant.get('launch_url', '')):
-                        print(f"   ✅ HTML5 variant correctly saved in DB")
-                    else:
-                        print(f"   ❌ HTML5 variant incorrect in DB: {html5_variant}")
-                        success_db = False
-                    
-                    # Validate Unity variant
-                    unity_variant = client_variants.get('unity', {})
-                    if (unity_variant.get('enabled') == True and
-                        unity_variant.get('runtime') == 'unity' and
-                        'test-unity.zip' in unity_variant.get('launch_url', '')):
-                        print(f"   ✅ Unity variant correctly saved in DB")
-                    else:
-                        print(f"   ❌ Unity variant incorrect in DB: {unity_variant}")
-                        success_db = False
-                    
-                    # Validate primary_client_type remains html5
-                    if primary_client_type == 'html5':
-                        print(f"   ✅ primary_client_type correctly remains 'html5'")
-                    else:
-                        print(f"   ❌ primary_client_type incorrect: {primary_client_type} (should be html5)")
-                        success_db = False
+                        # Validate HTML5 variant
+                        html5_variant = client_variants.get('html5', {})
+                        if (html5_variant.get('enabled') == True and
+                            html5_variant.get('runtime') == 'html5' and
+                            'test-html5.zip' in html5_variant.get('launch_url', '')):
+                            print(f"   ✅ HTML5 variant correctly saved in DB")
+                        else:
+                            print(f"   ❌ HTML5 variant incorrect in DB: {html5_variant}")
+                            success_db = False
+                        
+                        # Validate Unity variant
+                        unity_variant = client_variants.get('unity', {})
+                        if (unity_variant.get('enabled') == True and
+                            unity_variant.get('runtime') == 'unity' and
+                            'test-unity.zip' in unity_variant.get('launch_url', '')):
+                            print(f"   ✅ Unity variant correctly saved in DB")
+                        else:
+                            print(f"   ❌ Unity variant incorrect in DB: {unity_variant}")
+                            success_db = False
+                        
+                        # Validate primary_client_type remains html5
+                        if primary_client_type == 'html5':
+                            print(f"   ✅ primary_client_type correctly remains 'html5'")
+                        else:
+                            print(f"   ❌ primary_client_type incorrect: {primary_client_type} (should be html5)")
+                            success_db = False
                         
                 except Exception as e:
                     print(f"   ❌ Failed to parse game data for DB validation: {e}")
