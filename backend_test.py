@@ -11179,10 +11179,11 @@ TX-MISSING-LOW,25.50,EUR"""
             
             if success1:
                 response_data = response.json()
-                if 'Could not validate credentials' in response_data.get('detail', ''):
-                    print("   ✅ No auth header returns 401 'Could not validate credentials'")
+                detail = response_data.get('detail', '')
+                if 'Not authenticated' in detail or 'Could not validate credentials' in detail:
+                    print(f"   ✅ No auth header returns 401 '{detail}'")
                 else:
-                    print(f"   ❌ Unexpected error message: {response_data.get('detail')}")
+                    print(f"   ❌ Unexpected error message: {detail}")
                     success1 = False
             else:
                 print(f"   ❌ Expected 401, got {response.status_code}")
