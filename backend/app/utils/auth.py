@@ -130,6 +130,3 @@ def require_scope(context: AdminAPIKeyContext, scope: str) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"error_code": "API_KEY_SCOPE_FORBIDDEN", "scope": scope},
         )
-
-
-    return dependency
