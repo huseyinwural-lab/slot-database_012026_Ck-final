@@ -16,3 +16,9 @@ Bu doküman, config ve hardening ile ilgili test botlarının/süreçlerinin isk
   - enabled: true
   - runs: core UI flows for Slot/Crash/Dice/Blackjack/Poker (GameManagement, GameConfigPanel, diff UI, temel oyuncu akışları)
   - scope: Frontend/E2E akışların Playwright/agent tabanlı otomasyonu
+
+- `game-robot`
+  - enabled: true
+  - type: "deterministic_mvp"
+  - description: "Canonical Slot/Crash/Dice test oyunları üzerinde belirli sayıda round için deterministic config round-trip çalıştırır."
+  - command: "python -m backend.app.bots.game_robot --game-types slot,crash,dice --rounds 50"
