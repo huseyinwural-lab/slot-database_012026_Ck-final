@@ -32,4 +32,8 @@ class GameImportItem(BaseModel):
     warnings: List[str] = []
     already_exists: bool = False
     raw_payload: Optional[Dict[str, Any]] = None
+    # Client runtime metadata (optional for backwards compatibility)
+    client_type: Optional[str] = None  # "html5" | "unity"
+    client_launch_url: Optional[str] = None
+    client_min_version: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

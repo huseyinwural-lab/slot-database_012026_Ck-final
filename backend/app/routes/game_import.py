@@ -68,15 +68,24 @@ async def _generate_new_version(db, game_id: str, admin_id: str, notes: Optional
     return version
 
 
-def _validation_error(message: str, field: str, errors: Optional[List[str]] = None, warnings: Optional[List[str]] = None) -> Dict[str, Any]:
+def _validation_error(
+    message: str,
+    field: str,
+    errors: Optional[List[str]] = None,
+    warnings: Optional[List[str]] = None,
+    reason: Optional[str] = None,
+) -> Dict[str, Any]:
+    details: Dict[str, Any] = {
+        "field": field,
+        "errors": errors or [],
+        "warnings": warnings or [],
+    }
+    if reason is not None:
+        details["reason"] = reason
     return {
         "error_code": "GAME_IMPORT_VALIDATION_FAILED",
         "message": message,
-        "details": {
-            "field": field,
-            "errors": errors or [],
-            "warnings": warnings or [],
-        },
+        "details": details,
     }
 
 
@@ -86,6 +95,9 @@ async def manual_upload(
     file: UploadFile = File(...),
     source_label: Optional[str] = Form(None),
     notes: Optional[str] = Form(None),
+    client_type: Optional[str] = Form(None),
+    launch_url: Optional[str] = Form(None),
+    min_version: Optional[str] = Form(None),
 ):
     """Handle manual game import via JSON or ZIP bundle.
 
@@ -98,6 +110,24 @@ async def manual_upload(
 
     filename = file.filename or "upload.bin"
     content = await file.read()
+
+    # --- client_type validation (only for manual uploads) ---
+    client_type_norm = (client_type or "").lower() if client_type is not None else None
+    allowed_client_types = {"html5", "unity"}
+    if client_type_norm is None or client_type_norm == "":
+        err = _validation_error(
+            "client_type is required for manual uploads.",
+            "client_type",
+            reason="missing_client_type",
+        )
+        return JSONResponse(status_code=400, content=err)
+    if client_type_norm not in allowed_client_types:
+        err = _validation_error(
+            "client_type must be one of ['html5', 'unity'].",
+            "client_type",
+            errors=["invalid_client_type"],
+        )
+        return JSONResponse(status_code=400, content=err)
 
     # --- Parse file ---
     if filename.lower().endswith(".json"):
@@ -219,6 +249,9 @@ async def manual_upload(
         warnings=warnings,
         already_exists=already_exists,
         raw_payload=payload,
+        client_type=client_type_norm,
+        client_launch_url=launch_url,
+        client_min_version=min_version,
     )
 
     await db.game_import_items.insert_one(item.model_dump())
@@ -316,6 +349,36 @@ async def import_job(job_id: str, request: Request):
                 core_type=payload.get("core_type"),
             )
             new_game.provider_game_id = item.provider_game_id
+
+            # --- Client variants from import metadata ---
+            client_type_meta = (item.client_type or "").lower() if getattr(item, "client_type", None) else None
+            if client_type_meta in {"html5", "unity"}:
+                try:
+                    from app.models.core import ClientRuntimeType, ClientVariant
+
+                    runtime_enum = ClientRuntimeType.HTML5 if client_type_meta == "html5" else ClientRuntimeType.UNITY
+                    launch = item.client_launch_url
+                    if not launch:
+                        # Basit bir default; gerçek path ileride asset pipeline ile güncellenecek
+                        launch = f"/games/{new_game.id}/index.html"
+
+                    variant = ClientVariant(
+                        enabled=True,
+                        launch_url=launch,
+                        runtime=runtime_enum,
+                        extra={
+                            "import_job_id": job_id,
+                            "min_version": item.client_min_version,
+                        },
+                    )
+
+                    variants = {client_type_meta: variant}
+                    new_game.client_variants = variants
+
+                    if new_game.primary_client_type is None:
+                        new_game.primary_client_type = runtime_enum
+                except Exception:
+                    logger.warning("Failed to apply client variant metadata for imported game %s", new_game.id)
 
             await db.games.insert_one(new_game.model_dump())
 
