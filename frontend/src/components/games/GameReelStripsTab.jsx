@@ -247,6 +247,12 @@ const GameReelStripsTab = ({ game }) => {
         <CardContent>
           <Textarea
             className="font-mono text-xs h-64"
+            value={reelText}
+            onChange={(e) => setReelText(e.target.value)}
+            placeholder={"A,K,Q,J,9\nA,K,Q,10,9"}
+          />
+        </CardContent>
+      </Card>
 
       <ConfigDiffPanel
         open={diffOpen}
@@ -256,13 +262,6 @@ const GameReelStripsTab = ({ game }) => {
         toVersion={diffMeta.to}
         changes={diffChanges}
       />
-
-            value={reelText}
-            onChange={(e) => setReelText(e.target.value)}
-            placeholder={"A,K,Q,J,9\nA,K,Q,10,9"}
-          />
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
