@@ -1717,17 +1717,17 @@ class CasinoAdminAPITester:
                     print(f"   ❌ Response parsing error: {e}")
                     success_1 = False
             else:
-                        print(f"❌ Senaryo 1 Failed - Status: {response.status_code}")
-                        print(f"   Response: {response.text[:200]}...")
-                        self.failed_tests.append({
-                            "name": "Senaryo 1 - HTML5 upload with launch_url + min_version",
-                            "expected": 200,
-                            "actual": response.status_code,
-                            "response": response.text[:200]
-                        })
+                print(f"❌ Senaryo 1 Failed - Status: {response.status_code}")
+                print(f"   Response: {response.text[:200]}...")
+                self.failed_tests.append({
+                    "name": "Senaryo 1 - HTML5 upload with launch_url + min_version",
+                    "expected": 200,
+                    "actual": response.status_code,
+                    "response": response.text[:200]
+                })
                         
-            finally:
-                os.unlink(client1_file.name)
+        finally:
+            os.unlink(client1_file.name)
         
         # Scenario 2: Sadece min_version update
         print(f"\n🔍 Senaryo 2: Sadece min_version update")
