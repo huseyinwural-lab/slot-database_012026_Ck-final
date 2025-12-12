@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
@@ -17,12 +18,12 @@ import { toast } from 'sonner';
 import api from '../../services/api';
 
 const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) => {
-  if (!transaction) return null;
-
   const [isLoading, setLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [note, setNote] = useState("");
   const [aiAnalysis, setAiAnalysis] = useState(null);
+
+  if (!transaction) return null;
 
   const handleAction = async (action, reason = '') => {
     setLoading(true);
