@@ -131,7 +131,7 @@ const APIKeysPage = () => {
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
-                <Label>İsim</Label>
+                <Label>Name</Label>
                 <Input value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} />
               </div>
               <div className="space-y-2">
