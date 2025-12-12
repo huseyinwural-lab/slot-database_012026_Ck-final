@@ -88,7 +88,7 @@ const NewMemberManualBonusCard = () => {
       <CardContent className="space-y-4">
         <div className="grid md:grid-cols-4 gap-3">
           <div className="space-y-1">
-            <Label>Spin sayısı</Label>
+            <Label>Number of spins</Label>
             <Input
               type="number"
               value={config.spin_count}
@@ -96,7 +96,7 @@ const NewMemberManualBonusCard = () => {
             />
           </div>
           <div className="space-y-1">
-            <Label>Spin başına miktar (EUR)</Label>
+            <Label>Amount per spin (EUR)</Label>
             <Input
               type="number"
               value={config.fixed_bet_amount}
@@ -106,7 +106,7 @@ const NewMemberManualBonusCard = () => {
             />
           </div>
           <div className="space-y-1">
-            <Label>Toplam bütçe üst limiti (EUR)</Label>
+            <Label>Total budget cap (EUR)</Label>
             <Input
               type="number"
               value={config.total_budget_cap}
