@@ -22,8 +22,10 @@ app = FastAPI(
 )
 
 # MongoDB Connection
-client = AsyncIOMotorClient(settings.mongo_url)
-db = client[settings.db_name]
+from app.core.database import db_wrapper
+db_wrapper.connect()
+client = db_wrapper.client
+db = db_wrapper.db
 app.state.db = db
 
 # Configure CORS
@@ -92,10 +94,12 @@ app.include_router(settings_router.router)
 # Indexes
 from app.db.indexes import ensure_indexes
 
+from app.routes.tenant import seed_default_tenants
 
 @app.on_event("startup")
 async def init_indexes():
     await ensure_indexes(db)
+    await seed_default_tenants()
 
 
 @app.get("/api/health")
@@ -131,4 +135,4 @@ async def readiness_check():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    db_wrapper.close()
