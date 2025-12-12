@@ -100,8 +100,10 @@ async def update_admin_status(id: str, status: str = Body(..., embed=True)):
 
 # --- ROLES ---
 @router.get("/roles", response_model=List[AdminRole])
-async def get_roles():
+async def get_roles(current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
+    # Roles are typically global, but we can add tenant_id if needed
+    # For now, keeping it global for all admins
     roles = await db.admin_roles.find().to_list(100)
     return [AdminRole(**r) for r in roles]
 
