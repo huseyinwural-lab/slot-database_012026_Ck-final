@@ -234,6 +234,27 @@ function App() {
             )}
           />
           <Route path="/accept-invite" element={<AcceptInvite />} />
+          
+          {/* Revenue Routes */}
+          <Route
+            path="/revenue/all-tenants"
+            element={(
+              <RequireAuth>
+                <RequireFeature requireOwner={true}>
+                  <OwnerRevenue />
+                </RequireFeature>
+              </RequireAuth>
+            )}
+          />
+          <Route
+            path="/revenue/my-tenant"
+            element={(
+              <RequireAuth>
+                <TenantRevenue />
+              </RequireAuth>
+            )}
+          />
+          
           <Route
             path="/settings"
             element={(
