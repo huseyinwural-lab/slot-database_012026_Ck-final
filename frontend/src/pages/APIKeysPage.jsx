@@ -188,16 +188,16 @@ const APIKeysPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>API Key Listesi</CardTitle>
+          <CardTitle>API Key List</CardTitle>
           <CardDescription>
-            Aktif/pasif durumları ve scope’ları yönetin. Full secret yalnızca oluşturma anında gösterilir.
+            Manage active/inactive status and scopes. The full secret is only shown at creation time.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>İsim</TableHead>
+                <TableHead>Name</TableHead>
                 <TableHead>Key Prefix</TableHead>
                 <TableHead>Tenant</TableHead>
                 <TableHead>Scopes</TableHead>
