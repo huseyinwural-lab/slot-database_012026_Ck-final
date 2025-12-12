@@ -60,7 +60,7 @@ async def get_dashboard_stats():
     )
 
 # --- PLAYERS ---
-from app.models.common import PaginationMeta, PaginatedResponse
+from app.models.common import PaginationMeta, PaginatedResponse, PaginationParams
 
 
 @router.get("/players", response_model=PaginatedResponse[Player])
@@ -71,11 +71,7 @@ async def get_players(
     vip_level: Optional[int] = None,
     risk_score: Optional[str] = None,
     country: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(50, ge=1, le=200),
-    include_total: bool = Query(True),
-    sort_by: Optional[str] = Query(None),
-    sort_dir: str = Query("desc"),
+    pagination: PaginationParams = Depends(get_pagination_params),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     db = get_db()
