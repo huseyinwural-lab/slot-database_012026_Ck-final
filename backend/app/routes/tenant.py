@@ -192,6 +192,8 @@ async def seed_default_tenants():
                 "can_edit_configs": False,
                 "can_manage_bonus": True,
                 "can_view_reports": True,
+                "can_manage_admins": True,
+                "can_manage_finance": True,
             },
         )
         await db.tenants.insert_many([

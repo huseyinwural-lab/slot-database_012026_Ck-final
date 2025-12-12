@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 
 from app.models.domain.admin import AdminUser
+from app.models.domain.admin import AdminStatus
 from app.utils.auth import (
     verify_password,
     get_password_hash,
@@ -161,7 +162,7 @@ async def request_password_reset(payload: PasswordResetRequest):
         },
     )
 
-    # V1: Mail entegrasyonu yok, sadece token[200~
+    # V1: Mail entegrasyonu yok, sadece token
     # Gerçek dünyada burada e-posta gönderilir.
     return {"message": "RESET_REQUEST_ACCEPTED", "reset_token": token}
 

@@ -14,7 +14,8 @@ export function useTenant() {
     const load = async () => {
       try {
         const res = await api.get('/v1/tenants/');
-        const items = res.data || [];
+        const data = res.data || {};
+        const items = data.items || [];
         // Geçici mantık: ilk owner'ı current tenant kabul et
         const owner = items.find((t) => t.type === 'owner');
         const renter = items.find((t) => t.type === 'renter');
