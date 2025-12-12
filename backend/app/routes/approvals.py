@@ -20,7 +20,14 @@ def get_db():
 
 # --- REQUESTS ---
 @router.get("/requests", response_model=List[ApprovalRequest])
-async def get_approval_requests(status: Optional[str] = None, category: Optional[str] = None):
+async def get_approval_requests(
+    status: Optional[str] = None, 
+    category: Optional[str] = None,
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    # Owner-only endpoint
+    require_owner(current_admin)
+    
     db = get_db()
     query = {}
     if status and status != "all": query["status"] = status
