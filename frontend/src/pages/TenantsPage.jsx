@@ -16,6 +16,7 @@ const featureKeys = [
 
 const TenantsPage = () => {
   const [tenants, setTenants] = useState([]);
+  const [tenantsMeta, setTenantsMeta] = useState({ page: 1, page_size: 50, total: null });
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     name: '',
