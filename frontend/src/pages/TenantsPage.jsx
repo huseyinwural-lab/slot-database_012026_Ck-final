@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import api from '../services/api';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,7 @@ const TenantsPage = () => {
   const [editingTenant, setEditingTenant] = useState(null);
   const [editFeatures, setEditFeatures] = useState({});
 
-  const loadTenants = async (page = 1) => {
+  const loadTenants = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const res = await api.get('/v1/tenants/', { params: { page, page_size: tenantsMeta.page_size || 50 } });
@@ -45,11 +46,11 @@ const TenantsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tenantsMeta.page_size]);
 
   useEffect(() => {
     loadTenants(1);
-  }, []);
+  }, [loadTenants]);
 
   const handleToggleFeature = (key) => {
     setForm((prev) => ({
