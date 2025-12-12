@@ -51,6 +51,27 @@ const AdminManagement = () => {
   const [activityFilter, setActivityFilter] = useState({ admin_id: '', module: '', action: '' });
   const [loginFilter, setLoginFilter] = useState({ admin_id: '', result: '', suspicious_only: false });
 
+  useEffect(() => {
+    // Load tenants and current user on mount
+    const loadInitialData = async () => {
+      try {
+        const tenantsRes = await api.get('/v1/tenants/', { params: { page: 1, page_size: 100 } });
+        setTenants(tenantsRes.data.items || []);
+        
+        // Get current user from localStorage or API
+        const token = localStorage.getItem('admin_token');
+        if (token) {
+          // Decode token to get user info (simple approach)
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          setCurrentUser({ sub: payload.sub, email: payload.email });
+        }
+      } catch (err) {
+        console.error('Failed to load initial data:', err);
+      }
+    };
+    loadInitialData();
+  }, []);
+
   const fetchData = async () => {
     try {
         if (activeTab === 'users') setUsers((await api.get('/v1/admin/users')).data);
