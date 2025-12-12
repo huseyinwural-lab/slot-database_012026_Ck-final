@@ -7,6 +7,7 @@ import httpx
 from app.utils.auth import AdminAPIKeyContext, get_api_key_context, require_scope
 from app.services.robot_orchestrator import RobotOrchestrator
 from app.routes.core import get_db
+from app.utils.features import ensure_tenant_feature_by_tenant_id
 
 
 router = APIRouter(prefix="/api/v1/robot", tags=["robot"])
@@ -56,6 +57,9 @@ async def robot_round(
                 "requested_tenant": payload.tenant_id,
             },
         )
+
+    # Enforce tenant feature flag for robot usage
+    await ensure_tenant_feature_by_tenant_id(api_ctx.tenant_id, "can_use_game_robot")
 
     db = get_db()
 

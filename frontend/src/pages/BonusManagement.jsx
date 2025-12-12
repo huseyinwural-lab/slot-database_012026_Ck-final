@@ -88,7 +88,15 @@ const BonusManagement = () => {
         await api.post('/v1/bonuses', payload);
         toast.success("Bonus Created");
         fetchBonuses();
-    } catch (err) { toast.error("Failed to create bonus"); }
+    } catch (err) {
+        const status = err?.response?.status;
+        const code = err?.response?.data?.error_code;
+        if (status === 403 && code === 'TENANT_FEATURE_DISABLED') {
+          toast.error('This module is disabled for your tenant.');
+        } else {
+          toast.error('Failed to create bonus');
+        }
+    }
   };
 
   return (
