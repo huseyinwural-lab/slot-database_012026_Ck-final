@@ -80,6 +80,15 @@ app.include_router(simulation_lab.router)
 from app.routes import settings as settings_router
 app.include_router(settings_router.router)
 
+# Indexes
+from app.db.indexes import ensure_indexes
+
+
+@app.on_event("startup")
+async def init_indexes():
+    await ensure_indexes(db)
+
+
 @app.get("/api/health")
 async def health_check():
     return {
