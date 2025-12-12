@@ -119,17 +119,17 @@ async def get_players(
                 "registered_at": 1,
             },
         )
-        .sort(field, direction)
+        .sort(field, -1 if pagination.sort_dir == "desc" else 1)
         .skip(skip)
-        .limit(page_size)
+        .limit(pagination.page_size)
     )
 
-    docs = await cursor.to_list(page_size)
-    total = await db.players.count_documents(query) if include_total else None
+    docs = await cursor.to_list(pagination.page_size)
+    total = await db.players.count_documents(query) if pagination.include_total else None
 
     return {
         "items": [Player(**p) for p in docs],
-        "meta": PaginationMeta(total=total, page=page, page_size=page_size),
+        "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
     }
 
 @router.get("/players/{player_id}", response_model=Player)
