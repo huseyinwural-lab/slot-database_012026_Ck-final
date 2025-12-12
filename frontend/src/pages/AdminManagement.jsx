@@ -390,7 +390,7 @@ const AdminManagement = () => {
                           <TableHead>Action</TableHead>
                           <TableHead>Module</TableHead>
                           <TableHead>IP Address</TableHead>
-                          <TableHead>Zaman</TableHead>
+                          <TableHead>Time</TableHead>
                           <TableHead>Risk</TableHead>
                           <TableHead></TableHead>
                         </TableRow>
