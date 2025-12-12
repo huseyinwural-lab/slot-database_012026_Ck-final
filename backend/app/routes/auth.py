@@ -228,3 +228,72 @@ async def reset_password(payload: PasswordResetConfirmRequest):
     )
 
     return {"message": "PASSWORD_RESET_SUCCESS"}
+
+
+@router.post("/accept-invite")
+async def accept_invite(payload: AcceptInviteRequest):
+    db = get_db()
+
+    from jose import jwt, JWTError
+
+    try:
+        data = jwt.decode(
+            payload.token,
+            settings.jwt_secret,
+            algorithms=[settings.jwt_algorithm],
+        )
+    except JWTError:
+        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+
+    if data.get("purpose") != "invite":
+        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+
+    email = data.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+
+    admin_doc = await db.admins.find_one({"email": email}, {"_id": 0})
+    if not admin_doc:
+        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+
+    # Only invited admins can accept an invite
+    if admin_doc.get("status") != AdminStatus.INVITED:
+        raise HTTPException(status_code=400, detail="INVITE_NOT_PENDING")
+
+    invite_token = admin_doc.get("invite_token")
+    invite_expires_at = admin_doc.get("invite_expires_at")
+
+    if not invite_token or invite_token != payload.token:
+        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+
+    # Optional: server-side expiry check (in addition to JWT exp)
+    if invite_expires_at:
+        if isinstance(invite_expires_at, str):
+            expires_dt = datetime.fromisoformat(invite_expires_at.replace('Z', '+00:00'))
+        else:
+            if invite_expires_at.tzinfo is None:
+                expires_dt = invite_expires_at.replace(tzinfo=timezone.utc)
+            else:
+                expires_dt = invite_expires_at
+        if expires_dt < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="INVITE_TOKEN_EXPIRED")
+
+    _validate_password_policy(payload.new_password)
+
+    password_hash = get_password_hash(payload.new_password)
+    await db.admins.update_one(
+        {"email": email},
+        {
+            "$set": {
+                "password_hash": password_hash,
+                "status": AdminStatus.ACTIVE,
+                "last_password_change_at": datetime.now(timezone.utc),
+            },
+            "$unset": {
+                "invite_token": "",
+                "invite_expires_at": "",
+            },
+        },
+    )
+
+    return {"message": "INVITE_ACCEPTED"}
