@@ -15,6 +15,7 @@ from app.models.modules import KYCDocument
 from app.models.domain.admin import AdminUser
 from app.utils.tenant import get_current_tenant_id
 from app.utils.auth import get_current_admin, require_permission
+from app.utils.permissions import require_tenant_role
 from app.utils.pagination import get_pagination_params
 from app.utils.features import ensure_tenant_feature
 from config import settings
@@ -73,7 +74,7 @@ async def get_players(
     risk_score: Optional[str] = None,
     country: Optional[str] = None,
     pagination: PaginationParams = Depends(get_pagination_params),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(require_tenant_role(["operations", "support", "tenant_admin", "finance"])),
 ):
     db = get_db()
     tenant_id = get_current_tenant_id(request, current_admin)
@@ -152,7 +153,13 @@ async def update_player(player_id: str, update_data: Dict = Body(...)):
     return {"message": "Player updated"}
 
 @router.post("/players/{player_id}/balance")
-async def manual_balance_adjustment(player_id: str, amount: float = Body(...), type: str = Body(...), note: str = Body(...)):
+async def manual_balance_adjustment(
+    player_id: str, 
+    amount: float = Body(...), 
+    type: str = Body(...), 
+    note: str = Body(...),
+    current_admin: AdminUser = Depends(require_tenant_role(["finance", "tenant_admin"]))
+):
     db = get_db()
     if abs(amount) > 1000:
         approval_req = ApprovalRequest(
