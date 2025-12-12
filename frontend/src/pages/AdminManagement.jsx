@@ -557,7 +557,7 @@ const AdminManagement = () => {
                           ))}
                         </TableBody>
                       </Table>
-                      {ipRestrictions.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz IP kısıtlaması yok</p>}
+                      {ipRestrictions.length === 0 && <p className="text-center text-muted-foreground py-8">No IP restrictions yet.</p>}
                     </CardContent>
                   </Card>
 
