@@ -309,7 +309,7 @@ const AdminManagement = () => {
                 </div>
                 <Card><CardContent className="pt-6">
                     <Table>
-                        <TableHeader><TableRow><TableHead>Ad</TableHead><TableHead>Email</TableHead><TableHead>Rol</TableHead><TableHead>Durum</TableHead><TableHead>2FA</TableHead></TableRow></TableHeader>
+                        <TableHeader><TableRow><TableHead>Ad</TableHead><TableHead>Email</TableHead><TableHead>Rol</TableHead><TableHead>Status</TableHead><TableHead>2FA</TableHead></TableRow></TableHeader>
                         <TableBody>{users.map(u => (
                             <TableRow key={u.id}>
                                 <TableCell>{u.full_name}</TableCell>
