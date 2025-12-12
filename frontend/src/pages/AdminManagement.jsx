@@ -186,12 +186,23 @@ const AdminManagement = () => {
                                 <div className="space-y-2"><Label>Ad Soyad</Label><Input value={newUser.full_name} onChange={e=>setNewUser({...newUser, full_name: e.target.value})} /></div>
                                 <div className="space-y-2"><Label>Email</Label><Input value={newUser.email} onChange={e=>setNewUser({...newUser, email: e.target.value})} /></div>
                                 <div className="space-y-2">
-                                  <Label>Rol (serbest yazılabilir)</Label>
-                                  <Input
-                                    placeholder="Örn. Risk Analyst, VIP Manager, Support L1"
-                                    value={newUser.role}
-                                    onChange={e => setNewUser({ ...newUser, role: e.target.value })}
-                                  />
+                                  <Label>Rol</Label>
+                                  <div className="grid grid-cols-3 gap-2 text-sm">
+                                    {['Super Admin', 'Manager', 'Admin'].map(roleOpt => (
+                                      <button
+                                        key={roleOpt}
+                                        type="button"
+                                        onClick={() => setNewUser({ ...newUser, role: roleOpt })}
+                                        className={`rounded border px-3 py-2 text-xs ${
+                                          newUser.role === roleOpt
+                                            ? 'bg-primary text-primary-foreground border-primary'
+                                            : 'hover:bg-secondary'
+                                        }`}
+                                      >
+                                        {roleOpt}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
                                 <div className="space-y-2">
                                   <Label>Yetki Alanları (modüller)</Label>
