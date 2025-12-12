@@ -64,7 +64,12 @@ async def list_tenants(
 
 
 @router.post("/", response_model=Tenant)
-async def create_tenant(tenant: Tenant = Body(...)) -> Tenant:
+async def create_tenant(
+    tenant: Tenant = Body(...),
+    current_admin: AdminUser = Depends(get_current_admin)
+) -> Tenant:
+    # Only owner can create tenants
+    require_owner(current_admin)
     db = get_db()
     # Basic uniqueness by name
     existing = await db.tenants.find_one({"name": tenant.name})
