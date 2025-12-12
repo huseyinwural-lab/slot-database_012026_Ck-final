@@ -103,7 +103,7 @@ const AdminManagement = () => {
         // Süper Admin her şeye erişir
         allowedModules = baseModules;
       } else if (newUser.role === 'Manager') {
-        // Manager kritik alanlar (fraud, settings) dışında her şeye erişir
+        // Manager can access everything except critical areas (fraud, settings)
         allowedModules = baseModules.filter(m => !['fraud', 'settings'].includes(m));
       }
 
