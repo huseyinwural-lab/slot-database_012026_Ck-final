@@ -37,9 +37,13 @@ const AdminManagement = () => {
   const [ipRestrictions, setIpRestrictions] = useState([]);
   const [deviceRestrictions, setDeviceRestrictions] = useState([]);
   
+  // Tenant & User
+  const [tenants, setTenants] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  
   // Create States
   const [isUserOpen, setIsUserOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '' });
+  const [newUser, setNewUser] = useState({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '', tenant_id: '' });
   const [isIPDialogOpen, setIsIPDialogOpen] = useState(false);
   const [newIP, setNewIP] = useState({ ip_address: '', restriction_type: 'allowed', reason: '' });
   
