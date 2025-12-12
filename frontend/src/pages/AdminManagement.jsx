@@ -402,7 +402,7 @@ const AdminManagement = () => {
                             <TableCell>{log.action}</TableCell>
                             <TableCell><Badge variant="outline">{log.module}</Badge></TableCell>
                             <TableCell className="text-xs text-muted-foreground">{log.ip_address}</TableCell>
-                            <TableCell className="text-xs">{new Date(log.timestamp).toLocaleString('tr-TR')}</TableCell>
+                            <TableCell className="text-xs">{new Date(log.timestamp).toLocaleString('en-US')}</TableCell>
                             <TableCell>
                               <Badge variant={log.risk_level === 'critical' ? 'destructive' : log.risk_level === 'high' ? 'destructive' : 'secondary'}>
                                 {log.risk_level}
