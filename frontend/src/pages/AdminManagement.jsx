@@ -723,7 +723,7 @@ const AdminManagement = () => {
                           const factors = [
                             ['Normal activity'],
                             ['New device +10', 'Failed login +5'],
-                            ['Yeni ülke +20', 'Alışılmadık aksiyonlar +30']
+                            ['New country +20', 'Unusual actions +30']
                           ][idx];
                           
                           return (
