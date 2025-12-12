@@ -30,11 +30,13 @@ const TenantsPage = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const loadTenants = async () => {
+  const loadTenants = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await api.get('/v1/tenants/');
-      setTenants(res.data || []);
+      const res = await api.get('/v1/tenants/', { params: { page, page_size: tenantsMeta.page_size || 50 } });
+      const data = res.data || {};
+      setTenants(data.items || []);
+      setTenantsMeta(data.meta || { page, page_size: tenantsMeta.page_size || 50, total: null });
     } catch (e) {
       console.error(e);
       toast.error('Tenants yüklenemedi');
