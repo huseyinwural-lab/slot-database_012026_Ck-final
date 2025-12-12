@@ -1264,6 +1264,368 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_pagination_smoke_test_asama1(self):
+        """Backend pagination & projection smoke test for Aşama 1"""
+        print("\n📄 BACKEND PAGINATION & PROJECTION SMOKE TEST - AŞAMA 1")
+        
+        all_tests_passed = True
+        
+        # Test 1: GET /api/v1/players
+        print(f"\n🔍 Test 1: GET /api/v1/players - Pagination & Projection")
+        success_players = self._test_players_pagination()
+        all_tests_passed = all_tests_passed and success_players
+        
+        # Test 2: GET /api/v1/finance/transactions  
+        print(f"\n🔍 Test 2: GET /api/v1/finance/transactions - Pagination & Filters")
+        success_transactions = self._test_transactions_pagination()
+        all_tests_passed = all_tests_passed and success_transactions
+        
+        # Test 3: GET /api/v1/games
+        print(f"\n🔍 Test 3: GET /api/v1/games - Pagination & Projection")
+        success_games = self._test_games_pagination()
+        all_tests_passed = all_tests_passed and success_games
+        
+        # Test 4: GET /api/v1/tenants/
+        print(f"\n🔍 Test 4: GET /api/v1/tenants/ - Pagination & Features")
+        success_tenants = self._test_tenants_pagination()
+        all_tests_passed = all_tests_passed and success_tenants
+        
+        if all_tests_passed:
+            print("\n✅ PAGINATION SMOKE TEST - ALL TESTS PASSED")
+            print("   ✅ Players endpoint pagination working correctly")
+            print("   ✅ Transactions endpoint pagination working correctly")
+            print("   ✅ Games endpoint pagination working correctly")
+            print("   ✅ Tenants endpoint pagination working correctly")
+        else:
+            print("\n❌ PAGINATION SMOKE TEST - SOME TESTS FAILED")
+        
+        return all_tests_passed
+
+    def _test_players_pagination(self):
+        """Test GET /api/v1/players pagination and projection"""
+        # Test basic pagination without include_total
+        success1, response1 = self.run_test(
+            "Players Pagination (include_total=false)", 
+            "GET", 
+            "api/v1/players?page=1&page_size=50&include_total=false", 
+            200
+        )
+        
+        if not success1:
+            return False
+            
+        # Validate response structure
+        if not self._validate_paginated_response(response1, "players"):
+            return False
+            
+        # Validate projection fields for Player objects
+        if response1.get("items"):
+            player = response1["items"][0]
+            required_fields = ["id", "tenant_id", "username", "email", "country", 
+                             "balance_real", "balance_bonus", "vip_level", "status", 
+                             "risk_score", "registered_at"]
+            if not self._validate_projection_fields(player, required_fields, "Player"):
+                return False
+            
+            # Ensure _id is not present
+            if "_id" in player:
+                print(f"   ❌ Player projection contains _id field (should be excluded)")
+                return False
+        
+        # Test with include_total=true
+        success2, response2 = self.run_test(
+            "Players Pagination (include_total=true)", 
+            "GET", 
+            "api/v1/players?page=1&page_size=50&include_total=true", 
+            200
+        )
+        
+        if not success2:
+            return False
+            
+        # Verify meta.total is a number when include_total=true
+        if not isinstance(response2.get("meta", {}).get("total"), int):
+            print(f"   ❌ meta.total should be a number when include_total=true")
+            return False
+            
+        # Test invalid sort_by (should not return 400/500)
+        success3, response3 = self.run_test(
+            "Players Invalid sort_by", 
+            "GET", 
+            "api/v1/players?page=1&page_size=50&sort_by=foo", 
+            200
+        )
+        
+        if not success3:
+            print(f"   ❌ Invalid sort_by should return 200 with default sort, not error")
+            return False
+            
+        # Test sort_dir variations
+        success4, _ = self.run_test(
+            "Players sort_dir=DESC", 
+            "GET", 
+            "api/v1/players?page=1&page_size=50&sort_dir=DESC", 
+            200
+        )
+        
+        success5, _ = self.run_test(
+            "Players sort_dir=Asc", 
+            "GET", 
+            "api/v1/players?page=1&page_size=50&sort_dir=Asc", 
+            200
+        )
+        
+        print(f"   ✅ Players pagination tests passed")
+        return success1 and success2 and success3 and success4 and success5
+
+    def _test_transactions_pagination(self):
+        """Test GET /api/v1/finance/transactions pagination and projection"""
+        # Test basic pagination
+        success1, response1 = self.run_test(
+            "Transactions Pagination (include_total=false)", 
+            "GET", 
+            "api/v1/finance/transactions?page=1&page_size=50&include_total=false", 
+            200
+        )
+        
+        if not success1:
+            return False
+            
+        # Validate response structure
+        if not self._validate_paginated_response(response1, "transactions"):
+            return False
+            
+        # Validate projection fields for Transaction objects
+        if response1.get("items"):
+            transaction = response1["items"][0]
+            required_fields = ["id", "tenant_id", "player_id", "player_username", 
+                             "type", "amount", "currency", "status", "provider", 
+                             "method", "created_at"]
+            if not self._validate_projection_fields(transaction, required_fields, "Transaction"):
+                return False
+        
+        # Test with include_total=true
+        success2, response2 = self.run_test(
+            "Transactions Pagination (include_total=true)", 
+            "GET", 
+            "api/v1/finance/transactions?page=1&page_size=50&include_total=true", 
+            200
+        )
+        
+        if not success2:
+            return False
+            
+        # Verify meta.total is a number
+        if not isinstance(response2.get("meta", {}).get("total"), int):
+            print(f"   ❌ meta.total should be a number when include_total=true")
+            return False
+        
+        # Test with filters
+        success3, response3 = self.run_test(
+            "Transactions with type=deposit filter", 
+            "GET", 
+            "api/v1/finance/transactions?page=1&page_size=50&type=deposit", 
+            200
+        )
+        
+        success4, response4 = self.run_test(
+            "Transactions with status=completed filter", 
+            "GET", 
+            "api/v1/finance/transactions?page=1&page_size=50&status=completed", 
+            200
+        )
+        
+        # Test invalid sort_by
+        success5, _ = self.run_test(
+            "Transactions Invalid sort_by", 
+            "GET", 
+            "api/v1/finance/transactions?page=1&page_size=50&sort_by=foo", 
+            200
+        )
+        
+        print(f"   ✅ Transactions pagination tests passed")
+        return success1 and success2 and success3 and success4 and success5
+
+    def _test_games_pagination(self):
+        """Test GET /api/v1/games pagination and projection"""
+        # Test basic pagination
+        success1, response1 = self.run_test(
+            "Games Pagination (include_total=false)", 
+            "GET", 
+            "api/v1/games?page=1&page_size=50&include_total=false", 
+            200
+        )
+        
+        if not success1:
+            return False
+            
+        # Validate response structure
+        if not self._validate_paginated_response(response1, "games"):
+            return False
+            
+        # Validate projection fields for Game objects
+        if response1.get("items"):
+            game = response1["items"][0]
+            required_fields = ["id", "tenant_id", "name", "category", "provider", 
+                             "business_status", "runtime_status", "created_at"]
+            if not self._validate_projection_fields(game, required_fields, "Game"):
+                return False
+                
+            # Check for configuration.rtp (may be missing/undefined)
+            config = game.get("configuration", {})
+            if config and "rtp" in config:
+                print(f"   ✅ Game configuration.rtp found: {config['rtp']}")
+            else:
+                print(f"   ℹ️  Game configuration.rtp missing (acceptable)")
+        
+        # Test with include_total=true
+        success2, response2 = self.run_test(
+            "Games Pagination (include_total=true)", 
+            "GET", 
+            "api/v1/games?page=1&page_size=50&include_total=true", 
+            200
+        )
+        
+        if not success2:
+            return False
+            
+        # Test invalid sort_by
+        success3, _ = self.run_test(
+            "Games Invalid sort_by", 
+            "GET", 
+            "api/v1/games?page=1&page_size=50&sort_by=foo", 
+            200
+        )
+        
+        print(f"   ✅ Games pagination tests passed")
+        return success1 and success2 and success3
+
+    def _test_tenants_pagination(self):
+        """Test GET /api/v1/tenants/ pagination and features"""
+        # Test basic pagination
+        success1, response1 = self.run_test(
+            "Tenants Pagination (include_total=false)", 
+            "GET", 
+            "api/v1/tenants/?page=1&page_size=50&include_total=false", 
+            200
+        )
+        
+        if not success1:
+            return False
+            
+        # Validate response structure
+        if not self._validate_paginated_response(response1, "tenants"):
+            return False
+            
+        # Validate projection fields for Tenant objects
+        if response1.get("items"):
+            tenant = response1["items"][0]
+            required_fields = ["id", "name", "type", "created_at"]
+            if not self._validate_projection_fields(tenant, required_fields, "Tenant"):
+                return False
+                
+            # Check features (may be optional but should not break validation)
+            features = tenant.get("features", {})
+            if features:
+                feature_fields = ["can_use_game_robot", "can_edit_configs", 
+                                "can_manage_bonus", "can_view_reports"]
+                for field in feature_fields:
+                    if field in features:
+                        print(f"   ✅ Tenant features.{field}: {features[field]}")
+                    else:
+                        print(f"   ℹ️  Tenant features.{field} missing (may be optional)")
+        
+        # Test with include_total=true
+        success2, response2 = self.run_test(
+            "Tenants Pagination (include_total=true)", 
+            "GET", 
+            "api/v1/tenants/?page=1&page_size=50&include_total=true", 
+            200
+        )
+        
+        if not success2:
+            return False
+            
+        # Test invalid sort_by
+        success3, _ = self.run_test(
+            "Tenants Invalid sort_by", 
+            "GET", 
+            "api/v1/tenants/?page=1&page_size=50&sort_by=foo", 
+            200
+        )
+        
+        print(f"   ✅ Tenants pagination tests passed")
+        return success1 and success2 and success3
+
+    def _validate_paginated_response(self, response, endpoint_name):
+        """Validate the standard paginated response structure"""
+        if not isinstance(response, dict):
+            print(f"   ❌ {endpoint_name} response is not a dict")
+            return False
+            
+        # Check for required keys
+        if "items" not in response:
+            print(f"   ❌ {endpoint_name} response missing 'items' key")
+            return False
+            
+        if "meta" not in response:
+            print(f"   ❌ {endpoint_name} response missing 'meta' key")
+            return False
+            
+        # Validate items is an array
+        if not isinstance(response["items"], list):
+            print(f"   ❌ {endpoint_name} 'items' is not an array")
+            return False
+            
+        # Validate meta structure
+        meta = response["meta"]
+        if not isinstance(meta, dict):
+            print(f"   ❌ {endpoint_name} 'meta' is not a dict")
+            return False
+            
+        # Check meta fields
+        required_meta_fields = ["page", "page_size"]
+        for field in required_meta_fields:
+            if field not in meta:
+                print(f"   ❌ {endpoint_name} meta missing '{field}' field")
+                return False
+                
+        # Validate meta values
+        if meta["page"] != 1:
+            print(f"   ❌ {endpoint_name} meta.page should be 1, got {meta['page']}")
+            return False
+            
+        if meta["page_size"] != 50:
+            print(f"   ❌ {endpoint_name} meta.page_size should be 50, got {meta['page_size']}")
+            return False
+            
+        print(f"   ✅ {endpoint_name} paginated response structure valid")
+        return True
+
+    def _validate_projection_fields(self, item, required_fields, item_type):
+        """Validate that an item contains all required projection fields"""
+        missing_fields = []
+        for field in required_fields:
+            if "." in field:  # Handle nested fields like configuration.rtp
+                parts = field.split(".")
+                current = item
+                for part in parts:
+                    if isinstance(current, dict) and part in current:
+                        current = current[part]
+                    else:
+                        missing_fields.append(field)
+                        break
+            else:
+                if field not in item:
+                    missing_fields.append(field)
+        
+        if missing_fields:
+            print(f"   ❌ {item_type} missing projection fields: {missing_fields}")
+            return False
+            
+        print(f"   ✅ {item_type} projection fields complete")
+        return True
+
     def test_robot_orchestrator_backend_endpoint_faz5(self):
         """Test FAZ 5 – Robot Orchestrator Backend Endpoint - Turkish Review Request"""
         print("\n🤖 FAZ 5 – ROBOT ORCHESTRATOR BACKEND ENDPOINT TESTS")
