@@ -224,7 +224,7 @@ const APIKeysPage = () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant={key.active ? 'default' : 'secondary'}>
-                      {key.active ? 'Aktif' : 'Pasif'}
+                      {key.active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs">
