@@ -1276,9 +1276,8 @@ async def save_slot_advanced_config(
     from fastapi.responses import JSONResponse
     from app.utils.features import ensure_tenant_feature
 
-    await ensure_tenant_feature(request, current_admin, "can_edit_configs")
-
     db = get_db()
+    await ensure_tenant_feature(request, current_admin, "can_edit_configs", db)
     game_doc = await db.games.find_one({"id": game_id}, {"_id": 0})
     if not game_doc:
         raise HTTPException(status_code=404, detail="Game not found")
