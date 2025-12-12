@@ -70,6 +70,34 @@ async def create_tenant(tenant: Tenant = Body(...)) -> Tenant:
     return tenant
 
 
+@router.patch("/{tenant_id}")
+async def update_tenant_features(
+    tenant_id: str,
+    features: dict = Body(..., embed=True)
+):
+    """Update tenant feature flags"""
+    db = get_db()
+    
+    tenant = await db.tenants.find_one({"id": tenant_id}, {"_id": 0})
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    
+    # Update features
+    update_data = {
+        "features": features,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.tenants.update_one(
+        {"id": tenant_id},
+        {"$set": update_data}
+    )
+    
+    # Return updated tenant
+    updated_tenant = await db.tenants.find_one({"id": tenant_id}, {"_id": 0})
+    return Tenant(**updated_tenant)
+
+
 async def seed_default_tenants():
     db = get_db()
     count = await db.tenants.count_documents({})
