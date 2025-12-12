@@ -388,7 +388,7 @@ const AdminManagement = () => {
                         <TableRow>
                           <TableHead>Admin</TableHead>
                           <TableHead>Action</TableHead>
-                          <TableHead>Modül</TableHead>
+                          <TableHead>Module</TableHead>
                           <TableHead>IP Adresi</TableHead>
                           <TableHead>Zaman</TableHead>
                           <TableHead>Risk</TableHead>
@@ -456,7 +456,7 @@ const AdminManagement = () => {
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    <TableHead>Modül</TableHead>
+                                    <TableHead>Module</TableHead>
                                     <TableHead className="text-center">Read</TableHead>
                                     <TableHead className="text-center">Write</TableHead>
                                     <TableHead className="text-center">Approve</TableHead>
