@@ -70,6 +70,7 @@ app.include_router(tenant.router)
 app.include_router(auth.router)
 app.include_router(api_keys.router)
 app.include_router(robot.router)
+app.include_router(revenue.router)  # Revenue reporting
 
 
 
