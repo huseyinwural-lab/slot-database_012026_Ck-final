@@ -790,11 +790,11 @@ const AdminManagement = () => {
                             <TableCell className="text-xs">2025-12-20</TableCell>
                             <TableCell className="text-xs">2025-12-27</TableCell>
                             <TableCell><Badge variant="outline">Player Management</Badge></TableCell>
-                            <TableCell><Badge>Aktif</Badge></TableCell>
+                            <TableCell><Badge>Active</Badge></TableCell>
                           </TableRow>
                           <TableRow>
                             <TableCell className="font-medium">Ali Kaya</TableCell>
-                            <TableCell>Fatma Şahin</TableCell>
+                            <TableCell>Fatma Sahin</TableCell>
                             <TableCell className="text-xs">2025-12-10</TableCell>
                             <TableCell className="text-xs">2025-12-15</TableCell>
                             <TableCell><Badge variant="outline">Finance Approve</Badge></TableCell>
