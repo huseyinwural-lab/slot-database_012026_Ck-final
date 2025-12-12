@@ -438,7 +438,7 @@ const AdminManagement = () => {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="flex items-center gap-2">🧩 İzin Matrisi (Permission Matrix)</CardTitle>
+                      <CardTitle className="flex items-center gap-2">🧩 Permission Matrix</CardTitle>
                       <CardDescription>Rol bazlı yetkilendirme haritası - Tek bakışta hangi rol hangi modüle erişiyor</CardDescription>
                     </div>
                     <Button onClick={() => handleExportLogs(permissionMatrix, 'permission_matrix.csv')}>
