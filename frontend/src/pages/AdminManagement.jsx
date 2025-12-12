@@ -192,12 +192,12 @@ const AdminManagement = () => {
                     <Dialog open={isUserOpen} onOpenChange={setIsUserOpen}>
                         <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Admin</Button></DialogTrigger>
                         <DialogContent>
-                            <DialogHeader><DialogTitle>Yeni Admin Kullanıcı</DialogTitle></DialogHeader>
+                            <DialogHeader><DialogTitle>New Admin User</DialogTitle></DialogHeader>
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2"><Label>Full Name</Label><Input value={newUser.full_name} onChange={e=>setNewUser({...newUser, full_name: e.target.value})} /></div>
                                 <div className="space-y-2"><Label>Email</Label><Input value={newUser.email} onChange={e=>setNewUser({...newUser, email: e.target.value})} /></div>
                                 <div className="space-y-2">
-                                  <Label>Rol</Label>
+                                  <Label>Role</Label>
                                   <div className="grid grid-cols-3 gap-2 text-sm">
                                     {['Super Admin', 'Manager', 'Admin'].map(roleOpt => (
                                       <button
