@@ -533,8 +533,8 @@ const AdminManagement = () => {
                             <TableHead>IP Address</TableHead>
                             <TableHead>Tip</TableHead>
                             <TableHead>Reason</TableHead>
-                            <TableHead>Ekleyen</TableHead>
-                            <TableHead>Tarih</TableHead>
+                            <TableHead>Added By</TableHead>
+                            <TableHead>Date</TableHead>
                             <TableHead></TableHead>
                           </TableRow>
                         </TableHeader>
@@ -551,7 +551,7 @@ const AdminManagement = () => {
                               <TableCell className="text-xs">{ip.added_by}</TableCell>
                               <TableCell className="text-xs">{new Date(ip.added_at).toLocaleDateString('tr-TR')}</TableCell>
                               <TableCell>
-                                <Button variant="ghost" size="sm" className="text-red-600">Kaldır</Button>
+                                <Button variant="ghost" size="sm" className="text-red-600">Remove</Button>
                               </TableCell>
                             </TableRow>
                           ))}
