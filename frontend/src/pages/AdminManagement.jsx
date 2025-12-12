@@ -231,6 +231,29 @@ const AdminManagement = () => {
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2"><Label>Full Name</Label><Input value={newUser.full_name} onChange={e=>setNewUser({...newUser, full_name: e.target.value})} /></div>
                                 <div className="space-y-2"><Label>Email</Label><Input value={newUser.email} onChange={e=>setNewUser({...newUser, email: e.target.value})} /></div>
+                                
+                                <div className="space-y-2">
+                                  <Label>Tenant (Kiracı)</Label>
+                                  <Select 
+                                    value={newUser.tenant_id} 
+                                    onValueChange={(val) => setNewUser({ ...newUser, tenant_id: val })}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kiracı seçin..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {tenants.map((t) => (
+                                        <SelectItem key={t.id} value={t.id}>
+                                          {t.name} ({t.type})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <p className="text-xs text-muted-foreground">
+                                    Bu admin hangi kiracıya ait olacak?
+                                  </p>
+                                </div>
+
                                 <div className="space-y-2">
                                   <Label>Role</Label>
                                   <div className="grid grid-cols-3 gap-2 text-sm">
