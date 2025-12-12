@@ -115,8 +115,9 @@ async def create_role(role: AdminRole):
 
 # --- TEAMS ---
 @router.get("/teams", response_model=List[AdminTeam])
-async def get_teams():
+async def get_teams(current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
+    # Teams could be tenant-specific if the model supports it
     teams = await db.admin_teams.find().to_list(100)
     return [AdminTeam(**t) for t in teams]
 
