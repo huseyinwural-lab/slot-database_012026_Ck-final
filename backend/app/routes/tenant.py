@@ -16,11 +16,43 @@ def get_db():
     return client[settings.db_name]
 
 
-@router.get("/", response_model=List[Tenant])
-async def list_tenants() -> List[Tenant]:
+@router.get("/", response_model=PaginatedResponse[Tenant])
+async def list_tenants(pagination: PaginationParams = Depends(get_pagination_params)) -> PaginatedResponse[Tenant]:
     db = get_db()
-    docs = await db.tenants.find({}, {"_id": 0}).to_list(100)
-    return [Tenant(**d) for d in docs]
+
+    # Sort whitelist
+    ALLOWED_SORT_FIELDS = {"created_at"}
+    sort_field = pagination.sort_by if pagination.sort_by in ALLOWED_SORT_FIELDS else "created_at"
+    skip = (pagination.page - 1) * pagination.page_size
+
+    cursor = (
+        db.tenants
+        .find(
+            {},
+            {
+                "_id": 0,
+                "id": 1,
+                "name": 1,
+                "type": 1,
+                "created_at": 1,
+                "features.can_use_game_robot": 1,
+                "features.can_edit_configs": 1,
+                "features.can_manage_bonus": 1,
+                "features.can_view_reports": 1,
+            },
+        )
+        .sort(sort_field, -1 if pagination.sort_dir == "desc" else 1)
+        .skip(skip)
+        .limit(pagination.page_size)
+    )
+
+    docs = await cursor.to_list(pagination.page_size)
+    total = await db.tenants.count_documents({}) if pagination.include_total else None
+
+    return {
+        "items": [Tenant(**d) for d in docs],
+        "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
+    }
 
 
 @router.post("/", response_model=Tenant)
