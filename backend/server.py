@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import logging
 from config import settings
 from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, admin, game_config, game_import, game_config_presets, auth, api_keys, robot
+from app.middleware.request_logging import RequestLoggingMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -34,6 +35,9 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
+# Request logging & correlation ID
+app.add_middleware(RequestLoggingMiddleware)
+
     allow_headers=["*"],
 )
 
