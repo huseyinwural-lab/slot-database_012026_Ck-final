@@ -118,7 +118,7 @@ const AdminManagement = () => {
       setIsUserOpen(false);
       setNewUser({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '' });
       fetchData();
-      toast.success('Kullanıcı oluşturuldu');
+      toast.success('Admin user created');
     } catch (err) {
       console.error(err);
       toast.error('Başarısız');
