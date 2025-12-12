@@ -585,7 +585,7 @@ const AdminManagement = () => {
                               <TableCell>{device.admin_id}</TableCell>
                               <TableCell>
                                 <div>
-                                  <p className="font-medium">{device.device_name || 'Bilinmeyen Cihaz'}</p>
+                                  <p className="font-medium">{device.device_name || 'Unknown Device'}</p>
                                   <p className="text-xs text-muted-foreground">{device.browser_info}</p>
                                 </div>
                               </TableCell>
@@ -603,7 +603,7 @@ const AdminManagement = () => {
                               <TableCell>
                                 {device.status === 'pending' && (
                                   <Button size="sm" onClick={() => handleApproveDevice(device.id)}>
-                                    <CheckCircle className="w-4 h-4 mr-1" /> Onayla
+                                    <CheckCircle className="w-4 h-4 mr-1" /> Approve
                                   </Button>
                                 )}
                               </TableCell>
@@ -611,7 +611,7 @@ const AdminManagement = () => {
                           ))}
                         </TableBody>
                       </Table>
-                      {deviceRestrictions.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz cihaz kaydı yok</p>}
+                      {deviceRestrictions.length === 0 && <p className="text-center text-muted-foreground py-8">No device records yet.</p>}
                     </CardContent>
                   </Card>
                 </div>
