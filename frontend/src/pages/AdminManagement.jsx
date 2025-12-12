@@ -414,7 +414,7 @@ const AdminManagement = () => {
                                   <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
                                 </DialogTrigger>
                                 <DialogContent className="max-w-2xl">
-                                  <DialogHeader><DialogTitle>Log Detayı</DialogTitle></DialogHeader>
+                                  <DialogHeader><DialogTitle>Log Detail</DialogTitle></DialogHeader>
                                   <div className="space-y-4">
                                     <div><Label>Admin</Label><p>{log.admin_name} ({log.admin_id})</p></div>
                                     <div><Label>Aksiyon</Label><p>{log.action}</p></div>
