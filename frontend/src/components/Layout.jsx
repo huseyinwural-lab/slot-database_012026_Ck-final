@@ -6,13 +6,14 @@ import {
   ListChecks, ToggleRight, Search, FlaskConical,
   FileText, Megaphone, BarChart3, Globe, Handshake,
   AlertOctagon, UserCog, ScrollText, Scale, Crown,
-  KeyRound
+  KeyRound, Building
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '../services/api';
 import { useTenant } from '../hooks/useTenant';
+import { useCapabilities } from '../context/CapabilitiesContext';
 
 const SidebarItem = ({ to, icon: Icon, label, activeClassName }) => (
   <NavLink
