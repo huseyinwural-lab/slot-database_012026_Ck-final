@@ -764,7 +764,7 @@ const AdminManagement = () => {
             <TabsContent value="delegation" className="mt-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">🟩 Yetki Devri / Vekalet (Opsiyonel)</CardTitle>
+                    <CardTitle className="flex items-center gap-2">🟩 Delegation / Proxy (Optional)</CardTitle>
                     <CardDescription>Admin izinliyken yetkilerini geçici olarak başka bir admin'e devredebilir</CardDescription>
                   </CardHeader>
                   <CardContent>
