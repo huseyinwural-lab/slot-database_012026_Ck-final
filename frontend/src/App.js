@@ -202,7 +202,9 @@ function App() {
             path="/admins"
             element={(
               <RequireAuth>
-                <AdminManagement />
+                <RequireFeature feature="can_manage_admins">
+                  <AdminManagement />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -210,7 +212,9 @@ function App() {
             path="/logs"
             element={(
               <RequireAuth>
-                <SystemLogs />
+                <RequireFeature requireOwner={true}>
+                  <SystemLogs />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -218,7 +222,9 @@ function App() {
             path="/rg"
             element={(
               <RequireAuth>
-                <ResponsibleGaming />
+                <RequireFeature requireOwner={true}>
+                  <ResponsibleGaming />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -226,7 +232,9 @@ function App() {
             path="/reports"
             element={(
               <RequireAuth>
-                <Reports />
+                <RequireFeature feature="can_view_reports">
+                  <Reports />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
