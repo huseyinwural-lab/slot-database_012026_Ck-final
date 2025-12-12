@@ -42,12 +42,13 @@ const GameManagement = () => {
   const [importJob, setImportJob] = useState(null);
   const [importItems, setImportItems] = useState([]);
 
-  const fetchAll = async (category = 'all', page = 1) => {
+  const fetchAll = async (category = 'all', page = 1, pageSizeOverride) => {
     try {
       const gameParams = {};
       if (category && category !== 'all') gameParams.category = category;
+      const effectivePageSize = pageSizeOverride || gamesPageSize;
       gameParams.page = page;
-      gameParams.page_size = gamesMeta.page_size || 50;
+      gameParams.page_size = effectivePageSize;
 
       const [gamesRes, tablesRes] = await Promise.all([
         api.get('/v1/games', { params: gameParams }),
