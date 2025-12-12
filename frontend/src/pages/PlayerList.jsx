@@ -29,7 +29,7 @@ const PlayerList = () => {
       if (riskScore !== "all") params.risk_score = riskScore;
       
       const res = await api.get('/v1/players', { params });
-      setPlayers(res.data);
+      setPlayers(res.data.items || []);
     } catch (err) {
       console.error(err);
     } finally {
