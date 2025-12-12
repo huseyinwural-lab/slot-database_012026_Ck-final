@@ -6,6 +6,9 @@ import random
 from app.models.core import (
     ApprovalRequest, ApprovalRule, Delegation, ApprovalStatus, ApprovalCategory
 )
+from app.models.domain.admin import AdminUser
+from app.utils.auth import get_current_admin
+from app.utils.permissions import require_owner
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
