@@ -176,9 +176,9 @@ const AdminManagement = () => {
                     <TabsTrigger value="activity-log"><FileText className="w-4 h-4 mr-2" /> 📜 Activity Log</TabsTrigger>
                     <TabsTrigger value="permission-matrix"><Grid3x3 className="w-4 h-4 mr-2" /> 🧩 Permission Matrix</TabsTrigger>
                     <TabsTrigger value="ip-device"><Globe className="w-4 h-4 mr-2" /> 🛡️ IP & Devices</TabsTrigger>
-                    <TabsTrigger value="login-history"><History className="w-4 h-4 mr-2" /> 🔑 Giriş Geçmişi</TabsTrigger>
-                    <TabsTrigger value="security"><Lock className="w-4 h-4 mr-2" /> Güvenlik</TabsTrigger>
-                    <TabsTrigger value="sessions"><Calendar className="w-4 h-4 mr-2" /> Oturumlar</TabsTrigger>
+                    <TabsTrigger value="login-history"><History className="w-4 h-4 mr-2" /> 🔑 Login History</TabsTrigger>
+                    <TabsTrigger value="security"><Lock className="w-4 h-4 mr-2" /> Security</TabsTrigger>
+                    <TabsTrigger value="sessions"><Calendar className="w-4 h-4 mr-2" /> Sessions</TabsTrigger>
                     <TabsTrigger value="invites"><Mail className="w-4 h-4 mr-2" /> Davetler</TabsTrigger>
                     <TabsTrigger value="keys"><Key className="w-4 h-4 mr-2" /> API Keys</TabsTrigger>
                     <TabsTrigger value="risk-score"><AlertTriangle className="w-4 h-4 mr-2" /> 🟩 Risk Skoru</TabsTrigger>
