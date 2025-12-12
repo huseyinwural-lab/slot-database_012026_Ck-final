@@ -1268,6 +1268,12 @@ class CasinoAdminAPITester:
         """Backend pagination & projection smoke test for Aşama 1"""
         print("\n📄 BACKEND PAGINATION & PROJECTION SMOKE TEST - AŞAMA 1")
         
+        # Setup authentication for endpoints that require it
+        print(f"\n🔍 Setup: Authentication for protected endpoints")
+        auth_success = self._setup_pagination_auth()
+        if not auth_success:
+            print("❌ Authentication setup failed - some tests will be skipped")
+        
         all_tests_passed = True
         
         # Test 1: GET /api/v1/players
@@ -1300,6 +1306,35 @@ class CasinoAdminAPITester:
             print("\n❌ PAGINATION SMOKE TEST - SOME TESTS FAILED")
         
         return all_tests_passed
+
+    def _setup_pagination_auth(self):
+        """Setup authentication for pagination tests"""
+        # Step 1: Seed admin data
+        success1, seed_response = self.run_test("Admin Seed", "POST", "api/v1/admin/seed", 200)
+        if not success1:
+            print("   ❌ Admin seed failed")
+            return False
+        
+        print("   ✅ Admin seed successful")
+        
+        # Step 2: Login to get JWT token
+        login_data = {
+            "email": "admin@casino.com",
+            "password": "Admin123!"
+        }
+        success2, login_response = self.run_test("Admin Login", "POST", "api/v1/auth/login", 200, login_data)
+        if not success2 or not isinstance(login_response, dict):
+            print("   ❌ Admin login failed")
+            return False
+        
+        # Store JWT token for authenticated requests
+        self.access_token = login_response.get('access_token')
+        if not self.access_token:
+            print("   ❌ JWT token not received")
+            return False
+            
+        print("   ✅ Authentication setup successful")
+        return True
 
     def _test_players_pagination(self):
         """Test GET /api/v1/players pagination and projection"""
