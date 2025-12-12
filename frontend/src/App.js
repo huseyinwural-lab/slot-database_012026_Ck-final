@@ -253,7 +253,9 @@ function App() {
             path="/keys"
             element={(
               <RequireAuth>
-                <APIKeysPage />
+                <RequireFeature requireOwner={true}>
+                  <APIKeysPage />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
