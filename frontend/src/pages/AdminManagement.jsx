@@ -287,7 +287,7 @@ const AdminManagement = () => {
                                       }`}
                                       onClick={() => setNewUser({ ...newUser, password_mode: 'invite', password: '' })}
                                     >
-                                      Davet Linki / İlk Girişte Şifre
+                                      Invite Link / First Login Password
                                     </button>
                                   </div>
                                 </div>
