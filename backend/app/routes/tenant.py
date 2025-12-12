@@ -171,9 +171,9 @@ async def get_tenant_capabilities(current_admin: AdminUser = Depends(get_current
 
 async def seed_default_tenants():
     db = get_db()
-    count = await db.tenants.count_documents({})
-    if count == 0:
-        default_owner = Tenant(
+    
+    tenants = [
+        Tenant(
             id="default_casino",
             name="Default Casino",
             type="owner",
@@ -182,9 +182,11 @@ async def seed_default_tenants():
                 "can_edit_configs": True,
                 "can_manage_bonus": True,
                 "can_view_reports": True,
+                "can_manage_admins": True,
+                "can_manage_finance": True,
             },
-        )
-        demo_renter = Tenant(
+        ),
+        Tenant(
             id="demo_renter",
             name="Demo Renter",
             type="renter",
@@ -197,7 +199,15 @@ async def seed_default_tenants():
                 "can_manage_finance": True,
             },
         )
-        await db.tenants.insert_many([
-            default_owner.model_dump(),
-            demo_renter.model_dump(),
-        ])
+    ]
+
+    for tenant in tenants:
+        existing = await db.tenants.find_one({"id": tenant.id})
+        if not existing:
+            await db.tenants.insert_one(tenant.model_dump())
+        else:
+            # Ensure critical features are present even if tenant exists
+            await db.tenants.update_one(
+                {"id": tenant.id},
+                {"$set": {"features": tenant.features}}
+            )
