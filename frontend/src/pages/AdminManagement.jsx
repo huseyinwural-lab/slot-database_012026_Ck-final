@@ -219,8 +219,8 @@ const AdminManagement = () => {
                                   <Label>Permission Scopes (modules)</Label>
                                   <div className="grid grid-cols-2 gap-2 text-sm">
                                     {[
-                                      { key: 'players', label: 'Oyuncular' },
-                                      { key: 'games', label: 'Oyunlar' },
+                                      { key: 'players', label: 'Players' },
+                                      { key: 'games', label: 'Games' },
                                       { key: 'bonuses', label: 'Bonuslar' },
                                       { key: 'reports', label: 'Raporlar' },
                                       { key: 'fraud', label: 'Fraud/Risk' },
