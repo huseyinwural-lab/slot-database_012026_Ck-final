@@ -276,7 +276,7 @@ const AdminManagement = () => {
                                       }`}
                                       onClick={() => setNewUser({ ...newUser, password_mode: 'manual' })}
                                     >
-                                      Şifreyi Ben Belirle
+                                      Set Password Manually
                                     </button>
                                     <button
                                       type="button"
