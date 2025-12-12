@@ -164,9 +164,15 @@ async def update_security_policy(policy: SecurityPolicy):
 
 # --- INVITES ---
 @router.get("/invites", response_model=List[AdminInvite])
-async def get_invites():
+async def get_invites(current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
-    return [AdminInvite(**i) for i in await db.admin_invites.find().to_list(100)]
+    
+    # Filter invites by tenant
+    query = {}
+    if current_admin.role != "Super Admin":
+        query["tenant_id"] = current_admin.tenant_id
+    
+    return [AdminInvite(**i) for i in await db.admin_invites.find(query).to_list(100)]
 
 @router.post("/invites")
 async def create_invite(invite: AdminInvite):
