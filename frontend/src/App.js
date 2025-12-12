@@ -240,6 +240,7 @@ function App() {
         </Routes>
         <Toaster position="top-right" theme="dark" />
       </Layout>
+      </CapabilitiesProvider>
     </BrowserRouter>
   );
 }
