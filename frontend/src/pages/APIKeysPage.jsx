@@ -244,7 +244,7 @@ const APIKeysPage = () => {
               {keys.length === 0 && !loading && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground text-sm py-8">
-                    Henüz API key yok.
+                    No API keys yet.
                   </TableCell>
                 </TableRow>
               )}
