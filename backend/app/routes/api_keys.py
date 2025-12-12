@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Body, status
+from fastapi import APIRouter, Depends, HTTPException, Body, status, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 
@@ -59,13 +59,11 @@ async def list_api_keys(current_admin: AdminUser = Depends(get_current_admin)):
 @router.post("/", status_code=201)
 async def create_api_key(
     payload: APIKeyCreateRequest,
+    request: Request,
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     # Admin-level key management; require tenant feature flag can_manage_admins
-    from fastapi import Request
-    from fastapi import Request as _RequestAlias  # avoid unused import warnings
-    request: Request = _RequestAlias(scope={})  # placeholder to satisfy type checkers
-    # NOTE: for now enforcement is done via ensure_tenant_feature in admin routes
+    await ensure_tenant_feature(request, current_admin, "can_manage_admins")
     db = get_db()
 
     validate_scopes(payload.scopes)
@@ -101,8 +99,10 @@ async def create_api_key(
 async def update_api_key(
     key_id: str,
     active: Optional[bool] = Body(None, embed=True),
+    request: Request,
     current_admin: AdminUser = Depends(get_current_admin),
 ):
+    await ensure_tenant_feature(request, current_admin, "can_manage_admins")
     db = get_db()
 
     doc = await db.admin_api_keys.find_one({"id": key_id}, {"_id": 0})
