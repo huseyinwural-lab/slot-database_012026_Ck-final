@@ -574,7 +574,7 @@ const AdminManagement = () => {
                             <TableHead>Admin</TableHead>
                             <TableHead>Cihaz</TableHead>
                             <TableHead>Tip</TableHead>
-                            <TableHead>Durum</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead>Son Görülme</TableHead>
                             <TableHead></TableHead>
                           </TableRow>
@@ -780,7 +780,7 @@ const AdminManagement = () => {
                             <TableHead>Start</TableHead>
                             <TableHead>End</TableHead>
                             <TableHead>Delegated Permissions</TableHead>
-                            <TableHead>Durum</TableHead>
+                            <TableHead>Status</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
