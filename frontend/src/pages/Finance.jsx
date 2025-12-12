@@ -70,16 +70,19 @@ const Finance = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const fetchData = async () => {
+  const fetchData = async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       Object.keys(filters).forEach(key => {
         if (filters[key] && filters[key] !== 'all') params.append(key, filters[key]);
       });
+      params.append('page', page);
+      params.append('page_size', txMeta.page_size || 50);
 
       const res = await api.get(`/v1/finance/transactions?${params.toString()}`);
-      setTransactions(res.data);
+      setTransactions(res.data.items || []);
+      setTxMeta(res.data.meta || { page, page_size: txMeta.page_size || 50, total: null });
     } catch (err) {
       toast.error('Failed to load transactions');
     } finally {
