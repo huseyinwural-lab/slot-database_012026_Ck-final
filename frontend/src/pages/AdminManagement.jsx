@@ -702,7 +702,7 @@ const AdminManagement = () => {
             <TabsContent value="risk-score" className="mt-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">🟩 Admin Risk Skoru (Opsiyonel)</CardTitle>
+                    <CardTitle className="flex items-center gap-2">🟩 Admin Risk Score (Optional)</CardTitle>
                     <CardDescription>Her adminin risk değerlendirmesi - Yeni cihaz, yeni ülke, başarısız giriş denemeleri</CardDescription>
                   </CardHeader>
                   <CardContent>
