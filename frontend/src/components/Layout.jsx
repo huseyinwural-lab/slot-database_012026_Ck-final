@@ -65,7 +65,7 @@ const Layout = ({ children }) => {
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Core</div>
               <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" />
               <SidebarItem to="/players" icon={Users} label="Players" />
-              {tenantType === 'owner' && (
+              {isOwner && (
                 <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
               )}
               <SidebarItem to="/games" icon={Gamepad2} label="Games" />
@@ -79,32 +79,32 @@ const Layout = ({ children }) => {
 
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Operations</div>
-              {tenantType === 'owner' && <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" />}
-              {tenantType === 'owner' && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" />}
-              <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" />
-              {tenantType === 'owner' && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" />}
+              {hasFeature('can_manage_kyc') && <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" />}
+              {isOwner && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" />}
+              {hasFeature('can_manage_bonus') && <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" />}
+              {isOwner && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" />}
               <SidebarItem to="/support" icon={MessageSquare} label="Support" />
           </div>
 
            <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Risk & Compliance</div>
-              {tenantType === 'owner' && <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" />}
-              {tenantType === 'owner' && <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />}
-              {tenantType === 'owner' && <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />}
-              {tenantType === 'owner' && <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" />}
+              {isOwner && <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" />}
+              {isOwner && <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />}
+              {isOwner && <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />}
+              {isOwner && <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" />}
           </div>
 
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">System</div>
-              {tenantType === 'owner' && <SidebarItem to="/cms" icon={Globe} label="CMS" />}
-              <SidebarItem to="/reports" icon={BarChart3} label="Reports" />
-              {tenantType === 'owner' && <SidebarItem to="/logs" icon={ScrollText} label="Logs" />}
-              {tenantType === 'owner' && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" />}
-              {tenantType === 'owner' && <SidebarItem to="/tenants" icon={Users} label="Tenants" />}
-              {tenantType === 'owner' && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" />}
-              {tenantType === 'owner' && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />}
-              {tenantType === 'owner' && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" />}
-              {tenantType === 'owner' && <SidebarItem to="/settings" icon={Settings} label="Settings" />}
+              {isOwner && <SidebarItem to="/cms" icon={Globe} label="CMS" />}
+              {hasFeature('can_view_reports') && <SidebarItem to="/reports" icon={BarChart3} label="Reports" />}
+              {isOwner && <SidebarItem to="/logs" icon={ScrollText} label="Logs" />}
+              {hasFeature('can_manage_admins') && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" />}
+              {isOwner && <SidebarItem to="/tenants" icon={Building} label="Tenants" />}
+              {isOwner && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" />}
+              {isOwner && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />}
+              {hasFeature('can_use_game_robot') && isOwner && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" />}
+              {isOwner && <SidebarItem to="/settings" icon={Settings} label="Settings" />}
           </div>
         </ScrollArea>
 
