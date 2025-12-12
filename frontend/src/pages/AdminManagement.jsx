@@ -564,7 +564,7 @@ const AdminManagement = () => {
                   {/* Device Restrictions */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">📱 Cihaz Yönetimi</CardTitle>
+                      <CardTitle className="flex items-center gap-2">📱 Device Management</CardTitle>
                       <CardDescription>Admin kullanıcıları için cihaz onayı ve kısıtlamaları</CardDescription>
                     </CardHeader>
                     <CardContent>
