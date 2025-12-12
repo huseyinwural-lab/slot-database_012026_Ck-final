@@ -27,6 +27,7 @@ import SettingsPanel from './pages/SettingsPanel';
 import TenantsPage from './pages/TenantsPage';
 import Login from './pages/Login';
 import APIKeysPage from './pages/APIKeysPage';
+import AcceptInvite from './pages/AcceptInvite';
 import { Toaster } from 'sonner';
 
 function App() {
