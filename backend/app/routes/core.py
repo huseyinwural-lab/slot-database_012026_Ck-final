@@ -743,8 +743,8 @@ async def create_bonus(
     bonus: Bonus,
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    await ensure_tenant_feature(request, current_admin, "can_manage_bonus")
     db = get_db()
+    await ensure_tenant_feature(request, current_admin, "can_manage_bonus", db)
     tenant_id = get_current_tenant_id(request, current_admin)
 
     doc = bonus.model_dump()
