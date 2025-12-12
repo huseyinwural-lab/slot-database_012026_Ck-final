@@ -12940,6 +12940,9 @@ def main():
     print("\n🏢 TENANT MODEL + ENDPOINTS + SEED TESTS - Görev 2.1.1")
     test_results.append(("Tenant Model + Endpoints + Seed", tester.test_tenant_model_endpoints_seed()))
     
+    print("\n📄 PAGINATION & PROJECTION SMOKE TEST - AŞAMA 1")
+    test_results.append(("Pagination & Projection Smoke Test", tester.test_pagination_smoke_test_asama1()))
+    
     print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
     test_results.append(("Review Request Specific", tester.test_review_request_specific()))
     
