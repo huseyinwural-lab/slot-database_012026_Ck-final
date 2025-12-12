@@ -712,7 +712,7 @@ const AdminManagement = () => {
                           <TableHead>Admin</TableHead>
                           <TableHead>Risk Score</TableHead>
                           <TableHead>Risk Level</TableHead>
-                          <TableHead>Faktörler</TableHead>
+                          <TableHead>Factors</TableHead>
                           <TableHead>Son Güncelleme</TableHead>
                         </TableRow>
                       </TableHeader>
