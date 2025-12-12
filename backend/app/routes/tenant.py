@@ -114,6 +114,59 @@ async def update_tenant_features(
     return Tenant(**updated_tenant)
 
 
+@router.get("/capabilities")
+async def get_tenant_capabilities(current_admin: AdminUser = Depends(get_current_admin)):
+    """
+    Return current user's tenant capabilities + owner status
+    Used by frontend for role-based UI rendering
+    """
+    from app.utils.permissions import is_owner
+    
+    db = get_db()
+    tenant_id = current_admin.tenant_id
+    
+    # Get tenant features
+    tenant = await db.tenants.find_one(
+        {"id": tenant_id},
+        {
+            "_id": 0,
+            "can_use_game_robot": 1,
+            "can_edit_configs": 1,
+            "can_manage_bonus": 1,
+            "can_view_reports": 1,
+            "can_manage_admins": 1,
+            "can_manage_kyc": 1
+        }
+    )
+    
+    if not tenant:
+        # Default capabilities if tenant not found
+        features = {
+            "can_use_game_robot": False,
+            "can_edit_configs": False,
+            "can_manage_bonus": False,
+            "can_view_reports": True,
+            "can_manage_admins": False,
+            "can_manage_kyc": True
+        }
+    else:
+        features = {
+            "can_use_game_robot": tenant.get("can_use_game_robot", False),
+            "can_edit_configs": tenant.get("can_edit_configs", False),
+            "can_manage_bonus": tenant.get("can_manage_bonus", False),
+            "can_view_reports": tenant.get("can_view_reports", True),
+            "can_manage_admins": tenant.get("can_manage_admins", False),
+            "can_manage_kyc": tenant.get("can_manage_kyc", True)
+        }
+    
+    return {
+        "features": features,
+        "is_owner": is_owner(current_admin),  # CRITICAL: Owner status
+        "tenant_id": tenant_id,
+        "tenant_name": tenant.get("name") if tenant else "Unknown"
+    }
+
+
 async def seed_default_tenants():
     db = get_db()
     count = await db.tenants.count_documents({})
