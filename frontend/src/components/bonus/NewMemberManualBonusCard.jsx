@@ -147,7 +147,7 @@ const NewMemberManualBonusCard = () => {
               );
             })}
             {(!games || games.length === 0) && (
-              <div className="text-[11px] text-muted-foreground">Henüz oyun bulunamadı.</div>
+              <div className="text-[11px] text-muted-foreground">No games found yet.</div>
             )}
           </div>
         </div>
