@@ -34,12 +34,12 @@ const Login = () => {
           console.error('Failed to store admin_user', err);
         }
       }
-      toast.success('Giriş başarılı');
+      toast.success('Sign in successful');
       navigate(from === '/login' ? '/' : from, { replace: true });
     } catch (err) {
       console.error(err);
-      const detail = err?.response?.data?.detail || 'Giriş başarısız';
-      toast.error(typeof detail === 'string' ? detail : 'Giriş başarısız');
+      const detail = err?.response?.data?.detail || 'Sign in failed';
+      toast.error(typeof detail === 'string' ? detail : 'Sign in failed');
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,7 @@ const Login = () => {
               <Shield className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <CardTitle>Admin Girişi</CardTitle>
+          <CardTitle>Admin Login</CardTitle>
           <CardDescription>
             CasinoAdmin kontrol paneline erişmek için bilgilerinizi girin.
           </CardDescription>
