@@ -33,6 +33,7 @@ import OwnerRevenue from './pages/OwnerRevenue';
 import TenantRevenue from './pages/TenantRevenue';
 import { Toaster } from 'sonner';
 import { CapabilitiesProvider } from './context/CapabilitiesContext';
+import ModuleDisabled from './pages/ModuleDisabled'; // Import ModuleDisabled
 
 function App() {
   return (
@@ -260,7 +261,8 @@ function App() {
             )}
           />
           <Route path="/accept-invite" element={<AcceptInvite />} />
-          
+          <Route path="/module-disabled" element={<ModuleDisabled />} />
+
           {/* Revenue Routes */}
           <Route
             path="/revenue/all-tenants"
