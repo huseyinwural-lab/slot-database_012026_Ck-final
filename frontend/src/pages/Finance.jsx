@@ -29,6 +29,7 @@ import ChargebackList from '../components/finance/ChargebackList';
 const Finance = () => {
   const [transactions, setTransactions] = useState([]);
   const [txMeta, setTxMeta] = useState({ page: 1, page_size: 50, total: null });
+  const [pageSize, setPageSize] = useState(50);
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
   
