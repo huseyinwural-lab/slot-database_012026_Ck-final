@@ -876,6 +876,67 @@ const AdminManagement = () => {
                 )}
             </TabsContent>
         </Tabs>
+    {/* Invite Link Modal */}
+    {inviteModal.open && (
+      <Dialog open={inviteModal.open} onOpenChange={(open) => open ? setInviteModal(inviteModal) : setInviteModal({ open: false, token: '', link: '' })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Admin Invite Link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1">
+              <Label>Invite Link</Label>
+              <div className="flex gap-2 items-center">
+                <Input readOnly value={inviteModal.link} />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(inviteModal.link);
+                      toast.success('Invite link copied');
+                    } catch {
+                      toast.error('Failed to copy link');
+                    }
+                  }}
+                >
+                  Copy Link
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label>Raw Token</Label>
+              <div className="flex gap-2 items-center">
+                <Input readOnly value={inviteModal.token} />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(inviteModal.token);
+                      toast.success('Token copied');
+                    } catch {
+                      toast.error('Failed to copy token');
+                    }
+                  }}
+                >
+                  Copy Token
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setInviteModal({ open: false, token: '', link: '' })}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )}
     </div>
   );
 };
