@@ -294,6 +294,47 @@ const TenantsPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Features Modal */}
+      {editingTenant && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Edit Features - {editingTenant.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {featureKeys.map((key) => (
+                  <div key={key} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-300">{key}</span>
+                    <Switch
+                      checked={!!editFeatures[key]}
+                      onCheckedChange={() => handleToggleEditFeature(key)}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={handleCancelEdit}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={handleSaveFeatures}
+                  disabled={submitting}
+                >
+                  {submitting ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
