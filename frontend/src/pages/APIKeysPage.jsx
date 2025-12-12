@@ -101,7 +101,7 @@ const APIKeysPage = () => {
       await navigator.clipboard.writeText(generatedSecret);
       toast.success('API key copied');
     } catch {
-      toast.error('Kopyalama başarısız');
+      toast.error('Copy failed');
     }
   };
 
