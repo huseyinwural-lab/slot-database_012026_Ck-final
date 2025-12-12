@@ -63,8 +63,8 @@ async def create_api_key(
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     # Admin-level key management; require tenant feature flag can_manage_admins
-    await ensure_tenant_feature(request, current_admin, "can_manage_admins")
     db = get_db()
+    await ensure_tenant_feature(request, current_admin, "can_manage_admins", db)
 
     validate_scopes(payload.scopes)
 
