@@ -327,7 +327,7 @@ const AdminManagement = () => {
             <TabsContent value="roles" className="mt-4">
                 <Card><CardContent className="pt-6">
                     <Table>
-                        <TableHeader><TableRow><TableHead>Rol Adı</TableHead><TableHead>Açıklama</TableHead><TableHead>Kullanıcı Sayısı</TableHead></TableRow></TableHeader>
+                        <TableHeader><TableRow><TableHead>Role Name</TableHead><TableHead>Description</TableHead><TableHead>User Count</TableHead></TableRow></TableHeader>
                         <TableBody>{roles.map(r => (
                             <TableRow key={r.id}>
                                 <TableCell className="font-bold">{r.name}</TableCell>
