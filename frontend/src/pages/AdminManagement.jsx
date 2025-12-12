@@ -841,19 +841,19 @@ const AdminManagement = () => {
             
             {/* INVITES */}
             <TabsContent value="invites" className="mt-4">
-              <Card><CardContent className="p-10 text-center text-muted-foreground">Davet Yönetimi (Geliştirme Aşamasında)</CardContent></Card>
+              <Card><CardContent className="p-10 text-center text-muted-foreground">Invite management (under development)</CardContent></Card>
             </TabsContent>
             
             {/* KEYS */}
             <TabsContent value="keys" className="mt-4">
-              <Card><CardContent className="p-10 text-center text-muted-foreground">API Anahtarları (Geliştirme Aşamasında)</CardContent></Card>
+              <Card><CardContent className="p-10 text-center text-muted-foreground">API keys (under development)</CardContent></Card>
             </TabsContent>
             
             {/* SECURITY */}
             <TabsContent value="security" className="mt-4">
                 {policy && (
                     <Card>
-                        <CardHeader><CardTitle>Güvenlik Politikası</CardTitle></CardHeader>
+                        <CardHeader><CardTitle>Security Policy</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div><Label>Min Şifre Uzunluğu</Label><Input value={policy.password_min_length} readOnly /></div>
