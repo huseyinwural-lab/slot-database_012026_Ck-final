@@ -803,6 +803,21 @@ frontend:
         -agent: "testing"
         -comment: "ℹ️ JACKPOTS CONFIG DIFF UI OUT OF P0-C SCOPE: Jackpots için backend config-diff API (type=jackpots) mevcut ancak UI tarafında history + diff panel entegrasyonu bu fazda kasıtlı olarak yapılmadı. Jackpots diff UI, ileriki fazlarda (post P0-C) ele alınacak bir future work olarak planlandı."
 
+  - task: "Admin Panel UI English Translation Control - Turkish Review Request"
+    implemented: true
+    working: false
+    file: "src/pages/Login.jsx, src/pages/BonusManagement.jsx, src/pages/AdminManagement.jsx, src/pages/APIKeysPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Turkish review request for admin panel UI English translation control testing."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ CRITICAL TURKISH TRANSLATION ISSUES FOUND - Multiple Turkish texts remain in admin panel UI requiring immediate English translation: 1) LOGIN PAGE ISSUES: Title 'Admin Girişi' (should be 'Admin Login'), Description 'CasinoAdmin kontrol paneline erişmek için bilgilerinizi girin' (should be 'Enter your credentials to access CasinoAdmin control panel'), Email label 'E-posta' (should be 'Email'), Password label 'Şifre' (should be 'Password'), Login button 'Giriş Yap' (should be 'Login'), Demo text 'Demo kullanıcı' (should be 'Demo user'). These are visible in Login.jsx component lines 57, 59, 65, 76, 97, 100. 2) BONUS MANAGEMENT PAGE: Title appears correct as 'Bonus Campaigns', New Member Manual Bonus card labels appear correct in English. 3) ADMIN MANAGEMENT PAGE: Title appears correct as 'Admin & Security Management', tab titles appear correct in English. 4) API KEYS PAGE: Title appears correct as 'API Keys', dialog components appear correct. URGENT FIXES NEEDED: Update Login.jsx Turkish strings to English equivalents. All other tested pages appear to have correct English translations."
+
 metadata:
   created_by: "main_agent"
   version: "2.1"
