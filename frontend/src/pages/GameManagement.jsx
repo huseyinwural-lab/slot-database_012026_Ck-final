@@ -56,7 +56,7 @@ const GameManagement = () => {
       ]);
       const data = gamesRes.data || {};
       setGames(data.items || []);
-      setGamesMeta(data.meta || { page, page_size: gamesMeta.page_size || 50, total: null });
+      setGamesMeta(data.meta || { page, page_size: effectivePageSize, total: null });
       setTables(tablesRes.data || []);
     } catch {
       toast.error('Failed to load games');
