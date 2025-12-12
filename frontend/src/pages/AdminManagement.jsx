@@ -364,7 +364,7 @@ const AdminManagement = () => {
                         <Input placeholder="Admin ID" value={activityFilter.admin_id} onChange={e => setActivityFilter({...activityFilter, admin_id: e.target.value})} />
                       </div>
                       <div>
-                        <Label>Modül</Label>
+                        <Label>Module</Label>
                         <Select value={activityFilter.module || "all"} onValueChange={v => setActivityFilter({...activityFilter, module: v === "all" ? "" : v})}>
                           <SelectTrigger><SelectValue placeholder="Tümü" /></SelectTrigger>
                           <SelectContent>
