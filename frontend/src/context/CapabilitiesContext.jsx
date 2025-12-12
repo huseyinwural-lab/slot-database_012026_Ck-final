@@ -7,6 +7,7 @@ export const CapabilitiesProvider = ({ children }) => {
   const [capabilities, setCapabilities] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [tenantRole, setTenantRole] = useState(null);
+  const [tenantName, setTenantName] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export const CapabilitiesProvider = ({ children }) => {
       setCapabilities(data.features || {});
       setIsOwner(data.is_owner || false);
       setTenantRole(data.tenant_role || null);
+      setTenantName(data.tenant_name || 'Casino');
       console.log('✅ isOwner set to:', data.is_owner);
     } catch (error) {
       console.error('Failed to fetch capabilities:', error);
@@ -70,6 +72,7 @@ export const CapabilitiesProvider = ({ children }) => {
         loading,
         isOwner,
         tenantRole,
+        tenantName,
         hasFeature,
         refetch: fetchCapabilities
       }}
