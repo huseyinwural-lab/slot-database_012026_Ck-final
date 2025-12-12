@@ -198,7 +198,10 @@ async def get_player_logs(player_id: str):
     ]
 
 # --- FINANCE & APPROVALS ---
-@router.get("/finance/transactions", response_model=List[Transaction])
+from app.models.common import PaginatedResponse
+
+
+@router.get("/finance/transactions", response_model=PaginatedResponse[Transaction])
 async def get_transactions(
     type: Optional[str] = None,
     status: Optional[str] = None,
@@ -210,10 +213,11 @@ async def get_transactions(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     currency: Optional[str] = None,
-    ip_address: Optional[str] = None
+    ip_address: Optional[str] = None,
+    pagination: PaginationParams = Depends(get_pagination_params),
 ):
     db = get_db()
-    query = {}
+    query: Dict[str, Any] = {}
     if type and type != "all":
         query["type"] = type
     if status and status != "all":
@@ -225,8 +229,8 @@ async def get_transactions(
     if currency and currency != "all":
         query["currency"] = currency
     if ip_address:
-         query["ip_address"] = ip_address
-        
+        query["ip_address"] = ip_address
+
     if min_amount or max_amount:
         query["amount"] = {}
         if min_amount:
@@ -242,8 +246,46 @@ async def get_transactions(
         else:
             query["id"] = player_search
 
-    txs = await db.transactions.find(query).sort("created_at", -1).limit(100).to_list(100)
-    return [Transaction(**t) for t in txs]
+    # Sort whitelist
+    ALLOWED_SORT_FIELDS = {"created_at"}
+    sort_field = pagination.sort_by if pagination.sort_by in ALLOWED_SORT_FIELDS else "created_at"
+
+    skip = (pagination.page - 1) * pagination.page_size
+
+    cursor = (
+        db.transactions
+        .find(
+            query,
+            {
+                "_id": 0,
+                "id": 1,
+                "tenant_id": 1,
+                "player_id": 1,
+                "player_username": 1,
+                "type": 1,
+                "amount": 1,
+                "currency": 1,
+                "status": 1,
+                "provider": 1,
+                "method": 1,
+                "created_at": 1,
+            },
+        )
+        .sort(sort_field, -1 if pagination.sort_dir == "desc" else 1)
+        .skip(skip)
+        .limit(pagination.page_size)
+    )
+
+    docs = await cursor.to_list(pagination.page_size)
+    total = await db.transactions.count_documents(query) if pagination.include_total else None
+
+    # NOTE: If status/type filters become heavy, consider adding a compound index
+    # on (tenant_id, status, created_at) or similar.
+
+    return {
+        "items": [Transaction(**t) for t in docs],
+        "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
+    }
 
 @router.post("/finance/transactions/{tx_id}/action")
 async def action_transaction(tx_id: str, action: str = Body(..., embed=True), reason: str = Body(None, embed=True)):
