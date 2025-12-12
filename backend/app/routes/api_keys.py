@@ -10,6 +10,7 @@ from app.models.domain.admin import AdminUser, AdminAPIKey
 from app.utils.auth import get_current_admin
 from app.utils.api_keys import generate_api_key, validate_scopes
 from app.constants.api_keys import API_KEY_SCOPES
+from app.utils.features import ensure_tenant_feature
 
 
 router = APIRouter(prefix="/api/v1/api-keys", tags=["api_keys"])

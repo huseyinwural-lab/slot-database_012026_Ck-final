@@ -16,6 +16,7 @@ from app.models.domain.admin import AdminUser
 from app.utils.tenant import get_current_tenant_id
 from app.utils.auth import get_current_admin, require_permission
 from app.utils.pagination import get_pagination_params
+from app.utils.features import ensure_tenant_feature
 from config import settings
 from app.services.ai_service import risk_analyzer
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -743,6 +744,7 @@ async def create_bonus(
     bonus: Bonus,
     current_admin: AdminUser = Depends(get_current_admin),
 ):
+    await ensure_tenant_feature(request, current_admin, "can_manage_bonus")
     db = get_db()
     tenant_id = get_current_tenant_id(request, current_admin)
 
