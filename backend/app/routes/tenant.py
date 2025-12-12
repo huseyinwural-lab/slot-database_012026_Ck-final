@@ -7,6 +7,9 @@ from config import settings
 from app.models.tenant import Tenant
 from app.models.common import PaginatedResponse, PaginationParams, PaginationMeta
 from app.utils.pagination import get_pagination_params
+from app.utils.permissions import require_owner
+from app.utils.auth import get_current_admin
+from app.models.domain.admin import AdminUser
 
 router = APIRouter(prefix="/api/v1/tenants", tags=["tenants"])
 
