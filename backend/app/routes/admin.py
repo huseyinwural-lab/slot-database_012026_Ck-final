@@ -33,6 +33,7 @@ class AdminUserCreateRequest(BaseModel):
     allowed_modules: List[str] = []
     password_mode: str  # "manual" | "invite"
     password: Optional[str] = None
+    tenant_id: Optional[str] = None  # If not provided, use default
 
 
 @router.post("/users")
