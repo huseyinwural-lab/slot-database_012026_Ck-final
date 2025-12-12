@@ -72,17 +72,17 @@ const NewMemberManualBonusCard = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-lg">
-          Yeni Üye Manuel Bonus
+          New Member Manual Bonus
           <div className="flex items-center gap-2 text-xs">
             <Switch
               checked={config.enabled}
               onCheckedChange={(v) => setConfig({ ...config, enabled: v })}
             />
-            <span>Yeni üye bonusu aktif</span>
+            <span>New member bonus active</span>
           </div>
         </CardTitle>
         <CardDescription className="text-xs">
-          Bu bonus sadece yeni kayıt olan oyuncular için otomatik olarak devreye girer.
+          This bonus is automatically activated only for newly registered players.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
