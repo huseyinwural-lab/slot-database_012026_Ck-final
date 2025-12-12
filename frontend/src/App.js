@@ -224,6 +224,7 @@ function App() {
               </RequireAuth>
             )}
           />
+          <Route path="/accept-invite" element={<AcceptInvite />} />
           <Route
             path="/settings"
             element={(
