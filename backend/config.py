@@ -26,8 +26,17 @@ class Settings(BaseSettings):
                 ]
             # For prod/stage, do NOT fall back to '*'; require explicit list
             return []
-        # Support comma-separated list
-        return [o.strip() for o in raw.split(",") if o.strip()]
+        # Support comma-separated list and basic normalization
+        origins = []
+        for part in raw.split(","):
+            o = part.strip().strip('"').strip("'").rstrip("/")
+            if not o:
+                continue
+            if not (o.startswith("http://") or o.startswith("https://")):
+                # Ignore invalid origin without scheme
+                continue
+            origins.append(o)
+        return origins
     cors_allowed_origins: str = os.getenv("CORS_ALLOWED_ORIGINS", "*")
 
     # Auth / JWT
