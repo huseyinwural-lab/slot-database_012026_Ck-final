@@ -54,7 +54,7 @@ const TenantRevenue = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">My Revenue</h1>
-          <p className="text-muted-foreground">Your tenant's financial performance</p>
+          <p className="text-muted-foreground">Your tenant&apos;s financial performance</p>
         </div>
         <Select value={dateRange} onValueChange={setDateRange}>
           <SelectTrigger className="w-[180px]">
