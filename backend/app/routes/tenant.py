@@ -163,6 +163,7 @@ async def get_tenant_capabilities(current_admin: AdminUser = Depends(get_current
         "features": features,
         "is_owner": is_owner(current_admin),  # CRITICAL: Owner status
         "tenant_id": tenant_id,
+        "tenant_role": current_admin.tenant_role, # Return tenant role
         "tenant_name": tenant.get("name") if tenant else "Unknown"
     }
 
