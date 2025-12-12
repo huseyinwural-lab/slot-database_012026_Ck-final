@@ -293,7 +293,7 @@ const AdminManagement = () => {
                                 </div>
                                 {newUser.password_mode === 'manual' && (
                                   <div className="space-y-2">
-                                    <Label>Şifre (policy ile uyumlu)</Label>
+                                    <Label>Password (must satisfy policy)</Label>
                                     <Input
                                       type="password"
                                       placeholder="En az 8 karakter, büyük harf, rakam ve özel karakter içermeli"
