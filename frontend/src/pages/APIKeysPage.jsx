@@ -73,6 +73,8 @@ const APIKeysPage = () => {
       const detail = err?.response?.data?.detail;
       if (detail?.error_code === 'INVALID_API_KEY_SCOPE') {
         toast.error('Invalid scope selection');
+      } else if (err?.response?.status === 403 && detail?.error_code === 'TENANT_FEATURE_DISABLED') {
+        toast.error('This module is disabled for your tenant.');
       } else {
         toast.error('Failed to create API key');
       }
