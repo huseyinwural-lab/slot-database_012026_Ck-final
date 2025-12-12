@@ -198,7 +198,7 @@ async def get_player_logs(player_id: str):
     ]
 
 # --- FINANCE & APPROVALS ---
-from app.models.common import PaginatedResponse
+from app.models.common import PaginatedResponse, PaginationParams, PaginationMeta
 
 
 @router.get("/finance/transactions", response_model=PaginatedResponse[Transaction])
