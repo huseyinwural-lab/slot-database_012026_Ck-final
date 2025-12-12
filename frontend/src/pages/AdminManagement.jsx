@@ -770,7 +770,7 @@ const AdminManagement = () => {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex justify-end">
-                        <Button><Plus className="w-4 h-4 mr-2" /> Yeni Vekalet</Button>
+                        <Button><Plus className="w-4 h-4 mr-2" /> New Delegation</Button>
                       </div>
                       <Table>
                         <TableHeader>
