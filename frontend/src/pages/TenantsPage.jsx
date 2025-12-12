@@ -29,6 +29,8 @@ const TenantsPage = () => {
     },
   });
   const [submitting, setSubmitting] = useState(false);
+  const [editingTenant, setEditingTenant] = useState(null);
+  const [editFeatures, setEditFeatures] = useState({});
 
   const loadTenants = async (page = 1) => {
     try {
