@@ -129,9 +129,21 @@ async def create_team(team: AdminTeam):
 
 # --- SESSIONS ---
 @router.get("/sessions", response_model=List[AdminSession])
-async def get_sessions():
+async def get_sessions(current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
-    sessions = await db.admin_sessions.find().sort("last_active", -1).to_list(100)
+    
+    # Filter sessions by tenant (join with admin users)
+    query = {}
+    if current_admin.role != "Super Admin":
+        # Get admin IDs from same tenant
+        tenant_admins = await db.admins.find(
+            {"tenant_id": current_admin.tenant_id},
+            {"_id": 0, "id": 1}
+        ).to_list(1000)
+        admin_ids = [a["id"] for a in tenant_admins]
+        query["admin_id"] = {"$in": admin_ids}
+    
+    sessions = await db.admin_sessions.find(query).sort("last_active", -1).to_list(100)
     return [AdminSession(**s) for s in sessions]
 
 # --- SECURITY ---
