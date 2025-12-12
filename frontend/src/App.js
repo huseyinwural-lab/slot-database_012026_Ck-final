@@ -130,7 +130,9 @@ function App() {
             path="/features"
             element={(
               <RequireAuth>
-                <FeatureFlags />
+                <RequireFeature requireOwner={true}>
+                  <FeatureFlags />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -138,7 +140,9 @@ function App() {
             path="/simulator"
             element={(
               <RequireAuth>
-                <SimulationLab />
+                <RequireFeature feature="can_use_game_robot" requireOwner={true}>
+                  <SimulationLab />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -148,7 +152,9 @@ function App() {
             path="/kyc"
             element={(
               <RequireAuth>
-                <KYCManagement />
+                <RequireFeature feature="can_manage_kyc">
+                  <KYCManagement />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -156,7 +162,9 @@ function App() {
             path="/crm"
             element={(
               <RequireAuth>
-                <CRM />
+                <RequireFeature requireOwner={true}>
+                  <CRM />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -164,7 +172,9 @@ function App() {
             path="/cms"
             element={(
               <RequireAuth>
-                <CMSManagement />
+                <RequireFeature requireOwner={true}>
+                  <CMSManagement />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -172,7 +182,9 @@ function App() {
             path="/affiliates"
             element={(
               <RequireAuth>
-                <AffiliateManagement />
+                <RequireFeature requireOwner={true}>
+                  <AffiliateManagement />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
@@ -180,7 +192,9 @@ function App() {
             path="/risk"
             element={(
               <RequireAuth>
-                <RiskManagement />
+                <RequireFeature requireOwner={true}>
+                  <RiskManagement />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
