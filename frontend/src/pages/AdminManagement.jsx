@@ -683,7 +683,7 @@ const AdminManagement = () => {
                             <TableCell className="text-xs">{login.location || '-'}</TableCell>
                             <TableCell>
                               <Badge variant={login.result === 'success' ? 'default' : 'destructive'}>
-                                {login.result === 'success' ? '✅ Başarılı' : '❌ Başarısız'}
+                                {login.result === 'success' ? '✅ Success' : '❌ Failed'}
                               </Badge>
                             </TableCell>
                             <TableCell className="text-xs text-muted-foreground">
