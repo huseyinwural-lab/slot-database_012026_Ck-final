@@ -478,7 +478,7 @@ async def update_table_status(table_id: str, status: str = Body(..., embed=True)
     return {"message": "Status updated"}
 
 # --- GAMES & ADVANCED SETTINGS ---
-@router.get("/games", response_model=List[Game])
+@router.get("/games", response_model=PaginatedResponse[Game])
 async def get_games(
     request: Request,
     category: Optional[str] = None,
@@ -490,12 +490,13 @@ async def get_games(
     volatility: Optional[str] = None,
     country: Optional[str] = None,
     feature_buy: Optional[bool] = None,
+    pagination: PaginationParams = Depends(get_pagination_params),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     db = get_db()
     tenant_id = get_current_tenant_id(request, current_admin)
 
-    query = {"tenant_id": tenant_id}
+    query: Dict[str, Any] = {"tenant_id": tenant_id}
     if category and category != "all":
         query["category"] = category
     if provider and provider != "all":
@@ -521,20 +522,52 @@ async def get_games(
     if search:
         query["name"] = {"$regex": search, "$options": "i"}
 
-    games = await db.games.find(query).limit(100).to_list(100)
-    
+    # Sort whitelist
+    ALLOWED_SORT_FIELDS = {"created_at"}
+    sort_field = pagination.sort_by if pagination.sort_by in ALLOWED_SORT_FIELDS else "created_at"
+
+    skip = (pagination.page - 1) * pagination.page_size
+
+    cursor = (
+        db.games
+        .find(
+            query,
+            {
+                "_id": 0,
+                "id": 1,
+                "tenant_id": 1,
+                "name": 1,
+                "category": 1,
+                "provider": 1,
+                "business_status": 1,
+                "runtime_status": 1,
+                "configuration.rtp": 1,
+                "created_at": 1,
+            },
+        )
+        .sort(sort_field, -1 if pagination.sort_dir == "desc" else 1)
+        .skip(skip)
+        .limit(pagination.page_size)
+    )
+
+    games = await cursor.to_list(pagination.page_size)
+
     enhanced_games = []
     for g in games:
         # Auto-Suggestion Logic (Mock)
-        config = g.get('configuration', {})
-        # Handle case where configuration is a dict or model dump
-        min_bet = config.get('min_bet', 0) if isinstance(config, dict) else 0
-        
-        if min_bet > 10 and not g.get('is_special_game'):
-            g['suggestion_reason'] = "High min bet detected - Candidate for VIP"
+        config = g.get("configuration", {}) if isinstance(g, dict) else {}
+        min_bet = config.get("min_bet", 0) if isinstance(config, dict) else 0
+
+        if min_bet > 10 and not g.get("is_special_game"):
+            g["suggestion_reason"] = "High min bet detected - Candidate for VIP"
         enhanced_games.append(Game(**g))
-        
-    return enhanced_games
+
+    total = await db.games.count_documents(query) if pagination.include_total else None
+
+    return {
+        "items": enhanced_games,
+        "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
+    }
 
 @router.get("/games/{game_id}/analytics")
 async def get_game_analytics(game_id: str):

@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Depends
 from typing import List
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime, timezone
 
 from config import settings
 from app.models.tenant import Tenant
+from app.models.common import PaginatedResponse, PaginationParams, PaginationMeta
+from app.utils.pagination import get_pagination_params
 
 router = APIRouter(prefix="/api/v1/tenants", tags=["tenants"])
 
