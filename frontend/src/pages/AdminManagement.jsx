@@ -170,9 +170,9 @@ const AdminManagement = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
             <ScrollArea className="w-full whitespace-nowrap rounded-md border">
                 <TabsList className="w-full flex justify-start">
-                    <TabsTrigger value="users"><User className="w-4 h-4 mr-2" /> Admin Kullanıcılar</TabsTrigger>
-                    <TabsTrigger value="roles"><Settings className="w-4 h-4 mr-2" /> Roller</TabsTrigger>
-                    <TabsTrigger value="teams"><Users className="w-4 h-4 mr-2" /> Takımlar</TabsTrigger>
+                    <TabsTrigger value="users"><User className="w-4 h-4 mr-2" /> Admin Users</TabsTrigger>
+                    <TabsTrigger value="roles"><Settings className="w-4 h-4 mr-2" /> Roles</TabsTrigger>
+                    <TabsTrigger value="teams"><Users className="w-4 h-4 mr-2" /> Teams</TabsTrigger>
                     <TabsTrigger value="activity-log"><FileText className="w-4 h-4 mr-2" /> 📜 Aktivite Logu</TabsTrigger>
                     <TabsTrigger value="permission-matrix"><Grid3x3 className="w-4 h-4 mr-2" /> 🧩 İzin Matrisi</TabsTrigger>
                     <TabsTrigger value="ip-device"><Globe className="w-4 h-4 mr-2" /> 🛡️ IP & Cihaz</TabsTrigger>
