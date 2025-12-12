@@ -100,7 +100,9 @@ function App() {
             path="/bonuses"
             element={(
               <RequireAuth>
-                <BonusManagement />
+                <RequireFeature feature="can_manage_bonus">
+                  <BonusManagement />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
