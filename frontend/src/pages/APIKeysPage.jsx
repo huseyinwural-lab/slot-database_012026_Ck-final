@@ -64,7 +64,7 @@ const APIKeysPage = () => {
       });
       setGeneratedSecret(res.data.api_key);
       setGeneratedMeta(res.data.key);
-      toast.success('API key oluşturuldu');
+      toast.success('API key created');
       setNewKeyName('');
       setNewKeyScopes([]);
       fetchData();
@@ -72,9 +72,9 @@ const APIKeysPage = () => {
       console.error(err);
       const detail = err?.response?.data?.detail;
       if (detail?.error_code === 'INVALID_API_KEY_SCOPE') {
-        toast.error('Geçersiz scope seçimi');
+        toast.error('Invalid scope selection');
       } else {
-        toast.error('API key oluşturulamadı');
+        toast.error('Failed to create API key');
       }
     }
   };
