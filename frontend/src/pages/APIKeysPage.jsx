@@ -201,9 +201,9 @@ const APIKeysPage = () => {
                 <TableHead>Key Prefix</TableHead>
                 <TableHead>Tenant</TableHead>
                 <TableHead>Scopes</TableHead>
-                <TableHead>Durum</TableHead>
-                <TableHead>Oluşturulma</TableHead>
-                <TableHead>Son Kullanım</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created At</TableHead>
+                <TableHead>Last Used</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
