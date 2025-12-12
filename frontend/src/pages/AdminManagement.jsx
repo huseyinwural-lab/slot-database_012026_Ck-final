@@ -368,7 +368,7 @@ const AdminManagement = () => {
                         <Select value={activityFilter.module || "all"} onValueChange={v => setActivityFilter({...activityFilter, module: v === "all" ? "" : v})}>
                           <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">Tümü</SelectItem>
+                            <SelectItem value="all">All</SelectItem>
                             <SelectItem value="players">Players</SelectItem>
                             <SelectItem value="finance">Finance</SelectItem>
                             <SelectItem value="games">Games</SelectItem>
@@ -641,7 +641,7 @@ const AdminManagement = () => {
                         <Select value={loginFilter.result || "all"} onValueChange={v => setLoginFilter({...loginFilter, result: v === "all" ? "" : v})}>
                           <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">Tümü</SelectItem>
+                            <SelectItem value="all">All</SelectItem>
                             <SelectItem value="success">✅ Başarılı</SelectItem>
                             <SelectItem value="failed">❌ Başarısız</SelectItem>
                           </SelectContent>
