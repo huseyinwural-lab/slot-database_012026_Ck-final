@@ -113,7 +113,7 @@ const APIKeysPage = () => {
             <KeyRound className="w-7 h-7 text-primary" /> API Keys
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Game Robot ve dış entegrasyonlar için scope tabanlı API anahtarları yönetin.
+            Manage scope-based API keys for Game Robot and external integrations.
           </p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
