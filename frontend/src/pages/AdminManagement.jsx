@@ -37,7 +37,7 @@ const AdminManagement = () => {
   
   // Create States
   const [isUserOpen, setIsUserOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ full_name: '', email: '', role: 'support' });
+  const [newUser, setNewUser] = useState({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '' });
   const [isIPDialogOpen, setIsIPDialogOpen] = useState(false);
   const [newIP, setNewIP] = useState({ ip_address: '', restriction_type: 'allowed', reason: '' });
   
