@@ -35,7 +35,8 @@ const Login = () => {
         }
       }
       toast.success('Sign in successful');
-      navigate(from === '/login' ? '/' : from, { replace: true });
+      // Reload to trigger CapabilitiesContext
+      window.location.href = from === '/login' ? '/' : from;
     } catch (err) {
       console.error(err);
       const detail = err?.response?.data?.detail || 'Sign in failed';
