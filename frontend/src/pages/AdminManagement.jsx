@@ -666,7 +666,7 @@ const AdminManagement = () => {
                           <TableHead>IP Address</TableHead>
                           <TableHead>Cihaz</TableHead>
                           <TableHead>Location</TableHead>
-                          <TableHead>Sonuç</TableHead>
+                          <TableHead>Result</TableHead>
                           <TableHead>Sebep</TableHead>
                         </TableRow>
                       </TableHeader>
