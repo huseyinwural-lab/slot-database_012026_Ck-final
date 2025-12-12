@@ -59,9 +59,8 @@ async def robot_round(
         )
 
     # Enforce tenant feature flag for robot usage
-    await ensure_tenant_feature_by_tenant_id(api_ctx.tenant_id, "can_use_game_robot")
-
     db = get_db()
+    await ensure_tenant_feature_by_tenant_id(api_ctx.tenant_id, "can_use_game_robot", db)
 
     async with httpx.AsyncClient(base_url="http://localhost:8001") as client:
         orchestrator = RobotOrchestrator(db, client)
