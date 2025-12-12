@@ -52,13 +52,12 @@ async def ensure_tenant_feature(request: Request, admin: AdminUser, feature_key:
         )
 
 
-async def ensure_tenant_feature_by_tenant_id(tenant_id: str, feature_key: str, request_id: str | None = None):
+async def ensure_tenant_feature_by_tenant_id(tenant_id: str, feature_key: str, db: AsyncIOMotorDatabase, request_id: str | None = None):
     """Ensure feature flag for non-admin contexts (e.g. API key / robot).
 
     Used when we only have tenant_id (no AdminUser/Request), for example
     in the Game Robot orchestrator.
     """
-    db = get_db()
     tenant = await db.tenants.find_one({"id": tenant_id}, {"_id": 0, "features": 1})
     if not tenant:
         logger.warning(
