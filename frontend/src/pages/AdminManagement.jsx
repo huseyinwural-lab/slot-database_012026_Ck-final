@@ -387,7 +387,7 @@ const AdminManagement = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Admin</TableHead>
-                          <TableHead>Aksiyon</TableHead>
+                          <TableHead>Action</TableHead>
                           <TableHead>Modül</TableHead>
                           <TableHead>IP Adresi</TableHead>
                           <TableHead>Zaman</TableHead>
