@@ -6,7 +6,7 @@ import {
   ListChecks, ToggleRight, Search, FlaskConical,
   FileText, Megaphone, BarChart3, Globe, Handshake,
   AlertOctagon, UserCog, ScrollText, Scale, Crown,
-  KeyRound, Building
+  KeyRound, Building, TrendingUp
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
