@@ -1403,14 +1403,16 @@ class CasinoAdminAPITester:
             "Players sort_dir=DESC", 
             "GET", 
             "api/v1/players?page=1&page_size=50&sort_dir=DESC", 
-            200
+            200,
+            auth_token=self.access_token
         )
         
         success5, _ = self.run_test(
             "Players sort_dir=Asc", 
             "GET", 
             "api/v1/players?page=1&page_size=50&sort_dir=Asc", 
-            200
+            200,
+            auth_token=self.access_token
         )
         
         print(f"   ✅ Players pagination tests passed")
