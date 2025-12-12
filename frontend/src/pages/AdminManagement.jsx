@@ -389,7 +389,7 @@ const AdminManagement = () => {
                           <TableHead>Admin</TableHead>
                           <TableHead>Action</TableHead>
                           <TableHead>Module</TableHead>
-                          <TableHead>IP Adresi</TableHead>
+                          <TableHead>IP Address</TableHead>
                           <TableHead>Zaman</TableHead>
                           <TableHead>Risk</TableHead>
                           <TableHead></TableHead>
@@ -663,7 +663,7 @@ const AdminManagement = () => {
                         <TableRow>
                           <TableHead>Admin</TableHead>
                           <TableHead>Giriş Zamanı</TableHead>
-                          <TableHead>IP Adresi</TableHead>
+                          <TableHead>IP Address</TableHead>
                           <TableHead>Cihaz</TableHead>
                           <TableHead>Konum</TableHead>
                           <TableHead>Sonuç</TableHead>
