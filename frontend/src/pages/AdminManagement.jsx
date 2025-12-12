@@ -341,7 +341,7 @@ const AdminManagement = () => {
 
             {/* TEAMS */}
             <TabsContent value="teams" className="mt-4">
-              <Card><CardContent className="p-10 text-center text-muted-foreground">Takım Yönetimi (Geliştirme Aşamasında)</CardContent></Card>
+              <Card><CardContent className="p-10 text-center text-muted-foreground">Team management (under development)</CardContent></Card>
             </TabsContent>
             
             {/* 📜 ACTIVITY LOG - ZORUNLU 1 */}
