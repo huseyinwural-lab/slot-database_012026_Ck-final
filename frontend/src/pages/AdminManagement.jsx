@@ -350,7 +350,7 @@ const AdminManagement = () => {
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">📜 Admin Activity Log (Audit)</CardTitle>
-                      <CardDescription>Tüm admin aksiyonları burada kayıt altında tutulur</CardDescription>
+                      <CardDescription>All admin actions are recorded here for auditing</CardDescription>
                     </div>
                     <Button onClick={() => handleExportLogs(activityLogs, 'activity_log.csv')}>
                       <Download className="w-4 h-4 mr-2" /> CSV Export
