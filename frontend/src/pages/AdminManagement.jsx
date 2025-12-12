@@ -622,8 +622,8 @@ const AdminManagement = () => {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="flex items-center gap-2">🔑 Admin Giriş Geçmişi</CardTitle>
-                      <CardDescription>Tüm admin giriş denemeleri (başarılı ve başarısız)</CardDescription>
+                      <CardTitle className="flex items-center gap-2">🔑 Admin Login History</CardTitle>
+                      <CardDescription>All admin login attempts (successful and failed)</CardDescription>
                     </div>
                     <Button onClick={() => handleExportLogs(loginHistory, 'login_history.csv')}>
                       <Download className="w-4 h-4 mr-2" /> CSV Export
@@ -637,7 +637,7 @@ const AdminManagement = () => {
                         <Input placeholder="Admin ID" value={loginFilter.admin_id} onChange={e => setLoginFilter({...loginFilter, admin_id: e.target.value})} />
                       </div>
                       <div>
-                        <Label>Sonuç</Label>
+                        <Label>Result</Label>
                         <Select value={loginFilter.result || "all"} onValueChange={v => setLoginFilter({...loginFilter, result: v === "all" ? "" : v})}>
                           <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
