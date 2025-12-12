@@ -675,7 +675,7 @@ const AdminManagement = () => {
                           <TableRow key={login.id} className={login.is_suspicious ? 'bg-red-50' : ''}>
                             <TableCell className="font-medium">
                               {login.admin_name}
-                              {login.is_suspicious && <Badge variant="destructive" className="ml-2 text-xs">⚠️ ŞÜPHELİ</Badge>}
+                              {login.is_suspicious && <Badge variant="destructive" className="ml-2 text-xs">⚠️ SUSPICIOUS</Badge>}
                             </TableCell>
                             <TableCell className="text-xs">{new Date(login.login_time).toLocaleString('tr-TR')}</TableCell>
                             <TableCell className="font-mono text-xs">{login.ip_address}</TableCell>
