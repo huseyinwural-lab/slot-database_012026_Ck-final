@@ -36,14 +36,14 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-# Request logging & correlation ID
+    allow_headers=["*"],
+)
+
 # Rate limiting (basic IP-based)
 app.add_middleware(RateLimitMiddleware)
 
+# Request logging & correlation ID
 app.add_middleware(RequestLoggingMiddleware)
-
-    allow_headers=["*"],
-)
 
 # Include Routes
 app.include_router(core.router)
