@@ -653,7 +653,7 @@ const AdminManagement = () => {
                           onClick={() => setLoginFilter({...loginFilter, suspicious_only: !loginFilter.suspicious_only})}
                           className="w-full"
                         >
-                          <Filter className="w-4 h-4 mr-2" /> Sadece Şüpheli
+                          <Filter className="w-4 h-4 mr-2" /> Only suspicious
                         </Button>
                       </div>
                     </div>
