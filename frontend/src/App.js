@@ -29,6 +29,8 @@ import TenantsPage from './pages/TenantsPage';
 import Login from './pages/Login';
 import APIKeysPage from './pages/APIKeysPage';
 import AcceptInvite from './pages/AcceptInvite';
+import OwnerRevenue from './pages/OwnerRevenue';
+import TenantRevenue from './pages/TenantRevenue';
 import { Toaster } from 'sonner';
 import { CapabilitiesProvider } from './context/CapabilitiesContext';
 
