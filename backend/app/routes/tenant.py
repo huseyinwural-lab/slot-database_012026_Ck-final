@@ -44,10 +44,7 @@ async def list_tenants(
                 "name": 1,
                 "type": 1,
                 "created_at": 1,
-                "features.can_use_game_robot": 1,
-                "features.can_edit_configs": 1,
-                "features.can_manage_bonus": 1,
-                "features.can_view_reports": 1,
+                "features": 1,
             },
         )
         .sort(sort_field, -1 if pagination.sort_dir == "desc" else 1)
