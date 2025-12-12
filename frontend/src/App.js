@@ -35,9 +35,10 @@ import { CapabilitiesProvider } from './context/CapabilitiesContext';
 function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+      <CapabilitiesProvider>
+        <Layout>
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
           <Route
             path="/"
