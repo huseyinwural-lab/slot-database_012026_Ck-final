@@ -59,20 +59,28 @@ async def get_dashboard_stats():
     )
 
 # --- PLAYERS ---
-@router.get("/players", response_model=List[Player])
+from app.models.common import PaginationMeta
+
+
+@router.get("/players")
 async def get_players(
     request: Request,
-    status: Optional[str] = None, 
+    status: Optional[str] = None,
     search: Optional[str] = None,
     vip_level: Optional[int] = None,
     risk_score: Optional[str] = None,
     country: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    include_total: bool = Query(True),
+    sort_by: Optional[str] = Query(None),
+    sort_dir: str = Query("desc"),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     db = get_db()
     tenant_id = get_current_tenant_id(request, current_admin)
 
-    query = {"tenant_id": tenant_id}
+    query: Dict[str, Any] = {"tenant_id": tenant_id}
     if status and status != "all":
         query["status"] = status
     if vip_level:
@@ -81,16 +89,54 @@ async def get_players(
         query["risk_score"] = risk_score
     if country and country != "all":
         query["country"] = country
-        
+
     if search:
         query["$or"] = [
             {"username": {"$regex": search, "$options": "i"}},
             {"email": {"$regex": search, "$options": "i"}},
-            {"id": search} 
+            {"id": search},
         ]
-        
-    players = await db.players.find(query).sort("registered_at", -1).limit(100).to_list(100)
-    return [Player(**p) for p in players]
+
+    # Sort whitelist
+    allowed_sorts = {"registered_at", "vip_level", "risk_score"}
+    field = "registered_at"
+    if sort_by in allowed_sorts:
+        field = sort_by
+    direction = -1 if sort_dir != "asc" else 1
+
+    skip = (page - 1) * page_size
+
+    cursor = (
+        db.players
+        .find(
+            query,
+            {
+                "_id": 0,
+                "id": 1,
+                "tenant_id": 1,
+                "username": 1,
+                "email": 1,
+                "country": 1,
+                "balance_real": 1,
+                "balance_bonus": 1,
+                "vip_level": 1,
+                "status": 1,
+                "risk_score": 1,
+                "registered_at": 1,
+            },
+        )
+        .sort(field, direction)
+        .skip(skip)
+        .limit(page_size)
+    )
+
+    docs = await cursor.to_list(page_size)
+    total = await db.players.count_documents(query) if include_total else None
+
+    return {
+        "items": [Player(**p) for p in docs],
+        "meta": PaginationMeta(total=total, page=page, page_size=page_size),
+    }
 
 @router.get("/players/{player_id}", response_model=Player)
 async def get_player_detail(player_id: str):
