@@ -221,9 +221,9 @@ const AdminManagement = () => {
                                     {[
                                       { key: 'players', label: 'Players' },
                                       { key: 'games', label: 'Games' },
-                                      { key: 'bonuses', label: 'Bonuslar' },
-                                      { key: 'reports', label: 'Raporlar' },
-                                      { key: 'fraud', label: 'Fraud/Risk' },
+                                      { key: 'bonuses', label: 'Bonuses' },
+                                      { key: 'reports', label: 'Reports' },
+                                      { key: 'fraud', label: 'Fraud / Risk' },
                                       { key: 'settings', label: 'Ayarlar' },
                                     ].map(mod => {
                                       // Rol bazlı otomatik seçim mantığı
