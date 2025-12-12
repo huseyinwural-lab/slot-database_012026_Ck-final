@@ -121,7 +121,7 @@ const AdminManagement = () => {
       toast.success('Admin user created');
     } catch (err) {
       console.error(err);
-      toast.error('Başarısız');
+      toast.error('Operation failed');
     }
   };
   
