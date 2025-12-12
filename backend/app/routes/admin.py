@@ -26,9 +26,48 @@ async def get_admins():
     users = await db.admins.find().to_list(100)
     return [AdminUser(**u) for u in users]
 
+class AdminUserCreateRequest(BaseModel):
+    full_name: str
+    email: EmailStr
+    role: str
+    allowed_modules: List[str] = []
+    password_mode: str  # "manual" | "invite"
+    password: Optional[str] = None
+
+
 @router.post("/users")
-async def create_admin(user: AdminUser):
+async def create_admin(payload: AdminUserCreateRequest):
     db = get_db()
+
+    if payload.password_mode not in {"manual", "invite"}:
+        raise HTTPException(status_code=400, detail="INVALID_PASSWORD_MODE")
+
+    if payload.password_mode == "manual" and not payload.password:
+        raise HTTPException(status_code=400, detail="PASSWORD_REQUIRED_FOR_MANUAL_MODE")
+
+    username = payload.email.split("@")[0]
+
+    password_hash = None
+    status = AdminStatus.ACTIVE
+
+    if payload.password_mode == "manual":
+        from app.utils.auth import get_password_hash
+
+        password_hash = get_password_hash(payload.password)
+    else:
+        # Invite mode: kullanıcı ilk girişte şifre belirleyecek
+        status = AdminStatus.INVITED
+
+    user = AdminUser(
+        username=username,
+        email=payload.email,
+        full_name=payload.full_name,
+        role=payload.role,
+        allowed_modules=payload.allowed_modules,
+        status=status,
+        password_hash=password_hash,
+    )
+
     await db.admins.insert_one(user.model_dump())
     return user
 
