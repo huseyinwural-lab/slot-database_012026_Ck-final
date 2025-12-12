@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from config import settings
 from app.models.domain.admin import AdminUser
 from app.utils.auth import get_current_admin
-from app.utils.permissions import is_owner, require_owner
+from app.utils.permissions import is_owner, require_owner, require_tenant_role
 
 
 router = APIRouter(prefix="/api/v1/reports", tags=["revenue"])
@@ -141,7 +141,7 @@ async def get_all_tenants_revenue(
 async def get_my_tenant_revenue(
     from_date: Optional[datetime] = Query(None, description="Start date (default: 7 days ago)"),
     to_date: Optional[datetime] = Query(None, description="End date (default: now)"),
-    current_admin: AdminUser = Depends(get_current_admin)
+    current_admin: AdminUser = Depends(require_tenant_role(["finance", "tenant_admin"]))
 ):
     """
     Tenant: Get revenue for own tenant only
