@@ -16,17 +16,17 @@ const ThemeSettings = ({ brands }) => {
     color_palette: { primary: '#000000', secondary: '#ffffff' }
   });
 
-  const fetchTheme = async (brandId) => {
-    try {
-      const res = await api.get(`/v1/settings/theme/${brandId}`);
-      setTheme(res.data);
-    } catch {
-      // Reset if not found
-      setTheme({ brand_id: brandId, logo_url: '', color_palette: { primary: '#000000', secondary: '#ffffff' } });
-    }
-  };
-
   useEffect(() => {
+    const fetchTheme = async (brandId) => {
+      try {
+        const res = await api.get(`/v1/settings/theme/${brandId}`);
+        setTheme(res.data);
+      } catch {
+        // Reset if not found
+        setTheme({ brand_id: brandId, logo_url: '', color_palette: { primary: '#000000', secondary: '#ffffff' } });
+      }
+    };
+
     if (selectedBrand) fetchTheme(selectedBrand);
   }, [selectedBrand]);
 

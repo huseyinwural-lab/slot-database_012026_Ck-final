@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,7 +73,7 @@ const AdminManagement = () => {
     loadInitialData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
         if (activeTab === 'users') setUsers((await api.get('/v1/admin/users')).data);
         if (activeTab === 'roles') setRoles((await api.get('/v1/admin/roles')).data);
@@ -109,7 +110,7 @@ const AdminManagement = () => {
         }
         
     } catch (err) { console.error(err); toast.error('Failed to load data'); }
-  };
+  }, [activeTab, activityFilter, loginFilter]);
 
   useEffect(() => { fetchData(); }, [activeTab, activityFilter, loginFilter]);
 

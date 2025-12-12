@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ const AffiliateManagement = () => {
   const [newPayout, setNewPayout] = useState({ affiliate_id: '', amount: 0, period_start: '', period_end: '' });
   const [newCreative, setNewCreative] = useState({ name: '', type: 'banner', url: '' });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
         if (activeTab === 'partners') setAffiliates((await api.get('/v1/affiliates')).data);
         if (activeTab === 'offers') setOffers((await api.get('/v1/affiliates/offers')).data);
@@ -49,7 +50,7 @@ const AffiliateManagement = () => {
         }
         if (activeTab === 'creatives') setCreatives((await api.get('/v1/affiliates/creatives')).data);
     } catch (err) { toast.error("Load failed"); }
-  };
+  }, [activeTab]);
 
   useEffect(() => { fetchData(); }, [activeTab]);
 
