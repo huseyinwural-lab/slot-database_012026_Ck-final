@@ -798,7 +798,7 @@ const AdminManagement = () => {
                             <TableCell className="text-xs">2025-12-10</TableCell>
                             <TableCell className="text-xs">2025-12-15</TableCell>
                             <TableCell><Badge variant="outline">Finance Approve</Badge></TableCell>
-                            <TableCell><Badge variant="secondary">Tamamlandı</Badge></TableCell>
+                            <TableCell><Badge variant="secondary">Completed</Badge></TableCell>
                           </TableRow>
                         </TableBody>
                       </Table>
