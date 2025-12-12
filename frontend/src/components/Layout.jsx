@@ -68,6 +68,12 @@ const Layout = ({ children }) => {
               {isOwner && (
                 <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
               )}
+              {isOwner && (
+                <SidebarItem to="/revenue/all-tenants" icon={TrendingUp} label="All Revenue" />
+              )}
+              {!isOwner && (
+                <SidebarItem to="/revenue/my-tenant" icon={TrendingUp} label="My Revenue" />
+              )}
               <SidebarItem to="/games" icon={Gamepad2} label="Games" />
               <SidebarItem
                 to="/vip-games"
