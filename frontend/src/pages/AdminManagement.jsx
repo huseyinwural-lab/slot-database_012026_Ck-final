@@ -521,7 +521,7 @@ const AdminManagement = () => {
                               <Label>Reason</Label>
                               <Textarea placeholder="Why is this being added?" value={newIP.reason} onChange={e=>setNewIP({...newIP, reason: e.target.value})} />
                             </div>
-                            <Button onClick={handleAddIPRestriction} className="w-full">Ekle</Button>
+                            <Button onClick={handleAddIPRestriction} className="w-full">Add</Button>
                           </div>
                         </DialogContent>
                       </Dialog>
