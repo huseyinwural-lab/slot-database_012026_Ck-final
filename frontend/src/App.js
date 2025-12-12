@@ -214,7 +214,9 @@ function App() {
             path="/tenants"
             element={(
               <RequireAuth>
-                <TenantsPage />
+                <RequireFeature requireOwner={true}>
+                  <TenantsPage />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
