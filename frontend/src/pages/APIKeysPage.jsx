@@ -50,11 +50,11 @@ const APIKeysPage = () => {
 
   const handleCreate = async () => {
     if (!newKeyName.trim()) {
-      toast.error('İsim zorunludur');
+      toast.error('Name is required');
       return;
     }
     if (newKeyScopes.length === 0) {
-      toast.error('En az bir scope seçmelisiniz');
+      toast.error('You must select at least one scope');
       return;
     }
     try {
@@ -86,7 +86,7 @@ const APIKeysPage = () => {
       toast.success('API key status updated');
     } catch (err) {
       console.error(err);
-      toast.error('Durum güncellenemedi');
+      toast.error('Failed to update status');
     }
   };
 
@@ -119,7 +119,7 @@ const APIKeysPage = () => {
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="w-4 h-4 mr-2" /> Yeni API Key
+              <Plus className="w-4 h-4 mr-2" /> New API Key
             </Button>
           </DialogTrigger>
           <DialogContent>
