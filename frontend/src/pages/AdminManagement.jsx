@@ -499,12 +499,12 @@ const AdminManagement = () => {
                         <CardDescription>Manage IP whitelist and blacklist for admin users</CardDescription>
                       </div>
                       <Dialog open={isIPDialogOpen} onOpenChange={setIsIPDialogOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> IP Ekle</Button></DialogTrigger>
+                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add IP</Button></DialogTrigger>
                         <DialogContent>
-                          <DialogHeader><DialogTitle>Yeni IP Kısıtlaması</DialogTitle></DialogHeader>
+                          <DialogHeader><DialogTitle>New IP Restriction</DialogTitle></DialogHeader>
                           <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                              <Label>IP Adresi</Label>
+                              <Label>IP Address</Label>
                               <Input placeholder="192.168.1.1" value={newIP.ip_address} onChange={e=>setNewIP({...newIP, ip_address: e.target.value})} />
                             </div>
                             <div className="space-y-2">
