@@ -96,11 +96,22 @@ const AdminManagement = () => {
         toast.error('Manuel modda şifre zorunlu');
         return;
       }
+      const baseModules = ['players', 'games', 'bonuses', 'reports', 'fraud', 'settings'];
+      let allowedModules = [...newUser.allowed_modules];
+
+      if (newUser.role === 'Super Admin') {
+        // Süper Admin her şeye erişir
+        allowedModules = baseModules;
+      } else if (newUser.role === 'Manager') {
+        // Manager kritik alanlar (fraud, settings) dışında her şeye erişir
+        allowedModules = baseModules.filter(m => !['fraud', 'settings'].includes(m));
+      }
+
       await api.post('/v1/admin/users', {
         full_name: newUser.full_name,
         email: newUser.email,
-        role: newUser.role || 'Custom',
-        allowed_modules: newUser.allowed_modules,
+        role: newUser.role || 'Admin',
+        allowed_modules: allowedModules,
         password_mode: newUser.password_mode,
         password: newUser.password_mode === 'manual' ? newUser.password : undefined,
       });
