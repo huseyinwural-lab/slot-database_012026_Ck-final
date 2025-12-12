@@ -124,9 +124,9 @@ const APIKeysPage = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Yeni API Key Oluştur</DialogTitle>
+              <DialogTitle>Create New API Key</DialogTitle>
               <DialogDescription>
-                Bu anahtar sadece bir kez gösterilecek. Lütfen oluşturduktan sonra güvenli bir yerde saklayın.
+                This key will only be shown once. Please store it securely after creation.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
