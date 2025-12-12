@@ -153,7 +153,7 @@ const AdminManagement = () => {
       }
 
       setIsUserOpen(false);
-      setNewUser({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '' });
+      setNewUser({ full_name: '', email: '', role: '', tenant_role: 'tenant_admin', allowed_modules: [], password_mode: 'manual', password: '', tenant_id: '' });
       fetchData();
       toast.success('Admin user created');
     } catch (err) {
@@ -258,22 +258,49 @@ const AdminManagement = () => {
 
                                 <div className="space-y-2">
                                   <Label>Role</Label>
-                                  <div className="grid grid-cols-3 gap-2 text-sm">
-                                    {['Super Admin', 'Manager', 'Admin'].map(roleOpt => (
-                                      <button
-                                        key={roleOpt}
-                                        type="button"
-                                        onClick={() => setNewUser({ ...newUser, role: roleOpt })}
-                                        className={`rounded border px-3 py-2 text-xs ${
-                                          newUser.role === roleOpt
-                                            ? 'bg-primary text-primary-foreground border-primary'
-                                            : 'hover:bg-secondary'
-                                        }`}
-                                      >
-                                        {roleOpt}
-                                      </button>
-                                    ))}
-                                  </div>
+                                  {newUser.tenant_id && newUser.tenant_id !== 'default_casino' ? (
+                                    <div className="space-y-3">
+                                        <div className="text-sm text-muted-foreground mb-1">Tenant Roles</div>
+                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                            {[
+                                                { label: 'Full Admin', value: 'tenant_admin' },
+                                                { label: 'Operations', value: 'operations' },
+                                                { label: 'Finance', value: 'finance' },
+                                                { label: 'Support', value: 'support' }
+                                            ].map(roleOpt => (
+                                            <button
+                                                key={roleOpt.value}
+                                                type="button"
+                                                onClick={() => setNewUser({ ...newUser, role: 'Tenant Admin', tenant_role: roleOpt.value })}
+                                                className={`rounded border px-3 py-2 text-xs ${
+                                                newUser.tenant_role === roleOpt.value
+                                                    ? 'bg-primary text-primary-foreground border-primary'
+                                                    : 'hover:bg-secondary'
+                                                }`}
+                                            >
+                                                {roleOpt.label}
+                                            </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                  ) : (
+                                    <div className="grid grid-cols-3 gap-2 text-sm">
+                                        {['Super Admin', 'Manager', 'Admin'].map(roleOpt => (
+                                        <button
+                                            key={roleOpt}
+                                            type="button"
+                                            onClick={() => setNewUser({ ...newUser, role: roleOpt, tenant_role: null })}
+                                            className={`rounded border px-3 py-2 text-xs ${
+                                            newUser.role === roleOpt
+                                                ? 'bg-primary text-primary-foreground border-primary'
+                                                : 'hover:bg-secondary'
+                                            }`}
+                                        >
+                                            {roleOpt}
+                                        </button>
+                                        ))}
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="space-y-2">
                                   <Label>Permission Scopes (modules)</Label>
