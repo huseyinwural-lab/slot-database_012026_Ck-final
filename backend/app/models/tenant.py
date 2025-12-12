@@ -13,6 +13,8 @@ class Tenant(BaseModel):
         "can_edit_configs": True,
         "can_manage_bonus": True,
         "can_view_reports": True,
+        "can_manage_finance": True,
+        "can_manage_admins": True,
     }
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
