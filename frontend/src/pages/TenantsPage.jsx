@@ -144,6 +144,45 @@ const TenantsPage = () => {
               </div>
             )}
           </CardContent>
+          <div className="flex items-center justify-between px-4 py-3 border-t text-xs text-muted-foreground">
+            <div>
+              Page {tenantsMeta.page}
+              {tenantsMeta.total != null && tenantsMeta.page_size && (
+                <span>
+                  {' '}of {Math.max(1, Math.ceil(tenantsMeta.total / tenantsMeta.page_size))}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loading || tenantsMeta.page <= 1}
+                onClick={() => {
+                  const prevPage = (tenantsMeta.page || 1) - 1;
+                  if (prevPage < 1) return;
+                  loadTenants(prevPage).then(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  });
+                }}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loading || tenants.length < (tenantsMeta.page_size || 50)}
+                onClick={() => {
+                  const nextPage = (tenantsMeta.page || 1) + 1;
+                  loadTenants(nextPage).then(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  });
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
         </Card>
 
         {/* New Tenant Form */}
