@@ -98,8 +98,8 @@ async def create_api_key(
 @router.patch("/{key_id}", response_model=APIKeyMetaResponse)
 async def update_api_key(
     key_id: str,
-    active: Optional[bool] = Body(None, embed=True),
     request: Request,
+    active: Optional[bool] = Body(None, embed=True),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     await ensure_tenant_feature(request, current_admin, "can_manage_admins")
