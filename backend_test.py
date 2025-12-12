@@ -1343,7 +1343,8 @@ class CasinoAdminAPITester:
             "Players Pagination (include_total=false)", 
             "GET", 
             "api/v1/players?page=1&page_size=50&include_total=false", 
-            200
+            200,
+            auth_token=self.access_token
         )
         
         if not success1:
