@@ -86,8 +86,11 @@ async def create_tenant(
 @router.patch("/{tenant_id}")
 async def update_tenant_features(
     tenant_id: str,
-    features: dict = Body(..., embed=True)
+    features: dict = Body(..., embed=True),
+    current_admin: AdminUser = Depends(get_current_admin)
 ):
+    # Only owner can update tenant features
+    require_owner(current_admin)
     """Update tenant feature flags"""
     db = get_db()
     
