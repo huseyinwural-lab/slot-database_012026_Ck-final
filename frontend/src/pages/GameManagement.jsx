@@ -17,6 +17,7 @@ import GameConfigPanel from '../components/games/GameConfigPanel';
 
 const GameManagement = () => {
   const [games, setGames] = useState([]);
+  const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });
   const [tables, setTables] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [gameCategory, setGameCategory] = useState('all');
@@ -40,15 +41,20 @@ const GameManagement = () => {
   const [importJob, setImportJob] = useState(null);
   const [importItems, setImportItems] = useState([]);
 
-  const fetchAll = async (category = 'all') => {
+  const fetchAll = async (category = 'all', page = 1) => {
     try {
+      const gameParams = {};
+      if (category && category !== 'all') gameParams.category = category;
+      gameParams.page = page;
+      gameParams.page_size = gamesMeta.page_size || 50;
+
       const [gamesRes, tablesRes] = await Promise.all([
-        api.get('/v1/games', {
-          params: category && category !== 'all' ? { category } : {},
-        }),
+        api.get('/v1/games', { params: gameParams }),
         api.get('/v1/tables'),
       ]);
-      setGames(gamesRes.data || []);
+      const data = gamesRes.data || {};
+      setGames(data.items || []);
+      setGamesMeta(data.meta || { page, page_size: gamesMeta.page_size || 50, total: null });
       setTables(tablesRes.data || []);
     } catch {
       toast.error('Failed to load games');
@@ -56,7 +62,7 @@ const GameManagement = () => {
   };
 
   useEffect(() => {
-    fetchAll(gameCategory);
+    fetchAll(gameCategory, 1);
   }, [gameCategory]);
 
   const handleToggleGame = async (gameId) => {
