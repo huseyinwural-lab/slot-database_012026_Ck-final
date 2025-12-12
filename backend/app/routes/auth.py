@@ -45,6 +45,11 @@ class PasswordResetConfirmRequest(BaseModel):
     new_password: str
 
 
+class AcceptInviteRequest(BaseModel):
+    token: str
+    new_password: str
+
+
 def _validate_password_policy(password: str) -> None:
     if len(password) < 8:
         raise HTTPException(
