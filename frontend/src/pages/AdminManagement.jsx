@@ -496,7 +496,7 @@ const AdminManagement = () => {
                     <CardHeader className="flex flex-row items-center justify-between">
                       <div>
                         <CardTitle className="flex items-center gap-2">🛡️ IP Restrictions</CardTitle>
-                        <CardDescription>Admin kullanıcıları için IP whitelist ve blacklist yönetimi</CardDescription>
+                        <CardDescription>Manage IP whitelist and blacklist for admin users</CardDescription>
                       </div>
                       <Dialog open={isIPDialogOpen} onOpenChange={setIsIPDialogOpen}>
                         <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> IP Ekle</Button></DialogTrigger>
