@@ -366,7 +366,7 @@ const AdminManagement = () => {
                       <div>
                         <Label>Module</Label>
                         <Select value={activityFilter.module || "all"} onValueChange={v => setActivityFilter({...activityFilter, module: v === "all" ? "" : v})}>
-                          <SelectTrigger><SelectValue placeholder="Tümü" /></SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">Tümü</SelectItem>
                             <SelectItem value="players">Players</SelectItem>
@@ -639,7 +639,7 @@ const AdminManagement = () => {
                       <div>
                         <Label>Sonuç</Label>
                         <Select value={loginFilter.result || "all"} onValueChange={v => setLoginFilter({...loginFilter, result: v === "all" ? "" : v})}>
-                          <SelectTrigger><SelectValue placeholder="Tümü" /></SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">Tümü</SelectItem>
                             <SelectItem value="success">✅ Başarılı</SelectItem>
