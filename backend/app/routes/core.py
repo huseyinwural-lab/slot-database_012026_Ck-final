@@ -4,12 +4,12 @@ from typing import List, Optional, Dict, Any
 import uuid
 import random
 from app.models.core import (
-    Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus, 
+    Player, Transaction, DashboardStats, PlayerStatus, TransactionStatus,
     TransactionType, KYCStatus, Game, Bonus, Ticket, TicketMessage,
     FeatureFlag, ApprovalRequest, GameConfig, BonusRule, KPIMetric, LoginLog,
     FinancialReport, CustomTable, GameUploadLog, Paytable, JackpotConfig,
     BusinessStatus, RuntimeStatus, SpecialType, TransactionTimeline,
-    WageringStatus
+    WageringStatus,
 )
 from app.models.modules import KYCDocument
 from app.models.domain.admin import AdminUser
