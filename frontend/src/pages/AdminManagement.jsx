@@ -173,9 +173,9 @@ const AdminManagement = () => {
                     <TabsTrigger value="users"><User className="w-4 h-4 mr-2" /> Admin Users</TabsTrigger>
                     <TabsTrigger value="roles"><Settings className="w-4 h-4 mr-2" /> Roles</TabsTrigger>
                     <TabsTrigger value="teams"><Users className="w-4 h-4 mr-2" /> Teams</TabsTrigger>
-                    <TabsTrigger value="activity-log"><FileText className="w-4 h-4 mr-2" /> 📜 Aktivite Logu</TabsTrigger>
-                    <TabsTrigger value="permission-matrix"><Grid3x3 className="w-4 h-4 mr-2" /> 🧩 İzin Matrisi</TabsTrigger>
-                    <TabsTrigger value="ip-device"><Globe className="w-4 h-4 mr-2" /> 🛡️ IP & Cihaz</TabsTrigger>
+                    <TabsTrigger value="activity-log"><FileText className="w-4 h-4 mr-2" /> 📜 Activity Log</TabsTrigger>
+                    <TabsTrigger value="permission-matrix"><Grid3x3 className="w-4 h-4 mr-2" /> 🧩 Permission Matrix</TabsTrigger>
+                    <TabsTrigger value="ip-device"><Globe className="w-4 h-4 mr-2" /> 🛡️ IP & Devices</TabsTrigger>
                     <TabsTrigger value="login-history"><History className="w-4 h-4 mr-2" /> 🔑 Giriş Geçmişi</TabsTrigger>
                     <TabsTrigger value="security"><Lock className="w-4 h-4 mr-2" /> Güvenlik</TabsTrigger>
                     <TabsTrigger value="sessions"><Calendar className="w-4 h-4 mr-2" /> Oturumlar</TabsTrigger>
