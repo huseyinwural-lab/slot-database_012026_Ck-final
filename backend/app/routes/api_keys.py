@@ -102,8 +102,8 @@ async def update_api_key(
     active: Optional[bool] = Body(None, embed=True),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    await ensure_tenant_feature(request, current_admin, "can_manage_admins")
     db = get_db()
+    await ensure_tenant_feature(request, current_admin, "can_manage_admins", db)
 
     doc = await db.admin_api_keys.find_one({"id": key_id}, {"_id": 0})
     if not doc:
