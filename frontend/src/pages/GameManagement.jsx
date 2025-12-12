@@ -18,6 +18,7 @@ import GameConfigPanel from '../components/games/GameConfigPanel';
 const GameManagement = () => {
   const [games, setGames] = useState([]);
   const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });
+  const [gamesPageSize, setGamesPageSize] = useState(50);
   const [tables, setTables] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [gameCategory, setGameCategory] = useState('all');

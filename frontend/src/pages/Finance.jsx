@@ -30,6 +30,17 @@ const Finance = () => {
   const [transactions, setTransactions] = useState([]);
   const [txMeta, setTxMeta] = useState({ page: 1, page_size: 50, total: null });
   const [pageSize, setPageSize] = useState(50);
+const formatAmount = (amount, currency) => {
+  if (amount == null) return '-';
+  try {
+    const value = Number(amount);
+    const formatted = value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    return `${formatted} ${currency || ''}`.trim();
+  } catch {
+    return `${amount} ${currency || ''}`.trim();
+  }
+};
+
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
   
@@ -378,8 +389,7 @@ const Finance = () => {
                            <div className="text-[10px] text-muted-foreground mt-1">{tx.provider}</div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="font-bold">${tx.amount.toLocaleString()}</div>
-                          <div className="text-[10px] text-muted-foreground">{tx.currency}</div>
+                          <div className="font-bold">{formatAmount(tx.amount, tx.currency)}</div>
                         </TableCell>
                         
                         {visibleColumns.net_amount && <TableCell className="text-right font-mono text-xs">${tx.net_amount?.toLocaleString()}</TableCell>}
