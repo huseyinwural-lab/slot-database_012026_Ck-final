@@ -59,10 +59,10 @@ async def get_dashboard_stats():
     )
 
 # --- PLAYERS ---
-from app.models.common import PaginationMeta
+from app.models.common import PaginationMeta, PaginatedResponse
 
 
-@router.get("/players")
+@router.get("/players", response_model=PaginatedResponse[Player])
 async def get_players(
     request: Request,
     status: Optional[str] = None,
