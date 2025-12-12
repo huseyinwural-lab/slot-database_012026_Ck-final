@@ -97,7 +97,7 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
             <p className="mt-2 text-xs text-muted-foreground text-center">
-              Demo kullanıcı: <span className="font-mono">admin@casino.com / Admin123!</span>
+              Demo user: <span className="font-mono">admin@casino.com / Admin123!</span>
             </p>
           </form>
         </CardContent>
