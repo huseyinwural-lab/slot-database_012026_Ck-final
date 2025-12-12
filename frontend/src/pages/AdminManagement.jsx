@@ -28,6 +28,8 @@ const AdminManagement = () => {
   const [keys, setKeys] = useState([]);
   const [policy, setPolicy] = useState(null);
   
+  const [inviteModal, setInviteModal] = useState({ open: false, token: '', link: '' });
+  
   // NEW: Critical Features
   const [activityLogs, setActivityLogs] = useState([]);
   const [loginHistory, setLoginHistory] = useState([]);
@@ -107,7 +109,7 @@ const AdminManagement = () => {
         allowedModules = baseModules.filter(m => !['fraud', 'settings'].includes(m));
       }
 
-      await api.post('/v1/admin/users', {
+      const res = await api.post('/v1/admin/users', {
         full_name: newUser.full_name,
         email: newUser.email,
         role: newUser.role || 'Admin',
@@ -115,6 +117,14 @@ const AdminManagement = () => {
         password_mode: newUser.password_mode,
         password: newUser.password_mode === 'manual' ? newUser.password : undefined,
       });
+
+      // If created via invite mode and backend returned a token, show invite modal
+      if (newUser.password_mode === 'invite' && res.data?.invite_token) {
+        const origin = window.location.origin;
+        const link = `${origin}/accept-invite?token=${res.data.invite_token}`;
+        setInviteModal({ open: true, token: res.data.invite_token, link });
+      }
+
       setIsUserOpen(false);
       setNewUser({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '' });
       fetchData();
