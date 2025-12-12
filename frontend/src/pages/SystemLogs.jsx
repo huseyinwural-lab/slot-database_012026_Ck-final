@@ -11,6 +11,15 @@ import {
     Activity, Clock, Server, Package, Settings, AlertOctagon, Mail, Database, Zap, Archive, Link
 } from 'lucide-react';
 
+const NavButton = ({ tab, icon: Icon, label, activeTab, setActiveTab }) => (
+    <Button 
+        variant={activeTab===tab ? 'secondary' : 'ghost'} 
+        className="w-full justify-start text-sm" 
+        onClick={()=>setActiveTab(tab)}
+    >
+        <Icon className="w-4 h-4 mr-2" /> {label}
+    </Button>
+);
 const SystemLogs = () => {
   const [activeTab, setActiveTab] = useState("events");
   const [data, setData] = useState([]);
@@ -41,16 +50,6 @@ const SystemLogs = () => {
     try { await api.post('/v1/logs/cron/run', { job_name: "manual_trigger" }); toast.success("Job Started"); fetchData(); } catch { toast.error("Failed"); }
   };
 
-  const NavButton = ({ tab, icon: Icon, label }) => (
-    <Button 
-        variant={activeTab===tab ? 'secondary' : 'ghost'} 
-        className="w-full justify-start text-sm" 
-        onClick={()=>setActiveTab(tab)}
-    >
-        <Icon className="w-4 h-4 mr-2" /> {label}
-    </Button>
-  );
-
   return (
     <div className="flex h-[calc(100vh-100px)]">
         {/* SIDEBAR NAVIGATION */}
@@ -58,17 +57,17 @@ const SystemLogs = () => {
             <h3 className="font-bold mb-2 px-4 flex items-center gap-2"><Server className="w-5 h-5 text-primary" /> System Logs</h3>
             <ScrollArea className="flex-1 pr-2">
                 <div className="space-y-1">
-                    <NavButton tab="events" icon={Activity} label="System Events" />
-                    <NavButton tab="cron" icon={Clock} label="Cron Jobs" />
-                    <NavButton tab="health" icon={Zap} label="Service Health" />
-                    <NavButton tab="deployments" icon={Package} label="Deployments" />
-                    <NavButton tab="config" icon={Settings} label="Config Changes" />
-                    <NavButton tab="errors" icon={AlertOctagon} label="Error Logs" />
-                    <NavButton tab="queues" icon={Mail} label="Queue / Workers" />
-                    <NavButton tab="db" icon={Database} label="Database Logs" />
-                    <NavButton tab="cache" icon={Zap} label="Cache Logs" />
-                    <NavButton tab="archive" icon={Archive} label="Log Archive" />
-                    <NavButton tab="trace" icon={Link} label="Trace View" />
+                    <NavButton tab="events" icon={Activity} label="System Events" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="cron" icon={Clock} label="Cron Jobs" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="health" icon={Zap} label="Service Health" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="deployments" icon={Package} label="Deployments" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="config" icon={Settings} label="Config Changes" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="errors" icon={AlertOctagon} label="Error Logs" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="queues" icon={Mail} label="Queue / Workers" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="db" icon={Database} label="Database Logs" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="cache" icon={Zap} label="Cache Logs" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="archive" icon={Archive} label="Log Archive" activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <NavButton tab="trace" icon={Link} label="Trace View" activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
             </ScrollArea>
         </div>
