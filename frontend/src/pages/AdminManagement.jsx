@@ -81,7 +81,7 @@ const AdminManagement = () => {
           setDeviceRestrictions((await api.get('/v1/admin/device-restrictions')).data);
         }
         
-    } catch (err) { console.error(err); toast.error('Veri yüklenirken hata oluştu'); }
+    } catch (err) { console.error(err); toast.error('Failed to load data'); }
   };
 
   useEffect(() => { fetchData(); }, [activeTab, activityFilter, loginFilter]);
@@ -135,7 +135,7 @@ const AdminManagement = () => {
       setIsIPDialogOpen(false);
       setNewIP({ ip_address: '', restriction_type: 'allowed', reason: '' });
       fetchData();
-      toast.success('IP kısıtlaması eklendi');
+      toast.success('IP restriction added');
     } catch { toast.error('Başarısız'); }
   };
   
@@ -143,7 +143,7 @@ const AdminManagement = () => {
     try {
       await api.put(`/v1/admin/device-restrictions/${deviceId}/approve`, { approved_by: 'current_admin' });
       fetchData();
-      toast.success('Cihaz onaylandı');
+      toast.success('Device approved');
     } catch { toast.error('Başarısız'); }
   };
   
