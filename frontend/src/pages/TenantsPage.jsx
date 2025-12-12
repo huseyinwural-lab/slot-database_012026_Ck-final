@@ -155,7 +155,7 @@ const TenantsPage = () => {
                     key={t.id}
                     className="border rounded-md px-3 py-2 flex items-center justify-between gap-4"
                   >
-                    <div>
+                    <div className="flex-1">
                       <div className="font-medium">
                         {t.name}{' '}
                         <span className="text-xs uppercase text-muted-foreground">({t.type})</span>
@@ -175,6 +175,13 @@ const TenantsPage = () => {
                         </span>
                       </div>
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditClick(t)}
+                    >
+                      Edit Features
+                    </Button>
                   </div>
                 ))}
               </div>
