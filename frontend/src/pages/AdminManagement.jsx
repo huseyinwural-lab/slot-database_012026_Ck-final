@@ -158,7 +158,7 @@ const AdminManagement = () => {
     a.href = url;
     a.download = filename;
     a.click();
-    toast.success('Export başarılı');
+    toast.success('Export successful');
   };
 
   return (
