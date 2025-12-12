@@ -750,7 +750,7 @@ const AdminManagement = () => {
                                   {factors.map((f, i) => <p key={i} className="text-xs text-muted-foreground">{f}</p>)}
                                 </div>
                               </TableCell>
-                              <TableCell className="text-xs">{new Date().toLocaleDateString('tr-TR')}</TableCell>
+                              <TableCell className="text-xs">{new Date().toLocaleDateString('en-US')}</TableCell>
                             </TableRow>
                           );
                         })}
