@@ -265,7 +265,7 @@ const AdminManagement = () => {
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>Şifre Belirleme Modu</Label>
+                                  <Label>Password Mode</Label>
                                   <div className="flex gap-2 text-sm">
                                     <button
                                       type="button"
