@@ -1524,7 +1524,8 @@ class CasinoAdminAPITester:
             "Games Pagination (include_total=true)", 
             "GET", 
             "api/v1/games?page=1&page_size=50&include_total=true", 
-            200
+            200,
+            auth_token=self.access_token
         )
         
         if not success2:
@@ -1535,7 +1536,8 @@ class CasinoAdminAPITester:
             "Games Invalid sort_by", 
             "GET", 
             "api/v1/games?page=1&page_size=50&sort_by=foo", 
-            200
+            200,
+            auth_token=self.access_token
         )
         
         print(f"   ✅ Games pagination tests passed")
