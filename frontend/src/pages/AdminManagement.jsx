@@ -775,7 +775,7 @@ const AdminManagement = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Asıl Admin</TableHead>
+                            <TableHead>Primary Admin</TableHead>
                             <TableHead>Vekil Admin</TableHead>
                             <TableHead>Başlangıç</TableHead>
                             <TableHead>Bitiş</TableHead>
