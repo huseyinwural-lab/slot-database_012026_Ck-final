@@ -24,9 +24,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 router = APIRouter(prefix="/api/v1", tags=["core"])
 
+from app.core.database import db_wrapper
+
 def get_db():
-    client = AsyncIOMotorClient(settings.mongo_url)
-    return client[settings.db_name]
+    return db_wrapper.db
 
 # --- DASHBOARD & MOCK ---
 @router.get("/dashboard/stats", response_model=DashboardStats)

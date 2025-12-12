@@ -16,9 +16,10 @@ from app.utils.permissions import is_owner, require_owner, require_tenant_role
 router = APIRouter(prefix="/api/v1/reports", tags=["revenue"])
 
 
-def get_db() -> AsyncIOMotorDatabase:
-    client = AsyncIOMotorClient(settings.mongo_url)
-    return client[settings.db_name]
+from app.core.database import db_wrapper
+
+def get_db():
+    return db_wrapper.db
 
 
 # --- RESPONSE MODELS ---

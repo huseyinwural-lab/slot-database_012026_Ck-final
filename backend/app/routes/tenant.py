@@ -14,9 +14,10 @@ from app.models.domain.admin import AdminUser
 router = APIRouter(prefix="/api/v1/tenants", tags=["tenants"])
 
 
+from app.core.database import db_wrapper
+
 def get_db():
-    client = AsyncIOMotorClient(settings.mongo_url)
-    return client[settings.db_name]
+    return db_wrapper.db
 
 
 @router.get("/", response_model=PaginatedResponse[Tenant])

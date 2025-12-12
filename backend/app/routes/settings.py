@@ -14,9 +14,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 router = APIRouter(prefix="/api/v1/settings", tags=["settings"])
 
+from app.core.database import db_wrapper
+
 def get_db():
-    client = AsyncIOMotorClient(app_settings.mongo_url)
-    return client[app_settings.db_name]
+    return db_wrapper.db
 
 # --- BRANDS ---
 @router.get("/brands", response_model=List[Brand])
