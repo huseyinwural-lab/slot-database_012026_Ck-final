@@ -43,7 +43,7 @@ const AdminManagement = () => {
   
   // Create States
   const [isUserOpen, setIsUserOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '', tenant_id: '' });
+  const [newUser, setNewUser] = useState({ full_name: '', email: '', role: '', tenant_role: 'tenant_admin', allowed_modules: [], password_mode: 'manual', password: '', tenant_id: '' });
   const [isIPDialogOpen, setIsIPDialogOpen] = useState(false);
   const [newIP, setNewIP] = useState({ ip_address: '', restriction_type: 'allowed', reason: '' });
   
@@ -138,6 +138,8 @@ const AdminManagement = () => {
         full_name: newUser.full_name,
         email: newUser.email,
         role: newUser.role || 'Admin',
+        tenant_role: newUser.tenant_role,
+        tenant_id: newUser.tenant_id,
         allowed_modules: allowedModules,
         password_mode: newUser.password_mode,
         password: newUser.password_mode === 'manual' ? newUser.password : undefined,
