@@ -32,7 +32,7 @@ const APIKeysPage = () => {
       setScopes(scopesRes.data || []);
     } catch (err) {
       console.error(err);
-      toast.error('API key verileri yüklenirken hata oluştu');
+      toast.error('Failed to load API key data');
     } finally {
       setLoading(false);
     }
