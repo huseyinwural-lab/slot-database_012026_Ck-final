@@ -51,6 +51,8 @@ const Layout = ({ children }) => {
     brandName: tenantName || 'Tenant Portal',
     activeItem: 'bg-emerald-600 text-white'
   };
+
+  const handleSearch = async (val) => {
     if (val.length > 2) {
       try {
         const res = await api.get(`/v1/search?q=${val}`);
