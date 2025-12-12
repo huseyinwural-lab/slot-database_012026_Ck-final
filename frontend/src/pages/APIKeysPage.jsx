@@ -83,7 +83,7 @@ const APIKeysPage = () => {
     try {
       const res = await api.patch(`/v1/api-keys/${id}`, { active: !current });
       setKeys((prev) => prev.map((k) => (k.id === id ? res.data : k)));
-      toast.success('API key durumu güncellendi');
+      toast.success('API key status updated');
     } catch (err) {
       console.error(err);
       toast.error('Durum güncellenemedi');
