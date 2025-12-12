@@ -66,11 +66,15 @@ async def create_admin(payload: AdminUserCreateRequest):
             expires_delta=timedelta(days=7),
         )
 
+    # Use provided tenant_id or default to "default_casino"
+    tenant_id = payload.tenant_id if payload.tenant_id else "default_casino"
+    
     user = AdminUser(
         username=username,
         email=payload.email,
         full_name=payload.full_name,
         role=payload.role,
+        tenant_id=tenant_id,
         allowed_modules=payload.allowed_modules,
         status=status,
         password_hash=password_hash,
