@@ -662,10 +662,10 @@ const AdminManagement = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Admin</TableHead>
-                          <TableHead>Giriş Zamanı</TableHead>
+                          <TableHead>Login Time</TableHead>
                           <TableHead>IP Address</TableHead>
                           <TableHead>Cihaz</TableHead>
-                          <TableHead>Konum</TableHead>
+                          <TableHead>Location</TableHead>
                           <TableHead>Sonuç</TableHead>
                           <TableHead>Sebep</TableHead>
                         </TableRow>
