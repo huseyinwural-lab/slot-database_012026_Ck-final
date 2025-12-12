@@ -785,7 +785,7 @@ const AdminManagement = () => {
                         </TableHeader>
                         <TableBody>
                           <TableRow>
-                            <TableCell className="font-medium">Mehmet Yılmaz</TableCell>
+                            <TableCell className="font-medium">Mehmet Yilmaz</TableCell>
                             <TableCell>Ayşe Demir</TableCell>
                             <TableCell className="text-xs">2025-12-20</TableCell>
                             <TableCell className="text-xs">2025-12-27</TableCell>
