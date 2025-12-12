@@ -302,7 +302,7 @@ const AdminManagement = () => {
                                     />
                                   </div>
                                 )}
-                                <Button onClick={handleCreateUser} className="w-full">Oluştur</Button>
+                                <Button onClick={handleCreateUser} className="w-full">Create</Button>
                             </div>
                         </DialogContent>
                     </Dialog>
