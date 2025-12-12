@@ -721,7 +721,7 @@ const AdminManagement = () => {
                           const riskScore = [25, 45, 80][idx];
                           const riskLevel = riskScore < 30 ? 'Low' : riskScore < 60 ? 'Medium' : 'High';
                           const factors = [
-                            ['Normal aktivite'],
+                            ['Normal activity'],
                             ['Yeni cihaz +10', 'Başarısız giriş +5'],
                             ['Yeni ülke +20', 'Alışılmadık aksiyonlar +30']
                           ][idx];
