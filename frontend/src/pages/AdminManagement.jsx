@@ -296,7 +296,7 @@ const AdminManagement = () => {
                                     <Label>Password (must satisfy policy)</Label>
                                     <Input
                                       type="password"
-                                      placeholder="En az 8 karakter, büyük harf, rakam ve özel karakter içermeli"
+                                      placeholder="At least 8 chars, incl. uppercase, number and special character"
                                       value={newUser.password}
                                       onChange={e => setNewUser({ ...newUser, password: e.target.value })}
                                     />
