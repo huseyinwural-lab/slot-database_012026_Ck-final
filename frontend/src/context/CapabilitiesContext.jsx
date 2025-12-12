@@ -25,8 +25,10 @@ export const CapabilitiesProvider = ({ children }) => {
       const response = await api.get('/v1/tenants/capabilities');
       const data = response.data;
 
+      console.log('✅ Capabilities fetched:', data);
       setCapabilities(data.features || {});
       setIsOwner(data.is_owner || false);
+      console.log('✅ isOwner set to:', data.is_owner);
     } catch (error) {
       console.error('Failed to fetch capabilities:', error);
       setCapabilities({});
