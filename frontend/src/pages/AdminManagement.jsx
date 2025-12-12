@@ -779,7 +779,7 @@ const AdminManagement = () => {
                             <TableHead>Delegate Admin</TableHead>
                             <TableHead>Start</TableHead>
                             <TableHead>End</TableHead>
-                            <TableHead>Devredilen Yetkiler</TableHead>
+                            <TableHead>Delegated Permissions</TableHead>
                             <TableHead>Durum</TableHead>
                           </TableRow>
                         </TableHeader>
