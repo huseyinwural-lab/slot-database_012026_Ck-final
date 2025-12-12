@@ -14,7 +14,21 @@ class Settings(BaseSettings):
     # Application
     environment: str = os.getenv("ENVIRONMENT", "development")
     debug: bool = os.getenv("DEBUG", "False").lower() == "true"
-    cors_origins: str = os.getenv("CORS_ORIGINS", "*")
+    def get_cors_origins(self) -> list[str]:
+        # If explicit allowed origins are provided, use them
+        raw = (self.cors_allowed_origins or "").strip()
+        if raw in ("", "*"):
+            # Fallbacks by environment
+            if self.environment in ("development", "local", "dev"):
+                return [
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000",
+                ]
+            # For prod/stage, do NOT fall back to '*'; require explicit list
+            return []
+        # Support comma-separated list
+        return [o.strip() for o in raw.split(",") if o.strip()]
+    cors_allowed_origins: str = os.getenv("CORS_ALLOWED_ORIGINS", "*")
 
     # Auth / JWT
     jwt_secret: str = os.getenv("JWT_SECRET", "change-me-dev-secret")
