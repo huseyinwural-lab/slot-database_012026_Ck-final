@@ -11,29 +11,29 @@ const TenantRevenue = () => {
   const [dateRange, setDateRange] = useState('7'); // days
 
   useEffect(() => {
+    const fetchRevenue = async () => {
+      setLoading(true);
+      try {
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - parseInt(dateRange));
+        
+        const params = {
+          from_date: fromDate.toISOString(),
+          to_date: new Date().toISOString()
+        };
+        
+        const response = await api.get('/v1/reports/revenue/my-tenant', { params });
+        setRevenueData(response.data);
+      } catch (error) {
+        console.error('Failed to fetch revenue:', error);
+        toast.error('Failed to load revenue data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchRevenue();
   }, [dateRange]);
-
-  const fetchRevenue = async () => {
-    setLoading(true);
-    try {
-      const fromDate = new Date();
-      fromDate.setDate(fromDate.getDate() - parseInt(dateRange));
-      
-      const params = {
-        from_date: fromDate.toISOString(),
-        to_date: new Date().toISOString()
-      };
-      
-      const response = await api.get('/v1/reports/revenue/my-tenant', { params });
-      setRevenueData(response.data);
-    } catch (error) {
-      console.error('Failed to fetch revenue:', error);
-      toast.error('Failed to load revenue data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
