@@ -360,7 +360,7 @@ const AdminManagement = () => {
                     {/* Filters */}
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <Label>Admin Filtrele</Label>
+                        <Label>Filter by admin</Label>
                         <Input placeholder="Admin ID" value={activityFilter.admin_id} onChange={e => setActivityFilter({...activityFilter, admin_id: e.target.value})} />
                       </div>
                       <div>
@@ -633,7 +633,7 @@ const AdminManagement = () => {
                     {/* Filters */}
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <Label>Admin Filtrele</Label>
+                        <Label>Filter by admin</Label>
                         <Input placeholder="Admin ID" value={loginFilter.admin_id} onChange={e => setLoginFilter({...loginFilter, admin_id: e.target.value})} />
                       </div>
                       <div>
