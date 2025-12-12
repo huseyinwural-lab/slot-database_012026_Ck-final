@@ -61,6 +61,40 @@ const TenantsPage = () => {
     }));
   };
 
+  const handleEditClick = (tenant) => {
+    setEditingTenant(tenant);
+    setEditFeatures(tenant.features || {});
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTenant(null);
+    setEditFeatures({});
+  };
+
+  const handleSaveFeatures = async () => {
+    if (!editingTenant) return;
+    setSubmitting(true);
+    try {
+      await api.patch(`/v1/tenants/${editingTenant.id}`, { features: editFeatures });
+      toast.success('Tenant features updated');
+      setEditingTenant(null);
+      setEditFeatures({});
+      loadTenants();
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to update tenant');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleToggleEditFeature = (key) => {
+    setEditFeatures((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) {
