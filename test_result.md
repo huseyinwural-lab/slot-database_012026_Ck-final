@@ -458,6 +458,19 @@ api_keys_backend:
         -agent: "testing"
         -comment: "✅ BACKEND PAGINATION & PROJECTION SMOKE TEST - ALL TESTS PASSED (4/4 endpoints - 100% success rate): Test 1) GET /api/v1/players: Pagination working correctly with ?page=1&page_size=50&include_total=false (200 OK, {items, meta} structure), meta.page=1, meta.page_size=50, items array contains Player objects with correct projection fields (id, tenant_id, username, email, country, balance_real, balance_bonus, vip_level, status, risk_score, registered_at - no _id field). include_total=true returns meta.total as number (176). Invalid sort_by=foo returns 200 with default sort applied. Sort direction variations (DESC, Asc, invalid) all normalized correctly to 200 responses. Test 2) GET /api/v1/finance/transactions: Pagination working with correct projection (id, tenant_id, player_id, player_username, type, amount, currency, status, provider, method, created_at). Filters type=deposit and status=completed both return 200. Invalid sort_by handled correctly. Test 3) GET /api/v1/games: Pagination working with projection (id, tenant_id, name, category, provider, business_status, runtime_status, configuration.rtp, created_at). configuration.rtp field present (96.0). Invalid sort_by returns 200 with default sort. Test 4) GET /api/v1/tenants/: Pagination working with projection (id, name, type, created_at) and features object containing can_use_game_robot, can_edit_configs, can_manage_bonus, can_view_reports fields. All endpoints handle invalid sort_by gracefully (200 not 400/500) and normalize sort_dir variations correctly. PaginatedResponse contract fully implemented and working across all endpoints."
 
+frontend:
+  - task: "Frontend Pagination Smoke Test - Aşama 1"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Finance.jsx, frontend/src/pages/GameManagement.jsx, frontend/src/pages/TenantsPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ AŞAMA 1 FRONTEND PAGINATION SMOKE TEST - ALL TESTS PASSED: 1) Login Flow: admin@casino.com / Admin123! login başarılı, dashboard yüklendi. 2) Finance Sayfası (Transactions tab): Transaction History tablosu 50 satır ile yüklendi, Next butonu aktif ve çalışıyor (sayfa güncellendi, hata yok), Previous butonu Next'ten sonra aktif oldu ve ilk sayfaya başarıyla döndü. 3) Games Sayfası (Game Operations): Slots & Games tablosu 50 oyun ile yüklendi, RTP sütunu doğru görüntüleniyor (96%, 96%, 96.5% örnekleri), Page X / of Y bilgisi görüntüleniyor, Next ve Previous butonları çalışıyor (tablo verisi güncellendi, hata yok). 4) Tenants Sayfası: Existing Tenants listesi 6 tenant ile yüklendi, tenant bilgileri doğru görüntüleniyor (Final Test Tenant örneği), mevcut implementasyonda explicit pagination yok (expected). Genel Kontroller: Konsol hatası tespit edilmedi, 4xx/5xx response hatası yok, PaginatedResponse backend kontratına uyumlu olarak UI hiçbir yerde kırılmadı. Tüm pagination akışları başarıyla test edildi."
+
   - task: "Slot P0-B UI/E2E Testing"
     implemented: true
     working: true
