@@ -460,6 +460,45 @@ const formatAmount = (amount, currency) => {
                 </TableBody>
               </Table>
             </CardContent>
+            <div className="flex items-center justify-between px-4 py-3 border-t text-xs text-muted-foreground">
+              <div>
+                Page {txMeta.page}
+                {txMeta.total != null && txMeta.page_size && (
+                  <span>
+                    {' '}of {Math.max(1, Math.ceil(txMeta.total / txMeta.page_size))}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={loading || txMeta.page <= 1}
+                  onClick={() => {
+                    const prevPage = (txMeta.page || 1) - 1;
+                    if (prevPage < 1) return;
+                    fetchData(prevPage).then(() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                  }}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={loading || transactions.length < (txMeta.page_size || pageSize)}
+                  onClick={() => {
+                    const nextPage = (txMeta.page || 1) + 1;
+                    fetchData(nextPage).then(() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                  }}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </Card>
         </TabsContent>
 
