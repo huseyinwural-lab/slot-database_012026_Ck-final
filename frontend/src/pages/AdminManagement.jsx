@@ -703,7 +703,7 @@ const AdminManagement = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">🟩 Admin Risk Score (Optional)</CardTitle>
-                    <CardDescription>Her adminin risk değerlendirmesi - Yeni cihaz, yeni ülke, başarısız giriş denemeleri</CardDescription>
+                    <CardDescription>Risk assessment per admin - new devices, new countries, failed login attempts</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
