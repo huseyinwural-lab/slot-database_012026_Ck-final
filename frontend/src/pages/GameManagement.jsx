@@ -281,7 +281,7 @@ const GameManagement = () => {
                         )}
                       </TableCell>
                       <TableCell>{game.provider}</TableCell>
-                      <TableCell>{game.configuration?.rtp}%</TableCell>
+                      <TableCell>{game.configuration?.rtp ?? '-'}%</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="uppercase text-[10px]">
                           {game.business_status}
