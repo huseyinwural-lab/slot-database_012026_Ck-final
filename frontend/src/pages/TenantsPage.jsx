@@ -46,7 +46,7 @@ const TenantsPage = () => {
   };
 
   useEffect(() => {
-    loadTenants();
+    loadTenants(1);
   }, []);
 
   const handleToggleFeature = (key) => {
