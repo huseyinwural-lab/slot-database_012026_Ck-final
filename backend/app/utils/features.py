@@ -1,20 +1,19 @@
 import logging
 from fastapi import Request, HTTPException
+from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.domain.admin import AdminUser
 from app.utils.tenant import get_current_tenant_id
-from app.routes.core import get_db
 
 
 logger = logging.getLogger("app.features")
 
 
-async def ensure_tenant_feature(request: Request, admin: AdminUser, feature_key: str):
+async def ensure_tenant_feature(request: Request, admin: AdminUser, feature_key: str, db: AsyncIOMotorDatabase):
     """Ensure that a given tenant feature flag is enabled.
 
     If not, raises 403 TENANT_FEATURE_DISABLED and logs a structured warning
     with correlation id, tenant id and admin id.
     """
-    db = get_db()
     tenant_id = get_current_tenant_id(request, admin)
     tenant = await db.tenants.find_one({"id": tenant_id}, {"_id": 0, "features": 1})
     request_id = request.headers.get("X-Request-ID")
