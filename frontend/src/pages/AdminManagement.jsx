@@ -519,7 +519,7 @@ const AdminManagement = () => {
                             </div>
                             <div className="space-y-2">
                               <Label>Reason</Label>
-                              <Textarea placeholder="Neden ekleniyor?" value={newIP.reason} onChange={e=>setNewIP({...newIP, reason: e.target.value})} />
+                              <Textarea placeholder="Why is this being added?" value={newIP.reason} onChange={e=>setNewIP({...newIP, reason: e.target.value})} />
                             </div>
                             <Button onClick={handleAddIPRestriction} className="w-full">Ekle</Button>
                           </div>
