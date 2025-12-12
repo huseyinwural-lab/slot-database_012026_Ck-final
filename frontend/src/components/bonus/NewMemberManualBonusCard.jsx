@@ -154,13 +154,13 @@ const NewMemberManualBonusCard = () => {
 
         {summary && (
           <div className="text-[11px] text-muted-foreground">
-            Özet: <span className="font-medium text-foreground">{summary}</span>
+            Summary: <span className="font-medium text-foreground">{summary}</span>
           </div>
         )}
 
         <div className="flex justify-end pt-2">
           <Button size="sm" onClick={handleSave}>
-            Konfigürasyonu Kaydet
+            Save Configuration
           </Button>
         </div>
       </CardContent>
