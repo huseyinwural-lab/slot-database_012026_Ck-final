@@ -37,6 +37,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
 # Request logging & correlation ID
+# Rate limiting (basic IP-based)
+app.add_middleware(RateLimitMiddleware)
+
 app.add_middleware(RequestLoggingMiddleware)
 
     allow_headers=["*"],
