@@ -40,7 +40,7 @@ const NewMemberManualBonusCard = () => {
         setGames(gamesRes.data || []);
       } catch (err) {
         console.error(err);
-        toast.error('Yeni üye bonus konfigürasyonu yüklenemedi');
+        toast.error('Failed to load new member bonus configuration');
       }
     };
     load();
@@ -50,11 +50,11 @@ const NewMemberManualBonusCard = () => {
     try {
       const payload = { ...config };
       await api.put('/v1/bonus/config/new-member-manual', payload);
-      toast.success('Yeni üye bonus konfigürasyonu güncellendi');
+      toast.success('New member bonus configuration updated');
     } catch (err) {
       console.error(err);
       const apiError = err?.response?.data;
-      toast.error(apiError?.detail || apiError?.message || 'Kaydedilemedi');
+      toast.error(apiError?.detail || apiError?.message || 'Save failed');
     }
   };
 
