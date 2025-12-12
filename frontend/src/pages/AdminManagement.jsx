@@ -89,11 +89,11 @@ const AdminManagement = () => {
   const handleCreateUser = async () => {
     try {
       if (!newUser.full_name || !newUser.email) {
-        toast.error('Ad soyad ve email zorunlu');
+        toast.error('Full name and email are required');
         return;
       }
       if (newUser.password_mode === 'manual' && !newUser.password) {
-        toast.error('Manuel modda şifre zorunlu');
+        toast.error('Password is required in manual mode');
         return;
       }
       const baseModules = ['players', 'games', 'bonuses', 'reports', 'fraud', 'settings'];
