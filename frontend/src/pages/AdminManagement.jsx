@@ -216,7 +216,7 @@ const AdminManagement = () => {
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>Yetki Alanları (modüller)</Label>
+                                  <Label>Permission Scopes (modules)</Label>
                                   <div className="grid grid-cols-2 gap-2 text-sm">
                                     {[
                                       { key: 'players', label: 'Oyuncular' },
