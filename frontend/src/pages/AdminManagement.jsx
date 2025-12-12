@@ -224,7 +224,7 @@ const AdminManagement = () => {
                                       { key: 'bonuses', label: 'Bonuses' },
                                       { key: 'reports', label: 'Reports' },
                                       { key: 'fraud', label: 'Fraud / Risk' },
-                                      { key: 'settings', label: 'Ayarlar' },
+                                      { key: 'settings', label: 'Settings' },
                                     ].map(mod => {
                                       // Rol bazlı otomatik seçim mantığı
                                       let forced = false;
