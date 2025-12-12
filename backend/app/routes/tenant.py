@@ -20,7 +20,12 @@ def get_db():
 
 
 @router.get("/", response_model=PaginatedResponse[Tenant])
-async def list_tenants(pagination: PaginationParams = Depends(get_pagination_params)) -> PaginatedResponse[Tenant]:
+async def list_tenants(
+    pagination: PaginationParams = Depends(get_pagination_params),
+    current_admin: AdminUser = Depends(get_current_admin)
+) -> PaginatedResponse[Tenant]:
+    # Only owner can see all tenants
+    require_owner(current_admin)
     db = get_db()
 
     # Sort whitelist
