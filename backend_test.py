@@ -1390,7 +1390,8 @@ class CasinoAdminAPITester:
             "Players Invalid sort_by", 
             "GET", 
             "api/v1/players?page=1&page_size=50&sort_by=foo", 
-            200
+            200,
+            auth_token=self.access_token
         )
         
         if not success3:
