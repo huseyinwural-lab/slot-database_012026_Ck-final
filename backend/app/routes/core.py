@@ -197,6 +197,7 @@ from app.models.common import PaginatedResponse, PaginationParams, PaginationMet
 
 @router.get("/finance/transactions", response_model=PaginatedResponse[Transaction])
 async def get_transactions(
+    request: Request,
     type: Optional[str] = None,
     status: Optional[str] = None,
     min_amount: Optional[float] = None,
@@ -209,9 +210,12 @@ async def get_transactions(
     currency: Optional[str] = None,
     ip_address: Optional[str] = None,
     pagination: PaginationParams = Depends(get_pagination_params),
+    current_admin: AdminUser = Depends(get_current_admin),
 ):
     db = get_db()
-    query: Dict[str, Any] = {}
+    tenant_id = get_current_tenant_id(request, current_admin)
+    
+    query: Dict[str, Any] = {"tenant_id": tenant_id}
     if type and type != "all":
         query["type"] = type
     if status and status != "all":
