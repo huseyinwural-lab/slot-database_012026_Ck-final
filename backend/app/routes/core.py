@@ -95,13 +95,10 @@ async def get_players(
         ]
 
     # Sort whitelist
-    allowed_sorts = {"registered_at", "vip_level", "risk_score"}
-    field = "registered_at"
-    if sort_by in allowed_sorts:
-        field = sort_by
-    direction = -1 if sort_dir != "asc" else 1
+    ALLOWED_SORT_FIELDS = {"registered_at"}
+    field = pagination.sort_by if pagination.sort_by in ALLOWED_SORT_FIELDS else "registered_at"
 
-    skip = (page - 1) * page_size
+    skip = (pagination.page - 1) * pagination.page_size
 
     cursor = (
         db.players
