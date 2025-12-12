@@ -21,9 +21,15 @@ def get_db():
 
 # --- USERS ---
 @router.get("/users", response_model=List[AdminUser])
-async def get_admins():
+async def get_admins(current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
-    users = await db.admins.find().to_list(100)
+    
+    # Super Admin can see all admins, others only see their tenant's admins
+    query = {}
+    if current_admin.role != "Super Admin":
+        query["tenant_id"] = current_admin.tenant_id
+    
+    users = await db.admins.find(query).to_list(100)
     return [AdminUser(**u) for u in users]
 
 class AdminUserCreateRequest(BaseModel):
