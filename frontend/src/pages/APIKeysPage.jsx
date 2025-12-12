@@ -155,15 +155,15 @@ const APIKeysPage = () => {
                 </div>
               </div>
               <Button className="w-full" onClick={handleCreate} disabled={loading}>
-                Oluştur
+                Create
               </Button>
 
               {generatedSecret && generatedMeta && (
                 <Card className="mt-4 bg-muted">
                   <CardHeader>
-                    <CardTitle className="text-sm">API Key Oluşturuldu</CardTitle>
+                    <CardTitle className="text-sm">API Key Created</CardTitle>
                     <CardDescription className="text-xs">
-                      Bu anahtar sadece bu ekranda gösterilecek. Lütfen kopyalayın.
+                      This key will only be shown on this screen. Please copy and store it safely.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
