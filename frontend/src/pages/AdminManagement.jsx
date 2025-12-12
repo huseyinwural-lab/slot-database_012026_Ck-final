@@ -765,7 +765,7 @@ const AdminManagement = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">🟩 Delegation / Proxy (Optional)</CardTitle>
-                    <CardDescription>Admin izinliyken yetkilerini geçici olarak başka bir admin'e devredebilir</CardDescription>
+                    <CardDescription>When an admin is on leave, they can temporarily delegate their permissions to another admin</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
