@@ -378,7 +378,7 @@ const AdminManagement = () => {
                         </Select>
                       </div>
                       <div>
-                        <Label>Aksiyon Tipi</Label>
+                        <Label>Action Type</Label>
                         <Input placeholder="Aksiyon" value={activityFilter.action} onChange={e => setActivityFilter({...activityFilter, action: e.target.value})} />
                       </div>
                     </div>
