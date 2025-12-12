@@ -52,6 +52,7 @@ class AdminUser(BaseModel):
     role: str  # role_id or name
     tenant_id: str = "default_casino"
     is_platform_owner: bool = False  # TRUE = Owner (can see all tenants), FALSE = Tenant admin
+    tenant_role: Optional[TenantRole] = TenantRole.TENANT_ADMIN  # Default to full tenant admin
     department: str = "General"
     status: AdminStatus = AdminStatus.ACTIVE
     is_2fa_enabled: bool = False

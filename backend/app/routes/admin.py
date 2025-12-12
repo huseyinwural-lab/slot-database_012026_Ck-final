@@ -36,6 +36,7 @@ class AdminUserCreateRequest(BaseModel):
     full_name: str
     email: EmailStr
     role: str
+    tenant_role: Optional[str] = "tenant_admin"  # New field for tenant role
     allowed_modules: List[str] = []
     password_mode: str  # "manual" | "invite"
     password: Optional[str] = None
@@ -80,6 +81,7 @@ async def create_admin(payload: AdminUserCreateRequest):
         email=payload.email,
         full_name=payload.full_name,
         role=payload.role,
+        tenant_role=payload.tenant_role, # Save tenant role
         tenant_id=tenant_id,
         allowed_modules=payload.allowed_modules,
         status=status,
