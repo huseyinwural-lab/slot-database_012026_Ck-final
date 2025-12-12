@@ -856,9 +856,9 @@ const AdminManagement = () => {
                         <CardHeader><CardTitle>Security Policy</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <div><Label>Min Şifre Uzunluğu</Label><Input value={policy.password_min_length} readOnly /></div>
-                                <div><Label>Oturum Zaman Aşımı (dk)</Label><Input value={policy.session_timeout_minutes} readOnly /></div>
-                                <div><Label>Maks Giriş Denemesi</Label><Input value={policy.max_login_attempts} readOnly /></div>
+                                <div><Label>Minimum Password Length</Label><Input value={policy.password_min_length} readOnly /></div>
+                                <div><Label>Session Timeout (min)</Label><Input value={policy.session_timeout_minutes} readOnly /></div>
+                                <div><Label>Max Login Attempts</Label><Input value={policy.max_login_attempts} readOnly /></div>
                                 <div className="flex items-center gap-2 pt-6"><input type="checkbox" checked={policy.require_2fa} readOnly /> <Label>2FA Zorunlu</Label></div>
                             </div>
                         </CardContent>
