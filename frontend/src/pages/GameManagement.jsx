@@ -323,6 +323,45 @@ const GameManagement = () => {
                 </TableBody>
               </Table>
             </CardContent>
+            <div className="flex items-center justify-between px-4 py-3 border-t text-xs text-muted-foreground">
+              <div>
+                Page {gamesMeta.page}
+                {gamesMeta.total != null && gamesMeta.page_size && (
+                  <span>
+                    {' '}of {Math.max(1, Math.ceil(gamesMeta.total / gamesMeta.page_size))}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={gamesMeta.page <= 1}
+                  onClick={() => {
+                    const prevPage = (gamesMeta.page || 1) - 1;
+                    if (prevPage < 1) return;
+                    fetchAll(gameCategory, prevPage).then(() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                  }}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={games.length < (gamesMeta.page_size || gamesPageSize)}
+                  onClick={() => {
+                    const nextPage = (gamesMeta.page || 1) + 1;
+                    fetchAll(gameCategory, nextPage).then(() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                  }}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </Card>
         </TabsContent>
 
