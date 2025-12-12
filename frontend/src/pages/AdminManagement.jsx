@@ -164,7 +164,7 @@ const AdminManagement = () => {
   return (
     <div className="space-y-6">
         <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Shield className="w-8 h-8 text-blue-600" /> Admin & Güvenlik Yönetimi
+          <Shield className="w-8 h-8 text-blue-600" /> Admin & Security Management
         </h2>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
