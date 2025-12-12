@@ -532,7 +532,7 @@ const AdminManagement = () => {
                           <TableRow>
                             <TableHead>IP Address</TableHead>
                             <TableHead>Tip</TableHead>
-                            <TableHead>Sebep</TableHead>
+                            <TableHead>Reason</TableHead>
                             <TableHead>Ekleyen</TableHead>
                             <TableHead>Tarih</TableHead>
                             <TableHead></TableHead>
