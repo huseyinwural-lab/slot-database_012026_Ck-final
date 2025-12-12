@@ -708,8 +708,9 @@ async def update_new_member_manual_bonus_config(
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     from app.utils.features import ensure_tenant_feature
-
-    await ensure_tenant_feature(request, current_admin, "can_manage_bonus")
+    
+    db = get_db()
+    await ensure_tenant_feature(request, current_admin, "can_manage_bonus", db)
 
     # Validation guardrails
     if not (1 <= cfg.spin_count <= 1000):
@@ -718,8 +719,6 @@ async def update_new_member_manual_bonus_config(
         raise HTTPException(400, detail="fixed_bet_amount must be > 0 and <= 1000")
     if cfg.total_budget_cap < 0 or cfg.total_budget_cap > 1000000:
         raise HTTPException(400, detail="total_budget_cap must be >= 0 and <= 1,000,000")
-
-    db = get_db()
     await db.platform_settings.update_one(
         {"key": "new_member_manual_bonus"},
         {"$set": {"key": "new_member_manual_bonus", "config": cfg.model_dump()}},
