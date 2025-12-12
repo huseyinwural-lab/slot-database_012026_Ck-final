@@ -37,6 +37,7 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
 
   const { tenant, loading: tenantLoading } = useTenant();
+  const { isOwner, hasFeature } = useCapabilities();
   const tenantType = tenant?.type || 'owner';
   const tenantFeatures = tenant?.features || {};
 
