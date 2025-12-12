@@ -231,7 +231,7 @@ const APIKeysPage = () => {
                     {key.created_at ? new Date(key.created_at).toLocaleString('en-US') : '-'}
                   </TableCell>
                   <TableCell className="text-xs">
-                    {key.last_used_at ? new Date(key.last_used_at).toLocaleString('tr-TR') : '-'}
+                    {key.last_used_at ? new Date(key.last_used_at).toLocaleString('en-US') : '-'}
                   </TableCell>
                   <TableCell>
                     <Switch
