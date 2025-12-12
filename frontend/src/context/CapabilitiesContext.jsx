@@ -1,24 +1,24 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AuthContext } from './AuthContext';
+import React, { createContext, useState, useEffect } from 'react';
 import api from '../services/api';
 
 export const CapabilitiesContext = createContext();
 
 export const CapabilitiesProvider = ({ children }) => {
-  const { user } = useContext(AuthContext);
   const [capabilities, setCapabilities] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
+    // Check if user is logged in (token exists)
+    const token = localStorage.getItem('admin_token');
+    if (token) {
       fetchCapabilities();
     } else {
       setCapabilities(null);
       setIsOwner(false);
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   const fetchCapabilities = async () => {
     try {
