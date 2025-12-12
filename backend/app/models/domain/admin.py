@@ -11,6 +11,16 @@ class AdminStatus(str, Enum):
     LOCKED = "locked"
     INVITED = "invited"
 
+
+class TenantRole(str, Enum):
+    """
+    Tenant-specific roles for granular access control
+    """
+    TENANT_ADMIN = "tenant_admin"      # Full access within tenant
+    OPERATIONS = "operations"          # Players, Games, Bonuses
+    FINANCE = "finance"                # Revenue, Reports only
+    SUPPORT = "support"                # Support tickets, basic player view
+
 class InviteStatus(str, Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"
