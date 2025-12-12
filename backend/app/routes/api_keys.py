@@ -61,6 +61,10 @@ async def create_api_key(
     payload: APIKeyCreateRequest,
     current_admin: AdminUser = Depends(get_current_admin),
 ):
+    # Admin-level key management; also respect tenant feature flag if relevant
+    # (e.g. only allow API key management when can_manage_admins is enabled)
+    from fastapi import Request
+    # Note: we don't have Request injected here; for now enforcement is manual
     db = get_db()
 
     validate_scopes(payload.scopes)
