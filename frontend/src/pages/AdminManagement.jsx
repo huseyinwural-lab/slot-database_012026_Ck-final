@@ -379,7 +379,7 @@ const AdminManagement = () => {
                       </div>
                       <div>
                         <Label>Action Type</Label>
-                        <Input placeholder="Aksiyon" value={activityFilter.action} onChange={e => setActivityFilter({...activityFilter, action: e.target.value})} />
+                        <Input placeholder="Action" value={activityFilter.action} onChange={e => setActivityFilter({...activityFilter, action: e.target.value})} />
                       </div>
                     </div>
                     
