@@ -443,6 +443,21 @@ api_keys_backend:
         -agent: "testing"
         -comment: "✅ DICE ADVANCED LIMITS UI ROUND-TRIP VE E2E DOĞRULAMA COMPLETE - All Turkish review request scenarios successfully tested and working: Ön koşul: Test Dice Game (Advanced Limits QA) successfully found and accessible via Dice category filter in /games page. Senaryo 1 - Global limits happy-path round-trip: Advanced Limits (global) fields (max_win_per_bet=200, max_loss_per_bet=100, max_session_loss=1000, max_session_bets=500, enforcement_mode=hard_block) successfully filled and saved with 'Dice math config kaydedildi' success toast. Round-trip verification confirmed all values preserved correctly after modal close/reopen. Senaryo 2 - TR override round-trip: Country Overrides JSON textarea accepts TR-specific limits (max_session_loss=800, max_win_per_bet=150) correctly, saves successfully, and preserves values in prettified JSON format after round-trip test. Senaryo 3 - Bozuk JSON davranışı: Invalid JSON (missing closing brace) properly handled with client-side validation showing error message, preventing malformed data submission. All UI components functional: GameDiceMathTab.jsx properly integrated with GameConfigPanel.jsx, Dice Math tab appears correctly for DICE games, all form fields editable and responsive, API integrations working (GET/POST /api/v1/games/{game_id}/config/dice-math), data persistence verified through multiple round-trip tests. The Dice Advanced Limits UI flow is fully operational and ready for production use."
 
+  - task: "Backend Pagination & Projection Smoke Test - Aşama 1"
+    implemented: true
+    working: true
+    file: "backend/app/routes/core.py, backend/app/routes/tenant.py, backend/app/utils/pagination.py, backend/app/models/common.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Backend pagination & projection smoke test for Aşama 1 - testing PaginatedResponse + PaginationParams contract for players, transactions, games, and tenants endpoints."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ BACKEND PAGINATION & PROJECTION SMOKE TEST - ALL TESTS PASSED (4/4 endpoints - 100% success rate): Test 1) GET /api/v1/players: Pagination working correctly with ?page=1&page_size=50&include_total=false (200 OK, {items, meta} structure), meta.page=1, meta.page_size=50, items array contains Player objects with correct projection fields (id, tenant_id, username, email, country, balance_real, balance_bonus, vip_level, status, risk_score, registered_at - no _id field). include_total=true returns meta.total as number (176). Invalid sort_by=foo returns 200 with default sort applied. Sort direction variations (DESC, Asc, invalid) all normalized correctly to 200 responses. Test 2) GET /api/v1/finance/transactions: Pagination working with correct projection (id, tenant_id, player_id, player_username, type, amount, currency, status, provider, method, created_at). Filters type=deposit and status=completed both return 200. Invalid sort_by handled correctly. Test 3) GET /api/v1/games: Pagination working with projection (id, tenant_id, name, category, provider, business_status, runtime_status, configuration.rtp, created_at). configuration.rtp field present (96.0). Invalid sort_by returns 200 with default sort. Test 4) GET /api/v1/tenants/: Pagination working with projection (id, name, type, created_at) and features object containing can_use_game_robot, can_edit_configs, can_manage_bonus, can_view_reports fields. All endpoints handle invalid sort_by gracefully (200 not 400/500) and normalize sort_dir variations correctly. PaginatedResponse contract fully implemented and working across all endpoints."
+
   - task: "Slot P0-B UI/E2E Testing"
     implemented: true
     working: true
