@@ -36,10 +36,7 @@ const Layout = ({ children }) => {
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
-  const { tenant, loading: tenantLoading } = useTenant();
-  const { isOwner, hasFeature } = useCapabilities();
-  const tenantType = tenant?.type || 'owner';
-  const tenantFeatures = tenant?.features || {};
+  const { isOwner, hasFeature, loading: capabilitiesLoading } = useCapabilities();
 
   const handleSearch = async (val) => {
     if (val.length > 2) {
