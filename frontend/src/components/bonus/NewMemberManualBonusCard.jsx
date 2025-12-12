@@ -116,7 +116,7 @@ const NewMemberManualBonusCard = () => {
             />
           </div>
           <div className="space-y-1">
-            <Label>Geçerlilik (gün)</Label>
+            <Label>Validity (days)</Label>
             <Input
               type="number"
               value={config.validity_days}
@@ -128,7 +128,7 @@ const NewMemberManualBonusCard = () => {
         </div>
 
         <div className="space-y-2">
-          <Label>Oyun Ara / Seç</Label>
+          <Label>Search / Select Game</Label>
           <div className="max-h-48 overflow-auto border rounded-md p-2 text-xs space-y-1">
             {games.map((g) => {
               const selected = (config.allowed_game_ids || []).includes(g.id);
@@ -142,7 +142,7 @@ const NewMemberManualBonusCard = () => {
                   }`}
                 >
                   <span className="truncate mr-2">{g.name}</span>
-                  {selected && <span className="text-[10px] text-green-400">SEÇİLİ</span>}
+                  {selected && <span className="text-[10px] text-green-400">SELECTED</span>}
                 </button>
               );
             })}
