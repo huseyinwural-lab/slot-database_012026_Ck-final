@@ -35,9 +35,22 @@ const Layout = ({ children }) => {
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
-  const { isOwner, hasFeature, loading: capabilitiesLoading } = useCapabilities();
+  const { isOwner, tenantName, hasFeature, loading: capabilitiesLoading } = useCapabilities();
 
-  const handleSearch = async (val) => {
+  // Theme Config based on Role
+  const theme = isOwner ? {
+    sidebarBg: 'bg-card',
+    headerGradient: 'from-primary to-blue-400',
+    iconColor: 'text-primary',
+    brandName: 'Platform Admin',
+    activeItem: 'bg-primary text-primary-foreground'
+  } : {
+    sidebarBg: 'bg-slate-900',
+    headerGradient: 'from-emerald-400 to-teal-500',
+    iconColor: 'text-emerald-400',
+    brandName: tenantName || 'Tenant Portal',
+    activeItem: 'bg-emerald-600 text-white'
+  };
     if (val.length > 2) {
       try {
         const res = await api.get(`/v1/search?q=${val}`);
@@ -49,28 +62,29 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-border bg-card flex flex-col fixed h-full z-20">
+      <aside className={`w-64 border-r border-border ${theme.sidebarBg} flex flex-col fixed h-full z-20 transition-colors duration-300`}>
         <div className="p-6">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-            CasinoAdmin
+          <h1 className={`text-2xl font-bold bg-gradient-to-r ${theme.headerGradient} bg-clip-text text-transparent`}>
+            {theme.brandName}
           </h1>
+          {!isOwner && <p className="text-xs text-muted-foreground mt-1">Tenant Panel</p>}
         </div>
         
         <ScrollArea className="flex-1 px-4">
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Core</div>
-              <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" />
-              <SidebarItem to="/players" icon={Users} label="Players" />
+              <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" activeClassName={theme.activeItem} />
+              <SidebarItem to="/players" icon={Users} label="Players" activeClassName={theme.activeItem} />
               {isOwner && (
-                <SidebarItem to="/finance" icon={CreditCard} label="Finance" />
+                <SidebarItem to="/finance" icon={CreditCard} label="Finance" activeClassName={theme.activeItem} />
               )}
               {isOwner && (
-                <SidebarItem to="/revenue/all-tenants" icon={TrendingUp} label="All Revenue" />
+                <SidebarItem to="/revenue/all-tenants" icon={TrendingUp} label="All Revenue" activeClassName={theme.activeItem} />
               )}
               {!isOwner && (
-                <SidebarItem to="/revenue/my-tenant" icon={TrendingUp} label="My Revenue" />
+                <SidebarItem to="/revenue/my-tenant" icon={TrendingUp} label="My Revenue" activeClassName={theme.activeItem} />
               )}
-              <SidebarItem to="/games" icon={Gamepad2} label="Games" />
+              <SidebarItem to="/games" icon={Gamepad2} label="Games" activeClassName={theme.activeItem} />
               <SidebarItem
                 to="/vip-games"
                 icon={Crown}
@@ -81,32 +95,32 @@ const Layout = ({ children }) => {
 
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Operations</div>
-              {hasFeature('can_manage_kyc') && <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" />}
-              {isOwner && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" />}
-              {hasFeature('can_manage_bonus') && <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" />}
-              {isOwner && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" />}
-              <SidebarItem to="/support" icon={MessageSquare} label="Support" />
+              {hasFeature('can_manage_kyc') && <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" activeClassName={theme.activeItem} />}
+              {hasFeature('can_manage_bonus') && <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" activeClassName={theme.activeItem} />}
+              <SidebarItem to="/support" icon={MessageSquare} label="Support" activeClassName={theme.activeItem} />
           </div>
 
            <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Risk & Compliance</div>
-              {isOwner && <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" />}
-              {isOwner && <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" />}
-              {isOwner && <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" />}
-              {isOwner && <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" />}
+              {isOwner && <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" activeClassName={theme.activeItem} />}
           </div>
 
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">System</div>
-              {isOwner && <SidebarItem to="/cms" icon={Globe} label="CMS" />}
-              {hasFeature('can_view_reports') && <SidebarItem to="/reports" icon={BarChart3} label="Reports" />}
-              {isOwner && <SidebarItem to="/logs" icon={ScrollText} label="Logs" />}
-              {hasFeature('can_manage_admins') && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" />}
-              {isOwner && <SidebarItem to="/tenants" icon={Building} label="Tenants" />}
-              {isOwner && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" />}
-              {isOwner && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" />}
-              {hasFeature('can_use_game_robot') && isOwner && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" />}
-              {isOwner && <SidebarItem to="/settings" icon={Settings} label="Settings" />}
+              {isOwner && <SidebarItem to="/cms" icon={Globe} label="CMS" activeClassName={theme.activeItem} />}
+              {hasFeature('can_view_reports') && <SidebarItem to="/reports" icon={BarChart3} label="Reports" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/logs" icon={ScrollText} label="Logs" activeClassName={theme.activeItem} />}
+              {hasFeature('can_manage_admins') && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/tenants" icon={Building} label="Tenants" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" activeClassName={theme.activeItem} />}
+              {hasFeature('can_use_game_robot') && isOwner && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/settings" icon={Settings} label="Settings" activeClassName={theme.activeItem} />}
           </div>
         </ScrollArea>
 
