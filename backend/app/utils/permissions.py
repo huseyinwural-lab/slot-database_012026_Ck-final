@@ -1,9 +1,9 @@
 """
 Permission and role checking utilities
 """
-from app.models.domain.admin import AdminUser
 from app.models.domain.admin import AdminUser, TenantRole
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from app.utils.auth import get_current_admin
 
 
 def is_owner(admin: AdminUser) -> bool:
