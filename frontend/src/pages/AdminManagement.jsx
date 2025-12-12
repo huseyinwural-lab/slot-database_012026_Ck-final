@@ -215,6 +215,17 @@ const AdminManagement = () => {
                                       { key: 'fraud', label: 'Fraud/Risk' },
                                       { key: 'settings', label: 'Ayarlar' },
                                     ].map(mod => {
+                                      // Rol bazlı otomatik seçim mantığı
+                                      let forced = false;
+                                      if (newUser.role === 'Super Admin') {
+                                        forced = true;
+                                      } else if (newUser.role === 'Manager') {
+                                        // Manager kritik alanlar dışında erişsin: Fraud ve Settings hariç hepsine erişsin
+                                        if (!['fraud', 'settings'].includes(mod.key)) {
+                                          forced = true;
+                                        }
+                                      }
+
                                       const checked = newUser.allowed_modules.includes(mod.key);
                                       return (
                                         <button
