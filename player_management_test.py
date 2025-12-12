@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class PlayerManagementTester:
-    def __init__(self, base_url="https://game-manager-6.preview.emergentagent.com"):
+    def __init__(self, base_url="https://casinohub-11.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

@@ -15,45 +15,57 @@ The user's goal is to build a comprehensive, feature-rich admin panel for a casi
 **User's preferred language**: **Turkish**. The next agent MUST respond in Turkish.
 
 **what currently exists?**
-A full-stack application (React/FastAPI/MongoDB) with a Game Management module. Recent work has added significant new functionality:
-- **Game Robot:** A script () exists to simulate gameplay on test games. It is now tenant-aware.
-- **Client-Aware Imports:** A full-stack flow allows uploading and managing game clients (HTML5 vs. Unity), with dedicated backend models (), a new upload endpoint, and a frontend wizard.
-- **New Member Bonus:** A New Member Manual Bonus feature is fully implemented, including backend configuration models, GET/PUT endpoints, and a trigger mechanism that grants bonuses to new users. The frontend has a dedicated card in the Bonus Management section to configure this.
-- **Multi-Tenancy (Backend):** A  model (/ types, feature flags) and  endpoints are in place. Key data endpoints (, , ) now filter by tenant. A feature guard helper () has been implemented to restrict access based on tenant features.
-- **Multi-Tenancy (Frontend):** A  hook and a  have been created. The main layout () now conditionally renders menu items based on the tenant type (owner vs. renter).
+A full-stack application (React/FastAPI/MongoDB). The mocked admin authentication has been replaced with a complete JWT-based system (Görev 3/3b). A sophisticated Role-Based Access Control (RBAC) system is now in place for admin users, with roles (, , ) and module-level permissions (). A full-featured API key management system (FAZ 4) has been implemented, allowing scoped, tenant-aware keys to be created and managed via the UI. The Game Robot has been refactored (FAZ 5) into a thin CLI client that uses a new backend orchestrator service, authenticated via API key. The UI has been partially translated from Turkish to English as per the user's latest request.
 
 **Last working item**:
-    - **Last item agent was working:** The agent was given a detailed roadmap and greenlit to begin implementation. The user approved the plan to start with **Görev 3 (RBAC - Role & Yetki Yönetimi)**, to be followed by **Görev 3b (Admin Auth & Şifre Yönetimi)**. The last user message was uygula (apply/implement), confirming this plan.
-    - **Status:** NOT STARTED
-    - **Agent Testing Done:** N/A
-    - **Which testing method agent to use?** Both (backend testing agent for APIs, frontend testing agent for UI flows). This is a large, critical feature.
+    - **Last item agent was working:** The agent was translating UI components from Turkish to English, specifically focusing on , , and . Several replacement commands failed, and the agent was attempting to correct these translations when the session ended.
+    - **Status:** IN PROGRESS
+    - **Agent Testing Done:** N
+    - **Which testing method agent to use?** Frontend testing agent. This is necessary to verify the text changes across multiple pages and ensure no UI elements were broken during the translation process.
     - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-  - **Issue 1: ESLint warnings (P2)**
-    - **Description:**  warnings persist across several frontend components. This is a low-priority technical debt item that does not block functionality.
+  - **Issue 1: Incomplete UI Translation (P0)**
+    - **Description:** The agent was in the middle of translating hardcoded Turkish strings to English in several frontend components. Multiple  operations failed, leaving the UI in a partially translated state.
+    - **Status:** IN PROGRESS
+    - **Is recurring issue?** N
+  - **Issue 2: ESLint warnings (P2)**
+    - **Description:**  warnings and other linting issues persist across several frontend components (, , etc.). This is a low-priority technical debt item.
     - **Status:** NOT STARTED
     - **Is recurring issue?** Y
 
+  Issues Detail:
+  - **Issue 1: Incomplete UI Translation (P0)**
+     - **Attempted fixes:** The agent used a series of  commands. Some succeeded, but many failed on  with No replacement was performed errors, indicating the  did not match.
+     - **Next debug checklist:**
+       1. View  to see the current state and identify remaining Turkish strings.
+       2. View  and  to verify the status of their translations.
+       3. Create a list of all remaining Turkish strings in these files.
+       4. Use  carefully to replace each remaining string with its English equivalent.
+       5. After fixing, run the  to confirm the UI is fully in English and functional.
+     - **Why fix this issue and what will be achieved with the fix?** To fulfill the user's explicit request for an English UI and ensure consistency across the admin panel.
+     - **Status:** IN PROGRESS
+     - **Is recurring issue?** N
+     - **Should Test frontend/backend/both after fix?** Frontend
+     - **Blocked on other issue:** None
+
 **In progress Task List**:
-- None.
+  - **Task 1: Complete UI translation to English (P0)**
+     - **Where to resume:** Resume by inspecting  to find the remaining Turkish strings that failed to be replaced. Then, verify  and  and complete all translations.
+     - **What will be achieved with this?** A consistent English user interface for the core admin management, API key, and bonus pages.
+     - **Status:** IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Frontend
+     - **Blocked on something:** None
 
 **Upcoming and Future Tasks**
-*   **Upcoming Tasks (P0, Highest Priority):**
-    *   **Görev 3: RBAC (Rol & Yetki Yönetimi):** Implement a flexible Role-Based Access Control system.
-        *   **Backend:** Create  model, a  constant list, Role CRUD endpoints, and a  helper to guard routes.
-        *   **Frontend:** Create a Roller (Roles) management page with a creation form and permission checkboxes. Integrate role selection into the Admin Users page.
-    *   **Görev 3b: Admin Auth & Şifre Yönetimi:** Replace the dummy admin with a full authentication system.
-        *   **Auth Method:** JWT (Bearer token) with frontend storage.
-        *   **Password Policy:** Min. 8 chars, >=1 uppercase, >=1 number, >=1 special character.
-        *   **Backend:** Update  model (, etc.). Create all necessary auth endpoints (, , , ). Update the admin creation flow to support manual password and invite link modes.
-        - **Frontend:** Create login, change password, forgot password, and reset password pages.
-    *   **Görev 4: API Anahtarları (API Keys):** Implement a system for generating and managing scoped API keys, and integrate it with the Game Robot.
-    *   **Görev 5: Dokümantasyon (TR + EN + PDF):** Create comprehensive user manuals and technical checklists in Turkish and English, with PDF export capability.
+*   **Upcoming Tasks:**
+    *   **P0: Create and Embed Screenshots in Documentation:** The user requested adding annotated screenshots to the newly created user guides (, etc.). This involves taking screenshots of Login, Dashboard, API Keys page, etc., annotating them, and linking them in the markdown files.
+    *   **P1: Enforce  Permissions:** The  field is saved in the  model but is not yet used to enforce authorization. This task involves using this data to conditionally render UI elements (like sidebar items) and protect backend endpoints.
+    *   **P2: Complete Invite Flow for New Admins:** The backend supports creating a user in an invite state, but the frontend/backend flow for the user to set their password on first login is not implemented.
 
 *   **Future Tasks (Backlog):**
-    *   P0-F: Unity Integration Checklist (creation failed, still pending).
-    *   P0-G: Admin Panel Runbook ( was updated but a full runbook is pending).
+    *   P0-F: Unity Integration Checklist.
+    *   P0-G: Full Admin Panel Runbook ( needs expansion).
     *   P1 - Enable Hardening Bot.
     *   Implement Blackjack/Poker Diff API.
     *   Refactor the large  and  files.
@@ -61,96 +73,111 @@ A full-stack application (React/FastAPI/MongoDB) with a Game Management module. 
     *   Tenant-branding (logo, colors).
 
 **Completed work in this session**
-- **Görev 1 - Yeni Üye Manuel Bonus:** Implemented a full-stack feature for configuring and automatically triggering a manual bonus for new members.
-- **Görev 2 - Kiracı Yetkisi (Tenant / Renter Modeli):**
-  - **Backend (2.1, 2.2):** Implemented a multi-tenant architecture with  models, feature flags, data filtering on core endpoints, and a tenant-aware Game Robot.
-  - **Frontend (2.3):** Created a  for owner admins to manage tenants and updated the main layout to show/hide menus based on tenant type.
-- **Client-Aware Game Imports:** Added a full-stack flow to distinguish between HTML5 and Unity game clients during the import and upload process.
+- **Görev 3/3b - RBAC & Admin Authentication:** Implemented a full JWT-based authentication system, replacing the mock admin. Created a role system (, , ) with module-level permissions () and a two-factor password creation flow (manual vs. invite) for new admins.
+- **FAZ 4 - API Key Management:** Built a full-stack feature for creating, listing, and managing scoped, tenant-aware API keys. This includes a new UI at  (for owners) and corresponding backend endpoints at .
+- **FAZ 5 - Game Robot Refactor:** Refactored the Game Robot. The core logic now resides in a backend  service, exposed via the  endpoint. The CLI is now a thin client that authenticates using a mandatory API key.
+- **Documentation:** Created four new markdown documents: , , , and .
+- **Dead Code Cleanup:** Removed unused frontend pages:  and .
+- **UI Fixes & Enhancements:**
+    - Added the Tenants page link to the sidebar for owner-type users.
+    - Added a password visibility toggle (eye icon) to the Login page.
+    - Changed the  frontend route to  to resolve an ingress conflict.
 
 **Earlier issues found/mentioned but not fixed**
-   - **Jackpots Diff UI Integration:** The generic  has not been integrated into a Jackpots history view, as no such UI view exists yet.
-   - **Manual Game Import expansion:** While client-awareness was added, a broader expansion to handle all config types is unstarted.
+   - **Jackpots Diff UI Integration:** The generic  has not been integrated into a Jackpots history view.
+   - **Manual Game Import expansion:** A broader expansion to handle all config types is unstarted.
    - **Player Management Overhaul:** Unstarted.
 
 **Known issue recurrence from previous fork**
-  - **Fragile :** This large file continues to grow, making it a prime candidate for refactoring into smaller, more focused routers.
+  - **Fragile :** This large file continues to grow, making it a prime candidate for refactoring. The same applies to .
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Multi-Tenancy:** The application now supports  and  tenants. Data access is filtered by , and feature access is controlled by a  dictionary on the  model.
-- **Feature Guarding:** A backend helper () protects endpoints, raising a 403 error if a tenant's feature flag is disabled.
-- **Event-Driven Bonus Trigger:** A New Member Bonus is granted via event endpoints (, ), which call an idempotent trigger function.
-- **Client-Aware Asset Management:** The system can distinguish between  and  game clients during upload and stores this information in the  model's  field.
+- **JWT Authentication:** A complete authentication flow using  for password hashing and JWT Bearer tokens for session management. Includes login, get current user, and password management endpoints.
+- **RBAC (Role-Based Access Control):**  model now has an  list to store permissions. Three predefined roles (, , ) have been implemented with automatic or manual permission assignments.
+- **API Key Authentication:** A separate authentication layer for programmatic access using scoped, tenant-aware API keys. Hashed in the DB and verified on-the-fly.
+- **Backend Service Layer:** A  directory was introduced, with  being the first service to abstract business logic away from the route handlers.
+- **SPA Routing Fix:** Frontend page routes were conflicting with backend API prefixes (e.g., ). The solution was to change the frontend route to a non-conflicting path (e.g., ).
 
 **key DB schema**
-  - ** (NEW):** 
-  - **:** Now stores  configuration.
-  - **, , :** Now have a  field for data segregation.
-  - **:** Updated to include . Will be further extended for RBAC and Auth.
+  - **:** Heavily modified to include , , , , and .
+  - ** (NEW):** .
 
 **changes in tech stack**
-  -  will be added as a backend dependency for password hashing.
+  -  has been added to  for password hashing.
 
 **All files of reference**
--  (New Tenant model)
--  (New Tenant API)
--  (Tenant ID helper)
--  (Feature guard helper)
--  (Heavily modified for filtering and bonus trigger)
--  (Modified to be tenant-aware)
--  (New Tenant management UI)
--  (Modified for conditional menu rendering)
--  (New Bonus UI)
+-  (Core JWT, password, and permission logic)
+-  (Login/auth endpoints)
+-  (API Key CRUD endpoints)
+-  (New home for Game Robot logic)
+-  (Now a thin CLI client)
+-  (New login UI)
+-  (New API Key management UI)
+-  (Heavily modified for RBAC)
+-  (Updated with new protected routes)
+-  (Contains all new documentation)
 
 **Areas that need refactoring**:
--  is critically large.
--  is also becoming bloated with bonus triggers and various list endpoints. It should be split into smaller, domain-specific routers (e.g., , ).
+-  is critically large and a known issue.
+-  is also becoming bloated.
+-  has grown complex with the new RBAC logic and could be broken into smaller, more manageable components.
 
 **key api endpoints**
 - 
 - 
+-  (Create admin with roles and password modes)
+- , , 
 - 
-- 
-- 
-- 
--  (Modified to be client-aware)
 
 **Critical Info for New Agent**
 - **You MUST interact with the user exclusively in Turkish.**
-- The project is being developed in phases. Faz 1 (Bonus) and Faz 2 (Tenant Model) are now complete.
-- The next set of tasks are **Görev 3 (RBAC)** and **Görev 3b (Admin Auth & Şifre Yönetimi)**. These are the highest priorities.
-- The user has approved a **JWT-based** authentication model.
-- The password policy is strict: **min. 8 characters, >=1 uppercase, >=1 number, >=1 special character.**
-- Start by implementing the RBAC backend, then the Admin Auth backend, before moving to the frontend UI for both.
+- The application now has a live, working authentication system. Use  with password  to log in for testing.
+- The frontend route for API Keys is  (not ) to avoid conflicts with the backend API prefix.
+- The Game Robot CLI () is now a thin client and requires the  argument to function.
+- The  field on  is being populated based on the selected role but is not yet being used to enforce permissions in the UI or backend. This is a key upcoming task.
 
 **documents created in this job**
-  - None. Attempts to create  failed due to tool usage errors. This remains a pending task.
+  - 
+  - 
+  - 
+  - 
 
 **Last 10 User Messages and any pending user messages**
-- The user has been providing extremely detailed, multi-part Görev (Task) definitions.
-- The last several messages confirmed the roadmap, approved the plan for RBAC and Admin Auth, and provided the final uygula (apply) command to start work. There are no pending user questions.
+- **User requested to clean up dead code:** Agent identified and deleted unused pages (, ). **(COMPLETED)**
+- **User asked to hold off on linting:** Agreed to tackle tech debt like linting in a separate epic. **(ACKNOWLEDGED)**
+- **User requested a full, screenshot-based user guide:** Agent generated the markdown structure for a comprehensive guide. **(IN PROGRESS - text done, screenshots pending)**
+- **User asked if the task was finished:** Agent clarified that the text part of the guide was done, but screenshots were pending. **(ADDRESSED)**
+- **User requested translation of UI elements:** , ,  to be translated to English. **(IN PROGRESS)**
+- **User pointed out an unimplemented feature:** Noticed the New Admin User screen was missing advanced features (manual role name, permission selection, password modes). Agent confirmed and started implementation. **(ADDRESSED)**
+- **User refined the roles:** Specified behavior for , , and  roles. Agent implemented this logic. **(COMPLETED)**
+- **User asked where the add tenant area was:** Agent investigated, found the menu item was missing for the current user, fixed it, and provided a screenshot. **(COMPLETED)**
+- **User asked to check for other unlinked pages:** Agent verified no other critical pages were unlinked. **(COMPLETED)**
+- **User requested a screenshot-based guide:** Agent provided a detailed plan for creating the guide. **(ADDRESSED)**
 
 **Project Health Check:**
-- **Healthy:** Core features are functional and tested.
-- **Broken:** None.
-- **Mocked:** The  context is still mocked. The next major task (Admin Auth) will replace this.
+- **Healthy:** The core application is stable. Major new features (Auth, API Keys, Robot Refactor) are implemented and functional at the backend level.
+- **Mocked:** The enforcement of  is not yet implemented; it's saved but doesn't restrict access. The invite flow for new admins creates the user but lacks the mechanism for the user to set their password.
+- **Broken:** The UI is in a partially translated state. The translation from Turkish to English needs to be completed and verified.
 
 **3rd Party Integrations**
 - **OpenAI GPT-4o:** Used for fraud detection risk analysis via . Uses Emergent LLM Key.
 - **recharts:** Used for data visualization.
-- **bcrypt:** To be added for password hashing.
+- **bcrypt:** Added for password hashing.
 
 **Testing status**
-  - **Testing agent used after significant changes:** YES.  and  were used extensively for the Bonus, Tenant, and Client-Aware features.
+  - **Testing agent used after significant changes:** YES. Backend agent was used extensively to test the new Auth, API Key, and Robot endpoints.
   - **Troubleshoot agent used after agent stuck in loop:** NO.
-  - **Test files created:** None. Test execution was done via sub-agents interpreting test plans.
+  - **Test files created:** None.
   - **Known regressions:** None.
 
 **Credentials to test flow:**
-- None currently. After the Admin Auth task, new credentials will need to be created and used.
+- **Email:** 
+- **Password:** 
 
 **What agent forgot to execute**
-- The entire Admin Authentication flow (Görev 3b / FAZ X) was not implemented and was brought up by the user. It is now the next major priority after RBAC.
-- The creation of  failed and was not corrected.</analysis>
+- The task to translate UI components to English is incomplete. The agent encountered errors and did not finish the job.
+- The user's request to add screenshots to the documentation was planned but not started.
+- The invite password flow for new admins is incomplete; it creates the user but doesn't provide a way for them to set their password.</analysis>
