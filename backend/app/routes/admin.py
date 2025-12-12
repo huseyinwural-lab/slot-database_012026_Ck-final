@@ -182,9 +182,15 @@ async def create_invite(invite: AdminInvite):
 
 # --- API KEYS ---
 @router.get("/keys", response_model=List[AdminAPIKey])
-async def get_api_keys():
+async def get_api_keys(current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
-    return [AdminAPIKey(**k) for k in await db.admin_keys.find().to_list(100)]
+    
+    # Filter API keys by tenant
+    query = {}
+    if current_admin.role != "Super Admin":
+        query["tenant_id"] = current_admin.tenant_id
+    
+    return [AdminAPIKey(**k) for k in await db.admin_keys.find(query).to_list(100)]
 
 @router.post("/keys")
 async def create_api_key(key: AdminAPIKey):
