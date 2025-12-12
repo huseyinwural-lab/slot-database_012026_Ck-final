@@ -99,7 +99,7 @@ const Finance = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, [filters]);
+  useEffect(() => { fetchData(1); }, [filters]);
 
   const handleViewDetails = (tx) => {
     setSelectedTx(tx);
