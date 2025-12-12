@@ -226,22 +226,25 @@ const AdminManagement = () => {
                                         }
                                       }
 
-                                      const checked = newUser.allowed_modules.includes(mod.key);
+                                      const checked = forced || newUser.allowed_modules.includes(mod.key);
+                                      const toggle = () => {
+                                        if (forced) return; // Super Admin / Manager için zorunlu alanlar değiştirilemez
+                                        setNewUser({
+                                          ...newUser,
+                                          allowed_modules: checked
+                                            ? newUser.allowed_modules.filter(m => m !== mod.key)
+                                            : [...newUser.allowed_modules, mod.key],
+                                        });
+                                      };
+
                                       return (
                                         <button
                                           key={mod.key}
                                           type="button"
-                                          onClick={() => {
-                                            setNewUser({
-                                              ...newUser,
-                                              allowed_modules: checked
-                                                ? newUser.allowed_modules.filter(m => m !== mod.key)
-                                                : [...newUser.allowed_modules, mod.key],
-                                            });
-                                          }}
+                                          onClick={toggle}
                                           className={`flex items-center justify-between rounded border px-3 py-2 text-xs ${
                                             checked ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-secondary'
-                                          }`}
+                                          } ${forced ? 'cursor-not-allowed opacity-80' : ''}`}
                                         >
                                           <span>{mod.label}</span>
                                           {checked && <span>✓</span>}
