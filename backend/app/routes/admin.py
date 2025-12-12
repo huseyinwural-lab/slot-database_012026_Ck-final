@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 import uuid
 import random
+from pydantic import BaseModel, EmailStr
 from app.models.modules import (
     AdminUser, AdminRole, AdminTeam, AdminSession, SecurityPolicy, AdminInvite, AdminAPIKey,
     AdminStatus, InviteStatus, SystemEvent, LogSeverity, AdminActivityLog, AdminLoginHistory,

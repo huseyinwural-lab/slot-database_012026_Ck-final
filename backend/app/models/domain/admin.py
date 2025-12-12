@@ -48,6 +48,9 @@ class AdminUser(BaseModel):
     last_ip: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+    # Basit modül bazlı erişim listesi (ileride RBAC ile genişletilebilir)
+    allowed_modules: List[str] = []
+
     # Auth & security fields
     password_hash: Optional[str] = None
     is_active: bool = True
