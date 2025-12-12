@@ -94,7 +94,7 @@ const Login = () => {
               </div>
             </div>
             <Button type="submit" className="w-full mt-2" disabled={loading}>
-              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+              {loading ? 'Signing in...' : 'Sign In'}
             </Button>
             <p className="mt-2 text-xs text-muted-foreground text-center">
               Demo kullanıcı: <span className="font-mono">admin@casino.com / Admin123!</span>
