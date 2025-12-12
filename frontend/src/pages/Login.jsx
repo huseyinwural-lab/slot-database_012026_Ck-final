@@ -56,13 +56,13 @@ const Login = () => {
           </div>
           <CardTitle>Admin Login</CardTitle>
           <CardDescription>
-            CasinoAdmin kontrol paneline erişmek için bilgilerinizi girin.
+            Enter your credentials to access the CasinoAdmin control panel.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="email">E-posta</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -73,7 +73,7 @@ const Login = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Şifre</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
