@@ -9,7 +9,7 @@ from app.models.modules import (
     AdminStatus, InviteStatus, SystemEvent, LogSeverity, AdminActivityLog, AdminLoginHistory,
     AdminPermissionMatrix, AdminIPRestriction, AdminDeviceRestriction
 )
-from app.utils.auth import get_password_hash
+from app.utils.auth import get_password_hash, create_access_token
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -49,14 +49,21 @@ async def create_admin(payload: AdminUserCreateRequest):
 
     password_hash = None
     status = AdminStatus.ACTIVE
+    invite_token = None
+    invite_expires_at = None
 
     if payload.password_mode == "manual":
         from app.utils.auth import get_password_hash
 
         password_hash = get_password_hash(payload.password)
     else:
-        # Invite mode: kullanıcı ilk girişte şifre belirleyecek
+        # Invite mode: user will set password on first login via invite token
         status = AdminStatus.INVITED
+        invite_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        invite_token = create_access_token(
+            data={"sub": None, "email": payload.email, "purpose": "invite"},
+            expires_delta=timedelta(days=7),
+        )
 
     user = AdminUser(
         username=username,
@@ -66,10 +73,13 @@ async def create_admin(payload: AdminUserCreateRequest):
         allowed_modules=payload.allowed_modules,
         status=status,
         password_hash=password_hash,
+        invite_token=invite_token,
+        invite_expires_at=invite_expires_at,
     )
 
     await db.admins.insert_one(user.model_dump())
-    return user
+    # For manual mode, invite_token will be None; for invite mode, return token to caller
+    return {"user": user, "invite_token": invite_token}
 
 @router.put("/users/{id}/status")
 async def update_admin_status(id: str, status: str = Body(..., embed=True)):

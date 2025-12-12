@@ -58,6 +58,8 @@ class AdminUser(BaseModel):
     last_password_change_at: Optional[datetime] = None
     password_reset_token: Optional[str] = None
     password_reset_expires_at: Optional[datetime] = None
+    invite_token: Optional[str] = None
+    invite_expires_at: Optional[datetime] = None
 
 class AdminSession(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
