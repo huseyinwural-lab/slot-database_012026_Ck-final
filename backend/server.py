@@ -5,6 +5,7 @@ import logging
 from config import settings
 from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, admin, game_config, game_import, game_config_presets, auth, api_keys, robot
 from app.middleware.request_logging import RequestLoggingMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -95,11 +96,34 @@ async def init_indexes():
 
 @app.get("/api/health")
 async def health_check():
+    """Liveness probe: process up & running.
+
+    Does NOT touch external dependencies (e.g. Mongo), so it should be cheap
+    and always 200 as long as the app is alive.
+    """
     return {
         "status": "healthy",
         "environment": settings.environment,
-        "db": "connected" if await db.command("ping") else "disconnected"
     }
+
+
+@app.get("/api/readiness")
+async def readiness_check():
+    """Readiness probe: checks MongoDB connectivity.
+
+    Returns 503 if critical dependencies are not ready.
+    """
+    try:
+        await db.command("ping")
+        return {
+            "status": "ready",
+            "environment": settings.environment,
+            "dependencies": {"mongo": "connected"},
+        }
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.exception("readiness check failed: mongo ping error", exc_info=exc)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail={"status": "degraded", "dependencies": {"mongo": "unreachable"}})
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
