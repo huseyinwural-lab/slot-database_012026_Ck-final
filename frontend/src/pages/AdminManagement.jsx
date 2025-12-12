@@ -185,16 +185,87 @@ const AdminManagement = () => {
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2"><Label>Ad Soyad</Label><Input value={newUser.full_name} onChange={e=>setNewUser({...newUser, full_name: e.target.value})} /></div>
                                 <div className="space-y-2"><Label>Email</Label><Input value={newUser.email} onChange={e=>setNewUser({...newUser, email: e.target.value})} /></div>
-                                <div className="space-y-2"><Label>Rol</Label>
-                                    <Select value={newUser.role} onValueChange={v=>setNewUser({...newUser, role: v})}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="Support">Destek</SelectItem>
-                                          <SelectItem value="Manager">Yönetici</SelectItem>
-                                          <SelectItem value="Super Admin">Süper Admin</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                <div className="space-y-2">
+                                  <Label>Rol (serbest yazılabilir)</Label>
+                                  <Input
+                                    placeholder="Örn. Risk Analyst, VIP Manager, Support L1"
+                                    value={newUser.role}
+                                    onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+                                  />
                                 </div>
+                                <div className="space-y-2">
+                                  <Label>Yetki Alanları (modüller)</Label>
+                                  <div className="grid grid-cols-2 gap-2 text-sm">
+                                    {[
+                                      { key: 'players', label: 'Oyuncular' },
+                                      { key: 'games', label: 'Oyunlar' },
+                                      { key: 'bonuses', label: 'Bonuslar' },
+                                      { key: 'reports', label: 'Raporlar' },
+                                      { key: 'fraud', label: 'Fraud/Risk' },
+                                      { key: 'settings', label: 'Ayarlar' },
+                                    ].map(mod => {
+                                      const checked = newUser.allowed_modules.includes(mod.key);
+                                      return (
+                                        <button
+                                          key={mod.key}
+                                          type="button"
+                                          onClick={() => {
+                                            setNewUser({
+                                              ...newUser,
+                                              allowed_modules: checked
+                                                ? newUser.allowed_modules.filter(m => m !== mod.key)
+                                                : [...newUser.allowed_modules, mod.key],
+                                            });
+                                          }}
+                                          className={`flex items-center justify-between rounded border px-3 py-2 text-xs ${
+                                            checked ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-secondary'
+                                          }`}
+                                        >
+                                          <span>{mod.label}</span>
+                                          {checked && <span>✓</span>}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Şifre Belirleme Modu</Label>
+                                  <div className="flex gap-2 text-sm">
+                                    <button
+                                      type="button"
+                                      className={`flex-1 rounded border px-3 py-2 ${
+                                        newUser.password_mode === 'manual'
+                                          ? 'bg-primary text-primary-foreground border-primary'
+                                          : 'hover:bg-secondary'
+                                      }`}
+                                      onClick={() => setNewUser({ ...newUser, password_mode: 'manual' })}
+                                    >
+                                      Şifreyi Ben Belirle
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className={`flex-1 rounded border px-3 py-2 ${
+                                        newUser.password_mode === 'invite'
+                                          ? 'bg-primary text-primary-foreground border-primary'
+                                          : 'hover:bg-secondary'
+                                      }`}
+                                      onClick={() => setNewUser({ ...newUser, password_mode: 'invite', password: '' })}
+                                    >
+                                      Davet Linki / İlk Girişte Şifre
+                                    </button>
+                                  </div>
+                                </div>
+                                {newUser.password_mode === 'manual' && (
+                                  <div className="space-y-2">
+                                    <Label>Şifre (policy ile uyumlu)</Label>
+                                    <Input
+                                      type="password"
+                                      placeholder="En az 8 karakter, büyük harf, rakam ve özel karakter içermeli"
+                                      value={newUser.password}
+                                      onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                                    />
+                                  </div>
+                                )}
                                 <Button onClick={handleCreateUser} className="w-full">Oluştur</Button>
                             </div>
                         </DialogContent>
