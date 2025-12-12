@@ -87,12 +87,31 @@ const AdminManagement = () => {
   useEffect(() => { fetchData(); }, [activeTab, activityFilter, loginFilter]);
 
   const handleCreateUser = async () => {
-    try { 
-      await api.post('/v1/admin/users', { ...newUser, username: newUser.email.split('@')[0] }); 
-      setIsUserOpen(false); 
-      fetchData(); 
-      toast.success("Kullanıcı oluşturuldu"); 
-    } catch { toast.error("Başarısız"); }
+    try {
+      if (!newUser.full_name || !newUser.email) {
+        toast.error('Ad soyad ve email zorunlu');
+        return;
+      }
+      if (newUser.password_mode === 'manual' && !newUser.password) {
+        toast.error('Manuel modda şifre zorunlu');
+        return;
+      }
+      await api.post('/v1/admin/users', {
+        full_name: newUser.full_name,
+        email: newUser.email,
+        role: newUser.role || 'Custom',
+        allowed_modules: newUser.allowed_modules,
+        password_mode: newUser.password_mode,
+        password: newUser.password_mode === 'manual' ? newUser.password : undefined,
+      });
+      setIsUserOpen(false);
+      setNewUser({ full_name: '', email: '', role: '', allowed_modules: [], password_mode: 'manual', password: '' });
+      fetchData();
+      toast.success('Kullanıcı oluşturuldu');
+    } catch (err) {
+      console.error(err);
+      toast.error('Başarısız');
+    }
   };
   
   const handleAddIPRestriction = async () => {
