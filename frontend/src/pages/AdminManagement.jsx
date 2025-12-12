@@ -508,7 +508,7 @@ const AdminManagement = () => {
                               <Input placeholder="192.168.1.1" value={newIP.ip_address} onChange={e=>setNewIP({...newIP, ip_address: e.target.value})} />
                             </div>
                             <div className="space-y-2">
-                              <Label>Tip</Label>
+                              <Label>Type</Label>
                               <Select value={newIP.restriction_type} onValueChange={v=>setNewIP({...newIP, restriction_type: v})}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -518,7 +518,7 @@ const AdminManagement = () => {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>Sebep</Label>
+                              <Label>Reason</Label>
                               <Textarea placeholder="Neden ekleniyor?" value={newIP.reason} onChange={e=>setNewIP({...newIP, reason: e.target.value})} />
                             </div>
                             <Button onClick={handleAddIPRestriction} className="w-full">Ekle</Button>
