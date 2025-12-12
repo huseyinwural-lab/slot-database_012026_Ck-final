@@ -859,7 +859,7 @@ const AdminManagement = () => {
                                 <div><Label>Minimum Password Length</Label><Input value={policy.password_min_length} readOnly /></div>
                                 <div><Label>Session Timeout (min)</Label><Input value={policy.session_timeout_minutes} readOnly /></div>
                                 <div><Label>Max Login Attempts</Label><Input value={policy.max_login_attempts} readOnly /></div>
-                                <div className="flex items-center gap-2 pt-6"><input type="checkbox" checked={policy.require_2fa} readOnly /> <Label>2FA Zorunlu</Label></div>
+                                <div className="flex items-center gap-2 pt-6"><input type="checkbox" checked={policy.require_2fa} readOnly /> <Label>2FA Required</Label></div>
                             </div>
                         </CardContent>
                     </Card>
