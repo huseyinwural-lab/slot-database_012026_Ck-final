@@ -74,6 +74,7 @@ const TenantsPage = () => {
       };
       await api.post('/v1/tenants/', payload);
       toast.success('Tenant created');
+      setTenantsMeta({ page: 1, page_size: tenantsMeta.page_size || 50, total: null });
       setForm({
         name: '',
         type: 'renter',
