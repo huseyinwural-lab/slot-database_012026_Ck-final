@@ -693,7 +693,7 @@ const AdminManagement = () => {
                         ))}
                       </TableBody>
                     </Table>
-                    {loginHistory.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz giriş kaydı yok</p>}
+                    {loginHistory.length === 0 && <p className="text-center text-muted-foreground py-8">No login history yet.</p>}
                   </CardContent>
                 </Card>
             </TabsContent>
