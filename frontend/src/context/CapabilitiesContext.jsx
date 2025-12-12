@@ -11,14 +11,32 @@ export const CapabilitiesProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is logged in (token exists)
     const token = localStorage.getItem('admin_token');
+    console.log('🔑 Token check:', token ? 'EXISTS' : 'MISSING');
+    
     if (token) {
+      console.log('🔄 Fetching capabilities...');
       fetchCapabilities();
     } else {
+      console.log('❌ No token, skipping capabilities fetch');
       setCapabilities(null);
       setIsOwner(false);
       setLoading(false);
     }
   }, []);
+  
+  // Refetch when window gets focus (for login flow)
+  useEffect(() => {
+    const handleFocus = () => {
+      const token = localStorage.getItem('admin_token');
+      if (token && !capabilities) {
+        console.log('🔄 Window focused, refetching capabilities');
+        fetchCapabilities();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [capabilities]);
 
   const fetchCapabilities = async () => {
     try {
