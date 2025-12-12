@@ -112,7 +112,9 @@ function App() {
             path="/fraud"
             element={(
               <RequireAuth>
-                <FraudCheck />
+                <RequireFeature requireOwner={true}>
+                  <FraudCheck />
+                </RequireFeature>
               </RequireAuth>
             )}
           />
