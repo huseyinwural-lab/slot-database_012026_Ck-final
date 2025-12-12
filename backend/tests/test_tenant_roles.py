@@ -5,7 +5,7 @@ BASE_URL = "http://localhost:8001/api/v1"
 
 def login(email, password):
     print(f"Logging in as {email}...")
-    resp = requests.post(f"{BASE_URL}/auth/login", json={"username": email, "password": password})
+    resp = requests.post(f"{BASE_URL}/auth/login", json={"email": email, "password": password})
     if resp.status_code != 200:
         print(f"Login failed: {resp.text}")
         sys.exit(1)
