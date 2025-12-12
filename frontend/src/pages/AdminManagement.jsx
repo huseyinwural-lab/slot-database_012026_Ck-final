@@ -417,7 +417,7 @@ const AdminManagement = () => {
                                   <DialogHeader><DialogTitle>Log Detail</DialogTitle></DialogHeader>
                                   <div className="space-y-4">
                                     <div><Label>Admin</Label><p>{log.admin_name} ({log.admin_id})</p></div>
-                                    <div><Label>Aksiyon</Label><p>{log.action}</p></div>
+                                    <div><Label>Action</Label><p>{log.action}</p></div>
                                     <div><Label>Before Snapshot</Label><pre className="bg-gray-100 p-2 rounded text-xs overflow-auto max-h-40">{JSON.stringify(log.before_snapshot, null, 2)}</pre></div>
                                     <div><Label>After Snapshot</Label><pre className="bg-gray-100 p-2 rounded text-xs overflow-auto max-h-40">{JSON.stringify(log.after_snapshot, null, 2)}</pre></div>
                                   </div>
