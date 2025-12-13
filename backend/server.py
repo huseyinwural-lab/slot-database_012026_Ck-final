@@ -7,6 +7,7 @@ from app.routes import fraud_detection, email_notification, core, simulator, mod
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 
+from app.core.errors import AppError, app_exception_handler, generic_exception_handler
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
@@ -44,6 +45,9 @@ app.add_middleware(
 # Rate limiting (basic IP-based)
 app.add_middleware(RateLimitMiddleware)
 
+# Exception Handlers
+app.add_exception_handler(AppError, app_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
 # Request logging & correlation ID
 app.add_middleware(RequestLoggingMiddleware)
 

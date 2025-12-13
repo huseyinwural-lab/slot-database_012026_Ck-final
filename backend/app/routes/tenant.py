@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from config import settings
 from app.models.tenant import Tenant
+from app.core.errors import AppError
 from app.models.common import PaginatedResponse, PaginationParams, PaginationMeta
 from app.utils.pagination import get_pagination_params
 from app.utils.permissions import require_owner
@@ -72,7 +73,12 @@ async def create_tenant(
     # Basic uniqueness by name
     existing = await db.tenants.find_one({"name": tenant.name})
     if existing:
-        raise HTTPException(status_code=400, detail="Tenant with this name already exists")
+        raise AppError(
+            error_code="TENANT_EXISTS",
+            message="Tenant with this name already exists",
+            status_code=400,
+            details={"name": tenant.name}
+        )
 
     tenant.created_at = datetime.now(timezone.utc)
     tenant.updated_at = tenant.created_at
