@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     debug: bool = True
     cors_origins: str = '["http://localhost:3000", "http://localhost:3001"]'
     
+    openai_model: str = "gpt-4-1106-preview"
     # Integrations
     openai_api_key: Optional[str] = None
     
