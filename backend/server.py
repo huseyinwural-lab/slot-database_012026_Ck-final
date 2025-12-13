@@ -78,6 +78,8 @@ app.include_router(api_keys.router)
 app.include_router(robot.router)
 app.include_router(revenue.router)  # Revenue reporting
 
+from app.routes import player_wallet
+app.include_router(player_wallet.router)
 
 
 # Finance Advanced

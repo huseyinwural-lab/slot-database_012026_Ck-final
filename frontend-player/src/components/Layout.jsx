@@ -26,7 +26,7 @@ const Layout = () => {
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/" className="hover:text-primary transition-colors">Lobby</Link>
             <Link to="/slots" className="hover:text-primary transition-colors">Slots</Link>
-            <Link to="/live" className="hover:text-primary transition-colors">Live Casino</Link>
+            <Link to="/wallet" className="hover:text-primary transition-colors">Wallet</Link>
             <Link to="/promotions" className="hover:text-primary transition-colors">Promotions</Link>
           </nav>
 
