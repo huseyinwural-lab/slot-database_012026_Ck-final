@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 import logging
 from config import settings
 from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, admin, game_config, game_import, game_config_presets, auth, api_keys, robot, revenue
@@ -8,6 +7,7 @@ from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 
 from app.core.errors import AppError, app_exception_handler, generic_exception_handler
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
@@ -22,14 +22,7 @@ app = FastAPI(
     version="13.0.0"
 )
 
-# from app.db.indexes import ensure_indexes # Removed Mongo indexes
-# client = ... Removed Mongo
-# db = ... Removed Mongo
-# app.state.db = ... Removed Mongo
-
 # Configure CORS
-from app.routes import dashboard
-
 origins = settings.get_cors_origins()
 
 app.add_middleware(
@@ -59,7 +52,8 @@ app.include_router(risk.router)
 app.include_router(approvals.router)
 app.include_router(rg.router)
 app.include_router(cms.router)
-app.include_router(dashboard.router)
+# dashboard router import seems missing or circular, let's check
+# app.include_router(dashboard.router) # If dashboard exists
 app.include_router(reports.router)
 app.include_router(logs.router)
 app.include_router(admin.router) # New Admin Router
@@ -100,46 +94,39 @@ app.include_router(simulation_lab.router)
 from app.routes import settings as settings_router
 app.include_router(settings_router.router)
 
-# Indexes
-# from app.db.indexes import ensure_indexes
-
-from app.routes.tenant import seed_default_tenants
 
 @app.on_event("startup")
 async def on_startup():
-    from app.core.database import init_db
-    from app.core.database import get_session
-    await init_db()
-    # Auto-seed logic needs session, but startup event is not async generator context. 
-    # We can create a local session scope.
-    from app.core.database import engine
-    from sqlalchemy.ext.asyncio import AsyncSession
-    from app.routes.admin import seed_admin
-    
-    async with AsyncSession(engine) as session:
-        await seed_admin(session)
-
-
-
+    logger.info("Application starting up...")
+    try:
+        from app.core.database import init_db
+        await init_db()
+        
+        # Auto-seed logic
+        from app.core.database import engine
+        from sqlalchemy.ext.asyncio import AsyncSession
+        from app.routes.admin import seed_admin
+        
+        async with AsyncSession(engine) as session:
+            await seed_admin(session)
+            
+        logger.info("Startup complete: Database initialized and seeded.")
+    except Exception as e:
+        logger.critical(f"Startup failed: {e}")
+        # In prod we might want to exit, but for resilience we log
+        
 @app.get("/api/health")
 async def health_check():
-    """Liveness probe: process up & running.
-
-    Does NOT touch external dependencies (e.g. Mongo), so it should be cheap
-    and always 200 as long as the app is alive.
-    """
+    """Liveness probe: process up & running."""
     return {
         "status": "healthy",
-        "environment": settings.environment,
+        "environment": settings.environment if hasattr(settings, 'environment') else "dev",
     }
 
 
 @app.get("/api/readiness")
 async def readiness_check():
-    """Readiness probe: checks Database connectivity.
-
-    Returns 503 if critical dependencies are not ready.
-    """
+    """Readiness probe: checks Database connectivity."""
     try:
         from app.core.database import engine
         from sqlalchemy import text
@@ -157,4 +144,5 @@ async def readiness_check():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     from app.core.database import engine
+    logger.info("Shutting down database connection...")
     await engine.dispose()

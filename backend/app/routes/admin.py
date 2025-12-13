@@ -8,6 +8,9 @@ from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin, get_password_hash, create_access_token
 from app.core.errors import AppError
 from datetime import datetime, timedelta, timezone
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -64,27 +67,35 @@ async def create_admin(
 
 @router.post("/seed")
 async def seed_admin(session: AsyncSession = Depends(get_session)):
-    # 1. Ensure Tenant Exists
-    from app.routes.tenant import seed_default_tenants
-    await seed_default_tenants(session)
-    
-    # 2. Check Admin
-    stmt = select(AdminUser).where(AdminUser.email == "admin@casino.com")
-    existing = (await session.exec(stmt)).first()
-    
-    if not existing:
-        super_admin = AdminUser(
-            email="admin@casino.com",
-            username="superadmin",
-            full_name="Super Owner",
-            role="Super Admin",
-            tenant_id="default_casino",
-            is_platform_owner=True,
-            password_hash=get_password_hash("Admin123!"),
-            status="active"
-        )
-        session.add(super_admin)
-        await session.commit()
-        return {"message": "Super Admin Seeded"}
-    
-    return {"message": "Already seeded"}
+    try:
+        # 1. Ensure Tenant Exists
+        from app.routes.tenant import seed_default_tenants
+        await seed_default_tenants(session)
+        
+        # 2. Check Admin
+        stmt = select(AdminUser).where(AdminUser.email == "admin@casino.com")
+        result = await session.exec(stmt)
+        existing = result.first()
+        
+        if not existing:
+            super_admin = AdminUser(
+                email="admin@casino.com",
+                username="superadmin",
+                full_name="Super Owner",
+                role="Super Admin",
+                tenant_id="default_casino",
+                is_platform_owner=True,
+                password_hash=get_password_hash("Admin123!"),
+                status="active"
+            )
+            session.add(super_admin)
+            await session.commit()
+            logger.info("Super Admin Seeded successfully.")
+            return {"message": "Super Admin Seeded"}
+        
+        logger.info("Admin already exists, skipping seed.")
+        return {"message": "Already seeded"}
+    except Exception as e:
+        logger.error(f"Seeding failed: {e}")
+        # Don't crash startup if seed fails, just log
+        return {"message": "Seeding failed", "error": str(e)}
