@@ -14,7 +14,7 @@ from app.models.core import (
 from app.models.modules import KYCDocument
 from app.models.domain.admin import AdminUser
 from app.utils.tenant import get_current_tenant_id
-from app.utils.auth import get_current_admin, require_permission
+from app.utils.auth import get_current_admin
 from app.utils.permissions import require_tenant_role
 from app.utils.pagination import get_pagination_params
 from app.utils.features import ensure_tenant_feature
