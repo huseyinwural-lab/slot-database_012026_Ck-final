@@ -3,39 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const Login = () => {
-  const [email, setEmail] = useState('player@test.com'); // Pre-fill for ease
-  const [password, setPassword] = useState('Player123!');
+  const [email, setEmail] = useState(''); 
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
-      // Note: Assuming backend has /api/v1/auth/login that supports players too, 
-      // OR we have a separate /api/v1/player-auth/login.
-      // For MVP, let's assume standard auth works or we mock it.
-      // Based on previous files, backend auth was AdminUser based.
-      // We NEED a player auth endpoint.
-      // I will implement a mock login in the frontend for now to show the UI flow
-      // until we implement Player Auth in backend.
-      
-      const res = await api.post('/auth/player/login', { email, password }); // This endpoint needs to be created
+      const res = await api.post('/auth/player/login', { email, password });
       
       localStorage.setItem('player_token', res.data.access_token);
       localStorage.setItem('player_user', JSON.stringify(res.data.user));
       navigate('/');
     } catch (err) {
       console.error(err);
-      // Mock Success for Demo if backend 404
-      if (err.response && err.response.status === 404) {
-          console.warn("Backend player auth not found, mocking login");
-          localStorage.setItem('player_token', 'mock_token_123');
-          localStorage.setItem('player_user', JSON.stringify({ username: 'Demo Player', balance_real: 1000 }));
-          navigate('/');
-          return;
-      }
-      setError('Invalid credentials');
+      setError(err.response?.data?.detail || 'Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,6 +43,7 @@ const Login = () => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:outline-none focus:border-primary"
+                required
             />
           </div>
           <div>
@@ -64,10 +53,15 @@ const Login = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:outline-none focus:border-primary"
+                required
             />
           </div>
-          <button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors">
-            Log In
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Logging In...' : 'Log In'}
           </button>
         </form>
         
