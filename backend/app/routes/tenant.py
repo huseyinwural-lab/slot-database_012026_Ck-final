@@ -19,8 +19,8 @@ async def list_tenants(
     require_owner(current_admin)
     
     statement = select(Tenant)
-    result = await session.exec(statement)
-    tenants = result.all()
+    result = await session.execute(statement) # Changed exec to execute for AsyncSession
+    tenants = result.scalars().all()
     
     return {
         "items": tenants,
@@ -29,7 +29,7 @@ async def list_tenants(
 
 @router.post("/", response_model=Tenant)
 async def create_tenant(
-    tenant_data: Tenant, # Pydantic will parse body to Tenant SQLModel
+    tenant_data: Tenant, 
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
@@ -37,7 +37,8 @@ async def create_tenant(
     
     # Check exists
     stmt = select(Tenant).where(Tenant.name == tenant_data.name)
-    existing = (await session.exec(stmt)).first()
+    result = await session.execute(stmt)
+    existing = result.scalars().first()
     if existing:
         raise AppError(error_code="TENANT_EXISTS", message="Tenant exists", status_code=400)
     
@@ -49,10 +50,6 @@ async def create_tenant(
 
 @router.get("/capabilities")
 async def get_capabilities(current_admin: AdminUser = Depends(get_current_admin), session: AsyncSession = Depends(get_session)):
-    # Re-fetch tenant to get features
-    # AdminUser SQLModel has 'tenant' relationship if eager loaded, or we fetch it.
-    # But AdminUser defined in sql_models has tenant_id.
-    
     tenant = await session.get(Tenant, current_admin.tenant_id)
     features = tenant.features if tenant else {}
     
@@ -68,8 +65,8 @@ async def get_capabilities(current_admin: AdminUser = Depends(get_current_admin)
 async def seed_default_tenants(session: AsyncSession):
     # Check if default exists
     stmt = select(Tenant).where(Tenant.id == "default_casino")
-    result = await session.exec(stmt)
-    if result.first():
+    result = await session.execute(stmt)
+    if result.scalars().first():
         return
 
     # Create Owner Tenant
@@ -80,7 +77,6 @@ async def seed_default_tenants(session: AsyncSession):
         features={
             "can_manage_admins": True,
             "can_view_reports": True,
-            # ... add others
         }
     )
     

@@ -46,8 +46,8 @@ async def get_current_admin(
         raise credentials_exception
 
     statement = select(AdminUser).where(AdminUser.email == email)
-    result = await session.exec(statement)
-    admin = result.first()
+    result = await session.execute(statement) # Changed exec to execute
+    admin = result.scalars().first()
     
     if admin is None:
         raise credentials_exception
@@ -55,24 +55,5 @@ async def get_current_admin(
 
 async def get_admin_by_email(email: str, session: AsyncSession) -> AdminUser | None:
     statement = select(AdminUser).where(AdminUser.email == email)
-    result = await session.exec(statement)
-    return result.first()
-
-from pydantic import BaseModel
-from typing import List
-
-class AdminAPIKeyContext(BaseModel):
-    tenant_id: str
-    scopes: List[str]
-
-async def get_api_key_context(token: str = Depends(oauth2_scheme)) -> AdminAPIKeyContext:
-    # Stub implementation for now to satisfy imports
-    # In a real scenario, this would validate an API Key from header
-    return AdminAPIKeyContext(tenant_id="default_casino", scopes=["robot.run"])
-
-def require_scope(ctx: AdminAPIKeyContext, scope: str):
-    if scope not in ctx.scopes:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient scope"
-        )
+    result = await session.execute(statement)
+    return result.scalars().first()

@@ -11,6 +11,7 @@ from app.utils.auth import (
     verify_password,
     get_password_hash,
     create_access_token,
+    get_admin_by_email,
     get_current_admin,
 )
 from config import settings
@@ -22,8 +23,6 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    # AdminUser is now SQLModel, Pydantic should handle it, but we might need to map it if structure differs significantly or use response_model properly.
-    # Simple dict for now to be safe or subset.
     admin_email: str
     admin_role: str
 
@@ -60,8 +59,8 @@ def _validate_password_policy(password: str) -> None:
 async def login(form_data: LoginRequest = Body(...), session: AsyncSession = Depends(get_session)):
     # 1. Fetch User
     statement = select(AdminUser).where(AdminUser.email == form_data.email)
-    result = await session.exec(statement)
-    admin = result.first()
+    result = await session.execute(statement) # Changed exec to execute
+    admin = result.scalars().first()
 
     auth_error = AppError(error_code="INVALID_CREDENTIALS", message="Invalid email or password", status_code=401)
 
@@ -76,13 +75,6 @@ async def login(form_data: LoginRequest = Body(...), session: AsyncSession = Dep
 
     # 3. Success Update
     admin.failed_login_attempts = 0
-    # admin.last_login is not in the minimal SQL model I created, let's assume I need to add it or skip for now. 
-    # Checking sql_models.py... AdminUser has NO last_login field in the generated file in previous turn? 
-    # Let me check... Ah, I see created_at. I should probably add last_login to model if needed. 
-    # For now, let's skip updating last_login to avoid errors if field missing, or I'll check model file.
-    # Model has: failed_login_attempts, invite_token, etc. 
-    # It DOES NOT have last_login in the text I wrote in previous step. I will skip it.
-    
     await session.commit()
     await session.refresh(admin)
 
@@ -121,8 +113,8 @@ async def change_password(
 @router.post("/request-password-reset")
 async def request_password_reset(payload: PasswordResetRequest, session: AsyncSession = Depends(get_session)):
     statement = select(AdminUser).where(AdminUser.email == payload.email)
-    result = await session.exec(statement)
-    admin = result.first()
+    result = await session.execute(statement) # Changed exec to execute
+    admin = result.scalars().first()
 
     if not admin:
         return {"message": "RESET_REQUEST_ACCEPTED"}
@@ -133,7 +125,6 @@ async def request_password_reset(payload: PasswordResetRequest, session: AsyncSe
     )
 
     admin.password_reset_token = token
-    # expiry logic omitted for brevity in MVP SQL model
     session.add(admin)
     await session.commit()
 
@@ -153,8 +144,8 @@ async def reset_password(payload: PasswordResetConfirmRequest, session: AsyncSes
 
     admin_id = data.get("sub")
     statement = select(AdminUser).where(AdminUser.id == admin_id)
-    result = await session.exec(statement)
-    admin = result.first()
+    result = await session.execute(statement) # Changed exec to execute
+    admin = result.scalars().first()
 
     if not admin or admin.password_reset_token != payload.token:
         raise AppError(error_code="RESET_TOKEN_INVALID", message="Token mismatch or user not found", status_code=400)
@@ -180,8 +171,8 @@ async def accept_invite(payload: AcceptInviteRequest, session: AsyncSession = De
 
     email = data.get("email")
     statement = select(AdminUser).where(AdminUser.email == email)
-    result = await session.exec(statement)
-    admin = result.first()
+    result = await session.execute(statement) # Changed exec to execute
+    admin = result.scalars().first()
 
     if not admin:
         raise AppError(error_code="INVITE_TOKEN_INVALID", message="User not found", status_code=400)

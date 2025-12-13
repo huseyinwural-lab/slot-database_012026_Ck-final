@@ -23,39 +23,35 @@ async def get_admins(
     if not current_admin.is_platform_owner:
         query = query.where(AdminUser.tenant_id == current_admin.tenant_id)
         
-    result = await session.exec(query)
-    return result.all()
+    result = await session.execute(query) # Changed exec to execute
+    return result.scalars().all()
 
 @router.post("/users")
 async def create_admin(
-    payload: dict = Body(...), # Using dict for flexibility in refactor
+    payload: dict = Body(...), 
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    # Basic validation
     email = payload.get("email")
     password = payload.get("password")
     
-    # Check existence
-    existing = (await session.exec(select(AdminUser).where(AdminUser.email == email))).first()
+    existing = (await session.execute(select(AdminUser).where(AdminUser.email == email))).scalars().first()
     if existing:
         raise AppError("USER_EXISTS", "User already exists", 400)
     
-    # Create
     new_admin = AdminUser(
         email=email,
         username=email.split("@")[0],
         full_name=payload.get("full_name", "Admin"),
         role=payload.get("role", "Admin"),
         tenant_role=payload.get("tenant_role", "tenant_admin"),
-        tenant_id=payload.get("tenant_id") or current_admin.tenant_id, # Default to creator's tenant
+        tenant_id=payload.get("tenant_id") or current_admin.tenant_id,
         password_hash=get_password_hash(password) if password else "",
         status="active"
     )
     
     if payload.get("password_mode") == "invite":
         new_admin.status = "invited"
-        # Logic for invite token...
         token = create_access_token({"sub": "invite", "email": email}, timedelta(days=7))
         new_admin.invite_token = token
     
@@ -68,14 +64,12 @@ async def create_admin(
 @router.post("/seed")
 async def seed_admin(session: AsyncSession = Depends(get_session)):
     try:
-        # 1. Ensure Tenant Exists
         from app.routes.tenant import seed_default_tenants
         await seed_default_tenants(session)
         
-        # 2. Check Admin
         stmt = select(AdminUser).where(AdminUser.email == "admin@casino.com")
-        result = await session.exec(stmt)
-        existing = result.first()
+        result = await session.execute(stmt)
+        existing = result.scalars().first()
         
         if not existing:
             super_admin = AdminUser(
@@ -97,5 +91,4 @@ async def seed_admin(session: AsyncSession = Depends(get_session)):
         return {"message": "Already seeded"}
     except Exception as e:
         logger.error(f"Seeding failed: {e}")
-        # Don't crash startup if seed fails, just log
         return {"message": "Seeding failed", "error": str(e)}
