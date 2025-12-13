@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   CreditCard, CheckCircle, XCircle, Clock, ShieldAlert, FileText, 
   RefreshCw, Edit, Upload, Activity, Globe, Smartphone, User, ArrowRight,
@@ -21,6 +22,7 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
   const [isLoading, setLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [note, setNote] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState(""); // For manual payouts
   const [aiAnalysis, setAiAnalysis] = useState(null);
 
   if (!transaction) return null;
@@ -28,7 +30,11 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
   const handleAction = async (action, reason = '') => {
     setLoading(true);
     try {
-      await api.post(`/v1/finance/transactions/${transaction.id}/action`, { action, reason: reason || note });
+      const payload = { action, reason: reason || note };
+      if (action === 'approve' && isWithdrawal && paymentMethod) {
+        payload.payment_method = paymentMethod;
+      }
+      await api.post(`/v1/finance/transactions/${transaction.id}/action`, payload);
       toast.success(`Action ${action} successful`);
       onRefresh();
       onOpenChange(false);
@@ -154,6 +160,22 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                        <h3 className="font-semibold text-sm">Quick Actions</h3>
                        {transaction.status !== 'completed' && transaction.status !== 'rejected' && (
                            <>
+                               {isWithdrawal && (
+                                 <div className="mb-2">
+                                   <Label className="text-xs">Payout Method</Label>
+                                   <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                                     <SelectTrigger className="h-8 text-xs">
+                                       <SelectValue placeholder="Select Channel" />
+                                     </SelectTrigger>
+                                     <SelectContent>
+                                       <SelectItem value="manual_bank">Bank Transfer (Manual)</SelectItem>
+                                       <SelectItem value="crypto_usdt">Crypto (USDT)</SelectItem>
+                                       <SelectItem value="papara">Papara</SelectItem>
+                                       <SelectItem value="payfix">Payfix</SelectItem>
+                                     </SelectContent>
+                                   </Select>
+                                 </div>
+                               )}
                                <Button className="w-full bg-green-600 hover:bg-green-700 h-10" onClick={() => handleAction('approve')}>
                                    <CheckCircle className="w-4 h-4 mr-2" /> 
                                    {isWithdrawal ? 'Approve Payout' : 'Approve Deposit'}
