@@ -78,6 +78,8 @@ app.include_router(revenue.router)  # Revenue reporting
 
 # Finance Advanced
 from app.routes import finance
+from app.routes import finance_actions
+app.include_router(finance_actions.router, prefix="/api/v1")
 app.include_router(finance.router)
 # Feature Flags & A/B Testing
 from app.routes import feature_flags
