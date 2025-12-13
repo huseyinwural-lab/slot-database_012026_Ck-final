@@ -34,10 +34,12 @@ import TenantRevenue from './pages/TenantRevenue';
 import { Toaster } from 'sonner';
 import { CapabilitiesProvider } from './context/CapabilitiesContext';
 import ModuleDisabled from './pages/ModuleDisabled'; // Import ModuleDisabled
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
     <BrowserRouter>
+      <ErrorBoundary>
       <CapabilitiesProvider>
         <Layout>
           <Routes>

@@ -25,6 +25,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Per-path limits: (max_requests, window_seconds)
         self._limits = {
             "/api/v1/auth/login": (10, 60.0),  # 10 login attempts / minute per IP
+            "/api/v1/auth/player/login": (10, 60.0), # Player login
+            "/api/v1/auth/player/register": (5, 60.0), # Registration
         }
 
     async def dispatch(self, request: Request, call_next: Callable):
