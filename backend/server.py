@@ -136,22 +136,25 @@ async def health_check():
 
 @app.get("/api/readiness")
 async def readiness_check():
-    """Readiness probe: checks MongoDB connectivity.
+    """Readiness probe: checks Database connectivity.
 
     Returns 503 if critical dependencies are not ready.
     """
     try:
-        await db.command("ping")
+        from app.core.database import engine
+        from sqlalchemy import text
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
         return {
             "status": "ready",
-            "environment": settings.environment,
-            "dependencies": {"mongo": "connected"},
+            "dependencies": {"database": "connected"},
         }
     except Exception as exc:  # pragma: no cover - defensive
-        logger.exception("readiness check failed: mongo ping error", exc_info=exc)
+        logger.exception("readiness check failed: db ping error", exc_info=exc)
         from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail={"status": "degraded", "dependencies": {"mongo": "unreachable"}})
+        raise HTTPException(status_code=503, detail={"status": "degraded", "dependencies": {"database": "unreachable"}})
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    db_wrapper.close()
+    from app.core.database import engine
+    await engine.dispose()
