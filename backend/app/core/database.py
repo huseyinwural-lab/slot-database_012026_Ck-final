@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel, select
+from sqlmodel import SQLModel
 from config import settings
 import logging
 
@@ -45,3 +45,10 @@ async def get_session() -> AsyncSession:
     )
     async with async_session() as session:
         yield session
+
+# LEGACY MONGO WRAPPER SHIM (To prevent ImportErrors in unrefactored files)
+class LegacyDBWrapper:
+    def __getattr__(self, name):
+        raise NotImplementedError(f"MongoDB wrapper is deprecated. Use SQLModel session. Accessing: {name}")
+
+db_wrapper = LegacyDBWrapper()
