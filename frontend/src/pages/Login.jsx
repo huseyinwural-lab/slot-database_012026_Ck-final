@@ -39,8 +39,9 @@ const Login = () => {
       window.location.href = from === '/login' ? '/' : from;
     } catch (err) {
       console.error(err);
-      const detail = err?.response?.data?.detail || 'Sign in failed';
-      toast.error(typeof detail === 'string' ? detail : 'Sign in failed');
+      // Use standardized error object
+      const error = err.standardized;
+      toast.error(error?.message || 'Sign in failed');
     } finally {
       setLoading(false);
     }

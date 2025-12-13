@@ -35,15 +35,18 @@ const AcceptInvite = () => {
       toast.success('Invite accepted. You can now log in.');
       navigate('/login');
     } catch (err) {
-      const detail = err?.response?.data?.detail;
-      if (detail === 'INVITE_TOKEN_INVALID') {
+      // Use standardized error object
+      const error = err.standardized;
+      if (error?.code === 'INVITE_TOKEN_INVALID') {
         toast.error('Invite link is invalid or has already been used.');
-      } else if (detail === 'INVITE_TOKEN_EXPIRED') {
+      } else if (error?.code === 'INVITE_TOKEN_EXPIRED') {
         toast.error('Invite link has expired.');
-      } else if (detail === 'INVITE_NOT_PENDING') {
+      } else if (error?.code === 'INVITE_NOT_PENDING') {
         toast.error('This invite is not pending anymore.');
+      } else if (error?.code === 'PASSWORD_TOO_SHORT' || error?.code === 'PASSWORD_MUST_CONTAIN_UPPERCASE' || error?.code === 'PASSWORD_MUST_CONTAIN_DIGIT' || error?.code === 'PASSWORD_MUST_CONTAIN_SPECIAL') {
+        toast.error(error.message); // Password policy errors
       } else {
-        toast.error('Failed to accept invite');
+        toast.error(error?.message || 'Failed to accept invite');
       }
     } finally {
       setSubmitting(false);

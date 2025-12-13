@@ -17,6 +17,7 @@ from app.utils.auth import (
 from config import settings
 from app.routes.admin import get_db
 
+from app.core.errors import AppError
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -53,40 +54,32 @@ class AcceptInviteRequest(BaseModel):
 
 def _validate_password_policy(password: str) -> None:
     if len(password) < 8:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="PASSWORD_TOO_SHORT",
-        )
+        raise AppError(error_code="PASSWORD_TOO_SHORT", message="Password must be at least 8 characters long", status_code=400)
     if not any(c.isupper() for c in password):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="PASSWORD_MUST_CONTAIN_UPPERCASE",
-        )
+        raise AppError(error_code="PASSWORD_MUST_CONTAIN_UPPERCASE", message="Password must contain at least one uppercase letter", status_code=400)
     if not any(c.isdigit() for c in password):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="PASSWORD_MUST_CONTAIN_DIGIT",
-        )
+        raise AppError(error_code="PASSWORD_MUST_CONTAIN_DIGIT", message="Password must contain at least one digit", status_code=400)
     if not any(not c.isalnum() for c in password):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="PASSWORD_MUST_CONTAIN_SPECIAL",
-        )
+        raise AppError(error_code="PASSWORD_MUST_CONTAIN_SPECIAL", message="Password must contain at least one special character", status_code=400)
 
 
 @router.post("/login", response_model=TokenResponse)
 async def login(form_data: LoginRequest = Body(...)):
     db = get_db()
     admin = await get_admin_by_email(form_data.email)
+    
+    # Generic error to prevent enumeration
+    auth_error = AppError(error_code="INVALID_CREDENTIALS", message="Invalid email or password", status_code=401)
+
     if not admin or not admin.is_active or not admin.password_hash:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="INVALID_CREDENTIALS")
+        raise auth_error
 
     if not verify_password(form_data.password, admin.password_hash):
         await db.admins.update_one(
             {"id": admin.id},
             {"$inc": {"failed_login_attempts": 1}},
         )
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="INVALID_CREDENTIALS")
+        raise auth_error
 
     # Reset failed attempts and update last_login
     await db.admins.update_one(
@@ -118,10 +111,10 @@ async def change_password(payload: ChangePasswordRequest, current_admin: AdminUs
     db = get_db()
 
     if not current_admin.password_hash:
-        raise HTTPException(status_code=400, detail="PASSWORD_NOT_SET")
+        raise AppError(error_code="PASSWORD_NOT_SET", message="Password is not set for this user", status_code=400)
 
     if not verify_password(payload.current_password, current_admin.password_hash):
-        raise HTTPException(status_code=400, detail="CURRENT_PASSWORD_INVALID")
+        raise AppError(error_code="CURRENT_PASSWORD_INVALID", message="Current password is incorrect", status_code=400)
 
     _validate_password_policy(payload.new_password)
 
@@ -244,28 +237,28 @@ async def accept_invite(payload: AcceptInviteRequest):
             algorithms=[settings.jwt_algorithm],
         )
     except JWTError:
-        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+        raise AppError(error_code="INVITE_TOKEN_INVALID", message="Invite token is invalid or corrupted", status_code=400)
 
     if data.get("purpose") != "invite":
-        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+        raise AppError(error_code="INVITE_TOKEN_INVALID", message="Invalid token purpose", status_code=400)
 
     email = data.get("email")
     if not email:
-        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+        raise AppError(error_code="INVITE_TOKEN_INVALID", message="Token missing email claim", status_code=400)
 
     admin_doc = await db.admins.find_one({"email": email}, {"_id": 0})
     if not admin_doc:
-        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+        raise AppError(error_code="INVITE_TOKEN_INVALID", message="User not found", status_code=400)
 
     # Only invited admins can accept an invite
     if admin_doc.get("status") != AdminStatus.INVITED:
-        raise HTTPException(status_code=400, detail="INVITE_NOT_PENDING")
+        raise AppError(error_code="INVITE_NOT_PENDING", message="This user is already active or not in invited status", status_code=400)
 
     invite_token = admin_doc.get("invite_token")
     invite_expires_at = admin_doc.get("invite_expires_at")
 
     if not invite_token or invite_token != payload.token:
-        raise HTTPException(status_code=400, detail="INVITE_TOKEN_INVALID")
+        raise AppError(error_code="INVITE_TOKEN_INVALID", message="Token mismatch", status_code=400)
 
     # Optional: server-side expiry check (in addition to JWT exp)
     if invite_expires_at:
@@ -277,7 +270,7 @@ async def accept_invite(payload: AcceptInviteRequest):
             else:
                 expires_dt = invite_expires_at
         if expires_dt < datetime.now(timezone.utc):
-            raise HTTPException(status_code=400, detail="INVITE_TOKEN_EXPIRED")
+            raise AppError(error_code="INVITE_TOKEN_EXPIRED", message="Invite link has expired", status_code=400)
 
     _validate_password_policy(payload.new_password)
 
