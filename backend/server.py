@@ -101,7 +101,7 @@ from app.routes import settings as settings_router
 app.include_router(settings_router.router)
 
 # Indexes
-from app.db.indexes import ensure_indexes
+# from app.db.indexes import ensure_indexes
 
 from app.routes.tenant import seed_default_tenants
 
