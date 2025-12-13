@@ -14,6 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '../services/api';
 import { useCapabilities } from '../context/CapabilitiesContext';
 
+import TenantSwitcher from './TenantSwitcher';
 const SidebarItem = ({ to, icon: Icon, label, activeClassName }) => (
   <NavLink
     to={to}
@@ -157,6 +158,7 @@ const Layout = ({ children }) => {
              </div>
           </div>
           <div className="flex items-center gap-4">
+            <TenantSwitcher />
             <div className="text-sm text-right hidden md:block">
               <p className="font-medium">
                 {(() => {
