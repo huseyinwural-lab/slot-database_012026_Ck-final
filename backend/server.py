@@ -22,12 +22,10 @@ app = FastAPI(
     version="13.0.0"
 )
 
-# MongoDB Connection
-from app.core.database import db_wrapper
-db_wrapper.connect()
-client = db_wrapper.client
-db = db_wrapper.db
-app.state.db = db
+# from app.db.indexes import ensure_indexes # Removed Mongo indexes
+# client = ... Removed Mongo
+# db = ... Removed Mongo
+# app.state.db = ... Removed Mongo
 
 # Configure CORS
 from app.routes import dashboard
@@ -108,9 +106,19 @@ from app.db.indexes import ensure_indexes
 from app.routes.tenant import seed_default_tenants
 
 @app.on_event("startup")
-async def init_indexes():
-    await ensure_indexes(db)
-    await seed_default_tenants()
+async def on_startup():
+    from app.core.database import init_db
+    from app.core.database import get_session
+    await init_db()
+    # Auto-seed logic needs session, but startup event is not async generator context. 
+    # We can create a local session scope.
+    from app.core.database import engine
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from app.routes.admin import seed_admin
+    
+    async with AsyncSession(engine) as session:
+        await seed_admin(session)
+
 
 
 @app.get("/api/health")

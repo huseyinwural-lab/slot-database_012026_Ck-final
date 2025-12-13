@@ -1,17 +1,19 @@
 version: '3.8'
 
 services:
-  # 🗄️ Database
-  mongodb:
-    image: mongo:6.0
-    container_name: casino_mongo
+  # 🐘 PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: casino_postgres
     restart: always
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      MONGO_INITDB_DATABASE: casino_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: casino_db
 
   # 🐍 Backend (API)
   backend:
@@ -21,10 +23,9 @@ services:
     ports:
       - "8001:8001"
     depends_on:
-      - mongodb
+      - postgres
     environment:
-      - MONGO_URL=mongodb://mongodb:27017
-      - DB_NAME=casino_db
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/casino_db
       - DEBUG=True
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
       - JWT_SECRET=change_this_secret_in_production_env
@@ -63,4 +64,4 @@ services:
       - /app/node_modules
 
 volumes:
-  mongo_data:
+  postgres_data:

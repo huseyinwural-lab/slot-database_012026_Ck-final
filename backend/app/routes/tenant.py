@@ -1,216 +1,101 @@
-from fastapi import APIRouter, HTTPException, Body, Depends
-from typing import List
-from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime, timezone
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import settings
-from app.models.tenant import Tenant
+from app.core.database import get_session
+from app.models.sql_models import Tenant, AdminUser
 from app.core.errors import AppError
-from app.models.common import PaginatedResponse, PaginationParams, PaginationMeta
-from app.utils.pagination import get_pagination_params
-from app.utils.permissions import require_owner
 from app.utils.auth import get_current_admin
-from app.models.domain.admin import AdminUser
+from app.utils.permissions import require_owner
 
 router = APIRouter(prefix="/api/v1/tenants", tags=["tenants"])
 
-
-from app.core.database import db_wrapper
-
-def get_db():
-    return db_wrapper.db
-
-
-@router.get("/", response_model=PaginatedResponse[Tenant])
+@router.get("/", response_model=dict)
 async def list_tenants(
-    pagination: PaginationParams = Depends(get_pagination_params),
+    session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
-) -> PaginatedResponse[Tenant]:
-    # Only owner can see all tenants
+):
     require_owner(current_admin)
-    db = get_db()
-
-    # Sort whitelist
-    ALLOWED_SORT_FIELDS = {"created_at"}
-    sort_field = pagination.sort_by if pagination.sort_by in ALLOWED_SORT_FIELDS else "created_at"
-    skip = (pagination.page - 1) * pagination.page_size
-
-    cursor = (
-        db.tenants
-        .find(
-            {},
-            {
-                "_id": 0,
-                "id": 1,
-                "name": 1,
-                "type": 1,
-                "created_at": 1,
-                "features": 1,
-            },
-        )
-        .sort(sort_field, -1 if pagination.sort_dir == "desc" else 1)
-        .skip(skip)
-        .limit(pagination.page_size)
-    )
-
-    docs = await cursor.to_list(pagination.page_size)
-    total = await db.tenants.count_documents({}) if pagination.include_total else None
-
+    
+    statement = select(Tenant)
+    result = await session.exec(statement)
+    tenants = result.all()
+    
     return {
-        "items": [Tenant(**d) for d in docs],
-        "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
+        "items": tenants,
+        "meta": {"total": len(tenants), "page": 1}
     }
-
 
 @router.post("/", response_model=Tenant)
 async def create_tenant(
-    tenant: Tenant = Body(...),
-    current_admin: AdminUser = Depends(get_current_admin)
-) -> Tenant:
-    # Only owner can create tenants
-    require_owner(current_admin)
-    db = get_db()
-    # Basic uniqueness by name
-    existing = await db.tenants.find_one({"name": tenant.name})
-    if existing:
-        raise AppError(
-            error_code="TENANT_EXISTS",
-            message="Tenant with this name already exists",
-            status_code=400,
-            details={"name": tenant.name}
-        )
-
-    tenant.created_at = datetime.now(timezone.utc)
-    tenant.updated_at = tenant.created_at
-
-    await db.tenants.insert_one(tenant.model_dump())
-    return tenant
-
-
-@router.patch("/{tenant_id}")
-async def update_tenant_features(
-    tenant_id: str,
-    features: dict = Body(..., embed=True),
+    tenant_data: Tenant, # Pydantic will parse body to Tenant SQLModel
+    session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    # Only owner can update tenant features
     require_owner(current_admin)
-    """Update tenant feature flags"""
-    db = get_db()
     
-    tenant = await db.tenants.find_one({"id": tenant_id}, {"_id": 0})
-    if not tenant:
-        raise HTTPException(status_code=404, detail="Tenant not found")
+    # Check exists
+    stmt = select(Tenant).where(Tenant.name == tenant_data.name)
+    existing = (await session.exec(stmt)).first()
+    if existing:
+        raise AppError(error_code="TENANT_EXISTS", message="Tenant exists", status_code=400)
     
-    # Update features
-    update_data = {
-        "features": features,
-        "updated_at": datetime.now(timezone.utc)
-    }
+    session.add(tenant_data)
+    await session.commit()
+    await session.refresh(tenant_data)
     
-    await db.tenants.update_one(
-        {"id": tenant_id},
-        {"$set": update_data}
-    )
-    
-    # Return updated tenant
-    updated_tenant = await db.tenants.find_one({"id": tenant_id}, {"_id": 0})
-    return Tenant(**updated_tenant)
-
+    return tenant_data
 
 @router.get("/capabilities")
-async def get_tenant_capabilities(current_admin: AdminUser = Depends(get_current_admin)):
-    """
-    Return current user's tenant capabilities + owner status
-    Used by frontend for role-based UI rendering
-    """
-    from app.utils.permissions import is_owner
+async def get_capabilities(current_admin: AdminUser = Depends(get_current_admin), session: AsyncSession = Depends(get_session)):
+    # Re-fetch tenant to get features
+    # AdminUser SQLModel has 'tenant' relationship if eager loaded, or we fetch it.
+    # But AdminUser defined in sql_models has tenant_id.
     
-    db = get_db()
-    tenant_id = current_admin.tenant_id
-    
-    # Get tenant features
-    tenant = await db.tenants.find_one(
-        {"id": tenant_id},
-        {
-            "_id": 0,
-            "can_use_game_robot": 1,
-            "can_edit_configs": 1,
-            "can_manage_bonus": 1,
-            "can_view_reports": 1,
-            "can_manage_admins": 1,
-            "can_manage_kyc": 1
-        }
-    )
-    
-    if not tenant:
-        # Default capabilities if tenant not found
-        features = {
-            "can_use_game_robot": False,
-            "can_edit_configs": False,
-            "can_manage_bonus": False,
-            "can_view_reports": True,
-            "can_manage_admins": False,
-            "can_manage_kyc": True
-        }
-    else:
-        features = {
-            "can_use_game_robot": tenant.get("can_use_game_robot", False),
-            "can_edit_configs": tenant.get("can_edit_configs", False),
-            "can_manage_bonus": tenant.get("can_manage_bonus", False),
-            "can_view_reports": tenant.get("can_view_reports", True),
-            "can_manage_admins": tenant.get("can_manage_admins", False),
-            "can_manage_kyc": tenant.get("can_manage_kyc", True)
-        }
+    tenant = await session.get(Tenant, current_admin.tenant_id)
+    features = tenant.features if tenant else {}
     
     return {
         "features": features,
-        "is_owner": is_owner(current_admin),  # CRITICAL: Owner status
-        "tenant_id": tenant_id,
-        "tenant_role": current_admin.tenant_role, # Return tenant role
-        "tenant_name": tenant.get("name") if tenant else "Unknown"
+        "is_owner": current_admin.is_platform_owner,
+        "tenant_id": current_admin.tenant_id,
+        "tenant_role": current_admin.tenant_role,
+        "tenant_name": tenant.name if tenant else "Unknown"
     }
 
+# Seeding function adapted for SQL
+async def seed_default_tenants(session: AsyncSession):
+    # Check if default exists
+    stmt = select(Tenant).where(Tenant.id == "default_casino")
+    result = await session.exec(stmt)
+    if result.first():
+        return
 
-async def seed_default_tenants():
-    db = get_db()
+    # Create Owner Tenant
+    owner = Tenant(
+        id="default_casino", 
+        name="Default Casino", 
+        type="owner",
+        features={
+            "can_manage_admins": True,
+            "can_view_reports": True,
+            # ... add others
+        }
+    )
     
-    tenants = [
-        Tenant(
-            id="default_casino",
-            name="Default Casino",
-            type="owner",
-            features={
-                "can_use_game_robot": True,
-                "can_edit_configs": True,
-                "can_manage_bonus": True,
-                "can_view_reports": True,
-                "can_manage_admins": True,
-                "can_manage_finance": True,
-            },
-        ),
-        Tenant(
-            id="demo_renter",
-            name="Demo Renter",
-            type="renter",
-            features={
-                "can_use_game_robot": True,
-                "can_edit_configs": False,
-                "can_manage_bonus": True,
-                "can_view_reports": True,
-                "can_manage_admins": True,
-                "can_manage_finance": True,
-            },
-        )
-    ]
-
-    for tenant in tenants:
-        existing = await db.tenants.find_one({"id": tenant.id})
-        if not existing:
-            await db.tenants.insert_one(tenant.model_dump())
-        else:
-            # Ensure critical features are present even if tenant exists
-            await db.tenants.update_one(
-                {"id": tenant.id},
-                {"$set": {"features": tenant.features}}
-            )
+    # Create Demo Renter
+    renter = Tenant(
+        id="demo_renter",
+        name="Demo Renter",
+        type="renter",
+        features={
+            "can_manage_admins": True,
+            "can_view_reports": True
+        }
+    )
+    
+    session.add(owner)
+    session.add(renter)
+    await session.commit()
+    print("✅ SQL Tenants Seeded")

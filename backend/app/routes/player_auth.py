@@ -1,100 +1,60 @@
+from fastapi import APIRouter, Depends, HTTPException, Body
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 from datetime import datetime, timezone, timedelta
-from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends, Body
-from pydantic import BaseModel, EmailStr
-from app.models.core import Player
-from app.utils.auth import get_password_hash, verify_password, create_access_token
-from app.core.database import db_wrapper
-from config import settings
 import uuid
+
+from app.models.sql_models import Player
+from app.core.database import get_session
+from app.utils.auth import get_password_hash, verify_password, create_access_token
 
 router = APIRouter(prefix="/api/v1/auth/player", tags=["player_auth"])
 
-class PlayerRegisterRequest(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    tenant_id: str = "default_casino" # Client should send this, but can default
-
-class PlayerLoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-    tenant_id: str = "default_casino"
-
-class PlayerTokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    user: dict
-
 @router.post("/register")
-async def register_player(payload: PlayerRegisterRequest):
-    db = db_wrapper.db
+async def register_player(payload: dict = Body(...), session: AsyncSession = Depends(get_session)):
+    email = payload.get("email")
+    tenant_id = payload.get("tenant_id", "default_casino")
     
-    # Check if user exists in this tenant
-    existing = await db.players.find_one({
-        "email": payload.email, 
-        "tenant_id": payload.tenant_id
-    })
-    
+    # Check exists
+    stmt = select(Player).where(Player.email == email).where(Player.tenant_id == tenant_id)
+    existing = (await session.exec(stmt)).first()
     if existing:
-        raise HTTPException(status_code=400, detail="Email already registered in this casino")
-    
-    # Basic password hash
-    password_hash = get_password_hash(payload.password)
-    
-    player_id = str(uuid.uuid4())
-    
+        raise HTTPException(400, "Player exists")
+        
     player = Player(
-        id=player_id,
-        tenant_id=payload.tenant_id,
-        username=payload.username,
-        email=payload.email,
-        balance_real=0.0,
+        email=email,
+        username=payload.get("username"),
+        tenant_id=tenant_id,
+        password_hash=get_password_hash(payload.get("password")),
         registered_at=datetime.now(timezone.utc)
     )
     
-    player_dict = player.model_dump()
-    player_dict["password_hash"] = password_hash # Store manually as Player model doesn't have it explicitly yet in shared model
+    session.add(player)
+    await session.commit()
     
-    await db.players.insert_one(player_dict)
-    
-    return {"message": "Registration successful", "player_id": player_id}
+    return {"message": "Registered", "player_id": player.id}
 
-@router.post("/login", response_model=PlayerTokenResponse)
-async def login_player(payload: PlayerLoginRequest):
-    db = db_wrapper.db
+@router.post("/login")
+async def login_player(payload: dict = Body(...), session: AsyncSession = Depends(get_session)):
+    email = payload.get("email")
+    tenant_id = payload.get("tenant_id", "default_casino")
     
-    player_doc = await db.players.find_one({
-        "email": payload.email, 
-        "tenant_id": payload.tenant_id
-    })
+    stmt = select(Player).where(Player.email == email).where(Player.tenant_id == tenant_id)
+    player = (await session.exec(stmt)).first()
     
-    if not player_doc:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if not player or not verify_password(payload.get("password"), player.password_hash):
+        raise HTTPException(401, "Invalid credentials")
         
-    # Check password
-    stored_hash = player_doc.get("password_hash")
-    if not stored_hash or not verify_password(payload.password, stored_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    # Update last login
-    await db.players.update_one(
-        {"id": player_doc["id"]},
-        {"$set": {"last_login": datetime.now(timezone.utc)}}
-    )
-    
-    # Create Token
     token = create_access_token(
-        data={"sub": player_doc["id"], "role": "player", "tenant_id": payload.tenant_id},
-        expires_delta=timedelta(days=7) # Long lived for players
+        data={"sub": player.id, "role": "player", "tenant_id": tenant_id},
+        expires_delta=timedelta(days=7)
     )
     
     return {
         "access_token": token,
         "user": {
-            "id": player_doc["id"],
-            "username": player_doc["username"],
-            "email": player_doc["email"],
-            "balance_real": player_doc.get("balance_real", 0.0)
+            "id": player.id,
+            "username": player.username,
+            "balance_real": player.balance_real
         }
     }
