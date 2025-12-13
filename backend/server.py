@@ -78,6 +78,9 @@ app.include_router(revenue.router)  # Revenue reporting
 
 # Finance Advanced
 from app.routes import finance
+from app.routes import player_auth, player_lobby
+app.include_router(player_auth.router)
+app.include_router(player_lobby.router)
 from app.routes import finance_actions
 app.include_router(finance_actions.router, prefix="/api/v1")
 app.include_router(finance.router)
