@@ -47,7 +47,10 @@ class AdminUserCreateRequest(BaseModel):
 
 
 @router.post("/users")
-async def create_admin(payload: AdminUserCreateRequest):
+async def create_admin(
+    payload: AdminUserCreateRequest,
+    current_admin: AdminUser = Depends(get_current_admin)
+):
     db = get_db()
 
     if payload.password_mode not in {"manual", "invite"}:
