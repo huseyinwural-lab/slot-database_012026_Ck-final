@@ -173,24 +173,24 @@ async def reset_password(payload: PasswordResetConfirmRequest):
             algorithms=[settings.jwt_algorithm],
         )
     except JWTError:
-        raise HTTPException(status_code=400, detail="RESET_TOKEN_INVALID")
+        raise AppError(error_code="RESET_TOKEN_INVALID", message="Reset token is invalid or corrupted", status_code=400)
 
     if data.get("purpose") != "password_reset":
-        raise HTTPException(status_code=400, detail="RESET_TOKEN_INVALID")
+        raise AppError(error_code="RESET_TOKEN_INVALID", message="Invalid token purpose", status_code=400)
 
     admin_id = data.get("sub")
     if not admin_id:
-        raise HTTPException(status_code=400, detail="RESET_TOKEN_INVALID")
+        raise AppError(error_code="RESET_TOKEN_INVALID", message="Token missing user claim", status_code=400)
 
     admin_doc = await db.admins.find_one({"id": admin_id}, {"_id": 0})
     if not admin_doc:
-        raise HTTPException(status_code=400, detail="RESET_TOKEN_INVALID")
+        raise AppError(error_code="RESET_TOKEN_INVALID", message="User not found", status_code=400)
 
     stored_token = admin_doc.get("password_reset_token")
     expires_at = admin_doc.get("password_reset_expires_at")
 
     if not stored_token or stored_token != payload.token:
-        raise HTTPException(status_code=400, detail="RESET_TOKEN_INVALID")
+        raise AppError(error_code="RESET_TOKEN_INVALID", message="Token mismatch", status_code=400)
 
     if expires_at:
         if isinstance(expires_at, str):
@@ -202,7 +202,7 @@ async def reset_password(payload: PasswordResetConfirmRequest):
             else:
                 expires_dt = expires_at
         if expires_dt < datetime.now(timezone.utc):
-            raise HTTPException(status_code=400, detail="RESET_TOKEN_EXPIRED")
+            raise AppError(error_code="RESET_TOKEN_EXPIRED", message="Reset link has expired", status_code=400)
 
     _validate_password_policy(payload.new_password)
 
