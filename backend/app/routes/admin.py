@@ -15,6 +15,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
+from app.core.errors import AppError
 from app.core.database import db_wrapper
 
 def get_db():
@@ -49,10 +50,10 @@ async def create_admin(payload: AdminUserCreateRequest):
     db = get_db()
 
     if payload.password_mode not in {"manual", "invite"}:
-        raise HTTPException(status_code=400, detail="INVALID_PASSWORD_MODE")
+        raise AppError(error_code="INVALID_PASSWORD_MODE", message="Password mode must be 'manual' or 'invite'", status_code=400)
 
     if payload.password_mode == "manual" and not payload.password:
-        raise HTTPException(status_code=400, detail="PASSWORD_REQUIRED_FOR_MANUAL_MODE")
+        raise AppError(error_code="PASSWORD_REQUIRED_FOR_MANUAL_MODE", message="Password is required when mode is manual", status_code=400)
 
     username = payload.email.split("@")[0]
 
