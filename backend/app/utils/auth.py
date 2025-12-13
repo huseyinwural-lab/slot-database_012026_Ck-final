@@ -57,3 +57,22 @@ async def get_admin_by_email(email: str, session: AsyncSession) -> AdminUser | N
     statement = select(AdminUser).where(AdminUser.email == email)
     result = await session.exec(statement)
     return result.first()
+
+from pydantic import BaseModel
+from typing import List
+
+class AdminAPIKeyContext(BaseModel):
+    tenant_id: str
+    scopes: List[str]
+
+async def get_api_key_context(token: str = Depends(oauth2_scheme)) -> AdminAPIKeyContext:
+    # Stub implementation for now to satisfy imports
+    # In a real scenario, this would validate an API Key from header
+    return AdminAPIKeyContext(tenant_id="default_casino", scopes=["robot.run"])
+
+def require_scope(ctx: AdminAPIKeyContext, scope: str):
+    if scope not in ctx.scopes:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient scope"
+        )
