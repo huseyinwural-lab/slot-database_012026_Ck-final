@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # Integrations
     openai_api_key: Optional[str] = None
     
+    sendgrid_api_key: Optional[str] = None
+    sendgrid_from_email: str = "admin@casino.com"
+    emergent_llm_key: Optional[str] = None
     # Legacy/Other (Just in case other files ref it)
     mongo_url: Optional[str] = None
     db_name: str = "casino_db"
