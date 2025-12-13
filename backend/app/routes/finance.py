@@ -9,6 +9,10 @@ from app.models.finance import (
     ChargebackStatus, AuditLogEntry, ReconciliationSchedule
 )
 from app.models.core import Transaction
+from app.services.audit import audit
+from app.utils.auth import get_current_admin
+from app.models.domain.admin import AdminUser
+from fastapi import Depends
 from config import settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -26,7 +30,8 @@ async def upload_reconciliation(
     file: UploadFile = File(...),
     currency_col: str = "currency", # CSV column name
     amount_col: str = "amount",
-    id_col: str = "tx_id"
+    id_col: str = "tx_id",
+    current_admin: AdminUser = Depends(get_current_admin)
 ):
     db = get_db()
     content = await file.read()

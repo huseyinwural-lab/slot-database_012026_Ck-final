@@ -12,6 +12,10 @@ from app.models.modules import (
 from config import settings as app_settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from app.services.audit import audit
+from app.utils.auth import get_current_admin
+from app.models.domain.admin import AdminUser
+from fastapi import Depends
 router = APIRouter(prefix="/api/v1/settings", tags=["settings"])
 
 from app.core.database import db_wrapper
@@ -33,10 +37,19 @@ async def create_brand(brand: Brand):
     return brand
 
 @router.put("/brands/{brand_id}", response_model=Brand)
-async def update_brand(brand_id: str, updates: Dict[str, Any] = Body(...)):
+async def update_brand(brand_id: str, updates: Dict[str, Any] = Body(...), current_admin: AdminUser = Depends(get_current_admin)):
     db = get_db()
     await db.brands.update_one({"id": brand_id}, {"$set": updates})
     brand = await db.brands.find_one({"id": brand_id})
+    
+    await audit.log(
+        admin=current_admin,
+        action="update_brand",
+        module="settings",
+        target_id=brand_id,
+        details=updates
+    )
+    
     return Brand(**brand)
 
 @router.delete("/brands/{brand_id}")
