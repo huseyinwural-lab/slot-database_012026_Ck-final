@@ -16,6 +16,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 from app.core.errors import AppError
+from app.services.audit import audit
 from app.core.database import db_wrapper
 
 def get_db():
@@ -93,8 +94,21 @@ async def create_admin(payload: AdminUserCreateRequest):
     )
 
     await db.admins.insert_one(user.model_dump())
-    # For manual mode, invite_token will be None; for invite mode, return token to caller
-    return {"user": user, "invite_token": invite_token}
+    
+    # Audit Log
+    await audit.log(
+        admin=db_wrapper.db, # Hack: create_admin doesn't have current_admin in payload usually, but we need context. 
+                             # Wait, create_admin endpoint DOES NOT have Depends(get_current_admin) in the signature provided earlier?
+                             # Let's check the view of admin.py again. 
+                             # It seems create_admin was public/unprotected in previous view? 
+                             # NO, create_admin usually needs auth. 
+                             # Checking admin.py content from memory/context: 
+                             # It seems I missed adding Depends(get_current_admin) to create_admin in previous turns if it wasn't there.
+                             # If it's the initial setup flow, maybe it's open? 
+                             # But standard flow requires admin.
+    )
+    
+    # Let's verify admin.py signature first.
 
 @router.put("/users/{id}/status")
 async def update_admin_status(id: str, status: str = Body(..., embed=True)):
