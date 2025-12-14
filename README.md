@@ -38,7 +38,7 @@ If you want to code and debug locally without Docker containers for apps:
 ### 1. Prerequisites
 *   Node.js 18+
 *   Python 3.11+
-*   MongoDB (Installed locally or run `docker-compose up mongodb -d`)
+*   PostgreSQL (Installed locally or run `docker-compose up postgres -d`)
 
 ### 2. Backend Setup
 ```bash
