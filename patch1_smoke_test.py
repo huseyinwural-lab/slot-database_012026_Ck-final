@@ -159,7 +159,11 @@ class Patch1SmokeTest:
         if success7 and isinstance(api_key_response, dict):
             if 'api_key' in api_key_response and 'key' in api_key_response:
                 print(f"   ✅ API key created - Response has 'api_key' and 'key' objects")
-                print(f"   ✅ API key ID: {api_key_response.get('api_key', {}).get('id', 'Unknown')}")
+                key_obj = api_key_response.get('key', {})
+                if isinstance(key_obj, dict):
+                    print(f"   ✅ API key ID: {key_obj.get('id', 'Unknown')}")
+                else:
+                    print(f"   ✅ API key created successfully")
             else:
                 print(f"   ⚠️  API key response missing expected fields: {list(api_key_response.keys())}")
         all_tests_passed = all_tests_passed and success7
