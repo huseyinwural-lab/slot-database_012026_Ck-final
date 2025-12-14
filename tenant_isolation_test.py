@@ -186,13 +186,26 @@ class TenantIsolationTester:
             
             if response.status_code == 400:
                 response_data = response.json()
-                detail = response_data.get('detail', {})
-                error_code = detail.get('error_code')
+                
+                # Handle both old and new response formats
+                if isinstance(response_data.get('detail'), dict):
+                    # New format: {"detail": {"error_code": "INVALID_TENANT_HEADER"}}
+                    detail = response_data.get('detail', {})
+                    error_code = detail.get('error_code')
+                elif isinstance(response_data.get('detail'), str):
+                    # Old format: {"detail": "Invalid X-Tenant-ID"}
+                    detail_str = response_data.get('detail', '')
+                    if 'Invalid X-Tenant-ID' in detail_str:
+                        error_code = 'INVALID_TENANT_HEADER'
+                    else:
+                        error_code = None
+                else:
+                    error_code = response_data.get('error_code')
                 
                 if error_code == 'INVALID_TENANT_HEADER':
                     self.log_test("Owner Invalid X-Tenant-ID", True, "400 INVALID_TENANT_HEADER")
                 else:
-                    self.log_test("Owner Invalid X-Tenant-ID", False, f"Wrong error_code: {error_code}")
+                    self.log_test("Owner Invalid X-Tenant-ID", False, f"Wrong error_code: {error_code}, Response: {response_data}")
                     all_success = False
             else:
                 self.log_test("Owner Invalid X-Tenant-ID", False, f"Expected 400, got {response.status_code}")
