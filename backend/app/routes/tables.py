@@ -10,6 +10,7 @@ from sqlmodel import SQLModel, Field, select
 from app.core.database import get_session
 from app.utils.auth import get_current_admin
 from app.models.sql_models import AdminUser
+from app.utils.tenant import get_current_tenant_id
 
 router = APIRouter(prefix="/api/v1/tables", tags=["tables"])
 
