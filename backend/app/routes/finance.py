@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
@@ -6,6 +6,7 @@ from typing import List
 from app.core.database import get_session
 from app.models.sql_models import ReconciliationReport, ChargebackCase, AdminUser
 from app.utils.auth import get_current_admin
+from app.utils.tenant import get_current_tenant_id
 
 router = APIRouter(prefix="/api/v1/finance", tags=["finance_advanced"])
 
