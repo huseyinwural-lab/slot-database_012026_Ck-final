@@ -6,11 +6,11 @@ from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.core.errors import AppError, app_exception_handler, generic_exception_handler
 
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG if settings.debug else logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+from app.core.logging_config import configure_logging
+
+# Configure logging (env-controlled)
+# Defaults: LOG_LEVEL=INFO, LOG_FORMAT=json (prod recommended)
+configure_logging(level=settings.log_level, fmt=settings.log_format)
 
 # Fail-fast for prod/staging secrets
 if settings.env in {"prod", "staging"}:
@@ -18,6 +18,7 @@ if settings.env in {"prod", "staging"}:
         raise RuntimeError("JWT_SECRET must be set to a strong value in prod/staging")
     if not settings.database_url:
         raise RuntimeError("DATABASE_URL must be set in prod/staging")
+
 logger = logging.getLogger(__name__)
 
 # Create the main app
