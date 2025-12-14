@@ -12,7 +12,7 @@ def _login_token() -> str:
     api = _api_base()
     r = requests.post(
         f"{api}/api/v1/auth/login",
-        json={"email": "admin@casino.com", "password": "Admin123!"},
+        json={"email": os.environ.get("TEST_OWNER_EMAIL", "admin@casino.com"), "password": os.environ.get("TEST_OWNER_PASSWORD", "Admin123!")},
         timeout=30,
     )
     r.raise_for_status()
