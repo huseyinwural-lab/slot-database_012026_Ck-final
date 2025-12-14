@@ -47,6 +47,7 @@ async def get_api_keys(
 
 @router.post("/", response_model=APIKeyCreatedOnce)
 async def create_api_key(
+    request: Request,
     payload: dict = Body(...),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
