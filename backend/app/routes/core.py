@@ -109,10 +109,20 @@ async def get_players(
     }
 
 @router.get("/players/{player_id}", response_model=PlayerPublic)
-async def get_player_detail(player_id: str, session: AsyncSession = Depends(get_session)):
-    player = await session.get(Player, player_id)
+async def get_player_detail(
+    player_id: str,
+    request: Request,
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    stmt = select(Player).where(Player.id == player_id, Player.tenant_id == tenant_id)
+    res = await session.execute(stmt)
+    player = res.scalars().first()
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
+
     return PlayerPublic.model_validate(player)
 
 @router.put("/players/{player_id}")
