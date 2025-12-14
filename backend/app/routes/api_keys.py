@@ -18,12 +18,18 @@ async def get_scopes():
     return API_KEY_SCOPES
 
 
+from fastapi import Request
+from app.utils.tenant import get_current_tenant_id
+
+
 @router.get("/", response_model=List[APIKeyPublic])
 async def get_api_keys(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    query = select(APIKey).where(APIKey.tenant_id == current_admin.tenant_id)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    query = select(APIKey).where(APIKey.tenant_id == tenant_id)
     result = await session.execute(query)
     keys = result.scalars().all()
 
