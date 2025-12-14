@@ -93,6 +93,11 @@ class Transaction(SQLModel, table=True):
 
 # --- NEW MODELS FOR FULL COVERAGE ---
 
+class TicketMessage(SQLModel): # Pydantic-like model for JSON storage
+    sender: str
+    text: str
+    timestamp: str
+
 class SupportTicket(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(foreign_key="tenant.id", index=True)
