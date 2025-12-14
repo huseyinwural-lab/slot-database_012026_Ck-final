@@ -68,9 +68,8 @@ def test_owner_invalid_header_400():
     )
 
     assert r.status_code == 400, r.text
-    detail = r.json().get("detail")
-    assert isinstance(detail, dict)
-    assert detail.get("error_code") == "INVALID_TENANT_HEADER"
+    response_data = r.json()
+    assert response_data.get("error_code") == "INVALID_TENANT_HEADER"
 
 
 def test_owner_headerless_default_scope_200():
