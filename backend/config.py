@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     # 2) CSV: http://localhost:3000,http://localhost:3001
     cors_origins: str = '["http://localhost:3000", "http://localhost:3001"]'
 
+    # Logging
+    log_level: str = "INFO"  # LOG_LEVEL
+    log_format: str = "plain"  # LOG_FORMAT (plain|json)
+
     # Kill switch
     # Global emergency switch to disable all non-core modules
     kill_switch_all: str = "false"  # KILL_SWITCH_ALL

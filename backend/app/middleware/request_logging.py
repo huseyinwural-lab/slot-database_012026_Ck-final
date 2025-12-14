@@ -28,12 +28,15 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
         except Exception:
             duration_ms = (time.monotonic() - start_time) * 1000.0
+            tenant_id = request.headers.get("X-Tenant-ID")
             logger.exception(
                 "request failed",
                 extra={
-                    "correlation_id": request_id,
+                    "request_id": request_id,
+                    "tenant_id": tenant_id,
                     "method": request.method,
                     "path": request.url.path,
+                    "status_code": 500,
                     "duration_ms": duration_ms,
                 },
             )
@@ -46,13 +49,15 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         tenant_id = request.headers.get("X-Tenant-ID")
 
         logger.info(
-            "%s %s -> %s in %.1fms [req_id=%s tenant_id=%s]",
-            request.method,
-            request.url.path,
-            response.status_code,
-            duration_ms,
-            request_id,
-            tenant_id,
+            "request",
+            extra={
+                "request_id": request_id,
+                "tenant_id": tenant_id,
+                "method": request.method,
+                "path": request.url.path,
+                "status_code": response.status_code,
+                "duration_ms": duration_ms,
+            },
         )
 
         return response
