@@ -144,13 +144,26 @@ class TenantIsolationTester:
             
             if response.status_code == 403:
                 response_data = response.json()
-                detail = response_data.get('detail', {})
-                error_code = detail.get('error_code')
+                
+                # Handle both old and new response formats
+                if isinstance(response_data.get('detail'), dict):
+                    # New format: {"detail": {"error_code": "TENANT_HEADER_FORBIDDEN"}}
+                    detail = response_data.get('detail', {})
+                    error_code = detail.get('error_code')
+                elif isinstance(response_data.get('detail'), str):
+                    # Old format: {"detail": "X-Tenant-ID is only allowed for owner impersonation"}
+                    detail_str = response_data.get('detail', '')
+                    if 'X-Tenant-ID is only allowed for owner impersonation' in detail_str:
+                        error_code = 'TENANT_HEADER_FORBIDDEN'
+                    else:
+                        error_code = None
+                else:
+                    error_code = response_data.get('error_code')
                 
                 if error_code == 'TENANT_HEADER_FORBIDDEN':
                     self.log_test("Tenant Admin X-Tenant-ID Forbidden", True, "403 TENANT_HEADER_FORBIDDEN")
                 else:
-                    self.log_test("Tenant Admin X-Tenant-ID Forbidden", False, f"Wrong error_code: {error_code}")
+                    self.log_test("Tenant Admin X-Tenant-ID Forbidden", False, f"Wrong error_code: {error_code}, Response: {response_data}")
                     all_success = False
             else:
                 self.log_test("Tenant Admin X-Tenant-ID Forbidden", False, f"Expected 403, got {response.status_code}")
