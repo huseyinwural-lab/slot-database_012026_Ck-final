@@ -123,6 +123,37 @@ jobs:
             compose_ps.txt
             compose_logs.txt
 
+      - name: Setup Node (for Playwright)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: e2e/yarn.lock
+
+      - name: Install E2E deps
+        working-directory: e2e
+        run: |
+          yarn install --frozen-lockfile || yarn install
+          yarn playwright install --with-deps chromium
+
+      - name: UI smoke matrix (Playwright)
+        working-directory: e2e
+        env:
+          E2E_BASE_URL: "http://localhost:3000"
+          E2E_OWNER_EMAIL: "admin@casino.com"
+          E2E_OWNER_PASSWORD: "Admin123!"
+        run: |
+          yarn test:e2e
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            e2e/test-results/**
+            e2e/playwright-report/**
+
       - name: Tear down
         if: always()
         run: |
