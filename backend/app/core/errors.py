@@ -17,15 +17,24 @@ class AppError(HTTPException):
         self.details = details or {}
 
 async def app_exception_handler(request: Request, exc: AppError):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error_code": exc.error_code,
-            "message": exc.message,
-            "details": exc.details,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-    )
+    # Standard error body:
+    # - keeps legacy keys: error_code, message, details
+    # - adds top-level detail for UI
+    # - if details contains feature/module, also expose them at top-level
+    content = {
+        "error_code": exc.error_code,
+        "message": exc.message,
+        "detail": exc.message,
+        "details": exc.details,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+    if isinstance(exc.details, dict):
+        for key in ("feature", "module", "tenant_id", "reason"):
+            if key in exc.details:
+                content[key] = exc.details[key]
+
+    return JSONResponse(status_code=exc.status_code, content=content)
 
 async def generic_exception_handler(request: Request, exc: Exception):
     # In prod: do not leak internal exception details to clients.

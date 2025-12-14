@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.constants.feature_catalog import FEATURE_CATALOG
+from app.core.errors import AppError
 from app.models.sql_models import Tenant
 from config import settings
 
@@ -35,13 +36,11 @@ async def enforce_module_access(
 
     # 1) Global kill switch
     if mod.non_core and _is_kill_switch_all_enabled():
-        raise HTTPException(
+        raise AppError(
+            error_code="MODULE_TEMPORARILY_DISABLED",
+            message="Module temporarily disabled by global kill switch",
             status_code=503,
-            detail={
-                "error_code": "MODULE_TEMPORARILY_DISABLED",
-                "detail": "Module temporarily disabled by global kill switch",
-                "module": module_key,
-            },
+            details={"module": module_key, "reason": "global_kill_switch"},
         )
 
     res = await session.execute(select(Tenant).where(Tenant.id == tenant_id))
@@ -51,25 +50,19 @@ async def enforce_module_access(
     # 2) Tenant kill switch
     kill_switches = (features.get("kill_switches") or {}) if isinstance(features, dict) else {}
     if kill_switches.get(module_key) is True:
-        raise HTTPException(
+        raise AppError(
+            error_code="MODULE_TEMPORARILY_DISABLED",
+            message="Module temporarily disabled for tenant",
             status_code=503,
-            detail={
-                "error_code": "MODULE_TEMPORARILY_DISABLED",
-                "detail": "Module temporarily disabled for tenant",
-                "module": module_key,
-                "tenant_id": tenant_id,
-            },
+            details={"module": module_key, "tenant_id": tenant_id, "reason": "tenant_kill_switch"},
         )
 
     # 3) Feature flag
     flag = mod.required_flag
     if features.get(flag) is not True:
-        raise HTTPException(
+        raise AppError(
+            error_code="FEATURE_DISABLED",
+            message="Feature is disabled for this tenant",
             status_code=403,
-            detail={
-                "error_code": "FEATURE_DISABLED",
-                "detail": "Feature is disabled for this tenant",
-                "feature": flag,
-                "module": module_key,
-            },
+            details={"feature": flag, "module": module_key},
         )
