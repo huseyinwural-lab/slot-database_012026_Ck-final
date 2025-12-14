@@ -73,6 +73,67 @@ async def create_admin(
     
     return {"user": new_admin, "invite_token": new_admin.invite_token}
 
+
+@router.post("/create-tenant-admin")
+async def create_tenant_admin(
+    payload: dict = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Owner-only: create a tenant admin for a given tenant.
+
+    Payload (minimum):
+    - email
+    - tenant_id
+
+    Optional:
+    - password (default: TenantAdmin123!)
+    - full_name
+
+    This is primarily for ops/testing (SEC-001).
+    """
+
+    require_owner(current_admin)
+
+    email = (payload.get("email") or "").strip().lower()
+    tenant_id = (payload.get("tenant_id") or "").strip() or "demo_renter"
+    password = payload.get("password") or "TenantAdmin123!"
+    full_name = payload.get("full_name") or "Tenant Admin"
+
+    stmt = select(AdminUser).where(AdminUser.email == email)
+    res = await session.execute(stmt)
+    if res.scalars().first():
+        raise AppError(error_code="ADMIN_EXISTS", message="Admin already exists", status_code=400)
+
+    new_admin = AdminUser(
+        email=email,
+        username=email.split("@")[0],
+        full_name=full_name,
+        role="Tenant Admin",
+        tenant_role="tenant_admin",
+        tenant_id=tenant_id,
+        password_hash=get_password_hash(password),
+        is_platform_owner=False,
+        status="active",
+        is_active=True,
+    )
+
+    session.add(new_admin)
+    await audit.log(
+        admin=current_admin,
+        action="create_tenant_admin",
+        module="admin",
+        target_id=str(new_admin.id),
+        details={"email": email, "tenant_id": tenant_id},
+        session=session,
+    )
+
+    await session.commit()
+    await session.refresh(new_admin)
+
+    return {"message": "CREATED", "admin": new_admin}
+
+
 @router.post("/seed")
 async def seed_admin(session: AsyncSession = Depends(get_session)):
     try:
