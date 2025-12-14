@@ -26,6 +26,7 @@ services:
       - postgres
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
+      - ENV=dev
       - DEBUG=True
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
       - JWT_SECRET=${JWT_SECRET}
