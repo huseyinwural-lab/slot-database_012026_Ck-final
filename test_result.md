@@ -937,7 +937,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "Patch 2 Partial Validation (A2/A3 + CORS allow_credentials=false + readiness behavior)"
+    - "Prod-hardening Regression Check - CORS allow_credentials=false"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
