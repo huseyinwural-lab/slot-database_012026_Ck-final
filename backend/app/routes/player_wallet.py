@@ -101,7 +101,7 @@ async def create_withdrawal(
     
     return {"message": "Withdrawal requested successfully", "transaction_id": tx_id}
 
-@router.get("/transactions", response_model=PaginatedResponse[Transaction])
+@router.get("/transactions", response_model=dict)
 async def get_my_transactions(
     current_player: Player = Depends(get_current_player),
     page: int = 1,
