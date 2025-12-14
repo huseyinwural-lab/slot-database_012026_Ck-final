@@ -27,7 +27,7 @@ If you have Docker Desktop installed:
     *   **Player Lobby:** http://localhost:3001
     *   **API Docs:** http://localhost:8001/docs
 
-*Note: Database (MongoDB) will start automatically within Docker.*
+*Note: Database (PostgreSQL) will start automatically within Docker.*
 
 ---
 
