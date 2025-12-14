@@ -33,7 +33,7 @@ async def create_affiliate(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    tenant_id = await get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
 
     # UI sends: { username, email, company_name, model }
@@ -55,7 +55,7 @@ async def get_offers(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    tenant_id = await get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
 
@@ -65,7 +65,7 @@ async def get_links(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    tenant_id = await get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
 
@@ -76,7 +76,7 @@ async def get_payouts(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    tenant_id = await get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
 
@@ -87,6 +87,6 @@ async def get_creatives(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    tenant_id = await get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
