@@ -45,7 +45,7 @@ const FeatureFlags = () => {
     targeting: {}
   });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       if (activeTab === 'flags') setFlags((await api.get('/v1/flags/')).data);
       if (activeTab === 'experiments') setExperiments((await api.get('/v1/flags/experiments')).data);
@@ -57,7 +57,7 @@ const FeatureFlags = () => {
       console.error(err);
       toast.error('Veri yüklenirken hata');
     }
-  };
+  }, [activeTab]);
 
   // Avoid direct setState sync-in-effect lint by scheduling fetch.
   useEffect(() => {
