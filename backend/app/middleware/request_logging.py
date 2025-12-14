@@ -43,13 +43,16 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Echo correlation id back to the client
         response.headers["X-Request-ID"] = request_id
 
+        tenant_id = request.headers.get("X-Tenant-ID")
+
         logger.info(
-            "%s %s -> %s in %.1fms [req_id=%s]",
+            "%s %s -> %s in %.1fms [req_id=%s tenant_id=%s]",
             request.method,
             request.url.path,
             response.status_code,
             duration_ms,
             request_id,
+            tenant_id,
         )
 
         return response
