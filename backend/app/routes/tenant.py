@@ -69,6 +69,8 @@ async def seed_default_tenants(session: AsyncSession):
     if result.scalars().first():
         return
 
+    # Ensure demo_renter is also cleanly re-created if needed
+
     # Create Owner Tenant
     owner = Tenant(
         id="default_casino", 
