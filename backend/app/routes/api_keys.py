@@ -1,3 +1,4 @@
+from datetime import timezone
 from fastapi import APIRouter, Depends, Body
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,8 +8,10 @@ from app.core.database import get_session
 from app.models.sql_models import APIKey
 from app.utils.auth import get_current_admin, AdminUser
 from app.constants.api_keys import API_KEY_SCOPES
+from app.schemas.api_keys import APIKeyPublic, APIKeyCreatedOnce
 
 router = APIRouter(prefix="/api/v1/api-keys", tags=["api_keys"])
+
 
 @router.get("/scopes", response_model=List[str])
 async def get_scopes():
@@ -16,17 +19,31 @@ async def get_scopes():
     return API_KEY_SCOPES
 
 
-@router.get("/", response_model=List[APIKey])
+@router.get("/", response_model=List[APIKeyPublic])
 async def get_api_keys(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
     query = select(APIKey).where(APIKey.tenant_id == current_admin.tenant_id)
     result = await session.execute(query)
-    return result.scalars().all()
+    keys = result.scalars().all()
+
+    # Never return key_hash
+    return [
+        APIKeyPublic(
+            id=k.id,
+            tenant_id=k.tenant_id,
+            name=k.name,
+            scopes=(k.scopes.split(",") if k.scopes else []),
+            active=(k.status == "active"),
+            created_at=k.created_at,
+            last_used_at=None,
+        )
+        for k in keys
+    ]
 
 
-@router.post("/")
+@router.post("/", response_model=APIKeyCreatedOnce)
 async def create_api_key(
     payload: dict = Body(...),
     session: AsyncSession = Depends(get_session),
@@ -55,4 +72,17 @@ async def create_api_key(
     await session.commit()
     await session.refresh(key)
 
-    return {"api_key": full_key, "key": {"id": key.id, "tenant_id": key.tenant_id, "name": key.name, "key_prefix": key_prefix, "scopes": scopes, "active": True}}
+    # Return secret once (create endpoint only)
+    return {
+        "api_key": full_key,
+        "key": {
+            "id": key.id,
+            "tenant_id": key.tenant_id,
+            "name": key.name,
+            "key_prefix": key_prefix,
+            "scopes": scopes,
+            "active": True,
+            "created_at": key.created_at,
+            "last_used_at": None,
+        },
+    }
