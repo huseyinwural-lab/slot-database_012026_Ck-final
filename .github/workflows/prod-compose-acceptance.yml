@@ -14,6 +14,7 @@ jobs:
     env:
       # Uygulamanın prod/staging davranışını tetiklemek için
       ENV: staging
+      SEED_ON_STARTUP: "false"
       DEBUG: "false"
       LOG_FORMAT: json
       LOG_LEVEL: INFO
