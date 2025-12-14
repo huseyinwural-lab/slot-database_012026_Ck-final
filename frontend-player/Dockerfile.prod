@@ -4,8 +4,9 @@ RUN node -v
 
 WORKDIR /app
 
-COPY package.json yarn.lock* ./
-RUN yarn install --frozen-lockfile || yarn install
+COPY package.json yarn.lock ./
+RUN test -f yarn.lock
+RUN yarn install --frozen-lockfile --non-interactive
 
 COPY . .
 
