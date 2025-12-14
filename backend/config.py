@@ -3,16 +3,23 @@ from typing import List, Optional
 import json
 
 class Settings(BaseSettings):
+    # Environment
+    # Canonical values: dev | local | staging | prod
+    env: str = "dev"
+
     # Database
-    database_url: str = "sqlite+aiosqlite:///./casino.db" # Default to SQLite for ease of run
-    
+    database_url: str = "sqlite+aiosqlite:///./casino.db"  # Default to SQLite for ease of run
+
     # Auth
     jwt_secret: str = "secret"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expires_minutes: int = 1440
-    
+
     # App
     debug: bool = True
+    # Supports both formats:
+    # 1) JSON list: ["http://localhost:3000", "http://localhost:3001"]
+    # 2) CSV: http://localhost:3000,http://localhost:3001
     cors_origins: str = '["http://localhost:3000", "http://localhost:3001"]'
     
     openai_model: str = "gpt-4-1106-preview"
@@ -22,15 +29,27 @@ class Settings(BaseSettings):
     sendgrid_api_key: Optional[str] = None
     sendgrid_from_email: str = "admin@casino.com"
     emergent_llm_key: Optional[str] = None
-    # Legacy/Other (Just in case other files ref it)
+    # DEPRECATED (MongoDB was removed; kept temporarily to avoid breaking legacy scripts)
+    # Planned removal: Patch 3 repo cleanup.
     mongo_url: Optional[str] = None
     db_name: str = "casino_db"
 
     def get_cors_origins(self) -> List[str]:
-        try:
-            return json.loads(self.cors_origins)
-        except json.JSONDecodeError:
+        raw = (self.cors_origins or "").strip()
+        if not raw:
             return ["*"]
+
+        # JSON list support (legacy)
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return [str(o).strip() for o in parsed if str(o).strip()]
+        except json.JSONDecodeError:
+            pass
+
+        # CSV support (canonical for prod)
+        origins = [o.strip() for o in raw.split(",") if o.strip()]
+        return origins or ["*"]
 
     class Config:
         env_file = ".env"

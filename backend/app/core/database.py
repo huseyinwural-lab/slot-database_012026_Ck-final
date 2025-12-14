@@ -35,8 +35,15 @@ async def init_db():
 
     try:
         async with engine.begin() as conn:
-            if "sqlite" in settings.database_url and settings.debug:
-                logger.warning("SQLite + DEBUG: resetting schema with drop_all/create_all")
+            env = getattr(settings, "env", "dev")
+
+            # Safety barrier: drop_all is ONLY allowed in dev/local + DEBUG + sqlite.
+            if (
+                settings.debug
+                and env in {"dev", "local"}
+                and "sqlite" in (settings.database_url or "")
+            ):
+                logger.warning("SQLite + DEBUG + env=%s: resetting schema with drop_all/create_all", env)
                 await conn.run_sync(SQLModel.metadata.drop_all)
             await conn.run_sync(SQLModel.metadata.create_all)
 
