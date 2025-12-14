@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "sqlite+aiosqlite:///./casino.db"  # Default to SQLite for ease of run
+    # Connection pool tuning (Postgres/asyncpg)
     db_pool_size: int = 5
     db_max_overflow: int = 10
 
@@ -55,6 +56,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        extra = "ignore" # Ignore extra fields in .env
+        extra = "ignore"  # Ignore extra fields in .env
 
 settings = Settings()
