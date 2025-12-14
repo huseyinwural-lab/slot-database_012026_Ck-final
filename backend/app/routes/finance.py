@@ -12,10 +12,12 @@ router = APIRouter(prefix="/api/v1/finance", tags=["finance_advanced"])
 
 @router.get("/reconciliation")
 async def get_reconciliations(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    query = select(ReconciliationReport).where(ReconciliationReport.tenant_id == current_admin.tenant_id)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    query = select(ReconciliationReport).where(ReconciliationReport.tenant_id == tenant_id)
     result = await session.execute(query)
     return result.scalars().all()
 
