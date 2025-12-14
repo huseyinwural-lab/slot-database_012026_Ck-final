@@ -51,11 +51,13 @@ async def login_player(payload: dict = Body(...), session: AsyncSession = Depend
         expires_delta=timedelta(days=7)
     )
     
+    pub = PlayerPublic.model_validate(player)
     return {
         "access_token": token,
         "user": {
-            "id": player.id,
-            "username": player.username,
-            "balance_real": player.balance_real
+            "id": pub.id,
+            "username": pub.username,
+            "balance_real": pub.balance_real,
+            "tenant_id": pub.tenant_id,
         }
     }
