@@ -65,9 +65,11 @@ async def create_table(
 ):
     import uuid
 
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
     table = TableGameDB(
         id=str(uuid.uuid4()),
-        tenant_id=current_admin.tenant_id,
+        tenant_id=tenant_id,
         name=(payload.get("name") or "New Table").strip(),
         provider=(payload.get("provider") or "Unknown").strip(),
         min_bet=float(payload.get("min_bet") or 1),
