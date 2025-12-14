@@ -62,6 +62,7 @@ const FeatureFlags = () => {
     }, 0);
 
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const handleToggleFlag = async (flagId) => {
