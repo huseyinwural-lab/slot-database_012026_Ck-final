@@ -50,9 +50,8 @@ def test_tenant_admin_header_forbidden_403():
     )
 
     assert r.status_code == 403, r.text
-    detail = r.json().get("detail")
-    assert isinstance(detail, dict)
-    assert detail.get("error_code") == "TENANT_HEADER_FORBIDDEN"
+    response_data = r.json()
+    assert response_data.get("error_code") == "TENANT_HEADER_FORBIDDEN"
 
 
 def test_owner_invalid_header_400():
