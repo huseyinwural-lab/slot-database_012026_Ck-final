@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# Intentionally NOT using `set -e` to guarantee artifact output even when docker/compose is unhealthy.
+set -u
+set -o pipefail
 
 COMPOSE_FILE="${1:-docker-compose.prod.yml}"
 OUT_DIR="${2:-ci_artifacts}"
