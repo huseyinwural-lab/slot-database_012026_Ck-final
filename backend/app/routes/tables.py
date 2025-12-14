@@ -46,10 +46,12 @@ class TableGameDB(SQLModel, table=True):
 
 @router.get("", response_model=List[TableGameDB])
 async def list_tables(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    stmt = select(TableGameDB).where(TableGameDB.tenant_id == current_admin.tenant_id)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    stmt = select(TableGameDB).where(TableGameDB.tenant_id == tenant_id)
     res = await session.execute(stmt)
     return res.scalars().all()
 
