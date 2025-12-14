@@ -799,6 +799,21 @@ frontend:
         -agent: "testing"
         -comment: "✅ CONFIG DIFF UI ERROR HANDLING WORKING: 1) 400 CONFIG_DIFF_VALIDATION_FAILED senaryosunda (örneğin type=foo veya geçersiz from UUID) backend 400 + error_code='CONFIG_DIFF_VALIDATION_FAILED' ve message='Config diff parameters are invalid' döndürüyor; UI tarafında apiError.message toast olarak doğru şekilde gösteriliyor. 2) Network/5xx hata senaryosunda (geçici dev değişikliği ile simüle edildi) diff çağrısı başarısız olduğunda 'Config diff yüklenemedi.' fallback mesajı toast olarak gösteriliyor. Hem Paytable hem Reel Strips ve Slot Advanced diff akışlarında error handling davranışı tutarlı ve production için yeterli."
 
+  - task: "Frontend E2E regression test (Admin Panel) after Patch 1"
+    implemented: true
+    working: false
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Frontend E2E regression test (Admin Panel) after Patch 1. App URL: http://localhost:3000. Credentials: admin@casino.com / Admin123!. Goals: 1) Login flow works, lands on dashboard. 2) Navigate via sidebar to these pages and verify they load without 'Failed to load' banners/toasts and without JS console errors: Dashboard, Players, Games, VIP Games, My Revenue (or Revenue), Support, Tenants page if present, API Keys page if present, Finance/Transactions if present. 3) For pages with tables, confirm table renders even if empty (should show empty-state, not crash). 4) Capture any failing network calls (status 4xx/5xx) and console errors; report the exact route causing failure. Notes: Backend is at REACT_APP_BACKEND_URL from frontend/.env, routes prefixed with /api. It's acceptable if lists are empty; should not crash. If any page fails because it expects array vs {items, meta}, note which component expects which."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ FRONTEND E2E REGRESSION TEST AFTER PATCH 1 - CRITICAL BACKEND API ISSUES FOUND: Login flow working correctly (✅ admin@casino.com/Admin123! successful, redirected to dashboard), but multiple backend endpoints missing causing 'Failed to load' errors. FAILED PAGES (3/9): 1) Dashboard - Shows 'Failed to load data' error due to 404 GET /api/v1/dashboard/comprehensive-stats (missing endpoint). 2) Games - Shows 'Failed to load games' toast due to 404 GET /api/v1/tables (missing endpoint). 3) API Keys - Shows 'Failed to load' error due to 404 GET /api/v1/api-keys/scopes (missing endpoint). SUCCESSFUL PAGES (6/9): ✅ Players (table renders correctly), ✅ VIP Games (loads without errors), ✅ Finance (table with 'No transactions found matching filters' empty state), ✅ Support (loads despite 404 /api/v1/support/dashboard), ✅ My Revenue (displays revenue metrics correctly), ✅ Tenants (loads but no table/empty state detected). NETWORK FAILURES: 10 failed requests total - all 404 errors for missing backend endpoints: /api/v1/dashboard/comprehensive-stats, /api/v1/tables, /api/v1/api-keys/scopes, /api/v1/support/dashboard. CONSOLE ERRORS: 18 console errors related to failed API calls. CRITICAL ISSUE: Backend API endpoints missing after Patch 1, causing core functionality failures on Dashboard, Games, and API Keys pages. Frontend UI components working correctly but backend integration broken."
+
   - task: "Slot Advanced config diff UI"
     implemented: true
     working: true
