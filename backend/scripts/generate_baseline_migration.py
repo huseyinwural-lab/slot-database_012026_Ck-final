@@ -16,6 +16,8 @@ from pathlib import Path
 
 
 def main() -> None:
+    import sys
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
     from alembic.autogenerate import api as ag_api
     from alembic.migration import MigrationContext
     import sqlalchemy as sa
