@@ -82,7 +82,7 @@ async def create_api_key(
         "api_key": full_key,
         "key": {
             "id": key.id,
-            "tenant_id": key.tenant_id,
+            "tenant_id": tenant_id,
             "name": key.name,
             "key_prefix": key_prefix,
             "scopes": scopes,
