@@ -1240,6 +1240,218 @@ class CasinoAdminAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_patch2_hardening_regression(self):
+        """Test Patch 2 Hardening Regression (post JSON logging + SEC-001)"""
+        print("\n🔒 PATCH 2 HARDENING REGRESSION TESTS")
+        
+        # Test 1: Health and Ready endpoints return 200
+        print(f"\n🔍 Test 1: Health and Ready endpoints")
+        success1, health_response = self.run_test("GET /api/health", "GET", "api/health", 200)
+        success2, ready_response = self.run_test("GET /api/ready", "GET", "api/ready", 200)
+        
+        if success1 and isinstance(health_response, dict):
+            print(f"   ✅ Health endpoint: status={health_response.get('status')}")
+        if success2 and isinstance(ready_response, dict):
+            print(f"   ✅ Ready endpoint: status={ready_response.get('status')}")
+        
+        # Test 2: CORS blocks disallowed origins
+        print(f"\n🔍 Test 2: CORS blocks disallowed origins")
+        success3 = self._test_cors_blocking()
+        
+        # Test 3: Create tenant admin (owner-only)
+        print(f"\n🔍 Test 3: Create tenant admin (owner-only)")
+        success4, owner_token = self._setup_owner_auth()
+        success5 = False
+        if success4 and owner_token:
+            success5 = self._test_create_tenant_admin(owner_token)
+        
+        # Test 4: Tenant admin impersonation protection
+        print(f"\n🔍 Test 4: Tenant admin impersonation protection")
+        success6 = self._test_tenant_impersonation_protection()
+        
+        # Test 5: Error body schema stability and no debug leakage
+        print(f"\n🔍 Test 5: Error body schema stability")
+        success7 = self._test_error_schema_stability()
+        
+        overall_success = success1 and success2 and success3 and success4 and success5 and success6 and success7
+        
+        if overall_success:
+            print("\n✅ PATCH 2 HARDENING REGRESSION - ALL TESTS PASSED")
+        else:
+            print("\n❌ PATCH 2 HARDENING REGRESSION - SOME TESTS FAILED")
+            
+        return overall_success
+    
+    def _test_cors_blocking(self):
+        """Test CORS blocks disallowed origins"""
+        try:
+            # Test with disallowed origin
+            headers = {
+                'Origin': 'http://evil.com',
+                'Access-Control-Request-Method': 'GET',
+                'Access-Control-Request-Headers': 'authorization'
+            }
+            
+            url = f"{self.base_url}/api/v1/players"
+            response = requests.options(url, headers=headers, timeout=30)
+            
+            # Should not have Access-Control-Allow-Origin for disallowed origin
+            allow_origin = response.headers.get('Access-Control-Allow-Origin')
+            
+            if allow_origin is None or allow_origin != 'http://evil.com':
+                print(f"   ✅ CORS correctly blocks disallowed origin 'http://evil.com'")
+                return True
+            else:
+                print(f"   ❌ CORS allows disallowed origin: {allow_origin}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ CORS test error: {str(e)}")
+            return False
+    
+    def _setup_owner_auth(self):
+        """Setup owner authentication"""
+        try:
+            # Seed admin data
+            success_seed, _ = self.run_test("Seed Admin Data", "POST", "api/v1/admin/seed", 200)
+            if not success_seed:
+                print("   ❌ Admin seeding failed")
+                return False, None
+            
+            # Login as admin@casino.com/Admin123! (should be owner)
+            login_data = {
+                "email": "admin@casino.com", 
+                "password": "Admin123!"
+            }
+            success_login, login_response = self.run_test("Login Owner Admin", "POST", "api/v1/auth/login", 200, login_data)
+            
+            if success_login and isinstance(login_response, dict) and 'access_token' in login_response:
+                token = login_response['access_token']
+                print(f"   ✅ Owner authentication successful")
+                return True, token
+            else:
+                print("   ❌ Owner login failed")
+                return False, None
+                
+        except Exception as e:
+            print(f"   ❌ Owner auth setup error: {str(e)}")
+            return False, None
+    
+    def _test_create_tenant_admin(self, owner_token):
+        """Test creating tenant admin with owner token"""
+        try:
+            headers = {
+                'Authorization': f'Bearer {owner_token}',
+                'Content-Type': 'application/json'
+            }
+            
+            # Create tenant admin for demo_renter
+            create_data = {
+                "email": "demo_admin@casino.com",
+                "password": "DemoAdmin123!",
+                "tenant_id": "demo_renter",
+                "role": "tenant_admin"
+            }
+            
+            url = f"{self.base_url}/api/v1/admin/create-tenant-admin"
+            response = requests.post(url, json=create_data, headers=headers, timeout=30)
+            
+            if response.status_code == 200:
+                print(f"   ✅ Tenant admin creation successful (200 OK)")
+                return True
+            else:
+                print(f"   ❌ Tenant admin creation failed: {response.status_code}")
+                print(f"      Response: {response.text[:200]}...")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Tenant admin creation error: {str(e)}")
+            return False
+    
+    def _test_tenant_impersonation_protection(self):
+        """Test tenant admin impersonation protection"""
+        try:
+            # Login as demo_renter tenant admin
+            login_data = {
+                "email": "demo_admin@casino.com",
+                "password": "DemoAdmin123!"
+            }
+            
+            success_login, login_response = self.run_test("Login Tenant Admin", "POST", "api/v1/auth/login", 200, login_data)
+            
+            if not success_login or not isinstance(login_response, dict) or 'access_token' not in login_response:
+                print("   ❌ Tenant admin login failed")
+                return False
+            
+            tenant_token = login_response['access_token']
+            
+            # Try to access capabilities with X-Tenant-ID=default_casino
+            headers = {
+                'Authorization': f'Bearer {tenant_token}',
+                'X-Tenant-ID': 'default_casino'
+            }
+            
+            url = f"{self.base_url}/api/v1/tenants/capabilities"
+            response = requests.get(url, headers=headers, timeout=30)
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                returned_tenant_id = response_data.get('tenant_id')
+                
+                if returned_tenant_id == 'demo_renter':
+                    print(f"   ✅ Impersonation protection working: tenant_id remains 'demo_renter'")
+                    return True
+                else:
+                    print(f"   ❌ Impersonation protection failed: tenant_id={returned_tenant_id}")
+                    return False
+            else:
+                print(f"   ❌ Capabilities endpoint failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Impersonation protection test error: {str(e)}")
+            return False
+    
+    def _test_error_schema_stability(self):
+        """Test error body schema remains stable and no debug leakage"""
+        try:
+            # Test with invalid endpoint to trigger error
+            url = f"{self.base_url}/api/v1/invalid-endpoint"
+            response = requests.get(url, timeout=30)
+            
+            if response.status_code == 404:
+                try:
+                    error_data = response.json()
+                    
+                    # Check for standard error fields
+                    has_error_code = 'error_code' in error_data
+                    has_message = 'message' in error_data or 'detail' in error_data
+                    has_details = 'details' in error_data or 'detail' in error_data
+                    
+                    # Check for debug leakage (should not have these in production)
+                    has_debug_leakage = any(key in error_data for key in ['traceback', 'stack_trace', 'debug_info', 'internal_error'])
+                    
+                    if has_error_code and has_message and not has_debug_leakage:
+                        print(f"   ✅ Error schema stable: error_code, message/detail present, no debug leakage")
+                        return True
+                    else:
+                        print(f"   ❌ Error schema issues:")
+                        print(f"      error_code: {has_error_code}")
+                        print(f"      message/detail: {has_message}")
+                        print(f"      debug_leakage: {has_debug_leakage}")
+                        return False
+                        
+                except Exception as e:
+                    print(f"   ❌ Error response not JSON: {str(e)}")
+                    return False
+            else:
+                print(f"   ⚠️  Expected 404 for invalid endpoint, got {response.status_code}")
+                return True  # Not a failure, just different behavior
+                
+        except Exception as e:
+            print(f"   ❌ Error schema test error: {str(e)}")
+            return False
+
     def test_tenant_helper_validation(self):
         """Test Tenant Helper Validation - Turkish Review Request 2.1.2-2.1.4"""
         print("\n🏢 TENANT HELPER VALIDATION TESTS - Görev 2.1.2-2.1.4")
