@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, Request
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
@@ -6,6 +6,7 @@ from typing import List
 from app.core.database import get_session
 from app.models.sql_models import APIKey
 from app.utils.auth import get_current_admin, AdminUser
+from app.utils.tenant import get_current_tenant_id
 from app.constants.api_keys import API_KEY_SCOPES
 from app.schemas.api_keys import APIKeyPublic, APIKeyCreatedOnce
 
