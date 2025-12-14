@@ -8,6 +8,7 @@ from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin, get_password_hash, create_access_token
 from app.core.errors import AppError
 from datetime import datetime, timedelta, timezone
+from app.services.audit import audit
 import logging
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,16 @@ async def create_admin(
         new_admin.invite_token = token
     
     session.add(new_admin)
+    
+    await audit.log(
+        admin=current_admin,
+        action="create_admin",
+        module="admin",
+        target_id=str(new_admin.id), # Assuming ID is generated pre-insert default_factory
+        details={"email": email, "role": new_admin.role},
+        session=session
+    )
+
     await session.commit()
     await session.refresh(new_admin)
     
