@@ -1,5 +1,7 @@
 FROM node:20-alpine AS build
 
+RUN node -v
+
 WORKDIR /app
 
 COPY package.json yarn.lock* ./

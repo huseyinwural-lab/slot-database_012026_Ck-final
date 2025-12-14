@@ -64,9 +64,24 @@ jobs:
           # Fresh DB için volume’ları sil
           docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
 
+          # Runner disk / build cache kaynaklı fail’leri minimize et
+          docker system prune -af || true
+          docker buildx prune -af || true
+
           # BuildKit output'u root-cause'u net gösterir (stack trace yerine gerçek fail-to-solve)
           # Ayrıca build output'u artifact'e yazıyoruz ki tek seferde RCA yapılabilsin.
-          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml build --no-cache --progress=plain | tee ci_artifacts/compose_build.log
+          set +e
+          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml build --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
+          build_rc=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$build_rc" != "0" ]; then
+            echo "=== BUILD FAILED: LAST 250 LINES (compose_build.log) ==="
+            tail -n 250 ci_artifacts/compose_build.log || true
+            echo "=== BUILD FAILED: GREP ROOT-CAUSE CANDIDATES ==="
+            grep -E "ERROR: failed to solve:|failed to solve:|COPY failed|no space left on device|engine \"node\" is incompatible|pull access denied|manifest unknown|Cannot connect to the Docker daemon" ci_artifacts/compose_build.log | tail -n 80 || true
+            exit 1
+          fi
 
           docker compose -f docker-compose.prod.yml up -d --remove-orphans
           docker compose -f docker-compose.prod.yml ps | tee ci_artifacts/compose_ps_inline.txt
