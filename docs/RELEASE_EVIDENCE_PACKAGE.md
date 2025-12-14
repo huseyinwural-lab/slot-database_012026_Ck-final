@@ -132,12 +132,8 @@ psql "$DATABASE_URL" -c "SELECT email, status, invite_token, invite_expires_at F
 #### **Durum 2: ACTIVE (Token Temizlendi)**
 **Komut:**
 ```bash
-mongosh $MONGO_URL --eval '
-  db.admin_users.findOne(
-    { email: "test-invite-XXXXX@casino.com" },
-    { _id: 0, email: 1, status: 1, invite_token: 1, invite_expires_at: 1, password_hash: 1 }
-  )
-' | sed 's/\$2[aby]\$[0-9]{2}\$[A-Za-z0-9./]*$/***PASSWORD_HASH_MASKED***/g'
+# PostgreSQL (SQLModel) – örnek sorgu (tablo/kolon isimlerini şemaya göre uyarlayın)
+psql "$DATABASE_URL" -c "SELECT email, status, invite_token, invite_expires_at, hashed_password FROM adminuser WHERE email='test-invite-XXXXX@casino.com'"
 ```
 
 **Çıktı:**
