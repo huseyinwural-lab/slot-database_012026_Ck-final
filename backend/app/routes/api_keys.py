@@ -6,6 +6,7 @@ from typing import List
 from app.core.database import get_session
 from app.models.sql_models import APIKey
 from app.utils.auth import get_current_admin, AdminUser
+from app.constants.api_keys import API_KEY_SCOPES
 
 router = APIRouter(prefix="/api/v1/api-keys", tags=["api_keys"])
 
