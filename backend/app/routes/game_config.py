@@ -15,11 +15,16 @@ router = APIRouter(prefix="/api/v1/games", tags=["game_config"])
 @router.get("/{game_id}/config")
 async def get_game_config(
     game_id: str,
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    game = await session.get(Game, game_id)
-    if not game or game.tenant_id != current_admin.tenant_id:
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    stmt = select(Game).where(Game.id == game_id, Game.tenant_id == tenant_id)
+    res = await session.execute(stmt)
+    game = res.scalars().first()
+    if not game:
         raise HTTPException(404, "Game not found")
     return game.configuration
 
