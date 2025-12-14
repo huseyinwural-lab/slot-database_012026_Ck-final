@@ -63,8 +63,10 @@ async def create_api_key(
 
     full_key, key_prefix, key_hash = generate_api_key()
 
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
     key = APIKey(
-        tenant_id=current_admin.tenant_id,
+        tenant_id=tenant_id,
         name=name,
         key_hash=key_hash,
         scopes=",".join(scopes),
