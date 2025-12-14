@@ -25,10 +25,10 @@ services:
     depends_on:
       - postgres
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/casino_db
+      - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
       - DEBUG=True
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
-      - JWT_SECRET=change_this_secret_in_production_env
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=HS256
     volumes:
       - ./backend:/app
