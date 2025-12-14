@@ -10,6 +10,12 @@ from app.constants.api_keys import API_KEY_SCOPES
 
 router = APIRouter(prefix="/api/v1/api-keys", tags=["api_keys"])
 
+@router.get("/scopes", response_model=List[str])
+async def get_scopes():
+    # Frontend expects array of strings
+    return API_KEY_SCOPES
+
+
 @router.get("/", response_model=List[APIKey])
 async def get_api_keys(
     session: AsyncSession = Depends(get_session),
@@ -17,8 +23,8 @@ async def get_api_keys(
 ):
     query = select(APIKey).where(APIKey.tenant_id == current_admin.tenant_id)
     result = await session.execute(query)
-    # Frontend APIKeysPage.jsx expects array
     return result.scalars().all()
+
 
 @router.post("/")
 async def create_api_key(
@@ -26,16 +32,27 @@ async def create_api_key(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    import secrets
-    raw_key = secrets.token_urlsafe(32)
-    
+    # Lightweight SQL-only impl for UI: generate a secret shown once.
+    # Persist: key_prefix + bcrypt hash.
+    from app.utils.api_keys import generate_api_key, validate_scopes
+
+    name = (payload.get("name") or "New Key").strip()
+    scopes = payload.get("scopes") or []
+
+    validate_scopes(scopes)
+
+    full_key, key_prefix, key_hash = generate_api_key()
+
     key = APIKey(
         tenant_id=current_admin.tenant_id,
-        name=payload.get("name", "New Key"),
-        key_hash=f"sk_{raw_key[:4]}...{raw_key[-4:]}", 
-        scopes=",".join(payload.get("scopes", []))
+        name=name,
+        key_hash=key_hash,
+        scopes=",".join(scopes),
+        status="active",
     )
+
     session.add(key)
     await session.commit()
     await session.refresh(key)
-    return key
+
+    return {"api_key": full_key, "key": {"id": key.id, "tenant_id": key.tenant_id, "name": key.name, "key_prefix": key_prefix, "scopes": scopes, "active": True}}
