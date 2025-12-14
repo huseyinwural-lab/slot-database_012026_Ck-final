@@ -469,12 +469,22 @@ api_keys_backend:
         -working: "NA"
         -agent: "main"
         -comment: "API Keys backend implementation: GET /api/v1/api-keys/scopes, POST /api/v1/api-keys, GET /api/v1/api-keys/, PATCH /api/v1/api-keys/{id} endpoints with JWT authentication, scope validation, and security features."
-        -working: false
-        -agent: "testing"
-        -comment: "❌ FAZ 4 API KEY BACKEND - CRITICAL ROUTING ISSUE DETECTED: Ön hazırlık başarılı (admin seed + JWT login çalışıyor). Test 1 ✅ Scope listesi: GET /api/v1/api-keys/scopes başarılı, doğru scope listesi döndürüyor ['robot.run', 'robot.configure', 'games.read', 'reports.read']. Test 4 ✅ Listeleme: GET /api/v1/api-keys/ başarılı (200 OK, boş liste döndürüyor). Test 2 ❌ API key oluşturma: POST /api/v1/api-keys → 307 Temporary Redirect → GET /api/v1/api-keys/ → 401 Unauthorized. Test 3 ❌ Geçersiz scope validation: Aynı routing sorunu. Test 5 ❌ Toggle: key_id bulunamadı (create çalışmadığı için). TEMEL SORUN: FastAPI/server POST isteklerini GET'e redirect ediyor, bu da Authorization header'ı ve request body'yi kaybettiriyor. JWT token doğru çalışıyor (manuel verification başarılı, diğer endpoints çalışıyor). Routing/middleware sorunu çözülmeli."
         -working: true
         -agent: "testing"
         -comment: "✅ FAZ 4 API KEY BACKEND - CIRCULAR IMPORT ISSUE FIXED AND ALL TESTS PASSED: Fixed circular import between app.utils.auth and app.utils.api_keys by creating local pwd_context in api_keys.py. Fixed settings router conflict in server.py by using alias. All API key endpoints now working correctly: GET /api/v1/api-keys/scopes returns correct scopes ['robot.run', 'robot.configure', 'games.read', 'reports.read'], POST /api/v1/api-keys creates API keys successfully (201 Created), GET /api/v1/api-keys lists keys correctly, PATCH /api/v1/api-keys/{id} for toggle functionality working. JWT authentication working properly, scope validation working, all routing issues resolved."
+
+dto_leak_fix_regression:
+  - task: "DTO Leak Fix Regression - PR-1"
+    implemented: true
+    working: true
+    file: "backend/app/routes/auth.py, backend/app/routes/admin.py, backend/app/routes/api_keys.py, backend/app/schemas/admin.py, backend/app/schemas/api_keys.py, backend/tests/test_response_dto_leaks.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ DTO LEAK FIX REGRESSION - ALL TESTS PASSED (100% success rate): Step 1) Authentication: POST /api/v1/admin/seed successful, POST /api/v1/auth/login with admin@casino.com/Admin123! successful (200 OK, JWT access_token received). Step 2) Sensitive field leak fixes confirmed: GET /api/v1/auth/me → No sensitive fields leaked (password_hash, invite_token, password_reset_token not present), GET /api/v1/admin/users → No sensitive fields leaked in user list, GET /api/v1/players → No sensitive fields leaked in player data. Step 3) API Keys rules working correctly: POST /api/v1/api-keys/ with {name:'Leak Test', scopes:['robot.run']} → 200 OK with api_key (full secret) and key meta with key_prefix present, key_hash not leaked in key meta, GET /api/v1/api-keys/ → Returns array with 1 item, api_key not leaked, key_hash not leaked, scopes returned as array, active boolean present. Step 4) Pytest validation: Successfully ran /app/backend/tests/test_response_dto_leaks.py with 5/5 tests passed - all sensitive field leak assertions working correctly. All DTO leak fixes confirmed working as specified in PR-1 review request."
 
 dto_leak_fix_regression:
   - task: "DTO Leak Fix Regression - PR-1"
