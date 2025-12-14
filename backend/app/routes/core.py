@@ -106,12 +106,12 @@ async def get_players(
         "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
     }
 
-@router.get("/players/{player_id}", response_model=Player)
+@router.get("/players/{player_id}", response_model=PlayerPublic)
 async def get_player_detail(player_id: str, session: AsyncSession = Depends(get_session)):
     player = await session.get(Player, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-    return player
+    return PlayerPublic.model_validate(player)
 
 @router.put("/players/{player_id}")
 async def update_player(player_id: str, update_data: Dict = Body(...), session: AsyncSession = Depends(get_session)):
