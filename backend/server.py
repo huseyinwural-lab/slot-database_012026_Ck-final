@@ -116,11 +116,9 @@ async def on_startup():
         env = settings.env
 
         if env in {"prod", "staging"}:
-            from alembic import command
-            from alembic.config import Config
-
-            alembic_cfg = Config("alembic.ini")
-            command.upgrade(alembic_cfg, "head")
+            # Migrations are executed in the container entrypoint (scripts/start_prod.sh)
+            # to avoid running Alembic inside the FastAPI event loop.
+            pass
         else:
             from app.core.database import init_db
             await init_db()
