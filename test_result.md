@@ -34,6 +34,19 @@ frontend:
 
 backend:
 
+seeding_gate_regression:
+  - task: "PR-2 Seed Gate Regression"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/app/routes/admin.py, backend/config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ PR-2 SEED GATE REGRESSION - ALL TESTS PASSED (4/4 - 100% success rate): Test 1) Manual seed endpoint (POST /api/v1/admin/seed) working in dev environment - returns 'Super Admin Seeded' or 'Already seeded' message with 200 OK status. Test 2) Startup logs validation - confirmed 'Seeding skipped' message in /var/log/supervisor/backend.*.log, proving SEED_ON_STARTUP guard is working correctly (ENV=dev, SEED_ON_STARTUP not set). Test 3) Code path validation - verified settings.env check for prod/staging environments, confirmed endpoint returns {'message': 'Seeding disabled in this environment'} when settings.env in {'prod', 'staging'}. Test 4) Pytest validation - successfully ran /app/backend/tests/test_seeding_guard.py with 3 passed tests, 4 warnings. All seeding gate mechanisms working as specified: manual seed accessible in dev, startup seeding skipped by default, environment-based restrictions implemented, pytest validation confirms guard logic."
+
 feature_flags_enforcement_kill_switch:
   - task: "Backend enforcement & kill switch validation for FF epic"
     implemented: true
