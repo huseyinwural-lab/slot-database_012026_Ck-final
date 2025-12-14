@@ -129,7 +129,7 @@ async def update_player(player_id: str, update_data: Dict = Body(...), session: 
     return {"message": "Player updated"}
 
 # --- FINANCE ---
-@router.get("/finance/transactions", response_model=PaginatedResponse[Transaction])
+@router.get("/finance/transactions", response_model=dict)
 async def get_transactions(
     request: Request,
     type: Optional[str] = None,
