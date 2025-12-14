@@ -287,7 +287,7 @@ curl -X POST "$API_URL/api/v1/admins" \
 
 ## 📋 Deployment Checklist (PROD_CHECKLIST.md'den)
 
-- [ ] Environment variables set (MONGO_URL, JWT_SECRET, CORS_ALLOWED_ORIGINS)
+- [ ] Environment variables set (DATABASE_URL, JWT_SECRET, CORS_ORIGINS)
 - [ ] MongoDB indexes created (check logs: "Indexes ensured")
 - [ ] Health checks responding
 - [ ] Rate limiting active
