@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, func
 
 from app.models.sql_models import Transaction, Player
 from app.core.database import get_session
@@ -18,12 +18,12 @@ async def get_balance(
     session: AsyncSession = Depends(get_session)
 ):
     """Get current player balance"""
-    # Player is already fetched by dependency, but let's ensure it's fresh if needed
-    # current_player is SQLModel object
+    # Force refresh from DB
+    await session.refresh(current_player)
     return {
         "balance_real": current_player.balance_real,
         "balance_bonus": current_player.balance_bonus,
-        "currency": "USD" # Mock currency
+        "currency": "USD"
     }
 
 @router.post("/deposit")
@@ -44,7 +44,7 @@ async def create_deposit(
         player_id=current_player.id,
         type="deposit",
         amount=amount,
-        status="completed", # Auto-complete for MVP
+        status="completed",
         method=method,
         provider_tx_id="MockGateway",
         balance_after=current_player.balance_real + amount
@@ -72,6 +72,9 @@ async def create_withdrawal(
     if amount <= 0:
         raise HTTPException(400, "Amount must be positive")
         
+    # Refresh to ensure balance check is accurate
+    await session.refresh(current_player)
+    
     if current_player.balance_real < amount:
         raise HTTPException(400, "Insufficient funds")
         
@@ -83,14 +86,14 @@ async def create_withdrawal(
         player_id=current_player.id,
         type="withdrawal",
         amount=amount,
-        status="pending", # Needs approval
+        status="pending",
         method=method,
         balance_after=current_player.balance_real - amount
     )
     
     session.add(tx)
     
-    # Deduct Balance immediately (lock funds)
+    # Deduct Balance
     current_player.balance_real -= amount
     session.add(current_player)
     
@@ -110,16 +113,12 @@ async def get_my_transactions(
     query = select(Transaction).where(Transaction.player_id == current_player.id).order_by(Transaction.created_at.desc())
     
     # Count
-    # count_query = select(func.count()).select_from(query.subquery()) # SQLModel subquery count sometimes tricky
-    # Let's do simple list for now
+    count_query = select(func.count()).select_from(query.subquery())
+    total = (await session.execute(count_query)).scalar() or 0
     
     query = query.offset(skip).limit(limit)
     result = await session.execute(query)
     items = result.scalars().all()
-    
-    # Total count separate
-    # total = await session.scalar(select(func.count()).where(Transaction.player_id == current_player.id))
-    total = 100 # Mock count for now to avoid query complexity issues in quick fix
     
     return {
         "items": items,

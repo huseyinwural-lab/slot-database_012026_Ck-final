@@ -2,10 +2,8 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import logging
 from config import settings
-from app.routes import fraud_detection, email_notification, core, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, admin, game_config, game_import, game_config_presets, auth, api_keys, robot, revenue
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
-
 from app.core.errors import AppError, app_exception_handler, generic_exception_handler
 
 # Configure logging
@@ -42,79 +40,52 @@ app.add_exception_handler(Exception, generic_exception_handler)
 # Request logging & correlation ID
 app.add_middleware(RequestLoggingMiddleware)
 
-# Include Routes
-app.include_router(core.router)
-app.include_router(modules.router)
-app.include_router(crm.router)
-app.include_router(affiliates.router)
-app.include_router(support.router)
-app.include_router(risk.router)
-app.include_router(approvals.router)
-app.include_router(rg.router)
-app.include_router(cms.router)
-# dashboard router import seems missing or circular, let's check
-# app.include_router(dashboard.router) # If dashboard exists
-app.include_router(reports.router)
-app.include_router(logs.router)
-app.include_router(admin.router) # New Admin Router
-app.include_router(fraud_detection.router)
-app.include_router(email_notification.router)
-app.include_router(simulator.router)
-app.include_router(game_config.router)
-app.include_router(game_import.router)
-app.include_router(game_config_presets.router)
-from app.routes import tenant
-app.include_router(tenant.router)
+# --- ROUTER INCLUSION (SQL ONLY) ---
+# Only include routers that have been fully refactored to SQLModel
+# Disabled routers are commented out to prevent MongoDB errors
+
+# 1. Core Auth & Admin
+from app.routes import auth, admin, tenant, api_keys
 app.include_router(auth.router)
-app.include_router(api_keys.router)
-app.include_router(robot.router)
-app.include_router(revenue.router)  # Revenue reporting
+app.include_router(admin.router)
+app.include_router(tenant.router)
+# app.include_router(api_keys.router) # Needs Refactor
 
-from app.routes import player_wallet
-app.include_router(player_wallet.router)
-
-
-# Finance Advanced
-from app.routes import finance
-from app.routes import player_auth, player_lobby
+# 2. Player Side
+from app.routes import player_auth, player_lobby, player_wallet
 app.include_router(player_auth.router)
 app.include_router(player_lobby.router)
-from app.routes import finance_actions
-app.include_router(finance_actions.router, prefix="/api/v1")
-app.include_router(finance.router)
-# Feature Flags & A/B Testing
-from app.routes import feature_flags
-app.include_router(feature_flags.router)
+app.include_router(player_wallet.router)
 
-# Simulation Lab
-from app.routes import simulation_lab
-app.include_router(simulation_lab.router)
+# 3. Core Business Logic (Partially Refactored)
+from app.routes import core
+app.include_router(core.router)
 
-# Settings Panel
-from app.routes import settings as settings_router
-app.include_router(settings_router.router)
+# 4. Modules (Disabled - Mongo Dependent)
+# from app.routes import fraud_detection, email_notification, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, game_config, game_import, game_config_presets, robot, revenue, finance, finance_actions, feature_flags, simulation_lab, settings as settings_router
 
-
+# Startup Event
 @app.on_event("startup")
 async def on_startup():
     logger.info("Application starting up...")
     try:
         from app.core.database import init_db
-        await init_db()
-        
-        # Auto-seed logic
         from app.core.database import engine
         from sqlalchemy.ext.asyncio import AsyncSession
         from app.routes.admin import seed_admin
         
+        # Initialize DB Tables
+        await init_db()
+        
+        # Seed Admin & Data
         async with AsyncSession(engine) as session:
             await seed_admin(session)
             
         logger.info("Startup complete: Database initialized and seeded.")
     except Exception as e:
         logger.critical(f"Startup failed: {e}")
-        # In prod we might want to exit, but for resilience we log
-        
+
+# Health Checks
 @app.get("/api/health")
 async def health_check():
     """Liveness probe: process up & running."""
@@ -122,7 +93,6 @@ async def health_check():
         "status": "healthy",
         "environment": settings.environment if hasattr(settings, 'environment') else "dev",
     }
-
 
 @app.get("/api/readiness")
 async def readiness_check():
