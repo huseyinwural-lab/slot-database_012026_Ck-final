@@ -52,14 +52,19 @@ async def set_tenant_kill_switch(
     if not tenant:
         return {"message": "TENANT_NOT_FOUND"}
 
-    features = (tenant.features or {})
-    kill_switches = (features.get("kill_switches") or {})
+    # Create new features dict to avoid SQLAlchemy mutation detection issues
+    features = dict(tenant.features or {})
+    kill_switches = features.get("kill_switches", {})
     kill_switches[module_key] = bool(disabled)
     features["kill_switches"] = kill_switches
-    tenant.features = features
 
-    session.add(tenant)
+    # Use update statement to ensure the JSON field is properly updated
+    from sqlalchemy import update
+    stmt = update(Tenant).where(Tenant.id == tenant_id).values(features=features)
+    await session.execute(stmt)
     await session.commit()
-    await session.refresh(tenant)
+    
+    # Get fresh tenant data
+    tenant = await session.get(Tenant, tenant_id)
 
     return {"message": "UPDATED", "tenant_id": tenant_id, "kill_switches": kill_switches}
