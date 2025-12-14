@@ -1024,7 +1024,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "CRM/Affiliates Regression Tests - Review Request"
+    - "PR-2 Seed Gate Regression"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
