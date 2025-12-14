@@ -2,6 +2,9 @@ import os
 import pytest
 import requests
 
+TEST_OWNER_EMAIL = os.environ.get("TEST_OWNER_EMAIL", "admin@casino.com")
+TEST_OWNER_PASSWORD = os.environ.get("TEST_OWNER_PASSWORD", "Admin123!")
+
 
 def _api_base() -> str:
     return os.environ.get("REACT_APP_BACKEND_URL", "http://localhost:8001")
