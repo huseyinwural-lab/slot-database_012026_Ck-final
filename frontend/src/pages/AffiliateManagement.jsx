@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 import { Users, Target, Link as LinkIcon, DollarSign, Image as ImageIcon, BarChart, Handshake, Plus, ExternalLink, Copy } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
+import RequireFeature from '../components/RequireFeature';
+
 const AffiliateManagement = () => {
   const [activeTab, setActiveTab] = useState("partners");
   const [affiliates, setAffiliates] = useState([]);
@@ -49,10 +51,29 @@ const AffiliateManagement = () => {
             setAffiliates((await api.get('/v1/affiliates')).data);
         }
         if (activeTab === 'creatives') setCreatives((await api.get('/v1/affiliates/creatives')).data);
-    } catch (err) { toast.error("Load failed"); }
+    } catch (err) {
+      const code = err?.standardized?.code;
+      if (code === 'MODULE_TEMPORARILY_DISABLED') {
+        toast.message('Temporarily disabled');
+        return;
+      }
+      if (code === 'FEATURE_DISABLED') {
+        return;
+      }
+      if (err?.standardized?.status === 404) {
+        toast.message('Coming soon / Not implemented');
+        return;
+      }
+      toast.error('Load failed');
+    }
   }, [activeTab]);
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeTab, fetchData]);
 
   // Handlers
   const handleCreateAffiliate = async () => {
@@ -80,6 +101,7 @@ const AffiliateManagement = () => {
   };
 
   return (
+    <RequireFeature feature="can_manage_affiliates">
     <div className="space-y-6">
         <h2 className="text-3xl font-bold tracking-tight">Affiliate Program</h2>
         
@@ -266,6 +288,7 @@ const AffiliateManagement = () => {
             </TabsContent>
         </Tabs>
     </div>
+    </RequireFeature>
   );
 };
 
