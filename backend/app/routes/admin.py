@@ -7,6 +7,7 @@ from app.core.database import get_session
 from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin, get_password_hash, create_access_token
 from app.core.errors import AppError
+from app.utils.permissions import require_owner
 from datetime import datetime, timedelta, timezone
 from app.services.audit import audit
 import logging
