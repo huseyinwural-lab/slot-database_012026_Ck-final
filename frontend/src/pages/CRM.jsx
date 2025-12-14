@@ -13,6 +13,8 @@ import { Megaphone, Users, Mail, MessageSquare, Send, Plus, Smartphone, Bell } f
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 
+import RequireFeature from '../components/RequireFeature';
+
 const CRM = () => {
   const [activeTab, setActiveTab] = useState("campaigns");
   const [campaigns, setCampaigns] = useState([]);
@@ -26,11 +28,29 @@ const CRM = () => {
 
   const fetchData = async () => {
     try {
-        if (activeTab === 'campaigns') setCampaigns((await api.get('/v1/crm/campaigns')).data);
-        if (activeTab === 'templates') setTemplates((await api.get('/v1/crm/templates')).data);
-        if (activeTab === 'segments') setSegments((await api.get('/v1/crm/segments')).data);
-        if (activeTab === 'channels') setChannels((await api.get('/v1/crm/channels')).data);
-    } catch (err) { toast.error("Load failed"); }
+      if (activeTab === 'campaigns') setCampaigns((await api.get('/v1/crm/campaigns')).data);
+      if (activeTab === 'templates') setTemplates((await api.get('/v1/crm/templates')).data);
+      if (activeTab === 'segments') setSegments((await api.get('/v1/crm/segments')).data);
+      if (activeTab === 'channels') setChannels((await api.get('/v1/crm/channels')).data);
+    } catch (err) {
+      // Standard states:
+      // - FEATURE_DISABLED -> ModuleDisabled (handled by RequireFeature)
+      // - MODULE_TEMPORARILY_DISABLED -> banner
+      // - 404 -> Coming soon
+      const code = err?.standardized?.code;
+      if (code === 'MODULE_TEMPORARILY_DISABLED') {
+        toast.message('Temporarily disabled');
+        return;
+      }
+      if (code === 'FEATURE_DISABLED') {
+        return;
+      }
+      if (err?.standardized?.status === 404) {
+        toast.message('Coming soon / Not implemented');
+        return;
+      }
+      toast.error('Load failed');
+    }
   };
 
   useEffect(() => { fetchData(); }, [activeTab]);
@@ -53,6 +73,7 @@ const CRM = () => {
   };
 
   return (
+    <RequireFeature feature="can_use_crm">
     <div className="space-y-6">
         <h2 className="text-3xl font-bold tracking-tight">CRM & Communications</h2>
         
@@ -163,6 +184,7 @@ const CRM = () => {
             </TabsContent>
         </Tabs>
     </div>
+    </RequireFeature>
   );
 };
 
