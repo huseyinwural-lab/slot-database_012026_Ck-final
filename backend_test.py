@@ -13128,6 +13128,319 @@ TX-MISSING-LOW,25.50,EUR"""
             print(f"   ❌ CLI test hatası: {str(e)}")
             return False
 
+    def test_dto_leak_fix_regression(self):
+        """Test DTO leak fix regression - Review Request PR-1"""
+        print("\n🔒 DTO LEAK FIX REGRESSION TESTS - PR-1")
+        
+        # Step 1: Auth setup
+        print(f"\n🔍 Step 1: Auth setup")
+        success_auth = self._setup_dto_leak_auth()
+        if not success_auth:
+            print("❌ Authentication setup failed - cannot proceed with tests")
+            return False
+        
+        # Step 2: Confirm sensitive-field leak is fixed
+        print(f"\n🔍 Step 2: Confirm sensitive-field leak is fixed")
+        success_sensitive = self._test_sensitive_field_leak_fix()
+        
+        # Step 3: API Keys rules
+        print(f"\n🔍 Step 3: API Keys rules")
+        success_api_keys = self._test_api_keys_rules()
+        
+        # Step 4: Run pytest file
+        print(f"\n🔍 Step 4: Run pytest file")
+        success_pytest = self._run_dto_leak_pytest()
+        
+        # Overall result
+        overall_success = success_auth and success_sensitive and success_api_keys and success_pytest
+        
+        if overall_success:
+            print("\n✅ DTO LEAK FIX REGRESSION - ALL TESTS PASSED")
+            print("   ✅ Authentication setup successful")
+            print("   ✅ Sensitive field leak fixes confirmed")
+            print("   ✅ API Keys rules working correctly")
+            print("   ✅ Pytest validation passed")
+        else:
+            print("\n❌ DTO LEAK FIX REGRESSION - SOME TESTS FAILED")
+            if not success_auth:
+                print("   ❌ Authentication setup failed")
+            if not success_sensitive:
+                print("   ❌ Sensitive field leak fixes failed")
+            if not success_api_keys:
+                print("   ❌ API Keys rules failed")
+            if not success_pytest:
+                print("   ❌ Pytest validation failed")
+        
+        return overall_success
+
+    def _setup_dto_leak_auth(self):
+        """Setup authentication for DTO leak tests"""
+        try:
+            # Seed admin data if exists
+            success_seed, _ = self.run_test("Seed Admin Data", "POST", "api/v1/admin/seed", 200)
+            
+            # Login as admin@casino.com/Admin123!
+            login_data = {
+                "email": "admin@casino.com",
+                "password": "Admin123!"
+            }
+            success_login, login_response = self.run_test("Login Admin", "POST", "api/v1/auth/login", 200, login_data)
+            
+            if success_login and isinstance(login_response, dict) and 'access_token' in login_response:
+                self.access_token = login_response['access_token']
+                print(f"   ✅ Authentication successful - Token: {self.access_token[:20]}...")
+                return True
+            else:
+                print("   ❌ Login failed or invalid response")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Authentication setup error: {str(e)}")
+            return False
+
+    def _test_sensitive_field_leak_fix(self):
+        """Test that sensitive fields are not leaked in responses"""
+        if not self.access_token:
+            print("   ❌ No access token available")
+            return False
+        
+        headers = {
+            'Authorization': f'Bearer {self.access_token}'
+        }
+        
+        sensitive_fields = {
+            "password_hash", "invite_token", "password_reset_token", 
+            "key_hash", "secret", "jwt", "token"
+        }
+        
+        test_cases = [
+            ("GET /api/v1/auth/me", "api/v1/auth/me"),
+            ("GET /api/v1/admin/users", "api/v1/admin/users"),
+            ("GET /api/v1/players", "api/v1/players?page=1&page_size=5&include_total=true")
+        ]
+        
+        all_success = True
+        
+        for test_name, endpoint in test_cases:
+            print(f"\n   🔍 Testing {test_name}")
+            
+            url = f"{self.base_url}/{endpoint}"
+            try:
+                import requests
+                response = requests.get(url, headers=headers, timeout=30)
+                
+                if response.status_code == 200:
+                    try:
+                        response_data = response.json()
+                        leaked_fields = self._find_sensitive_fields(response_data, sensitive_fields)
+                        
+                        if not leaked_fields:
+                            print(f"   ✅ {test_name}: No sensitive fields leaked")
+                        else:
+                            print(f"   ❌ {test_name}: SENSITIVE FIELDS LEAKED: {leaked_fields}")
+                            all_success = False
+                            
+                    except Exception as e:
+                        print(f"   ❌ {test_name}: Failed to parse response - {str(e)}")
+                        all_success = False
+                else:
+                    print(f"   ❌ {test_name}: Expected 200, got {response.status_code}")
+                    print(f"      Response: {response.text[:200]}...")
+                    all_success = False
+                    
+            except Exception as e:
+                print(f"   ❌ {test_name}: Request error - {str(e)}")
+                all_success = False
+        
+        return all_success
+
+    def _find_sensitive_fields(self, obj, sensitive_fields, path=""):
+        """Recursively find sensitive fields in response object"""
+        leaked_fields = []
+        
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                current_path = f"{path}.{key}" if path else key
+                if key in sensitive_fields:
+                    leaked_fields.append(current_path)
+                leaked_fields.extend(self._find_sensitive_fields(value, sensitive_fields, current_path))
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                current_path = f"{path}[{i}]" if path else f"[{i}]"
+                leaked_fields.extend(self._find_sensitive_fields(item, sensitive_fields, current_path))
+        
+        return leaked_fields
+
+    def _test_api_keys_rules(self):
+        """Test API Keys rules - create returns secret once, list doesn't include secrets"""
+        if not self.access_token:
+            print("   ❌ No access token available")
+            return False
+        
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        all_success = True
+        
+        # Test 1: POST /api/v1/api-keys/ - should include api_key (full secret) and key meta with key_prefix
+        print(f"\n   🔍 Testing POST /api/v1/api-keys/ - Create API Key")
+        
+        create_payload = {
+            "name": "Leak Test",
+            "scopes": ["robot.run"]
+        }
+        
+        url = f"{self.base_url}/api/v1/api-keys/"
+        try:
+            import requests
+            response = requests.post(url, json=create_payload, headers=headers, timeout=30)
+            
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+                    
+                    # Must include api_key (full secret)
+                    if "api_key" in response_data and isinstance(response_data["api_key"], str) and len(response_data["api_key"]) > 10:
+                        print(f"   ✅ POST API Keys: api_key field present (length: {len(response_data['api_key'])})")
+                    else:
+                        print(f"   ❌ POST API Keys: api_key field missing or invalid")
+                        all_success = False
+                    
+                    # Must include key meta with key_prefix
+                    if "key" in response_data and isinstance(response_data["key"], dict):
+                        key_meta = response_data["key"]
+                        if "key_prefix" in key_meta:
+                            print(f"   ✅ POST API Keys: key meta with key_prefix present")
+                        else:
+                            print(f"   ❌ POST API Keys: key_prefix missing from key meta")
+                            all_success = False
+                        
+                        # Must NOT include key_hash in key meta
+                        if "key_hash" not in key_meta:
+                            print(f"   ✅ POST API Keys: key_hash not leaked in key meta")
+                        else:
+                            print(f"   ❌ POST API Keys: key_hash LEAKED in key meta")
+                            all_success = False
+                    else:
+                        print(f"   ❌ POST API Keys: key meta missing or invalid")
+                        all_success = False
+                        
+                except Exception as e:
+                    print(f"   ❌ POST API Keys: Failed to parse response - {str(e)}")
+                    all_success = False
+            else:
+                print(f"   ❌ POST API Keys: Expected 200, got {response.status_code}")
+                print(f"      Response: {response.text[:200]}...")
+                all_success = False
+                
+        except Exception as e:
+            print(f"   ❌ POST API Keys: Request error - {str(e)}")
+            all_success = False
+        
+        # Test 2: GET /api/v1/api-keys/ - should NOT include api_key nor key_hash, MUST return scopes as array, MUST include active boolean
+        print(f"\n   🔍 Testing GET /api/v1/api-keys/ - List API Keys")
+        
+        url = f"{self.base_url}/api/v1/api-keys/"
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+                    
+                    if isinstance(response_data, list):
+                        print(f"   ✅ GET API Keys: Returns array with {len(response_data)} items")
+                        
+                        # Check each item for sensitive field leaks
+                        for i, item in enumerate(response_data):
+                            if isinstance(item, dict):
+                                # Must NOT include api_key
+                                if "api_key" not in item:
+                                    print(f"   ✅ GET API Keys[{i}]: api_key not leaked")
+                                else:
+                                    print(f"   ❌ GET API Keys[{i}]: api_key LEAKED")
+                                    all_success = False
+                                
+                                # Must NOT include key_hash
+                                if "key_hash" not in item:
+                                    print(f"   ✅ GET API Keys[{i}]: key_hash not leaked")
+                                else:
+                                    print(f"   ❌ GET API Keys[{i}]: key_hash LEAKED")
+                                    all_success = False
+                                
+                                # Must return scopes as array
+                                if "scopes" in item and isinstance(item["scopes"], list):
+                                    print(f"   ✅ GET API Keys[{i}]: scopes is array")
+                                else:
+                                    print(f"   ❌ GET API Keys[{i}]: scopes missing or not array")
+                                    all_success = False
+                                
+                                # Must include active boolean
+                                if "active" in item and isinstance(item["active"], bool):
+                                    print(f"   ✅ GET API Keys[{i}]: active boolean present")
+                                else:
+                                    print(f"   ❌ GET API Keys[{i}]: active boolean missing")
+                                    all_success = False
+                    else:
+                        print(f"   ❌ GET API Keys: Response is not an array")
+                        all_success = False
+                        
+                except Exception as e:
+                    print(f"   ❌ GET API Keys: Failed to parse response - {str(e)}")
+                    all_success = False
+            else:
+                print(f"   ❌ GET API Keys: Expected 200, got {response.status_code}")
+                print(f"      Response: {response.text[:200]}...")
+                all_success = False
+                
+        except Exception as e:
+            print(f"   ❌ GET API Keys: Request error - {str(e)}")
+            all_success = False
+        
+        return all_success
+
+    def _run_dto_leak_pytest(self):
+        """Run the pytest file for DTO leak tests"""
+        print(f"\n   🔍 Running pytest /app/backend/tests/test_response_dto_leaks.py")
+        
+        try:
+            import subprocess
+            import os
+            
+            # Set environment variable for the test
+            env = os.environ.copy()
+            env['REACT_APP_BACKEND_URL'] = self.base_url
+            
+            # Run pytest
+            result = subprocess.run(
+                ['python', '-m', 'pytest', '/app/backend/tests/test_response_dto_leaks.py', '-v'],
+                cwd='/app',
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=60
+            )
+            
+            if result.returncode == 0:
+                print(f"   ✅ Pytest: All tests passed")
+                print(f"      Output: {result.stdout.strip()}")
+                return True
+            else:
+                print(f"   ❌ Pytest: Tests failed (exit code: {result.returncode})")
+                print(f"      Stdout: {result.stdout}")
+                print(f"      Stderr: {result.stderr}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            print(f"   ❌ Pytest: Timeout after 60 seconds")
+            return False
+        except Exception as e:
+            print(f"   ❌ Pytest: Error running tests - {str(e)}")
+            return False
+
+
 def main():
     def test_crash_dice_math_endpoints(self):
         """Test new Crash & Dice Math backend endpoints as per Turkish review request"""
