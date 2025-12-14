@@ -94,13 +94,20 @@ app.include_router(settings_router.router)
 async def on_startup():
     logger.info("Application starting up...")
     try:
-        from app.core.database import init_db
         from app.core.database import engine
         from sqlalchemy.ext.asyncio import AsyncSession
         from app.routes.admin import seed_admin
         
-        # Initialize DB Tables
-        await init_db()
+        # Initialize DB (Alembic for prod, create_all for dev)
+        if not settings.debug:
+            from alembic import command
+            from alembic.config import Config
+
+            alembic_cfg = Config("alembic.ini")
+            command.upgrade(alembic_cfg, "head")
+        else:
+            from app.core.database import init_db
+            await init_db()
         
         # Seed Admin & Data
         async with AsyncSession(engine) as session:
