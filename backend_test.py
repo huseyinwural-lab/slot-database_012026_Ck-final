@@ -14005,6 +14005,9 @@ def main():
     # Run all tests
     test_results = []
     
+    print("\n🌱 SEEDING GATE REGRESSION TESTS - PR-2")
+    test_results.append(("Seeding Gate Regression", tester.test_seeding_gate_regression()))
+    
     print("\n🔐 JWT ADMIN AUTH & PASSWORD MANAGEMENT TESTS - TURKISH REVIEW REQUEST")
     test_results.append(("JWT Admin Auth & Password Management", tester.test_jwt_auth_comprehensive()))
     
