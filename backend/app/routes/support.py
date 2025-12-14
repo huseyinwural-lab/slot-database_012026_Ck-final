@@ -28,8 +28,9 @@ async def get_tickets(
 
 @router.post("/tickets/{ticket_id}/reply")
 async def reply_ticket(
-    ticket_id: str, 
-    message: dict = Body(...), 
+    ticket_id: str,
+    request: Request,
+    message: dict = Body(...),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
