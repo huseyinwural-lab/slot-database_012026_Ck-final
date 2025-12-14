@@ -892,6 +892,18 @@ frontend:
         -agent: "testing"
         -comment: "✅ ADMIN PANEL UI ENGLISH TRANSLATION CONTROL - ALL TESTS PASSED: Login page English translation validation completed successfully. 1) Login Page Verification: ✅ Title shows 'Admin Login' (found in card header), ✅ Description text is in English: 'Enter your credentials to access the CasinoAdmin control panel.', ✅ Email label shows 'Email', ✅ Password label shows 'Password', ✅ Button text shows 'Sign In' in normal state, ✅ Demo user text shows 'Demo user: admin@casino.com / Admin123!'. 2) Login Flow Testing: ✅ Login with correct credentials (admin@casino.com / Admin123!) successful, ✅ No errors during login process, ✅ Successfully redirected to Dashboard (https://casino-admin-8.preview.emergentagent.com/), ✅ Dashboard loads properly with 'Executive Dashboard' title and operational insights. 3) Turkish Text Detection: ✅ No Turkish text detected on login page or dashboard - comprehensive scan for common Turkish words (Giriş, Şifre, E-posta, Kullanıcı, Yönetici, Kontrol, Panel, Bilgiler, Oturum, Çıkış) found no matches. RESOLUTION: Previous Turkish translation issues have been completely resolved by main agent. All English translations are now working correctly as specified in the Turkish review request. The login screen and main dashboard are fully English-localized and ready for production use."
 
+  - task: "Frontend Authorization Bearer Token Verification - allow_credentials=false"
+    implemented: true
+    working: true
+    file: "frontend/src/services/api.js, frontend/src/pages/Login.jsx, frontend/src/pages/PlayerList.jsx, frontend/src/pages/Finance.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ FRONTEND AUTHORIZATION BEARER TOKEN VERIFICATION - ALL TESTS PASSED: Verified frontend sends Authorization: Bearer token on critical API requests when allow_credentials=false. 1) Login Process: ✅ Login with admin@casino.com / Admin123! successful, POST /api/v1/auth/login correctly does NOT include Authorization header (expected for login endpoint), subsequent authenticated requests include proper Bearer tokens. 2) Players Page Testing: ✅ Navigated to /players page, triggered 4 API requests (GET /api/v1/players, GET /api/v1/tenants/capabilities), ALL requests include Authorization: Bearer tokens, all responses returned 200 OK, UI loaded successfully with player data. 3) Finance/Transactions Page Testing: ✅ Navigated to /finance page, triggered 4 API requests (GET /api/v1/finance/transactions with various parameters), ALL requests include Authorization: Bearer tokens, all responses returned 200 OK, UI loaded successfully with transaction data. 4) Network Request Analysis: ✅ Total 16 API requests captured, 15/16 include proper Authorization headers (only login request excluded as expected), no 401/403/5xx errors detected, all critical endpoints properly authenticated. 5) API Client Implementation: ✅ Verified api.js interceptor correctly adds 'Authorization: Bearer <token>' header from localStorage.admin_token to all requests, token format verified as JWT (eyJhbGciOiJIUzI1NiIsInR...), authentication flow working correctly with allow_credentials=false. CONCLUSION: Frontend properly implements Authorization: Bearer token authentication for all critical API requests, UI loads successfully on both tested pages, no authentication failures detected."
+
 metadata:
   created_by: "main_agent"
   version: "2.1"
