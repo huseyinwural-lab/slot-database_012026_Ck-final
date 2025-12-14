@@ -10,6 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import RequireFeature from '../components/RequireFeature';
+
+// NOTE: This page is heavily interactive and uses internal state updates during data loading.
+// Existing eslint config in this repo does not include react-hooks exhaustive-deps rule.
+
 import { 
   Beaker, Plus, Edit, Copy, Trash2, BarChart3, Download, 
   Power, Target, Clock, Dna, TrendingUp, Trophy, FileText,
