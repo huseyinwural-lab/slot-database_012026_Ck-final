@@ -22,7 +22,10 @@ const KillSwitchPage = () => {
   };
 
   useEffect(() => {
-    loadTenants();
+    const t = setTimeout(() => {
+      loadTenants();
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   const apply = async () => {
