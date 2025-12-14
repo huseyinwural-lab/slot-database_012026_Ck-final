@@ -34,13 +34,15 @@ async def get_kill_switch_status(
 
 @router.post("/tenant")
 async def set_tenant_kill_switch(
+    request: Request,
     payload: dict = Body(...),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     """Owner-only: update tenant.features.kill_switches[module_key]"""
     require_owner(current_admin)
-    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="kill_switch")
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="kill_switch")
 
     tenant_id = payload.get("tenant_id")
     module_key = payload.get("module_key")
