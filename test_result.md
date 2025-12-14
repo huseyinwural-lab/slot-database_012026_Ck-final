@@ -50,6 +50,19 @@ feature_flags_enforcement_kill_switch:
         -agent: "testing"
         -comment: "✅ FEATURE FLAGS ENFORCEMENT RE-TEST AFTER APPERROR STANDARD - ALL TESTS PASSED (100% success rate): Authentication: Fixed admin password hash issue and reset failed login attempts, admin@casino.com/Admin123! login now working correctly. Test 1) X-Tenant-ID=demo_renter AppError validation: GET /api/v1/features/ → 403 with top-level error_code=FEATURE_DISABLED, detail='Feature is disabled for this tenant', feature=can_manage_experiments, module=experiments. GET /api/v1/affiliates/ → 403 with proper AppError structure (error_code=FEATURE_DISABLED, feature=can_manage_affiliates, module=affiliates). GET /api/v1/crm/ → 403 with AppError structure (error_code=FEATURE_DISABLED, feature=can_use_crm, module=crm). GET /api/v1/kill-switch/status → 403 with AppError structure (error_code=FEATURE_DISABLED, feature=can_use_kill_switch, module=kill_switch). Test 2) X-Tenant-ID=default_casino access: All endpoints return 200 OK - Feature Flags (empty array), Affiliates (empty array), CRM (empty array), Kill Switch Status (object with kill_switch_all=false, tenant_kill_switches={}). Test 3) Global kill switch validation: Code path verified for KILL_SWITCH_ALL environment variable, 503 MODULE_TEMPORARILY_DISABLED behavior for non-core modules confirmed. Test 4) Tenant kill switch validation: Fixed SQLAlchemy JSON field mutation detection issue in kill switch endpoint using update() statement. POST /api/v1/kill-switch/tenant successfully enables/disables tenant kill switches. When enabled, GET /api/v1/features/ returns 503 MODULE_TEMPORARILY_DISABLED with proper AppError structure (error_code=MODULE_TEMPORARILY_DISABLED, module=experiments, tenant_id=default_casino, reason=tenant_kill_switch). When disabled, endpoint returns 200 OK. AppError standard implementation working correctly with top-level error_code, detail, feature, module, tenant_id, and reason fields as specified in review request."
 
+crm_aff_regression:
+  - task: "CRM/Affiliates Regression Tests - Review Request"
+    implemented: true
+    working: true
+    file: "backend/app/routes/crm.py, backend/app/routes/affiliates.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ CRM/AFFILIATES REGRESSION TESTS - ALL TESTS PASSED (100% success rate): Step 1) Login admin@casino.com/Admin123! successful - Fixed admin password hash issue and reset failed login attempts, authentication now working correctly. Step 2) X-Tenant-ID=default_casino (full tenant access): GET /api/v1/crm/campaigns → 200 OK with JSON list (0 items), GET /api/v1/crm/templates → 200 OK with JSON list (0 items), GET /api/v1/crm/segments → 200 OK with JSON list (0 items), GET /api/v1/crm/channels → 200 OK with JSON list (0 items), GET /api/v1/affiliates/ → 200 OK with JSON list (0 items). Step 3) X-Tenant-ID=demo_renter (minimal tenant restrictions): GET /api/v1/crm/campaigns → 403 FEATURE_DISABLED, GET /api/v1/affiliates/ → 403 FEATURE_DISABLED. Step 4) Pytest validation: Successfully ran /app/backend/tests/test_crm_aff_endpoints.py with 2/2 tests passed. All CRM and Affiliates endpoints working correctly with proper tenant-based feature gating as specified in review request."
+
 patch2_validation:
   - task: "Patch 2 Partial Validation (A2/A3 + CORS allow_credentials=false + readiness behavior)"
     implemented: true
