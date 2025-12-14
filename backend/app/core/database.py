@@ -11,13 +11,21 @@ logger = logging.getLogger(__name__)
 # Note: For SQLite, we must use check_same_thread=False for async
 connect_args = {"check_same_thread": False} if "sqlite" in settings.database_url else {}
 
+# Connection pool tuning (only meaningful for Postgres/asyncpg)
+pool_size = int(getattr(settings, "db_pool_size", 5)) if hasattr(settings, "db_pool_size") else 5
+max_overflow = int(getattr(settings, "db_max_overflow", 10)) if hasattr(settings, "db_max_overflow") else 10
+
 try:
-    engine = create_async_engine(
-        settings.database_url, 
-        echo=settings.debug, 
-        future=True,
-        connect_args=connect_args
-    )
+    engine_kwargs = {
+        "echo": settings.debug,
+        "future": True,
+        "connect_args": connect_args,
+    }
+
+    if "postgresql" in (settings.database_url or ""):
+        engine_kwargs.update({"pool_size": pool_size, "max_overflow": max_overflow})
+
+    engine = create_async_engine(settings.database_url, **engine_kwargs)
 except Exception as e:
     logger.critical(f"Failed to create database engine: {e}")
     raise
