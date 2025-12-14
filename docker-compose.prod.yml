@@ -25,11 +25,14 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
+      DATABASE_URL: ${DATABASE_URL}
+      ENV: prod
       DEBUG: "False"
       JWT_SECRET: ${JWT_SECRET}
       JWT_ALGORITHM: HS256
       CORS_ORIGINS: ${CORS_ORIGINS}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+      DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-10}
     ports:
       - "8001:8001"
     healthcheck:
