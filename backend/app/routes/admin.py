@@ -103,7 +103,9 @@ async def create_tenant_admin(
 
     email = (payload.get("email") or "").strip().lower()
     tenant_id = (payload.get("tenant_id") or "").strip() or "demo_renter"
-    password = payload.get("password") or "TenantAdmin123!"
+    password = payload.get("password")
+    if not password:
+        raise AppError(error_code="PASSWORD_REQUIRED", message="Password is required", status_code=400)
     full_name = payload.get("full_name") or "Tenant Admin"
 
     stmt = select(AdminUser).where(AdminUser.email == email)
