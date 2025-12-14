@@ -19,14 +19,19 @@ router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
 
+from fastapi import Request
+from app.utils.tenant import get_current_tenant_id
+
+
 @router.get("/users", response_model=List[AdminUserPublic])
 async def get_admins(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    query = select(AdminUser)
-    if not current_admin.is_platform_owner:
-        query = query.where(AdminUser.tenant_id == current_admin.tenant_id)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    query = select(AdminUser).where(AdminUser.tenant_id == tenant_id)
 
     result = await session.execute(query)  # Changed exec to execute
     admins = result.scalars().all()
