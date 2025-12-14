@@ -36,11 +36,12 @@ async def create_affiliate(
     tenant_id = get_current_tenant_id(request, current_admin)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
 
+    # UI sends: { username, email, company_name, model }
     aff = Affiliate(
         tenant_id=tenant_id,
-        username=affiliate_data["username"],
-        email=affiliate_data["email"],
-        commission_rate=affiliate_data.get("commission_rate", 0.0)
+        name=affiliate_data.get("username") or affiliate_data.get("name") or "",
+        email=affiliate_data.get("email") or "",
+        status="active",
     )
     session.add(aff)
     await session.commit()
