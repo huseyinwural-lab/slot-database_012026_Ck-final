@@ -55,8 +55,8 @@ async def get_capabilities(
     current_admin: AdminUser = Depends(get_current_admin),
     session: AsyncSession = Depends(get_session),
 ):
-    # Owner impersonation support via header
-    tenant_id = request.headers.get("X-Tenant-ID") or current_admin.tenant_id
+    # Owner impersonation support via header (SEC-001): only owner can override.
+    tenant_id = get_current_tenant_id(request, current_admin)
 
     tenant = await session.get(Tenant, tenant_id)
     features = tenant.features if tenant else {}
