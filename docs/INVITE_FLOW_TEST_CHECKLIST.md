@@ -11,7 +11,7 @@
 ### 📋 Ön Koşullar
 - [ ] Backend servis çalışıyor (`/api/health` OK)
 - [ ] Frontend erişilebilir
-- [ ] MongoDB bağlantısı aktif
+- [ ] PostgreSQL bağlantısı aktif (Docker: postgres servisi healthy)
 - [ ] Test admin hesabı hazır: `admin@casino.com` / `Admin123!`
 
 ---

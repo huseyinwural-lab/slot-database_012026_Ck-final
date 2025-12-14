@@ -4,7 +4,7 @@
 
 ### Prerequisites
 - Python 3.11+
-- MongoDB 6.0+
+- PostgreSQL 15+ (veya Docker ile postgres servisi)
 - Supervisor (optional, for production)
 
 ### Installation

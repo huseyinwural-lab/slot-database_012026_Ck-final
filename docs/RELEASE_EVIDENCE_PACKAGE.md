@@ -11,7 +11,7 @@
 ### PR-1: Production Hardening & Operational Maturity
 - ✅ CORS Allowlist
 - ✅ Server-side Pagination (Players, Transactions, Games, Tenants)
-- ✅ MongoDB Indexing
+- ✅ PostgreSQL Schema & Migrations (Alembic baseline)
 - ✅ Request Logging (Correlation IDs)
 - ✅ Health Probes (`/api/health`, `/api/readiness`)
 - ✅ Rate Limiting (Login endpoint)
