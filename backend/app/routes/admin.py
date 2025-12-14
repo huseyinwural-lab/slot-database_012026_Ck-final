@@ -10,6 +10,7 @@ from app.core.errors import AppError
 from app.utils.permissions import require_owner
 from datetime import datetime, timedelta, timezone
 from app.services.audit import audit
+from app.schemas.admin import AdminUserPublic
 import logging
 
 logger = logging.getLogger(__name__)
