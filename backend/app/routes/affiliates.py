@@ -15,6 +15,8 @@ async def get_affiliates(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+
     query = select(Affiliate).where(Affiliate.tenant_id == current_admin.tenant_id)
     result = await session.execute(query)
     items = result.scalars().all()
