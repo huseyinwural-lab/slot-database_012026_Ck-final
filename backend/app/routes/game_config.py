@@ -1,3 +1,50 @@
-from fastapi import APIRouter
-# Stub for Game Config
-router = APIRouter(prefix="/api/v1/game-config", tags=["game_config"])
+from fastapi import APIRouter, Depends, HTTPException, Body
+from sqlmodel import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Dict, Any
+
+from app.core.database import get_session
+from app.models.sql_models import Game, GameConfigVersion, AdminUser
+from app.utils.auth import get_current_admin
+from app.core.errors import AppError
+
+router = APIRouter(prefix="/api/v1/games", tags=["game_config"])
+
+@router.get("/{game_id}/config")
+async def get_game_config(
+    game_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    game = await session.get(Game, game_id)
+    if not game or game.tenant_id != current_admin.tenant_id:
+        raise HTTPException(404, "Game not found")
+    return game.configuration
+
+@router.put("/{game_id}/config")
+async def update_game_config(
+    game_id: str,
+    config: Dict[str, Any] = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    game = await session.get(Game, game_id)
+    if not game or game.tenant_id != current_admin.tenant_id:
+        raise HTTPException(404, "Game not found")
+        
+    # Versioning
+    version_entry = GameConfigVersion(
+        game_id=game.id,
+        tenant_id=game.tenant_id,
+        version=str(datetime.now().timestamp()), # Simple versioning
+        config_snapshot=game.configuration,
+        created_by=current_admin.email
+    )
+    session.add(version_entry)
+    
+    # Update
+    game.configuration = config
+    session.add(game)
+    
+    await session.commit()
+    return {"message": "Config updated"}

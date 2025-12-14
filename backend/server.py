@@ -49,7 +49,7 @@ from app.routes import auth, admin, tenant, api_keys
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(tenant.router)
-# app.include_router(api_keys.router) # Needs Refactor
+app.include_router(api_keys.router) 
 
 # 2. Player Side
 from app.routes import player_auth, player_lobby, player_wallet
@@ -87,7 +87,7 @@ app.include_router(finance_actions.router)
 app.include_router(feature_flags.router)
 app.include_router(simulation_lab.router)
 app.include_router(settings_router.router)
-app.include_router(api_keys.router)
+
 
 # Startup Event
 @app.on_event("startup")
