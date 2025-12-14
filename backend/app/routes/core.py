@@ -66,7 +66,7 @@ async def get_dashboard_stats(
     )
 
 # --- PLAYERS ---
-@router.get("/players", response_model=PaginatedResponse[Player])
+@router.get("/players", response_model=PaginatedResponse[PlayerPublic])
 async def get_players(
     request: Request,
     status: Optional[str] = None,
