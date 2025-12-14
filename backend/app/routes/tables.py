@@ -58,6 +58,7 @@ async def list_tables(
 
 @router.post("", response_model=TableGameDB)
 async def create_table(
+    request: Request,
     payload: dict = Body(...),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
