@@ -140,6 +140,11 @@ async def create_tenant_admin(
 
 @router.post("/seed")
 async def seed_admin(session: AsyncSession = Depends(get_session)):
+    # P0 safety: do not allow seeding in staging/prod.
+    from config import settings
+    if settings.env in {"prod", "staging"}:
+        return {"message": "Seeding disabled in this environment"}
+
     try:
         from app.routes.tenant import seed_default_tenants
         await seed_default_tenants(session)
