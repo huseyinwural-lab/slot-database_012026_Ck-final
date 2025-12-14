@@ -917,6 +917,18 @@ frontend:
         -agent: "testing"
         -comment: "✅ FRONTEND AUTHORIZATION BEARER TOKEN VERIFICATION - ALL TESTS PASSED: Verified frontend sends Authorization: Bearer token on critical API requests when allow_credentials=false. 1) Login Process: ✅ Login with admin@casino.com / Admin123! successful, POST /api/v1/auth/login correctly does NOT include Authorization header (expected for login endpoint), subsequent authenticated requests include proper Bearer tokens. 2) Players Page Testing: ✅ Navigated to /players page, triggered 4 API requests (GET /api/v1/players, GET /api/v1/tenants/capabilities), ALL requests include Authorization: Bearer tokens, all responses returned 200 OK, UI loaded successfully with player data. 3) Finance/Transactions Page Testing: ✅ Navigated to /finance page, triggered 4 API requests (GET /api/v1/finance/transactions with various parameters), ALL requests include Authorization: Bearer tokens, all responses returned 200 OK, UI loaded successfully with transaction data. 4) Network Request Analysis: ✅ Total 16 API requests captured, 15/16 include proper Authorization headers (only login request excluded as expected), no 401/403/5xx errors detected, all critical endpoints properly authenticated. 5) API Client Implementation: ✅ Verified api.js interceptor correctly adds 'Authorization: Bearer <token>' header from localStorage.admin_token to all requests, token format verified as JWT (eyJhbGciOiJIUzI1NiIsInR...), authentication flow working correctly with allow_credentials=false. CONCLUSION: Frontend properly implements Authorization: Bearer token authentication for all critical API requests, UI loads successfully on both tested pages, no authentication failures detected."
 
+  - task: "Prod-hardening Regression Check - CORS allow_credentials=false"
+    implemented: true
+    working: true
+    file: "backend/server.py, frontend/src/services/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ PROD-HARDENING REGRESSION CHECK COMPLETE - All review request requirements verified and working (4/4 - 100% success rate): 1) Login Flow Verification: POST /api/v1/auth/login with admin@casino.com/Admin123! returns 200 OK with proper JWT access_token (eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...), token_type='bearer', admin_email='admin@casino.com', admin_role='Super Admin' - login works and token is stored correctly. 2) Protected Endpoints Authentication: GET /api/v1/players with Authorization: Bearer token returns 200 OK with proper response structure {items:[], meta:{total:0, page:1, page_size:5}} - network calls include Authorization: Bearer token for protected endpoints as required. 3) CORS Configuration Validation: All API requests include proper CORS headers (Access-Control-Allow-Origin='http://localhost:3000', Vary: Origin), Access-Control-Allow-Credentials header correctly omitted (allow_credentials=false implemented), no CORS errors detected in console or network requests. 4) Application Functionality: Frontend pages (Players, Finance/Transactions) load successfully after CORS changes, no regression in core functionality, authentication flow remains intact with Bearer token approach. REGRESSION IMPACT ASSESSMENT: The CORS allow_credentials=false change has been successfully implemented without breaking existing functionality. The application correctly uses Authorization: Bearer tokens instead of credentials for authentication, maintaining security while ensuring cross-origin compatibility. All critical user flows remain operational."
+
 metadata:
   created_by: "main_agent"
   version: "2.1"
