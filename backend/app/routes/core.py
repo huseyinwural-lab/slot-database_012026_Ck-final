@@ -11,6 +11,7 @@ from app.models.core import (
 from app.models.sql_models import (
     Player, Transaction, Game, AdminUser
 )
+from app.schemas.player import PlayerPublic
 from app.utils.auth import get_current_admin
 from app.utils.pagination import get_pagination_params
 from app.models.common import PaginationMeta, PaginatedResponse, PaginationParams
