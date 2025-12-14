@@ -112,6 +112,8 @@ async def seed_default_tenants(session: AsyncSession):
             "can_view_reports": True,
             "can_manage_experiments": True,
             "can_use_kill_switch": True,
+            "can_manage_affiliates": True,
+            "can_use_crm": True,
         }
     )
     
