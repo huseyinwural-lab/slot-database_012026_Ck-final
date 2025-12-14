@@ -102,7 +102,7 @@ async def get_players(
     players = result.scalars().all()
 
     return {
-        "items": players,
+        "items": [PlayerPublic.model_validate(p) for p in players],
         "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
     }
 
