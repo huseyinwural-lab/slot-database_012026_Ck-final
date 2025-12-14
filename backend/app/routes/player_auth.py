@@ -23,11 +23,18 @@ async def register_player(payload: dict = Body(...), session: AsyncSession = Dep
     if existing:
         raise HTTPException(400, "Player exists")
         
+    password = payload.get("password")
+    if not password or len(str(password)) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+
+    # Hash password
+    hashed_password = get_password_hash(password)
+    
     player = Player(
         email=email,
         username=payload.get("username"),
         tenant_id=tenant_id,
-        password_hash=get_password_hash(payload.get("password")),
+        password_hash=hashed_password,
         registered_at=datetime.now(timezone.utc)
     )
     
