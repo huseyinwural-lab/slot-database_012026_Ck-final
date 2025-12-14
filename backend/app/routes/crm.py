@@ -19,7 +19,7 @@ async def list_campaigns(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ) -> List[dict]:
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return []
 
@@ -31,7 +31,7 @@ async def create_campaign(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return {"message": "CREATED", "campaign": payload}
 
@@ -43,7 +43,7 @@ async def send_campaign(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return {"message": "QUEUED", "campaign_id": campaign_id}
 
@@ -54,7 +54,7 @@ async def list_templates(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ) -> List[dict]:
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return []
 
@@ -65,7 +65,7 @@ async def list_segments(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ) -> List[dict]:
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return []
 
@@ -76,7 +76,7 @@ async def list_channels(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ) -> List[dict]:
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return []
 
@@ -88,6 +88,6 @@ async def get_crm(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ) -> List[dict]:
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return []
