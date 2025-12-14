@@ -74,13 +74,11 @@ yarn install
 yarn dev
 ```
 
-## 🔑 Default Credentials
+## 🔑 Initial Access (Staging/Prod)
 
-| Role | Email | Password |
-|------|-------|----------|
-| **Platform Owner** | `admin@casino.com` | `Admin123!` |
-| **Tenant Admin** | (Seed edilmedi) | - |
-| **Player** | `player@test.com` | `Player123!` |
+- **Staging/Prod** ortamlarında seed kapalıdır.
+- İlk platform owner hesabı için **BOOTSTRAP_OWNER_EMAIL / BOOTSTRAP_OWNER_PASSWORD** env’lerini verin (one-shot, AdminUser tablosu boşsa oluşturur).
+- Tenant admin kullanıcıları owner tarafından oluşturulur (password artık zorunlu).
 
 ## 🛠 VS Code Configuration
 This project includes `.vscode` folder with:

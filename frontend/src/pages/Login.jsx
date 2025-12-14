@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Shield, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
-  const [email, setEmail] = useState('admin@casino.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -99,7 +99,7 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
             <p className="mt-2 text-xs text-muted-foreground text-center">
-              Demo user: <span className="font-mono">admin@casino.com / Admin123!</span>
+              Demo user: <span className="font-mono">(disabled in production)</span>
             </p>
           </form>
         </CardContent>
