@@ -28,7 +28,7 @@ for svc in "${SERVICES[@]}"; do
 done
 
 # Mask secrets in-place (preserve line structure)
-python3 - <<'PY'
+python3 - <<PY
 import re
 from pathlib import Path
 
