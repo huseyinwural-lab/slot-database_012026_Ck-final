@@ -1,25 +1,19 @@
-from fastapi import Request
+"""Deprecated wrapper.
 
+P0-TENANT-SCOPE: tenant context resolution moved to app.core.tenant_context.
+Keep this module to avoid changing all imports at once.
+"""
+
+from fastapi import Request
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.tenant_context import get_current_tenant_id as _get_current_tenant_id
 from app.models.sql_models import AdminUser
 
 
-def get_current_tenant_id(request: Request, admin: AdminUser) -> str:
-    """Aktif tenant_id'yi belirler.
-
-    Öncelik sırası:
-    1) (Sadece Platform Owner için) Header X-Tenant-ID (impersonation)
-    2) admin.tenant_id
-    3) "default_casino"
-
-    Güvenlik: Platform owner olmayan bir kullanıcı X-Tenant-ID ile başka tenant verisine
-    erişemez. Header yalnızca owner için dikkate alınır.
-    """
-
-    header_tenant = request.headers.get("X-Tenant-ID") if request else None
-    if header_tenant and getattr(admin, "is_platform_owner", False):
-        return header_tenant
-
-    if getattr(admin, "tenant_id", None):
-        return admin.tenant_id
-
-    return "default_casino"
+async def get_current_tenant_id(
+    request: Request,
+    admin: AdminUser,
+    session: AsyncSession | None = None,
+) -> str:
+    return await _get_current_tenant_id(request=request, current_admin=admin, session=session)
