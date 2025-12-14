@@ -105,23 +105,23 @@ jobs:
           echo "GET /api/ready after restart => $code"
           test "$code" = "200"
 
-      - name: Dump logs on failure
-        if: failure()
+      # Always collect diagnostics (success or failure) to unblock RCA.
+      - name: Collect compose diagnostics (always)
+        if: always()
         run: |
-          echo "=== docker compose ps ===" | tee compose_ps.txt
-          docker compose -f docker-compose.prod.yml ps | tee -a compose_ps.txt || true
+          set +e
+          chmod +x scripts/ci_prod_compose_debug.sh
+          scripts/ci_prod_compose_debug.sh docker-compose.prod.yml ci_artifacts
 
-          echo "=== docker compose logs (last 300 lines) ===" | tee compose_logs.txt
-          docker compose -f docker-compose.prod.yml logs --tail=300 | tee -a compose_logs.txt || true
-
-      - name: Upload failure artifacts
-        if: failure()
+      - name: Upload compose artifacts (always)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: prod-compose-failure-logs
+          name: prod-compose-artifacts
           path: |
-            compose_ps.txt
-            compose_logs.txt
+            ci_artifacts/compose_ps.txt
+            ci_artifacts/compose_logs_tail.txt
+            ci_artifacts/inspect_*.json
 
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
