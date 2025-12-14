@@ -25,7 +25,44 @@ pg_restore --clean --if-exists --no-owner --no-acl \
   casino_db.dump
 ```
 
-## 3) Basit doğrulama
+## 2.1) Restore Tatbikatı (0’dan geri yükleme)
+
+Amaç: Tek kişinin, sıfır DB’den başlayarak restore yapabilmesi.
+
+1) Boş DB oluştur (örnek):
+```bash
+createdb casino_db
+```
+
+2) Migrations (prod/staging):
+```bash
+alembic upgrade head
+```
+
+3) Restore:
+```bash
+pg_restore --clean --if-exists --no-owner --no-acl \
+  --dbname "$DATABASE_URL" \
+  casino_db.dump
+```
+
+4) Uygulama ready kontrol:
+```bash
+curl -i http://localhost:8001/api/ready
+```
+
+## 3) Pool tuning önerileri
+
+ENV:
+- `DB_POOL_SIZE` (default: 5)
+- `DB_MAX_OVERFLOW` (default: 10)
+
+Öneri (başlangıç):
+- Küçük trafik: 5 / 10
+- Orta trafik: 10 / 20
+- Yüksek trafik: DB limitlerine göre ayarlanmalı (max connections).
+
+## 4) Basit doğrulama
 
 ```bash
 psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM tenant;"
