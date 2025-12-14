@@ -100,8 +100,12 @@ async def on_startup():
         from sqlalchemy.ext.asyncio import AsyncSession
         from app.routes.admin import seed_admin
         
-        # Initialize DB (Alembic for prod, create_all for dev)
-        if not settings.debug:
+        # Initialize DB
+        # Prod/staging: Alembic is the single source of truth.
+        # Dev/local: create_all (and optional drop_all) is allowed only under strict safety checks.
+        env = settings.env
+
+        if env in {"prod", "staging"}:
             from alembic import command
             from alembic.config import Config
 
