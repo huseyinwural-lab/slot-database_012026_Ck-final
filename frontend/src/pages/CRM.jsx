@@ -58,7 +58,7 @@ const CRM = () => {
       fetchData();
     }, 0);
     return () => clearTimeout(t);
-  }, [activeTab]);
+  }, [activeTab, fetchData]);
 
   const handleCreateCampaign = async () => {
     try {
