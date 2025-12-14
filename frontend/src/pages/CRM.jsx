@@ -53,7 +53,12 @@ const CRM = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeTab]);
 
   const handleCreateCampaign = async () => {
     try {
