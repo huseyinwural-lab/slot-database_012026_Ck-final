@@ -1,20 +1,13 @@
 from fastapi import APIRouter, Depends
-from sqlmodel import select, SQLModel, Field
+from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-import uuid
 
 from app.core.database import get_session
+from app.models.sql_models import FeatureFlag
 from app.utils.auth import get_current_admin, AdminUser
 
 router = APIRouter(prefix="/api/v1/features", tags=["features"])
-
-class FeatureFlag(SQLModel, table=True):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    key: str
-    description: str
-    is_enabled: bool = False
-    created_at: str = ""
 
 @router.get("/", response_model=List[FeatureFlag])
 async def get_feature_flags(

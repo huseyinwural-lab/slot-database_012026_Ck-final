@@ -222,3 +222,27 @@ class FinanceSettings(SQLModel, table=True):
     auto_payout_limit: float = 0.0
     provider_configs: Dict = Field(default={}, sa_column=Column(JSON))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+# --- MISC TABLES (moved from route modules to keep Alembic metadata complete) ---
+
+class APIKey(SQLModel, table=True):
+    __tablename__ = "apikey"
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    tenant_id: str = Field(index=True)
+    name: str
+    key_hash: str
+    scopes: str  # comma-separated
+    status: str = "active"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class FeatureFlag(SQLModel, table=True):
+    __tablename__ = "featureflag"
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    key: str
+    description: str
+    is_enabled: bool = False
+    created_at: str = ""

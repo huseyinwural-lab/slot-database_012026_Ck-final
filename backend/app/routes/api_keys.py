@@ -1,23 +1,13 @@
 from fastapi import APIRouter, Depends, Body
-from sqlmodel import select, Field, SQLModel
+from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
-from datetime import datetime, timezone
-import uuid
+from typing import List
 
 from app.core.database import get_session
+from app.models.sql_models import APIKey
 from app.utils.auth import get_current_admin, AdminUser
 
 router = APIRouter(prefix="/api/v1/api-keys", tags=["api_keys"])
-
-class APIKey(SQLModel, table=True):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(index=True)
-    name: str
-    key_hash: str
-    scopes: str # Comma separated
-    status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 @router.get("/", response_model=List[APIKey])
 async def get_api_keys(
