@@ -13,6 +13,9 @@ from app.models.sql_models import AdminUser
 
 router = APIRouter(prefix="/api/v1/tables", tags=["tables"])
 
+# Trailing slash redirect (FastAPI 307) frontend'de toast'a sebep olmasın diye
+router.redirect_slashes = False
+
 
 class TableGame(SQLModel, table=False):
     """Frontend 'tables' ihtiyacı için minimal model.
