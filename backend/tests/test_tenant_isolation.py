@@ -34,7 +34,7 @@ def _create_tenant_admin(owner_token: str, email: str, tenant_id: str):
 def test_tenant_admin_header_forbidden_403():
     api = _api_base()
 
-    owner_token = _login("admin@casino.com", "Admin123!")
+    owner_token = _login(os.environ.get("TEST_OWNER_EMAIL", "admin@casino.com"), os.environ.get("TEST_OWNER_PASSWORD", "Admin123!"))
     tenant_admin_email = "tenant.admin@demo-renter.com"
     _create_tenant_admin(owner_token, tenant_admin_email, "demo_renter")
 
@@ -56,7 +56,7 @@ def test_tenant_admin_header_forbidden_403():
 
 def test_owner_invalid_header_400():
     api = _api_base()
-    owner_token = _login("admin@casino.com", "Admin123!")
+    owner_token = _login(os.environ.get("TEST_OWNER_EMAIL", "admin@casino.com"), os.environ.get("TEST_OWNER_PASSWORD", "Admin123!"))
 
     r = requests.get(
         f"{api}/api/v1/api-keys/",
@@ -74,7 +74,7 @@ def test_owner_invalid_header_400():
 
 def test_owner_headerless_default_scope_200():
     api = _api_base()
-    owner_token = _login("admin@casino.com", "Admin123!")
+    owner_token = _login(os.environ.get("TEST_OWNER_EMAIL", "admin@casino.com"), os.environ.get("TEST_OWNER_PASSWORD", "Admin123!"))
 
     r = requests.get(
         f"{api}/api/v1/api-keys/",
@@ -88,7 +88,7 @@ def test_owner_headerless_default_scope_200():
 def test_cross_tenant_detail_access_404():
     api = _api_base()
 
-    owner_token = _login("admin@casino.com", "Admin123!")
+    owner_token = _login(os.environ.get("TEST_OWNER_EMAIL", "admin@casino.com"), os.environ.get("TEST_OWNER_PASSWORD", "Admin123!"))
     tenant_admin_email = "tenant.admin@demo-renter.com"
     _create_tenant_admin(owner_token, tenant_admin_email, "demo_renter")
 
@@ -127,7 +127,7 @@ def test_cross_tenant_detail_access_404():
 
 def test_owner_impersonation_works_for_other_tenant_200():
     api = _api_base()
-    owner_token = _login("admin@casino.com", "Admin123!")
+    owner_token = _login(os.environ.get("TEST_OWNER_EMAIL", "admin@casino.com"), os.environ.get("TEST_OWNER_PASSWORD", "Admin123!"))
 
     # Owner impersonate demo_renter capabilities (should work if tenant exists)
     r = requests.get(
