@@ -108,10 +108,20 @@ jobs:
       - name: Dump logs on failure
         if: failure()
         run: |
-          echo "=== docker compose ps ==="
-          docker compose -f docker-compose.prod.yml ps || true
-          echo "=== docker compose logs (last 300 lines) ==="
-          docker compose -f docker-compose.prod.yml logs --tail=300 || true
+          echo "=== docker compose ps ===" | tee compose_ps.txt
+          docker compose -f docker-compose.prod.yml ps | tee -a compose_ps.txt || true
+
+          echo "=== docker compose logs (last 300 lines) ===" | tee compose_logs.txt
+          docker compose -f docker-compose.prod.yml logs --tail=300 | tee -a compose_logs.txt || true
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-compose-failure-logs
+          path: |
+            compose_ps.txt
+            compose_logs.txt
 
       - name: Tear down
         if: always()
