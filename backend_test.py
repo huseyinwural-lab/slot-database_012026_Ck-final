@@ -1310,6 +1310,145 @@ class CasinoAdminAPITester:
             print(f"   ❌ Pytest execution error: {str(e)}")
             return False
 
+    def _test_health_endpoints_quick(self):
+        """Quick test: Health endpoints validation"""
+        try:
+            print("   📋 Validating health endpoints")
+            
+            # Test: GET /api/health should return 200
+            print("   🔍 Testing GET /api/health")
+            
+            url = f"{self.base_url}/api/health"
+            response = requests.get(url, timeout=30)
+            
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+                    status = response_data.get('status')
+                    if status == 'healthy':
+                        print("   ✅ /api/health: 200 OK with status='healthy'")
+                        success_health = True
+                    else:
+                        print(f"   ❌ /api/health: Expected status='healthy', got {status}")
+                        success_health = False
+                except Exception as e:
+                    print(f"   ❌ /api/health: Failed to parse response - {str(e)}")
+                    success_health = False
+            else:
+                print(f"   ❌ /api/health: Expected 200, got {response.status_code}")
+                success_health = False
+            
+            # Test: GET /api/ready should return 200
+            print("   🔍 Testing GET /api/ready")
+            
+            url = f"{self.base_url}/api/ready"
+            response = requests.get(url, timeout=30)
+            
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+                    status = response_data.get('status')
+                    if status == 'ready':
+                        print("   ✅ /api/ready: 200 OK with status='ready'")
+                        success_ready = True
+                    else:
+                        print(f"   ❌ /api/ready: Expected status='ready', got {status}")
+                        success_ready = False
+                except Exception as e:
+                    print(f"   ❌ /api/ready: Failed to parse response - {str(e)}")
+                    success_ready = False
+            else:
+                print(f"   ❌ /api/ready: Expected 200, got {response.status_code}")
+                success_ready = False
+            
+            return success_health and success_ready
+            
+        except Exception as e:
+            print(f"   ❌ Health endpoints validation error: {str(e)}")
+            return False
+
+    def _test_password_policy_quick(self):
+        """Quick test: Password policy validation"""
+        try:
+            # Setup authentication first
+            success_login = self._setup_ff_enforcement_auth()
+            if not success_login:
+                print("   ❌ Authentication setup failed for password policy tests")
+                return False
+            
+            # Test: POST /api/v1/admin/create-tenant-admin without password should return 400 PASSWORD_REQUIRED
+            print("   🔍 Testing create-tenant-admin without password")
+            
+            headers = {
+                'Authorization': f'Bearer {self.access_token}',
+                'Content-Type': 'application/json'
+            }
+            
+            payload_no_password = {
+                "email": "test.tenant.admin@example.com",
+                "tenant_id": "demo_renter",
+                "full_name": "Test Tenant Admin"
+                # No password field
+            }
+            
+            url = f"{self.base_url}/api/v1/admin/create-tenant-admin"
+            response = requests.post(url, json=payload_no_password, headers=headers, timeout=30)
+            
+            if response.status_code == 400:
+                try:
+                    response_data = response.json()
+                    error_code = response_data.get('error_code')
+                    if error_code == 'PASSWORD_REQUIRED':
+                        print("   ✅ create-tenant-admin without password: 400 PASSWORD_REQUIRED")
+                        success_admin_password = True
+                    else:
+                        print(f"   ❌ create-tenant-admin: Expected PASSWORD_REQUIRED, got {error_code}")
+                        success_admin_password = False
+                except Exception as e:
+                    print(f"   ❌ create-tenant-admin: Failed to parse 400 response - {str(e)}")
+                    success_admin_password = False
+            else:
+                print(f"   ❌ create-tenant-admin: Expected 400, got {response.status_code}")
+                print(f"      Response: {response.text[:200]}...")
+                success_admin_password = False
+            
+            # Test: POST /api/v1/auth/player/register with short password should return 400
+            print("   🔍 Testing player register with short password")
+            
+            payload_short_password = {
+                "email": "test.player@example.com",
+                "username": "testplayer",
+                "tenant_id": "default_casino",
+                "password": "123"  # Less than 8 characters
+            }
+            
+            url = f"{self.base_url}/api/v1/auth/player/register"
+            response = requests.post(url, json=payload_short_password, timeout=30)
+            
+            if response.status_code == 400:
+                try:
+                    response_data = response.json()
+                    detail = response_data.get('detail', '')
+                    if 'Password must be at least 8 characters' in detail or 'password' in detail.lower():
+                        print("   ✅ player register with short password: 400 with password validation")
+                        success_player_password = True
+                    else:
+                        print(f"   ❌ player register: Expected password validation, got {detail}")
+                        success_player_password = False
+                except Exception as e:
+                    print(f"   ❌ player register: Failed to parse 400 response - {str(e)}")
+                    success_player_password = False
+            else:
+                print(f"   ❌ player register: Expected 400, got {response.status_code}")
+                print(f"      Response: {response.text[:200]}...")
+                success_player_password = False
+            
+            return success_admin_password and success_player_password
+            
+        except Exception as e:
+            print(f"   ❌ Password policy validation error: {str(e)}")
+            return False
+
     def _test_health_endpoints(self):
         """Test 4: Health endpoints validation"""
         try:
