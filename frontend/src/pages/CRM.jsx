@@ -51,7 +51,7 @@ const CRM = () => {
       }
       toast.error('Load failed');
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
     const t = setTimeout(() => {
