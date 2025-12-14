@@ -63,17 +63,12 @@
 ---
 
 ### **ADIM 3: Veritabanı Kontrol (İlk Durum)**
-**Eylem:** MongoDB'de yeni oluşturulan admin'in durumunu kontrol et
+**Eylem:** PostgreSQL'de yeni oluşturulan admin'in durumunu kontrol et
 
 **Komut:**
 ```bash
-# Backend container içinde
-mongosh $MONGO_URL --eval '
-  db.admin_users.findOne(
-    { email: "test-invite-XXXXXX@casino.com" },
-    { _id: 0, email: 1, status: 1, invite_token: 1, invite_expires_at: 1 }
-  )
-'
+# Backend container içinde (örnek)
+psql "$DATABASE_URL" -c "SELECT email, status, invite_token, invite_expires_at FROM adminuser WHERE email='test-invite-XXXXXX@casino.com'"
 ```
 
 **Beklenen Sonuç:**
