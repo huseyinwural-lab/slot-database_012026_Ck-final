@@ -73,8 +73,8 @@ const FeatureFlags = () => {
 
   const handleCreateFlag = async () => {
     try {
-      newFlag.last_updated_by = 'Admin';
-      await api.post('/v1/flags/', newFlag);
+      const payload = { ...newFlag, last_updated_by: 'Admin' };
+      await api.post('/v1/flags/', payload);
       setIsFlagModalOpen(false);
       fetchData();
       toast.success('Flag oluşturuldu');
