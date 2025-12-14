@@ -26,6 +26,7 @@ import { SystemLogs } from './pages/SystemLogs';
 import { AdminManagement } from './pages/AdminManagement';
 import SettingsPanel from './pages/SettingsPanel';
 import TenantsPage from './pages/TenantsPage';
+import KillSwitchPage from './pages/KillSwitchPage';
 import Login from './pages/Login';
 import APIKeysPage from './pages/APIKeysPage';
 import AcceptInvite from './pages/AcceptInvite';
@@ -157,6 +158,12 @@ function App() {
                 <RequireAuth><TenantRevenue /></RequireAuth>
               } />
               
+              <Route path="/kill-switch" element={
+                <RequireAuth>
+                  <RequireFeature feature="can_use_kill_switch"><KillSwitchPage /></RequireFeature>
+                </RequireAuth>
+              } />
+
               <Route path="/settings" element={<RequireAuth><SettingsPanel /></RequireAuth>} />
               
               <Route path="*" element={<Navigate to="/" />} />

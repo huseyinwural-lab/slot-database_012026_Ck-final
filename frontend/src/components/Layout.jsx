@@ -102,6 +102,7 @@ const Layout = ({ children }) => {
               {hasFeature('can_use_crm') && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" activeClassName={theme.activeItem} />}
               {hasFeature('can_manage_bonus') && <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" activeClassName={theme.activeItem} />}
               {hasFeature('can_manage_affiliates') && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" activeClassName={theme.activeItem} />}
+              {isOwner && hasFeature('can_use_kill_switch') && <SidebarItem to="/kill-switch" icon={Power} label="Kill Switch" activeClassName={theme.activeItem} />}
               <SidebarItem to="/support" icon={MessageSquare} label="Support" activeClassName={theme.activeItem} />
           </div>
 
@@ -121,7 +122,7 @@ const Layout = ({ children }) => {
               {hasFeature('can_manage_admins') && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/tenants" icon={Building} label="Tenants" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" activeClassName={theme.activeItem} />}
-              {hasFeature('can_manage_experiments') && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" activeClassName={theme.activeItem} />}
+              {isOwner && hasFeature('can_manage_experiments') && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" activeClassName={theme.activeItem} />}
               {hasFeature('can_use_game_robot') && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/settings" icon={Settings} label="Settings" activeClassName={theme.activeItem} />}
           </div>

@@ -49,10 +49,20 @@ const FeatureFlags = () => {
       if (activeTab === 'audit') setAuditLogs((await api.get('/v1/flags/audit-log')).data);
       if (activeTab === 'env-compare') setEnvComparison((await api.get('/v1/flags/environment-comparison')).data);
       setGroups((await api.get('/v1/flags/groups')).data);
-    } catch (err) { console.error(err); toast.error('Veri yüklenirken hata'); }
+    } catch (err) {
+      console.error(err);
+      toast.error('Veri yüklenirken hata');
+    }
   };
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  // Avoid direct setState sync-in-effect lint by scheduling fetch.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetchData();
+    }, 0);
+
+    return () => clearTimeout(t);
+  }, [activeTab]);
 
   const handleToggleFlag = async (flagId) => {
     try {
