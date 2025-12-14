@@ -99,7 +99,7 @@ const Layout = ({ children }) => {
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Operations</div>
               {hasFeature('can_manage_kyc') && <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" activeClassName={theme.activeItem} />}
+              {hasFeature('can_use_crm') && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" activeClassName={theme.activeItem} />}
               {hasFeature('can_manage_bonus') && <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" activeClassName={theme.activeItem} />}
               <SidebarItem to="/support" icon={MessageSquare} label="Support" activeClassName={theme.activeItem} />
