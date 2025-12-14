@@ -1090,7 +1090,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "PR-2 Seed Gate Regression"
+    - "Quick Regression - CI Workflow Env Updates"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
