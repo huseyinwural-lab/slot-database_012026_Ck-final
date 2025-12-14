@@ -18,8 +18,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
-
-from fastapi import Request
 from app.utils.tenant import get_current_tenant_id
 
 
