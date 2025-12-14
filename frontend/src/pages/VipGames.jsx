@@ -19,7 +19,8 @@ const VipGames = () => {
   const fetchData = async () => {
     try {
         const res = await api.get('/v1/games');
-        const all = res.data;
+        // Handle both Array and Paginated Response
+        const all = Array.isArray(res.data) ? res.data : (res.data.items || []);
         setAllGames(all);
         setVipGames(all.filter(g => g.tags && g.tags.includes('VIP')));
     } catch (err) {

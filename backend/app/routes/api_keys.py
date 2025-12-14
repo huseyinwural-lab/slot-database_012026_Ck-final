@@ -26,6 +26,7 @@ async def get_api_keys(
 ):
     query = select(APIKey).where(APIKey.tenant_id == current_admin.tenant_id)
     result = await session.execute(query)
+    # Frontend APIKeysPage.jsx expects array
     return result.scalars().all()
 
 @router.post("/")

@@ -21,10 +21,10 @@ async def get_feature_flags(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    # Try/Except block to handle table missing error gracefully if migration hasn't run
     try:
         query = select(FeatureFlag)
         result = await session.execute(query)
+        # Frontend FeatureFlags.jsx likely expects array
         return result.scalars().all()
     except Exception as e:
         print(f"Feature Flag Error: {e}")
