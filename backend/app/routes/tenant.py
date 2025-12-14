@@ -49,16 +49,23 @@ async def create_tenant(
     return tenant_data
 
 @router.get("/capabilities")
-async def get_capabilities(current_admin: AdminUser = Depends(get_current_admin), session: AsyncSession = Depends(get_session)):
-    tenant = await session.get(Tenant, current_admin.tenant_id)
+async def get_capabilities(
+    request: Request,
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    # Owner impersonation support via header
+    tenant_id = request.headers.get("X-Tenant-ID") or current_admin.tenant_id
+
+    tenant = await session.get(Tenant, tenant_id)
     features = tenant.features if tenant else {}
-    
+
     return {
         "features": features,
         "is_owner": current_admin.is_platform_owner,
-        "tenant_id": current_admin.tenant_id,
+        "tenant_id": tenant_id,
         "tenant_role": current_admin.tenant_role,
-        "tenant_name": tenant.name if tenant else "Unknown"
+        "tenant_name": tenant.name if tenant else "Unknown",
     }
 
 
