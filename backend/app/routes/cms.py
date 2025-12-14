@@ -16,6 +16,7 @@ async def get_pages(
 ):
     query = select(ContentPage).where(ContentPage.tenant_id == current_admin.tenant_id)
     result = await session.execute(query)
+    # Direct list return
     return result.scalars().all()
 
 @router.post("/pages")

@@ -17,6 +17,7 @@ async def get_approval_requests(
     query = select(ApprovalRequest).where(ApprovalRequest.tenant_id == current_admin.tenant_id)
     query = query.where(ApprovalRequest.status == "pending")
     result = await session.execute(query)
+    # Direct list return
     return result.scalars().all()
 
 @router.post("/requests/{req_id}/action")

@@ -16,4 +16,5 @@ async def get_risk_rules(
 ):
     query = select(RiskRule).where(RiskRule.tenant_id == current_admin.tenant_id)
     result = await session.execute(query)
+    # Direct list return
     return result.scalars().all()

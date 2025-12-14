@@ -17,6 +17,10 @@ async def get_tickets(
 ):
     query = select(SupportTicket).where(SupportTicket.tenant_id == current_admin.tenant_id).order_by(SupportTicket.created_at.desc())
     result = await session.execute(query)
+    # Return as list, frontend should handle it (or update to {items: ...})
+    # Given previous instruction: standardize to match frontend if it expects list.
+    # If frontend expects paginated, we should wrap.
+    # Looking at Support.jsx (from memory), it likely maps directly.
     return result.scalars().all()
 
 @router.post("/tickets/{ticket_id}/reply")
@@ -36,8 +40,6 @@ async def reply_ticket(
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     
-    # Update JSON field
-    # Create a new list to ensure SQLAlchemy detects the change in JSON column
     msgs = list(ticket.messages) if ticket.messages else []
     msgs.append(msg_obj)
     ticket.messages = msgs

@@ -14,12 +14,12 @@ async def get_logs(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    # Logs are global or scoped by tenant logic if added later
-    # For now, return all logs (limit 100)
     query = select(AuditLog).order_by(AuditLog.timestamp.desc()).limit(100)
     result = await session.execute(query)
+    # Direct list return
     return result.scalars().all()
 
+# Stub endpoints returning empty lists (Frontend expects arrays for these)
 @router.get("/cron")
 async def get_cron_logs(): return []
 
