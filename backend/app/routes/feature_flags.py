@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import select, SQLModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Dict
-from sqlalchemy import Column, JSON
+from typing import List
 import uuid
 
 from app.core.database import get_session
@@ -22,10 +21,11 @@ async def get_feature_flags(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    # If table doesn't exist yet in seed, return empty list instead of 500
+    # Try/Except block to handle table missing error gracefully if migration hasn't run
     try:
         query = select(FeatureFlag)
         result = await session.execute(query)
         return result.scalars().all()
-    except:
+    except Exception as e:
+        print(f"Feature Flag Error: {e}")
         return []

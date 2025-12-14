@@ -4,9 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.core.database import get_session
-from app.models.sql_models import SupportTicket, TicketMessage, AdminUser, Player
+from app.models.sql_models import SupportTicket, AdminUser
 from app.utils.auth import get_current_admin
-from app.core.errors import AppError
 from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/v1/support", tags=["support"])
@@ -37,8 +36,9 @@ async def reply_ticket(
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     
-    # Update JSON field - requires re-assignment to detect change in some ORMs
-    msgs = list(ticket.messages)
+    # Update JSON field
+    # Create a new list to ensure SQLAlchemy detects the change in JSON column
+    msgs = list(ticket.messages) if ticket.messages else []
     msgs.append(msg_obj)
     ticket.messages = msgs
     ticket.status = "answered"
