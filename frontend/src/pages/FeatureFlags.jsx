@@ -66,7 +66,7 @@ const FeatureFlags = () => {
     }, 0);
 
     return () => clearTimeout(t);
-  }, [activeTab]);
+  }, [activeTab, fetchData]);
 
   const handleToggleFlag = async (flagId) => {
     try {
