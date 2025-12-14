@@ -2,6 +2,19 @@ user_problem_statement:
   summary: "Phase 1: Financial Integrity & Security Update"
 backend:
 
+p0_patch1_smoke_test:
+  - task: "P0 Patch 1 Backend Smoke/Regression Test"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/app/routes/auth.py, backend/app/routes/core.py, backend/app/routes/finance.py, backend/app/routes/tenant.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ P0 PATCH 1 BACKEND SMOKE/REGRESSION TEST - ALL TESTS PASSED (8/8 - 100% success rate): Test 1) GET /api/health → 200 OK with status='healthy'. Test 2) GET /api/readiness → 200 OK with database='connected'. Test 3) POST /api/v1/auth/login with admin@casino.com/Admin123! → 200 OK with access_token (JWT bearer token, length 268). Test 4a) GET /api/v1/tenants/ with Authorization → 200 OK with {items, meta} structure (2 tenants found). Test 4b) GET /api/v1/players?page=1&page_size=5&include_total=true with Authorization → 200 OK with {items, meta} structure (pagination working, 0 players). Test 4c) GET /api/v1/games?page=1&page_size=5&include_total=true with Authorization → 200 OK with {items, meta} structure (pagination working, 0 games). Test 4d) GET /api/v1/finance/transactions?page=1&page_size=5&include_total=true with Authorization → 200 OK with {items, meta} structure (pagination working, 0 transactions). Test 5) Server import dependency check → No Mongo/motor import errors detected. All core endpoints functional, authentication working, pagination contracts implemented correctly, no 4xx/5xx errors encountered."
+
 jwt_admin_auth:
   - task: "JWT-based Admin Auth & Password Management - Turkish Review Request"
     implemented: true
