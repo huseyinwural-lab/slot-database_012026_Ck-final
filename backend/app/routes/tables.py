@@ -43,7 +43,7 @@ class TableGameDB(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-@router.get("/", response_model=List[TableGameDB])
+@router.get("", response_model=List[TableGameDB])
 async def list_tables(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
