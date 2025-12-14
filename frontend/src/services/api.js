@@ -13,11 +13,20 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   try {
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    const tenantId = typeof window !== 'undefined' ? localStorage.getItem('impersonate_tenant_id') : null;
+
+    // eslint-disable-next-line no-param-reassign
+    config.headers = config.headers || {};
+
     if (token) {
       // eslint-disable-next-line no-param-reassign
-      config.headers = config.headers || {};
-      // eslint-disable-next-line no-param-reassign
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Owner impersonation: pass tenant context via header
+    if (tenantId) {
+      // eslint-disable-next-line no-param-reassign
+      config.headers['X-Tenant-ID'] = tenantId;
     }
   } catch (e) {
     // localStorage not available; ignore
