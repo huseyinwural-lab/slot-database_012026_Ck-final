@@ -4,6 +4,8 @@ import json
 import zipfile
 import io
 import jwt
+import subprocess
+import os
 from datetime import datetime
 
 class CasinoAdminAPITester:
