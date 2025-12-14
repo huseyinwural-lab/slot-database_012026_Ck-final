@@ -158,6 +158,8 @@ async def seed_admin(session: AsyncSession = Depends(get_session)):
         existing = result.scalars().first()
         
         if not existing:
+            # Dev/local convenience seed only.
+            # In staging/prod use BOOTSTRAP_OWNER_* env-based bootstrap.
             super_admin = AdminUser(
                 email="admin@casino.com",
                 username="superadmin",
