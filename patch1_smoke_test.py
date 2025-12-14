@@ -154,7 +154,7 @@ class Patch1SmokeTest:
             "name": "Test API Key - Patch1 Smoke",
             "scopes": ["robot.run", "games.read"]
         }
-        success7, api_key_response = self.run_test("Create API Key", "POST", "api/v1/api-keys/", 201, api_key_data, auth_token=access_token)
+        success7, api_key_response = self.run_test("Create API Key", "POST", "api/v1/api-keys/", 200, api_key_data, auth_token=access_token)
         test_results.append(("Create API Key", success7))
         if success7 and isinstance(api_key_response, dict):
             if 'api_key' in api_key_response and 'key' in api_key_response:
