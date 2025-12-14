@@ -25,7 +25,8 @@ async def get_approval_requests(
 
 @router.post("/requests/{req_id}/action")
 async def action_approval(
-    req_id: str, 
+    req_id: str,
+    request: Request,
     action: str = Body(..., embed=True),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
