@@ -52,7 +52,6 @@ const FeatureFlags = () => {
     } catch (err) { console.error(err); toast.error('Veri yüklenirken hata'); }
   };
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(); }, [activeTab]);
 
   const handleToggleFlag = async (flagId) => {
