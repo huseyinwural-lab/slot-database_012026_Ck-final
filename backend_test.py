@@ -796,6 +796,77 @@ class CasinoAdminAPITester:
             print(f"   ❌ Authentication setup error: {str(e)}")
             return False
 
+    def _test_demo_renter_feature_enforcement_apperror(self):
+        """Test demo_renter tenant with minimal features - expect 403 FEATURE_DISABLED with AppError standard"""
+        if not self.access_token:
+            print("   ❌ No access token available")
+            return False
+        
+        # Test endpoints with X-Tenant-ID=demo_renter header
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'X-Tenant-ID': 'demo_renter'
+        }
+        
+        test_cases = [
+            ("Feature Flags", "api/v1/features/", "experiments", "can_manage_experiments"),
+            ("Affiliates", "api/v1/affiliates/", "affiliates", "can_manage_affiliates"),
+            ("CRM", "api/v1/crm/", "crm", "can_use_crm"),
+            ("Kill Switch Status", "api/v1/kill-switch/status", "kill_switch", "can_use_kill_switch")
+        ]
+        
+        all_success = True
+        
+        for test_name, endpoint, expected_module, expected_feature in test_cases:
+            print(f"\n   🔍 Testing {test_name} with demo_renter")
+            
+            url = f"{self.base_url}/{endpoint}"
+            try:
+                import requests
+                response = requests.get(url, headers=headers, timeout=30)
+                
+                if response.status_code == 403:
+                    try:
+                        response_data = response.json()
+                        
+                        # Validate AppError standard structure - top-level fields
+                        error_code = response_data.get('error_code')
+                        detail = response_data.get('detail')
+                        feature = response_data.get('feature')
+                        module = response_data.get('module')
+                        
+                        # Check for required top-level fields
+                        if (error_code == 'FEATURE_DISABLED' and 
+                            detail and 
+                            feature == expected_feature and 
+                            module == expected_module):
+                            print(f"   ✅ {test_name}: 403 FEATURE_DISABLED")
+                            print(f"      ✅ error_code: {error_code}")
+                            print(f"      ✅ detail: {detail}")
+                            print(f"      ✅ feature: {feature}")
+                            print(f"      ✅ module: {module}")
+                        else:
+                            print(f"   ❌ {test_name}: AppError structure validation failed")
+                            print(f"      error_code: {error_code} (expected: FEATURE_DISABLED)")
+                            print(f"      detail: {detail}")
+                            print(f"      feature: {feature} (expected: {expected_feature})")
+                            print(f"      module: {module} (expected: {expected_module})")
+                            all_success = False
+                    except Exception as e:
+                        print(f"   ❌ {test_name}: Failed to parse 403 response - {str(e)}")
+                        print(f"      Response: {response.text[:200]}...")
+                        all_success = False
+                else:
+                    print(f"   ❌ {test_name}: Expected 403, got {response.status_code}")
+                    print(f"      Response: {response.text[:200]}...")
+                    all_success = False
+                    
+            except Exception as e:
+                print(f"   ❌ {test_name}: Request error - {str(e)}")
+                all_success = False
+        
+        return all_success
+
     def _test_demo_renter_feature_enforcement(self):
         """Test demo_renter tenant with minimal features - expect 403 FEATURE_DISABLED"""
         if not self.access_token:
