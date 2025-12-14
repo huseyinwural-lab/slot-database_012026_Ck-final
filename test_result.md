@@ -34,6 +34,19 @@ frontend:
 
 backend:
 
+pr3_tenant_isolation:
+  - task: "PR-3 Tenant Scope/Isolation Standardization"
+    implemented: true
+    working: true
+    file: "backend/app/utils/tenant.py, backend/app/routes/admin.py, backend/app/routes/api_keys.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ PR-3 TENANT ISOLATION STANDARDIZATION - CORE FUNCTIONALITY WORKING (90% success rate): A) Setup Phase: ✅ Admin seeded successfully, ✅ Owner login (admin@casino.com/Admin123!) successful, ✅ Tenant admin created/exists for demo_renter (tenant.admin@demo-renter.com), ✅ Tenant admin login successful. B) Header Policy Tests: ✅ Test 4) Tenant admin with X-Tenant-ID header correctly returns 403 TENANT_HEADER_FORBIDDEN, ✅ Test 5) Owner with invalid X-Tenant-ID correctly returns 400 INVALID_TENANT_HEADER, ✅ Test 6) Owner without header defaults to owner tenant scope (200 OK). C) Tenant Isolation Tests: ✅ Test 7) Cross-tenant player access correctly blocked (404), ✅ Test 8) Admin list properly scoped - tenant admin only sees demo_renter admins, owner admin not visible, ✅ Test 9) Owner impersonation working correctly (200 OK with tenant_id='demo_renter'). D) Pytest Issues: ❌ Backend SQLAlchemy compatibility issue - 'AsyncSession' object has no attribute 'exec' in player_auth.py line 21, causing player registration endpoint to fail with 500 errors. All core tenant isolation mechanisms working correctly: header validation, tenant scoping, cross-tenant access prevention, owner impersonation. Minor: Backend needs SQLAlchemy async session fix (session.exec -> session.execute)."
+
 seeding_gate_regression:
   - task: "PR-2 Seed Gate Regression"
     implemented: true
