@@ -111,12 +111,8 @@ curl -X GET "$API_URL/api/readiness"
 #### **Durum 1: INVITED (Token Var)**
 **Komut:**
 ```bash
-mongosh $MONGO_URL --eval '
-  db.admin_users.findOne(
-    { email: "test-invite-XXXXX@casino.com" },
-    { _id: 0, email: 1, status: 1, invite_token: 1, invite_expires_at: 1 }
-  )
-' | sed 's/ey[A-Za-z0-9_-]*\.ey[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*/***JWT_TOKEN_MASKED***/g'
+# PostgreSQL (SQLModel) – örnek sorgu (tablo/kolon isimlerini şemaya göre uyarlayın)
+psql "$DATABASE_URL" -c "SELECT email, status, invite_token, invite_expires_at FROM adminuser WHERE email='test-invite-XXXXX@casino.com'" 
 ```
 
 **Çıktı:**
