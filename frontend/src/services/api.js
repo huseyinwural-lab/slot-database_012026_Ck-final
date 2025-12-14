@@ -40,10 +40,13 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     
     // Standardize Error Object
+    const raw = error.response?.data || {};
+    const detail = raw.detail || {};
+
     const standardizedError = {
-        code: error.response?.data?.error_code || 'UNKNOWN_ERROR',
-        message: error.response?.data?.message || error.message || 'An unexpected error occurred',
-        details: error.response?.data?.details || {},
+        code: raw.error_code || detail.error_code || 'UNKNOWN_ERROR',
+        message: raw.message || detail.detail || error.message || 'An unexpected error occurred',
+        details: raw.details || detail || {},
         status: error.response?.status
     };
 
