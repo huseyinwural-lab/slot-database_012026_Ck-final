@@ -61,6 +61,30 @@ async def get_capabilities(current_admin: AdminUser = Depends(get_current_admin)
         "tenant_name": tenant.name if tenant else "Unknown"
     }
 
+
+@router.patch("/{tenant_id}")
+async def update_tenant_features(
+    tenant_id: str,
+    payload: dict,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    require_owner(current_admin)
+
+    tenant = await session.get(Tenant, tenant_id)
+    if not tenant:
+        raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
+
+    # Only update provided keys
+    if "features" in payload and isinstance(payload["features"], dict):
+        tenant.features = payload["features"]
+
+    session.add(tenant)
+    await session.commit()
+    await session.refresh(tenant)
+
+    return {"message": "UPDATED", "tenant": tenant}
+
 # Seeding function adapted for SQL
 async def seed_default_tenants(session: AsyncSession):
     # Check if default exists
