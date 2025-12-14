@@ -11,6 +11,8 @@ mkdir -p "$OUT_DIR"
 # Capture compose ps
 {
   echo "=== docker compose ps ==="
+  echo "compose_file=$COMPOSE_FILE"
+  echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   docker compose -f "$COMPOSE_FILE" ps || true
 } > "$OUT_DIR/compose_ps.txt"
 
