@@ -2,6 +2,21 @@ user_problem_statement:
   summary: "Phase 1: Financial Integrity & Security Update"
 
 frontend:
+  - task: "TCK-CRM-002 + TCK-AFF-002 + TCK-UI-001 Verification"
+    implemented: true
+    working: true
+    file: "src/pages/CRM.jsx, src/pages/AffiliateManagement.jsx, src/pages/ModuleDisabled.jsx, src/components/TenantSwitcher.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ TCK-CRM-002 + TCK-AFF-002 + TCK-UI-001 VERIFICATION COMPLETE - ALL TESTS PASSED: Test 1) Authentication: Login with admin@casino.com/Admin123! successful - redirected to dashboard. Test 2) default_casino tenant (Global Context): ✅ /crm loads successfully with 'CRM & Communications' heading, /api/v1/crm/campaigns returns 200 OK, ✅ /affiliates loads successfully with 'Affiliate Program' heading, /api/v1/affiliates returns 200 OK, ✅ No 'Load failed' toasts detected on either page. Test 3) demo_renter tenant switching: ✅ Tenant switcher functional (Global Context dropdown working), ✅ localStorage impersonate_tenant_id mechanism working. Test 4) demo_renter restrictions: ✅ /crm shows ModuleDisabled page with 'Module Disabled' and 'does not have access' messages, ✅ /affiliates shows ModuleDisabled page with proper restriction messages, ✅ No 'Load failed' toasts on restricted pages. Test 5) Error handling: ✅ 404 routes redirect to dashboard (expected behavior), ✅ Deterministic error messaging infrastructure in place. All feature gating, tenant impersonation, and UI restriction mechanisms working correctly as specified in review request."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ VERIFICATION CONFIRMED - All TCK requirements met: CRM and Affiliates modules properly accessible for full tenant (default_casino) with 200 API responses, properly blocked for minimal tenant (demo_renter) with ModuleDisabled pages, no Load failed toasts detected, error handling working correctly."
+
   - task: "E2E Feature Flags Gating Matrix (FF-006)"
     implemented: true
     working: true
