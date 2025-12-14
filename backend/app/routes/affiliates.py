@@ -28,14 +28,16 @@ async def get_affiliates(
 
 @router.post("/")
 async def create_affiliate(
+    request: Request,
     affiliate_data: dict = Body(...),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
 
     aff = Affiliate(
-        tenant_id=current_admin.tenant_id,
+        tenant_id=tenant_id,
         username=affiliate_data["username"],
         email=affiliate_data["email"],
         commission_rate=affiliate_data.get("commission_rate", 0.0)
@@ -48,34 +50,42 @@ async def create_affiliate(
 # Stubs returning arrays
 @router.get("/offers")
 async def get_offers(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
 
 @router.get("/links")
 async def get_links(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
 
 
 @router.get("/payouts")
 async def get_payouts(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
 
 
 @router.get("/creatives")
 async def get_creatives(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
