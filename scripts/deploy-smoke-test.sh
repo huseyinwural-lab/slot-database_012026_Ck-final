@@ -35,21 +35,19 @@ else
     exit 1
 fi
 
-# 4. Check Frontend Assets (Basic Reachability)
-# Since we are in a container without full browser, we just check if ports are open/listening
+# 4. Check Frontend Assets (Alternative to nc)
 echo "\n🔍 [4/4] Checking Frontends..."
-# Admin
-if nc -z localhost 3000; then
-    echo "✅ Admin Frontend listening on 3000"
+# Since 'nc' is missing, we check process list for node/yarn
+if pgrep -f "react-scripts start" > /dev/null; then
+    echo "✅ Admin Frontend process RUNNING"
 else
-    echo "⚠️  Admin Frontend not reachable (might be starting up)"
+    echo "⚠️  Admin Frontend process NOT FOUND"
 fi
 
-# Player
-if nc -z localhost 3001; then
-    echo "✅ Player Frontend listening on 3001"
+if pgrep -f "vite" > /dev/null; then
+    echo "✅ Player Frontend process RUNNING"
 else
-    echo "⚠️  Player Frontend not reachable (might be starting up)"
+    echo "⚠️  Player Frontend process NOT FOUND"
 fi
 
 echo "\n✨ SMOKE TEST COMPLETE: SYSTEM READY ✨"
