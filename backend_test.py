@@ -1017,6 +1017,171 @@ class CasinoAdminAPITester:
         """Test Feature Flags endpoints - Legacy method for compatibility"""
         return self.test_feature_flags_enforcement_and_kill_switch()
 
+    def test_crm_aff_regression(self):
+        """Test CRM/Affiliates regression tests as per review request"""
+        print("\n🔄 CRM/AFFILIATES REGRESSION TESTS")
+        
+        # Step 1: Login admin@casino.com/Admin123!
+        print(f"\n🔍 Step 1: Login admin@casino.com/Admin123!")
+        success_login = self._setup_crm_aff_auth()
+        if not success_login:
+            print("❌ Authentication setup failed - cannot proceed with tests")
+            return False
+        
+        # Step 2: Test with X-Tenant-ID=default_casino (should return 200 and JSON list)
+        print(f"\n🔍 Step 2: X-Tenant-ID=default_casino (expect 200 OK)")
+        success_default_casino = self._test_default_casino_crm_aff()
+        
+        # Step 3: Test with X-Tenant-ID=demo_renter (should return 403 FEATURE_DISABLED)
+        print(f"\n🔍 Step 3: X-Tenant-ID=demo_renter (expect 403 FEATURE_DISABLED)")
+        success_demo_renter = self._test_demo_renter_crm_aff()
+        
+        # Overall result
+        overall_success = success_login and success_default_casino and success_demo_renter
+        
+        if overall_success:
+            print("\n✅ CRM/AFFILIATES REGRESSION TESTS - ALL TESTS PASSED")
+            print("   ✅ Authentication successful")
+            print("   ✅ default_casino tenant access working (200 OK)")
+            print("   ✅ demo_renter tenant restrictions working (403 FEATURE_DISABLED)")
+        else:
+            print("\n❌ CRM/AFFILIATES REGRESSION TESTS - SOME TESTS FAILED")
+            if not success_login:
+                print("   ❌ Authentication setup failed")
+            if not success_default_casino:
+                print("   ❌ default_casino tenant access failed")
+            if not success_demo_renter:
+                print("   ❌ demo_renter tenant restrictions failed")
+        
+        return overall_success
+
+    def _setup_crm_aff_auth(self):
+        """Setup authentication for CRM/Affiliates regression tests"""
+        try:
+            # Login as admin@casino.com/Admin123!
+            login_data = {
+                "email": "admin@casino.com",
+                "password": "Admin123!"
+            }
+            success_login, login_response = self.run_test("Login Admin", "POST", "api/v1/auth/login", 200, login_data)
+            
+            if success_login and isinstance(login_response, dict) and 'access_token' in login_response:
+                self.access_token = login_response['access_token']
+                print(f"   ✅ Authentication successful - Token: {self.access_token[:20]}...")
+                return True
+            else:
+                print("   ❌ Login failed or invalid response")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Authentication setup error: {str(e)}")
+            return False
+
+    def _test_default_casino_crm_aff(self):
+        """Test default_casino tenant CRM/Affiliates access - expect 200 OK and JSON list"""
+        if not self.access_token:
+            print("   ❌ No access token available")
+            return False
+        
+        # Test endpoints with X-Tenant-ID=default_casino header
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'X-Tenant-ID': 'default_casino'
+        }
+        
+        test_cases = [
+            ("CRM Campaigns", "api/v1/crm/campaigns"),
+            ("CRM Templates", "api/v1/crm/templates"),
+            ("CRM Segments", "api/v1/crm/segments"),
+            ("CRM Channels", "api/v1/crm/channels"),
+            ("Affiliates", "api/v1/affiliates/")
+        ]
+        
+        all_success = True
+        
+        for test_name, endpoint in test_cases:
+            print(f"\n   🔍 Testing {test_name} with default_casino")
+            
+            url = f"{self.base_url}/{endpoint}"
+            try:
+                import requests
+                response = requests.get(url, headers=headers, timeout=30)
+                
+                if response.status_code == 200:
+                    try:
+                        response_data = response.json()
+                        if isinstance(response_data, list):
+                            print(f"   ✅ {test_name}: 200 OK - JSON list with {len(response_data)} items")
+                        else:
+                            print(f"   ✅ {test_name}: 200 OK - JSON response (type: {type(response_data)})")
+                    except Exception as e:
+                        print(f"   ❌ {test_name}: 200 OK but failed to parse JSON - {str(e)}")
+                        all_success = False
+                else:
+                    print(f"   ❌ {test_name}: Expected 200, got {response.status_code}")
+                    print(f"      Response: {response.text[:200]}...")
+                    all_success = False
+                    
+            except Exception as e:
+                print(f"   ❌ {test_name}: Request error - {str(e)}")
+                all_success = False
+        
+        return all_success
+
+    def _test_demo_renter_crm_aff(self):
+        """Test demo_renter tenant CRM/Affiliates access - expect 403 FEATURE_DISABLED"""
+        if not self.access_token:
+            print("   ❌ No access token available")
+            return False
+        
+        # Test endpoints with X-Tenant-ID=demo_renter header
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'X-Tenant-ID': 'demo_renter'
+        }
+        
+        test_cases = [
+            ("CRM Campaigns", "api/v1/crm/campaigns"),
+            ("Affiliates", "api/v1/affiliates/")
+        ]
+        
+        all_success = True
+        
+        for test_name, endpoint in test_cases:
+            print(f"\n   🔍 Testing {test_name} with demo_renter")
+            
+            url = f"{self.base_url}/{endpoint}"
+            try:
+                import requests
+                response = requests.get(url, headers=headers, timeout=30)
+                
+                if response.status_code == 403:
+                    try:
+                        response_data = response.json()
+                        
+                        # Check for FEATURE_DISABLED error
+                        error_code = response_data.get('error_code')
+                        if error_code == 'FEATURE_DISABLED':
+                            print(f"   ✅ {test_name}: 403 FEATURE_DISABLED")
+                        else:
+                            print(f"   ❌ {test_name}: 403 but wrong error_code: {error_code}")
+                            print(f"      Response: {response.text[:200]}...")
+                            all_success = False
+                    except Exception as e:
+                        print(f"   ❌ {test_name}: Failed to parse 403 response - {str(e)}")
+                        print(f"      Response: {response.text[:200]}...")
+                        all_success = False
+                else:
+                    print(f"   ❌ {test_name}: Expected 403, got {response.status_code}")
+                    print(f"      Response: {response.text[:200]}...")
+                    all_success = False
+                    
+            except Exception as e:
+                print(f"   ❌ {test_name}: Request error - {str(e)}")
+                all_success = False
+        
+        return all_success
+
     def test_approval_queue_module(self):
         """Test Approval Queue Module - Comprehensive Testing"""
         print("\n📋 APPROVAL QUEUE MODULE TESTS")
