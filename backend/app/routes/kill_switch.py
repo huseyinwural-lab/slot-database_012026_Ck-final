@@ -21,7 +21,7 @@ async def get_kill_switch_status(
 ):
     # owner-only module
     require_owner(current_admin)
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="kill_switch")
 
     tenant = await session.get(Tenant, tenant_id)
@@ -41,7 +41,7 @@ async def set_tenant_kill_switch(
 ):
     """Owner-only: update tenant.features.kill_switches[module_key]"""
     require_owner(current_admin)
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="kill_switch")
 
     tenant_id = payload.get("tenant_id")
