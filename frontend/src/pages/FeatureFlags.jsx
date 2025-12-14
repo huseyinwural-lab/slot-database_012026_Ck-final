@@ -528,6 +528,7 @@ const FeatureFlags = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </RequireFeature>
   );
 };
 
