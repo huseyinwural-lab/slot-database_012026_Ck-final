@@ -52,10 +52,27 @@ async def get_offers(
     return []
 
 @router.get("/links")
-async def get_links(): return []
+async def get_links(
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    return []
+
 
 @router.get("/payouts")
-async def get_payouts(): return []
+async def get_payouts(
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    return []
+
 
 @router.get("/creatives")
-async def get_creatives(): return []
+async def get_creatives(
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    return []
