@@ -53,7 +53,7 @@ async def list_tables(
     return res.scalars().all()
 
 
-@router.post("/", response_model=TableGameDB)
+@router.post("", response_model=TableGameDB)
 async def create_table(
     payload: dict = Body(...),
     session: AsyncSession = Depends(get_session),
