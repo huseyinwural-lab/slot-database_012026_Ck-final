@@ -121,7 +121,7 @@ const Layout = ({ children }) => {
               {hasFeature('can_manage_admins') && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/tenants" icon={Building} label="Tenants" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" activeClassName={theme.activeItem} />}
+              {hasFeature('can_manage_experiments') && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" activeClassName={theme.activeItem} />}
               {hasFeature('can_use_game_robot') && isOwner && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/settings" icon={Settings} label="Settings" activeClassName={theme.activeItem} />}
           </div>
