@@ -6,6 +6,7 @@ from typing import List
 from app.core.database import get_session
 from app.models.sql_models import Affiliate, AdminUser
 from app.utils.auth import get_current_admin
+from app.services.feature_access import enforce_module_access
 
 router = APIRouter(prefix="/api/v1/affiliates", tags=["affiliates"])
 
