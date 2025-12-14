@@ -79,7 +79,7 @@ yarn dev
 | Role | Email | Password |
 |------|-------|----------|
 | **Platform Owner** | `admin@casino.com` | `Admin123!` |
-| **Tenant Admin** | `admin-demo_renter@tenant.com` | `TenantAdmin123!` |
+| **Tenant Admin** | (Seed edilmedi) | - |
 | **Player** | `player@test.com` | `Player123!` |
 
 ## 🛠 VS Code Configuration
