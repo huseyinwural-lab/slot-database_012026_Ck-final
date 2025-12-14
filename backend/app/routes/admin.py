@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
-
 from app.utils.tenant import get_current_tenant_id
 
 
