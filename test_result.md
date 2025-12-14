@@ -32,6 +32,21 @@ frontend:
         -agent: "testing"
         -comment: "✅ FF-006 E2E FEATURE FLAGS GATING MATRIX RE-TEST AFTER FIXES - ALL TESTS PASSED (100% success rate): Test Case A (demo_renter minimal tenant): ✅ A1) Login successful with admin@casino.com/Admin123! - Platform Admin dashboard loaded. ✅ A2) TenantSwitcher found and working - 3 options available (Global Context, Demo Renter Casino, VIP Casino Operator). ✅ A3) Successfully switched to demo_renter tenant - localStorage X-Tenant-ID correctly set to 'demo_renter'. ✅ A4) Sidebar correctly hides ALL 4/4 restricted modules (CRM & Comms, Affiliates, Feature Flags, Kill Switch) - feature gating working perfectly. ✅ A5) Direct navigation to restricted routes (/crm, /affiliates, /features, /kill-switch) ALL show ModuleDisabled page (FIXED - no longer redirects to login). ✅ A6) No 'Failed to load' toasts or error messages found. Test Case B (default_casino full tenant): ✅ B1) Successfully switched back to Global Context - localStorage X-Tenant-ID correctly cleared to null. ✅ B2) Sidebar correctly shows ALL 4/4 modules for Global Context. ✅ B3) Navigation to /crm loads successfully for Global Context (200 response, UI loads properly). HEADER VERIFICATION: ✅ Authorization header and X-Tenant-ID header confirmed working through successful tenant switching behavior. FIXES CONFIRMED: Tenant impersonation header + standardized error handling working correctly. All previous session management issues resolved - direct URL navigation now properly shows ModuleDisabled instead of redirecting to login."
 
+  - task: "Final UI Sanity - Login Page Demo Credentials Removal"
+    implemented: true
+    working: true
+    file: "src/pages/Login.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ FINAL UI SANITY TEST - ALL REQUIREMENTS MET (100% success rate): Test 1) Login page loads successfully at https://casino-admin-panel-3.preview.emergentagent.com/login with 'Admin Login' title visible. Test 2) Email input confirmed empty by default - no pre-filled values. Test 3) Demo credentials successfully removed - '(disabled in production)' text and 'Demo user:' text no longer visible on login page (CRITICAL FIX APPLIED). Test 4) Manual login with admin@casino.com/Admin123! successful after admin seed - redirected to dashboard at root URL, 'Executive Dashboard' and 'Platform Admin' elements visible, comprehensive dashboard with revenue metrics, alerts, and live data loaded correctly. Test 5) No UI regressions detected - no error elements found, clean login form, proper styling maintained. ISSUE RESOLVED: Removed lines 101-103 from Login.jsx containing demo credential references. All review request requirements satisfied."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ FINAL VERIFICATION COMPLETE - Demo credentials removal successful and login functionality working perfectly. Fixed demo credential visibility issue by removing the paragraph element containing 'Demo user: (disabled in production)' text from Login.jsx. Login flow tested end-to-end with admin@casino.com/Admin123! credentials and dashboard loads successfully."
+
 backend:
   - task: "Final Backend Regression Tests - Release Hardening"
     implemented: true
