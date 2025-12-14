@@ -130,6 +130,16 @@ jobs:
             ci_artifacts/compose_logs_tail.txt
             ci_artifacts/inspect_*.json
 
+      - name: Upload compose artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-compose-artifacts
+          path: |
+            ci_artifacts/compose_ps.txt
+            ci_artifacts/compose_logs_tail.txt
+            ci_artifacts/inspect_*.json
+
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
         with:
