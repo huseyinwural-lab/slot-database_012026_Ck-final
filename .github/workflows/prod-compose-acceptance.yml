@@ -1,0 +1,119 @@
+name: Prod Compose Acceptance (Postgres + Migrations)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  prod_compose_acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      # Uygulamanın prod/staging davranışını tetiklemek için
+      ENV: staging
+      DEBUG: "false"
+      LOG_FORMAT: json
+      LOG_LEVEL: INFO
+
+      # CI için dummy secret yeterli; prod’da GitHub Secrets kullanın
+      JWT_SECRET: "ci_dummy_secret_change_me"
+
+      # docker-compose.prod.yml backend port mapping: 8001:8001
+      API_BASE: "http://localhost:8001"
+
+      # docker-compose.prod.yml postgres env uses POSTGRES_PASSWORD
+      POSTGRES_PASSWORD: "postgres"
+
+      # CI db connection string (service name is 'postgres' in compose)
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/casino_db"
+
+      DB_POOL_SIZE: "5"
+      DB_MAX_OVERFLOW: "10"
+
+      # CORS_ORIGINS CI için önemli değil ama fail-fast varsa boş bırakmayın
+      CORS_ORIGINS: "http://localhost:8001"
+
+      # Frontend build args
+      REACT_APP_BACKEND_URL: "http://localhost:8001"
+      VITE_API_URL: "http://localhost:8001/api/v1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Docker versions
+        run: |
+          docker version
+          docker compose version
+
+      - name: Bring up prod stack (fresh)
+        run: |
+          set -e
+          # Fresh DB için volume’ları sil
+          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
+          docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+          docker ps -a
+
+      - name: Wait for API health
+        run: |
+          set -e
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/health" || true)
+            if [ "$code" = "200" ]; then
+              echo "Health OK"
+              exit 0
+            fi
+            echo "Waiting for /api/health ... ($i) code=$code"
+            sleep 2
+          done
+          echo "Health did not become ready in time"
+          exit 1
+
+      - name: Check readiness (DB up)
+        run: |
+          set -e
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/ready" || true)
+          echo "GET /api/ready => $code"
+          test "$code" = "200"
+
+      - name: Assert migrations ran on fresh DB (restart idempotency)
+        run: |
+          set -e
+          backend_cid=$(docker compose -f docker-compose.prod.yml ps -q backend || true)
+          if [ -z "$backend_cid" ]; then
+            echo "Backend service name 'backend' değilse bu adımı compose servisinize göre düzeltin."
+            docker compose -f docker-compose.prod.yml ps
+            exit 1
+          fi
+
+          echo "Restarting backend to validate alembic idempotency..."
+          docker restart "$backend_cid"
+
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/health" || true)
+            if [ "$code" = "200" ]; then
+              break
+            fi
+            echo "Waiting after restart ... ($i) code=$code"
+            sleep 2
+          done
+
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/ready" || true)
+          echo "GET /api/ready after restart => $code"
+          test "$code" = "200"
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          echo "=== docker compose ps ==="
+          docker compose -f docker-compose.prod.yml ps || true
+          echo "=== docker compose logs (last 300 lines) ==="
+          docker compose -f docker-compose.prod.yml logs --tail=300 || true
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
