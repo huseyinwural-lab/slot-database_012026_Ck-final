@@ -77,6 +77,8 @@ async def seed_default_tenants(session: AsyncSession):
         features={
             "can_manage_admins": True,
             "can_view_reports": True,
+            "can_manage_experiments": True,
+            "can_use_kill_switch": True,
         }
     )
     
