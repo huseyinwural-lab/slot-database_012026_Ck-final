@@ -87,6 +87,7 @@ app.include_router(finance_actions.router)
 app.include_router(feature_flags.router)
 app.include_router(simulation_lab.router)
 app.include_router(settings_router.router)
+app.include_router(dashboard.router)
 
 
 # Startup Event
