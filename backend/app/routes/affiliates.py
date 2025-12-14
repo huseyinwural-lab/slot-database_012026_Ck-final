@@ -29,6 +29,8 @@ async def create_affiliate(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+
     aff = Affiliate(
         tenant_id=current_admin.tenant_id,
         username=affiliate_data["username"],
