@@ -136,10 +136,26 @@ jobs:
           yarn install --frozen-lockfile || yarn install
           yarn playwright install --with-deps chromium
 
+      - name: Wait for Frontend (admin)
+        run: |
+          set -e
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000/login" || true)
+            if [ "$code" = "200" ]; then
+              echo "Frontend OK"
+              exit 0
+            fi
+            echo "Waiting for frontend ... ($i) code=$code"
+            sleep 2
+          done
+          echo "Frontend did not become ready in time"
+          exit 1
+
       - name: UI smoke matrix (Playwright)
         working-directory: e2e
         env:
           E2E_BASE_URL: "http://localhost:3000"
+          E2E_API_BASE: "http://localhost:8001"
           E2E_OWNER_EMAIL: "admin@casino.com"
           E2E_OWNER_PASSWORD: "Admin123!"
         run: |
