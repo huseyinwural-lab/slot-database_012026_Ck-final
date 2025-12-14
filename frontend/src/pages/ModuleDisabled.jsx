@@ -11,7 +11,11 @@ const ModuleDisabled = ({ featureName, reason }) => {
     'can_use_game_robot': 'Game Robot',
     'can_edit_configs': 'Game Configuration',
     'can_manage_kyc': 'KYC Management',
-    'can_view_reports': 'Reports'
+    'can_view_reports': 'Reports',
+    'can_manage_experiments': 'Feature Flags & A/B Testing',
+    'can_use_kill_switch': 'Kill Switch',
+    'can_manage_affiliates': 'Affiliate Program',
+    'can_use_crm': 'CRM & Communications'
   };
 
   let title = "Module Disabled";

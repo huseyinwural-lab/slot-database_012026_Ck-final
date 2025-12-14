@@ -55,7 +55,7 @@ export const CapabilitiesProvider = ({ children }) => {
       console.error('Failed to fetch capabilities:', error);
       // If token exists but capabilities fail (e.g., 403/503 due to tenant context),
       // keep the user authenticated; just mark capabilities as empty.
-      setCapabilities({ features: {}, is_owner: false });
+      setCapabilities({});
       setIsOwner(false);
     } finally {
       setLoading(false);
