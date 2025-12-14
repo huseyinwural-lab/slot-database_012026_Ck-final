@@ -22,6 +22,10 @@ jobs:
       # CI için dummy secret yeterli; prod’da GitHub Secrets kullanın
       JWT_SECRET: "ci_dummy_secret_change_me"
 
+      # One-shot owner bootstrap (seed kapalıyken E2E login için)
+      BOOTSTRAP_OWNER_EMAIL: "ci_owner@casino.local"
+      BOOTSTRAP_OWNER_PASSWORD: "StrongPassw0rd!"
+
       # docker-compose.prod.yml backend port mapping: 8001:8001
       API_BASE: "http://localhost:8001"
 
@@ -163,8 +167,8 @@ jobs:
         env:
           E2E_BASE_URL: "http://localhost:3000"
           E2E_API_BASE: "http://localhost:8001"
-          E2E_OWNER_EMAIL: "admin@casino.com"
-          E2E_OWNER_PASSWORD: "Admin123!"
+          E2E_OWNER_EMAIL: ${{ env.BOOTSTRAP_OWNER_EMAIL }}
+          E2E_OWNER_PASSWORD: ${{ env.BOOTSTRAP_OWNER_PASSWORD }}
         run: |
           yarn test:e2e
 
@@ -175,7 +179,6 @@ jobs:
           name: playwright-artifacts
           path: |
             e2e/test-results/**
-            e2e/playwright-report/**
 
       - name: Tear down
         if: always()
