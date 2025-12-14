@@ -42,8 +42,8 @@ async def get_dashboard_stats(
     pending_wit = (await session.execute(select(func.count()).select_from(Transaction).where(Transaction.type == "withdrawal", Transaction.status == "pending"))).scalar() or 0
     pending_kyc = (await session.execute(select(func.count()).select_from(Player).where(Player.kyc_status == "pending"))).scalar() or 0
     
-    # Recent Players
-    recent_players = (await session.execute(select(Player).order_by(Player.registered_at.desc()).limit(5))).scalars().all()
+    # Recent Players (placeholder - future use)
+    _recent_players = (await session.execute(select(Player).order_by(Player.registered_at.desc()).limit(5))).scalars().all()
 
     return DashboardStats(
         ggr=KPIMetric(value=ggr_today, change_percent=0.0, trend="up"),
