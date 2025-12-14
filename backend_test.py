@@ -725,7 +725,7 @@ class CasinoAdminAPITester:
 
     def test_feature_flags_enforcement_and_kill_switch(self):
         """Test Backend enforcement & kill switch validation for FF epic - Review Request"""
-        print("\n🚫 FEATURE FLAGS ENFORCEMENT & KILL SWITCH VALIDATION TESTS")
+        print("\n🚫 FEATURE FLAGS ENFORCEMENT & KILL SWITCH VALIDATION TESTS - AppError Standard")
         
         # Setup: Login as admin@casino.com/Admin123!
         print(f"\n🔍 Setup: Login as admin@casino.com/Admin123!")
@@ -736,7 +736,7 @@ class CasinoAdminAPITester:
         
         # Test 1: With header X-Tenant-ID=demo_renter (minimal features)
         print(f"\n🔍 Test 1: X-Tenant-ID=demo_renter (minimal features) - Expect 403 FEATURE_DISABLED")
-        success_demo_renter = self._test_demo_renter_feature_enforcement()
+        success_demo_renter = self._test_demo_renter_feature_enforcement_apperror()
         
         # Test 2: With header X-Tenant-ID=default_casino (full features enabled)
         print(f"\n🔍 Test 2: X-Tenant-ID=default_casino (full features) - Expect 200 OK")
