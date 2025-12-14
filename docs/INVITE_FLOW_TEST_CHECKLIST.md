@@ -190,16 +190,11 @@ curl -X POST "$API_URL/api/v1/auth/accept-invite" \
 ---
 
 ### **ADIM 8: Veritabanı Kontrol (Final Durum)**
-**Eylem:** MongoDB'de admin'in güncellenmiş durumunu kontrol et
+**Eylem:** PostgreSQL'de admin'in güncellenmiş durumunu kontrol et
 
 **Komut:**
 ```bash
-mongosh $MONGO_URL --eval '
-  db.admin_users.findOne(
-    { email: "test-invite-XXXXXX@casino.com" },
-    { _id: 0, email: 1, status: 1, invite_token: 1, invite_expires_at: 1, password_hash: 1 }
-  )
-'
+psql "$DATABASE_URL" -c "SELECT email, status, invite_token, invite_expires_at, hashed_password FROM adminuser WHERE email='test-invite-XXXXXX@casino.com'"
 ```
 
 **Beklenen Sonuç:**
