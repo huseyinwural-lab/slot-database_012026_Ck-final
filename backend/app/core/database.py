@@ -23,14 +23,23 @@ except Exception as e:
     raise
 
 async def init_db():
+    """DB şema init.
+
+    - PostgreSQL (ve yeni DB'ler): create_all yeterlidir.
+    - SQLite dosya DB (dev/preview): create_all mevcut tablolara yeni kolon eklemez.
+      Bu nedenle **debug modunda** sqlite kullanıyorsak tabloları drop_all + create_all
+      ile yeniden yaratıyoruz.
+
+    Prod için hedef: Alembic migration (Patch 2).
     """
-    Creates tables if they don't exist.
-    In production, use Alembic migrations instead.
-    """
+
     try:
         async with engine.begin() as conn:
-            # await conn.run_sync(SQLModel.metadata.drop_all) # Uncomment to reset DB (Dev only)
+            if "sqlite" in settings.database_url and settings.debug:
+                logger.warning("SQLite + DEBUG: resetting schema with drop_all/create_all")
+                await conn.run_sync(SQLModel.metadata.drop_all)
             await conn.run_sync(SQLModel.metadata.create_all)
+
         logger.info("Database initialized and tables created.")
     except Exception as e:
         logger.critical(f"Database initialization failed: {e}")
