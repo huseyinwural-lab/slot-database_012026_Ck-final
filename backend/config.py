@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # Global emergency switch to disable all non-core modules
     kill_switch_all: str = "false"  # KILL_SWITCH_ALL
 
+    # Seeding guard (P0)
+    # Fail-closed: seed runs only in (dev|local) AND when explicitly enabled.
+    seed_on_startup: bool = False  # SEED_ON_STARTUP
+
     openai_model: str = "gpt-4-1106-preview"
     # Integrations
     openai_api_key: Optional[str] = None
