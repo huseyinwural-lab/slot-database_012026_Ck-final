@@ -159,6 +159,13 @@ async def readiness_check():
         from fastapi import HTTPException
         raise HTTPException(status_code=503, detail={"status": "degraded", "dependencies": {"database": "unreachable"}})
 
+
+# Alias for common ops naming
+@app.get("/api/ready")
+async def ready_alias():
+    return await readiness_check()
+
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     from app.core.database import engine
