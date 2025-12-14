@@ -18,7 +18,8 @@ async def register_player(payload: dict = Body(...), session: AsyncSession = Dep
     
     # Check exists
     stmt = select(Player).where(Player.email == email).where(Player.tenant_id == tenant_id)
-    existing = (await session.exec(stmt)).first()
+    res = await session.execute(stmt)
+    existing = res.scalars().first()
     if existing:
         raise HTTPException(400, "Player exists")
         
@@ -41,7 +42,8 @@ async def login_player(payload: dict = Body(...), session: AsyncSession = Depend
     tenant_id = payload.get("tenant_id", "default_casino")
     
     stmt = select(Player).where(Player.email == email).where(Player.tenant_id == tenant_id)
-    player = (await session.exec(stmt)).first()
+    res = await session.execute(stmt)
+    player = res.scalars().first()
     
     if not player or not verify_password(payload.get("password"), player.password_hash):
         raise HTTPException(401, "Invalid credentials")

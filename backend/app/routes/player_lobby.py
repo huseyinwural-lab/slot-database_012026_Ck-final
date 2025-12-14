@@ -11,8 +11,8 @@ async def get_lobby_games(request: Request, session: AsyncSession = Depends(get_
     tenant_id = request.headers.get("X-Tenant-ID", "default_casino")
     
     stmt = select(Game).where(Game.tenant_id == tenant_id).where(Game.status == "active")
-    result = await session.exec(stmt)
-    games = result.all()
+    result = await session.execute(stmt)
+    games = result.scalars().all()
     
     return {
         "items": games,
