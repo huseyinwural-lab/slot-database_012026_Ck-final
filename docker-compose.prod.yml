@@ -26,7 +26,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      ENV: prod
+      ENV: ${ENV:-prod}
       DEBUG: "False"
       JWT_SECRET: ${JWT_SECRET}
       JWT_ALGORITHM: HS256
