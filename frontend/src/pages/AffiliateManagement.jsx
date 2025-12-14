@@ -64,7 +64,7 @@ const AffiliateManagement = () => {
         toast.message('Coming soon / Not implemented');
         return;
       }
-      toast.error('Load failed');
+      toast.error('Unexpected error');
     }
   }, [activeTab]);
 

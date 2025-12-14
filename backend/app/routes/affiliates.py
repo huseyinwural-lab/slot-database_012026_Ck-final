@@ -11,7 +11,7 @@ from app.utils.tenant import get_current_tenant_id
 
 router = APIRouter(prefix="/api/v1/affiliates", tags=["affiliates"])
 
-@router.get("/")
+@router.get("")
 async def get_affiliates(
     request: Request,
     session: AsyncSession = Depends(get_session),
@@ -26,7 +26,7 @@ async def get_affiliates(
     # Frontend AffiliateManagement.jsx expects direct array: setAffiliates((await api.get('/v1/affiliates')).data);
     return items
 
-@router.post("/")
+@router.post("")
 async def create_affiliate(
     request: Request,
     affiliate_data: dict = Body(...),

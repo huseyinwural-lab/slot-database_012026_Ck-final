@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+const RAW_API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+// Prevent mixed-content in HTTPS environments.
+// If the app is served over HTTPS but the backend URL is HTTP (common misconfig), upgrade.
+let API_URL = RAW_API_URL;
+if (typeof window !== 'undefined' && window.location?.protocol === 'https:' && API_URL.startsWith('http://')) {
+  API_URL = API_URL.replace(/^http:\/\//, 'https://');
+}
 
 const api = axios.create({
   baseURL: API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`,
