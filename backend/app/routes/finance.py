@@ -23,9 +23,11 @@ async def get_reconciliations(
 
 @router.get("/chargebacks")
 async def get_chargebacks(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    query = select(ChargebackCase).where(ChargebackCase.tenant_id == current_admin.tenant_id)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    query = select(ChargebackCase).where(ChargebackCase.tenant_id == tenant_id)
     result = await session.execute(query)
     return result.scalars().all()
