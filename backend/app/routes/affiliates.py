@@ -44,7 +44,12 @@ async def create_affiliate(
 
 # Stubs returning arrays
 @router.get("/offers")
-async def get_offers(): return []
+async def get_offers(
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    await enforce_module_access(session=session, tenant_id=current_admin.tenant_id, module_key="affiliates")
+    return []
 
 @router.get("/links")
 async def get_links(): return []
