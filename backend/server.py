@@ -88,6 +88,7 @@ app.include_router(feature_flags.router)
 app.include_router(simulation_lab.router)
 app.include_router(settings_router.router)
 app.include_router(dashboard.router)
+app.include_router(tables.router)
 
 
 # Startup Event
