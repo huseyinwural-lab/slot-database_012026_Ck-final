@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
-@router.get("/users")
+from app.schemas.admin import AdminUserPublic
+
+
+@router.get("/users", response_model=List[AdminUserPublic])
 async def get_admins(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
@@ -24,9 +27,10 @@ async def get_admins(
     query = select(AdminUser)
     if not current_admin.is_platform_owner:
         query = query.where(AdminUser.tenant_id == current_admin.tenant_id)
-        
-    result = await session.execute(query) # Changed exec to execute
-    return result.scalars().all()
+
+    result = await session.execute(query)  # Changed exec to execute
+    admins = result.scalars().all()
+    return [AdminUserPublic.model_validate(a) for a in admins]
 
 @router.post("/users")
 async def create_admin(
