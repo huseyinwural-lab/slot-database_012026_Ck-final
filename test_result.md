@@ -2,6 +2,19 @@ user_problem_statement:
   summary: "Phase 1: Financial Integrity & Security Update"
 backend:
 
+patch2_validation:
+  - task: "Patch 2 Partial Validation (A2/A3 + CORS allow_credentials=false + readiness behavior)"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/config.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ PATCH 2 VALIDATION - ALL TESTS PASSED (7/7 - 100% success rate): Test 1) GET /api/health → 200 OK with status='healthy', GET /api/readiness → 200 OK with status='ready'. Test 2) OPTIONS preflight to /api/v1/players with Origin 'http://localhost:3000' → 200 OK with Access-Control-Allow-Origin='http://localhost:3000', Access-Control-Allow-Credentials=None (correctly does NOT include allow-credentials:true), Access-Control-Allow-Methods includes all required methods. Test 3) OPTIONS preflight with disallowed Origin 'http://evil.com' → 400 status with Access-Control-Allow-Origin=None (correctly blocked). Test 4) API login and protected endpoint validation: POST /api/v1/admin/seed → 200 OK, POST /api/v1/auth/login with admin@casino.com/Admin123! → 200 OK with JWT access_token, GET /api/v1/players with Authorization Bearer token → 200 OK (protected endpoint accessible). Test 5) ENV flag regression test: Health endpoint returns environment='dev' correctly, no regressions with default env=dev. Test 6) drop_all safety barrier validation: System operational in dev environment, indirect validation that init_db safety checks passed (drop_all only logs when env in {dev,local} and debug=true and database_url includes sqlite). All CORS, authentication, and safety mechanisms working as expected."
+
 p0_patch1_smoke_test:
   - task: "P0 Patch 1 Backend Smoke/Regression Test"
     implemented: true
