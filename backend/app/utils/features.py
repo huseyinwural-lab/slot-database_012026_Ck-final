@@ -24,7 +24,7 @@ async def ensure_tenant_feature(
     3) default_casino
     """
 
-    tenant_id = get_current_tenant_id(request, admin)
+    tenant_id = await get_current_tenant_id(request, admin, session=session)
     request_id = request.headers.get("X-Request-ID")
 
     res = await session.execute(select(Tenant).where(Tenant.id == tenant_id))
