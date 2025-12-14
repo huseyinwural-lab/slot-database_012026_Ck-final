@@ -125,7 +125,7 @@ async def health_check():
     """Liveness probe: process up & running."""
     return {
         "status": "healthy",
-        "environment": settings.environment if hasattr(settings, 'environment') else "dev",
+        "environment": settings.env,
     }
 
 @app.get("/api/readiness")
