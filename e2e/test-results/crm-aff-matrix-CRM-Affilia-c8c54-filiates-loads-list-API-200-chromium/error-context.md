@@ -1,0 +1,164 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - heading "Platform Admin" [level=1] [ref=e6]
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: Core
+          - link "Dashboard" [ref=e12] [cursor=pointer]:
+            - /url: /
+            - img [ref=e13]
+            - text: Dashboard
+          - link "Players" [ref=e18] [cursor=pointer]:
+            - /url: /players
+            - img [ref=e19]
+            - text: Players
+          - link "Finance" [ref=e24] [cursor=pointer]:
+            - /url: /finance
+            - img [ref=e25]
+            - text: Finance
+          - link "All Revenue" [ref=e27] [cursor=pointer]:
+            - /url: /revenue/all-tenants
+            - img [ref=e28]
+            - text: All Revenue
+          - link "Games" [ref=e31] [cursor=pointer]:
+            - /url: /games
+            - img [ref=e32]
+            - text: Games
+          - link "VIP Games" [ref=e34] [cursor=pointer]:
+            - /url: /vip-games
+            - img [ref=e35]
+            - text: VIP Games
+        - generic [ref=e37]:
+          - generic [ref=e38]: Operations
+          - link "CRM & Comms" [ref=e39] [cursor=pointer]:
+            - /url: /crm
+            - img [ref=e40]
+            - text: CRM & Comms
+          - link "Affiliates" [ref=e43] [cursor=pointer]:
+            - /url: /affiliates
+            - img [ref=e44]
+            - text: Affiliates
+          - link "Kill Switch" [ref=e49] [cursor=pointer]:
+            - /url: /kill-switch
+            - img [ref=e50]
+            - text: Kill Switch
+          - link "Support" [ref=e52] [cursor=pointer]:
+            - /url: /support
+            - img [ref=e53]
+            - text: Support
+        - generic [ref=e55]:
+          - generic [ref=e56]: Risk & Compliance
+          - link "Risk Rules" [ref=e57] [cursor=pointer]:
+            - /url: /risk
+            - img [ref=e58]
+            - text: Risk Rules
+          - link "Fraud Check" [ref=e60] [cursor=pointer]:
+            - /url: /fraud
+            - img [ref=e61]
+            - text: Fraud Check
+          - link "Approval Queue" [ref=e63] [cursor=pointer]:
+            - /url: /approvals
+            - img [ref=e64]
+            - text: Approval Queue
+          - link "Responsible Gaming" [ref=e67] [cursor=pointer]:
+            - /url: /rg
+            - img [ref=e68]
+            - text: Responsible Gaming
+        - generic [ref=e72]:
+          - generic [ref=e73]: System
+          - link "CMS" [ref=e74] [cursor=pointer]:
+            - /url: /cms
+            - img [ref=e75]
+            - text: CMS
+          - link "Reports" [ref=e78] [cursor=pointer]:
+            - /url: /reports
+            - img [ref=e79]
+            - text: Reports
+          - link "Logs" [ref=e81] [cursor=pointer]:
+            - /url: /logs
+            - img [ref=e82]
+            - text: Logs
+          - link "Admin Users" [ref=e85] [cursor=pointer]:
+            - /url: /admins
+            - img [ref=e86]
+            - text: Admin Users
+          - link "Tenants" [ref=e98] [cursor=pointer]:
+            - /url: /tenants
+            - img [ref=e99]
+            - text: Tenants
+          - link "API Keys" [ref=e102] [cursor=pointer]:
+            - /url: /keys
+            - img [ref=e103]
+            - text: API Keys
+          - link "Feature Flags" [ref=e106] [cursor=pointer]:
+            - /url: /features
+            - img [ref=e107]
+            - text: Feature Flags
+          - link "Settings" [ref=e110] [cursor=pointer]:
+            - /url: /settings
+            - img [ref=e111]
+            - text: Settings
+      - button "Logout" [ref=e115] [cursor=pointer]:
+        - img [ref=e116]
+        - text: Logout
+    - main [ref=e119]:
+      - generic [ref=e120]:
+        - generic [ref=e122]:
+          - img [ref=e123]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e126]
+        - generic [ref=e127]:
+          - generic [ref=e128]:
+            - img [ref=e129]
+            - combobox [ref=e132] [cursor=pointer]:
+              - img [ref=e133]
+          - generic [ref=e135]:
+            - paragraph [ref=e136]: Admin
+            - paragraph
+          - generic [ref=e137]: A
+      - generic [ref=e138]:
+        - generic [ref=e139]:
+          - heading "Affiliate Program" [level=2] [ref=e140]
+          - generic [ref=e141]:
+            - tablist [ref=e142]:
+              - tab "Partners" [selected] [ref=e143] [cursor=pointer]:
+                - img [ref=e144]
+                - text: Partners
+              - tab "Offers" [ref=e149] [cursor=pointer]:
+                - img [ref=e150]
+                - text: Offers
+              - tab "Tracking" [ref=e154] [cursor=pointer]:
+                - img [ref=e155]
+                - text: Tracking
+              - tab "Payouts" [ref=e158] [cursor=pointer]:
+                - img [ref=e159]
+                - text: Payouts
+              - tab "Creatives" [ref=e161] [cursor=pointer]:
+                - img [ref=e162]
+                - text: Creatives
+              - tab "Reports" [ref=e166] [cursor=pointer]:
+                - img [ref=e167]
+                - text: Reports
+            - tabpanel "Partners" [ref=e168]:
+              - button "Add Partner" [ref=e170] [cursor=pointer]:
+                - img
+                - text: Add Partner
+              - table [ref=e174]:
+                - rowgroup [ref=e175]:
+                  - row "Partner Email Balance Status Action" [ref=e176]:
+                    - columnheader "Partner" [ref=e177]
+                    - columnheader "Email" [ref=e178]
+                    - columnheader "Balance" [ref=e179]
+                    - columnheader "Status" [ref=e180]
+                    - columnheader "Action" [ref=e181]
+                - rowgroup
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e182] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e183]:
+      - img [ref=e184]
+      - paragraph [ref=e185]: Made with Emergent
+```
