@@ -86,9 +86,12 @@ async def login(form_data: LoginRequest = Body(...), session: AsyncSession = Dep
 
     return TokenResponse(access_token=access_token, admin_email=admin.email, admin_role=admin.role)
 
-@router.get("/me")
+from app.schemas.admin import AdminUserPublic
+
+
+@router.get("/me", response_model=AdminUserPublic)
 async def get_me(current_admin: AdminUser = Depends(get_current_admin)):
-    return current_admin
+    return AdminUserPublic.model_validate(current_admin)
 
 @router.post("/change-password")
 async def change_password(

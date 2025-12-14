@@ -75,7 +75,7 @@ async def create_admin(
     await session.commit()
     await session.refresh(new_admin)
     
-    return {"user": new_admin, "invite_token": new_admin.invite_token}
+    return {"user": AdminUserPublic.model_validate(new_admin), "invite_token": new_admin.invite_token}
 
 
 @router.post("/create-tenant-admin")
@@ -135,7 +135,7 @@ async def create_tenant_admin(
     await session.commit()
     await session.refresh(new_admin)
 
-    return {"message": "CREATED", "admin": new_admin}
+    return {"message": "CREATED", "admin": AdminUserPublic.model_validate(new_admin)}
 
 
 @router.post("/seed")
