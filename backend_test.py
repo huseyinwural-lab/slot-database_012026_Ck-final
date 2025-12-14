@@ -13774,6 +13774,9 @@ def main():
     print("\n🤖 FAZ 5 – ROBOT ORCHESTRATOR BACKEND ENDPOINT TESTS (TURKISH REVIEW REQUEST)")
     test_results.append(("FAZ 5 Robot Orchestrator Backend Endpoint", tester.test_robot_orchestrator_backend_endpoint_faz5()))
     
+    print("\n🔒 DTO LEAK FIX REGRESSION TESTS (PR-1)")
+    test_results.append(("DTO Leak Fix Regression", tester.test_dto_leak_fix_regression()))
+    
     # Print summary
     print("\n" + "=" * 50)
     print("📊 TEST SUMMARY")
