@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/v1/flags", tags=["flags"])
 async def _enforce(request: Request, session: AsyncSession, admin: AdminUser):
     # Experiments/flags module is owner-only in catalog.
     require_owner(admin)
-    tenant_id = get_current_tenant_id(request, admin)
+    tenant_id = await get_current_tenant_id(request, admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="experiments")
 
 
