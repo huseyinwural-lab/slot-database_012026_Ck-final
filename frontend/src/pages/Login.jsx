@@ -98,9 +98,7 @@ const Login = () => {
             <Button type="submit" className="w-full mt-2" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
-            <p className="mt-2 text-xs text-muted-foreground text-center">
-              Demo user: <span className="font-mono">(disabled in production)</span>
-            </p>
+            {/* Demo credentials removed for production */}
           </form>
         </CardContent>
       </Card>
