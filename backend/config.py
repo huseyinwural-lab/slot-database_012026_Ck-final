@@ -5,7 +5,7 @@ import json
 class Settings(BaseSettings):
     # Environment
     # Canonical values: dev | local | staging | prod
-    env: str = "dev"
+    env: str = "dev"  # ENV
 
     # Database
     database_url: str = "sqlite+aiosqlite:///./casino.db"  # Default to SQLite for ease of run
