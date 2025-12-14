@@ -56,11 +56,13 @@ def require_tenant_role(allowed_roles: list[str]):
 
 
 def get_tenant_filter(admin: AdminUser) -> dict:
-    """
-    Return MongoDB filter for tenant scoping
-    
-    - Owner: No filter (can see all)
-    - Tenant: Filter by tenant_id
+    """Tenant scope filtresi.
+
+    Not: Bu proje MongoDB'den PostgreSQL/SQLModel'e taşındı.
+    Bu fonksiyon artık sadece "tenant_id" bazlı genel bir filtre sözlüğü döndürür.
+
+    - Owner: boş filtre (tüm tenant'lar)
+    - Tenant: tenant_id filtresi
     """
     if is_owner(admin):
         return {}
