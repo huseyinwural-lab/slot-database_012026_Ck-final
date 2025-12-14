@@ -1019,6 +1019,35 @@ class CasinoAdminAPITester:
         """Test Feature Flags endpoints - Legacy method for compatibility"""
         return self.test_feature_flags_enforcement_and_kill_switch()
 
+    def test_quick_regression_ci_workflow(self):
+        """Quick regression after CI workflow env updates (bootstrap owner vars + HTML reporter changes)"""
+        print("\n🔧 QUICK REGRESSION - CI WORKFLOW ENV UPDATES")
+        
+        # Test 1: Health endpoints validation
+        print(f"\n🔍 Test 1: Health Endpoints Validation")
+        success_health = self._test_health_endpoints_quick()
+        
+        # Test 2: Password policy validation (specific endpoints)
+        print(f"\n🔍 Test 2: Password Policy Validation")
+        success_password_policy = self._test_password_policy_quick()
+        
+        # Overall result
+        overall_success = success_health and success_password_policy
+        
+        if overall_success:
+            print("\n✅ QUICK REGRESSION - ALL TESTS PASSED")
+            print("   ✅ /api/health and /api/ready returning 200 OK")
+            print("   ✅ create-tenant-admin password required returns 400 PASSWORD_REQUIRED")
+            print("   ✅ player register short password returns 400")
+        else:
+            print("\n❌ QUICK REGRESSION - SOME TESTS FAILED")
+            if not success_health:
+                print("   ❌ Health endpoints validation failed")
+            if not success_password_policy:
+                print("   ❌ Password policy validation failed")
+        
+        return overall_success
+
     def test_final_backend_regression_hardening(self):
         """Final backend regression tests after latest release-hardening changes"""
         print("\n🔧 FINAL BACKEND REGRESSION TESTS - RELEASE HARDENING")
