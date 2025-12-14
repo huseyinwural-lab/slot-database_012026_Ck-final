@@ -57,15 +57,20 @@ jobs:
       - name: Bring up prod stack (fresh)
         run: |
           set -e
+          set -o pipefail
+
+          mkdir -p ci_artifacts
+
           # Fresh DB için volume’ları sil
           docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
 
           # BuildKit output'u root-cause'u net gösterir (stack trace yerine gerçek fail-to-solve)
-          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml build --no-cache --progress=plain
+          # Ayrıca build output'u artifact'e yazıyoruz ki tek seferde RCA yapılabilsin.
+          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml build --no-cache --progress=plain | tee ci_artifacts/compose_build.log
 
           docker compose -f docker-compose.prod.yml up -d --remove-orphans
-          docker compose -f docker-compose.prod.yml ps
-          docker compose -f docker-compose.prod.yml logs --no-color --tail=200 || true
+          docker compose -f docker-compose.prod.yml ps | tee ci_artifacts/compose_ps_inline.txt
+          docker compose -f docker-compose.prod.yml logs --no-color --tail=200 | tee ci_artifacts/compose_logs_inline_tail200.txt || true
           docker ps -a
 
       - name: Wait for API health
@@ -133,6 +138,9 @@ jobs:
             ci_artifacts/compose_ps.txt
             ci_artifacts/compose_logs_tail.txt
             ci_artifacts/inspect_*.json
+            ci_artifacts/compose_build.log
+            ci_artifacts/compose_ps_inline.txt
+            ci_artifacts/compose_logs_inline_tail200.txt
 
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
