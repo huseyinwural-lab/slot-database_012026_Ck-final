@@ -24,7 +24,11 @@ class Settings(BaseSettings):
     # 1) JSON list: ["http://localhost:3000", "http://localhost:3001"]
     # 2) CSV: http://localhost:3000,http://localhost:3001
     cors_origins: str = '["http://localhost:3000", "http://localhost:3001"]'
-    
+
+    # Kill switch
+    # Global emergency switch to disable all non-core modules
+    kill_switch_all: str = "false"  # KILL_SWITCH_ALL
+
     openai_model: str = "gpt-4-1106-preview"
     # Integrations
     openai_api_key: Optional[str] = None
