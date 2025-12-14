@@ -11,6 +11,13 @@ logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+
+# Fail-fast for prod/staging secrets
+if settings.env in {"prod", "staging"}:
+    if not settings.jwt_secret or settings.jwt_secret in {"secret", "change_this_secret_in_production_env"}:
+        raise RuntimeError("JWT_SECRET must be set to a strong value in prod/staging")
+    if not settings.database_url:
+        raise RuntimeError("DATABASE_URL must be set in prod/staging")
 logger = logging.getLogger(__name__)
 
 # Create the main app
