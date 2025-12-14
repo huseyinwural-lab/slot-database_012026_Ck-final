@@ -17,10 +17,10 @@ async def get_affiliates(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
 
-    query = select(Affiliate).where(Affiliate.tenant_id == current_admin.tenant_id)
+    query = select(Affiliate).where(Affiliate.tenant_id == tenant_id)
     result = await session.execute(query)
     items = result.scalars().all()
     # Frontend AffiliateManagement.jsx expects direct array: setAffiliates((await api.get('/v1/affiliates')).data);

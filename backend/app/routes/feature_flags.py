@@ -18,7 +18,7 @@ async def get_feature_flags(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    tenant_id = get_current_tenant_id(request, current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="experiments")
 
     query = select(FeatureFlag)
