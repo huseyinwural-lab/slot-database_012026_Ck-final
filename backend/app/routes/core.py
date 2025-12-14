@@ -126,15 +126,25 @@ async def get_player_detail(
     return PlayerPublic.model_validate(player)
 
 @router.put("/players/{player_id}")
-async def update_player(player_id: str, update_data: Dict = Body(...), session: AsyncSession = Depends(get_session)):
-    player = await session.get(Player, player_id)
+async def update_player(
+    player_id: str,
+    request: Request,
+    update_data: Dict = Body(...),
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    stmt = select(Player).where(Player.id == player_id, Player.tenant_id == tenant_id)
+    res = await session.execute(stmt)
+    player = res.scalars().first()
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
-        
+
     for k, v in update_data.items():
         if hasattr(player, k):
             setattr(player, k, v)
-            
+
     session.add(player)
     await session.commit()
     return {"message": "Player updated"}
