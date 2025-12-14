@@ -1055,6 +1055,52 @@ class CasinoAdminAPITester:
         
         return overall_success
 
+    def test_tenant_isolation_pr3(self):
+        """Test PR-3 Tenant Scope/Isolation Standardization - Review Request"""
+        print("\n🏢 PR-3 TENANT SCOPE/ISOLATION STANDARDIZATION TESTS")
+        
+        # A) Setup
+        print(f"\n🔍 A) Setup Phase")
+        success_setup = self._setup_tenant_isolation()
+        if not success_setup:
+            print("❌ Setup failed - cannot proceed with tests")
+            return False
+        
+        # B) Header policy tests
+        print(f"\n🔍 B) Header Policy Tests")
+        success_header_policy = self._test_header_policy()
+        
+        # C) Tenant isolation / existence leak tests
+        print(f"\n🔍 C) Tenant Isolation / Existence Leak Tests")
+        success_isolation = self._test_tenant_isolation()
+        
+        # D) Run pytest file (attempt to fix environment and run)
+        print(f"\n🔍 D) Pytest File Execution")
+        success_pytest = self._run_tenant_isolation_pytest()
+        
+        # Overall result
+        overall_success = success_setup and success_header_policy and success_isolation and success_pytest
+        
+        if overall_success:
+            print("\n✅ PR-3 TENANT ISOLATION STANDARDIZATION - ALL TESTS PASSED")
+            print("   ✅ Setup successful (admin seeded, tenant admin created)")
+            print("   ✅ Header policy working (403 TENANT_HEADER_FORBIDDEN, 400 INVALID_TENANT_HEADER)")
+            print("   ✅ Tenant isolation working (404 cross-tenant access, scoped lists)")
+            print("   ✅ Owner impersonation working (200 with correct tenant_id)")
+            print("   ✅ Pytest execution successful")
+        else:
+            print("\n❌ PR-3 TENANT ISOLATION STANDARDIZATION - SOME TESTS FAILED")
+            if not success_setup:
+                print("   ❌ Setup failed")
+            if not success_header_policy:
+                print("   ❌ Header policy tests failed")
+            if not success_isolation:
+                print("   ❌ Tenant isolation tests failed")
+            if not success_pytest:
+                print("   ❌ Pytest execution failed")
+        
+        return overall_success
+
     def _setup_crm_aff_auth(self):
         """Setup authentication for CRM/Affiliates regression tests"""
         try:
