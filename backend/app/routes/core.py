@@ -12,6 +12,7 @@ from app.models.sql_models import (
     Player, Transaction, Game, AdminUser
 )
 from app.schemas.player import PlayerPublic
+from app.utils.tenant import get_current_tenant_id
 from app.utils.auth import get_current_admin
 from app.utils.pagination import get_pagination_params
 from app.models.common import PaginationMeta, PaginationParams
@@ -78,9 +79,9 @@ async def get_players(
 ):
     query = select(Player)
     
-    # Tenant Filter
-    if not current_admin.is_platform_owner:
-        query = query.where(Player.tenant_id == current_admin.tenant_id)
+    # Tenant Filter (P0-TENANT-SCOPE)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    query = query.where(Player.tenant_id == tenant_id)
     
     if status and status != "all":
         query = query.where(Player.status == status)
@@ -140,8 +141,8 @@ async def get_transactions(
 ):
     query = select(Transaction)
     
-    if not current_admin.is_platform_owner:
-        query = query.where(Transaction.tenant_id == current_admin.tenant_id)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    query = query.where(Transaction.tenant_id == tenant_id)
         
     if type and type != "all":
         query = query.where(Transaction.type == type)
@@ -174,8 +175,8 @@ async def get_games(
 ):
     query = select(Game)
     
-    if not current_admin.is_platform_owner:
-        query = query.where(Game.tenant_id == current_admin.tenant_id)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    query = query.where(Game.tenant_id == tenant_id)
         
     if category and category != "all":
         query = query.where(Game.category == category)
