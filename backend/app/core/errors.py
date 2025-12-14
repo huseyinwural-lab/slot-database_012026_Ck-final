@@ -28,13 +28,17 @@ async def app_exception_handler(request: Request, exc: AppError):
     )
 
 async def generic_exception_handler(request: Request, exc: Exception):
-    # Log the full error here in production
+    # In prod: do not leak internal exception details to clients.
+    from config import settings
+
+    details = {"error": str(exc)} if settings.debug else {}
+
     return JSONResponse(
         status_code=500,
         content={
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "An unexpected error occurred.",
-            "details": {"error": str(exc)}, # Hide in prod
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
+            "details": details,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        },
     )
