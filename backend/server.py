@@ -125,11 +125,14 @@ async def on_startup():
             from app.core.database import init_db
             await init_db()
         
-        # Seed Admin & Data
-        async with AsyncSession(engine) as session:
-            await seed_admin(session)
-            
-        logger.info("Startup complete: Database initialized and seeded.")
+        # Seed Admin & Data (P0: guarded)
+        # Fail-closed: never seed in staging/prod; in dev/local only when SEED_ON_STARTUP=true.
+        if env in {"dev", "local"} and bool(settings.seed_on_startup):
+            async with AsyncSession(engine) as session:
+                await seed_admin(session)
+            logger.info("Startup complete: Database initialized and seeded.")
+        else:
+            logger.info("Startup complete: Database initialized. Seeding skipped.")
     except Exception as e:
         logger.critical(f"Startup failed: {e}")
 
