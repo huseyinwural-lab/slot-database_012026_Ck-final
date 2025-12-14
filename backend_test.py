@@ -13187,6 +13187,9 @@ def main():
     print("\n🎯 REVIEW REQUEST SPECIFIC TESTS")
     test_results.append(("Review Request Specific", tester.test_review_request_specific()))
     
+    print("\n🚫 FEATURE FLAGS ENFORCEMENT & KILL SWITCH VALIDATION")
+    test_results.append(("Feature Flags Enforcement & Kill Switch", tester.test_feature_flags_enforcement_and_kill_switch()))
+    
     print("\n🃏 POKER RULES ENDPOINTS TESTS")
     test_results.append(("Poker Rules Endpoints", tester.test_poker_rules_endpoints()))
     
