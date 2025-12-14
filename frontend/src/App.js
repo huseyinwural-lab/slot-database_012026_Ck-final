@@ -71,7 +71,7 @@ function App() {
               
               <Route path="/features" element={
                 <RequireAuth>
-                  <RequireFeature requireOwner={true}><FeatureFlags /></RequireFeature>
+                  <RequireFeature feature="can_manage_experiments"><FeatureFlags /></RequireFeature>
                 </RequireAuth>
               } />
               
@@ -89,7 +89,7 @@ function App() {
               
               <Route path="/crm" element={
                 <RequireAuth>
-                  <RequireFeature requireOwner={true}><CRM /></RequireFeature>
+                  <RequireFeature feature="can_use_crm"><CRM /></RequireFeature>
                 </RequireAuth>
               } />
               
@@ -101,7 +101,7 @@ function App() {
               
               <Route path="/affiliates" element={
                 <RequireAuth>
-                  <RequireFeature requireOwner={true}><AffiliateManagement /></RequireFeature>
+                  <RequireFeature feature="can_manage_affiliates"><AffiliateManagement /></RequireFeature>
                 </RequireAuth>
               } />
               
