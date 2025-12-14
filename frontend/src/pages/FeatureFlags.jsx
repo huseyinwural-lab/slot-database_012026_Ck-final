@@ -111,6 +111,7 @@ const FeatureFlags = () => {
   };
 
   return (
+    <RequireFeature feature="can_manage_experiments">
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
