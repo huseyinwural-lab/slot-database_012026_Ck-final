@@ -19,10 +19,6 @@ async def get_scopes():
     return API_KEY_SCOPES
 
 
-from fastapi import Request
-from app.utils.tenant import get_current_tenant_id
-
-
 @router.get("/", response_model=List[APIKeyPublic])
 async def get_api_keys(
     request: Request,
