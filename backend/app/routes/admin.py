@@ -93,7 +93,7 @@ async def create_tenant_admin(
     - tenant_id
 
     Optional:
-    - password (default: TenantAdmin123!)
+    - password (required)
     - full_name
 
     This is primarily for ops/testing (SEC-001).
