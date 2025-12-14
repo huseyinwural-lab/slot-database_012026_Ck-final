@@ -55,7 +55,13 @@ jobs:
           set -e
           # Fresh DB için volume’ları sil
           docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
-          docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+
+          # BuildKit output'u root-cause'u net gösterir (stack trace yerine gerçek fail-to-solve)
+          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml build --no-cache --progress=plain
+
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker compose -f docker-compose.prod.yml ps
+          docker compose -f docker-compose.prod.yml logs --no-color --tail=200 || true
           docker ps -a
 
       - name: Wait for API health
