@@ -11,7 +11,77 @@ from app.utils.tenant import get_current_tenant_id
 router = APIRouter(prefix="/api/v1/crm", tags=["crm"])
 
 
-# Stub returning array for CRM frontend
+# CRM stubs (UI contract)
+
+@router.get("/campaigns")
+async def list_campaigns(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+) -> List[dict]:
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+    return []
+
+
+@router.post("/campaigns")
+async def create_campaign(
+    request: Request,
+    payload: dict,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+    return {"message": "CREATED", "campaign": payload}
+
+
+@router.post("/campaigns/{campaign_id}/send")
+async def send_campaign(
+    campaign_id: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+    return {"message": "QUEUED", "campaign_id": campaign_id}
+
+
+@router.get("/templates")
+async def list_templates(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+) -> List[dict]:
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+    return []
+
+
+@router.get("/segments")
+async def list_segments(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+) -> List[dict]:
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+    return []
+
+
+@router.get("/channels")
+async def list_channels(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+) -> List[dict]:
+    tenant_id = get_current_tenant_id(request, current_admin)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+    return []
+
+
+# Legacy root
 @router.get("/")
 async def get_crm(
     request: Request,
