@@ -14433,6 +14433,9 @@ def main():
     print("\n🎯 PLAYER GAME HISTORY TESTS")
     test_results.append(("Player Game History", tester.test_player_game_history()))
     
+    print("\n🔧 FINAL BACKEND REGRESSION TESTS - RELEASE HARDENING")
+    test_results.append(("Final Backend Regression Hardening", tester.test_final_backend_regression_hardening()))
+    
     print("\n🚀 ADVANCED ARCHITECTURE TESTS")
     test_results.append(("Feature Flags", tester.test_feature_flags()))
     test_results.append(("Approval Queue", tester.test_approval_queue()))
