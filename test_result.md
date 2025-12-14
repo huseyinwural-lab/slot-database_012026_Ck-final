@@ -15,6 +15,18 @@ p0_patch1_smoke_test:
         -agent: "testing"
         -comment: "✅ P0 PATCH 1 BACKEND SMOKE/REGRESSION TEST - ALL TESTS PASSED (8/8 - 100% success rate): Test 1) GET /api/health → 200 OK with status='healthy'. Test 2) GET /api/readiness → 200 OK with database='connected'. Test 3) POST /api/v1/auth/login with admin@casino.com/Admin123! → 200 OK with access_token (JWT bearer token, length 268). Test 4a) GET /api/v1/tenants/ with Authorization → 200 OK with {items, meta} structure (2 tenants found). Test 4b) GET /api/v1/players?page=1&page_size=5&include_total=true with Authorization → 200 OK with {items, meta} structure (pagination working, 0 players). Test 4c) GET /api/v1/games?page=1&page_size=5&include_total=true with Authorization → 200 OK with {items, meta} structure (pagination working, 0 games). Test 4d) GET /api/v1/finance/transactions?page=1&page_size=5&include_total=true with Authorization → 200 OK with {items, meta} structure (pagination working, 0 transactions). Test 5) Server import dependency check → No Mongo/motor import errors detected. All core endpoints functional, authentication working, pagination contracts implemented correctly, no 4xx/5xx errors encountered."
 
+  - task: "Patch 1 Final Smoke/Regression Test - Dashboard/API-Keys/Tables Fixes"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/app/routes/dashboard.py, backend/app/routes/api_keys.py, backend/app/routes/tables.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ PATCH 1 FINAL SMOKE/REGRESSION - ALL TESTS PASSED (8/8 - 100% success rate): Test 1) GET /api/health → 200 OK with status='healthy'. Test 2) GET /api/readiness → 200 OK with database='connected'. Test 3) POST /api/v1/auth/login with admin@casino.com/Admin123! → 200 OK with access_token (JWT bearer token, length 268 chars). Test 4) GET /api/v1/dashboard/comprehensive-stats with Authorization → 200 OK with comprehensive dashboard data (financial_trend, retention_metrics, ftd_metrics, critical_alerts, financial_summary, negative_performing_games, live_bets, bonus_performance, provider_health, payment_health, online_users, active_sessions). Test 5) GET /api/v1/tables with Authorization → 200 OK returning JSON array (0 items). Test 6) GET /api/v1/api-keys/scopes with Authorization → 200 OK returning array with 4 scopes ['robot.run', 'robot.configure', 'games.read', 'reports.read']. Test 7) POST /api/v1/api-keys/ with Authorization → 200 OK creating API key with proper response structure containing 'api_key' and 'key' objects (API key ID: d8e99b8d-3527-4284-a97d-e219ee061e2c). Test 8) GET /api/v1/players?page=1&page_size=5&include_total=true with Authorization → 200 OK with {items, meta} structure (pagination working correctly). Test 9) Runtime ImportError Check → No motor/mongo import errors detected. All endpoints functional, authentication working, dashboard comprehensive stats working, tables endpoint returning JSON array, API keys scopes and creation working, players pagination working with items/meta structure."
+
 jwt_admin_auth:
   - task: "JWT-based Admin Auth & Password Management - Turkish Review Request"
     implemented: true
