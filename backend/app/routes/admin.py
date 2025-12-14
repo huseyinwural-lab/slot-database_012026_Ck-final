@@ -91,4 +91,5 @@ async def seed_admin(session: AsyncSession = Depends(get_session)):
         return {"message": "Already seeded"}
     except Exception as e:
         logger.error(f"Seeding failed: {e}")
+        # Don't crash startup if seed fails, just log
         return {"message": "Seeding failed", "error": str(e)}
