@@ -56,7 +56,9 @@ Detaylı kullanım rehberleri için aşağıdaki dokümanlara göz atın:
 *   🎰 **[Oyuncu Rehberi](docs/manuals/PLAYER_GUIDE.md):** Kayıt, para yatırma, oyun oynama.
 
 pip install -r requirements.txt
-python -m scripts.seed_complete_data  # SEED DATA (Important!)
+# Dev/local seed (opsiyonel):
+#   ENV=dev SEED_ON_STARTUP=true -> startup seeding
+# Prod/staging'de seed kapalıdır.
 uvicorn server:app --reload --port 8001
 ```
 
