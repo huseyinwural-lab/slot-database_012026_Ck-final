@@ -7,6 +7,7 @@ import uuid
 from app.models.sql_models import Player
 from app.core.database import get_session
 from app.utils.auth import get_password_hash, verify_password, create_access_token
+from app.schemas.player import PlayerPublic
 
 router = APIRouter(prefix="/api/v1/auth/player", tags=["player_auth"])
 
