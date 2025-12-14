@@ -13638,6 +13638,9 @@ def main():
     print("\n🚫 FEATURE FLAGS ENFORCEMENT & KILL SWITCH VALIDATION")
     test_results.append(("Feature Flags Enforcement & Kill Switch", tester.test_feature_flags_enforcement_and_kill_switch()))
     
+    print("\n🔄 CRM/AFFILIATES REGRESSION TESTS")
+    test_results.append(("CRM/Affiliates Regression", tester.test_crm_aff_regression()))
+    
     print("\n🃏 POKER RULES ENDPOINTS TESTS")
     test_results.append(("Poker Rules Endpoints", tester.test_poker_rules_endpoints()))
     
