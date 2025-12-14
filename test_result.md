@@ -1001,7 +1001,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "Prod-hardening Regression Check - CORS allow_credentials=false"
+    - "CRM/Affiliates Regression Tests - Review Request"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
