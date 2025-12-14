@@ -42,7 +42,7 @@ app.add_middleware(RequestLoggingMiddleware)
 
 # --- ROUTER INCLUSION (SQL ONLY) ---
 # Only include routers that have been fully refactored to SQLModel
-# Disabled routers are commented out to prevent MongoDB errors
+# Disabled routers are commented out to prevent legacy (pre-SQL migration) errors
 
 # 1. Core Auth & Admin
 from app.routes import auth, admin, tenant, api_keys
