@@ -26,10 +26,9 @@ def main() -> None:
 
     # Offline autogenerate: compare against empty DB
     ctx = MigrationContext.configure(
-        connection=None,
+        dialect_name="postgresql",
         opts={
             "target_metadata": SQLModel.metadata,
-            "dialect_name": "postgresql",
             "compare_type": True,
         },
     )
