@@ -26,7 +26,7 @@ const CRM = () => {
   const [newCampaign, setNewCampaign] = useState({ name: '', channel: 'email', segment_id: '', template_id: '' });
   const [isCampOpen, setIsCampOpen] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       if (activeTab === 'campaigns') setCampaigns((await api.get('/v1/crm/campaigns')).data);
       if (activeTab === 'templates') setTemplates((await api.get('/v1/crm/templates')).data);
