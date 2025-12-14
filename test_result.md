@@ -925,7 +925,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "FAZ 4 API Keys UI Frontend Testing"
+    - "Patch 2 Partial Validation (A2/A3 + CORS allow_credentials=false + readiness behavior)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
