@@ -8,6 +8,9 @@ cd /app
 
 ENV_NAME="${ENV:-dev}"
 
+echo "[start_prod] $(date -Iseconds) Starting up..."
+echo "[start_prod] ENV=$ENV_NAME"
+
 # Helper function for retrying commands
 retry_cmd() {
     cmd="$@"
@@ -29,28 +32,28 @@ retry_cmd() {
 
 # Run migrations before starting the app
 if [ "$ENV_NAME" = "prod" ] || [ "$ENV_NAME" = "staging" ]; then
-  echo "[start_prod] Running alembic migrations (ENV=$ENV_NAME)"
+  echo "[start_prod] $(date -Iseconds) Running alembic migrations (ENV=$ENV_NAME)"
   
   # Retry alembic upgrade to handle DB warmup race conditions
   if retry_cmd alembic upgrade head; then
-      echo "[start_prod] Migrations applied successfully."
+      echo "[start_prod] $(date -Iseconds) Migrations applied successfully."
   else
-      echo "[start_prod] ERROR: Migrations failed. Container will exit."
+      echo "[start_prod] $(date -Iseconds) ERROR: Migrations failed. Container will exit."
       exit 1
   fi
 
-  echo "[start_prod] Running one-shot owner bootstrap (if env vars present)"
+  echo "[start_prod] $(date -Iseconds) Running one-shot owner bootstrap (if env vars present)"
   # Bootstrap is also critical, but '|| true' was used before. 
   # Let's keep it safe but log explicitly.
   if python /app/scripts/bootstrap_owner.py; then
-      echo "[start_prod] Bootstrap completed or skipped."
+      echo "[start_prod] $(date -Iseconds) Bootstrap completed or skipped."
   else
-      echo "[start_prod] ERROR: Bootstrap script failed."
+      echo "[start_prod] $(date -Iseconds) ERROR: Bootstrap script failed."
       exit 1
   fi
 else
   echo "[start_prod] Skipping migrations/bootstrap (ENV=$ENV_NAME)"
 fi
 
-echo "[start_prod] Starting uvicorn"
+echo "[start_prod] $(date -Iseconds) Starting uvicorn"
 exec uvicorn server:app --host 0.0.0.0 --port 8001

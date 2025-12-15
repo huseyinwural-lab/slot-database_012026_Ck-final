@@ -44,7 +44,8 @@ services:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8001/api/health || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 30
+      start_period: 120s
 
   frontend-admin:
     build:
