@@ -171,6 +171,24 @@ jobs:
           yarn install --frozen-lockfile || yarn install
           yarn playwright install --with-deps chromium
 
+      - name: Verify Owner Login via Curl (Debug)
+        run: |
+          echo "Testing login with ${{ env.BOOTSTRAP_OWNER_EMAIL }}..."
+          curl -v -X POST "http://localhost:8001/api/v1/auth/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"email\": \"${{ env.BOOTSTRAP_OWNER_EMAIL }}\", \"password\": \"${{ env.BOOTSTRAP_OWNER_PASSWORD }}\"}" \
+            > login_response.json
+          
+          echo "Response:"
+          cat login_response.json
+          
+          if grep -q "access_token" login_response.json; then
+            echo "Login Verified via Curl!"
+          else
+            echo "Login Failed via Curl!"
+            exit 1
+          fi
+
       - name: Wait for Frontend (admin)
         run: |
           set -e
