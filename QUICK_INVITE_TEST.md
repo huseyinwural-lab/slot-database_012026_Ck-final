@@ -22,7 +22,7 @@
 2. **"Invite link copied!"** toast mesajını görmelisiniz
 3. Linki bir yere yapıştırın (örnek: notepad)
 
-**Link formatı:** `https://casino-admin-panel-3.preview.emergentagent.com/accept-invite?token=ey...`
+**Link formatı:** `https://casino-platform-16.preview.emergentagent.com/accept-invite?token=ey...`
 
 ---
 
