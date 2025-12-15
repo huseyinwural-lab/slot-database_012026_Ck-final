@@ -35,7 +35,7 @@ class AuditLogger:
             target_id=target_id,
             details=details or {},
             ip_address=ip_address or "unknown",
-            timestamp=datetime.now(timezone.utc)
+            timestamp=datetime.utcnow()
         )
         
         session.add(log_entry)

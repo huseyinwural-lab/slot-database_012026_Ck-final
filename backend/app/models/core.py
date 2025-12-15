@@ -138,8 +138,8 @@ class ApprovalRequest(BaseModel):
     diff: Dict[str, Any] = {} # {old: ..., new: ...}
     notes: List[Dict[str, Any]] = [] # {admin, text, time}
     documents: List[str] = [] # URLs
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ApprovalRule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -192,7 +192,7 @@ class Player(BaseModel):
     linked_accounts: List[str] = [] # IDs of other accounts
     
     # Technical & Tracking
-    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    registered_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     last_login: Optional[datetime] = None
     last_ip: Optional[str] = None
     device_fingerprint: Optional[str] = None
@@ -209,7 +209,7 @@ class Player(BaseModel):
 
 class TransactionTimeline(BaseModel):
     status: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
     description: str
     operator: Optional[str] = None
 
@@ -259,7 +259,7 @@ class Transaction(BaseModel):
     aml_flags: List[str] = []
     
     # Operational Fields
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     processed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
     compliance_notes: List[str] = []
@@ -340,14 +340,14 @@ class Game(BaseModel):
     countries_allowed: List[str] = [] # ["TR", "DE"] (Empty = All)
     countries_blocked: List[str] = [] 
     platform: str = "both" # "mobile", "desktop", "both"
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_updated: datetime = Field(default_factory=lambda: datetime.utcnow())
     provider_game_id: Optional[str] = None
     
     # Metrics
     active_players_24h: int = 0
     ggr_24h: float = 0.0
     
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     suggestion_reason: Optional[str] = None
 
 class CustomTable(BaseModel):
@@ -372,7 +372,7 @@ class CustomTable(BaseModel):
     branding_logo_url: Optional[str] = None
     uptime_percentage: float = 99.9
     
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class GameUploadLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -383,7 +383,7 @@ class GameUploadLog(BaseModel):
     error_count: int
     validation_warnings: List[str] = []
     status: str = "completed" # "processing", "completed", "failed"
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 # --- BONUS SYSTEM (EXPANDED) ---
 
@@ -478,7 +478,7 @@ class Bonus(BaseModel):
 class TicketMessage(BaseModel):
     sender: str 
     text: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class Ticket(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -488,7 +488,7 @@ class Ticket(BaseModel):
     status: str = "open" 
     priority: str = "medium"
     messages: List[TicketMessage] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class KPIMetric(BaseModel):
     value: float
@@ -551,7 +551,7 @@ class AuditLog(BaseModel):
     action: str
     target_id: str
     details: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class LoginLog(BaseModel):
     player_id: str
@@ -559,4 +559,4 @@ class LoginLog(BaseModel):
     location: str
     device_info: str
     status: str 
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())

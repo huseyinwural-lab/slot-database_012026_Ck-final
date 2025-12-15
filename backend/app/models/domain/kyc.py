@@ -29,7 +29,7 @@ class KYCDocument(BaseModel):
     type: str 
     status: str = "pending"
     file_url: str
-    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     reviewed_at: Optional[datetime] = None
     admin_note: Optional[str] = None
 
@@ -55,7 +55,7 @@ class KYCCheck(BaseModel):
     type: str 
     status: str 
     provider: str = "Internal Mock"
-    checked_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    checked_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     result_details: Dict[str, Any] = {}
 
 class KYCAuditLog(BaseModel):
@@ -65,7 +65,7 @@ class KYCAuditLog(BaseModel):
     action: str 
     old_value: Optional[str] = None
     new_value: Optional[str] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class KYCDashboardStats(BaseModel):
     pending_count: int

@@ -52,7 +52,7 @@ class ReconciliationReport(BaseModel):
     currency_mismatches: int = 0 # New Metric
     status: str = "processing" 
     items: List[ReconciliationItem] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ChargebackStatus(str, Enum):
     OPEN = "open"
@@ -76,8 +76,8 @@ class ChargebackCase(BaseModel):
     
     evidence_files: List[str] = []
     notes: List[Dict[str, Any]] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class AuditLogEntry(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -87,4 +87,4 @@ class AuditLogEntry(BaseModel):
     target_type: str
     details: str
     ip_address: Optional[str] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())

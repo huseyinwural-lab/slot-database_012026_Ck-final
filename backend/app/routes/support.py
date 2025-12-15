@@ -43,7 +43,7 @@ async def reply_ticket(
     msg_obj = {
         "sender": current_admin.email,
         "text": message.get("text"),
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.utcnow().isoformat()
     }
     
     msgs = list(ticket.messages) if ticket.messages else []

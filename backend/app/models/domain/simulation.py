@@ -43,7 +43,7 @@ class SimulationRun(BaseModel):
     duration_seconds: Optional[float] = None
     notes: str = ""
     tags: List[str] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class GameMathSimulation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -57,7 +57,7 @@ class GameMathSimulation(BaseModel):
     bet_config: Dict[str, Any] = {}
     results: Dict[str, Any] = {}
     distribution: Dict[str, Any] = {}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class PortfolioSimulation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -69,7 +69,7 @@ class PortfolioSimulation(BaseModel):
     simulated_ngr: float = 0.0
     jackpot_cost: float = 0.0
     bonus_cost: float = 0.0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class BonusSimulation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -84,7 +84,7 @@ class BonusSimulation(BaseModel):
     target_segment: str
     expected_participants: int
     results: Dict[str, Any] = {}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class CohortLTVSimulation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -100,7 +100,7 @@ class CohortLTVSimulation(BaseModel):
     rg_flag_rate: float = 0.0
     fraud_risk_impact: float = 0.0
     policy_changes: Dict[str, Any] = {}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class RiskSimulation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -114,7 +114,7 @@ class RiskSimulation(BaseModel):
     auto_freeze_count: int = 0
     withdrawal_blocks: int = 0
     lost_revenue: float = 0.0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class RGSimulation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -127,7 +127,7 @@ class RGSimulation(BaseModel):
     revenue_impact: float = 0.0
     players_hitting_limit_current: int = 0
     players_hitting_limit_simulated: int = 0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ABVariantSimulation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -139,7 +139,7 @@ class ABVariantSimulation(BaseModel):
     conversion_uplift: float = 0.0
     revenue_uplift: float = 0.0
     risk_uptick: float = 0.0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ScenarioBuilder(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -150,4 +150,4 @@ class ScenarioBuilder(BaseModel):
     time_horizon_days: int = 30
     target_players: int = 100000
     consolidated_results: Dict[str, Any] = {}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())

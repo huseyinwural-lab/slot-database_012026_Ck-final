@@ -26,7 +26,7 @@ async def app_exception_handler(request: Request, exc: AppError):
         "message": exc.message,
         "detail": exc.message,
         "details": exc.details,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
     if isinstance(exc.details, dict):
@@ -48,6 +48,6 @@ async def generic_exception_handler(request: Request, exc: Exception):
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "An unexpected error occurred.",
             "details": details,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.utcnow().isoformat(),
         },
     )

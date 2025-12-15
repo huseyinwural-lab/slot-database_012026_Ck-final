@@ -48,7 +48,7 @@ async def create_admins():
             "is_2fa_enabled": False,
             "password_hash": password_hash,
             "allowed_modules": [],
-            "created_at": datetime.now(timezone.utc),
+            "created_at": datetime.utcnow(),
             "last_login": None,
             "last_ip": None
         }

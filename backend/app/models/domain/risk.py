@@ -96,7 +96,7 @@ class RGAlert(BaseModel):
     type: str 
     severity: RGAlertSeverity
     status: str = "new"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     resolved_at: Optional[datetime] = None
     assigned_to: Optional[str] = None
 
@@ -108,8 +108,8 @@ class RGCase(BaseModel):
     status: RGCaseStatus = RGCaseStatus.NEW
     notes: List[Dict[str, Any]] = []
     actions_taken: List[str] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class RGDashboardStats(BaseModel):
     active_self_exclusions: int
@@ -141,7 +141,7 @@ class RiskRule(BaseModel):
     actions: List[RiskRuleAction] = []
     score_impact: int = 0
     version: int = 1
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class VelocityRule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -158,7 +158,7 @@ class BlacklistEntry(BaseModel):
     value: str
     reason: str
     added_by: str
-    added_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    added_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     expires_at: Optional[datetime] = None
 
 class DeviceProfile(BaseModel):
@@ -170,7 +170,7 @@ class DeviceProfile(BaseModel):
     is_rooted: bool = False
     is_emulator: bool = False
     trust_score: int = 100
-    last_seen: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_seen: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class RiskCase(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -182,8 +182,8 @@ class RiskCase(BaseModel):
     assigned_to: Optional[str] = None
     notes: List[Dict[str, Any]] = [] 
     evidence_ids: List[str] = [] 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class RiskAlert(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -193,7 +193,7 @@ class RiskAlert(BaseModel):
     player_id: Optional[str] = None
     metadata: Dict[str, Any] = {}
     is_resolved: bool = False
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class Evidence(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -202,7 +202,7 @@ class Evidence(BaseModel):
     description: str
     file_url: Optional[str] = None
     uploaded_by: str
-    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     tags: List[str] = []
 
 class RiskDashboardStats(BaseModel):

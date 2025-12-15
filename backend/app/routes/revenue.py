@@ -34,9 +34,9 @@ async def get_all_tenants_revenue(
     current_admin: AdminUser = Depends(get_current_admin)
 ):
     if not from_date:
-        from_date = datetime.now(timezone.utc) - timedelta(days=7)
+        from_date = datetime.utcnow() - timedelta(days=7)
     if not to_date:
-        to_date = datetime.now(timezone.utc)
+        to_date = datetime.utcnow()
 
     # 1. Get Tenants
     tenant_query = select(Tenant)
@@ -112,9 +112,9 @@ async def get_my_tenant_revenue(
     session: AsyncSession = Depends(get_session)
 ):
     if not from_date:
-        from_date = datetime.now(timezone.utc) - timedelta(days=7)
+        from_date = datetime.utcnow() - timedelta(days=7)
     if not to_date:
-        to_date = datetime.now(timezone.utc)
+        to_date = datetime.utcnow()
         
     tenant_id = current_admin.tenant_id
     

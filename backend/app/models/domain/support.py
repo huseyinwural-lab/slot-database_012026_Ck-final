@@ -60,7 +60,7 @@ class KnowledgeBaseArticle(BaseModel):
     tags: List[str] = []
     views: int = 0
     helpful_count: int = 0
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ChatMessage(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -69,7 +69,7 @@ class ChatMessage(BaseModel):
     sender_id: str
     sender_name: str
     content: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
     attachments: List[str] = []
 
 class ChatSession(BaseModel):
@@ -79,7 +79,7 @@ class ChatSession(BaseModel):
     agent_id: Optional[str] = None
     agent_name: Optional[str] = None
     status: ChatStatus = ChatStatus.QUEUED
-    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     ended_at: Optional[datetime] = None
     rating: Optional[int] = None
     tags: List[str] = []
@@ -97,8 +97,8 @@ class SupportTicket(BaseModel):
     assigned_agent_id: Optional[str] = None
     channel: str = "email" 
     tags: List[str] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     messages: List[Dict[str, Any]] = [] 
     
 class AgentPerformance(BaseModel):

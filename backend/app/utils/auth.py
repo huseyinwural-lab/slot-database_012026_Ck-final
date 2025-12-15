@@ -23,7 +23,7 @@ def get_password_hash(password):
 def create_access_token(data: dict, expires_delta):
     from datetime import datetime, timezone
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + expires_delta
+    expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
     return encoded_jwt

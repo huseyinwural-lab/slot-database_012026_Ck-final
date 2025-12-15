@@ -36,7 +36,7 @@ class CMSPage(BaseModel):
     content_blocks: List[Dict[str, Any]] = [] 
     seo: Dict[str, Any] = {} 
     publish_at: Optional[datetime] = None
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     updated_by: Optional[str] = None
 
 class CMSMenu(BaseModel):
@@ -44,7 +44,7 @@ class CMSMenu(BaseModel):
     name: str
     location: str 
     items: List[Dict[str, Any]] = [] 
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class CMSBanner(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -100,7 +100,7 @@ class CMSMedia(BaseModel):
     url: str
     size: int
     tags: List[str] = []
-    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class CMSLegalDoc(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -133,7 +133,7 @@ class CMSAuditLog(BaseModel):
     target_type: str
     target_id: str
     diff: Optional[Dict[str, Any]] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class CMSDashboardStats(BaseModel):
     published_pages: int

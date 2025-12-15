@@ -8,7 +8,7 @@ router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 @router.get("/comprehensive-stats")
 async def get_dashboard_stats():
     # 1. Financial Trend (Last 30 days)
-    today = datetime.now(timezone.utc)
+    today = datetime.utcnow()
     dates = [(today - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(29, -1, -1)]
     
     financial_trend = []
@@ -76,7 +76,7 @@ async def get_dashboard_stats():
             "bet": bet,
             "win": win,
             "multiplier": round(win/bet, 2) if bet > 0 else 0,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.utcnow().isoformat()
         })
 
     # 8. Bonus Performance Extended

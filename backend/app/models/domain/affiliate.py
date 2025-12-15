@@ -54,7 +54,7 @@ class Affiliate(BaseModel):
     total_registrations: int = 0
     total_ftd: int = 0 
     last_activity_at: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class AffiliateOffer(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -84,7 +84,7 @@ class Conversion(BaseModel):
     commission: float = 0.0
     status: str = "approved"
     sub_ids: Dict[str, str] = {}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class Payout(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -94,7 +94,7 @@ class Payout(BaseModel):
     period_end: datetime
     status: PayoutStatus = PayoutStatus.PENDING
     payment_method: str = "bank_transfer"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class Creative(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

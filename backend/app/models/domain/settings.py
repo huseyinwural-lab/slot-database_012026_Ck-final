@@ -41,7 +41,7 @@ class Brand(BaseModel):
     contact_info: Dict[str, Any] = {}
     timezone: str = "UTC"
     country_availability: List[str] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class DomainMarket(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -54,7 +54,7 @@ class DomainMarket(BaseModel):
     payment_methods: List[str] = []
     rg_ruleset: str = "default"
     regulatory_class: str = "standard"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class Currency(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -68,7 +68,7 @@ class Currency(BaseModel):
     max_deposit: float = 10000.0
     min_bet: float = 0.1
     max_bet: float = 1000.0
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class PaymentProvider(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -83,7 +83,7 @@ class PaymentProvider(BaseModel):
     fees: Dict[str, Any] = {}
     last_health_check: Optional[datetime] = None
     health_status: str = "unknown"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class CountryRule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -96,7 +96,7 @@ class CountryRule(BaseModel):
     payment_restrictions: List[str] = []
     default_language: str = "en"
     regulatory_notes: str = ""
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class GameAvailabilityRule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -106,7 +106,7 @@ class GameAvailabilityRule(BaseModel):
     is_allowed: bool = True
     rtp_override_allowed: bool = False
     provider_restrictions: List[str] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class CommunicationProvider(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -118,7 +118,7 @@ class CommunicationProvider(BaseModel):
     rate_limits: Dict[str, int] = {}
     country_restrictions: List[str] = []
     status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class RegulatorySettings(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -132,7 +132,7 @@ class RegulatorySettings(BaseModel):
     aml_threshold: float = 10000.0
     pep_check_required: bool = True
     rg_messages: Dict[str, str] = {}
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class PlatformDefaults(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -145,7 +145,7 @@ class PlatformDefaults(BaseModel):
     cache_ttl_seconds: int = 300
     pagination_default: int = 20
     api_rate_limit_per_minute: int = 60
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class NewMemberManualBonusConfig(BaseModel):
@@ -164,7 +164,7 @@ class APIKey(BaseModel):
     permissions: List[str] = []
     last_used: Optional[datetime] = None
     status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class Webhook(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -173,7 +173,7 @@ class Webhook(BaseModel):
     secret_token: str
     retry_policy: Dict[str, Any] = {"max_retries": 3, "backoff": "exponential"}
     status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ThemeBranding(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -184,7 +184,7 @@ class ThemeBranding(BaseModel):
     background_images: List[str] = []
     email_templates: Dict[str, str] = {}
     custom_css: Optional[str] = None
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class MaintenanceSchedule(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -196,7 +196,7 @@ class MaintenanceSchedule(BaseModel):
     affecting: List[str] = ["entire_site"]
     status: str = "scheduled"
     created_by: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ConfigVersion(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -206,7 +206,7 @@ class ConfigVersion(BaseModel):
     change_summary: str
     config_snapshot: Dict[str, Any] = {}
     status: ConfigStatus = ConfigStatus.DRAFT
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     deployed_at: Optional[datetime] = None
 
 class ConfigAuditLog(BaseModel):
@@ -218,4 +218,4 @@ class ConfigAuditLog(BaseModel):
     before_value: Optional[Dict[str, Any]] = None
     after_value: Optional[Dict[str, Any]] = None
     ip_address: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())

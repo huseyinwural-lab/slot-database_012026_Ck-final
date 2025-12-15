@@ -41,7 +41,7 @@ class TableGameDB(SQLModel, table=True):
     provider: str
     min_bet: float = 1.0
     max_bet: float = 100.0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 @router.get("", response_model=List[TableGameDB])

@@ -9,7 +9,7 @@ class GameImportJob(BaseModel):
     provider: Optional[str] = None
     source: str = "manual"  # "provider" | "manual"
     status: str = "created"  # "created", "fetching", "fetched", "importing", "completed", "failed"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
     completed_at: Optional[datetime] = None
     total_found: int = 0
@@ -36,4 +36,4 @@ class GameImportItem(BaseModel):
     client_type: Optional[str] = None  # "html5" | "unity"
     client_launch_url: Optional[str] = None
     client_min_version: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())

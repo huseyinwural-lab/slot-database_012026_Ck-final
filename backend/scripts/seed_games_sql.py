@@ -56,7 +56,7 @@ async def seed_games_sql():
                     rtp=g["rtp"],
                     image_url=f"https://placehold.co/300x200?text={g['name'].replace(' ', '+')}",
                     configuration={"min_bet": 0.2, "max_bet": 100},
-                    created_at=datetime.now(timezone.utc)
+                    created_at=datetime.utcnow()
                 )
                 session.add(new_game)
                 count += 1

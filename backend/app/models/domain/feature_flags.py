@@ -55,8 +55,8 @@ class FeatureFlag(BaseModel):
     targeting: Dict[str, Any] = {}  # {rollout_percentage, countries, vip_levels, tags, device}
     group: Optional[str] = None  # "Payments", "Games", "Fraud", etc.
     last_updated_by: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     scheduled_activation: Optional[datetime] = None
 
 class FlagGroup(BaseModel):
@@ -64,7 +64,7 @@ class FlagGroup(BaseModel):
     name: str  # "Payments", "Games", "Fraud", "CMS", "CRM"
     description: str
     flag_count: int = 0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class Segment(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -73,8 +73,8 @@ class Segment(BaseModel):
     rules: List[Dict[str, Any]] = []  # [{field, operator, value}]
     population_size: int = 0
     usage_count: int = 0  # how many flags/experiments use this
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ExperimentVariant(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -97,8 +97,8 @@ class Experiment(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     owner: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ExperimentResult(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -113,7 +113,7 @@ class ExperimentResult(BaseModel):
     statistical_confidence: float = 0.0
     is_winner: bool = False
     metrics: Dict[str, Any] = {}
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class FlagAnalytics(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -136,7 +136,7 @@ class FlagAuditLog(BaseModel):
     before_value: Optional[Dict[str, Any]] = None
     after_value: Optional[Dict[str, Any]] = None
     ip_address: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class EnvironmentComparison(BaseModel):
     flag_id: str

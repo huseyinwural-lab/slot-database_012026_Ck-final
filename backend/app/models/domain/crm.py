@@ -50,7 +50,7 @@ class PlayerCommPrefs(BaseModel):
     preferred_language: str = "en"
     channels_allowed: Dict[str, bool] = {"email": True, "sms": True, "push": True}
     marketing_opt_in: bool = True
-    marketing_opt_in_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    marketing_opt_in_date: datetime = Field(default_factory=lambda: datetime.utcnow())
     transactional_only: bool = False
     quiet_hours_enabled: bool = False
     quiet_hours_start: Optional[str] = "22:00"
@@ -64,7 +64,7 @@ class Segment(BaseModel):
     rule_definition: Dict[str, Any] = {} 
     estimated_size: int = 0
     tags: List[str] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class MessageTemplate(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -90,7 +90,7 @@ class Campaign(BaseModel):
     schedule_type: str = "immediate"
     start_at: Optional[datetime] = None
     stats: Dict[str, int] = {"sent": 0, "opened": 0, "clicked": 0}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class JourneyStep(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -111,7 +111,7 @@ class MessageLog(BaseModel):
     campaign_id: Optional[str] = None
     template_id: str
     channel: ChannelType
-    sent_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    sent_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     status: MessageStatus = MessageStatus.SENT
     metadata: Dict[str, Any] = {}
 
@@ -122,4 +122,4 @@ class InAppMessage(BaseModel):
     body: str
     type: str = "info"
     is_read: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())

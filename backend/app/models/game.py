@@ -25,7 +25,7 @@ class GameConfigVersion(BaseModel):
     environment: GameConfigEnvironment = GameConfigEnvironment.PROD
     status: GameConfigVersionStatus = GameConfigVersionStatus.DRAFT
     created_by: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     published_at: Optional[datetime] = None
     notes: Optional[str] = None
 
@@ -43,7 +43,7 @@ class RtpProfile(BaseModel):
     rtp_value: float
     is_default: bool = False
     country_overrides: List[RtpCountryOverride] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class RtpConfigResponse(BaseModel):
@@ -67,7 +67,7 @@ class BetConfig(BaseModel):
     step: float = 0.1
     presets: List[float] = []
     country_overrides: List[BetCountryOverride] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class BetConfigResponse(BaseModel):
@@ -80,7 +80,7 @@ class GameFeatureFlags(BaseModel):
     game_id: str
     config_version_id: str
     features: Dict[str, bool] = {}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class GameFeatureFlagsResponse(BaseModel):
@@ -111,7 +111,7 @@ class GameLog(BaseModel):
     admin_id: str
     action: str
     details: Dict[str, Any] = {}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class GameLogsResponse(BaseModel):
@@ -125,7 +125,7 @@ class PaytableRecord(BaseModel):
     data: Dict[str, Any]
     source: str  # "provider" or "override"
     schema_version: str = "1.0.0"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
 
 
@@ -148,7 +148,7 @@ class ReelStripsRecord(BaseModel):
     config_version_id: str
     data: Dict[str, Any]
     schema_version: str = "1.0.0"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
     source: str  # "manual" | "import" | "provider"
 
@@ -181,7 +181,7 @@ class JackpotConfig(BaseModel):
     config_version_id: str
     schema_version: str = "1.0.0"
     jackpots: List[Dict[str, Any]]
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
     source: str = "manual"  # "manual" | "import" | "provider"
 
@@ -197,7 +197,7 @@ class GameAsset(BaseModel):
     mime_type: str
     size_bytes: int
     language: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
     tags: List[str] = []
     is_deleted: bool = False
@@ -286,7 +286,7 @@ class CrashMathConfig(BaseModel):
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
 
 
@@ -359,7 +359,7 @@ class DiceMathConfig(BaseModel):
     rng_algorithm: str
     seed_rotation_interval_rounds: Optional[int] = None
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
 
 
@@ -447,7 +447,7 @@ class PokerRules(BaseModel):
     session_max_duration_minutes: Optional[int] = None
     max_daily_buyin_limit_bb: Optional[int] = None
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
 
 
@@ -495,7 +495,7 @@ class BlackjackRules(BaseModel):
     session_max_duration_minutes: Optional[int] = None
     max_daily_buyin_limit: Optional[float] = None
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
 
 
@@ -524,7 +524,7 @@ class SlotAdvancedConfig(BaseModel):
     big_win_animation_enabled: bool = True
     gamble_feature_allowed: bool = False
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     created_by: str
 
 

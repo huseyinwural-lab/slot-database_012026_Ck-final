@@ -32,7 +32,7 @@ class DeployStatus(str, Enum):
 
 class SystemEvent(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
     module: str
     severity: LogSeverity
     event_type: str
@@ -56,7 +56,7 @@ class ServiceHealth(BaseModel):
     latency_ms: float
     error_rate: float
     instance_count: int
-    last_heartbeat: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_heartbeat: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class DeploymentLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -71,7 +71,7 @@ class DeploymentLog(BaseModel):
 
 class ConfigChangeLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
     admin_id: str
     target: str
     diff: Dict[str, Any] 
@@ -80,7 +80,7 @@ class ConfigChangeLog(BaseModel):
 
 class ErrorLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
     service: str
     error_type: str
     severity: LogSeverity
@@ -102,7 +102,7 @@ class QueueLog(BaseModel):
 
 class DBLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
     execution_time_ms: float
     query_snippet: str
     affected_rows: int
@@ -110,7 +110,7 @@ class DBLog(BaseModel):
 
 class CacheLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
     cache_type: str 
     operation: str 
     key: str
@@ -130,4 +130,4 @@ class SystemLog(BaseModel):
     service: str 
     message: str
     details: Dict[str, Any] = {}
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
