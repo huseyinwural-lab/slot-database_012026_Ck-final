@@ -144,6 +144,7 @@ jobs:
             echo "Waiting after restart ... ($i) code=$code"
             sleep 2
           done
+          docker compose -f docker-compose.prod.yml logs --no-color --tail=400 backend > ci_artifacts/backend_tail.log || true
 
           code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/ready" || true)
           echo "GET /api/ready after restart => $code"
