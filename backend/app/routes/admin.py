@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Body, Request
+from fastapi import APIRouter, Depends, Body, Request, HTTPException
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -40,6 +40,15 @@ async def create_admin(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    # P0-003: Tenant Isolation Enforcement
+    if not current_admin.is_platform_owner:
+        # Force tenant_id to be the current admin's tenant
+        payload["tenant_id"] = current_admin.tenant_id
+    else:
+        # Platform Owner can create for any tenant, but must provide one or default to own
+        if "tenant_id" not in payload:
+            payload["tenant_id"] = current_admin.tenant_id
+
     email = payload.get("email")
     password = payload.get("password")
     
@@ -53,7 +62,7 @@ async def create_admin(
         full_name=payload.get("full_name", "Admin"),
         role=payload.get("role", "Admin"),
         tenant_role=payload.get("tenant_role", "tenant_admin"),
-        tenant_id=payload.get("tenant_id") or current_admin.tenant_id,
+        tenant_id=payload["tenant_id"],
         password_hash=get_password_hash(password) if password else "",
         status="active"
     )
@@ -70,7 +79,7 @@ async def create_admin(
         action="create_admin",
         module="admin",
         target_id=str(new_admin.id), # Assuming ID is generated pre-insert default_factory
-        details={"email": email, "role": new_admin.role},
+        details={"email": email, "role": new_admin.role, "target_tenant": new_admin.tenant_id},
         session=session
     )
 
@@ -91,9 +100,9 @@ async def create_tenant_admin(
     Payload (minimum):
     - email
     - tenant_id
-
-    Optional:
     - password (required)
+    
+    Optional:
     - full_name
 
     This is primarily for ops/testing (SEC-001).
