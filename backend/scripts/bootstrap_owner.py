@@ -1,11 +1,11 @@
 """One-shot owner bootstrap for prod/staging/dev.
 
 Behavior:
+- Runs only if BOOTSTRAP_ENABLED=true.
 - Creates DB Tables if missing (SQLite).
 - Creates an owner user if AdminUser table is empty.
-- Uses BOOTSTRAP_OWNER_EMAIL/PASSWORD if set.
-- FALLBACKS to admin@casino.com / Admin123! if not set (to ensure login works).
-- UPDATES default tenant features to ensure all modules are accessible.
+- Requires BOOTSTRAP_OWNER_EMAIL and BOOTSTRAP_OWNER_PASSWORD.
+- Updates default tenant features to ensure all modules are accessible.
 """
 
 from __future__ import annotations

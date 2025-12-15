@@ -36,11 +36,11 @@ services:
       DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-10}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}
-      
+
       # Security: No defaults/fallbacks for credentials
+      BOOTSTRAP_ENABLED: ${BOOTSTRAP_ENABLED:-false}
       BOOTSTRAP_OWNER_EMAIL: ${BOOTSTRAP_OWNER_EMAIL}
       BOOTSTRAP_OWNER_PASSWORD: ${BOOTSTRAP_OWNER_PASSWORD}
-      BOOTSTRAP_ENABLED: ${BOOTSTRAP_ENABLED:-false}
     ports:
       - "8001:8001"
     healthcheck:

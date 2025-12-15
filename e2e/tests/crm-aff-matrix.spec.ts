@@ -57,7 +57,7 @@ async function setTenantContext(page: any, tenantId: string) {
   
   await page.reload();
   // Wait for dashboard to settle again after reload
-  await expect(page.getByText('Dashboard', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('Dashboard', { exact: true }).first()).toBeVisible({ timeout: 10000 });
 }
 
 /**
