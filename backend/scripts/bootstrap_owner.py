@@ -71,6 +71,16 @@ async def main() -> None:
             print(f"[bootstrap_owner] CREATED: {email}")
 
     except Exception as e:
+
+        # SELF-VERIFICATION
+        verify_res = await session.execute(select(AdminUser).where(AdminUser.email == email))
+        user_verify = verify_res.scalars().first()
+        if user_verify:
+            print(f"[bootstrap_owner] VERIFICATION SUCCESS: Found user {user_verify.email} (ID: {user_verify.id}) in DB.")
+        else:
+            print(f"[bootstrap_owner] VERIFICATION FAILED: User {email} NOT found in DB after commit!")
+            sys.exit(1)
+
         print(f"[bootstrap_owner] FATAL ERROR: {e}")
         # Make sure we don't swallow errors, so the script fails and CI notices
         sys.exit(1)
