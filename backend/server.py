@@ -72,6 +72,8 @@ app.include_router(core.router)
 # 4. Modules (Refactored to SQL or Stubbed)
 from app.routes import fraud_detection, email_notification, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, game_config, game_import, game_config_presets, robot, revenue, finance, finance_actions, feature_flags, simulation_lab, settings as settings_router, dashboard, tables, kill_switch, flags
 
+from app.routes import bonuses
+app.include_router(bonuses.router)
 app.include_router(fraud_detection.router)
 app.include_router(email_notification.router)
 app.include_router(simulator.router)
