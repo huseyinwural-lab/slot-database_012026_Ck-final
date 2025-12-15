@@ -36,6 +36,22 @@ DEFAULT_OWNER_FEATURES = {
     "can_manage_kyc": True,
 }
 
+# Default features for the Demo Renter tenant used in E2E tenant gating tests
+DEFAULT_DEMO_RENTER_FEATURES = {
+    "can_manage_admins": True,
+    "can_view_reports": True,
+    "can_manage_experiments": False,
+    "can_use_kill_switch": False,
+    "can_manage_affiliates": False,
+    "can_use_crm": False,
+    "can_use_game_robot": True,
+    "can_manage_finance": False,
+    "can_edit_configs": False,
+    "can_manage_bonus": True,
+    "can_manage_kyc": False,
+}
+
+
 async def main() -> None:
     try:
         from sqlalchemy.ext.asyncio import AsyncSession
