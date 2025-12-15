@@ -146,6 +146,40 @@ jobs:
             exit 1
           fi
 
+      # Always collect diagnostics (success or failure) to unblock RCA.
+      - name: Collect compose diagnostics (always)
+        if: always()
+        run: |
+          set +e
+          chmod +x scripts/ci_prod_compose_debug.sh
+          scripts/ci_prod_compose_debug.sh docker-compose.prod.yml ci_artifacts
+
+      - name: Upload compose artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-compose-artifacts
+          path: |
+            ci_artifacts/compose_ps.txt
+            ci_artifacts/compose_logs_tail.txt
+            ci_artifacts/inspect_*.json
+            ci_artifacts/compose_build.log
+            ci_artifacts/compose_ps_inline.txt
+            ci_artifacts/compose_logs_inline_tail200.txt
+
+      - name: Setup Node (for Playwright)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: e2e/yarn.lock
+
+      - name: Install E2E deps
+        working-directory: e2e
+        run: |
+          yarn install --frozen-lockfile || yarn install
+          yarn playwright install --with-deps chromium
+
       - name: Wait for Frontend (admin)
         run: |
           set -e
