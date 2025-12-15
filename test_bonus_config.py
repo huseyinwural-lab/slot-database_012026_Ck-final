@@ -5,7 +5,7 @@ import sys
 import json
 
 class BonusConfigTester:
-    def __init__(self, base_url="https://casino-platform-16.preview.emergentagent.com"):
+    def __init__(self, base_url="https://casinopanel-2.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

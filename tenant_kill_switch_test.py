@@ -8,7 +8,7 @@ import json
 import sys
 
 class TenantKillSwitchTester:
-    def __init__(self, base_url="https://casino-platform-16.preview.emergentagent.com"):
+    def __init__(self, base_url="https://casinopanel-2.preview.emergentagent.com"):
         self.base_url = base_url
         self.access_token = None
 
