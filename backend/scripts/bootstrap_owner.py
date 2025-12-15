@@ -51,24 +51,13 @@ async def main() -> None:
             async with engine.begin() as conn:
                 await conn.run_sync(SQLModel.metadata.create_all)
 
-        # Check for ENABLE_BOOTSTRAP env var (P0-002)
-        if os.environ.get("BOOTSTRAP_ENABLED", "true").lower() != "true":
-            print("[bootstrap_owner] SKIP: Bootstrap disabled via env var.")
-            return
-
-        # DEFAULT FALLBACKS (Required for Dev/Preview)
-        # For Prod, these should be overridden by env vars without defaults in docker-compose
-        DEFAULT_EMAIL = "admin@casino.com"
-        DEFAULT_PASS = "Admin123!"
-
         email = os.environ.get("BOOTSTRAP_OWNER_EMAIL")
         password = os.environ.get("BOOTSTRAP_OWNER_PASSWORD")
         tenant_id = os.environ.get("BOOTSTRAP_OWNER_TENANT_ID", "default_casino")
 
         if not email or not password:
-            print(f"[bootstrap_owner] WARNING: Env vars not set. Using FALLBACK credentials: {DEFAULT_EMAIL} / {DEFAULT_PASS}")
-            email = DEFAULT_EMAIL
-            password = DEFAULT_PASS
+            print("[bootstrap_owner] FATAL: Missing BOOTSTRAP_OWNER_EMAIL or BOOTSTRAP_OWNER_PASSWORD while BOOTSTRAP_ENABLED=true")
+            sys.exit(1)
         
         async with AsyncSession(engine) as session:
             # 1. Ensure Tenant Exists & Has Correct Features

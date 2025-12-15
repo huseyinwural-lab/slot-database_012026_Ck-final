@@ -40,38 +40,47 @@ async def create_admin(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    # P0-003: Tenant Isolation Enforcement & Security
-    if not current_admin.is_platform_owner:
-        # Non-owners cannot override tenant_id
-        payload["tenant_id"] = current_admin.tenant_id
-    else:
-        # Owners can specify tenant_id, default to own if missing
-        if "tenant_id" not in payload:
-            payload["tenant_id"] = current_admin.tenant_id
-
-    email = payload.get("email")
+    email = (payload.get("email") or "").strip().lower()
     password = payload.get("password")
-    
-    # Password mandatory check (unless invite mode)
-    if not password and payload.get("password_mode") != "invite":
+    password_mode = payload.get("password_mode") or "set"
+
+    if not email:
+        raise AppError("EMAIL_REQUIRED", "Email is required", 400)
+
+    is_invite = password_mode == "invite"
+    if (not is_invite) and (not password):
         raise AppError("PASSWORD_REQUIRED", "Password is required", 400)
-    
+
     existing = (await session.execute(select(AdminUser).where(AdminUser.email == email))).scalars().first()
     if existing:
         raise AppError("USER_EXISTS", "User already exists", 400)
-    
+
+    # Tenant isolation: non-owner cannot override tenant_id
+    requested_tenant_id = payload.get("tenant_id")
+    if getattr(current_admin, "is_platform_owner", False):
+        tenant_id = requested_tenant_id or current_admin.tenant_id
+    else:
+        if requested_tenant_id and requested_tenant_id != current_admin.tenant_id:
+            raise AppError("TENANT_OVERRIDE_FORBIDDEN", "Cannot create admin for another tenant", 403)
+        tenant_id = current_admin.tenant_id
+
+    # password_hash must not be empty
+    if is_invite and not password:
+        import secrets
+        password = secrets.token_urlsafe(32)
+
     new_admin = AdminUser(
         email=email,
         username=email.split("@")[0],
         full_name=payload.get("full_name", "Admin"),
         role=payload.get("role", "Admin"),
         tenant_role=payload.get("tenant_role", "tenant_admin"),
-        tenant_id=payload["tenant_id"],
-        password_hash=get_password_hash(password) if password else "",
+        tenant_id=tenant_id,
+        password_hash=get_password_hash(password),
         status="active"
     )
-    
-    if payload.get("password_mode") == "invite":
+
+    if is_invite:
         new_admin.status = "invited"
         token = create_access_token({"sub": "invite", "email": email}, timedelta(days=7))
         new_admin.invite_token = token
