@@ -11,8 +11,8 @@ class Tenant(SQLModel, table=True):
     name: str = Field(index=True, unique=True)
     type: str = "renter"  # owner | renter
     features: Dict = Field(default={}, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     admins: List["AdminUser"] = Relationship(back_populates="tenant")
     players: List["Player"] = Relationship(back_populates="tenant")
@@ -36,7 +36,7 @@ class AdminUser(SQLModel, table=True):
     failed_login_attempts: int = 0
     invite_token: Optional[str] = None
     password_reset_token: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     tenant: Tenant = Relationship(back_populates="admins")
 
@@ -53,7 +53,7 @@ class Player(SQLModel, table=True):
     kyc_status: str = "pending"
     risk_score: str = "low"
     last_login: Optional[datetime] = None
-    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    registered_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     tenant: Tenant = Relationship(back_populates="players")
     transactions: List["Transaction"] = Relationship(back_populates="player")
@@ -70,7 +70,7 @@ class Game(SQLModel, table=True):
     rtp: float = 96.0
     image_url: Optional[str] = None
     configuration: Dict = Field(default={}, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     tenant: Tenant = Relationship(back_populates="games")
 
@@ -86,7 +86,7 @@ class Transaction(SQLModel, table=True):
     method: Optional[str] = None
     provider_tx_id: Optional[str] = None
     balance_after: float = 0.0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     player: Player = Relationship(back_populates="transactions")
 
@@ -106,7 +106,7 @@ class SupportTicket(SQLModel, table=True):
     status: str = "open" # open, answered, closed
     priority: str = "medium"
     messages: List[Dict] = Field(default=[], sa_column=Column(JSON)) # List of {sender, text, time}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     tenant: Tenant = Relationship(back_populates="tickets")
     player: Player = Relationship(back_populates="tickets")
@@ -119,7 +119,7 @@ class Bonus(SQLModel, table=True):
     type: str # deposit_match, freespin
     rules: Dict = Field(default={}, sa_column=Column(JSON))
     status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     tenant: Tenant = Relationship(back_populates="bonuses")
 
@@ -132,7 +132,7 @@ class AuditLog(SQLModel, table=True):
     target_id: Optional[str] = None
     details: Dict = Field(default={}, sa_column=Column(JSON))
     ip_address: Optional[str] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class Affiliate(SQLModel, table=True):
@@ -142,7 +142,7 @@ class Affiliate(SQLModel, table=True):
     email: str
     commission_rate: float = 0.0
     status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class RiskRule(SQLModel, table=True):
@@ -162,7 +162,7 @@ class ApprovalRequest(SQLModel, table=True):
     requester_id: str
     status: str = "pending"
     details: Dict = Field(default={}, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class ContentPage(SQLModel, table=True):
@@ -172,7 +172,7 @@ class ContentPage(SQLModel, table=True):
     title: str
     content: str = Field(sa_column=Column(Text))
     status: str = "published"
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 # --- GAME CONFIG & ASSET MODELS (EXTENDED) ---
 
@@ -183,7 +183,7 @@ class GameConfigVersion(SQLModel, table=True):
     version: str
     config_snapshot: Dict = Field(default={}, sa_column=Column(JSON))
     created_by: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class GameAsset(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
@@ -191,7 +191,7 @@ class GameAsset(SQLModel, table=True):
     asset_type: str # image, video, sound
     url: str
     metadata_json: Dict = Field(default={}, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 # --- FINANCE MODELS (EXTENDED) ---
 
@@ -205,7 +205,7 @@ class ReconciliationReport(SQLModel, table=True):
     mismatches: int = 0
     status: str = "pending"
     report_data: Dict = Field(default={}, sa_column=Column(JSON)) # Items, summary
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class ChargebackCase(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
@@ -214,14 +214,14 @@ class ChargebackCase(SQLModel, table=True):
     reason_code: str
     status: str = "open"
     evidence_files: List[str] = Field(default=[], sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class FinanceSettings(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(foreign_key="tenant.id", index=True, unique=True)
     auto_payout_limit: float = 0.0
     provider_configs: Dict = Field(default={}, sa_column=Column(JSON))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 # --- MISC TABLES (moved from route modules to keep Alembic metadata complete) ---
@@ -235,7 +235,7 @@ class APIKey(SQLModel, table=True):
     key_hash: str
     scopes: str  # comma-separated
     status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
 class FeatureFlag(SQLModel, table=True):
