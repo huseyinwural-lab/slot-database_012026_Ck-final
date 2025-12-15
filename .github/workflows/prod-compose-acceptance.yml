@@ -203,7 +203,18 @@ jobs:
           E2E_OWNER_EMAIL: ${{ env.BOOTSTRAP_OWNER_EMAIL }}
           E2E_OWNER_PASSWORD: ${{ env.BOOTSTRAP_OWNER_PASSWORD }}
         run: |
-          yarn test:e2e
+          echo "=== Environment Diagnostics ==="
+          echo "Node: $(node -v)"
+          echo "Yarn: $(yarn -v)"
+          echo "PWD: $(pwd)"
+          ls -la
+          
+          echo "=== Installing Browsers ==="
+          npx playwright install --with-deps chromium
+          
+          echo "=== Running Tests ==="
+          # Use '--' to pass arguments to the underlying playwright command
+          yarn test:e2e -- --project=chromium
 
       - name: Upload Playwright artifacts
         if: failure() && hashFiles('e2e/test-results/**') != ''
