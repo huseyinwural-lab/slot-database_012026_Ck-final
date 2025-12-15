@@ -40,17 +40,21 @@ async def create_admin(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    # P0-003: Tenant Isolation Enforcement
+    # P0-003: Tenant Isolation Enforcement & Security
     if not current_admin.is_platform_owner:
-        # Force tenant_id to be the current admin's tenant
+        # Non-owners cannot override tenant_id
         payload["tenant_id"] = current_admin.tenant_id
     else:
-        # Platform Owner can create for any tenant, but must provide one or default to own
+        # Owners can specify tenant_id, default to own if missing
         if "tenant_id" not in payload:
             payload["tenant_id"] = current_admin.tenant_id
 
     email = payload.get("email")
     password = payload.get("password")
+    
+    # Password mandatory check (unless invite mode)
+    if not password and payload.get("password_mode") != "invite":
+        raise AppError("PASSWORD_REQUIRED", "Password is required", 400)
     
     existing = (await session.execute(select(AdminUser).where(AdminUser.email == email))).scalars().first()
     if existing:
