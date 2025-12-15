@@ -29,11 +29,7 @@ class ScenarioSummary:
 class RobotOrchestrator:
     """Robot orchestrator (SQLModel).
 
-    Bu servis eskiden MongoDB (motor) kullanıyordu.
-    PostgreSQL/SQLModel geçişi kapsamında motor bağımlılığı kaldırıldı.
-
-    Not: Şu an robot route'u bu servisi kullanmıyor olabilir; ama import güvenliği açısından
-    bu modül runtime'da motor gerektirmez.
+    This service is fully migrated to PostgreSQL/SQLModel.
     """
 
     def __init__(self, session: AsyncSession, http_client: httpx.AsyncClient):
@@ -94,7 +90,7 @@ class RobotOrchestrator:
         }
 
     async def _find_test_game(self, tenant_id: str, game_type: str) -> Optional[Game]:
-        # Basit yaklaşım: tenant + category eşleşen bir oyun bul
+        # Simple approach: find a game matching tenant + category
         stmt = select(Game).where(Game.tenant_id == tenant_id, Game.category == game_type.capitalize())
         res = await self.session.execute(stmt)
         return res.scalars().first()
