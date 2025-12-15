@@ -111,6 +111,18 @@ jobs:
           echo "GET /api/ready => $code"
           test "$code" = "200"
 
+      - name: Verify User Creation in DB (P0)
+        run: |
+          echo "Verifying admin user creation in DB..."
+          sleep 5
+          docker compose -f docker-compose.prod.yml exec -T postgres \
+            psql -U postgres -d casino_db -c "select email, role, status from adminuser;"
+          
+          # Assert ci_owner exists
+          docker compose -f docker-compose.prod.yml exec -T postgres \
+            psql -U postgres -d casino_db -t -c "select email from adminuser where email='${{ env.BOOTSTRAP_OWNER_EMAIL }}';" | grep -q "${{ env.BOOTSTRAP_OWNER_EMAIL }}"
+
+
       - name: Assert migrations ran on fresh DB (restart idempotency)
         run: |
           set -e
