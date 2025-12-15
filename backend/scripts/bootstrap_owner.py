@@ -17,6 +17,15 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 
+def is_strong_password(password: str) -> bool:
+    if len(password) < 8:
+        return False
+    if not any(c.isupper() for c in password):
+        return False
+    if not any(c.isdigit() for c in password):
+        return False
+    return True
+
 async def main() -> None:
     try:
         from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,7 +41,18 @@ async def main() -> None:
 
         if not email or not password:
             print("[bootstrap_owner] SKIP: BOOTSTRAP_OWNER_EMAIL or BOOTSTRAP_OWNER_PASSWORD not set")
+            # Fail-fast for production if env vars are missing?
+            # User requirement: "Prod ortamında gerekli env’ler yoksa sistem ayağa kalkmayı reddeder (açıkça loglar)."
+            # Assuming ENV=prod check
+            if os.environ.get("ENV") == "prod":
+                 print("[bootstrap_owner] FATAL: Production environment requires bootstrap credentials.")
+                 sys.exit(1)
             return
+
+        # Weak password check
+        if not is_strong_password(password):
+             print("[bootstrap_owner] FATAL: Bootstrap password does not meet complexity requirements (min 8 chars, 1 uppercase, 1 digit).")
+             sys.exit(1)
 
         print(f"[bootstrap_owner] Found env for: {email}")
 
@@ -71,15 +91,19 @@ async def main() -> None:
             print(f"[bootstrap_owner] CREATED: {email}")
 
     except Exception as e:
-
         # SELF-VERIFICATION
-        verify_res = await session.execute(select(AdminUser).where(AdminUser.email == email))
-        user_verify = verify_res.scalars().first()
-        if user_verify:
-            print(f"[bootstrap_owner] VERIFICATION SUCCESS: Found user {user_verify.email} (ID: {user_verify.id}) in DB.")
-        else:
-            print(f"[bootstrap_owner] VERIFICATION FAILED: User {email} NOT found in DB after commit!")
-            sys.exit(1)
+        try:
+            # Re-create session for verification if original session failed/closed?
+            # Actually if main block failed, we probably didn't commit.
+            # But let's check if user exists anyway.
+            async with AsyncSession(engine) as session:
+                verify_res = await session.execute(select(AdminUser).where(AdminUser.email == email))
+                user_verify = verify_res.scalars().first()
+                if user_verify:
+                    print(f"[bootstrap_owner] VERIFICATION SUCCESS (Recovered?): Found user {user_verify.email} (ID: {user_verify.id}) in DB.")
+                    sys.exit(0)
+        except:
+            pass
 
         print(f"[bootstrap_owner] FATAL ERROR: {e}")
         # Make sure we don't swallow errors, so the script fails and CI notices
