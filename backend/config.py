@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     env: str = "dev"  # ENV
 
     # Database
-    database_url: str = "sqlite+aiosqlite:///./casino.db"  # Default to SQLite for ease of run
+    database_url: str = "sqlite+aiosqlite:////app/backend/casino.db"  # Absolute path to prevent CWD mismatch
     # Connection pool tuning (Postgres/asyncpg)
     db_pool_size: int = 5
     db_max_overflow: int = 10
