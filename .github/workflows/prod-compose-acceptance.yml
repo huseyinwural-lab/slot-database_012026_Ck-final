@@ -117,6 +117,7 @@ jobs:
           sleep 5
           docker compose -f docker-compose.prod.yml exec -T postgres \
             psql -U postgres -d casino_db -c "select email, role, status from adminuser;"
+            psql -U postgres -d casino_db -c "select email, role, status, created_at from adminuser order by created_at desc limit 20;"
           
           # Assert ci_owner exists
           docker compose -f docker-compose.prod.yml exec -T postgres \
