@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/v1/player", tags=["player_lobby"])
 async def get_lobby_games(request: Request, session: AsyncSession = Depends(get_session)):
     tenant_id = request.headers.get("X-Tenant-ID", "default_casino")
     
-    stmt = select(Game).where(Game.tenant_id == tenant_id).where(Game.status == "active")
+    stmt = select(Game).where(Game.tenant_id == tenant_id).where(Game.status == "active").limit(100)
     result = await session.execute(stmt)
     games = result.scalars().all()
     
