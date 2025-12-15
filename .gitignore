@@ -63,6 +63,7 @@ chainlit.md
 
 # Data and databases
 agenthub/agents/youtube/db
+backend/casino.db
 
 # Archive files and large assets
 **/*.zip
@@ -79,24 +80,13 @@ agenthub/agents/youtube/db
 # Environment Files
 .env
 .env.*
+
+# Emergent specific
+.emergent/
+ci_artifacts/
+ci_artifacts*/
 frontend/node_modules/.cache/default-development/3.pack
 frontend/node_modules/.cache/default-development/12.pack
 frontend/node_modules/.cache/default-development/14.pack
 frontend/node_modules/.cache/default-development/0.pack
 frontend/node_modules/.cache/default-development/4.pack
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
