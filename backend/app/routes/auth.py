@@ -20,11 +20,7 @@ from app.core.errors import AppError
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    admin_email: str
-    admin_role: str
+from app.schemas.token import TokenResponse
 
 class LoginRequest(BaseModel):
     email: EmailStr
