@@ -1,4 +1,18 @@
 user_problem_statement:
+p0_release_blockers_dec15:
+  - task: "P0 Release Blockers (#741) - Patch Verification"
+    implemented: true
+    working: "pending"
+    file: "e2e/tests/crm-aff-matrix.spec.ts, docker-compose.prod.yml, backend/scripts/bootstrap_owner.py, backend/app/routes/admin.py"
+    stuck_count: 0
+    priority: "highest"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Applied #741 patches: 1) Playwright exact: True -> true + timeout; 2) docker-compose.prod.yml removed bootstrap credential fallbacks, added BOOTSTRAP_ENABLED; 3) bootstrap_owner.py gated by BOOTSTRAP_ENABLED, removed fallback creds, requires env vars when enabled; also ensures demo_renter tenant exists for E2E gating; 4) /api/v1/admin/users now blocks cross-tenant tenant_id override (403 TENANT_OVERRIDE_FORBIDDEN) and enforces password unless invite (400 PASSWORD_REQUIRED). Next: run testing subagents + user run prod-compose-acceptance.yml workflow."
+
+
   summary: "Phase 1: Financial Integrity & Security Update"
 
 frontend:
