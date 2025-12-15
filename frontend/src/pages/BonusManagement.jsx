@@ -53,7 +53,9 @@ const BonusManagement = () => {
   const fetchBonuses = async () => {
     try {
         const res = await api.get('/v1/bonuses');
-        setBonuses(res.data);
+        // Handle paginated response or direct list
+        const items = res.data.items || res.data || [];
+        setBonuses(Array.isArray(items) ? items : []);
     } catch (err) { console.error(err); }
   };
 
