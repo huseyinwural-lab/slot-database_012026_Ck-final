@@ -40,7 +40,7 @@ async function robustLogin(page: any) {
   await page.waitForURL(/\/$/, { timeout: 15000 });
 
   // Explicitly wait for a Dashboard element to ensure app is interactive
-  await expect(page.getByText('Dashboard', { exact: True }).first()).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText('Dashboard', { exact: true }).first()).toBeVisible({ timeout: 10000 });
 }
 
 /**
