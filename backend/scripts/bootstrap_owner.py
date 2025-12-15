@@ -14,6 +14,11 @@ import os
 import sys
 from pathlib import Path
 
+if os.getenv("BOOTSTRAP_ENABLED", "").lower() != "true":
+    print("[bootstrap_owner] BOOTSTRAP_ENABLED!=true, skipping.")
+    sys.exit(0)
+
+
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 # Default features for the Platform Owner Tenant
