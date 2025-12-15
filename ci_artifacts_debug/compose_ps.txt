@@ -1,8 +1,0 @@
-=== docker compose ps ===
-compose_file=docker-compose.prod.yml
-timestamp=2025-12-15T01:28:42Z
-NAME                                       IMAGE                                    COMMAND                  SERVICE           CREATED          STATUS                    PORTS
-slot-database_son_1512-backend-1           slot-database_son_1512-backend           "/app/scripts/start_…"   backend           23 seconds ago   Up 11 seconds (healthy)   0.0.0.0:8001->8001/tcp, [::]:8001->8001/tcp
-slot-database_son_1512-frontend-admin-1    slot-database_son_1512-frontend-admin    "/docker-entrypoint.…"   frontend-admin    23 seconds ago   Up 5 seconds              0.0.0.0:3000->80/tcp, [::]:3000->80/tcp
-slot-database_son_1512-frontend-player-1   slot-database_son_1512-frontend-player   "/docker-entrypoint.…"   frontend-player   23 seconds ago   Up 5 seconds              0.0.0.0:3001->80/tcp, [::]:3001->80/tcp
-slot-database_son_1512-postgres-1          postgres:15-alpine                       "docker-entrypoint.s…"   postgres          23 seconds ago   Up 22 seconds (healthy)   5432/tcp
