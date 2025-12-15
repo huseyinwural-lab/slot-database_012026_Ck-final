@@ -1,0 +1,66 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - heading "Tenant Portal" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Tenant Panel
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: Core
+          - link "Dashboard" [ref=e13] [cursor=pointer]:
+            - /url: /
+            - img [ref=e14]
+            - text: Dashboard
+          - link "Players" [ref=e19] [cursor=pointer]:
+            - /url: /players
+            - img [ref=e20]
+            - text: Players
+          - link "My Revenue" [ref=e25] [cursor=pointer]:
+            - /url: /revenue/my-tenant
+            - img [ref=e26]
+            - text: My Revenue
+          - link "Games" [ref=e29] [cursor=pointer]:
+            - /url: /games
+            - img [ref=e30]
+            - text: Games
+          - link "VIP Games" [ref=e32] [cursor=pointer]:
+            - /url: /vip-games
+            - img [ref=e33]
+            - text: VIP Games
+        - generic [ref=e35]:
+          - generic [ref=e36]: Operations
+          - link "Support" [ref=e37] [cursor=pointer]:
+            - /url: /support
+            - img [ref=e38]
+            - text: Support
+        - generic [ref=e41]: Risk & Compliance
+        - generic [ref=e43]: System
+      - button "Logout" [ref=e45] [cursor=pointer]:
+        - img [ref=e46]
+        - text: Logout
+    - main [ref=e49]:
+      - generic [ref=e50]:
+        - generic [ref=e52]:
+          - img [ref=e53]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e56]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - paragraph [ref=e59]: Platform Owner
+            - paragraph [ref=e60]: admin@casino.com
+          - generic [ref=e61]: PO
+      - generic [ref=e62]:
+        - generic [ref=e64]:
+          - img [ref=e65]
+          - heading "Module Disabled" [level=1] [ref=e69]
+          - paragraph [ref=e70]: Your tenant does not have access to the CRM & Communications module. Please contact your platform administrator to enable this feature.
+          - button "Return to Dashboard" [ref=e71] [cursor=pointer]
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e72] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e73]:
+      - img [ref=e74]
+      - paragraph [ref=e75]: Made with Emergent
+```
