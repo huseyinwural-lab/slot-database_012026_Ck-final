@@ -7,11 +7,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create Async Engine
-# The echo parameter helps with debugging SQL queries
-# Note: For SQLite, we must use check_same_thread=False for async
 connect_args = {"check_same_thread": False} if "sqlite" in settings.database_url else {}
 
-# Connection pool tuning (only meaningful for Postgres/asyncpg)
 pool_size = int(getattr(settings, "db_pool_size", 5)) if hasattr(settings, "db_pool_size") else 5
 max_overflow = int(getattr(settings, "db_max_overflow", 10)) if hasattr(settings, "db_max_overflow") else 10
 
@@ -31,39 +28,22 @@ except Exception as e:
     raise
 
 async def init_db():
-    """DB şema init.
-
-    - PostgreSQL (ve yeni DB'ler): create_all yeterlidir.
-    - SQLite dosya DB (dev/preview): create_all mevcut tablolara yeni kolon eklemez.
-      Bu nedenle **debug modunda** sqlite kullanıyorsak tabloları drop_all + create_all
-      ile yeniden yaratıyoruz.
-
-    Prod için hedef: Alembic migration (Patch 2).
+    """DB Schema Init.
+    
+    Modified to NEVER drop tables automatically to prevent data loss during development reloads.
     """
-
     try:
         async with engine.begin() as conn:
-            env = getattr(settings, "env", "dev")
-
-            # Safety barrier: drop_all is ONLY allowed in dev/local + DEBUG + sqlite.
-            if (
-                settings.debug
-                and env in {"dev", "local"}
-                and "sqlite" in (settings.database_url or "")
-            ):
-                logger.warning("SQLite + DEBUG + env=%s: resetting schema with drop_all/create_all", env)
-                await conn.run_sync(SQLModel.metadata.drop_all)
+            # We removed the drop_all logic here to persist data across reloads
             await conn.run_sync(SQLModel.metadata.create_all)
 
-        logger.info("Database initialized and tables created.")
+        logger.info("Database initialized (create_all run).")
     except Exception as e:
         logger.critical(f"Database initialization failed: {e}")
         raise
 
 async def get_session() -> AsyncSession:
-    """
-    Dependency for FastAPI Routes to get a DB session.
-    """
+    """Dependency for FastAPI Routes to get a DB session."""
     async_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
