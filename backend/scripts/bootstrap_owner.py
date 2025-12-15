@@ -5,6 +5,7 @@ Behavior:
 - Creates an owner user if AdminUser table is empty.
 - Uses BOOTSTRAP_OWNER_EMAIL/PASSWORD if set.
 - FALLBACKS to admin@casino.com / Admin123! if not set.
+- UPDATES default tenant features to ensure all modules are accessible.
 """
 
 from __future__ import annotations
@@ -14,6 +15,21 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+# Default features for the Platform Owner Tenant
+DEFAULT_OWNER_FEATURES = {
+    "can_manage_admins": True,
+    "can_view_reports": True,
+    "can_manage_experiments": True,
+    "can_use_kill_switch": True,
+    "can_manage_affiliates": True,
+    "can_use_crm": True,
+    "can_use_game_robot": True,
+    "can_manage_finance": True,
+    "can_edit_configs": True,
+    "can_manage_bonus": True,
+    "can_manage_kyc": True,
+}
 
 async def main() -> None:
     try:
@@ -25,7 +41,6 @@ async def main() -> None:
         from app.utils.auth import get_password_hash
 
         # Initialize Tables if SQLite (auto-fix for "no such table" error)
-        # This is critical for the "Run" button environment
         if "sqlite" in str(engine.url):
             print("[bootstrap_owner] SQLite detected. Ensuring tables exist...")
             async with engine.begin() as conn:
@@ -45,38 +60,63 @@ async def main() -> None:
             password = DEFAULT_PASS
         
         async with AsyncSession(engine) as session:
-            # Only if no admins exist
-            res = await session.execute(select(AdminUser.id).limit(1))
-            if res.scalar_one_or_none() is not None:
-                print("[bootstrap_owner] SKIP: AdminUser table is not empty. (User exists)")
-                return
-
-            # Ensure tenant exists
+            # 1. Ensure Tenant Exists & Has Correct Features
             t_res = await session.execute(select(Tenant).where(Tenant.id == tenant_id))
             tenant = t_res.scalars().first()
+            
             if tenant is None:
                 print(f"[bootstrap_owner] Creating tenant: {tenant_id}")
-                tenant = Tenant(id=tenant_id, name="Default Casino", type="owner", features={})
+                tenant = Tenant(
+                    id=tenant_id, 
+                    name="Default Casino", 
+                    type="owner", 
+                    features=DEFAULT_OWNER_FEATURES
+                )
                 session.add(tenant)
                 await session.commit()
+            else:
+                # FIX: Check and update features if they are empty or missing
+                # This fixes the issue where menus were hidden because features={} was empty
+                current_features = tenant.features or {}
+                needs_update = False
+                
+                # Merge defaults into current features if missing
+                for k, v in DEFAULT_OWNER_FEATURES.items():
+                    if k not in current_features:
+                        current_features[k] = v
+                        needs_update = True
+                
+                if needs_update:
+                    print(f"[bootstrap_owner] Updating features for tenant {tenant_id}...")
+                    tenant.features = current_features
+                    session.add(tenant)
+                    await session.commit()
+                    print("[bootstrap_owner] Features updated successfully.")
 
-            print(f"[bootstrap_owner] Creating platform owner: {email}")
-            owner = AdminUser(
-                tenant_id=tenant_id,
-                username=email.split("@")[0],
-                email=email,
-                full_name="Platform Owner",
-                password_hash=get_password_hash(password),
-                role="platform_owner",
-                tenant_role="platform_owner",
-                is_platform_owner=True,
-                status="active",
-                is_active=True,
-                failed_login_attempts=0,
-            )
-            session.add(owner)
-            await session.commit()
-            print(f"[bootstrap_owner] SUCCESS: Created user {email}")
+            # 2. Ensure Owner User Exists
+            res = await session.execute(select(AdminUser).where(AdminUser.email == email))
+            existing_user = res.scalars().first()
+            
+            if existing_user is None:
+                print(f"[bootstrap_owner] Creating platform owner: {email}")
+                owner = AdminUser(
+                    tenant_id=tenant_id,
+                    username=email.split("@")[0],
+                    email=email,
+                    full_name="Platform Owner",
+                    password_hash=get_password_hash(password),
+                    role="platform_owner",
+                    tenant_role="platform_owner",
+                    is_platform_owner=True,
+                    status="active",
+                    is_active=True,
+                    failed_login_attempts=0,
+                )
+                session.add(owner)
+                await session.commit()
+                print(f"[bootstrap_owner] SUCCESS: Created user {email}")
+            else:
+                print(f"[bootstrap_owner] User {email} already exists. Skipping creation.")
 
     except Exception as e:
         print(f"[bootstrap_owner] FATAL ERROR: {e}")
