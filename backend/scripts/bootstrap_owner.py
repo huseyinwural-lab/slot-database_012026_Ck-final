@@ -4,7 +4,7 @@ Behavior:
 - Creates DB Tables if missing (SQLite).
 - Creates an owner user if AdminUser table is empty.
 - Uses BOOTSTRAP_OWNER_EMAIL/PASSWORD if set.
-- FALLBACKS to admin@casino.com / Admin123! if not set.
+- FALLBACKS to admin@casino.com / Admin123! if not set (to ensure login works).
 - UPDATES default tenant features to ensure all modules are accessible.
 """
 
@@ -46,7 +46,13 @@ async def main() -> None:
             async with engine.begin() as conn:
                 await conn.run_sync(SQLModel.metadata.create_all)
 
-        # DEFAULT FALLBACKS
+        # Check for ENABLE_BOOTSTRAP env var (P0-002)
+        if os.environ.get("BOOTSTRAP_ENABLED", "true").lower() != "true":
+            print("[bootstrap_owner] SKIP: Bootstrap disabled via env var.")
+            return
+
+        # DEFAULT FALLBACKS (Required for Dev/Preview)
+        # For Prod, these should be overridden by env vars without defaults in docker-compose
         DEFAULT_EMAIL = "admin@casino.com"
         DEFAULT_PASS = "Admin123!"
 
@@ -75,12 +81,9 @@ async def main() -> None:
                 session.add(tenant)
                 await session.commit()
             else:
-                # FIX: Check and update features if they are empty or missing
-                # This fixes the issue where menus were hidden because features={} was empty
+                # Update features if they are empty or missing
                 current_features = tenant.features or {}
                 needs_update = False
-                
-                # Merge defaults into current features if missing
                 for k, v in DEFAULT_OWNER_FEATURES.items():
                     if k not in current_features:
                         current_features[k] = v
@@ -91,10 +94,9 @@ async def main() -> None:
                     tenant.features = current_features
                     session.add(tenant)
                     await session.commit()
-                    print("[bootstrap_owner] Features updated successfully.")
 
             # 2. Ensure Owner User Exists
-            res = await session.execute(select(AdminUser).where(AdminUser.email == email))
+            res = await session.execute(select(AdminUser.id).where(AdminUser.email == email))
             existing_user = res.scalars().first()
             
             if existing_user is None:
