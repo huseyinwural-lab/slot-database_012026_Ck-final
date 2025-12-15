@@ -74,27 +74,13 @@ Eğer herhangi bir adımda sorun yaşadıysanız:
 
 ---
 
-## 🔍 Opsiyonel: Veritabanı Kontrolü
+## 🔍 Opsiyonel: Veritabanı Kontrolü (SQL)
 
 Backend terminalinde aşağıdaki komutu çalıştırarak kullanıcının durumunu kontrol edebilirsiniz:
 
 ```bash
-mongosh $MONGO_URL --eval '
-  db.admin_users.findOne(
-    { email: "test-invite-XXXXX@casino.com" },
-    { _id: 0, email: 1, status: 1, invite_token: 1, invite_expires_at: 1 }
-  )
-'
-```
-
-**Beklenen:**
-```json
-{
-  "email": "test-invite-XXXXX@casino.com",
-  "status": "active",
-  "invite_token": null,
-  "invite_expires_at": null
-}
+# PostgreSQL veya SQLite kullanıyorsanız
+python3 /app/backend/check_live_db.py
 ```
 
 ---
