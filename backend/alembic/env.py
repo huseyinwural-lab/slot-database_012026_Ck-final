@@ -7,20 +7,21 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+# P1-001: Correct import path for settings
+from app.core.database import SQLModel # Use absolute path
 from config import settings
-from app.models.sql_models import SQLModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Interpret the config file for Python logging.
+# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # SQLModel metadata
 target_metadata = SQLModel.metadata
-
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
@@ -47,7 +48,7 @@ def do_run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
+async def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
 
     connectable = async_engine_from_config(
@@ -58,17 +59,14 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
 
-    import asyncio
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-    async def _run() -> None:
-        async with connectable.connect() as connection:
-            await connection.run_sync(do_run_migrations)
-        await connectable.dispose()
-
-    asyncio.run(_run())
+    await connectable.dispose()
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    import asyncio
+    asyncio.run(run_migrations_online())
