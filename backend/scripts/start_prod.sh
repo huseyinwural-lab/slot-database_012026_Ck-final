@@ -1,17 +1,52 @@
 #!/usr/bin/env sh
 set -e
 
+# Force unbuffered output for better logs
+export PYTHONUNBUFFERED=1
+
 cd /app
 
 ENV_NAME="${ENV:-dev}"
 
-# Run migrations before starting the app (safe: no event loop running yet)
+# Helper function for retrying commands
+retry_cmd() {
+    cmd="$@"
+    n=0
+    max=10
+    delay=2
+    while [ $n -lt $max ]; do
+        if $cmd; then
+            return 0
+        else
+            n=$((n+1))
+            echo "[start_prod] Command '$cmd' failed. Attempt $n/$max. Retrying in ${delay}s..."
+            sleep $delay
+        fi
+    done
+    echo "[start_prod] Command '$cmd' failed after $max attempts."
+    return 1
+}
+
+# Run migrations before starting the app
 if [ "$ENV_NAME" = "prod" ] || [ "$ENV_NAME" = "staging" ]; then
   echo "[start_prod] Running alembic migrations (ENV=$ENV_NAME)"
-  alembic upgrade head
+  
+  # Retry alembic upgrade to handle DB warmup race conditions
+  if retry_cmd alembic upgrade head; then
+      echo "[start_prod] Migrations applied successfully."
+  else
+      echo "[start_prod] ERROR: Migrations failed. Container will exit."
+      exit 1
+  fi
 
   echo "[start_prod] Running one-shot owner bootstrap (if env vars present)"
-  python /app/scripts/bootstrap_owner.py || true
+  # Bootstrap is also critical, but '|| true' was used before. 
+  # Let's keep it safe but log explicitly.
+  if python /app/scripts/bootstrap_owner.py; then
+      echo "[start_prod] Bootstrap completed or skipped."
+  else
+      echo "[start_prod] WARNING: Bootstrap script failed. Continuing startup."
+  fi
 else
   echo "[start_prod] Skipping migrations/bootstrap (ENV=$ENV_NAME)"
 fi
