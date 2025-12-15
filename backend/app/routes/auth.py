@@ -120,8 +120,11 @@ async def request_password_reset(payload: PasswordResetRequest, session: AsyncSe
     result = await session.execute(statement) # Changed exec to execute
     admin = result.scalars().first()
 
+    # Generic response regardless of whether user exists or not (User Enumeration Prevention)
+    generic_response = {"message": "If this email is registered, you will receive a password reset link."}
+
     if not admin:
-        return {"message": "RESET_REQUEST_ACCEPTED"}
+        return generic_response
 
     token = create_access_token(
         data={"sub": admin.id, "purpose": "password_reset"},
@@ -132,7 +135,12 @@ async def request_password_reset(payload: PasswordResetRequest, session: AsyncSe
     session.add(admin)
     await session.commit()
 
-    return {"message": "RESET_REQUEST_ACCEPTED", "reset_token": token}
+    # In a real production scenario, we would send an email here.
+    # For now, we just log it on the server side so it doesn't leak in the response.
+    # TODO: Integrate SendGrid or SMTP here.
+    print(f"[Password Reset] Token for {admin.email}: {token}")
+
+    return generic_response
 
 @router.post("/reset-password")
 async def reset_password(payload: PasswordResetConfirmRequest, session: AsyncSession = Depends(get_session)):
