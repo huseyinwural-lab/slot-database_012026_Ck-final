@@ -105,6 +105,22 @@ async def main() -> None:
                     session.add(tenant)
                     await session.commit()
 
+
+            # 1b. Ensure demo_renter tenant exists for E2E gating matrix
+            demo_id = "demo_renter"
+            demo_res = await session.execute(select(Tenant).where(Tenant.id == demo_id))
+            demo_tenant = demo_res.scalars().first()
+            if demo_tenant is None:
+                print(f"[bootstrap_owner] Creating tenant: {demo_id}")
+                demo_tenant = Tenant(
+                    id=demo_id,
+                    name="Demo Renter",
+                    type="renter",
+                    features=DEFAULT_DEMO_RENTER_FEATURES,
+                )
+                session.add(demo_tenant)
+                await session.commit()
+
             # 2. Ensure Owner User Exists
             res = await session.execute(select(AdminUser.id).where(AdminUser.email == email))
             existing_user = res.scalars().first()
