@@ -44,10 +44,6 @@ class Settings(BaseSettings):
     sendgrid_api_key: Optional[str] = None
     sendgrid_from_email: str = "admin@casino.com"
     emergent_llm_key: Optional[str] = None
-    # DEPRECATED (MongoDB was removed; kept temporarily to avoid breaking legacy scripts)
-    # Planned removal: Patch 3 repo cleanup.
-    mongo_url: Optional[str] = None
-    db_name: str = "casino_db"
 
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
