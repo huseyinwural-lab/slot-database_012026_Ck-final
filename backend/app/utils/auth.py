@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Body, status
 from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -47,7 +47,7 @@ async def get_current_admin(
         raise credentials_exception
 
     statement = select(AdminUser).where(AdminUser.email == email)
-    result = await session.execute(statement) # Changed exec to execute
+    result = await session.execute(statement)
     admin = result.scalars().first()
     
     if admin is None:
@@ -71,26 +71,23 @@ async def get_api_key_context(
     session: AsyncSession = Depends(get_session)
 ) -> AdminAPIKeyContext:
     if not api_key_header:
+        # P0-3: If no API Key is provided, do NOT fall back to stub.
+        # Strict validation is required for production readiness.
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="API Key missing"
         )
 
-    # Simple hash check (in prod, use secure comparison)
-    # The API Key in header is raw. DB stores hash.
-    # Assuming for now we check against stored keys.
-    # NOTE: In a real system, you'd hash the input key and compare.
-    # Here we simulate by selecting all active keys and checking.
-    # Optimization: Key should be "prefix.secret", search by prefix.
-    
+    # In a real system, you'd look up the key by hash.
+    # Since we store hashes, we have to iterate (inefficient but secure for MVP)
+    # OR better: use a prefix-based lookup if the key format allowed it.
+    # Here, we will fetch all active keys and verify.
     stmt = select(APIKey).where(APIKey.status == "active")
     result = await session.execute(stmt)
     keys = result.scalars().all()
     
     valid_key = None
     for k in keys:
-        # P0-3: Implement verification. 
-        # Using verify_password as it uses bcrypt verify
         if verify_password(api_key_header, k.key_hash):
             valid_key = k
             break
