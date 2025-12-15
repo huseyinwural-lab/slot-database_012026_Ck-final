@@ -45,7 +45,8 @@ if [ "$ENV_NAME" = "prod" ] || [ "$ENV_NAME" = "staging" ]; then
   if python /app/scripts/bootstrap_owner.py; then
       echo "[start_prod] Bootstrap completed or skipped."
   else
-      echo "[start_prod] WARNING: Bootstrap script failed. Continuing startup."
+      echo "[start_prod] ERROR: Bootstrap script failed."
+      exit 1
   fi
 else
   echo "[start_prod] Skipping migrations/bootstrap (ENV=$ENV_NAME)"
