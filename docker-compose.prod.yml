@@ -25,6 +25,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      PYTHONUNBUFFERED: "1"
       DATABASE_URL: ${DATABASE_URL}
       ENV: ${ENV:-prod}
       DEBUG: "False"
