@@ -1,14 +1,15 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.database import get_session
-from app.models.sql_models import AdminUser
+from app.models.sql_models import AdminUser, APIKey
 from config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 def verify_password(plain_password, hashed_password):
     from passlib.context import CryptContext
@@ -65,14 +66,49 @@ class AdminAPIKeyContext(BaseModel):
     tenant_id: str
     scopes: List[str]
 
-async def get_api_key_context(token: str = Depends(oauth2_scheme)) -> AdminAPIKeyContext:
-    # Stub implementation for now to satisfy imports
-    # In a real scenario, this would validate an API Key from header
-    return AdminAPIKeyContext(tenant_id="default_casino", scopes=["robot.run"])
+async def get_api_key_context(
+    api_key_header: str = Depends(api_key_header),
+    session: AsyncSession = Depends(get_session)
+) -> AdminAPIKeyContext:
+    if not api_key_header:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API Key missing"
+        )
+
+    # Simple hash check (in prod, use secure comparison)
+    # The API Key in header is raw. DB stores hash.
+    # Assuming for now we check against stored keys.
+    # NOTE: In a real system, you'd hash the input key and compare.
+    # Here we simulate by selecting all active keys and checking.
+    # Optimization: Key should be "prefix.secret", search by prefix.
+    
+    stmt = select(APIKey).where(APIKey.status == "active")
+    result = await session.execute(stmt)
+    keys = result.scalars().all()
+    
+    valid_key = None
+    for k in keys:
+        # P0-3: Implement verification. 
+        # Using verify_password as it uses bcrypt verify
+        if verify_password(api_key_header, k.key_hash):
+            valid_key = k
+            break
+            
+    if not valid_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API Key"
+        )
+
+    return AdminAPIKeyContext(
+        tenant_id=valid_key.tenant_id,
+        scopes=valid_key.scopes.split(",") if valid_key.scopes else []
+    )
 
 def require_scope(ctx: AdminAPIKeyContext, scope: str):
     if scope not in ctx.scopes:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient scope"
+            detail=f"Insufficient scope: required {scope}"
         )
