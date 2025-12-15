@@ -80,7 +80,12 @@ async def login(form_data: LoginRequest = Body(...), session: AsyncSession = Dep
         expires_delta=access_token_expires,
     )
 
-    return TokenResponse(access_token=access_token, admin_email=admin.email, admin_role=admin.role)
+    return TokenResponse(
+        access_token=access_token, 
+        admin_email=admin.email, 
+        admin_role=admin.role,
+        admin=AdminUserPublic.model_validate(admin).model_dump()
+    )
 
 from app.schemas.admin import AdminUserPublic
 
