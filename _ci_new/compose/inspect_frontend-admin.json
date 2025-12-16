@@ -1,0 +1,253 @@
+[
+    {
+        "Id": "2d3ef23a371814935090c54181c529e147358e389acb17fff43dc3d0811aa205",
+        "Created": "2025-12-16T19:43:41.064207045Z",
+        "Path": "/docker-entrypoint.sh",
+        "Args": [
+            "nginx",
+            "-g",
+            "daemon off;"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 4338,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2025-12-16T19:43:57.42981267Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:42ee6ba0b038e6d2e471aa47b5be30825372dc65d31c1ea2bfb4e955bccba56b",
+        "ResolvConfPath": "/var/lib/docker/containers/2d3ef23a371814935090c54181c529e147358e389acb17fff43dc3d0811aa205/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/2d3ef23a371814935090c54181c529e147358e389acb17fff43dc3d0811aa205/hostname",
+        "HostsPath": "/var/lib/docker/containers/2d3ef23a371814935090c54181c529e147358e389acb17fff43dc3d0811aa205/hosts",
+        "LogPath": "/var/lib/docker/containers/2d3ef23a371814935090c54181c529e147358e389acb17fff43dc3d0811aa205/2d3ef23a371814935090c54181c529e147358e389acb17fff43dc3d0811aa205-json.log",
+        "Name": "/slot-database_son_1612-frontend-admin-1",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "slot-database_son_1612_default",
+            "PortBindings": {
+                "80/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "3000"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "always",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": null,
+            "DnsSearch": null,
+            "ExtraHosts": [],
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware",
+                "/sys/devices/virtual/powercap"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "ID": "2d3ef23a371814935090c54181c529e147358e389acb17fff43dc3d0811aa205",
+                "LowerDir": "/var/lib/docker/overlay2/d32d873024bfefe373f1f8a6e7f86f8f90690a0784ae984173e5ca540e586e2e-init/diff:/var/lib/docker/overlay2/zncdqls7i3368l60mtsarh0hg/diff:/var/lib/docker/overlay2/031k7jx7rifbisogc07hoa313/diff:/var/lib/docker/overlay2/8f5fe00f74d5c3daf69ebbc802cbad34a4c782671ca8c1132ecbccf9fc167a42/diff:/var/lib/docker/overlay2/09a5a4130c57c4a10984bb196da415c6f678f3ba7bdb6e5bcca25f8d8ece1ff8/diff:/var/lib/docker/overlay2/7db3d64aaa1eeee20b78c3258c62b5a96e858c4e985cc44799818fe315edc01c/diff:/var/lib/docker/overlay2/8cb9ce6f2945af3911ace2c798deda99a20d91d246e3f4f2d70144467d11a096/diff:/var/lib/docker/overlay2/0285c36056b147f61b2b56a80c0e47120f37a5e9645cf52f16775496496c869a/diff:/var/lib/docker/overlay2/e8526ab36c6b53284b49eb5b0d34af153f24d5f84ec711166b0b239a6fac9416/diff:/var/lib/docker/overlay2/8a048650e79fcc246495dd6b3ea391e4cfae1bf432be93ddd336136194becae6/diff:/var/lib/docker/overlay2/2f47c36f9d1dd06c9f1ec4840b7c3ba5fb7eff6173a16a0fbf80a8ead56c6c09/diff",
+                "MergedDir": "/var/lib/docker/overlay2/d32d873024bfefe373f1f8a6e7f86f8f90690a0784ae984173e5ca540e586e2e/merged",
+                "UpperDir": "/var/lib/docker/overlay2/d32d873024bfefe373f1f8a6e7f86f8f90690a0784ae984173e5ca540e586e2e/diff",
+                "WorkDir": "/var/lib/docker/overlay2/d32d873024bfefe373f1f8a6e7f86f8f90690a0784ae984173e5ca540e586e2e/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "2d3ef23a3718",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "ExposedPorts": {
+                "80/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "NGINX_VERSION=1.29.4",
+                "PKG_RELEASE=1",
+                "DYNPKG_RELEASE=1",
+                "NJS_VERSION=0.9.4",
+                "NJS_RELEASE=1"
+            ],
+            "Cmd": [
+                "nginx",
+                "-g",
+                "daemon off;"
+            ],
+            "Image": "slot-database_son_1612-frontend-admin",
+            "Volumes": null,
+            "WorkingDir": "/",
+            "Entrypoint": [
+                "/docker-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": {
+                "com.docker.compose.config-hash": "fa09e74988815bafca7a7e75f2cfb658cb2b2a09b83dfa8f553ae497864e1e9d",
+                "com.docker.compose.container-number": "1",
+                "com.docker.compose.depends_on": "backend:service_healthy:false",
+                "com.docker.compose.image": "sha256:42ee6ba0b038e6d2e471aa47b5be30825372dc65d31c1ea2bfb4e955bccba56b",
+                "com.docker.compose.oneoff": "False",
+                "com.docker.compose.project": "slot-database_son_1612",
+                "com.docker.compose.project.config_files": "/home/runner/work/slot-database_son_1612/slot-database_son_1612/docker-compose.prod.yml",
+                "com.docker.compose.project.working_dir": "/home/runner/work/slot-database_son_1612/slot-database_son_1612",
+                "com.docker.compose.service": "frontend-admin",
+                "com.docker.compose.version": "2.38.2",
+                "maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>"
+            },
+            "StopSignal": "SIGQUIT"
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "37669358fa23580588d64357a23acf5f840fbb11eaa5699d3484323610a07272",
+            "SandboxKey": "/var/run/docker/netns/37669358fa23",
+            "Ports": {
+                "80/tcp": [
+                    {
+                        "HostIp": "0.0.0.0",
+                        "HostPort": "3000"
+                    },
+                    {
+                        "HostIp": "::",
+                        "HostPort": "3000"
+                    }
+                ]
+            },
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "",
+            "Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "MacAddress": "",
+            "Networks": {
+                "slot-database_son_1612_default": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "slot-database_son_1612-frontend-admin-1",
+                        "frontend-admin"
+                    ],
+                    "MacAddress": "12:cd:24:cb:5e:23",
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "070ac1a09d63d3ebe590f9286f9aa92191da44572441bcf65f34908f67d7a964",
+                    "EndpointID": "642f385696137cb0fd2c210f4d5f3e390fe6535bfaae3bc5125d4edca245abd2",
+                    "Gateway": "172.18.0.1",
+                    "IPAddress": "172.18.0.4",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "slot-database_son_1612-frontend-admin-1",
+                        "frontend-admin",
+                        "2d3ef23a3718"
+                    ]
+                }
+            }
+        }
+    }
+]

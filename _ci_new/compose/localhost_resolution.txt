@@ -1,0 +1,10 @@
+getent hosts localhost:
+::1             localhost ip6-localhost ip6-loopback
+
+getent ahosts localhost:
+::1             STREAM localhost
+::1             DGRAM  
+::1             RAW    
+127.0.0.1       STREAM 
+127.0.0.1       DGRAM  
+127.0.0.1       RAW    
