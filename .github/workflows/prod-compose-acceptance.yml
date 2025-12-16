@@ -70,7 +70,8 @@ jobs:
         run: |
           set -e
           if [ -z "${BOOTSTRAP_OWNER_EMAIL:-}" ] || [ -z "${BOOTSTRAP_OWNER_PASSWORD:-}" ]; then
-            echo "Missing BOOTSTRAP_OWNER_EMAIL/BOOTSTRAP_OWNER_PASSWORD. Check GitHub Actions secrets or PR fork secret restrictions."
+            echo "Missing BOOTSTRAP_OWNER_EMAIL/BOOTSTRAP_OWNER_PASSWORD. Check GitHub Actions secrets."
+            echo "If you intentionally want CI to run without bootstrap, set BOOTSTRAP_ENABLED=false and remove this guard."
             exit 1
           fi
 
