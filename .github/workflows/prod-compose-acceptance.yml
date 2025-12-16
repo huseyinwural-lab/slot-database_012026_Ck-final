@@ -163,6 +163,24 @@ jobs:
           chmod +x scripts/ci_prod_compose_debug.sh
           scripts/ci_prod_compose_debug.sh docker-compose.prod.yml ci_artifacts
 
+      - name: Dump compose state (always)
+        if: always()
+        run: |
+          set +e
+          mkdir -p ci_artifacts
+
+          docker compose -f docker-compose.prod.yml ps > ci_artifacts/compose_ps.txt || true
+          docker compose -f docker-compose.prod.yml logs --no-color --tail=300 backend > ci_artifacts/backend.log || true
+          docker compose -f docker-compose.prod.yml logs --no-color --tail=200 postgres > ci_artifacts/postgres.log || true
+
+          BACKEND_ID=$(docker compose -f docker-compose.prod.yml ps -q backend 2>/dev/null || true)
+          if [ -n "$BACKEND_ID" ]; then
+            docker inspect "$BACKEND_ID" --format '{{json .State.Health}}' > ci_artifacts/backend_health.json || true
+            if command -v jq >/dev/null 2>&1; then
+              cat ci_artifacts/backend_health.json | jq . > ci_artifacts/backend_health.pretty.json || true
+            fi
+          fi
+
       - name: Upload compose artifacts (always)
         if: always()
         uses: actions/upload-artifact@v4
