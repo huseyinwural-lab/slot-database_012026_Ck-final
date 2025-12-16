@@ -46,6 +46,15 @@ release_ready_p0_env_and_proxy_dec16:
         -comment: "✅ DOC/CONFIG VALIDATION AFTER LATEST TWEAKS - ALL REQUIREMENTS PASSED (5/5 - 100% success rate): Requirement 1) /api path standard consistency: ✅ UI nginx.conf uses 'location /api/' and 'proxy_pass http://backend:8001;' (no trailing slash rewrite), ✅ External nginx.example.conf uses 'location /api/' and 'proxy_pass http://127.0.0.1:3000;' (no trailing slash). Requirement 2) Forwarded headers present in external nginx.example.conf: ✅ Lines 64-67 and 127-130 show proper forwarded headers (Host, X-Real-IP, X-Forwarded-For, X-Forwarded-Proto). Requirement 3) Rate limiting placeholder for login endpoint: ✅ Lines 73-77 and 136-140 show commented rate limiting placeholders for /api/v1/auth/login in both admin and player server blocks, ✅ Line 32 shows limit_req_zone is commented as expected. Requirement 4) DEPLOYMENT.md TLS termination statement: ✅ Line 6 explicitly states 'TLS terminates at the external proxy; upstream traffic to the UI containers is plain HTTP'. Requirement 5) admin.domain.tld and player.domain.tld distinct server blocks: ✅ Lines 37-96 show complete admin.domain.tld server block, ✅ Lines 102-158 show complete player.domain.tld server block with distinct configurations. All documentation and configuration standards are consistent and properly implemented for production deployment."
 
 
+p1_security_dec16:
+  - task: "P1-SECURITY: CORS tighten + login rate-limit (trusted proxy aware) + basic security headers + bootstrap warning + release checklist"
+    implemented: true
+    working: true
+    file: "backend/config.py, backend/server.py, backend/app/middleware/rate_limit.py, frontend/nginx.conf, frontend-player/nginx.conf, docs/release-checklist.md"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+
   summary: "Phase 1: Financial Integrity & Security Update"
 
 frontend:
