@@ -20,11 +20,11 @@ p0_ci_curl_sanity_step_dec16:
 release_ready_p0_env_and_proxy_dec16:
   - task: "P0 Release-Ready: .env.example set + bootstrap fallback guarantee + same-origin /api proxy usage"
     implemented: true
-    working: false
-    file: ".env.example, backend/.env.example, frontend/.env.example, frontend-player/.env.example, docker-compose.prod.yml, frontend/nginx.conf, frontend-player/nginx.conf, frontend/Dockerfile.prod, frontend-player/Dockerfile.prod, frontend/src/services/api.js, frontend-player/src/services/api.js"
+    working: "needs_user_ci_run"
+    file: ".env.example, backend/.env.example, frontend/.env.example, frontend-player/.env.example, docker-compose.prod.yml, frontend/nginx.conf, frontend-player/nginx.conf, frontend/Dockerfile.prod, frontend-player/Dockerfile.prod, frontend/src/services/api.js, frontend-player/src/services/api.js, DEPLOYMENT.md"
     stuck_count: 0
     priority: "highest"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: "NA"
         -agent: "main"
