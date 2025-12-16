@@ -9,7 +9,9 @@
 #
 # Notes:
 # - This file is intentionally minimal and may need adaption to your environment.
+# - TLS terminates at Traefik (websecure). Upstreams here are plain HTTP.
 # - The UI containers already proxy /api/* internally to backend:8001.
+# - /api path standard: browsers call https://<origin>/api/v1/... and Traefik forwards it to the UI container.
 
 http:
   routers:
