@@ -1,0 +1,66 @@
+# Optional: Traefik external reverse proxy example (copy-paste starting point)
+# Assumption:
+# - Single VM
+# - Traefik runs on host (or as its own docker compose stack)
+# - LetsEncrypt via ACME
+# - Your app docker-compose.prod.yml publishes:
+#   - admin UI on :3000
+#   - player UI on :3001
+#
+# Notes:
+# - This file is intentionally minimal and may need adaption to your environment.
+# - The UI containers already proxy /api/* internally to backend:8001.
+
+http:
+  routers:
+    admin:
+      rule: Host(`admin.domain.tld`)
+      entryPoints: ["websecure"]
+      tls:
+        certResolver: le
+      service: admin-svc
+      middlewares: ["security-headers"]
+
+    player:
+      rule: Host(`player.domain.tld`)
+      entryPoints: ["websecure"]
+      tls:
+        certResolver: le
+      service: player-svc
+      middlewares: ["security-headers"]
+
+  services:
+    admin-svc:
+      loadBalancer:
+        servers:
+          - url: http://127.0.0.1:3000
+
+    player-svc:
+      loadBalancer:
+        servers:
+          - url: http://127.0.0.1:3001
+
+  middlewares:
+    security-headers:
+      headers:
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        # Enable only after TLS is stable in production
+        # stsSeconds: 31536000
+        # stsIncludeSubdomains: true
+        # stsPreload: true
+
+# Traefik static config (example)
+# entryPoints:
+#   web:
+#     address: ":80"
+#   websecure:
+#     address: ":443"
+# certificatesResolvers:
+#   le:
+#     acme:
+#       email: ops@domain.tld
+#       storage: /etc/traefik/acme.json
+#       httpChallenge:
+#         entryPoint: web
