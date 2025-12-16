@@ -24,13 +24,14 @@ jobs:
       JWT_SECRET: "ci_dummy_secret_change_me"
 
       # Bootstrap guard'ı geçtiğimiz için CI'da bootstrap'ı açıyoruz
-      BOOTSTRAP_ENABLED: "true"
+      # Bootstrap only when secrets are provided
+      BOOTSTRAP_ENABLED: ${{ secrets.BOOTSTRAP_OWNER_EMAIL && secrets.BOOTSTRAP_OWNER_PASSWORD && 'true' || 'false' }}
 
-      # Owner credentials: repo secrets'ten gelecek (Settings > Secrets and variables > Actions)
+      # Owner credentials (optional)
       BOOTSTRAP_OWNER_EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
       BOOTSTRAP_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
 
-      # (Opsiyonel) E2E/Playwright tarafı farklı env isimleri bekliyorsa aynı değeri map et
+      # (Optional) E2E/Playwright mapping
       E2E_OWNER_EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
       E2E_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
 
