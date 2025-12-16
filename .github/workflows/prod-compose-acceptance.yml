@@ -72,6 +72,8 @@ jobs:
             echo "BOOTSTRAP_ENABLED=true" >> "$GITHUB_ENV"
             echo "BOOTSTRAP_OWNER_EMAIL=ci.owner@example.com" >> "$GITHUB_ENV"
             echo "BOOTSTRAP_OWNER_PASSWORD=CI-Temp-$(date +%s)-A!" >> "$GITHUB_ENV"
+            echo "E2E_OWNER_EMAIL=ci.owner@example.com" >> "$GITHUB_ENV"
+            echo "E2E_OWNER_PASSWORD=CI-Temp-$(date +%s)-A!" >> "$GITHUB_ENV"
           fi
 
 
