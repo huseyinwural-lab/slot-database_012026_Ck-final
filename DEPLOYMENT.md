@@ -3,7 +3,7 @@
 Target assumption:
 - **Single Ubuntu VM (22.04 / 24.04)**
 - **Docker Engine + Docker Compose v2**
-- External reverse proxy (**Nginx or Traefik**) with **Let's Encrypt** TLS
+- External reverse proxy (**Nginx or Traefik**) with **Let's Encrypt** TLS (TLS terminates at the external proxy; upstream traffic to the UI containers is plain HTTP)
 - Two separate origins:
   - Admin UI: `https://admin.domain.tld`
   - Player UI: `https://player.domain.tld`
