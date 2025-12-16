@@ -15,6 +15,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     """Very simple in-memory rate limiting.
 
     - IP-based limits on selected critical endpoints
+    - Uses X-Forwarded-For only when it is safe to trust it
     - Not suitable for multi-node global limits, but enough for basic protection
     """
 
@@ -24,14 +25,35 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self._buckets: Dict[Tuple[str, str], Deque[float]] = defaultdict(deque)
         # Per-path limits: (max_requests, window_seconds)
         self._limits = {
-            "/api/v1/auth/login": (10, 60.0),  # 10 login attempts / minute per IP
-            "/api/v1/auth/player/login": (10, 60.0), # Player login
-            "/api/v1/auth/player/register": (5, 60.0), # Registration
+            "/api/v1/auth/login": (5, 60.0),  # 5 login attempts / minute per IP
         }
+
+    def _get_client_ip(self, request: Request) -> str:
+        remote_ip = request.client.host if request.client else "unknown"
+
+        # In prod/staging, trust X-Forwarded-For ONLY if the immediate peer is a trusted proxy.
+        # Otherwise it's spoofable.
+        try:
+            from config import settings
+        except Exception:
+            settings = None
+
+        xff = request.headers.get("X-Forwarded-For")
+        if not xff:
+            return remote_ip
+
+        if settings and getattr(settings, "env", "dev") in {"prod", "staging"}:
+            trusted = getattr(settings, "trusted_proxy_ips", "") or ""
+            trusted_set = {ip.strip() for ip in trusted.split(",") if ip.strip()}
+            if remote_ip not in trusted_set:
+                return remote_ip
+
+        # Take the first hop as original client
+        return xff.split(",")[0].strip() or remote_ip
 
     async def dispatch(self, request: Request, call_next: Callable):
         path = request.url.path
-        client_host = request.client.host if request.client else "unknown"
+        client_ip = self._get_client_ip(request)
 
         limit = None
         for prefix, conf in self._limits.items():
@@ -44,7 +66,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         max_requests, window = limit
         now = time.monotonic()
-        key = (client_host, path)
+        key = (client_ip, path)
         bucket = self._buckets[key]
 
         # Drop old timestamps
@@ -52,7 +74,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             bucket.popleft()
 
         if len(bucket) >= max_requests:
-            logger.warning("rate limit exceeded", extra={"ip": client_host, "path": path})
+            logger.warning(
+                "rate limit exceeded",
+                extra={"ip": client_ip, "path": path, "rate_limited": True},
+            )
             return JSONResponse(
                 status_code=429,
                 content={
