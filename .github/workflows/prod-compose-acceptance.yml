@@ -52,8 +52,9 @@ jobs:
 
 
       # Frontend build args
-      REACT_APP_BACKEND_URL: "http://127.0.0.1:8001"
-      VITE_API_URL: "http://127.0.0.1:8001/api/v1"
+      # Browser should talk same-origin (frontend nginx proxies /api -> backend)
+      REACT_APP_BACKEND_URL: "http://localhost:3000"
+      VITE_API_URL: "http://localhost:3000/api/v1"
 
     steps:
       - name: Checkout
