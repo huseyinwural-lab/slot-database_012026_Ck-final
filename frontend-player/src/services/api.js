@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.VITE_API_URL
   || (typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : '');
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: BASE_URL || '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
