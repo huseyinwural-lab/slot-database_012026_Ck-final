@@ -137,23 +137,21 @@ jobs:
             psql -U postgres -d casino_db -c "select id, name from tenant;"
 
       # Login test is the ultimate truth. If this passes, we are good.
-      - name: Verify Owner Login via Curl (Debug)
+      - name: Test login via curl
+        env:
+          EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
+          PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
         run: |
-          echo "Testing login with ${{ env.BOOTSTRAP_OWNER_EMAIL }}..."
-          # Use -v to see handshake, headers, and body
-          curl -v -X POST "http://localhost:8001/api/v1/auth/login" \
+          echo "Testing login with ${EMAIL}..."
+          curl -sS -X POST "http://localhost:8001/api/v1/auth/login" \
             -H "Content-Type: application/json" \
-            -d "{\"email\": \"${{ env.BOOTSTRAP_OWNER_EMAIL }}\", \"password\": \"${{ env.BOOTSTRAP_OWNER_PASSWORD }}\"}" \
-            > login_response.txt 2>&1
-          
-          echo "=== CURL OUTPUT ==="
-          cat login_response.txt
-          echo "==================="
-          
-          if grep -q "access_token" login_response.txt; then
+            -d "{\"email\":\"${EMAIL}\",\"password\":\"${PASSWORD}\"}" | tee /tmp/login.json
+
+          if grep -q "access_token" /tmp/login.json; then
             echo "Login Verified via Curl!"
           else
             echo "Login Failed via Curl!"
+            cat /tmp/login.json
             exit 1
           fi
 
