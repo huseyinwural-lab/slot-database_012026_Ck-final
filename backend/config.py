@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     log_level: str = "INFO"  # LOG_LEVEL
     log_format: str = "plain"  # LOG_FORMAT (plain|json)
 
+    # Reverse proxy / client IP trust
+    # Comma-separated list of trusted proxy IPs (the immediate peer IP that forwards requests).
+    # Only when ENV is prod/staging and the request comes from a trusted proxy IP
+    # will we trust X-Forwarded-For for rate limiting.
+    trusted_proxy_ips: str = ""  # TRUSTED_PROXY_IPS
+
     # Kill switch
     # Global emergency switch to disable all non-core modules
     kill_switch_all: str = "false"  # KILL_SWITCH_ALL
