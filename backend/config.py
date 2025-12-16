@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
         if not raw:
+            # In prod/staging we fail-closed (no wildcard). In dev/local we keep permissive behavior.
+            if (self.env or "").lower() in {"prod", "staging"}:
+                return []
             return ["*"]
 
         # JSON list support (legacy)
