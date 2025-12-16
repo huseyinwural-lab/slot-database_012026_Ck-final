@@ -67,6 +67,8 @@ jobs:
             echo "BOOTSTRAP_ENABLED=true" >> "$GITHUB_ENV"
             echo "BOOTSTRAP_OWNER_EMAIL=${{ secrets.BOOTSTRAP_OWNER_EMAIL }}" >> "$GITHUB_ENV"
             echo "BOOTSTRAP_OWNER_PASSWORD=${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "E2E_OWNER_EMAIL=${{ secrets.BOOTSTRAP_OWNER_EMAIL }}" >> "$GITHUB_ENV"
+            echo "E2E_OWNER_PASSWORD=${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}" >> "$GITHUB_ENV"
           else
             echo "BOOTSTRAP_OWNER_* secrets not set; using ephemeral CI bootstrap credentials"
             echo "BOOTSTRAP_ENABLED=true" >> "$GITHUB_ENV"
