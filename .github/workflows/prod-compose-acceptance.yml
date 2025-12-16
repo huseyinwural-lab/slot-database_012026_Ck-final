@@ -63,6 +63,10 @@ jobs:
           docker compose version
 
       - name: Bring up prod stack (fresh)
+        env:
+          BOOTSTRAP_ENABLED: "true"
+          BOOTSTRAP_OWNER_EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
+          BOOTSTRAP_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
         run: |
           set -e
           set -o pipefail
