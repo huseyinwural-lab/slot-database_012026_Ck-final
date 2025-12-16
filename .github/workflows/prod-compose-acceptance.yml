@@ -175,6 +175,7 @@ jobs:
 
           BACKEND_ID=$(docker compose -f docker-compose.prod.yml ps -q backend 2>/dev/null || true)
           if [ -n "$BACKEND_ID" ]; then
+            docker inspect "$BACKEND_ID" > ci_artifacts/backend_inspect_full.json || true
             docker inspect "$BACKEND_ID" --format '{{json .State.Health}}' > ci_artifacts/backend_health.json || true
             if command -v jq >/dev/null 2>&1; then
               cat ci_artifacts/backend_health.json | jq . > ci_artifacts/backend_health.pretty.json || true
