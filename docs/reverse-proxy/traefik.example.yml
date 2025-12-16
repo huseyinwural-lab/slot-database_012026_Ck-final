@@ -48,6 +48,10 @@ http:
         contentTypeNosniff: true
         frameDeny: true
         referrerPolicy: "strict-origin-when-cross-origin"
+        # Enable only after TLS is stable in production
+        # stsSeconds: 31536000
+        # stsIncludeSubdomains: true
+        # stsPreload: true
 
     # Placeholder for login rate limit (P1-SECURITY)
     # In Traefik you can implement rate limiting via a middleware.
@@ -57,10 +61,6 @@ http:
     #     average: 10
     #     period: 1m
     #     burst: 5
-        # Enable only after TLS is stable in production
-        # stsSeconds: 31536000
-        # stsIncludeSubdomains: true
-        # stsPreload: true
 
 # Traefik static config (example)
 # entryPoints:
