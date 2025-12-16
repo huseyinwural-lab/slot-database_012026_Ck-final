@@ -226,19 +226,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: prod-compose-artifacts
-          path: |
-            ci_artifacts/compose_ps.txt
-            ci_artifacts/compose_logs_tail.txt
-            ci_artifacts/inspect_*.json
-            ci_artifacts/compose_build.log
-            ci_artifacts/compose_ps_inline.txt
-            ci_artifacts/compose_logs_inline_tail200.txt
-            ci_artifacts/backend.log
-            ci_artifacts/postgres.log
-            ci_artifacts/backend_health.json
-            ci_artifacts/backend_health.pretty.json
-            ci_artifacts/backend_inspect_full.json
-            ci_artifacts/localhost_resolution.txt
+          path: ci_artifacts/**
 
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
