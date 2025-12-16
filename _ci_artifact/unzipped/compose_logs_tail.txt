@@ -1,0 +1,72 @@
+=== docker compose logs (tail 400) ===
+postgres-1  | The files belonging to this database system will be owned by user "postgres".
+postgres-1  | This user must also own the server process.
+postgres-1  | 
+postgres-1  | The database cluster will be initialized with locale "en_US.utf8".
+postgres-1  | The default database encoding has accordingly been set to "UTF8".
+postgres-1  | The default text search configuration will be set to "english".
+postgres-1  | 
+postgres-1  | Data page checksums are disabled.
+postgres-1  | 
+postgres-1  | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+postgres-1  | creating subdirectories ... ok
+postgres-1  | selecting dynamic shared memory implementation ... posix
+postgres-1  | selecting default max_connections ... 100
+postgres-1  | selecting default shared_buffers ... 128MB
+postgres-1  | selecting default time zone ... UTC
+postgres-1  | creating configuration files ... ok
+postgres-1  | running bootstrap script ... ok
+postgres-1  | sh: locale: not found
+postgres-1  | 2025-12-16 09:44:58.782 UTC [34] WARNING:  no usable system locales were found
+postgres-1  | performing post-bootstrap initialization ... ok
+postgres-1  | initdb: warning: enabling "trust" authentication for local connections
+postgres-1  | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+postgres-1  | syncing data to disk ... ok
+postgres-1  | 
+postgres-1  | 
+postgres-1  | Success. You can now start the database server using:
+postgres-1  | 
+postgres-1  |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+postgres-1  | 
+postgres-1  | waiting for server to start....2025-12-16 09:44:59.367 UTC [40] LOG:  starting PostgreSQL 15.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+postgres-1  | 2025-12-16 09:44:59.367 UTC [40] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres-1  | 2025-12-16 09:44:59.370 UTC [43] LOG:  database system was shut down at 2025-12-16 09:44:59 UTC
+postgres-1  | 2025-12-16 09:44:59.374 UTC [40] LOG:  database system is ready to accept connections
+postgres-1  |  done
+postgres-1  | server started
+postgres-1  | CREATE DATABASE
+postgres-1  | 
+postgres-1  | 
+postgres-1  | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+postgres-1  | 
+postgres-1  | waiting for server to shut down...2025-12-16 09:44:59.515 UTC [40] LOG:  received fast shutdown request
+postgres-1  | .2025-12-16 09:44:59.516 UTC [40] LOG:  aborting any active transactions
+postgres-1  | 2025-12-16 09:44:59.519 UTC [40] LOG:  background worker "logical replication launcher" (PID 46) exited with exit code 1
+postgres-1  | 2025-12-16 09:44:59.522 UTC [41] LOG:  shutting down
+postgres-1  | 2025-12-16 09:44:59.522 UTC [41] LOG:  checkpoint starting: shutdown immediate
+postgres-1  | 2025-12-16 09:44:59.539 UTC [41] LOG:  checkpoint complete: wrote 921 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.015 s, sync=0.002 s, total=0.018 s; sync files=301, longest=0.001 s, average=0.001 s; distance=4239 kB, estimate=4239 kB
+postgres-1  | 2025-12-16 09:44:59.546 UTC [40] LOG:  database system is shut down
+postgres-1  |  done
+postgres-1  | server stopped
+postgres-1  | 
+postgres-1  | PostgreSQL init process complete; ready for start up.
+postgres-1  | 
+postgres-1  | 2025-12-16 09:44:59.635 UTC [1] LOG:  starting PostgreSQL 15.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+postgres-1  | 2025-12-16 09:44:59.635 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+postgres-1  | 2025-12-16 09:44:59.635 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres-1  | 2025-12-16 09:44:59.636 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres-1  | 2025-12-16 09:44:59.639 UTC [56] LOG:  database system was shut down at 2025-12-16 09:44:59 UTC
+postgres-1  | 2025-12-16 09:44:59.643 UTC [1] LOG:  database system is ready to accept connections
+backend-1   | [start_prod] 2025-12-16T09:45:09+00:00 Starting up...
+backend-1   | [start_prod] ENV=staging
+backend-1   | [start_prod] 2025-12-16T09:45:09+00:00 Running alembic migrations (ENV=staging)
+backend-1   | INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+backend-1   | INFO  [alembic.runtime.migration] Will assume transactional DDL.
+backend-1   | INFO  [alembic.runtime.migration] Running upgrade  -> 24e894ecb377, baseline
+backend-1   | [start_prod] 2025-12-16T09:45:09+00:00 Migrations applied successfully.
+backend-1   | [start_prod] 2025-12-16T09:45:09+00:00 Running one-shot owner bootstrap (if env vars present)
+backend-1   | [bootstrap_owner] FATAL: Missing BOOTSTRAP_OWNER_EMAIL or BOOTSTRAP_OWNER_PASSWORD while BOOTSTRAP_ENABLED=true
+backend-1   | [start_prod] 2025-12-16T09:45:10+00:00 ERROR: Bootstrap script failed.
+backend-1   | [start_prod] 2025-12-16T09:45:10+00:00 Starting up...
+backend-1   | [start_prod] ENV=staging
+backend-1   | [start_prod] 2025-12-16T09:45:10+00:00 Running alembic migrations (ENV=staging)

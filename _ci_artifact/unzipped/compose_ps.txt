@@ -1,0 +1,3 @@
+NAME                                IMAGE                            COMMAND                  SERVICE    CREATED          STATUS                           PORTS
+slot-database_son_1612-backend-1    slot-database_son_1612-backend   "/app/scripts/start_…"   backend    15 seconds ago   Up 1 second (health: starting)   0.0.0.0:8001->8001/tcp, [::]:8001->8001/tcp
+slot-database_son_1612-postgres-1   postgres:15-alpine               "docker-entrypoint.s…"   postgres   15 seconds ago   Up 14 seconds (healthy)          5432/tcp
