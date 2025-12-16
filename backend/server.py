@@ -19,6 +19,12 @@ if settings.env in {"prod", "staging"}:
     if not settings.database_url:
         raise RuntimeError("DATABASE_URL must be set in prod/staging")
 
+    # Bootstrap should not be left enabled in production.
+    # We don't hard-block here to keep emergency recovery possible, but we log loudly.
+    import os
+    if (os.getenv("BOOTSTRAP_ENABLED") or "").lower() == "true":
+        logger.warning("BOOTSTRAP_ENABLED=true in prod/staging. This should be one-shot only.")
+
 logger = logging.getLogger(__name__)
 
 # Create the main app
