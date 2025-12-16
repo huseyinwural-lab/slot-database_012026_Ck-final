@@ -11,7 +11,7 @@ p0_release_blockers_dec15:
 p0_ci_curl_sanity_step_dec16:
   - task: "P0.1 CI Curl Login Sanity Step - Simplify to HTTP code check"
     implemented: true
-    working: "needs_user_ci_run"
+    working: "blocked_by_missing_secrets"
     file: ".github/workflows/prod-compose-acceptance.yml"
     stuck_count: 0
     priority: "highest"
