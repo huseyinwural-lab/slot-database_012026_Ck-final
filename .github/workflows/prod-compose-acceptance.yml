@@ -22,9 +22,16 @@ jobs:
       # CI için dummy secret yeterli; prod’da GitHub Secrets kullanın
       JWT_SECRET: "ci_dummy_secret_change_me"
 
-      # One-shot owner bootstrap (seed kapalıyken E2E login için)
-      BOOTSTRAP_OWNER_EMAIL: "ci_owner@casino.com"
-      BOOTSTRAP_OWNER_PASSWORD: "StrongPassw0rd!"
+      # Bootstrap guard'ı geçtiğimiz için CI'da bootstrap'ı açıyoruz
+      BOOTSTRAP_ENABLED: "true"
+
+      # Owner credentials: repo secrets'ten gelecek (Settings > Secrets and variables > Actions)
+      BOOTSTRAP_OWNER_EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
+      BOOTSTRAP_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
+
+      # (Opsiyonel) E2E/Playwright tarafı farklı env isimleri bekliyorsa aynı değeri map et
+      E2E_OWNER_EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
+      E2E_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
 
       # docker-compose.prod.yml backend port mapping: 8001:8001
       API_BASE: "http://localhost:8001"
