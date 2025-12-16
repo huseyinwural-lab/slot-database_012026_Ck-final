@@ -35,7 +35,8 @@ jobs:
       E2E_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
 
       # docker-compose.prod.yml backend port mapping: 8001:8001
-      API_BASE: "http://localhost:8001"
+      # Use 127.0.0.1 (not localhost) to avoid IPv6/::1 resolution issues in CI Playwright/browser networking
+      API_BASE: "http://127.0.0.1:8001"
 
       # docker-compose.prod.yml postgres env uses POSTGRES_PASSWORD
       POSTGRES_PASSWORD: "postgres"
@@ -51,8 +52,8 @@ jobs:
 
 
       # Frontend build args
-      REACT_APP_BACKEND_URL: "http://localhost:8001"
-      VITE_API_URL: "http://localhost:8001/api/v1"
+      REACT_APP_BACKEND_URL: "http://127.0.0.1:8001"
+      VITE_API_URL: "http://127.0.0.1:8001/api/v1"
 
     steps:
       - name: Checkout
@@ -154,7 +155,7 @@ jobs:
           PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
         run: |
           echo "Testing login with ${EMAIL}..."
-          curl -sS -X POST "http://localhost:8001/api/v1/auth/login" \
+          curl -sS -X POST "$API_BASE/api/v1/auth/login" \
             -H "Content-Type: application/json" \
             -d "{\"email\":\"${EMAIL}\",\"password\":\"${PASSWORD}\"}" | tee /tmp/login.json
 
@@ -243,7 +244,7 @@ jobs:
         working-directory: e2e
         env:
           E2E_BASE_URL: "http://localhost:3000"
-          E2E_API_BASE: "http://localhost:8001"
+          E2E_API_BASE: ${{ env.API_BASE }}
           E2E_OWNER_EMAIL: ${{ env.BOOTSTRAP_OWNER_EMAIL }}
           E2E_OWNER_PASSWORD: ${{ env.BOOTSTRAP_OWNER_PASSWORD }}
         run: |
