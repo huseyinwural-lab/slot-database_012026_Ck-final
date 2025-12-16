@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-P0 Release Blockers Patch (#741) Backend Validation
-Testing auth, tenant admin security, and docker-compose.prod.yml static checks
+P1-SECURITY Backend Validation
+Testing rate limiting, CORS, and trusted proxy behavior
 """
 
 import requests
 import json
 import sys
 import os
+import time
 from typing import Dict, Any, Optional
 
 # Configuration
