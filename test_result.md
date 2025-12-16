@@ -15,7 +15,7 @@ p0_ci_curl_sanity_step_dec16:
     file: ".github/workflows/prod-compose-acceptance.yml"
     stuck_count: 0
     priority: "highest"
-    needs_retesting: true
+    needs_retesting: false
 
 release_ready_p0_env_and_proxy_dec16:
   - task: "P0 Release-Ready: .env.example set + bootstrap fallback guarantee + same-origin /api proxy usage"
