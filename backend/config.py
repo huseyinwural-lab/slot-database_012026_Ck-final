@@ -69,7 +69,12 @@ class Settings(BaseSettings):
 
         # CSV support (canonical for prod)
         origins = [o.strip() for o in raw.split(",") if o.strip()]
-        return origins or ["*"]
+        if origins:
+            return origins
+
+        if (self.env or "").lower() in {"prod", "staging"}:
+            return []
+        return ["*"]
 
     class Config:
         env_file = ".env"
