@@ -167,6 +167,20 @@ jobs:
             exit 1
           fi
 
+      - name: Dump localhost resolution
+        if: always()
+        run: |
+          set +e
+          mkdir -p ci_artifacts
+          {
+            echo "getent hosts localhost:";
+            getent hosts localhost || true;
+            echo;
+            echo "getent ahosts localhost:";
+            getent ahosts localhost || true;
+          } | tee ci_artifacts/localhost_resolution.txt
+
+
       # Always collect diagnostics (success or failure) to unblock RCA.
       - name: Collect compose diagnostics (always)
         if: always()
