@@ -31,6 +31,10 @@ app = FastAPI(
 # Configure CORS
 origins = settings.get_cors_origins()
 
+# In prod/staging we fail-closed: CORS_ORIGINS must be explicitly set.
+if settings.env in {"prod", "staging"} and (not origins or origins == ["*"]):
+    raise RuntimeError("CORS_ORIGINS must be a non-wildcard allowlist in prod/staging")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
