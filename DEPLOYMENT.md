@@ -50,10 +50,11 @@ High-level map:
 
 Important routing model:
 - Browsers call same-origin API paths:
-  - `https://admin.domain.tld/api/...`
-  - `https://player.domain.tld/api/...`
-- The UI containers' internal Nginx proxies `/api/*` -> `http://backend:8001`.
-- The **external** reverse proxy should forward `/api/*` to the UI container (not directly to backend), to preserve same-origin.
+  - `https://admin.domain.tld/api/v1/...`
+  - `https://player.domain.tld/api/v1/...`
+- The UI containers' internal Nginx proxies `location /api/` -> `proxy_pass http://backend:8001;` (Docker network).
+- The **external** reverse proxy should forward `location /api/` to the UI container (not directly to backend), to preserve same-origin.
+- Path handling rule: keep `/api/v1/...` intact (avoid trailing-slash rewrite mistakes).
 
 ---
 
