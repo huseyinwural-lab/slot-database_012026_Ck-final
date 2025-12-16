@@ -225,6 +225,7 @@ jobs:
             ci_artifacts/backend_health.json
             ci_artifacts/backend_health.pretty.json
             ci_artifacts/backend_inspect_full.json
+            ci_artifacts/localhost_resolution.txt
 
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
