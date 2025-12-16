@@ -12,6 +12,8 @@ from app.core.logging_config import configure_logging
 # Defaults: LOG_LEVEL=INFO, LOG_FORMAT=json (prod recommended)
 configure_logging(level=settings.log_level, fmt=settings.log_format)
 
+logger = logging.getLogger(__name__)
+
 # Fail-fast for prod/staging secrets
 if settings.env in {"prod", "staging"}:
     if not settings.jwt_secret or settings.jwt_secret in {"secret", "change_this_secret_in_production_env"}:
@@ -24,8 +26,6 @@ if settings.env in {"prod", "staging"}:
     import os
     if (os.getenv("BOOTSTRAP_ENABLED") or "").lower() == "true":
         logger.warning("BOOTSTRAP_ENABLED=true in prod/staging. This should be one-shot only.")
-
-logger = logging.getLogger(__name__)
 
 # Create the main app
 app = FastAPI(
