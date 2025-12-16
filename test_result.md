@@ -20,11 +20,11 @@ p0_ci_curl_sanity_step_dec16:
 release_ready_p0_env_and_proxy_dec16:
   - task: "P0 Release-Ready: .env.example set + bootstrap fallback guarantee + same-origin /api proxy usage"
     implemented: true
-    working: "needs_user_ci_run"
+    working: false
     file: ".env.example, backend/.env.example, frontend/.env.example, frontend-player/.env.example, docker-compose.prod.yml, frontend/nginx.conf, frontend-player/nginx.conf, frontend/Dockerfile.prod, frontend-player/Dockerfile.prod, frontend/src/services/api.js, frontend-player/src/services/api.js"
     stuck_count: 0
     priority: "highest"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
@@ -35,6 +35,9 @@ release_ready_p0_env_and_proxy_dec16:
         -working: true
         -agent: "testing"
         -comment: "✅ CI WORKFLOW ENV UPDATES E2E VALIDATION COMPLETE - ALL TESTS PASSED (4/4 - 100% success rate): Executed /app/e2e/tests/crm-aff-matrix.spec.ts with E2E_BASE_URL=http://localhost:3000 and E2E_API_BASE=http://127.0.0.1:8001 as requested. Test 1) default_casino: CRM loads correctly - robustLogin successful, CRM page loads with proper heading, no 'load failed' toasts, API call to /api/v1/crm/campaigns returns 200 OK (duration: 3.5s). Test 2) default_casino: Affiliates loads correctly - robustLogin successful, Affiliates page loads with proper heading, no 'load failed' toasts, API call to /api/v1/affiliates/ returns 200 OK (duration: 3.6s). Test 3) demo_renter: CRM is disabled/gated - robustLogin successful, tenant context switched to demo_renter, CRM page shows 'Module Disabled' message, API call returns 403 Forbidden as expected (duration: 3.6s). Test 4) demo_renter: Affiliates is disabled/gated - robustLogin successful, tenant context switched to demo_renter, Affiliates page shows 'Module Disabled' message, API call returns 403 Forbidden as expected (duration: 3.3s). CRITICAL VALIDATIONS: ✅ robustLogin function passes consistently with no authentication failures, ✅ No net::ERR_FAILED errors detected in any test run, ✅ Backend logs show successful login attempts with 200 OK responses, ✅ Frontend logs show no network errors, ✅ All API calls to 127.0.0.1:8001 working correctly (no localhost issues), ✅ Total test execution time: 14.5s with 0 failures. CI workflow environment variable changes validated successfully - E2E tests are robust and ready for CI pipeline."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ RELEASE-READY PROXY TESTING FAILED - SAME-ORIGIN PROXY NOT WORKING IN DEVELOPMENT: Test 1) ✅ Admin frontend (http://localhost:3000) loads successfully - login page renders correctly with proper form elements. Test 2) ❌ API requests NOT using same-origin paths - All 5 network requests go to external URL (https://casino-release.preview.emergentagent.com/api/v1/) instead of same-origin (http://localhost:3000/api/). Observed requests: POST /auth/login, GET /dashboard/comprehensive-stats, GET /tenants/capabilities. Test 3) ✅ Login functionality works - successful authentication with admin@casino.com/Admin123!, redirected to dashboard. Test 4) ✅ No console errors detected. Test 5) ❌ Player frontend (http://localhost:3001) not accessible - ERR_CONNECTION_REFUSED (service not configured in development). ROOT CAUSE: Development mode uses React dev server (localhost:3000) with REACT_APP_BACKEND_URL=https://casino-release.preview.emergentagent.com, bypassing same-origin proxy. Nginx proxy config (frontend/nginx.conf) only applies in production Docker containers. EVIDENCE: Backend accessible at localhost:8001/api/health, but frontend API service (frontend/src/services/api.js) uses external URL from .env instead of same-origin /api paths. Same-origin proxy requirement NOT met in current development setup."
 
 
   summary: "Phase 1: Financial Integrity & Security Update"
