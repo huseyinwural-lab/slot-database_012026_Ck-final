@@ -23,17 +23,8 @@ jobs:
       # CI için dummy secret yeterli; prod’da GitHub Secrets kullanın
       JWT_SECRET: "ci_dummy_secret_change_me"
 
-      # Bootstrap guard'ı geçtiğimiz için CI'da bootstrap'ı açıyoruz
-      # Bootstrap only when secrets are provided
-      BOOTSTRAP_ENABLED: ${{ secrets.BOOTSTRAP_OWNER_EMAIL && secrets.BOOTSTRAP_OWNER_PASSWORD && 'true' || 'false' }}
-
-      # Owner credentials (optional)
-      BOOTSTRAP_OWNER_EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
-      BOOTSTRAP_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
-
-      # (Optional) E2E/Playwright mapping
-      E2E_OWNER_EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
-      E2E_OWNER_PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
+      # Bootstrap credentials are set in a step (either from secrets or generated ephemerally)
+      # to avoid CI failing when repository secrets are not configured.
 
       # docker-compose.prod.yml backend port mapping: 8001:8001
       # Use 127.0.0.1 (not localhost) to avoid IPv6/::1 resolution issues in CI Playwright/browser networking
