@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const RAW_API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+// Prefer explicit env var; otherwise use same-origin (works with Nginx /api reverse proxy in prod images)
+const RAW_API_URL = process.env.REACT_APP_BACKEND_URL
+  || (typeof window !== 'undefined' ? window.location.origin : '');
 
 // Prevent mixed-content in HTTPS environments.
 // If the app is served over HTTPS but the backend URL is HTTP (common misconfig), upgrade.

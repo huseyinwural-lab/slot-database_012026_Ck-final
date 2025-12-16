@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // Environment variable handling
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1';
+// Prefer explicit env var; otherwise use same-origin (works with Nginx /api reverse proxy in prod images)
+const BASE_URL = import.meta.env.VITE_API_URL
+  || (typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : '/api/v1');
 
 const api = axios.create({
   baseURL: BASE_URL,
