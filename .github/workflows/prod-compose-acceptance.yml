@@ -193,6 +193,10 @@ jobs:
             ci_artifacts/compose_build.log
             ci_artifacts/compose_ps_inline.txt
             ci_artifacts/compose_logs_inline_tail200.txt
+            ci_artifacts/backend.log
+            ci_artifacts/postgres.log
+            ci_artifacts/backend_health.json
+            ci_artifacts/backend_health.pretty.json
 
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
