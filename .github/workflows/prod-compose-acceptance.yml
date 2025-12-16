@@ -198,6 +198,7 @@ jobs:
             ci_artifacts/postgres.log
             ci_artifacts/backend_health.json
             ci_artifacts/backend_health.pretty.json
+            ci_artifacts/backend_inspect_full.json
 
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
