@@ -150,35 +150,18 @@ jobs:
             psql -U postgres -d casino_db -c "select id, name from tenant;"
 
       # Login test is the ultimate truth. If this passes, we are good.
-      - name: Test login via curl
-        env:
-          EMAIL: ${{ secrets.BOOTSTRAP_OWNER_EMAIL }}
-          PASSWORD: ${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}
-        run: |
-          echo "Testing login with ${EMAIL}..."
-          curl -sS -X POST "$API_BASE/api/v1/auth/login" \
-            -H "Content-Type: application/json" \
-            -d "{\"email\":\"${EMAIL}\",\"password\":\"${PASSWORD}\"}" | tee /tmp/login.json
-
-          if grep -q "access_token" /tmp/login.json; then
-            echo "Login Verified via Curl!"
-          else
-            echo "Login Failed via Curl!"
-            cat /tmp/login.json
-
       - name: Curl login (sanity)
-        if: ${{ github.event_name != 'pull_request' }}
         run: |
-          set -e
-          curl -sS -X POST "$API_BASE/api/v1/auth/login" \
+          set -euo pipefail
+          echo "Testing login with ${BOOTSTRAP_OWNER_EMAIL}..."
+          code="$(curl -sS -o /tmp/login.json -w "%{http_code}" \
+            -X POST "${API_BASE}/api/v1/auth/login" \
             -H 'content-type: application/json' \
-            --data '{"email":"'"${BOOTSTRAP_OWNER_EMAIL}"'","password":"'"${BOOTSTRAP_OWNER_PASSWORD}"'"}' \
-            -o /tmp/login.json
-          echo "Login response (first 500 chars):"
-          head -c 500 /tmp/login.json
+            --data "{\"email\":\"${BOOTSTRAP_OWNER_EMAIL}\",\"password\":\"${BOOTSTRAP_OWNER_PASSWORD}\"}")"
 
-            exit 1
-          fi
+          echo "HTTP $code"
+          cat /tmp/login.json
+          test "$code" = "200"
 
       - name: Dump localhost resolution
         if: always()
