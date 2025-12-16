@@ -143,6 +143,18 @@ backend:
         -agent: "testing"
         -comment: "✅ FINAL BACKEND REGRESSION TESTS - ALL TESTS PASSED (4/4 - 100% success rate): Test 1) Alembic Baseline Migration Validation: ✅ Migration file 24e894ecb377_baseline.py contains op.create_table(...) calls for 19 core tables including tenant, adminuser, player, transaction, chargebackcase, reconciliationreport, financesettings, game, gameasset, gameconfigversion, apikey, featureflag, auditlog, approvalrequest, supportticket, riskrule, contentpage, bonus, affiliate - baseline migration is no longer empty and contains proper table creation statements. Test 2) Password Policy Validation: ✅ POST /api/v1/admin/create-tenant-admin without password returns 400 with error_code=PASSWORD_REQUIRED as expected, ✅ POST /api/v1/auth/player/register with password shorter than 8 characters returns 400 with 'Password must be at least 8 characters' validation message. Test 3) P0 Regression Pytest Execution: ✅ pytest /app/backend/tests/test_response_dto_leaks.py - 5/5 tests passed (no sensitive fields leaked in API responses, API key creation returns secret once but not in list), ✅ pytest /app/backend/tests/test_tenant_isolation.py - 5/5 tests passed (tenant admin header forbidden 403, owner invalid header 400, owner headerless default scope 200, cross-tenant detail access 404, owner impersonation works 200). Test 4) Health Endpoints Validation: ✅ GET /api/health returns 200 OK with status='healthy', ✅ GET /api/ready returns 200 OK with status='ready'. All release-hardening validation requirements met successfully. Admin authentication issue resolved by resetting admin password hash and failed_login_attempts."
 
+  - task: "Backend Regression Test - Logger NameError Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/app/middleware/rate_limit.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ BACKEND REGRESSION TEST - LOGGER NAMEERROR FIX - ALL TESTS PASSED (3/3 - 100% success rate): Test 1) Backend Health Check: ✅ GET /api/health returns 200 OK with status='healthy' - backend server running correctly after logger fix. Test 2) Login Rate Limiting: ✅ 6 rapid POST requests to /api/v1/auth/login with wrong password (admin@casino.com/WrongPassword123!) returned correct pattern [401, 401, 401, 401, 401, 429] - First 5 requests returned 401 INVALID_CREDENTIALS, 6th request returned 429 RATE_LIMIT_EXCEEDED as expected. Rate limiting middleware working correctly. Test 3) CORS Preflight Evil Origin Blocked: ✅ OPTIONS request to /api/v1/auth/login with Origin 'https://evil.example' correctly blocked - Access-Control-Allow-Origin header was None (evil origin rejected). CORS security working properly. All regression requirements verified: backend health operational, login rate limiting functional (5 requests/minute per IP), CORS preflight blocking unauthorized origins. Logger NameError fix has not introduced any regressions in core security functionality."
+
 pr3_tenant_isolation:
   - task: "PR-3 Tenant Scope/Isolation Standardization"
     implemented: true
