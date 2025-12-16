@@ -1,0 +1,1 @@
+{"Status":"healthy","FailingStreak":0,"Log":[{"Start":"2025-12-16T19:03:08.841989979Z","End":"2025-12-16T19:03:08.913084485Z","ExitCode":0,"Output":"{\"status\":\"healthy\",\"environment\":\"staging\"}"}]}

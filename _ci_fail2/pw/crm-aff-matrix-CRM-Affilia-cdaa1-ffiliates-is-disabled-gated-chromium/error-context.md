@@ -1,0 +1,77 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - heading "Tenant Portal" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Tenant Panel
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: Core
+          - link "Dashboard" [ref=e13] [cursor=pointer]:
+            - /url: /
+            - img [ref=e14]
+            - text: Dashboard
+          - link "Players" [ref=e19] [cursor=pointer]:
+            - /url: /players
+            - img [ref=e20]
+            - text: Players
+          - link "My Revenue" [ref=e25] [cursor=pointer]:
+            - /url: /revenue/my-tenant
+            - img [ref=e26]
+            - text: My Revenue
+          - link "Games" [ref=e29] [cursor=pointer]:
+            - /url: /games
+            - img [ref=e30]
+            - text: Games
+          - link "VIP Games" [ref=e32] [cursor=pointer]:
+            - /url: /vip-games
+            - img [ref=e33]
+            - text: VIP Games
+        - generic [ref=e35]:
+          - generic [ref=e36]: Operations
+          - link "Support" [ref=e37] [cursor=pointer]:
+            - /url: /support
+            - img [ref=e38]
+            - text: Support
+        - generic [ref=e41]: Risk & Compliance
+        - generic [ref=e43]: System
+      - button "Logout" [ref=e45] [cursor=pointer]:
+        - img [ref=e46]
+        - text: Logout
+    - main [ref=e49]:
+      - generic [ref=e50]:
+        - generic [ref=e52]:
+          - img [ref=e53]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e56]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - paragraph [ref=e59]: Admin
+            - paragraph
+          - generic [ref=e60]: A
+      - generic [ref=e61]:
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - img [ref=e67]
+            - generic [ref=e69]: Admin Login
+            - generic [ref=e70]: Enter your credentials to access the CasinoAdmin control panel.
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - text: Email
+              - textbox "Email" [ref=e74]: admin@casino.com
+            - generic [ref=e75]:
+              - text: Password
+              - generic [ref=e76]:
+                - textbox "Password" [ref=e77]: 13032010Phv.
+                - button [ref=e78] [cursor=pointer]:
+                  - img [ref=e79]
+            - button "Sign In" [ref=e82] [cursor=pointer]
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e83] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e84]:
+      - img [ref=e85]
+      - paragraph [ref=e86]: Made with Emergent
+```
