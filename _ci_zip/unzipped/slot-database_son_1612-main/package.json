@@ -1,0 +1,8 @@
+{
+  "name": "casino-monorepo-root",
+  "private": true,
+  "license": "UNLICENSED",
+  "dependencies": {
+    "recharts": "^3.5.1"
+  }
+}

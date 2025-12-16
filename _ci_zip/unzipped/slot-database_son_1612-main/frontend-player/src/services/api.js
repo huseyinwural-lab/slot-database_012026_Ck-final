@@ -1,0 +1,38 @@
+import axios from 'axios';
+
+// Environment variable handling
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1';
+
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Tenant ID detection logic
+// In production, this would parse subdomain (e.g., demo.casino.com -> demo)
+// For now, we mock or read from localStorage
+const getTenantId = () => {
+    return localStorage.getItem('player_tenant_id') || 'default_casino';
+};
+
+// Request Interceptor
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('player_token');
+    const tenantId = getTenantId();
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // Send Tenant-ID header for multi-tenancy routing
+    config.headers['X-Tenant-ID'] = tenantId;
+    
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export default api;
