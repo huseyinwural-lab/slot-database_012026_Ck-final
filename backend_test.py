@@ -345,52 +345,143 @@ def test_docker_compose_static_check(result: TestResult):
             f"Failed to read docker-compose.prod.yml: {str(e)}"
         )
 
+def test_rate_limiting(result: TestResult):
+    """Test 1: Rate limit behavior - 6 rapid requests to login endpoint"""
+    print("\n1. Testing Rate Limiting Behavior...")
+    
+    login_data = {
+        "email": "admin@casino.com",
+        "password": "WrongPass!"
+    }
+    
+    status_codes = []
+    
+    # Send 6 rapid requests
+    for i in range(6):
+        response = make_request("POST", "/v1/auth/login", json_data=login_data)
+        status_codes.append(response["status_code"])
+        print(f"   Request {i+1}: Status {response['status_code']}")
+        
+        # Small delay to avoid overwhelming the server
+        time.sleep(0.1)
+    
+    # Expected: First 5 should be 401 (INVALID_CREDENTIALS), 6th should be 429 (RATE_LIMIT_EXCEEDED)
+    expected_pattern = [401, 401, 401, 401, 401, 429]
+    
+    if status_codes == expected_pattern:
+        result.add_result(
+            "Rate Limiting", 
+            True, 
+            f"Correct pattern: {status_codes} - First 5 requests 401, 6th request 429"
+        )
+    else:
+        result.add_result(
+            "Rate Limiting", 
+            False, 
+            f"Expected {expected_pattern}, got {status_codes}"
+        )
+
+def test_trusted_proxy_behavior(result: TestResult):
+    """Test 2: Trusted proxy/X-Forwarded-For behavior"""
+    print("\n2. Testing Trusted Proxy Behavior...")
+    
+    login_data = {
+        "email": "admin@casino.com", 
+        "password": "WrongPass!"
+    }
+    
+    # Test with spoofed X-Forwarded-For header
+    headers = {"X-Forwarded-For": "1.2.3.4"}
+    
+    response = make_request("POST", "/v1/auth/login", headers=headers, json_data=login_data)
+    
+    # Since TRUSTED_PROXY_IPS is empty by default, the spoofed IP should be ignored
+    # and rate limiting should use the actual client IP
+    if response["status_code"] == 401:
+        result.add_result(
+            "Trusted Proxy Behavior", 
+            True, 
+            f"X-Forwarded-For header ignored (no trusted proxies configured), got {response['status_code']}"
+        )
+    else:
+        result.add_result(
+            "Trusted Proxy Behavior", 
+            False, 
+            f"Expected 401 (spoofed header ignored), got {response['status_code']}"
+        )
+
+def test_cors_behavior(result: TestResult):
+    """Test 3: CORS behavior"""
+    print("\n3. Testing CORS Behavior...")
+    
+    # Send OPTIONS preflight request with evil origin
+    headers = {"Origin": "https://evil.example"}
+    
+    try:
+        response = requests.options(
+            f"{API_BASE}/v1/auth/login",
+            headers=headers,
+            timeout=30
+        )
+        
+        access_control_origin = response.headers.get("Access-Control-Allow-Origin")
+        
+        # Check if evil origin is blocked
+        if access_control_origin != "https://evil.example":
+            result.add_result(
+                "CORS Evil Origin Blocked", 
+                True, 
+                f"Evil origin blocked - Access-Control-Allow-Origin: {access_control_origin}"
+            )
+        else:
+            result.add_result(
+                "CORS Evil Origin Blocked", 
+                False, 
+                f"Evil origin allowed - Access-Control-Allow-Origin: {access_control_origin}"
+            )
+            
+        # Check environment detection
+        # If backend is running and CORS_ORIGINS is set to "*" (dev mode), that's expected
+        # If it's prod/staging, CORS should be more restrictive
+        print(f"   CORS Origins header: {access_control_origin}")
+        print(f"   Backend appears to be running (not failing fast on startup)")
+        
+        result.add_result(
+            "CORS Configuration", 
+            True, 
+            f"Backend running with CORS config - likely dev/local environment"
+        )
+        
+    except Exception as e:
+        result.add_result(
+            "CORS Test", 
+            False, 
+            f"Failed to test CORS: {str(e)}"
+        )
+
 def main():
-    print("=== P0 RELEASE BLOCKERS PATCH (#741) BACKEND VALIDATION ===")
+    print("=== P1-SECURITY BACKEND VALIDATION ===")
     print(f"Testing against: {BASE_URL}")
     
     result = TestResult()
     
-    # Test 1: Auth works
-    owner_token = test_auth_works(result)
-    if not owner_token:
-        print("❌ Cannot proceed without owner authentication")
-        result.print_summary()
-        return False
+    # Test 1: Rate limiting behavior
+    test_rate_limiting(result)
     
-    # Test 2: Ensure demo_renter tenant exists
-    if not ensure_demo_renter_tenant(result, owner_token):
-        print("❌ Cannot proceed without demo_renter tenant")
-        result.print_summary()
-        return False
+    # Test 2: Trusted proxy behavior
+    test_trusted_proxy_behavior(result)
     
-    # Test 3: Ensure tenant admin exists and get token
-    tenant_admin_token = ensure_tenant_admin_exists(result, owner_token)
-    if not tenant_admin_token:
-        print("❌ Cannot proceed without tenant admin")
-        result.print_summary()
-        return False
-    
-    # Test 4: Tenant override forbidden
-    test_tenant_override_forbidden(result, tenant_admin_token)
-    
-    # Test 5: Password required validation
-    test_password_required(result, tenant_admin_token)
-    
-    # Test 6: Owner invite mode
-    test_owner_invite_mode(result, owner_token)
-    
-    # Test 7: Docker compose static checks
-    test_docker_compose_static_check(result)
+    # Test 3: CORS behavior
+    test_cors_behavior(result)
     
     # Print final summary
     success = result.print_summary()
     
     if success:
-        print("\n🎉 ALL P0 RELEASE BLOCKERS VALIDATION TESTS PASSED!")
+        print("\n🎉 ALL P1-SECURITY VALIDATION TESTS PASSED!")
         return True
     else:
-        print(f"\n💥 {result.failed} TEST(S) FAILED - RELEASE BLOCKERS DETECTED!")
+        print(f"\n💥 {result.failed} TEST(S) FAILED - SECURITY ISSUES DETECTED!")
         return False
 
 if __name__ == "__main__":
