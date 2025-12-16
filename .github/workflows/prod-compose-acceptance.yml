@@ -63,6 +63,16 @@ jobs:
           docker version
           docker compose version
 
+      - name: Verify required bootstrap secrets are present
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          set -e
+          if [ -z "${BOOTSTRAP_OWNER_EMAIL:-}" ] || [ -z "${BOOTSTRAP_OWNER_PASSWORD:-}" ]; then
+            echo "Missing BOOTSTRAP_OWNER_EMAIL/BOOTSTRAP_OWNER_PASSWORD. Check GitHub Actions secrets or PR fork secret restrictions."
+            exit 1
+          fi
+
+
       - name: Bring up prod stack (fresh)
         env:
           BOOTSTRAP_ENABLED: "true"
