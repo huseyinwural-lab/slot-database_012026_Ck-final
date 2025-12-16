@@ -64,19 +64,21 @@ jobs:
 
           if [ -n "${{ secrets.BOOTSTRAP_OWNER_EMAIL }}" ] && [ -n "${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}" ]; then
             echo "Using BOOTSTRAP_OWNER_* from GitHub Secrets"
-            echo "BOOTSTRAP_ENABLED=true" >> "$GITHUB_ENV"
-            echo "BOOTSTRAP_OWNER_EMAIL=${{ secrets.BOOTSTRAP_OWNER_EMAIL }}" >> "$GITHUB_ENV"
-            echo "BOOTSTRAP_OWNER_PASSWORD=${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "E2E_OWNER_EMAIL=${{ secrets.BOOTSTRAP_OWNER_EMAIL }}" >> "$GITHUB_ENV"
-            echo "E2E_OWNER_PASSWORD=${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}" >> "$GITHUB_ENV"
+            EMAIL="${{ secrets.BOOTSTRAP_OWNER_EMAIL }}"
+            PASS="${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}"
           else
             echo "BOOTSTRAP_OWNER_* secrets not set; using ephemeral CI bootstrap credentials"
-            echo "BOOTSTRAP_ENABLED=true" >> "$GITHUB_ENV"
-            echo "BOOTSTRAP_OWNER_EMAIL=ci.owner@example.com" >> "$GITHUB_ENV"
-            echo "BOOTSTRAP_OWNER_PASSWORD=CI-Temp-$(date +%s)-A!" >> "$GITHUB_ENV"
-            echo "E2E_OWNER_EMAIL=ci.owner@example.com" >> "$GITHUB_ENV"
-            echo "E2E_OWNER_PASSWORD=CI-Temp-$(date +%s)-A!" >> "$GITHUB_ENV"
+            EMAIL="ci.owner@example.com"
+            PASS="CI-Temp-$(date +%s)-A!"
           fi
+
+          echo "BOOTSTRAP_ENABLED=true" >> "$GITHUB_ENV"
+          echo "BOOTSTRAP_OWNER_EMAIL=$EMAIL" >> "$GITHUB_ENV"
+          echo "BOOTSTRAP_OWNER_PASSWORD=$PASS" >> "$GITHUB_ENV"
+
+          # Keep E2E credentials in sync with bootstrap
+          echo "E2E_OWNER_EMAIL=$EMAIL" >> "$GITHUB_ENV"
+          echo "E2E_OWNER_PASSWORD=$PASS" >> "$GITHUB_ENV"
 
 
       - name: Bring up prod stack (fresh)
