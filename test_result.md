@@ -98,6 +98,14 @@ p2_audit_log_mvp_dec17:
     stuck_count: 0
     priority: "medium"
     needs_retesting: false
+
+  - task: "P2 Admin Change Audit Events (P2 backlog #2) - admin.user_updated/role_changed/disabled/enabled with PII redaction"
+    implemented: true
+    working: true
+    file: "backend/app/routes/admin.py, backend/app/services/audit.py, backend/app/routes/audit.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
