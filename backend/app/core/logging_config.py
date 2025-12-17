@@ -10,7 +10,8 @@ _REDACT_KEYS = {
     "authorization",
     "cookie",
     "set-cookie",
-    "password",
+    # NOTE: do not redact key named "password" in logs globally; some events may
+    # legitimately use values like method="password". Avoid logging raw credential values.
     "token",
     "secret",
     "api_key",
