@@ -194,11 +194,17 @@ def test_request_id_behavior(result: TestResult):
     
     print(f"   Invalid X-Request-ID (bad chars) -> Response: '{returned_request_id}'")
     
-    if returned_request_id != invalid_chars_id and uuid_pattern.match(returned_request_id):
+    if returned_request_id and returned_request_id != invalid_chars_id and uuid_pattern.match(returned_request_id):
         result.add_result(
             "Invalid X-Request-ID Characters Rejection", 
             True, 
             f"Invalid characters rejected, server generated UUID: '{returned_request_id}'"
+        )
+    elif returned_request_id is None:
+        result.add_result(
+            "Invalid X-Request-ID Characters Rejection", 
+            False, 
+            f"No X-Request-ID header returned in response"
         )
     else:
         result.add_result(
