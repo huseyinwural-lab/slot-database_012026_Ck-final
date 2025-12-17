@@ -44,6 +44,22 @@ async def create_tenant(
         raise AppError(error_code="TENANT_EXISTS", message="Tenant exists", status_code=400)
     
     session.add(tenant_data)
+
+    # Audit (owner-only)
+    from app.services.audit import audit
+    await audit.log(
+        admin=current_admin,
+        action="tenant.created",
+        module="tenants",
+        target_id=str(tenant_data.id),
+        details={"name": tenant_data.name, "type": tenant_data.type},
+        session=session,
+        request_id=getattr(request.state, "request_id", None),
+        tenant_id=str(tenant_data.id),
+        resource_type="tenant",
+        result="success",
+    )
+
     await session.commit()
     await session.refresh(tenant_data)
     
