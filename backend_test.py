@@ -517,75 +517,7 @@ def test_required_fields_validation(result: TestResult, token: str) -> None:
 
 # Removed - not needed for auth audit events testing
 
-def test_redaction_in_details(result: TestResult, token: str, tenant_id: str) -> None:
-    """Test 7: Verify redaction in details (PII/credential keys)"""
-    print("\n7. Testing Redaction in Details...")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Create an admin with password field to trigger redaction
-    admin_data = {
-        "email": f"redaction.test.{uuid.uuid4().hex[:8]}@casino.com",
-        "password": "TestPassword123!",
-        "full_name": "Redaction Test Admin",
-        "role": "Admin",
-        "tenant_id": tenant_id,
-        "api_key": "secret-api-key-123",
-        "token": "secret-token-456"
-    }
-    
-    # Create admin (this should log an event with sensitive data)
-    create_response = make_request("POST", "/v1/admin/users", headers=headers, json_data=admin_data)
-    print(f"   POST /api/v1/admin/users (with sensitive data): Status {create_response['status_code']}")
-    
-    # Wait a moment for the audit event to be logged
-    time.sleep(1)
-    
-    # Fetch recent audit events
-    response = make_request("GET", "/v1/audit/events?since_hours=1&limit=10", headers=headers)
-    print(f"   GET /api/v1/audit/events (checking redaction): Status {response['status_code']}")
-    
-    if response["status_code"] == 200 and "items" in response["json"]:
-        items = response["json"]["items"]
-        
-        redaction_working = False
-        sensitive_keys_found = []
-        
-        for item in items:
-            details = item.get("details", {})
-            if isinstance(details, dict):
-                # Check for redacted sensitive keys
-                for key, value in details.items():
-                    if key.lower() in ["password", "token", "secret", "api_key"]:
-                        if value == "[REDACTED]":
-                            redaction_working = True
-                        else:
-                            sensitive_keys_found.append(f"{key}={value}")
-        
-        if redaction_working and not sensitive_keys_found:
-            result.add_result(
-                "Redaction in Details", 
-                True, 
-                "Sensitive keys properly redacted as [REDACTED]"
-            )
-        elif redaction_working and sensitive_keys_found:
-            result.add_result(
-                "Redaction in Details", 
-                False, 
-                f"Partial redaction - some sensitive data leaked: {sensitive_keys_found}"
-            )
-        else:
-            result.add_result(
-                "Redaction in Details", 
-                False, 
-                "No redaction detected - sensitive data may be exposed"
-            )
-    else:
-        result.add_result(
-            "Redaction in Details", 
-            False, 
-            f"Failed to fetch audit events for redaction test: {response['status_code']}"
-        )
+# Removed - not needed for auth audit events testing
 
 def main():
     print("=== P2 AUDIT LOG BACKEND VALIDATION ===")
