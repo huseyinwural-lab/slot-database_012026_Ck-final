@@ -34,16 +34,73 @@ def main() -> int:
     )
 
     async def _run() -> int:
+        start = time.perf_counter()
+
+        deleted_total = 0
+
         async with engine.begin() as conn:
-            # Table name is 'auditevent' for SQLite in this codebase.
-            res = await conn.execute(
-                text("DELETE FROM auditevent WHERE timestamp < :cutoff"),
-                {"cutoff": cutoff},
-            )
-            deleted = res.rowcount or 0
+            # Table name is 'auditevent' in this codebase.
+            # The script connects to whatever DB is configured via settings.database_url
+            # (SQLite in dev; Postgres in staging/prod).
+            count = (
+                await conn.execute(
+                    text("SELECT COUNT(*) FROM auditevent WHERE timestamp < :cutoff"),
+                    {"cutoff": cutoff},
+                )
+            ).scalar_one()
+
+            if args.dry_run:
+                duration_ms = int((time.perf_counter() - start) * 1000)
+                print(
+                    json.dumps(
+                        {
+                            "event": "audit.purge",
+                            "dry_run": True,
+                            "days": args.days,
+                            "batch_size": args.batch_size,
+                            "cutoff_ts": cutoff.isoformat(),
+                            "to_delete": int(count),
+                            "deleted_count": 0,
+                            "duration_ms": duration_ms,
+                        },
+                        ensure_ascii=False,
+                    )
+                )
+                await engine.dispose()
+                return 0
+
+            # Batch delete to reduce lock risk on large tables
+            while True:
+                res = await conn.execute(
+                    text(
+                        "DELETE FROM auditevent WHERE id IN (SELECT id FROM auditevent WHERE timestamp < :cutoff LIMIT :batch_size)"
+                    ),
+                    {"cutoff": cutoff, "batch_size": args.batch_size},
+                )
+                batch_deleted = res.rowcount or 0
+                deleted_total += batch_deleted
+
+                if batch_deleted == 0:
+                    break
 
         await engine.dispose()
-        print(f"deleted={deleted} cutoff={cutoff.isoformat()}")
+
+        duration_ms = int((time.perf_counter() - start) * 1000)
+        print(
+            json.dumps(
+                {
+                    "event": "audit.purge",
+                    "dry_run": False,
+                    "days": args.days,
+                    "batch_size": args.batch_size,
+                    "cutoff_ts": cutoff.isoformat(),
+                    "deleted_count": int(deleted_total),
+                    "duration_ms": duration_ms,
+                },
+                ensure_ascii=False,
+            )
+        )
+
         return 0
 
     import asyncio
