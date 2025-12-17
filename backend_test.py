@@ -520,48 +520,38 @@ def test_required_fields_validation(result: TestResult, token: str) -> None:
 # Removed - not needed for auth audit events testing
 
 def main():
-    print("=== P2 AUDIT LOG BACKEND VALIDATION ===")
+    print("=== P2 AUTH AUDIT EVENTS BACKEND VALIDATION ===")
     print(f"Testing against: {BASE_URL}")
     
     result = TestResult()
     
-    # Test 1: Login as owner and get token
-    token = test_owner_login_and_get_token(result)
+    # Test 1: Successful login audit event
+    token = test_successful_login_audit(result)
     if not token:
         print("❌ Cannot proceed without valid token")
         result.print_summary()
         return False
     
-    # Test 2: Create a new tenant
-    tenant_id = test_create_tenant(result, token)
-    if not tenant_id:
-        print("❌ Cannot proceed without valid tenant ID")
-        result.print_summary()
-        return False
+    # Test 2: Failed login audit event
+    test_failed_login_audit(result)
     
-    # Test 3: Create a new admin user
-    test_create_admin_user(result, token, tenant_id)
+    # Test 3: Rate limited audit event
+    test_rate_limited_audit(result)
     
-    # Test 4: Update tenant features
-    test_update_tenant_features(result, token, tenant_id)
+    # Test 4: Logout audit event (if endpoint exists)
+    test_logout_audit(result, token)
     
-    # Test 5: Fetch audit events
-    test_fetch_audit_events(result, token)
-    
-    # Test 6: Verify tenant scoping behavior
-    test_tenant_scoping_behavior(result, token, tenant_id)
-    
-    # Test 7: Verify redaction in details
-    test_redaction_in_details(result, token, tenant_id)
+    # Test 5: Required fields validation
+    test_required_fields_validation(result, token)
     
     # Print final summary
     success = result.print_summary()
     
     if success:
-        print("\n🎉 ALL P2 AUDIT LOG VALIDATION TESTS PASSED!")
+        print("\n🎉 ALL P2 AUTH AUDIT EVENTS VALIDATION TESTS PASSED!")
         return True
     else:
-        print(f"\n💥 {result.failed} TEST(S) FAILED - AUDIT LOG ISSUES DETECTED!")
+        print(f"\n💥 {result.failed} TEST(S) FAILED - AUTH AUDIT EVENTS ISSUES DETECTED!")
         return False
 
 if __name__ == "__main__":
