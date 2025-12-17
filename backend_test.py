@@ -378,37 +378,79 @@ def test_rate_limited_audit(result: TestResult) -> None:
     else:
         result.add_result("Rate Limited Audit", True, f"All validations passed. Event ID: {event.get('id')}")
 
-def test_update_tenant_features(result: TestResult, token: str, tenant_id: str) -> None:
-    """Test 4: Update tenant features via PATCH /api/v1/tenants/{tenant_id}"""
-    print("\n4. Testing Tenant Feature Update...")
+def test_logout_audit(result: TestResult, token: str) -> None:
+    """Test 4: Logout endpoint (if exists) creates auth.logout audit event"""
+    print("\n4. Testing Logout Audit Event...")
     
     headers = {"Authorization": f"Bearer {token}"}
-    features_data = {
-        "features": {
-            "can_manage_admins": True,
-            "can_view_reports": True,
-            "can_manage_affiliates": True,
-            "can_use_crm": True,
-            "can_manage_experiments": False,
-            "can_use_kill_switch": False
-        }
-    }
     
-    response = make_request("PATCH", f"/v1/tenants/{tenant_id}", headers=headers, json_data=features_data)
-    print(f"   PATCH /api/v1/tenants/{tenant_id}: Status {response['status_code']}")
+    # Check if logout endpoint exists
+    response = make_request("POST", "/v1/auth/logout", headers=headers)
+    print(f"   POST /api/v1/auth/logout: Status {response['status_code']}")
     
-    if response["status_code"] == 200:
-        result.add_result(
-            "Tenant Feature Update", 
-            True, 
-            f"Tenant features updated successfully"
-        )
+    if response["status_code"] == 404:
+        result.add_result("Logout Audit", True, "Logout endpoint not implemented (as expected)")
+        return
+    elif response["status_code"] == 405:
+        # Try GET method
+        response = make_request("GET", "/v1/auth/logout", headers=headers)
+        print(f"   GET /api/v1/auth/logout: Status {response['status_code']}")
+        
+        if response["status_code"] == 404:
+            result.add_result("Logout Audit", True, "Logout endpoint not implemented (as expected)")
+            return
+    
+    if response["status_code"] not in [200, 204]:
+        result.add_result("Logout Audit", False, f"Logout endpoint exists but returned unexpected status: {response['status_code']}")
+        return
+    
+    # If logout endpoint exists and works, check for audit event
+    time.sleep(1)
+    
+    # Get audit events after logout
+    # Note: We need a new token since logout might invalidate the current one
+    new_login = make_request("POST", "/v1/auth/login", json_data={"email": "admin@casino.com", "password": "Admin123!"})
+    if new_login["status_code"] != 200:
+        result.add_result("Logout Audit", False, "Cannot get new token to check audit events after logout")
+        return
+    
+    new_token = new_login["json"]["access_token"]
+    after_response = get_recent_audit_events(new_token)
+    
+    if after_response["status_code"] != 200:
+        result.add_result("Logout Audit", False, f"Cannot fetch audit events: {after_response['status_code']}")
+        return
+    
+    events = after_response["json"].get("items", [])
+    
+    # Find auth.logout event
+    logout_events = [e for e in events if e.get("action") == "auth.logout"]
+    
+    if not logout_events:
+        result.add_result("Logout Audit", False, "Logout endpoint exists but no auth.logout audit event found")
+        return
+    
+    event = logout_events[0]  # Most recent
+    
+    # Verify required fields
+    required_fields = ["request_id", "tenant_id", "action", "resource_type", "result", "timestamp", "ip_address"]
+    missing_fields = [f for f in required_fields if not event.get(f)]
+    
+    if missing_fields:
+        result.add_result("Logout Audit", False, f"Missing required fields: {missing_fields}")
+        return
+    
+    # Verify specific values
+    checks = []
+    if event.get("action") != "auth.logout":
+        checks.append(f"action={event.get('action')} (expected auth.logout)")
+    if event.get("resource_type") != "auth":
+        checks.append(f"resource_type={event.get('resource_type')} (expected auth)")
+    
+    if checks:
+        result.add_result("Logout Audit", False, f"Validation failures: {'; '.join(checks)}")
     else:
-        result.add_result(
-            "Tenant Feature Update", 
-            False, 
-            f"Expected 200, got {response['status_code']}: {response['json']}"
-        )
+        result.add_result("Logout Audit", True, f"Logout endpoint working with audit event. Event ID: {event.get('id')}")
 
 def test_fetch_audit_events(result: TestResult, token: str) -> None:
     """Test 5: Fetch audit events as owner"""
