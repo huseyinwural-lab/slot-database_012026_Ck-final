@@ -36,6 +36,7 @@ async def get_admins(
 
 @router.post("/users")
 async def create_admin(
+    request: Request,
     payload: dict = Body(...), 
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
