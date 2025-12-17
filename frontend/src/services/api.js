@@ -104,11 +104,13 @@ api.interceptors.response.use(
 
     // 401: Unauthorized -> Logout + toast
     if (error.response?.status === 401) {
-      showToast('warning', 'Unauthorized', 'Your session has expired. Please sign in again.');
+      await showToast('warning', 'Unauthorized', 'Your session has expired. Please sign in again.');
       if (typeof window !== 'undefined') {
         localStorage.removeItem('admin_token');
         localStorage.removeItem('admin_user');
         if (!window.location.pathname.includes('/login')) {
+          // Allow toast to render before redirect
+          await new Promise((r) => setTimeout(r, 1200));
           window.location.href = '/login';
         }
       }
