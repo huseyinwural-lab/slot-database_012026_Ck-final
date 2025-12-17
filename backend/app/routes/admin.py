@@ -89,11 +89,15 @@ async def create_admin(
     
     await audit.log(
         admin=current_admin,
-        action="create_admin",
+        action="admin.user_created",
         module="admin",
-        target_id=str(new_admin.id), # Assuming ID is generated pre-insert default_factory
+        target_id=str(new_admin.id),
         details={"email": email, "role": new_admin.role, "target_tenant": new_admin.tenant_id},
-        session=session
+        session=session,
+        request_id=getattr(request.state, "request_id", None),
+        tenant_id=tenant_id,
+        resource_type="admin_user",
+        result="success",
     )
 
     await session.commit()
