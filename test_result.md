@@ -1486,3 +1486,32 @@ agent_communication:
     -message: "✅ E2E PLAYWRIGHT SPEC RE-EXECUTION COMPLETE - ALL TESTS PASSED (4/4 - 100% success rate): Successfully re-ran /app/e2e/tests/crm-aff-matrix.spec.ts in current dev environment. Test 1) default_casino: CRM loads correctly - robustLogin successful, CRM page loads with proper heading, no 'load failed' toasts, API call to /api/v1/crm/campaigns returns 200 OK. Test 2) default_casino: Affiliates loads correctly - robustLogin successful, Affiliates page loads with proper heading, no 'load failed' toasts, API call to /api/v1/affiliates/ returns 200 OK. Test 3) demo_renter: CRM is disabled/gated - robustLogin successful, tenant context switched to demo_renter via localStorage impersonate_tenant_id, CRM page shows 'Module Disabled' message with proper restriction text 'Your tenant does not have access to the CRM & Communications module', API call returns 403 Forbidden as expected. Test 4) demo_renter: Affiliates is disabled/gated - robustLogin successful, tenant context switched to demo_renter, Affiliates page shows 'Module Disabled' message, API call returns 403 Forbidden as expected. CRITICAL VALIDATIONS CONFIRMED: ✅ Login works perfectly with admin@casino.com / Admin123!, ✅ Tenant switching via localStorage impersonate_tenant_id mechanism working correctly, ✅ UI login uses same-origin /api proxy correctly - NO direct calls to :8001 from browser detected, all API calls go through https://game-admin-hub-1.preview.emergentagent.com/api/ proxy, ✅ Gated modules behave correctly - show Module Disabled message for demo_renter tenant, ✅ No network errors detected in any test execution, ✅ Total execution time: 15.6s with 0 failures. All review request requirements verified successfully."
     -agent: "testing"
     -message: "✅ AUDIT LOG UI TESTING COMPLETED SUCCESSFULLY - All review request requirements validated and working perfectly. The Audit Log UI page is fully functional with proper sidebar navigation, table display, refresh functionality, filtering capabilities, and event detail modals. No issues found - ready for production use."
+
+frontend:
+  - task: "Request ID Display + Copy-to-Clipboard for 401 and 429 Scenarios"
+    implemented: true
+    working: false
+    file: "src/services/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "❌ REQUEST ID DISPLAY PARTIALLY WORKING - CRITICAL BUG FOUND: Test Case A (401 Unauthorized): ✅ Backend correctly returns X-Request-ID header (f6c31a80-9aeb-469c-a18a-c0cc26189966), ✅ Frontend API interceptor creates toast with 'Unauthorized' message, ❌ Toast shows 'Request ID: unavailable' despite valid header being present - indicates bug in header extraction logic in api.js interceptor. Test Case B (429 Rate Limit): ❌ Rate limiting not triggered during testing - may need more attempts or different approach. Test Case C (Network Error): ✅ Network error fallback working correctly - shows 'Request ID: unavailable' when no response. ROOT CAUSE: Frontend API interceptor (src/services/api.js line 56) extracts request ID using error.response?.headers?.['x-request-id'] but the header is present in network response. Possible issues: 1) Case sensitivity in header extraction, 2) Axios header normalization, 3) Timing issue in interceptor. EVIDENCE: Network monitoring shows 401 response with valid X-Request-ID header, but toast displays 'unavailable'. Copy functionality cannot be tested until header extraction is fixed."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.1"
+  test_sequence: 1
+
+test_plan:
+  current_focus:
+    - "Request ID Display + Copy-to-Clipboard for 401 and 429 Scenarios"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "testing"
+    -message: "CRITICAL BUG FOUND: Frontend API interceptor not properly extracting X-Request-ID header from 401 responses. Backend is correctly sending the header, but frontend shows 'Request ID: unavailable'. Need to debug header extraction logic in src/services/api.js around line 56. Rate limiting scenario needs more investigation - may require different approach to trigger 429 responses."
