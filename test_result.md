@@ -151,6 +151,18 @@ p2_audit_log_mvp_dec17:
   summary: "Phase 1: Financial Integrity & Security Update"
 
 frontend:
+  - task: "FE Request ID Extraction After Fix - 401 Unauthorized Scenario"
+    implemented: true
+    working: false
+    file: "src/services/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "❌ FE REQUEST ID EXTRACTION TEST FAILED - Toast not visible due to immediate redirect: Test executed Scenario A (401 Unauthorized) as requested. Step 1) ✅ Login successful with admin@casino.com/Admin123! - obtained valid JWT token. Step 2) ✅ Token corruption successful - localStorage admin_token set to 'badtoken'. Step 3) ✅ 401 API response detected - captured X-Request-ID from failing /api/v1/tenants/capabilities call (e.g., e9975289-6e52-45c4-a70f-8ae7636606fd). Step 4) ❌ Toast NOT visible - no toast appears with Request ID before redirect to login. Step 5) ❌ Request ID comparison impossible - no toast content to compare with API response. Step 6) ❌ Copy functionality not testable - no Copy button available since no toast shown. ROOT CAUSE: api.js interceptor calls showToast() on line 107 but immediately redirects to login on line 112 (window.location.href = '/login'). The redirect happens so fast that the toast never becomes visible to the user. EVIDENCE: DOM mutation monitoring detected 0 toast events, 401 responses properly captured with valid UUIDs, but no toast elements created in DOM before redirect. The fix for request ID extraction is implemented in the code but not user-visible due to timing issue."
+
   - task: "TCK-CRM-002 + TCK-AFF-002 + TCK-UI-001 Verification"
     implemented: true
     working: true
