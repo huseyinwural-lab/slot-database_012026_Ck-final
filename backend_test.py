@@ -16,13 +16,15 @@ import hashlib
 from typing import Dict, Any, Optional
 
 # Configuration - Use frontend .env for external URL
-with open("/app/frontend/.env", "r") as f:
-    for line in f:
-        if line.startswith("REACT_APP_BACKEND_URL="):
-            BASE_URL = line.split("=", 1)[1].strip()
-            break
-else:
-    BASE_URL = "https://game-admin-hub-1.preview.emergentagent.com"
+BASE_URL = "https://game-admin-hub-1.preview.emergentagent.com"  # Default
+try:
+    with open("/app/frontend/.env", "r") as f:
+        for line in f:
+            if line.startswith("REACT_APP_BACKEND_URL="):
+                BASE_URL = line.split("=", 1)[1].strip()
+                break
+except FileNotFoundError:
+    pass
 
 API_BASE = f"{BASE_URL}/api"
 
