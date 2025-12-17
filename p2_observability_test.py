@@ -412,7 +412,7 @@ def test_json_logging_defaults(result: TestResult):
         time.sleep(1)  # Allow time for log to be written
         
         recent_log_result = subprocess.run(
-            ["tail", "-n", "10", "/var/log/supervisor/backend.out.log"],
+            ["tail", "-n", "10", "/var/log/supervisor/backend.err.log"],
             capture_output=True, text=True, timeout=10
         )
         
