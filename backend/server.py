@@ -181,7 +181,7 @@ async def readiness_check():
                 # Migration check (lightweight): read version table.
                 # - prod/staging: expected to exist after alembic upgrade head
                 # - dev/local: may not exist (create_all path). In that case we do not fail readiness.
-                version = (await conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))).scalar()
+                version = (await conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))).scalar() or "unknown"
             except Exception:
                 if settings.env in {"prod", "staging"}:
                     raise
