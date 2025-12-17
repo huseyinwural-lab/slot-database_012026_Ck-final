@@ -189,40 +189,104 @@ def test_successful_login_audit(result: TestResult) -> Optional[str]:
     
     return token
 
-def test_create_tenant(result: TestResult, token: str) -> Optional[str]:
-    """Test 2: Create a new tenant via POST /api/v1/tenants/"""
-    print("\n2. Testing Tenant Creation...")
+def test_failed_login_audit(result: TestResult) -> None:
+    """Test 2: Failed login creates auth.login_failed audit event"""
+    print("\n2. Testing Failed Login Audit Event...")
     
-    headers = {"Authorization": f"Bearer {token}"}
-    tenant_data = {
-        "name": f"Test Tenant {uuid.uuid4().hex[:8]}",
-        "type": "renter",
-        "features": {
-            "can_manage_admins": True,
-            "can_view_reports": True,
-            "can_manage_affiliates": False,
-            "can_use_crm": False
-        }
+    # First get a valid token to check audit events
+    valid_login = {
+        "email": "admin@casino.com",
+        "password": "Admin123!"
+    }
+    temp_response = make_request("POST", "/v1/auth/login", json_data=valid_login)
+    if temp_response["status_code"] != 200:
+        result.add_result("Failed Login Audit", False, "Cannot get token for audit check")
+        return
+    
+    token = temp_response["json"]["access_token"]
+    
+    # Get baseline audit events
+    before_response = get_recent_audit_events(token)
+    before_count = len(before_response["json"].get("items", [])) if before_response["status_code"] == 200 else 0
+    
+    # Attempt login with wrong password
+    failed_login_data = {
+        "email": "admin@casino.com",
+        "password": "WrongPassword123!"
     }
     
-    response = make_request("POST", "/v1/tenants/", headers=headers, json_data=tenant_data)
-    print(f"   POST /api/v1/tenants/: Status {response['status_code']}")
+    response = make_request("POST", "/v1/auth/login", json_data=failed_login_data)
+    print(f"   POST /api/v1/auth/login (wrong password): Status {response['status_code']}")
     
-    if response["status_code"] == 200 and "id" in response["json"]:
-        tenant_id = response["json"]["id"]
-        result.add_result(
-            "Tenant Creation", 
-            True, 
-            f"Tenant created successfully, ID: {tenant_id}"
-        )
-        return tenant_id
+    if response["status_code"] != 401:
+        result.add_result("Failed Login Audit", False, f"Expected 401, got {response['status_code']}")
+        return
+    
+    # Wait for audit event
+    time.sleep(1)
+    
+    # Get audit events after failed login
+    after_response = get_recent_audit_events(token)
+    if after_response["status_code"] != 200:
+        result.add_result("Failed Login Audit", False, f"Cannot fetch audit events: {after_response['status_code']}")
+        return
+    
+    events = after_response["json"].get("items", [])
+    
+    # Find the most recent auth.login_failed event
+    login_failed_events = [e for e in events if e.get("action") == "auth.login_failed"]
+    
+    if not login_failed_events:
+        result.add_result("Failed Login Audit", False, "No auth.login_failed audit event found")
+        return
+    
+    event = login_failed_events[0]  # Most recent
+    
+    # Verify required fields
+    required_fields = ["request_id", "tenant_id", "action", "resource_type", "result", "timestamp", "ip_address"]
+    missing_fields = [f for f in required_fields if not event.get(f)]
+    
+    if missing_fields:
+        result.add_result("Failed Login Audit", False, f"Missing required fields: {missing_fields}")
+        return
+    
+    # Verify specific values
+    checks = []
+    if event.get("action") != "auth.login_failed":
+        checks.append(f"action={event.get('action')} (expected auth.login_failed)")
+    if event.get("resource_type") != "auth":
+        checks.append(f"resource_type={event.get('resource_type')} (expected auth)")
+    if event.get("result") != "failed":
+        checks.append(f"result={event.get('result')} (expected failed)")
+    
+    # Verify actor_user_id (can be 'unknown' or actual id)
+    actor_user_id = event.get("actor_user_id")
+    if not actor_user_id:
+        checks.append("actor_user_id is missing")
+    
+    # Verify resource_id is 64 hex chars (sha256 surrogate)
+    resource_id = event.get("resource_id", "")
+    if not re.match(r'^[a-f0-9]{64}$', resource_id):
+        checks.append(f"resource_id not 64 hex chars: {resource_id}")
+    
+    # Verify details.failure_reason
+    details = event.get("details", {})
+    failure_reason = details.get("failure_reason")
+    allowed_reasons = ["INVALID_CREDENTIALS", "USER_DISABLED", "ACCOUNT_LOCKED"]
+    if failure_reason not in allowed_reasons:
+        checks.append(f"failure_reason={failure_reason} not in allowed values: {allowed_reasons}")
+    
+    # Verify no sensitive data in details
+    details_str = json.dumps(details).lower()
+    sensitive_terms = ["password", "token", "authorization", "cookie", "wrongpassword123!"]
+    found_sensitive = [term for term in sensitive_terms if term in details_str]
+    if found_sensitive:
+        checks.append(f"Sensitive data found in details: {found_sensitive}")
+    
+    if checks:
+        result.add_result("Failed Login Audit", False, f"Validation failures: {'; '.join(checks)}")
     else:
-        result.add_result(
-            "Tenant Creation", 
-            False, 
-            f"Expected 200 with tenant ID, got {response['status_code']}: {response['json']}"
-        )
-        return None
+        result.add_result("Failed Login Audit", True, f"All validations passed. Event ID: {event.get('id')}")
 
 def test_create_admin_user(result: TestResult, token: str, tenant_id: str) -> None:
     """Test 3: Create a new admin via POST /api/v1/admin/users"""
