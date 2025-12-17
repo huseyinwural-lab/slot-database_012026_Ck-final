@@ -102,12 +102,22 @@ async def update_tenant_features(
         raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
 
     # Only update provided keys
-    before = {"features": dict(tenant.features or {})}
+    before_features = dict(tenant.features or {})
 
     if "features" in payload and isinstance(payload["features"], dict):
         tenant.features = payload["features"]
 
-    after = {"features": dict(tenant.features or {})}
+    after_features = dict(tenant.features or {})
+
+    # Diff only (changed keys)
+    changed = {}
+    keys = set(before_features.keys()) | set(after_features.keys())
+    for k in keys:
+        if before_features.get(k) != after_features.get(k):
+            changed[k] = {"before": before_features.get(k), "after": after_features.get(k)}
+
+    before = {"features": before_features}
+    after = {"features": after_features}
 
     session.add(tenant)
 
