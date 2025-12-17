@@ -10,7 +10,8 @@ _REDACT_KEYS = {
     "authorization",
     "cookie",
     "set-cookie",
-    "password",
+    # NOTE: do NOT include "password" here, because some payloads may contain
+    # non-secret values like method="password". We only redact real credential keys.
     "token",
     "secret",
     "api_key",
