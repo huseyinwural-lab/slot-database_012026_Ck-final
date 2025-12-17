@@ -12,7 +12,7 @@ def main() -> int:
     args = parser.parse_args()
 
     # Import inside main so the script can run from repo root
-    from backend.config import settings
+    from config import settings
     from sqlalchemy.ext.asyncio import create_async_engine
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=args.days)
