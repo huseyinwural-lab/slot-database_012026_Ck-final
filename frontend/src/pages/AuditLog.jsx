@@ -79,6 +79,18 @@ const AuditLog = () => {
           <CardTitle>Filters</CardTitle>
           <CardDescription>Filter by action, resource type, actor, result, or request id.</CardDescription>
         </CardHeader>
+        <CardContent className="pb-0">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setFilters({ ...filters, action: 'admin.' })}
+            >
+              Admin Changes
+            </Button>
+          </div>
+        </CardContent>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
