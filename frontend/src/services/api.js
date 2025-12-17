@@ -46,35 +46,92 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const originalRequest = error.config;
-    
+    const originalRequest = error.config || {};
+
     // Standardize Error Object
     const raw = error.response?.data || {};
     const detail = raw.detail || {};
 
+    // Axios normalizes header keys to lowercase
+    const requestId = error.response?.headers?.['x-request-id'];
+
     const standardizedError = {
-        code: raw.error_code || detail.error_code || 'UNKNOWN_ERROR',
-        message: raw.message || detail.detail || error.message || 'An unexpected error occurred',
-        details: raw.details || detail || {},
-        status: error.response?.status,
-        request_id: error.response?.headers?.['x-request-id']
+      code: raw.error_code || detail.error_code || 'UNKNOWN_ERROR',
+      message: raw.message || detail.detail || error.message || 'An unexpected error occurred',
+      details: raw.details || detail || {},
+      status: error.response?.status,
+      request_id: requestId,
     };
 
-    // 401: Unauthorized -> Logout
-    if (error.response?.status === 401 && !originalRequest._retry) {
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('admin_token');
-            localStorage.removeItem('admin_user');
-            // Prevent infinite loop if already on login
-            if (!window.location.pathname.includes('/login')) {
-                window.location.href = '/login';
-            }
+    const hasShownToast = Boolean(originalRequest.__reqid_toast_shown);
+
+    const formatRequestId = () => `Request ID: ${standardizedError.request_id || 'unavailable'}`;
+
+    const copyRequestId = async () => {
+      try {
+        if (!standardizedError.request_id) return;
+        await navigator.clipboard.writeText(standardizedError.request_id);
+        // eslint-disable-next-line no-undef
+        const { toast } = await import('sonner');
+        toast.success('Copied request id');
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    const showToast = async (type, title, description) => {
+      if (hasShownToast) return;
+      // eslint-disable-next-line no-param-reassign
+      originalRequest.__reqid_toast_shown = true;
+
+      // eslint-disable-next-line no-undef
+      const { toast } = await import('sonner');
+
+      const hasCopy = Boolean(standardizedError.request_id);
+      const action = hasCopy
+        ? {
+            label: 'Copy',
+            onClick: copyRequestId,
+          }
+        : undefined;
+
+      const desc = `${description}\n${formatRequestId()}`;
+
+      if (type === 'error') toast.error(title, { description: desc, action });
+      else if (type === 'warning') toast.warning(title, { description: desc, action });
+      else toast.message(title, { description: desc, action });
+    };
+
+    // 401: Unauthorized -> Logout + toast
+    if (error.response?.status === 401) {
+      showToast('warning', 'Unauthorized', 'Your session has expired. Please sign in again.');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
         }
+      }
     }
-    
-    // 403: Forbidden -> Optional: Redirect to module-disabled or show toast
+
+    // 429: Too many requests
+    if (error.response?.status === 429) {
+      showToast('warning', 'Too many requests', 'Please wait and try again.');
+    }
+
+    // Network error (no response)
+    if (!error.response) {
+      showToast('error', 'Network error', 'Backend is unreachable.');
+    }
+
+    // 5xx server errors
+    if (error.response?.status >= 500) {
+      showToast('error', 'Server error', 'Something went wrong on the server.');
+    }
+
+    // 403: Forbidden -> keep console warn (no redirect)
     if (error.response?.status === 403) {
-        console.warn('Access Forbidden:', standardizedError.message);
+      console.warn('Access Forbidden:', standardizedError.message);
     }
 
     // Attach standardized error to the rejection
