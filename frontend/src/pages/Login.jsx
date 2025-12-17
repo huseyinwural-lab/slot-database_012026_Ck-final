@@ -39,9 +39,11 @@ const Login = () => {
       window.location.href = from === '/login' ? '/' : from;
     } catch (err) {
       console.error(err);
-      // Use standardized error object
+      // Prefer global interceptor toast (includes request_id + copy)
       const error = err.standardized;
-      toast.error(error?.message || 'Sign in failed');
+      if (!error?.request_id) {
+        toast.error(error?.message || 'Sign in failed');
+      }
     } finally {
       setLoading(false);
     }
