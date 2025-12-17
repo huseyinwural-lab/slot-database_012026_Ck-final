@@ -150,53 +150,33 @@ def test_create_tenant(result: TestResult, token: str) -> Optional[str]:
         )
         return None
 
-def test_cors_behavior(result: TestResult):
-    """Test 3: CORS behavior"""
-    print("\n3. Testing CORS Behavior...")
+def test_create_admin_user(result: TestResult, token: str, tenant_id: str) -> None:
+    """Test 3: Create a new admin via POST /api/v1/admin/users"""
+    print("\n3. Testing Admin User Creation...")
     
-    # Send OPTIONS preflight request with evil origin
-    headers = {"Origin": "https://evil.example"}
+    headers = {"Authorization": f"Bearer {token}"}
+    admin_data = {
+        "email": f"test.admin.{uuid.uuid4().hex[:8]}@casino.com",
+        "password_mode": "invite",
+        "full_name": "Test Admin User",
+        "role": "Admin",
+        "tenant_id": tenant_id
+    }
     
-    try:
-        response = requests.options(
-            f"{API_BASE}/v1/auth/login",
-            headers=headers,
-            timeout=30
-        )
-        
-        access_control_origin = response.headers.get("Access-Control-Allow-Origin")
-        
-        # Check if evil origin is blocked
-        if access_control_origin != "https://evil.example":
-            result.add_result(
-                "CORS Evil Origin Blocked", 
-                True, 
-                f"Evil origin blocked - Access-Control-Allow-Origin: {access_control_origin}"
-            )
-        else:
-            result.add_result(
-                "CORS Evil Origin Blocked", 
-                False, 
-                f"Evil origin allowed - Access-Control-Allow-Origin: {access_control_origin}"
-            )
-            
-        # Check environment detection
-        # If backend is running and CORS_ORIGINS is set to "*" (dev mode), that's expected
-        # If it's prod/staging, CORS should be more restrictive
-        print(f"   CORS Origins header: {access_control_origin}")
-        print(f"   Backend appears to be running (not failing fast on startup)")
-        
+    response = make_request("POST", "/v1/admin/users", headers=headers, json_data=admin_data)
+    print(f"   POST /api/v1/admin/users: Status {response['status_code']}")
+    
+    if response["status_code"] == 200 and "user" in response["json"]:
         result.add_result(
-            "CORS Configuration", 
+            "Admin User Creation", 
             True, 
-            f"Backend running with CORS config - likely dev/local environment"
+            f"Admin user created successfully: {admin_data['email']}"
         )
-        
-    except Exception as e:
+    else:
         result.add_result(
-            "CORS Test", 
+            "Admin User Creation", 
             False, 
-            f"Failed to test CORS: {str(e)}"
+            f"Expected 200 with user data, got {response['status_code']}: {response['json']}"
         )
 
 def main():
