@@ -134,6 +134,25 @@ async def login(
 
     # 3. Success Update
     admin.failed_login_attempts = 0
+
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(admin.id),
+        tenant_id=str(admin.tenant_id),
+        action="auth.login_success",
+        resource_type="auth",
+        resource_id=resource_id,
+        result="success",
+        details={
+            "method": "password",
+            "mfa": False,
+            "user_agent": user_agent,
+            "tenant_context": str(admin.tenant_id),
+        },
+        ip_address=client_ip,
+    )
+
     await session.commit()
     await session.refresh(admin)
 
