@@ -57,8 +57,11 @@ def _validate_password_policy(password: str) -> None:
     #    raise AppError(error_code="PASSWORD_MUST_CONTAIN_SPECIAL", message="Password must contain at least one special character", status_code=400)
 
 @router.post("/login", response_model=TokenResponse)
-async def login(form_data: LoginRequest = Body(...), session: AsyncSession = Depends(get_session)):
-    logger.info(f"Login attempt for: {form_data.email}")
+async def login(
+    request: Request,
+    form_data: LoginRequest = Body(...),
+    session: AsyncSession = Depends(get_session),
+):
     
     # 1. Fetch User
     statement = select(AdminUser).where(AdminUser.email == form_data.email)
