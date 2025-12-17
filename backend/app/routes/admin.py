@@ -255,9 +255,6 @@ async def set_admin_status(
 
     return {"user": AdminUserPublic.model_validate(admin)}
 
-    
-    return {"user": AdminUserPublic.model_validate(new_admin), "invite_token": new_admin.invite_token}
-
 
 @router.post("/create-tenant-admin")
 async def create_tenant_admin(
