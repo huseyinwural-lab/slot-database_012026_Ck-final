@@ -59,7 +59,18 @@ CREATE INDEX IF NOT EXISTS ix_audit_event_request_id ON auditevent (request_id);
 Use `scripts/purge_audit_events.py`:
 
 ```bash
-python scripts/purge_audit_events.py --days 90
+# Dry-run (no deletes) – prints JSON summary
+python scripts/purge_audit_events.py --days 90 --dry-run
+
+# Batch delete (default batch size is 5000)
+python scripts/purge_audit_events.py --days 90 --batch-size 5000
+```
+
+### Running inside container (compose example)
+If running via Docker Compose, execute inside the backend container:
+
+```bash
+docker compose exec backend python /app/scripts/purge_audit_events.py --days 90 --dry-run
 ```
 
 ### Cron example
