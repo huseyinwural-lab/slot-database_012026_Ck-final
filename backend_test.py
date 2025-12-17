@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-P1-SECURITY Backend Validation
-Testing rate limiting, CORS, and trusted proxy behavior
+P2 Observability Backend Validation
+Testing liveness/readiness endpoints, X-Request-ID behavior, rate limiting logs, and JSON logging
 """
 
 import requests
@@ -9,10 +9,19 @@ import json
 import sys
 import os
 import time
+import uuid
+import re
 from typing import Dict, Any, Optional
 
-# Configuration
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://game-admin-hub-1.preview.emergentagent.com")
+# Configuration - Use frontend .env for external URL
+with open("/app/frontend/.env", "r") as f:
+    for line in f:
+        if line.startswith("REACT_APP_BACKEND_URL="):
+            BASE_URL = line.split("=", 1)[1].strip()
+            break
+else:
+    BASE_URL = "https://game-admin-hub-1.preview.emergentagent.com"
+
 API_BASE = f"{BASE_URL}/api"
 
 class TestResult:
