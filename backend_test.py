@@ -452,57 +452,68 @@ def test_logout_audit(result: TestResult, token: str) -> None:
     else:
         result.add_result("Logout Audit", True, f"Logout endpoint working with audit event. Event ID: {event.get('id')}")
 
-def test_fetch_audit_events(result: TestResult, token: str) -> None:
-    """Test 5: Fetch audit events as owner"""
-    print("\n5. Testing Audit Events Retrieval...")
+def test_required_fields_validation(result: TestResult, token: str) -> None:
+    """Test 5: Verify all auth audit events have required fields"""
+    print("\n5. Testing Required Fields Validation...")
     
     headers = {"Authorization": f"Bearer {token}"}
     
-    response = make_request("GET", "/v1/audit/events?since_hours=24&limit=50", headers=headers)
+    response = make_request("GET", "/v1/audit/events?since_hours=1&limit=100", headers=headers)
     print(f"   GET /api/v1/audit/events: Status {response['status_code']}")
     
-    if response["status_code"] == 200 and "items" in response["json"]:
-        items = response["json"]["items"]
+    if response["status_code"] != 200 or "items" not in response["json"]:
+        result.add_result("Required Fields Validation", False, f"Cannot fetch audit events: {response['status_code']}")
+        return
+    
+    events = response["json"]["items"]
+    
+    # Filter for auth-related events
+    auth_events = [e for e in events if e.get("resource_type") == "auth"]
+    
+    if not auth_events:
+        result.add_result("Required Fields Validation", False, "No auth-related audit events found")
+        return
+    
+    print(f"   Found {len(auth_events)} auth-related audit events")
+    
+    # Required fields for all audit events
+    required_fields = ["request_id", "tenant_id", "action", "resource_type", "result", "timestamp", "ip_address"]
+    
+    validation_errors = []
+    
+    for event in auth_events:
+        event_id = event.get("id", "unknown")
+        action = event.get("action", "unknown")
         
-        # Check for expected actions
-        actions_found = set()
-        required_fields_valid = True
+        # Check required fields
+        for field in required_fields:
+            if field not in event or event[field] is None or event[field] == "":
+                validation_errors.append(f"Event {event_id} ({action}): missing/null/empty field '{field}'")
         
-        for item in items:
-            actions_found.add(item.get("action", ""))
-            
-            # Verify required fields are present and non-null
-            required_fields = ["request_id", "actor_user_id", "tenant_id", "action", "resource_type", "result"]
-            for field in required_fields:
-                if field not in item or item[field] is None:
-                    required_fields_valid = False
-                    print(f"   Missing or null field '{field}' in audit event: {item.get('id', 'unknown')}")
-        
-        expected_actions = {"tenant.created", "admin.user_created", "tenant.feature_flags_changed"}
-        found_expected = expected_actions.intersection(actions_found)
-        
-        print(f"   Found {len(items)} audit events")
-        print(f"   Actions found: {sorted(actions_found)}")
-        print(f"   Expected actions found: {sorted(found_expected)}")
-        
-        if len(found_expected) >= 2 and required_fields_valid:  # At least 2 of the 3 expected actions
-            result.add_result(
-                "Audit Events Retrieval", 
-                True, 
-                f"Found {len(items)} events with {len(found_expected)} expected actions, all required fields present"
-            )
-        else:
-            result.add_result(
-                "Audit Events Retrieval", 
-                False, 
-                f"Expected actions missing or invalid fields. Found: {found_expected}, Fields valid: {required_fields_valid}"
-            )
+        # Verify tenant_id is not 'unknown' for known users (except for non-existing user scenarios)
+        tenant_id = event.get("tenant_id")
+        actor_user_id = event.get("actor_user_id")
+        if action == "auth.login_failed" and actor_user_id == "unknown":
+            # For non-existing users, tenant_id can be 'unknown'
+            pass
+        elif tenant_id == "unknown" and actor_user_id != "unknown":
+            validation_errors.append(f"Event {event_id} ({action}): tenant_id is 'unknown' for known user {actor_user_id}")
+    
+    # Check specific auth actions
+    auth_actions = set(e.get("action") for e in auth_events)
+    expected_auth_actions = {"auth.login_success", "auth.login_failed"}
+    found_expected = expected_auth_actions.intersection(auth_actions)
+    
+    print(f"   Auth actions found: {sorted(auth_actions)}")
+    print(f"   Expected auth actions found: {sorted(found_expected)}")
+    
+    if len(found_expected) < 2:
+        validation_errors.append(f"Missing expected auth actions. Found: {found_expected}, Expected: {expected_auth_actions}")
+    
+    if validation_errors:
+        result.add_result("Required Fields Validation", False, f"Validation errors: {'; '.join(validation_errors[:5])}")  # Limit to first 5 errors
     else:
-        result.add_result(
-            "Audit Events Retrieval", 
-            False, 
-            f"Expected 200 with items array, got {response['status_code']}: {response['json']}"
-        )
+        result.add_result("Required Fields Validation", True, f"All {len(auth_events)} auth events have required fields")
 
 def test_tenant_scoping_behavior(result: TestResult, token: str, tenant_id: str) -> None:
     """Test 6: Verify tenant scoping behavior"""
