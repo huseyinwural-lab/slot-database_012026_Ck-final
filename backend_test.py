@@ -115,34 +115,40 @@ def test_owner_login_and_get_token(result: TestResult) -> Optional[str]:
         )
         return None
 
-def test_trusted_proxy_behavior(result: TestResult):
-    """Test 2: Trusted proxy/X-Forwarded-For behavior"""
-    print("\n2. Testing Trusted Proxy Behavior...")
+def test_create_tenant(result: TestResult, token: str) -> Optional[str]:
+    """Test 2: Create a new tenant via POST /api/v1/tenants/"""
+    print("\n2. Testing Tenant Creation...")
     
-    login_data = {
-        "email": "admin@casino.com", 
-        "password": "WrongPass!"
+    headers = {"Authorization": f"Bearer {token}"}
+    tenant_data = {
+        "name": f"Test Tenant {uuid.uuid4().hex[:8]}",
+        "type": "renter",
+        "features": {
+            "can_manage_admins": True,
+            "can_view_reports": True,
+            "can_manage_affiliates": False,
+            "can_use_crm": False
+        }
     }
     
-    # Test with spoofed X-Forwarded-For header
-    headers = {"X-Forwarded-For": "1.2.3.4"}
+    response = make_request("POST", "/v1/tenants/", headers=headers, json_data=tenant_data)
+    print(f"   POST /api/v1/tenants/: Status {response['status_code']}")
     
-    response = make_request("POST", "/v1/auth/login", headers=headers, json_data=login_data)
-    
-    # Since TRUSTED_PROXY_IPS is empty by default, the spoofed IP should be ignored
-    # and rate limiting should use the actual client IP
-    if response["status_code"] == 401:
+    if response["status_code"] == 200 and "id" in response["json"]:
+        tenant_id = response["json"]["id"]
         result.add_result(
-            "Trusted Proxy Behavior", 
+            "Tenant Creation", 
             True, 
-            f"X-Forwarded-For header ignored (no trusted proxies configured), got {response['status_code']}"
+            f"Tenant created successfully, ID: {tenant_id}"
         )
+        return tenant_id
     else:
         result.add_result(
-            "Trusted Proxy Behavior", 
+            "Tenant Creation", 
             False, 
-            f"Expected 401 (spoofed header ignored), got {response['status_code']}"
+            f"Expected 200 with tenant ID, got {response['status_code']}: {response['json']}"
         )
+        return None
 
 def test_cors_behavior(result: TestResult):
     """Test 3: CORS behavior"""
