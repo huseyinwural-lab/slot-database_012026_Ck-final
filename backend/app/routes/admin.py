@@ -109,6 +109,7 @@ async def create_admin(
 
 @router.post("/create-tenant-admin")
 async def create_tenant_admin(
+    request: Request,
     payload: dict = Body(...),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
