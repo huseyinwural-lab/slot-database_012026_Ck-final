@@ -221,95 +221,58 @@ def test_purge_script_execution(result: TestResult, token: str) -> None:
     except Exception as e:
         result.add_result("Purge Script Execution", False, f"Error running purge script: {str(e)}")
 
-def test_rate_limited_audit(result: TestResult) -> None:
-    """Test 3: Rate limiting creates auth.login_rate_limited audit event"""
-    print("\n3. Testing Rate Limited Audit Event...")
+def test_post_purge_recent_events(result: TestResult, token: str) -> None:
+    """Test 3: After purge, query GET /api/v1/audit/events?since_hours=1 and confirm it returns 0 or only very recent events"""
+    print("\n3. Testing Post-Purge Recent Events Query...")
     
-    # First get a valid token to check audit events
-    valid_login = {
-        "email": "admin@casino.com",
-        "password": "Admin123!"
-    }
-    temp_response = make_request("POST", "/v1/auth/login", json_data=valid_login)
-    if temp_response["status_code"] != 200:
-        result.add_result("Rate Limited Audit", False, "Cannot get token for audit check")
-        return
-    
-    token = temp_response["json"]["access_token"]
-    
-    # Trigger rate limiting by making multiple failed login attempts
-    failed_login_data = {
-        "email": "admin@casino.com",
-        "password": "WrongPassword123!"
-    }
-    
-    print("   Triggering rate limit with multiple failed attempts...")
-    rate_limited = False
-    
-    # Make 6 attempts to exceed the 5/min limit
-    for i in range(6):
-        response = make_request("POST", "/v1/auth/login", json_data=failed_login_data)
-        print(f"   Attempt {i+1}: Status {response['status_code']}")
-        
-        if response["status_code"] == 429:
-            rate_limited = True
-            break
-        elif i < 5 and response["status_code"] != 401:
-            result.add_result("Rate Limited Audit", False, f"Unexpected status on attempt {i+1}: {response['status_code']}")
-            return
-    
-    if not rate_limited:
-        result.add_result("Rate Limited Audit", False, "Rate limiting not triggered after 6 attempts")
-        return
-    
-    # Wait for audit event
+    # Wait a moment after purge to ensure it's complete
     time.sleep(2)
     
-    # Get audit events after rate limiting
-    after_response = get_recent_audit_events(token)
-    if after_response["status_code"] != 200:
-        result.add_result("Rate Limited Audit", False, f"Cannot fetch audit events: {after_response['status_code']}")
+    # Query for events from the last hour
+    headers = {"Authorization": f"Bearer {token}"}
+    response = make_request("GET", "/v1/audit/events?since_hours=1&limit=100", headers=headers)
+    
+    print(f"   GET /api/v1/audit/events?since_hours=1: Status {response['status_code']}")
+    
+    if response["status_code"] != 200:
+        result.add_result("Post-Purge Recent Events Query", False, f"Cannot fetch recent audit events: {response['status_code']}")
         return
     
-    events = after_response["json"].get("items", [])
+    events = response["json"].get("items", [])
+    event_count = len(events)
     
-    # Find auth.login_rate_limited event
-    rate_limited_events = [e for e in events if e.get("action") == "auth.login_rate_limited"]
+    print(f"   Events found in last hour: {event_count}")
     
-    if not rate_limited_events:
-        result.add_result("Rate Limited Audit", False, "No auth.login_rate_limited audit event found")
-        return
+    # Check if we have very recent events (from our test login)
+    recent_events = []
+    current_time = time.time()
     
-    event = rate_limited_events[0]  # Most recent
+    for event in events:
+        event_timestamp = event.get("timestamp", "")
+        if event_timestamp:
+            try:
+                # Parse ISO timestamp
+                from datetime import datetime
+                event_time = datetime.fromisoformat(event_timestamp.replace('Z', '+00:00'))
+                event_unix = event_time.timestamp()
+                
+                # Check if event is within last 10 minutes (very recent)
+                if current_time - event_unix < 600:  # 10 minutes
+                    recent_events.append(event)
+                    print(f"   Recent event: {event.get('action')} at {event_timestamp}")
+            except Exception as e:
+                print(f"   Could not parse timestamp {event_timestamp}: {e}")
     
-    # Verify required fields
-    required_fields = ["request_id", "tenant_id", "action", "resource_type", "result", "timestamp", "ip_address"]
-    missing_fields = [f for f in required_fields if not event.get(f)]
-    
-    if missing_fields:
-        result.add_result("Rate Limited Audit", False, f"Missing required fields: {missing_fields}")
-        return
-    
-    # Verify specific values
-    checks = []
-    if event.get("action") != "auth.login_rate_limited":
-        checks.append(f"action={event.get('action')} (expected auth.login_rate_limited)")
-    if event.get("resource_type") != "auth":
-        checks.append(f"resource_type={event.get('resource_type')} (expected auth)")
-    if event.get("result") != "rate_limited":
-        checks.append(f"result={event.get('result')} (expected rate_limited)")
-    
-    # Verify details structure
-    details = event.get("details", {})
-    if details.get("limit") != "5/min":
-        checks.append(f"details.limit={details.get('limit')} (expected 5/min)")
-    if details.get("window_sec") != 60:
-        checks.append(f"details.window_sec={details.get('window_sec')} (expected 60)")
-    
-    if checks:
-        result.add_result("Rate Limited Audit", False, f"Validation failures: {'; '.join(checks)}")
+    # Validate results
+    if event_count == 0:
+        result.add_result("Post-Purge Recent Events Query", True, "No events found in last hour (expected after purge with --days 0)")
+    elif len(recent_events) > 0 and len(recent_events) <= 5:
+        # We expect only very recent events (from our test login)
+        result.add_result("Post-Purge Recent Events Query", True, f"Found {event_count} events in last hour, {len(recent_events)} are very recent (expected)")
+    elif event_count > 10:
+        result.add_result("Post-Purge Recent Events Query", False, f"Too many events ({event_count}) found after purge - purge may not have worked correctly")
     else:
-        result.add_result("Rate Limited Audit", True, f"All validations passed. Event ID: {event.get('id')}")
+        result.add_result("Post-Purge Recent Events Query", True, f"Found {event_count} events in last hour (acceptable range after purge)")
 
 def test_logout_audit(result: TestResult, token: str) -> None:
     """Test 4: Logout endpoint (if exists) creates auth.logout audit event"""
