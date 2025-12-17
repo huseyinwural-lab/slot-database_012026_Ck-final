@@ -106,6 +106,155 @@ async def create_admin(
 
     await session.commit()
     await session.refresh(new_admin)
+
+
+@router.patch("/users/{admin_id}")
+async def update_admin_user(
+    request: Request,
+    admin_id: str,
+    payload: AdminUpdateRequest,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Update admin user fields (owner only in MVP).
+
+    Audit:
+    - admin.user_updated (diff-only)
+    - admin.user_role_changed (when role changes)
+
+    PII policy: raw email/username are NOT stored in audit; only sha256 surrogates.
+    """
+
+    require_owner(current_admin)
+
+    admin = await session.get(AdminUser, admin_id)
+    if not admin:
+        raise AppError("ADMIN_NOT_FOUND", "Admin not found", 404)
+
+    tenant_id = admin.tenant_id
+
+    changes = {}
+
+    def record_change(key: str, before, after, pii: bool = False):
+        if before == after:
+            return
+        if pii:
+            changes[key] = {
+                "changed": True,
+                "before_hash": sha256_surrogate(before or ""),
+                "after_hash": sha256_surrogate(after or ""),
+            }
+        else:
+            changes[key] = {"before": before, "after": after}
+
+    # full_name (safe)
+    if payload.full_name is not None:
+        record_change("full_name", admin.full_name, payload.full_name, pii=False)
+        admin.full_name = payload.full_name
+
+    # email (PII)
+    if payload.email is not None:
+        new_email = str(payload.email).strip().lower()
+        record_change("email", admin.email, new_email, pii=True)
+        admin.email = new_email
+        # keep username in sync (PII-ish) but do not log raw
+        admin.username = new_email.split("@")[0]
+
+    # role (safe-ish but triggers dedicated event)
+    role_changed = False
+    if payload.role is not None:
+        record_change("role", admin.role, payload.role, pii=False)
+        role_changed = admin.role != payload.role
+        admin.role = payload.role
+
+    # tenant_role
+    if payload.tenant_role is not None:
+        record_change("tenant_role", admin.tenant_role, payload.tenant_role, pii=False)
+        admin.tenant_role = payload.tenant_role
+
+    session.add(admin)
+
+    request_id = getattr(request.state, "request_id", "unknown")
+    client_ip = request.client.host if request.client else "unknown"
+
+    if changes:
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=str(tenant_id),
+            action="admin.user_updated",
+            resource_type="admin_user",
+            resource_id=str(admin.id),
+            result="success",
+            details={"changed": changes},
+            ip_address=client_ip,
+        )
+
+        if role_changed:
+            await audit.log_event(
+                session=session,
+                request_id=request_id,
+                actor_user_id=str(current_admin.id),
+                tenant_id=str(tenant_id),
+                action="admin.user_role_changed",
+                resource_type="admin_user",
+                resource_id=str(admin.id),
+                result="success",
+                details={"changed": {"role": changes.get("role")}},
+                ip_address=client_ip,
+            )
+
+    await session.commit()
+    await session.refresh(admin)
+
+    return {"user": AdminUserPublic.model_validate(admin)}
+
+
+@router.post("/users/{admin_id}/status")
+async def set_admin_status(
+    request: Request,
+    admin_id: str,
+    payload: AdminStatusRequest,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Enable/disable an admin user (owner only in MVP)."""
+
+    require_owner(current_admin)
+
+    admin = await session.get(AdminUser, admin_id)
+    if not admin:
+        raise AppError("ADMIN_NOT_FOUND", "Admin not found", 404)
+
+    before = admin.is_active
+    admin.is_active = payload.is_active
+    admin.status = "active" if payload.is_active else "disabled"
+
+    session.add(admin)
+
+    request_id = getattr(request.state, "request_id", "unknown")
+    client_ip = request.client.host if request.client else "unknown"
+
+    if before != payload.is_active:
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=str(admin.tenant_id),
+            action="admin.user_enabled" if payload.is_active else "admin.user_disabled",
+            resource_type="admin_user",
+            resource_id=str(admin.id),
+            result="success",
+            details={"changed": {"is_active": {"before": before, "after": payload.is_active}}},
+            ip_address=client_ip,
+        )
+
+    await session.commit()
+    await session.refresh(admin)
+
+    return {"user": AdminUserPublic.model_validate(admin)}
+
     
     return {"user": AdminUserPublic.model_validate(new_admin), "invite_token": new_admin.invite_token}
 
