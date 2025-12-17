@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-P2 Observability Backend Validation
-Testing liveness/readiness endpoints, X-Request-ID behavior, rate limiting logs, and JSON logging
+P2 Audit Log Backend Validation
+Testing P2 Audit Log functionality end-to-end including login, tenant creation, admin creation, 
+feature updates, audit event retrieval, tenant scoping, and redaction
 """
 
 import requests
