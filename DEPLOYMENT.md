@@ -196,6 +196,9 @@ docker compose -f docker-compose.prod.yml logs --no-color --tail=300 backend
 
 ## 9) Backup / Restore / Rollback (P1-DEPLOY-004)
 
+## 9.1) Audit retention
+See: `docs/ops/audit_retention.md` (90-day retention + purge script)
+
 Primary doc:
 - `docs/ops/backup.md`
 
