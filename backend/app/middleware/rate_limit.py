@@ -87,6 +87,30 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     "path": path,
                 },
             )
+
+            # Also write to audit trail (important security signal)
+            try:
+                from app.core.database import async_session
+                from app.services.audit import audit
+
+                async with async_session() as session:
+                    await audit.log_event(
+                        session=session,
+                        request_id=request_id or "unknown",
+                        actor_user_id="unknown",
+                        tenant_id=tenant_id or "unknown",
+                        action="auth.login_rate_limited",
+                        resource_type="auth",
+                        resource_id=None,
+                        result="rate_limited",
+                        details={"limit": "5/min", "window_sec": int(window), "user_agent": request.headers.get("User-Agent")},
+                        ip_address=client_ip,
+                    )
+                    await session.commit()
+            except Exception:
+                # best-effort; do not block auth
+                pass
+
             return JSONResponse(
                 status_code=429,
                 content={
