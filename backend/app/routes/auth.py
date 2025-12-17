@@ -114,12 +114,23 @@ async def login(
     # 2. Verify Password
     is_valid = verify_password(form_data.password, admin.password_hash)
     if not is_valid:
-        logger.warning(f"Login failed: Invalid password for {form_data.email}. Hash in DB: {admin.password_hash[:10]}...")
         admin.failed_login_attempts += 1
+
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(admin.id),
+            tenant_id=str(admin.tenant_id),
+            action="auth.login_failed",
+            resource_type="auth",
+            resource_id=resource_id,
+            result="failed",
+            details={"failure_reason": "INVALID_CREDENTIALS", "user_agent": user_agent},
+            ip_address=client_ip,
+        )
+
         await session.commit()
         raise auth_error
-
-    logger.info(f"Login successful for: {form_data.email}")
 
     # 3. Success Update
     admin.failed_login_attempts = 0
