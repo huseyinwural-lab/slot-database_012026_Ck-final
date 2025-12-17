@@ -12,7 +12,7 @@ import time
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://casino-release.preview.emergentagent.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://game-admin-hub-1.preview.emergentagent.com")
 API_BASE = f"{BASE_URL}/api"
 
 class TestResult:
