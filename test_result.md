@@ -68,6 +68,17 @@ p2_observability_request_id_json_logs_ready_dec17:
     status_history:
         -working: "NA"
         -agent: "main"
+
+
+p2_audit_log_mvp_dec17:
+  - task: "P2 Audit Log: canonical AuditEvent (required fields) + diff-only details + redaction + /api/v1/audit/events + UI /audit"
+    implemented: true
+    working: "NA"
+    file: "backend/app/models/sql_models.py, backend/app/services/audit.py, backend/app/routes/audit.py, backend/app/routes/admin.py, backend/app/routes/tenant.py, backend/alembic/versions/7b01f4a2c9e1_add_audit_event_table.py, frontend/src/pages/AuditLog.jsx, frontend/src/App.js, frontend/src/components/Layout.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+
         -comment: "P2 Observability features implemented: X-Request-ID validation/propagation middleware, JSON logging with redaction, rate limiting with structured logs, liveness/readiness endpoints with database connectivity checks"
         -working: true
         -agent: "testing"
