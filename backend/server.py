@@ -9,8 +9,8 @@ from app.core.errors import AppError, app_exception_handler, generic_exception_h
 from app.core.logging_config import configure_logging
 
 # Configure logging (env-controlled)
-# Defaults: LOG_LEVEL=INFO, LOG_FORMAT=json (prod recommended)
-configure_logging(level=settings.log_level, fmt=settings.log_format)
+# Defaults: dev/local => plain, prod/staging => json
+configure_logging(level=settings.log_level, fmt=settings.get_log_format())
 
 logger = logging.getLogger(__name__)
 
