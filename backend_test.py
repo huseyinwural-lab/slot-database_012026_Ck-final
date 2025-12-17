@@ -87,45 +87,33 @@ def make_request(method: str, endpoint: str, headers: Dict = None, json_data: Di
             "headers": {}
         }
 
-def test_liveness_readiness_endpoints(result: TestResult):
-    """Test 1: Validate liveness/readiness endpoints"""
-    print("\n1. Testing Liveness/Readiness Endpoints...")
+def test_owner_login_and_get_token(result: TestResult) -> Optional[str]:
+    """Test 1: Login as owner and get token"""
+    print("\n1. Testing Owner Login...")
     
-    # Test liveness endpoint
-    health_response = make_request("GET", "/health")
-    print(f"   GET /api/health: Status {health_response['status_code']}")
+    login_data = {
+        "email": "admin@casino.com",
+        "password": "Admin123!"
+    }
     
-    if health_response["status_code"] == 200 and isinstance(health_response["json"], dict):
+    response = make_request("POST", "/v1/auth/login", json_data=login_data)
+    print(f"   POST /api/v1/auth/login: Status {response['status_code']}")
+    
+    if response["status_code"] == 200 and "access_token" in response["json"]:
+        token = response["json"]["access_token"]
         result.add_result(
-            "Liveness Endpoint (/api/health)", 
+            "Owner Login", 
             True, 
-            f"Returns 200 JSON: {health_response['json']}"
+            f"Login successful, token length: {len(token)}"
         )
+        return token
     else:
         result.add_result(
-            "Liveness Endpoint (/api/health)", 
+            "Owner Login", 
             False, 
-            f"Expected 200 JSON, got {health_response['status_code']}: {health_response['json']}"
+            f"Expected 200 with access_token, got {response['status_code']}: {response['json']}"
         )
-    
-    # Test readiness endpoint
-    ready_response = make_request("GET", "/ready")
-    print(f"   GET /api/ready: Status {ready_response['status_code']}")
-    
-    if (ready_response["status_code"] == 200 and 
-        isinstance(ready_response["json"], dict) and
-        ready_response["json"].get("dependencies", {}).get("database") == "connected"):
-        result.add_result(
-            "Readiness Endpoint (/api/ready)", 
-            True, 
-            f"Returns 200 JSON with database='connected': {ready_response['json']}"
-        )
-    else:
-        result.add_result(
-            "Readiness Endpoint (/api/ready)", 
-            False, 
-            f"Expected 200 JSON with dependencies.database='connected', got {ready_response['status_code']}: {ready_response['json']}"
-        )
+        return None
 
 def test_trusted_proxy_behavior(result: TestResult):
     """Test 2: Trusted proxy/X-Forwarded-For behavior"""
