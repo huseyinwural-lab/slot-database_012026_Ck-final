@@ -65,6 +65,8 @@ def make_request(method: str, endpoint: str, headers: Dict = None, json_data: Di
             response = requests.get(url, headers=headers, timeout=30)
         elif method.upper() == "POST":
             response = requests.post(url, headers=headers, json=json_data, timeout=30)
+        elif method.upper() == "PATCH":
+            response = requests.patch(url, headers=headers, json=json_data, timeout=30)
         elif method.upper() == "OPTIONS":
             response = requests.options(url, headers=headers, timeout=30)
         else:
