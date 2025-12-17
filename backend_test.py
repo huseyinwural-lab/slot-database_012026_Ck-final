@@ -42,7 +42,7 @@ class TestResult:
             self.failed += 1
     
     def print_summary(self):
-        print(f"\n=== P1-SECURITY VALIDATION SUMMARY ===")
+        print(f"\n=== P2 OBSERVABILITY VALIDATION SUMMARY ===")
         for result in self.results:
             status_icon = "✅" if result["status"] == "PASS" else "❌"
             print(f"{status_icon} {result['test']}: {result['status']}")
