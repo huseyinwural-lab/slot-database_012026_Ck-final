@@ -27,6 +27,10 @@ except Exception as e:
     logger.critical(f"Failed to create database engine: {e}")
     raise
 
+
+# Shared session factory (used by middleware/background tasks)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
 async def init_db():
     """DB Schema Init.
     
