@@ -76,9 +76,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             bucket.popleft()
 
         if len(bucket) >= max_requests:
+            # Stable event name required by ops
             logger.warning(
-                "rate limit exceeded",
-                extra={"ip": client_ip, "path": path, "rate_limited": True},
+                "auth.login_rate_limited",
+                extra={
+                    "event": "auth.login_rate_limited",
+                    "request_id": request_id,
+                    "client_ip": client_ip,
+                    "tenant_id": tenant_id,
+                    "path": path,
+                },
             )
             return JSONResponse(
                 status_code=429,
