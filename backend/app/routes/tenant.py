@@ -116,9 +116,6 @@ async def update_tenant_features(
         if before_features.get(k) != after_features.get(k):
             changed[k] = {"before": before_features.get(k), "after": after_features.get(k)}
 
-    before = {"features": before_features}
-    after = {"features": after_features}
-
     session.add(tenant)
 
     # Audit (diff-only; masked)
