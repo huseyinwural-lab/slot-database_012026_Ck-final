@@ -11,6 +11,9 @@ from app.utils.permissions import require_owner
 from datetime import datetime, timedelta, timezone
 from app.services.audit import audit
 from app.schemas.admin import AdminUserPublic
+from app.schemas.admin_update import AdminUpdateRequest, AdminStatusRequest
+from app.utils.security import sha256_surrogate
+
 import logging
 
 logger = logging.getLogger(__name__)
