@@ -102,10 +102,30 @@ async def update_tenant_features(
         raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
 
     # Only update provided keys
+    before = {"features": dict(tenant.features or {})}
+
     if "features" in payload and isinstance(payload["features"], dict):
         tenant.features = payload["features"]
 
+    after = {"features": dict(tenant.features or {})}
+
     session.add(tenant)
+
+    # Audit (diff-only; masked)
+    from app.services.audit import audit
+    await audit.log(
+        admin=current_admin,
+        action="tenant.feature_flags_changed",
+        module="tenants",
+        target_id=str(tenant.id),
+        details={"before": before, "after": after},
+        session=session,
+        request_id=getattr(request.state, "request_id", None),
+        tenant_id=str(tenant.id),
+        resource_type="tenant",
+        result="success",
+    )
+
     await session.commit()
     await session.refresh(tenant)
 
