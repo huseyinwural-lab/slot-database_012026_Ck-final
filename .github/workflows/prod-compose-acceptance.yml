@@ -39,8 +39,9 @@ jobs:
       DB_POOL_SIZE: "5"
       DB_MAX_OVERFLOW: "10"
 
-      # CORS: Allow all for CI to prevent any origin/network issues
-      CORS_ORIGINS: "*"
+      # CORS: Explicit allowlist for CI (no wildcard) to match prod/staging rules
+      # Browser origin will be http://localhost:3000 (and player http://localhost:3001)
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
 
 
       # Frontend build args
