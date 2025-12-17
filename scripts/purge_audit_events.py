@@ -12,6 +12,11 @@ def main() -> int:
     args = parser.parse_args()
 
     # Import inside main so the script can run from repo root
+    import os
+    import sys
+
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+
     from config import settings
     from sqlalchemy.ext.asyncio import create_async_engine
 
