@@ -11,6 +11,8 @@ from sqlalchemy import text
 def main() -> int:
     parser = argparse.ArgumentParser(description="Purge audit events older than N days")
     parser.add_argument("--days", type=int, default=90)
+    parser.add_argument("--dry-run", action="store_true", help="Report how many rows would be deleted and exit")
+    parser.add_argument("--batch-size", type=int, default=5000, help="Delete in batches to reduce lock risk")
     args = parser.parse_args()
 
     # Import inside main so the script can run from repo root
