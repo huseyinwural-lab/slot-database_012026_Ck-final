@@ -56,7 +56,8 @@ api.interceptors.response.use(
         code: raw.error_code || detail.error_code || 'UNKNOWN_ERROR',
         message: raw.message || detail.detail || error.message || 'An unexpected error occurred',
         details: raw.details || detail || {},
-        status: error.response?.status
+        status: error.response?.status,
+        request_id: error.response?.headers?.['x-request-id']
     };
 
     // 401: Unauthorized -> Logout
