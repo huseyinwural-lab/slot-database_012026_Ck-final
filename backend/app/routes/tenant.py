@@ -128,7 +128,7 @@ async def update_tenant_features(
         action="tenant.feature_flags_changed",
         module="tenants",
         target_id=str(tenant.id),
-        details={"before": before, "after": after},
+        details={"changed": changed},
         session=session,
         request_id=getattr(request.state, "request_id", None),
         tenant_id=str(tenant.id),
