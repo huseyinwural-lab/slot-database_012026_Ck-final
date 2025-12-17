@@ -45,7 +45,7 @@ api.interceptors.request.use((config) => {
 // Response Interceptor for Error Standardization
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const originalRequest = error.config || {};
 
     // Standardize Error Object
