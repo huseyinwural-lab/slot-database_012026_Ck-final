@@ -11,6 +11,7 @@
 - [ ] `DATABASE_URL` correct and points to the intended Postgres
 - [ ] `CORS_ORIGINS` is an allowlist (no `*` in prod/staging)
 - [ ] `TRUSTED_PROXY_IPS` set to your external reverse proxy IP(s) if you want to trust `X-Forwarded-For`
+- [ ] `LOG_FORMAT=auto` (or `json`) and logs are readable by your stack (Kibana/Grafana)
 
 ## 3) Bootstrap rule
 - [ ] `BOOTSTRAP_ENABLED=false` in steady-state production

@@ -81,7 +81,7 @@ At minimum set in `/.env`:
 
 Recommended optional:
 - `LOG_LEVEL=INFO`
-- `LOG_FORMAT=json`
+- `LOG_FORMAT=auto` (prod/staging default: json, dev default: plain)
 - `DB_POOL_SIZE=5`
 - `DB_MAX_OVERFLOW=10`
 
@@ -156,6 +156,8 @@ docker compose -f docker-compose.prod.yml ps
 ```bash
 curl -fsS http://127.0.0.1:8001/api/health
 curl -fsS http://127.0.0.1:8001/api/ready
+# (optional) provide your own correlation ID
+curl -fsS -H 'X-Request-ID: ABCdef12_-' http://127.0.0.1:8001/api/health -D - | head
 ```
 
 ### 7.3 Login sanity (curl)
@@ -180,6 +182,9 @@ From a browser:
 ---
 
 ## 8) Logs
+
+In `ENV=prod|staging`, logs are JSON by default (`LOG_FORMAT=auto`).
+Each response includes `X-Request-ID` for correlation.
 
 ```bash
 docker compose -f docker-compose.prod.yml logs --no-color --tail=300
