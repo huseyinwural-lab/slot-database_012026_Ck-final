@@ -157,11 +157,15 @@ async def create_tenant_admin(
     session.add(new_admin)
     await audit.log(
         admin=current_admin,
-        action="create_tenant_admin",
+        action="tenant.admin_created",
         module="admin",
         target_id=str(new_admin.id),
         details={"email": email, "tenant_id": tenant_id},
         session=session,
+        request_id=getattr(request.state, "request_id", None),
+        tenant_id=tenant_id,
+        resource_type="admin_user",
+        result="success",
     )
 
     await session.commit()
