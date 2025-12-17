@@ -89,6 +89,10 @@ p2_audit_log_mvp_dec17:
         -agent: "testing"
         -comment: "✅ AUDIT LOG UI TESTING COMPLETE - ALL REQUIREMENTS PASSED (6/6 - 100% success rate): Step 1) ✅ Login successful with admin@casino.com/Admin123! - redirected to Platform Admin dashboard. Step 2) ✅ Sidebar navigation verified - 'Audit Log' item found under SYSTEM section, successfully navigated to /audit route. Step 3) ✅ Page structure validated - Audit Log page loads without runtime errors, displays proper title 'Audit Log', shows table with correct headers (Time, Action, Resource, Tenant, Actor, Result), found 4 audit event rows. Step 4) ✅ Refresh functionality working - Refresh button triggers successful GET /api/v1/audit/events API call (200 OK), no error toasts detected. Step 5) ✅ Filter functionality operational - Applied action filter 'admin.user_created', Apply button triggers filtered API call with correct parameters, filter successfully included in URL query. Step 6) ✅ Event detail modal working perfectly - Eye icon buttons present for each event, modal opens on click showing 'Audit Event' title, displays Request ID field (fa338557-76e7-4120-8a5e-6d52a39ea737), shows Details (masked) section with properly formatted JSON containing email, roles, and target_tenant_id fields, modal closes correctly with Escape key. All UI components functional: table rendering, filtering, API integration, modal dialogs, and data masking. Audit Log UI ready for production use."
 
+
+        -working: true
+        -agent: "main"
+        -comment: "P2 Auth audit events implemented: auth.login_success/auth.login_failed + rate-limited written to AuditEvent with PII-minimized surrogate resource_id (sha256 of normalized email), details schema per spec, no raw identifiers/passwords logged."
         -comment: "P2 Observability features implemented: X-Request-ID validation/propagation middleware, JSON logging with redaction, rate limiting with structured logs, liveness/readiness endpoints with database connectivity checks"
         -working: true
         -agent: "testing"
