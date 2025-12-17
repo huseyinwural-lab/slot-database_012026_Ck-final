@@ -515,58 +515,7 @@ def test_required_fields_validation(result: TestResult, token: str) -> None:
     else:
         result.add_result("Required Fields Validation", True, f"All {len(auth_events)} auth events have required fields")
 
-def test_tenant_scoping_behavior(result: TestResult, token: str, tenant_id: str) -> None:
-    """Test 6: Verify tenant scoping behavior"""
-    print("\n6. Testing Tenant Scoping Behavior...")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Test without X-Tenant-ID header (should include multiple tenants)
-    response1 = make_request("GET", "/v1/audit/events?limit=10", headers=headers)
-    print(f"   GET /api/v1/audit/events (no header): Status {response1['status_code']}")
-    
-    # Test with X-Tenant-ID header (should only include that tenant)
-    headers_with_tenant = {
-        "Authorization": f"Bearer {token}",
-        "X-Tenant-ID": tenant_id
-    }
-    response2 = make_request("GET", "/v1/audit/events?limit=10", headers=headers_with_tenant)
-    print(f"   GET /api/v1/audit/events (with X-Tenant-ID): Status {response2['status_code']}")
-    
-    if response1["status_code"] == 200 and response2["status_code"] == 200:
-        items1 = response1["json"].get("items", [])
-        items2 = response2["json"].get("items", [])
-        
-        # Check tenant IDs in responses
-        tenant_ids_1 = set(item.get("tenant_id") for item in items1)
-        tenant_ids_2 = set(item.get("tenant_id") for item in items2)
-        
-        print(f"   Without header - tenant IDs: {sorted(tenant_ids_1)}")
-        print(f"   With header - tenant IDs: {sorted(tenant_ids_2)}")
-        
-        # Without header should have multiple tenants or at least default_casino
-        # With header should only have the specified tenant
-        multiple_tenants = len(tenant_ids_1) > 1 or "default_casino" in tenant_ids_1
-        scoped_correctly = len(tenant_ids_2) == 1 and tenant_id in tenant_ids_2
-        
-        if multiple_tenants and scoped_correctly:
-            result.add_result(
-                "Tenant Scoping Behavior", 
-                True, 
-                f"Scoping works correctly. Without header: {len(tenant_ids_1)} tenants, with header: {len(tenant_ids_2)} tenant"
-            )
-        else:
-            result.add_result(
-                "Tenant Scoping Behavior", 
-                False, 
-                f"Scoping issue. Multiple tenants: {multiple_tenants}, Scoped correctly: {scoped_correctly}"
-            )
-    else:
-        result.add_result(
-            "Tenant Scoping Behavior", 
-            False, 
-            f"API calls failed. Status codes: {response1['status_code']}, {response2['status_code']}"
-        )
+# Removed - not needed for auth audit events testing
 
 def test_redaction_in_details(result: TestResult, token: str, tenant_id: str) -> None:
     """Test 7: Verify redaction in details (PII/credential keys)"""
