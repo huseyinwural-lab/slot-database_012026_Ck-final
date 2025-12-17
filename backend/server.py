@@ -49,14 +49,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Request logging & correlation ID (must be before rate limiting so request_id is available)
+app.add_middleware(RequestLoggingMiddleware)
+
 # Rate limiting (basic IP-based)
 app.add_middleware(RateLimitMiddleware)
 
 # Exception Handlers
 app.add_exception_handler(AppError, app_exception_handler)
 app.add_exception_handler(Exception, generic_exception_handler)
-# Request logging & correlation ID
-app.add_middleware(RequestLoggingMiddleware)
 
 # --- ROUTER INCLUSION (SQL ONLY) ---
 # Only include routers that have been fully refactored to SQLModel
