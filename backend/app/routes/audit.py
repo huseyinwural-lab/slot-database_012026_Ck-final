@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.database import get_session
-from app.core.errors import AppError
 from app.models.sql_models import AdminUser, AuditEvent
 from app.schemas.audit_event import AuditEventListResponse, AuditEventPublic
 from app.utils.auth import get_current_admin
