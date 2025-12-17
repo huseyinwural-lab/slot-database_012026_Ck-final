@@ -1,6 +1,19 @@
 # Audit Log Retention (90 days)
 
-This project stores canonical audit events in the `AuditEvent` SQLModel (SQLite: `auditevent`).
+This project stores canonical audit events in the `AuditEvent` SQLModel.
+
+## Environments / DB separation (SQLite vs Postgres)
+- **Dev/local**: typically uses **SQLite** (`sqlite+aiosqlite:////app/backend/casino.db`).
+- **Staging/prod**: expected to use **PostgreSQL** (via `DATABASE_URL`).
+
+The purge script connects to **whatever DB is configured** in `backend/config.py` via `settings.database_url`.
+
+### Table name
+In this codebase the audit table name is **`auditevent`** (SQLModel default naming). The purge tool and SQL snippets assume this.
+
+## Timestamp
+- Audit `timestamp` is stored in **UTC**.
+- Purge cutoff is computed in **UTC** and compared against the DB `timestamp` column.
 
 ## Goal
 - Keep audit events for **90 days**
