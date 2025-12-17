@@ -27,13 +27,14 @@ class Settings(BaseSettings):
 
     # Logging
     log_level: str = "INFO"  # LOG_LEVEL
-    # Default: dev/local => plain, prod/staging => json
-    log_format: str = "plain"  # LOG_FORMAT (plain|json)
+    # Default: auto => dev/local plain, prod/staging json
+    log_format: str = "auto"  # LOG_FORMAT (auto|plain|json)
 
     def get_log_format(self) -> str:
         fmt = (self.log_format or "").strip().lower()
         if fmt in {"plain", "json"}:
             return fmt
+        # auto/empty/unknown -> env-based default
         if (self.env or "").lower() in {"prod", "staging"}:
             return "json"
         return "plain"

@@ -49,11 +49,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Request logging & correlation ID (must be before rate limiting so request_id is available)
-app.add_middleware(RequestLoggingMiddleware)
-
 # Rate limiting (basic IP-based)
 app.add_middleware(RateLimitMiddleware)
+
+# Request logging & correlation ID (outermost middleware; runs before rate limiting)
+app.add_middleware(RequestLoggingMiddleware)
 
 # Exception Handlers
 app.add_exception_handler(AppError, app_exception_handler)
@@ -175,9 +175,15 @@ async def readiness_check():
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
 
-            # Migration check (lightweight): verify alembic_version exists and has a value.
-            # This avoids heavy head/current operations and does not apply migrations.
-            version = (await conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))).scalar()
+            version = None
+            try:
+                # Migration check (lightweight): read version table.
+                # - prod/staging: expected to exist after alembic upgrade head
+                # - dev/local: may not exist (create_all path). In that case we do not fail readiness.
+                version = (await conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))).scalar()
+            except Exception:
+                if settings.env in {"prod", "staging"}:
+                    raise
 
         return {
             "status": "ready",
