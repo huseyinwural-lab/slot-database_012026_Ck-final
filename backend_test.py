@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-P2 Auth Audit Events Backend Validation
-Testing P2 Auth audit events end-to-end including successful login, failed login, 
-rate limiting, logout (if exists), and required fields validation
+Audit Retention Purge Tooling Validation
+Testing audit event creation, purge script functionality, and retention behavior
 """
 
 import requests
