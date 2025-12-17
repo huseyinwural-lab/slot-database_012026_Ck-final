@@ -19,7 +19,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "audit_event",
+        "auditevent",
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("request_id", sa.String(), nullable=False),
         sa.Column("actor_user_id", sa.String(), nullable=False),
@@ -34,23 +34,23 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
-    op.create_index(op.f("ix_audit_event_request_id"), "audit_event", ["request_id"], unique=False)
-    op.create_index(op.f("ix_audit_event_actor_user_id"), "audit_event", ["actor_user_id"], unique=False)
-    op.create_index(op.f("ix_audit_event_tenant_id"), "audit_event", ["tenant_id"], unique=False)
-    op.create_index(op.f("ix_audit_event_action"), "audit_event", ["action"], unique=False)
-    op.create_index(op.f("ix_audit_event_resource_type"), "audit_event", ["resource_type"], unique=False)
-    op.create_index(op.f("ix_audit_event_resource_id"), "audit_event", ["resource_id"], unique=False)
-    op.create_index(op.f("ix_audit_event_result"), "audit_event", ["result"], unique=False)
-    op.create_index(op.f("ix_audit_event_timestamp"), "audit_event", ["timestamp"], unique=False)
+    op.create_index(op.f("ix_auditevent_request_id"), "auditevent", ["request_id"], unique=False)
+    op.create_index(op.f("ix_auditevent_actor_user_id"), "auditevent", ["actor_user_id"], unique=False)
+    op.create_index(op.f("ix_auditevent_tenant_id"), "auditevent", ["tenant_id"], unique=False)
+    op.create_index(op.f("ix_auditevent_action"), "auditevent", ["action"], unique=False)
+    op.create_index(op.f("ix_auditevent_resource_type"), "auditevent", ["resource_type"], unique=False)
+    op.create_index(op.f("ix_auditevent_resource_id"), "auditevent", ["resource_id"], unique=False)
+    op.create_index(op.f("ix_auditevent_result"), "auditevent", ["result"], unique=False)
+    op.create_index(op.f("ix_auditevent_timestamp"), "auditevent", ["timestamp"], unique=False)
 
 
 def downgrade() -> None:
-    op.drop_index(op.f("ix_audit_event_timestamp"), table_name="audit_event")
-    op.drop_index(op.f("ix_audit_event_result"), table_name="audit_event")
-    op.drop_index(op.f("ix_audit_event_resource_id"), table_name="audit_event")
-    op.drop_index(op.f("ix_audit_event_resource_type"), table_name="audit_event")
-    op.drop_index(op.f("ix_audit_event_action"), table_name="audit_event")
-    op.drop_index(op.f("ix_audit_event_tenant_id"), table_name="audit_event")
-    op.drop_index(op.f("ix_audit_event_actor_user_id"), table_name="audit_event")
-    op.drop_index(op.f("ix_audit_event_request_id"), table_name="audit_event")
-    op.drop_table("audit_event")
+    op.drop_index(op.f("ix_auditevent_timestamp"), table_name="auditevent")
+    op.drop_index(op.f("ix_auditevent_result"), table_name="auditevent")
+    op.drop_index(op.f("ix_auditevent_resource_id"), table_name="auditevent")
+    op.drop_index(op.f("ix_auditevent_resource_type"), table_name="auditevent")
+    op.drop_index(op.f("ix_auditevent_action"), table_name="auditevent")
+    op.drop_index(op.f("ix_auditevent_tenant_id"), table_name="auditevent")
+    op.drop_index(op.f("ix_auditevent_actor_user_id"), table_name="auditevent")
+    op.drop_index(op.f("ix_auditevent_request_id"), table_name="auditevent")
+    op.drop_table("auditevent")
