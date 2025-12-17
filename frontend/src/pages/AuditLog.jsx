@@ -26,7 +26,7 @@ const AuditLog = () => {
     since_hours: 24,
   });
 
-  const fetchEvents = async () => {
+  const fetchEvents = React.useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
