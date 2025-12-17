@@ -116,26 +116,26 @@ jobs:
           docker compose -f docker-compose.prod.yml logs --no-color --tail=200 | tee ci_artifacts/compose_logs_inline_tail200.txt || true
           docker ps -a
 
-      - name: Wait for API health
+      - name: Wait for API readiness
         run: |
           set -e
           for i in {1..60}; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/health" || true)
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/ready" || true)
             if [ "$code" = "200" ]; then
-              echo "Health OK"
+              echo "Ready OK"
               exit 0
             fi
-            echo "Waiting for /api/health ... ($i) code=$code"
+            echo "Waiting for /api/ready ... ($i) code=$code"
             sleep 2
           done
-          echo "Health did not become ready in time"
+          echo "Readiness did not become ready in time"
           exit 1
 
-      - name: Check readiness (DB up)
+      - name: Check liveness (process up)
         run: |
           set -e
-          code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/ready" || true)
-          echo "GET /api/ready => $code"
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/health" || true)
+          echo "GET /api/health => $code"
           test "$code" = "200"
 
       - name: Verify User Creation in DB (P0)
