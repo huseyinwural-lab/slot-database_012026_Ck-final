@@ -277,38 +277,32 @@ def test_post_purge_recent_events(result: TestResult, token: str) -> None:
 # Additional helper functions for audit retention testing
 
 def main():
-    print("=== P2 AUTH AUDIT EVENTS BACKEND VALIDATION ===")
+    print("=== AUDIT RETENTION PURGE TOOLING VALIDATION ===")
     print(f"Testing against: {BASE_URL}")
     
     result = TestResult()
     
-    # Test 1: Successful login audit event
-    token = test_successful_login_audit(result)
+    # Test 1: Create new audit event by logging in and confirm audit event count increases
+    token = test_create_audit_event_via_login(result)
     if not token:
         print("❌ Cannot proceed without valid token")
         result.print_summary()
         return False
     
-    # Test 2: Failed login audit event
-    test_failed_login_audit(result)
+    # Test 2: Run purge script with --days 0 and verify it deletes older events but does not crash
+    test_purge_script_execution(result, token)
     
-    # Test 3: Rate limited audit event
-    test_rate_limited_audit(result)
-    
-    # Test 4: Logout audit event (if endpoint exists)
-    test_logout_audit(result, token)
-    
-    # Test 5: Required fields validation
-    test_required_fields_validation(result, token)
+    # Test 3: After purge, query GET /api/v1/audit/events?since_hours=1 and confirm it returns 0 or only very recent events
+    test_post_purge_recent_events(result, token)
     
     # Print final summary
     success = result.print_summary()
     
     if success:
-        print("\n🎉 ALL P2 AUTH AUDIT EVENTS VALIDATION TESTS PASSED!")
+        print("\n🎉 ALL AUDIT RETENTION PURGE TOOLING VALIDATION TESTS PASSED!")
         return True
     else:
-        print(f"\n💥 {result.failed} TEST(S) FAILED - AUTH AUDIT EVENTS ISSUES DETECTED!")
+        print(f"\n💥 {result.failed} TEST(S) FAILED - AUDIT RETENTION PURGE TOOLING ISSUES DETECTED!")
         return False
 
 if __name__ == "__main__":
