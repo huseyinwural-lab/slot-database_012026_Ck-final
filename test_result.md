@@ -55,6 +55,17 @@ p1_security_dec16:
     priority: "high"
     needs_retesting: false
 
+
+
+p2_observability_request_id_json_logs_ready_dec17:
+  - task: "P2 Observability: X-Request-ID validation/propagation + JSON logs (prod/staging default) + masking + readiness migration check + compose healthcheck"
+    implemented: true
+    working: "NA"
+    file: "backend/app/middleware/request_logging.py, backend/app/middleware/rate_limit.py, backend/app/core/logging_config.py, backend/config.py, backend/server.py, docker-compose.prod.yml, .github/workflows/prod-compose-acceptance.yml"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+
   summary: "Phase 1: Financial Integrity & Security Update"
 
 frontend:
