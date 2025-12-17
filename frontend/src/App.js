@@ -24,6 +24,7 @@ import { CMSManagement } from './pages/CMSManagement';
 import { Reports } from './pages/Reports';
 import { SystemLogs } from './pages/SystemLogs';
 import { AdminManagement } from './pages/AdminManagement';
+import AuditLog from './pages/AuditLog';
 import SettingsPanel from './pages/SettingsPanel';
 import TenantsPage from './pages/TenantsPage';
 import KillSwitchPage from './pages/KillSwitchPage';
@@ -121,6 +122,12 @@ function App() {
               <Route path="/logs" element={
                 <RequireAuth>
                   <RequireFeature requireOwner={true}><SystemLogs /></RequireFeature>
+                </RequireAuth>
+              } />
+
+              <Route path="/audit" element={
+                <RequireAuth>
+                  <RequireFeature requireOwner={true}><AuditLog /></RequireFeature>
                 </RequireAuth>
               } />
               

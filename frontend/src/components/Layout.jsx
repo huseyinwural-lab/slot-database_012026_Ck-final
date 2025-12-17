@@ -119,6 +119,7 @@ const Layout = ({ children }) => {
               {isOwner && <SidebarItem to="/cms" icon={Globe} label="CMS" activeClassName={theme.activeItem} />}
               {hasFeature('can_view_reports') && <SidebarItem to="/reports" icon={BarChart3} label="Reports" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/logs" icon={ScrollText} label="Logs" activeClassName={theme.activeItem} />}
+              {isOwner && <SidebarItem to="/audit" icon={ScrollText} label="Audit Log" activeClassName={theme.activeItem} />}
               {hasFeature('can_manage_admins') && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/tenants" icon={Building} label="Tenants" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" activeClassName={theme.activeItem} />}
