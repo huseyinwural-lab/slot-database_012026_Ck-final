@@ -24,7 +24,15 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next: Callable):
-        request_id = request.headers.get("X-Request-ID") or str(uuid4())
+        incoming_request_id = request.headers.get("X-Request-ID")
+        if incoming_request_id and _REQUEST_ID_RE.match(incoming_request_id):
+            request_id = incoming_request_id
+        else:
+            request_id = str(uuid4())
+
+        # Store for downstream access (other middleware / endpoints)
+        request.state.request_id = request_id
+
         start_time = time.monotonic()
 
         try:
