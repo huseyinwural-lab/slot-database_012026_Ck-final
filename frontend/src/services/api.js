@@ -52,8 +52,8 @@ api.interceptors.response.use(
     const raw = error.response?.data || {};
     const detail = raw.detail || {};
 
-    // Axios normalizes header keys to lowercase
-    const requestId = error.response?.headers?.['x-request-id'];
+    const headers = error.response?.headers;
+    const requestId = headers?.['x-request-id'] || headers?.['X-Request-ID'] || headers?.get?.('x-request-id') || headers?.get?.('X-Request-ID');
 
     const standardizedError = {
       code: raw.error_code || detail.error_code || 'UNKNOWN_ERROR',
