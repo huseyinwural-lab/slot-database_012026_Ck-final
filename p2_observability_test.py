@@ -138,7 +138,7 @@ def test_request_id_behavior(result: TestResult):
     headers = {"X-Request-ID": valid_request_id}
     
     response = make_request("GET", "/health", headers=headers)
-    returned_request_id = response["headers"].get("X-Request-ID")
+    returned_request_id = response["headers"].get("X-Request-ID") or response["headers"].get("x-request-id")
     
     print(f"   Valid X-Request-ID '{valid_request_id}' -> Response: '{returned_request_id}'")
     
@@ -160,7 +160,7 @@ def test_request_id_behavior(result: TestResult):
     headers = {"X-Request-ID": invalid_request_id}
     
     response = make_request("GET", "/health", headers=headers)
-    returned_request_id = response["headers"].get("X-Request-ID")
+    returned_request_id = response["headers"].get("X-Request-ID") or response["headers"].get("x-request-id")
     
     print(f"   Invalid X-Request-ID (too long) -> Response: '{returned_request_id}'")
     
@@ -190,7 +190,7 @@ def test_request_id_behavior(result: TestResult):
     headers = {"X-Request-ID": invalid_chars_id}
     
     response = make_request("GET", "/health", headers=headers)
-    returned_request_id = response["headers"].get("X-Request-ID")
+    returned_request_id = response["headers"].get("X-Request-ID") or response["headers"].get("x-request-id")
     
     print(f"   Invalid X-Request-ID (bad chars) -> Response: '{returned_request_id}'")
     
