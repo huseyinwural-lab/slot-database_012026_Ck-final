@@ -54,6 +54,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable):
         path = request.url.path
         client_ip = self._get_client_ip(request)
+        request_id = getattr(getattr(request, "state", None), "request_id", None)
+        tenant_id = request.headers.get("X-Tenant-ID")
 
         limit = None
         for prefix, conf in self._limits.items():
