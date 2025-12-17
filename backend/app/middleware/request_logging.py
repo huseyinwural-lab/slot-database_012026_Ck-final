@@ -1,5 +1,6 @@
 import time
 import logging
+import re
 from typing import Callable
 from uuid import uuid4
 
@@ -8,6 +9,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 logger = logging.getLogger("app.request")
+
+_REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9._-]{8,64}$")
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
