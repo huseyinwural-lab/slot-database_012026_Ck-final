@@ -46,7 +46,7 @@ class TestResult:
             self.failed += 1
     
     def print_summary(self):
-        print(f"\n=== P2 AUTH AUDIT EVENTS VALIDATION SUMMARY ===")
+        print(f"\n=== AUDIT RETENTION PURGE TOOLING VALIDATION SUMMARY ===")
         for result in self.results:
             status_icon = "✅" if result["status"] == "PASS" else "❌"
             print(f"{status_icon} {result['test']}: {result['status']}")
