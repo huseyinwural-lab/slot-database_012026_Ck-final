@@ -47,11 +47,11 @@ const AuditLog = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [fetchEvents]);
 
   const resultBadge = (result) => {
     if (result === 'success') return <Badge variant="secondary">success</Badge>;
