@@ -74,12 +74,41 @@ async def login(
 
     auth_error = AppError(error_code="INVALID_CREDENTIALS", message="Invalid email or password", status_code=401)
 
+    request_id = getattr(request.state, "request_id", "unknown")
+    client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("User-Agent")
+
+    # Never log raw identifiers; use surrogate hash
+    resource_id = sha256_surrogate(form_data.email)
+
     if not admin:
-        logger.warning(f"Login failed: User {form_data.email} not found in DB.")
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id="unknown",
+            tenant_id="unknown",
+            action="auth.login_failed",
+            resource_type="auth",
+            resource_id=resource_id,
+            result="failed",
+            details={"failure_reason": "INVALID_CREDENTIALS", "user_agent": user_agent},
+            ip_address=client_ip,
+        )
         raise auth_error
-        
-    if not admin.is_active:
-        logger.warning(f"Login failed: User {form_data.email} is inactive.")
+
+    if not admin.is_active or admin.status != "active":
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(admin.id),
+            tenant_id=str(admin.tenant_id),
+            action="auth.login_failed",
+            resource_type="auth",
+            resource_id=resource_id,
+            result="failed",
+            details={"failure_reason": "USER_DISABLED", "user_agent": user_agent},
+            ip_address=client_ip,
+        )
         raise auth_error
 
     # 2. Verify Password
