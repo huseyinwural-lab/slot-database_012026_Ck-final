@@ -47,10 +47,13 @@ async def list_audit_events(
 
     # Tenant scoping
     if not getattr(current_admin, "is_platform_owner", False):
+        # Tenant admins: always scoped to their own tenant
         q = q.where(AuditEvent.tenant_id == tenant_id)
     else:
-        # Owner can optionally filter to the currently selected tenant scope
-        if tenant_id:
+        # Owner: by default, can see ALL tenants.
+        # If owner is impersonating via X-Tenant-ID header, scope to that tenant.
+        header_tenant = (request.headers.get("X-Tenant-ID") or "").strip()
+        if header_tenant:
             q = q.where(AuditEvent.tenant_id == tenant_id)
 
     # Filters
