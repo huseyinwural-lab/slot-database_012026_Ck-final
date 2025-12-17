@@ -89,6 +89,7 @@ async def get_capabilities(
 
 @router.patch("/{tenant_id}")
 async def update_tenant_features(
+    request: Request,
     tenant_id: str,
     payload: dict,
     session: AsyncSession = Depends(get_session),
