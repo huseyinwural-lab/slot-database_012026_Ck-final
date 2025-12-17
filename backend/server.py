@@ -118,7 +118,14 @@ app.include_router(flags.router)
 # Startup Event
 @app.on_event("startup")
 async def on_startup():
-    logger.info("Application starting up...")
+    logger.info(
+        "app.startup",
+        extra={
+            "event": "app.startup",
+            "env": settings.env,
+            "log_format": settings.get_log_format(),
+        },
+    )
     try:
         from app.core.database import engine
         from sqlalchemy.ext.asyncio import AsyncSession
