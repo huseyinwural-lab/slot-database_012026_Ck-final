@@ -166,20 +166,33 @@ async def health_check():
 
 @app.get("/api/readiness")
 async def readiness_check():
-    """Readiness probe: checks Database connectivity."""
+    """Readiness probe: checks DB connectivity + migration state (lightweight)."""
     try:
         from app.core.database import engine
         from sqlalchemy import text
+
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
+
+            # Migration check (lightweight): verify alembic_version exists and has a value.
+            # This avoids heavy head/current operations and does not apply migrations.
+            version = (await conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))).scalar()
+
         return {
             "status": "ready",
-            "dependencies": {"database": "connected"},
+            "dependencies": {
+                "database": "connected",
+                "migrations": "ok" if version else "unknown",
+            },
+            "alembic_version": version,
         }
     except Exception as exc:  # pragma: no cover - defensive
-        logger.exception("readiness check failed: db ping error", exc_info=exc)
+        logger.exception("readiness check failed", exc_info=exc)
         from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail={"status": "degraded", "dependencies": {"database": "unreachable"}})
+        raise HTTPException(
+            status_code=503,
+            detail={"status": "degraded", "dependencies": {"database": "unreachable", "migrations": "unknown"}},
+        )
 
 
 # Alias for common ops naming
