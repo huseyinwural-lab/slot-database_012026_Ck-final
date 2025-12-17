@@ -288,34 +288,95 @@ def test_failed_login_audit(result: TestResult) -> None:
     else:
         result.add_result("Failed Login Audit", True, f"All validations passed. Event ID: {event.get('id')}")
 
-def test_create_admin_user(result: TestResult, token: str, tenant_id: str) -> None:
-    """Test 3: Create a new admin via POST /api/v1/admin/users"""
-    print("\n3. Testing Admin User Creation...")
+def test_rate_limited_audit(result: TestResult) -> None:
+    """Test 3: Rate limiting creates auth.login_rate_limited audit event"""
+    print("\n3. Testing Rate Limited Audit Event...")
     
-    headers = {"Authorization": f"Bearer {token}"}
-    admin_data = {
-        "email": f"test.admin.{uuid.uuid4().hex[:8]}@casino.com",
-        "password_mode": "invite",
-        "full_name": "Test Admin User",
-        "role": "Admin",
-        "tenant_id": tenant_id
+    # First get a valid token to check audit events
+    valid_login = {
+        "email": "admin@casino.com",
+        "password": "Admin123!"
+    }
+    temp_response = make_request("POST", "/v1/auth/login", json_data=valid_login)
+    if temp_response["status_code"] != 200:
+        result.add_result("Rate Limited Audit", False, "Cannot get token for audit check")
+        return
+    
+    token = temp_response["json"]["access_token"]
+    
+    # Trigger rate limiting by making multiple failed login attempts
+    failed_login_data = {
+        "email": "admin@casino.com",
+        "password": "WrongPassword123!"
     }
     
-    response = make_request("POST", "/v1/admin/users", headers=headers, json_data=admin_data)
-    print(f"   POST /api/v1/admin/users: Status {response['status_code']}")
+    print("   Triggering rate limit with multiple failed attempts...")
+    rate_limited = False
     
-    if response["status_code"] == 200 and "user" in response["json"]:
-        result.add_result(
-            "Admin User Creation", 
-            True, 
-            f"Admin user created successfully: {admin_data['email']}"
-        )
+    # Make 6 attempts to exceed the 5/min limit
+    for i in range(6):
+        response = make_request("POST", "/v1/auth/login", json_data=failed_login_data)
+        print(f"   Attempt {i+1}: Status {response['status_code']}")
+        
+        if response["status_code"] == 429:
+            rate_limited = True
+            break
+        elif i < 5 and response["status_code"] != 401:
+            result.add_result("Rate Limited Audit", False, f"Unexpected status on attempt {i+1}: {response['status_code']}")
+            return
+    
+    if not rate_limited:
+        result.add_result("Rate Limited Audit", False, "Rate limiting not triggered after 6 attempts")
+        return
+    
+    # Wait for audit event
+    time.sleep(2)
+    
+    # Get audit events after rate limiting
+    after_response = get_recent_audit_events(token)
+    if after_response["status_code"] != 200:
+        result.add_result("Rate Limited Audit", False, f"Cannot fetch audit events: {after_response['status_code']}")
+        return
+    
+    events = after_response["json"].get("items", [])
+    
+    # Find auth.login_rate_limited event
+    rate_limited_events = [e for e in events if e.get("action") == "auth.login_rate_limited"]
+    
+    if not rate_limited_events:
+        result.add_result("Rate Limited Audit", False, "No auth.login_rate_limited audit event found")
+        return
+    
+    event = rate_limited_events[0]  # Most recent
+    
+    # Verify required fields
+    required_fields = ["request_id", "tenant_id", "action", "resource_type", "result", "timestamp", "ip_address"]
+    missing_fields = [f for f in required_fields if not event.get(f)]
+    
+    if missing_fields:
+        result.add_result("Rate Limited Audit", False, f"Missing required fields: {missing_fields}")
+        return
+    
+    # Verify specific values
+    checks = []
+    if event.get("action") != "auth.login_rate_limited":
+        checks.append(f"action={event.get('action')} (expected auth.login_rate_limited)")
+    if event.get("resource_type") != "auth":
+        checks.append(f"resource_type={event.get('resource_type')} (expected auth)")
+    if event.get("result") != "rate_limited":
+        checks.append(f"result={event.get('result')} (expected rate_limited)")
+    
+    # Verify details structure
+    details = event.get("details", {})
+    if details.get("limit") != "5/min":
+        checks.append(f"details.limit={details.get('limit')} (expected 5/min)")
+    if details.get("window_sec") != 60:
+        checks.append(f"details.window_sec={details.get('window_sec')} (expected 60)")
+    
+    if checks:
+        result.add_result("Rate Limited Audit", False, f"Validation failures: {'; '.join(checks)}")
     else:
-        result.add_result(
-            "Admin User Creation", 
-            False, 
-            f"Expected 200 with user data, got {response['status_code']}: {response['json']}"
-        )
+        result.add_result("Rate Limited Audit", True, f"All validations passed. Event ID: {event.get('id')}")
 
 def test_update_tenant_features(result: TestResult, token: str, tenant_id: str) -> None:
     """Test 4: Update tenant features via PATCH /api/v1/tenants/{tenant_id}"""
