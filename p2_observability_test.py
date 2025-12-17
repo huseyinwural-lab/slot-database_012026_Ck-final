@@ -166,11 +166,17 @@ def test_request_id_behavior(result: TestResult):
     
     # Should be a different server-generated UUID-like value
     uuid_pattern = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
-    if returned_request_id != invalid_request_id and uuid_pattern.match(returned_request_id):
+    if returned_request_id and returned_request_id != invalid_request_id and uuid_pattern.match(returned_request_id):
         result.add_result(
             "Invalid X-Request-ID Rejection", 
             True, 
             f"Invalid request ID rejected, server generated UUID: '{returned_request_id}'"
+        )
+    elif returned_request_id is None:
+        result.add_result(
+            "Invalid X-Request-ID Rejection", 
+            False, 
+            f"No X-Request-ID header returned in response"
         )
     else:
         result.add_result(
