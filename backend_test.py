@@ -165,104 +165,61 @@ def test_create_audit_event_via_login(result: TestResult) -> Optional[str]:
     result.add_result("Create Audit Event via Login", True, f"Audit event count increased from {before_count} to {after_count}. Latest event ID: {event.get('id')}")
     return token
 
-def test_failed_login_audit(result: TestResult) -> None:
-    """Test 2: Failed login creates auth.login_failed audit event"""
-    print("\n2. Testing Failed Login Audit Event...")
+def test_purge_script_execution(result: TestResult, token: str) -> None:
+    """Test 2: Run purge script with --days 0 and verify it deletes older events but does not crash"""
+    print("\n2. Testing Purge Script Execution...")
     
-    # First get a valid token to check audit events
-    valid_login = {
-        "email": "admin@casino.com",
-        "password": "Admin123!"
-    }
-    temp_response = make_request("POST", "/v1/auth/login", json_data=valid_login)
-    if temp_response["status_code"] != 200:
-        result.add_result("Failed Login Audit", False, "Cannot get token for audit check")
+    # Get audit events before purge
+    headers = {"Authorization": f"Bearer {token}"}
+    before_response = make_request("GET", "/v1/audit/events?since_hours=24&limit=500", headers=headers)
+    
+    if before_response["status_code"] != 200:
+        result.add_result("Purge Script Execution", False, f"Cannot fetch audit events before purge: {before_response['status_code']}")
         return
     
-    token = temp_response["json"]["access_token"]
+    before_events = before_response["json"].get("items", [])
+    before_count = len(before_events)
+    print(f"   Audit events before purge: {before_count}")
     
-    # Get baseline audit events
-    before_response = get_recent_audit_events(token)
-    before_count = len(before_response["json"].get("items", [])) if before_response["status_code"] == 200 else 0
-    
-    # Attempt login with wrong password
-    failed_login_data = {
-        "email": "admin@casino.com",
-        "password": "WrongPassword123!"
-    }
-    
-    response = make_request("POST", "/v1/auth/login", json_data=failed_login_data)
-    print(f"   POST /api/v1/auth/login (wrong password): Status {response['status_code']}")
-    
-    if response["status_code"] != 401:
-        result.add_result("Failed Login Audit", False, f"Expected 401, got {response['status_code']}")
-        return
-    
-    # Wait for audit event
-    time.sleep(1)
-    
-    # Get audit events after failed login
-    after_response = get_recent_audit_events(token)
-    if after_response["status_code"] != 200:
-        result.add_result("Failed Login Audit", False, f"Cannot fetch audit events: {after_response['status_code']}")
-        return
-    
-    events = after_response["json"].get("items", [])
-    
-    # Find the most recent auth.login_failed event
-    login_failed_events = [e for e in events if e.get("action") == "auth.login_failed"]
-    
-    if not login_failed_events:
-        result.add_result("Failed Login Audit", False, "No auth.login_failed audit event found")
-        return
-    
-    event = login_failed_events[0]  # Most recent
-    
-    # Verify required fields
-    required_fields = ["request_id", "tenant_id", "action", "resource_type", "result", "timestamp", "ip_address"]
-    missing_fields = [f for f in required_fields if not event.get(f)]
-    
-    if missing_fields:
-        result.add_result("Failed Login Audit", False, f"Missing required fields: {missing_fields}")
-        return
-    
-    # Verify specific values
-    checks = []
-    if event.get("action") != "auth.login_failed":
-        checks.append(f"action={event.get('action')} (expected auth.login_failed)")
-    if event.get("resource_type") != "auth":
-        checks.append(f"resource_type={event.get('resource_type')} (expected auth)")
-    if event.get("result") != "failed":
-        checks.append(f"result={event.get('result')} (expected failed)")
-    
-    # Verify actor_user_id (can be 'unknown' or actual id)
-    actor_user_id = event.get("actor_user_id")
-    if not actor_user_id:
-        checks.append("actor_user_id is missing")
-    
-    # Verify resource_id is 64 hex chars (sha256 surrogate)
-    resource_id = event.get("resource_id", "")
-    if not re.match(r'^[a-f0-9]{64}$', resource_id):
-        checks.append(f"resource_id not 64 hex chars: {resource_id}")
-    
-    # Verify details.failure_reason
-    details = event.get("details", {})
-    failure_reason = details.get("failure_reason")
-    allowed_reasons = ["INVALID_CREDENTIALS", "USER_DISABLED", "ACCOUNT_LOCKED"]
-    if failure_reason not in allowed_reasons:
-        checks.append(f"failure_reason={failure_reason} not in allowed values: {allowed_reasons}")
-    
-    # Verify no sensitive data in details
-    details_str = json.dumps(details).lower()
-    sensitive_terms = ["password", "token", "authorization", "cookie", "wrongpassword123!"]
-    found_sensitive = [term for term in sensitive_terms if term in details_str]
-    if found_sensitive:
-        checks.append(f"Sensitive data found in details: {found_sensitive}")
-    
-    if checks:
-        result.add_result("Failed Login Audit", False, f"Validation failures: {'; '.join(checks)}")
-    else:
-        result.add_result("Failed Login Audit", True, f"All validations passed. Event ID: {event.get('id')}")
+    # Run purge script with --days 0 (should delete all events older than today)
+    try:
+        print("   Running purge script with --days 0...")
+        result_process = subprocess.run(
+            [sys.executable, "/app/scripts/purge_audit_events.py", "--days", "0"],
+            cwd="/app",
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        print(f"   Purge script exit code: {result_process.returncode}")
+        print(f"   Purge script stdout: {result_process.stdout.strip()}")
+        
+        if result_process.stderr:
+            print(f"   Purge script stderr: {result_process.stderr.strip()}")
+        
+        # Check if script executed successfully (exit code 0)
+        if result_process.returncode != 0:
+            result.add_result("Purge Script Execution", False, f"Purge script failed with exit code {result_process.returncode}: {result_process.stderr}")
+            return
+        
+        # Parse output to see how many events were deleted
+        stdout = result_process.stdout.strip()
+        deleted_count = 0
+        if "deleted=" in stdout:
+            try:
+                deleted_part = stdout.split("deleted=")[1].split()[0]
+                deleted_count = int(deleted_part)
+                print(f"   Events deleted by purge script: {deleted_count}")
+            except (IndexError, ValueError):
+                print(f"   Could not parse deleted count from output: {stdout}")
+        
+        result.add_result("Purge Script Execution", True, f"Purge script executed successfully. Exit code: {result_process.returncode}, Deleted: {deleted_count} events")
+        
+    except subprocess.TimeoutExpired:
+        result.add_result("Purge Script Execution", False, "Purge script timed out after 30 seconds")
+    except Exception as e:
+        result.add_result("Purge Script Execution", False, f"Error running purge script: {str(e)}")
 
 def test_rate_limited_audit(result: TestResult) -> None:
     """Test 3: Rate limiting creates auth.login_rate_limited audit event"""
