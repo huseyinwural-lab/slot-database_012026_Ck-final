@@ -107,9 +107,17 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         ip_address=client_ip,
                     )
                     await session.commit()
-            except Exception:
-                # best-effort; do not block auth
-                pass
+            except Exception as exc:
+                logger.warning(
+                    "auth.login_rate_limited_audit_write_failed",
+                    extra={
+                        "event": "auth.login_rate_limited_audit_write_failed",
+                        "request_id": request_id,
+                        "client_ip": client_ip,
+                        "tenant_id": tenant_id,
+                        "error": str(exc),
+                    },
+                )
 
             return JSONResponse(
                 status_code=429,
