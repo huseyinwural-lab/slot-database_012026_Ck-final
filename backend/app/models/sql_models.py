@@ -135,6 +135,38 @@ class AuditLog(SQLModel, table=True):
     timestamp: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 
+
+
+class AuditEvent(SQLModel, table=True):
+    """Canonical audit trail for critical admin actions (P2).
+
+    Required fields:
+    - request_id, actor_user_id, tenant_id, action, resource_type, resource_id, result
+    """
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+
+    # Correlation
+    request_id: str = Field(index=True)
+
+    # Actor
+    actor_user_id: str = Field(index=True)
+
+    # Tenant scope
+    tenant_id: str = Field(index=True)
+
+    # Event classification
+    action: str = Field(index=True)
+    resource_type: str = Field(index=True)
+    resource_id: Optional[str] = Field(default=None, index=True)
+    result: str = Field(index=True)  # success | failure | blocked
+
+    # Context
+    ip_address: Optional[str] = None
+    details: Dict = Field(default={}, sa_column=Column(JSON))
+
+    timestamp: datetime = Field(default_factory=lambda: datetime.utcnow(), index=True)
+
 class Affiliate(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(foreign_key="tenant.id", index=True)
