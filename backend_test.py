@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-P2 Audit Log Backend Validation
-Testing P2 Audit Log functionality end-to-end including login, tenant creation, admin creation, 
-feature updates, audit event retrieval, tenant scoping, and redaction
+P2 Auth Audit Events Backend Validation
+Testing P2 Auth audit events end-to-end including successful login, failed login, 
+rate limiting, logout (if exists), and required fields validation
 """
 
 import requests
@@ -12,6 +12,7 @@ import os
 import time
 import uuid
 import re
+import hashlib
 from typing import Dict, Any, Optional
 
 # Configuration - Use frontend .env for external URL
