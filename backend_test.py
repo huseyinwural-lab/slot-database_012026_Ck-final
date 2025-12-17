@@ -90,33 +90,104 @@ def make_request(method: str, endpoint: str, headers: Dict = None, json_data: Di
             "headers": {}
         }
 
-def test_owner_login_and_get_token(result: TestResult) -> Optional[str]:
-    """Test 1: Login as owner and get token"""
-    print("\n1. Testing Owner Login...")
+def get_recent_audit_events(token: str, since_minutes: int = 5) -> Dict[str, Any]:
+    """Helper to get recent audit events"""
+    headers = {"Authorization": f"Bearer {token}"}
+    return make_request("GET", f"/v1/audit/events?since_hours=1&limit=50", headers=headers)
+
+def test_successful_login_audit(result: TestResult) -> Optional[str]:
+    """Test 1: Successful login creates auth.login_success audit event"""
+    print("\n1. Testing Successful Login Audit Event...")
     
     login_data = {
         "email": "admin@casino.com",
         "password": "Admin123!"
     }
     
+    # Get audit events count before login
+    temp_response = make_request("POST", "/v1/auth/login", json_data=login_data)
+    if temp_response["status_code"] != 200:
+        result.add_result("Successful Login Audit", False, f"Cannot login to get baseline: {temp_response['status_code']}")
+        return None
+    
+    temp_token = temp_response["json"]["access_token"]
+    before_response = get_recent_audit_events(temp_token)
+    before_count = len(before_response["json"].get("items", [])) if before_response["status_code"] == 200 else 0
+    
+    # Perform the actual login we want to test
     response = make_request("POST", "/v1/auth/login", json_data=login_data)
     print(f"   POST /api/v1/auth/login: Status {response['status_code']}")
     
-    if response["status_code"] == 200 and "access_token" in response["json"]:
-        token = response["json"]["access_token"]
-        result.add_result(
-            "Owner Login", 
-            True, 
-            f"Login successful, token length: {len(token)}"
-        )
-        return token
-    else:
-        result.add_result(
-            "Owner Login", 
-            False, 
-            f"Expected 200 with access_token, got {response['status_code']}: {response['json']}"
-        )
+    if response["status_code"] != 200 or "access_token" not in response["json"]:
+        result.add_result("Successful Login Audit", False, f"Login failed: {response['status_code']}")
         return None
+    
+    token = response["json"]["access_token"]
+    
+    # Wait a moment for audit event to be written
+    time.sleep(1)
+    
+    # Get audit events after login
+    after_response = get_recent_audit_events(token)
+    if after_response["status_code"] != 200:
+        result.add_result("Successful Login Audit", False, f"Cannot fetch audit events: {after_response['status_code']}")
+        return token
+    
+    events = after_response["json"].get("items", [])
+    
+    # Find the most recent auth.login_success event
+    login_success_events = [e for e in events if e.get("action") == "auth.login_success"]
+    
+    if not login_success_events:
+        result.add_result("Successful Login Audit", False, "No auth.login_success audit event found")
+        return token
+    
+    event = login_success_events[0]  # Most recent
+    
+    # Verify required fields
+    required_fields = ["request_id", "tenant_id", "action", "resource_type", "result", "timestamp", "ip_address"]
+    missing_fields = [f for f in required_fields if not event.get(f)]
+    
+    if missing_fields:
+        result.add_result("Successful Login Audit", False, f"Missing required fields: {missing_fields}")
+        return token
+    
+    # Verify specific values
+    checks = []
+    if event.get("action") != "auth.login_success":
+        checks.append(f"action={event.get('action')} (expected auth.login_success)")
+    if event.get("resource_type") != "auth":
+        checks.append(f"resource_type={event.get('resource_type')} (expected auth)")
+    if event.get("result") != "success":
+        checks.append(f"result={event.get('result')} (expected success)")
+    
+    # Verify details structure
+    details = event.get("details", {})
+    expected_detail_keys = ["method", "mfa", "user_agent", "tenant_context"]
+    missing_detail_keys = [k for k in expected_detail_keys if k not in details]
+    
+    if missing_detail_keys:
+        checks.append(f"Missing details keys: {missing_detail_keys}")
+    
+    if details.get("method") != "password":
+        checks.append(f"details.method={details.get('method')} (expected password)")
+    
+    # Verify resource_id is 64 hex chars (sha256)
+    resource_id = event.get("resource_id", "")
+    if not re.match(r'^[a-f0-9]{64}$', resource_id):
+        checks.append(f"resource_id not 64 hex chars: {resource_id}")
+    
+    # Verify no raw email/username in details
+    details_str = json.dumps(details).lower()
+    if "admin@casino.com" in details_str or "admin123!" in details_str:
+        checks.append("Raw credentials found in details")
+    
+    if checks:
+        result.add_result("Successful Login Audit", False, f"Validation failures: {'; '.join(checks)}")
+    else:
+        result.add_result("Successful Login Audit", True, f"All validations passed. Event ID: {event.get('id')}")
+    
+    return token
 
 def test_create_tenant(result: TestResult, token: str) -> Optional[str]:
     """Test 2: Create a new tenant via POST /api/v1/tenants/"""
