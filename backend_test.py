@@ -12,6 +12,7 @@ import time
 import uuid
 import re
 import hashlib
+import subprocess
 from typing import Dict, Any, Optional
 
 # Configuration - Use frontend .env for external URL
