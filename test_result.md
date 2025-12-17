@@ -78,6 +78,14 @@ p2_audit_log_mvp_dec17:
     stuck_count: 0
     priority: "medium"
     needs_retesting: false
+
+  - task: "P2 Auth Audit Events (P2 backlog #1) - login_success/login_failed/rate_limited/logout"
+    implemented: true
+    working: true
+    file: "backend/app/routes/auth.py, backend/app/services/audit.py, backend/app/middleware/rate_limit.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
