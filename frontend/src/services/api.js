@@ -71,7 +71,7 @@ api.interceptors.response.use(
       try {
         if (!standardizedError.request_id) return;
         await navigator.clipboard.writeText(standardizedError.request_id);
-        // eslint-disable-next-line no-undef
+         
         const { toast } = await import('sonner');
         toast.success('Copied request id');
       } catch (e) {
@@ -81,10 +81,10 @@ api.interceptors.response.use(
 
     const showToast = async (type, title, description) => {
       if (hasShownToast) return;
-      // eslint-disable-next-line no-param-reassign
+       
       originalRequest.__reqid_toast_shown = true;
 
-      // eslint-disable-next-line no-undef
+       
       const { toast } = await import('sonner');
 
       const hasCopy = Boolean(standardizedError.request_id);
