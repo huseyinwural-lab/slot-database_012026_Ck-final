@@ -24,6 +24,7 @@ def main() -> int:
     from config import settings
     from sqlalchemy.ext.asyncio import create_async_engine
 
+    # Cutoff is always computed in UTC.
     cutoff = datetime.now(timezone.utc) - timedelta(days=args.days)
 
     engine = create_async_engine(
