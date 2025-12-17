@@ -22,6 +22,10 @@ import logging
 # Logger setup
 logger = logging.getLogger(__name__)
 
+from app.services.audit import audit
+from app.utils.security import sha256_surrogate
+
+
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 from app.schemas.token import TokenResponse
