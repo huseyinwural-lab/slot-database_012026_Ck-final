@@ -168,7 +168,7 @@ frontend:
 
   - task: "FE Request ID Extraction - 429 Rate Limit Scenario Testing"
     implemented: true
-    working: false
+    working: true
     file: "src/services/api.js"
     stuck_count: 0
     priority: "high"
@@ -177,6 +177,9 @@ frontend:
         -working: "NA"
         -agent: "testing"
         -comment: "❌ SCENARIO B (429 RATE LIMIT) TEST FAILED - CORS blocking prevents proper rate limiting test: Test executed at http://localhost:3000/login as requested. Step 1) ✅ Login page loads successfully with proper form elements. Step 2) ✅ Rapid login attempts (10 attempts) with admin@casino.com/wrongpass executed. Step 3) ❌ 429 rate limiting NOT triggered - Frontend configured to use external backend URL (https://game-admin-hub-1.preview.emergentagent.com) instead of local backend. Step 4) ✅ Toast system functional - Found toast with 'Network error' and 'Request ID: unavailable' confirming toast infrastructure works. Step 5) ❌ CORS blocking issue - After 4 successful 401 responses, subsequent requests blocked by CORS policy ('No Access-Control-Allow-Origin header'). ROOT CAUSE: Frontend .env configured with REACT_APP_BACKEND_URL=https://game-admin-hub-1.preview.emergentagent.com, causing API calls to external server instead of local backend where rate limiting can be properly tested. EVIDENCE: Backend rate limiting confirmed working via direct curl test (5 attempts → 401, 6th+ attempts → 429), but frontend cannot reach local backend due to configuration. RECOMMENDATION: To properly test 429 scenario, frontend needs to be configured to use local backend URL or external backend needs CORS configuration for localhost:3000."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ SCENARIO B (429 RATE LIMIT) TEST COMPLETE - ALL REQUIREMENTS PASSED (5/5 - 100% success rate): Test executed on staging/preview domain (https://game-admin-hub-1.preview.emergentagent.com/login) as requested to avoid localhost CORS issues. Step 1) ✅ Domain verification successful - Frontend serves correctly with proper login form elements. Step 2) ✅ Rate limiting triggered successfully - 6-8 rapid login attempts with admin@casino.com/wrongpass generated pattern: [401, 401, 401, 401, 401, 429, 429, 429] confirming rate limit threshold of 5 attempts. Step 3) ✅ 429 responses confirmed - Multiple 429 responses received with proper X-Request-ID headers (e.g., 23c0863b-7b0a-40b3-834e-90e1303800d6). Step 4) ✅ Toast verification complete - Toast displays 'Too many requests' message, includes 'Request ID: <uuid>' (NOT 'unavailable'), and has functional Copy button. Step 5) ✅ Request ID matching verified - Toast Request ID (23c0863b-7b0a-40b3-834e-90e1303800d6) exactly matches X-Request-ID response header from the corresponding 429 API response. EVIDENCE: Rate limiting working correctly at 5 attempts/minute threshold, toast system properly extracts and displays Request IDs from 429 responses, Copy button functional, no 'unavailable' Request IDs detected. All Scenario B requirements met successfully on same-origin staging domain."
 
   - task: "TCK-CRM-002 + TCK-AFF-002 + TCK-UI-001 Verification"
     implemented: true
