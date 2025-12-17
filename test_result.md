@@ -166,6 +166,18 @@ frontend:
         -agent: "testing"
         -comment: "✅ FE REQUEST ID EXTRACTION AFTER REDIRECT DELAY FIX - ALL REQUIREMENTS PASSED (6/6 - 100% success rate): Test executed Scenario A (401 Unauthorized) with redirect delay validation. Step 1) ✅ Login successful with admin@casino.com/Admin123! - obtained valid JWT token and redirected to dashboard. Step 2) ✅ Token corruption successful - localStorage admin_token set to 'badtoken'. Step 3) ✅ 401 API response captured - X-Request-ID: 3c5c1b5e-6cbb-4c12-84c7-54ff60371ff9 from /api/v1/tenants/capabilities call. Step 4) ✅ Toast VISIBLE before redirect - Toast found at check 1 with content: 'Unauthorized Your session has expired. Please sign in again. Request ID: 3c5c1b5e-6cbb-4c12-84c7-54ff60371ff9 Copy'. Step 5) ✅ Request ID match confirmed - API Request ID (3c5c1b5e-6cbb-4c12-84c7-54ff60371ff9) matches Toast Request ID exactly. Step 6) ✅ Copy button present and functional - Copy button found in toast and successfully clicked (clipboard read permission denied in test environment but button works). REDIRECT DELAY FIX WORKING: The 1.2-second delay (await new Promise((r) => setTimeout(r, 1200))) on line 113 of api.js successfully allows toast to render and be visible to users before redirect to login page. Toast displays proper unauthorized message, includes Request ID (not 'unavailable'), and has functional Copy button. All Scenario A requirements met - toast visibility, request ID extraction, request ID matching, and copy functionality operational."
 
+  - task: "FE Request ID Extraction - 429 Rate Limit Scenario Testing"
+    implemented: true
+    working: false
+    file: "src/services/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "❌ SCENARIO B (429 RATE LIMIT) TEST FAILED - CORS blocking prevents proper rate limiting test: Test executed at http://localhost:3000/login as requested. Step 1) ✅ Login page loads successfully with proper form elements. Step 2) ✅ Rapid login attempts (10 attempts) with admin@casino.com/wrongpass executed. Step 3) ❌ 429 rate limiting NOT triggered - Frontend configured to use external backend URL (https://game-admin-hub-1.preview.emergentagent.com) instead of local backend. Step 4) ✅ Toast system functional - Found toast with 'Network error' and 'Request ID: unavailable' confirming toast infrastructure works. Step 5) ❌ CORS blocking issue - After 4 successful 401 responses, subsequent requests blocked by CORS policy ('No Access-Control-Allow-Origin header'). ROOT CAUSE: Frontend .env configured with REACT_APP_BACKEND_URL=https://game-admin-hub-1.preview.emergentagent.com, causing API calls to external server instead of local backend where rate limiting can be properly tested. EVIDENCE: Backend rate limiting confirmed working via direct curl test (5 attempts → 401, 6th+ attempts → 429), but frontend cannot reach local backend due to configuration. RECOMMENDATION: To properly test 429 scenario, frontend needs to be configured to use local backend URL or external backend needs CORS configuration for localhost:3000."
+
   - task: "TCK-CRM-002 + TCK-AFF-002 + TCK-UI-001 Verification"
     implemented: true
     working: true
