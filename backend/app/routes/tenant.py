@@ -30,6 +30,7 @@ async def list_tenants(
 
 @router.post("/", response_model=Tenant)
 async def create_tenant(
+    request: Request,
     tenant_data: Tenant, 
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
