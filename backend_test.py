@@ -86,40 +86,44 @@ def make_request(method: str, endpoint: str, headers: Dict = None, json_data: Di
             "headers": {}
         }
 
-def test_rate_limiting(result: TestResult):
-    """Test 1: Rate limit behavior - 6 rapid requests to login endpoint"""
-    print("\n1. Testing Rate Limiting Behavior...")
+def test_liveness_readiness_endpoints(result: TestResult):
+    """Test 1: Validate liveness/readiness endpoints"""
+    print("\n1. Testing Liveness/Readiness Endpoints...")
     
-    login_data = {
-        "email": "admin@casino.com",
-        "password": "WrongPass!"
-    }
+    # Test liveness endpoint
+    health_response = make_request("GET", "/health")
+    print(f"   GET /api/health: Status {health_response['status_code']}")
     
-    status_codes = []
-    
-    # Send 6 rapid requests
-    for i in range(6):
-        response = make_request("POST", "/v1/auth/login", json_data=login_data)
-        status_codes.append(response["status_code"])
-        print(f"   Request {i+1}: Status {response['status_code']}")
-        
-        # Small delay to avoid overwhelming the server
-        time.sleep(0.1)
-    
-    # Expected: First 5 should be 401 (INVALID_CREDENTIALS), 6th should be 429 (RATE_LIMIT_EXCEEDED)
-    expected_pattern = [401, 401, 401, 401, 401, 429]
-    
-    if status_codes == expected_pattern:
+    if health_response["status_code"] == 200 and isinstance(health_response["json"], dict):
         result.add_result(
-            "Rate Limiting", 
+            "Liveness Endpoint (/api/health)", 
             True, 
-            f"Correct pattern: {status_codes} - First 5 requests 401, 6th request 429"
+            f"Returns 200 JSON: {health_response['json']}"
         )
     else:
         result.add_result(
-            "Rate Limiting", 
+            "Liveness Endpoint (/api/health)", 
             False, 
-            f"Expected {expected_pattern}, got {status_codes}"
+            f"Expected 200 JSON, got {health_response['status_code']}: {health_response['json']}"
+        )
+    
+    # Test readiness endpoint
+    ready_response = make_request("GET", "/ready")
+    print(f"   GET /api/ready: Status {ready_response['status_code']}")
+    
+    if (ready_response["status_code"] == 200 and 
+        isinstance(ready_response["json"], dict) and
+        ready_response["json"].get("dependencies", {}).get("database") == "connected"):
+        result.add_result(
+            "Readiness Endpoint (/api/ready)", 
+            True, 
+            f"Returns 200 JSON with database='connected': {ready_response['json']}"
+        )
+    else:
+        result.add_result(
+            "Readiness Endpoint (/api/ready)", 
+            False, 
+            f"Expected 200 JSON with dependencies.database='connected', got {ready_response['status_code']}: {ready_response['json']}"
         )
 
 def test_trusted_proxy_behavior(result: TestResult):
