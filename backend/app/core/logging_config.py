@@ -6,6 +6,43 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 
+_REDACT_KEYS = {
+    "authorization",
+    "cookie",
+    "set-cookie",
+    "password",
+    "token",
+    "secret",
+    "api_key",
+}
+
+
+def _redact_value(value: Any) -> Any:
+    if value is None:
+        return None
+    return "[REDACTED]"
+
+
+def _mask_sensitive(obj: Any) -> Any:
+    """Recursively redact common secrets in dict-like payloads."""
+    if obj is None:
+        return None
+
+    if isinstance(obj, dict):
+        out = {}
+        for k, v in obj.items():
+            if str(k).lower() in _REDACT_KEYS:
+                out[k] = _redact_value(v)
+            else:
+                out[k] = _mask_sensitive(v)
+        return out
+
+    if isinstance(obj, list):
+        return [_mask_sensitive(v) for v in obj]
+
+    return obj
+
+
 class JSONFormatter(logging.Formatter):
     """Structured JSON formatter.
 
@@ -17,7 +54,7 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         data: Dict[str, Any] = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "level": record.levelname,
             "message": record.getMessage(),
             "request_id": getattr(record, "request_id", None),
@@ -28,11 +65,51 @@ class JSONFormatter(logging.Formatter):
             "duration_ms": getattr(record, "duration_ms", None),
         }
 
+        # Keep stable "service" and "env" fields if present
+        if hasattr(record, "service"):
+            data["service"] = getattr(record, "service")
+        if hasattr(record, "env"):
+            data["env"] = getattr(record, "env")
+
+        # Attach event if present (useful for Kibana/Grafana filters)
+        if hasattr(record, "event"):
+            data["event"] = getattr(record, "event")
+
+        # Preserve any other structured extras (masked)
+        for key, value in record.__dict__.items():
+            if key in {
+                "name",
+                "msg",
+                "args",
+                "levelname",
+                "levelno",
+                "pathname",
+                "filename",
+                "module",
+                "exc_info",
+                "exc_text",
+                "stack_info",
+                "lineno",
+                "funcName",
+                "created",
+                "msecs",
+                "relativeCreated",
+                "thread",
+                "threadName",
+                "processName",
+                "process",
+            }:
+                continue
+            if key in data:
+                continue
+            # Avoid leaking request headers/cookies/etc if someone logs them
+            data[key] = _mask_sensitive(value)
+
         # If logger.exception was used, attach traceback for server-side debugging
         if record.exc_info:
             data["exc_info"] = self.formatException(record.exc_info)
 
-        return json.dumps(data, ensure_ascii=False)
+        return json.dumps(_mask_sensitive(data), ensure_ascii=False)
 
 
 def configure_logging(*, level: str, fmt: str) -> None:
