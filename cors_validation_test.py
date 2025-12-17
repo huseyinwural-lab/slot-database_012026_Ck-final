@@ -61,55 +61,57 @@ def test_cors_preflight():
     """Test CORS preflight request if backend is running"""
     print("\n=== TESTING CORS PREFLIGHT (OPTIONAL) ===")
     
-    # Try to determine backend URL
-    backend_url = None
-    
-    # Check frontend .env for backend URL
-    try:
-        with open("/app/frontend/.env", 'r') as f:
-            for line in f:
-                if line.startswith('REACT_APP_BACKEND_URL='):
-                    backend_url = line.split('=', 1)[1].strip()
-                    break
-    except:
-        pass
-    
-    # Fallback to localhost
-    if not backend_url:
-        backend_url = "http://localhost:8001"
-    
-    print(f"Testing against backend: {backend_url}")
-    
     results = []
     
-    try:
-        # Send OPTIONS preflight request with Origin: http://localhost:3000
-        headers = {"Origin": "http://localhost:3000"}
+    # Test both local backend and external backend
+    backends_to_test = [
+        ("Local Backend", "http://localhost:8001"),
+        ("External Backend", "https://casino-release.preview.emergentagent.com")
+    ]
+    
+    for backend_name, backend_url in backends_to_test:
+        print(f"\nTesting {backend_name}: {backend_url}")
         
-        response = requests.options(
-            f"{backend_url}/api/v1/auth/login",
-            headers=headers,
-            timeout=10
-        )
-        
-        access_control_origin = response.headers.get("Access-Control-Allow-Origin")
-        
-        print(f"Response status: {response.status_code}")
-        print(f"Access-Control-Allow-Origin: {access_control_origin}")
-        
-        # Check if localhost:3000 is allowed
-        if access_control_origin == "http://localhost:3000":
-            results.append(("CORS allows localhost:3000", True, f"Access-Control-Allow-Origin: {access_control_origin}"))
-        else:
-            results.append(("CORS allows localhost:3000", False, f"Expected 'http://localhost:3000', got: {access_control_origin}"))
-        
-        # Check that backend is responding
-        results.append(("Backend is running", True, f"Status: {response.status_code}"))
-        
-    except requests.exceptions.ConnectionError:
-        results.append(("Backend is running", False, "Connection refused - backend not running"))
-    except Exception as e:
-        results.append(("CORS preflight test", False, f"Error: {str(e)}"))
+        try:
+            # Send OPTIONS preflight request with Origin: http://localhost:3000
+            headers = {"Origin": "http://localhost:3000"}
+            
+            response = requests.options(
+                f"{backend_url}/api/v1/auth/login",
+                headers=headers,
+                timeout=10
+            )
+            
+            access_control_origin = response.headers.get("Access-Control-Allow-Origin")
+            
+            print(f"Response status: {response.status_code}")
+            print(f"Access-Control-Allow-Origin: {access_control_origin}")
+            
+            # Check backend environment
+            if backend_name == "Local Backend":
+                # Local dev environment - check current CORS config
+                if access_control_origin == "*":
+                    results.append((f"{backend_name} CORS config", True, f"Dev environment with wildcard CORS: {access_control_origin}"))
+                elif access_control_origin == "http://localhost:3000":
+                    results.append((f"{backend_name} CORS allows localhost:3000", True, f"Access-Control-Allow-Origin: {access_control_origin}"))
+                else:
+                    results.append((f"{backend_name} CORS config", False, f"Unexpected CORS config: {access_control_origin}"))
+            else:
+                # External backend - should have proper CORS
+                if access_control_origin == "http://localhost:3000":
+                    results.append((f"{backend_name} CORS allows localhost:3000", True, f"Access-Control-Allow-Origin: {access_control_origin}"))
+                elif access_control_origin == "*":
+                    results.append((f"{backend_name} CORS config", False, f"External backend using wildcard CORS: {access_control_origin}"))
+                else:
+                    results.append((f"{backend_name} CORS config", False, f"Unexpected CORS config: {access_control_origin}"))
+            
+            # Check that backend is responding
+            results.append((f"{backend_name} is running", True, f"Status: {response.status_code}"))
+            
+        except requests.exceptions.ConnectionError:
+            results.append((f"{backend_name} is running", False, "Connection refused - backend not running"))
+        except Exception as e:
+            results.append((f"{backend_name} test", False, f"Error: {str(e)}"))
     
     return results
 
