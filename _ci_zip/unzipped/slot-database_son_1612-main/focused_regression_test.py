@@ -13,7 +13,7 @@ import subprocess
 import os
 import sys
 
-BASE_URL = "https://game-admin-hub-1.preview.emergentagent.com"
+BASE_URL = "https://multi-tenant-panel.preview.emergentagent.com"
 
 def test_alembic_baseline_migration():
     """Test 1: Validate Alembic baseline migration contains op.create_table(...) calls"""

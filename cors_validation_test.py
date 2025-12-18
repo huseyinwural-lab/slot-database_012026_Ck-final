@@ -66,7 +66,7 @@ def test_cors_preflight():
     # Test both local backend and external backend
     backends_to_test = [
         ("Local Backend", "http://localhost:8001"),
-        ("External Backend", "https://game-admin-hub-1.preview.emergentagent.com")
+        ("External Backend", "https://multi-tenant-panel.preview.emergentagent.com")
     ]
     
     for backend_name, backend_url in backends_to_test:

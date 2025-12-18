@@ -8,7 +8,7 @@ import json
 import sys
 
 class TenantKillSwitchTester:
-    def __init__(self, base_url="https://game-admin-hub-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://multi-tenant-panel.preview.emergentagent.com"):
         self.base_url = base_url
         self.access_token = None
 

@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 
 class BonusTriggerTester:
-    def __init__(self, base_url="https://game-admin-hub-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://multi-tenant-panel.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
@@ -212,7 +212,7 @@ class BonusTriggerTester:
 def main():
     """Main test execution"""
     print("🚀 Starting Yeni Üye Manuel Bonus Trigger Backend Tests...")
-    print("🌐 Base URL: https://game-admin-hub-1.preview.emergentagent.com")
+    print("🌐 Base URL: https://multi-tenant-panel.preview.emergentagent.com")
     print("=" * 80)
     
     tester = BonusTriggerTester()
