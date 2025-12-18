@@ -63,7 +63,12 @@ const Support = () => {
 
   return (
     <div className="space-y-6">
-        <h2 className="text-3xl font-bold tracking-tight">Support Center</h2>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Support Center</h2>
+            <p className="text-sm text-muted-foreground">Diagnostics include the last captured Request ID for faster incident triage.</p>
+          </div>
+        </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-5 w-full lg:w-[600px]">
