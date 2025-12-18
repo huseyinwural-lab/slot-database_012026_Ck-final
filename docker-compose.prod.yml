@@ -57,15 +57,13 @@ services:
 
   frontend-admin:
     build:
-      args:
-        APP_VERSION: ${APP_VERSION:-unknown}
-        GIT_SHA: ${GIT_SHA:-unknown}
-        BUILD_TIME: ${BUILD_TIME:-unknown}
-
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
         REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL}
+        APP_VERSION: ${APP_VERSION:-unknown}
+        GIT_SHA: ${GIT_SHA:-unknown}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
     restart: always
     depends_on:
       backend:
