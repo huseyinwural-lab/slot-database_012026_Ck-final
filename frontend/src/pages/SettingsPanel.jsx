@@ -158,8 +158,41 @@ const SettingsPanel = () => {
         </TabsContent>
 
         <TabsContent value="versions" className="mt-4">
-          <Card><CardHeader><CardTitle>Config Versions & Deployment</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Versiyon yönetimi yakında eklenecek</p></CardContent></Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>About / Version</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="text-sm">
+                <span className="font-medium">UI Version:</span>{' '}
+                <span className="font-mono">{process.env.REACT_APP_VERSION || 'unknown'}</span>
+              </div>
+              <div className="text-sm">
+                <span className="font-medium">UI Git SHA:</span>{' '}
+                <span className="font-mono">{process.env.REACT_APP_GIT_SHA || 'unknown'}</span>
+              </div>
+              <div className="text-sm">
+                <span className="font-medium">UI Build Time:</span>{' '}
+                <span className="font-mono">{process.env.REACT_APP_BUILD_TIME || 'unknown'}</span>
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      const res = await api.get('/version');
+                      toast.success(`Backend: ${res.data.version} (${res.data.git_sha})`);
+                    } catch (e) {
+                      toast.error('Failed to fetch backend version');
+                    }
+                  }}
+                >
+                  Check Backend Version
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="audit" className="mt-4">
