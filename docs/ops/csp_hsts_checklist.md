@@ -43,7 +43,7 @@ Collect violations:
 - Capture blocked URLs + directives (console or report endpoint)
 
 Rollback (< 5 min):
-- Switch include OFF (comment out include) and reload nginx.
+- Set: `SECURITY_HEADERS_MODE=off` and redeploy/restart the frontend-admin pod.
 
 ---
 
