@@ -116,36 +116,46 @@ Then jump to the matching runbook section in `docs/ops/dr_runbook.md`.
 ## 5) Validate (must-pass)
 
 ### APIs
+Bash:
+```bash
+curl -i <URL>/api/health
+curl -i <URL>/api/ready
+curl -i <URL>/api/version
+```
+
+Expected:
 - `/api/health` → 200
 - `/api/ready` → 200
 - `/api/version` → expected
 
 ### Owner capabilities
-- Acquire token (example):
-  ```bash
-  curl -s -X POST <URL>/api/v1/auth/login \
-    -H "Content-Type: application/json" \
-    -d '{"email":"admin@casino.com","password":"***"}'
-  ```
-- Check capabilities:
-  ```bash
-  curl -s <URL>/api/v1/tenants/capabilities -H "Authorization: Bearer ***"
-  ```
+Bash:
+```bash
+# 1) Get token (redact password/token in proof)
+curl -s -X POST <URL>/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@casino.com","password":"***"}'
+
+# 2) Check capabilities
+curl -s <URL>/api/v1/tenants/capabilities -H "Authorization: Bearer ***"
+```
 
 Expected:
 - `is_owner=true`
 
 ### UI smoke (owner)
-- Login
-- Tenants list loads
-- Settings → Versions loads
-- Logout works
+- Result: PASS/FAIL
+- Steps:
+  1) Login
+  2) Tenants list loads
+  3) Settings → Versions loads
+  4) Logout works
 
 ### Logs (contract-based)
-Using your log system, confirm:
-- 5xx rate is dropping (filter `event=request` AND `status_code>=500`)
-- latency returns to baseline (p95 of `duration_ms`)
-- correlate errors via `request_id`
+Using your log system, confirm (by contract fields in `docs/ops/log_schema.md`):
+- 5xx rate is dropping: filter `event=request` AND `status_code>=500`
+- latency returns to baseline: p95 of `duration_ms`
+- correlate any remaining errors via `request_id`
 
 ---
 
