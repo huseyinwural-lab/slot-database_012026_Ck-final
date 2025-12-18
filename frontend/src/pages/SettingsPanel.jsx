@@ -27,6 +27,13 @@ const SettingsPanel = () => {
   const [platformDefaults, setPlatformDefaults] = useState(null);
   const [apiKeys, setApiKeys] = useState([]);
 
+
+  // Initial load
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const fetchData = async () => {
     try {
       if (activeTab === 'brands') setBrands((await api.get('/v1/settings/brands')).data);
