@@ -85,7 +85,7 @@ const Support = () => {
           </div>
         </div>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid grid-cols-5 w-full lg:w-[600px]">
                 <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
                 <TabsTrigger value="inbox"><Mail className="w-4 h-4 mr-2" /> Inbox</TabsTrigger>
