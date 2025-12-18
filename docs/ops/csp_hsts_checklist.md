@@ -76,7 +76,7 @@ Expected:
 UI smoke + monitor error rates.
 
 Rollback (< 5 min):
-- Switch back to report-only include.
+- Set: `SECURITY_HEADERS_MODE=report-only` and redeploy/restart the frontend-admin pod.
 
 ---
 
