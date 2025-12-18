@@ -137,7 +137,7 @@ const BonusManagement = () => {
                                 {category === 'Financial' && (
                                     <>
                                         <SelectItem value="deposit_match">Deposit Match (Welcome/Reload)</SelectItem>
-                                        <SelectItem value="threshold_deposit">Threshold Deposit (>Amount)</SelectItem>
+                                        <SelectItem value="threshold_deposit">Threshold Deposit (&gt;Amount)</SelectItem>
                                         <SelectItem value="high_roller">High Roller</SelectItem>
                                         <SelectItem value="manual_comp">Manual Comp</SelectItem>
                                         <SelectItem value="moneyback">Moneyback</SelectItem>
