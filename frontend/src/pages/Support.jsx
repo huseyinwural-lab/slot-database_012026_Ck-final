@@ -69,7 +69,12 @@ const Support = () => {
   };
 
   const handleCreateCanned = async () => {
-    try { await api.post('/v1/support/canned', { title: "New Response", content: "Text", category: "general" }); fetchData(); } catch {}
+    try {
+      await api.post('/v1/support/canned', { title: "New Response", content: "Text", category: "general" });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
