@@ -317,6 +317,18 @@ backend:
         -agent: "testing"
         -comment: "✅ BACKEND REGRESSION TEST - LOGGER NAMEERROR FIX - ALL TESTS PASSED (3/3 - 100% success rate): Test 1) Backend Health Check: ✅ GET /api/health returns 200 OK with status='healthy' - backend server running correctly after logger fix. Test 2) Login Rate Limiting: ✅ 6 rapid POST requests to /api/v1/auth/login with wrong password (admin@casino.com/WrongPassword123!) returned correct pattern [401, 401, 401, 401, 401, 429] - First 5 requests returned 401 INVALID_CREDENTIALS, 6th request returned 429 RATE_LIMIT_EXCEEDED as expected. Rate limiting middleware working correctly. Test 3) CORS Preflight Evil Origin Blocked: ✅ OPTIONS request to /api/v1/auth/login with Origin 'https://evil.example' correctly blocked - Access-Control-Allow-Origin header was None (evil origin rejected). CORS security working properly. All regression requirements verified: backend health operational, login rate limiting functional (5 requests/minute per IP), CORS preflight blocking unauthorized origins. Logger NameError fix has not introduced any regressions in core security functionality."
 
+  - task: "Quick Regression - Release Metadata Additions"
+    implemented: true
+    working: true
+    file: "backend/app/routes/version.py, backend/app/core/build_info.py, backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ QUICK REGRESSION - RELEASE METADATA ADDITIONS - ALL TESTS PASSED (2/2 - 100% success rate): Test 1) GET /api/version endpoint validation: ✅ Returns 200 OK with exact required keys (service, version, git_sha, build_time) and no extra fields, ✅ All values are strings as expected (service=backend, version=unknown, git_sha=unknown, build_time=unknown), ✅ No sensitive data leaked in response or headers. Test 2) GET /api/ready endpoint validation: ✅ Returns 200 OK with proper JSON structure (status=ready, dependencies.database=connected, alembic_version=unknown), ✅ Readiness check operational and responding correctly. REGRESSION VALIDATION: Both endpoints working correctly using external API base from frontend/.env (https://game-admin-hub-1.preview.emergentagent.com). Version endpoint returns only safe build metadata fields with correct structure, ready endpoint confirms system readiness. All release metadata requirements met successfully."
+
   - task: "CORS Wildcard Validation - CI Workflow Configuration"
     implemented: true
     working: true
