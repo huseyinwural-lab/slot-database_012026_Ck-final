@@ -59,6 +59,16 @@ stg_secheaders_01_report_only_enablement_dec18:
         -agent: "testing"
         -comment: "✅ STG-SecHeaders-01 K8S SECURITY HEADERS VALIDATION COMPLETE - ALL REQUIREMENTS PASSED (40/40 - 100% success rate): Test 1) YAML Parsing: ✅ ConfigMap YAML parsing successful with all required keys (default.conf, 99-security-headers.sh, security_headers_off.conf, security_headers_report_only.conf, security_headers_enforce.conf), ✅ Patch YAML parsing successful with valid Deployment structure. Test 2) Selector Script Logic: ✅ Script correctly handles all valid modes (off|report-only|enforce), ✅ Proper fallback for invalid modes to 'off', ✅ Correct source file path construction (/etc/nginx/snippets-src/security_headers_${MODE}.conf), ✅ Correct destination file path (/etc/nginx/snippets/security_headers_active.conf), ✅ File existence check and fallback logic implemented, ✅ Copy operation correctly implemented (cp ${SRC} ${DST}). Test 3) Mount Path Analysis: ✅ All mounts correctly configured - read-only: /etc/nginx/conf.d/default.conf, /etc/nginx/snippets-src, /docker-entrypoint.d/99-security-headers.sh; writable: /etc/nginx/snippets, ✅ No actual mount conflicts detected (different subdirectories under /etc/nginx is correct design). Test 4) HSTS & CSP Configuration: ✅ HSTS max-age=300 correctly configured in report-only mode, ✅ CSP report-only header correctly configured with all required directives (default-src 'self', base-uri 'self', object-src 'none', frame-ancestors 'none', script-src 'self' 'report-sample', style-src 'self' 'unsafe-inline', img-src 'self' data: blob:, font-src 'self' data:, connect-src 'self' https: wss:), ✅ All baseline security headers present (X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options), ✅ Enforce mode correctly uses Content-Security-Policy (not report-only), ✅ Off mode correctly excludes CSP and HSTS headers. Test 5) Patch Environment: ✅ SECURITY_HEADERS_MODE correctly set to 'report-only' in patch. Test 6) Documentation: ✅ STG-SecHeaders-01 section found, ✅ Security headers mode options documented, ✅ Rollback instructions present, ✅ Validation commands documented. STATUS: READY-TO-APPLY - All K8s manifests are consistent and ready for deployment. No corrections needed."
 
+
+
+stg_secheaders_01_staging_readme_dec18:
+  - task: "STG-SecHeaders-01: staging apply/verify/rollback komutları için operator README"
+    implemented: true
+    working: true
+    file: "k8s/README-staging-secheaders.md"
+    priority: "high"
+    needs_retesting: false
+
 p3_release_decision_tree_dec18:
   - task: "P3.1 Release & Rollback: add single decision-tree runbook"
     implemented: true
