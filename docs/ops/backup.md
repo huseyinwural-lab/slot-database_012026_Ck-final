@@ -39,10 +39,7 @@ Create `/etc/cron.d/casino-backup`:
 > WARNING: restore overwrites data. Always confirm you target the correct DB.
 
 ```bash
-FILE=backups/casino_db_YYYYMMDD_HHMMSS.sql.gz
-
-gunzip -c "$FILE" | docker compose -f docker-compose.prod.yml exec -T postgres \
-  psql -U postgres -d casino_db
+./scripts/restore_postgres.sh backups/casino_db_YYYYMMDD_HHMMSS.sql.gz
 ```
 
 After restore:
