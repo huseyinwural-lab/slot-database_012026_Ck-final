@@ -68,3 +68,14 @@ When an alert fires:
 3) If rollback needed: see `docs/ops/rollback.md`
 4) If DB schema mismatch suspected: see `docs/ops/migrations.md`
 5) If data corruption suspected: restore from backup (see `docs/ops/backup.md`)
+
+
+## 7) Log schema contract reference
+
+This alerting baseline assumes the backend JSON log contract documented in:
+- `docs/ops/log_schema.md`
+
+Key fields used by these alerts:
+- correlation: `request_id`
+- HTTP health/5xx: `event=request`, `status_code`, `path`
+- latency: `duration_ms`
