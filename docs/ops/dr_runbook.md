@@ -41,8 +41,19 @@ Symptoms:
 - `/api/ready` fails OR elevated 5xx
 - DB checks are clean (no corruption signals), or issues point to app release/regression.
 
-Minimum signals:
-- Logs show `event=request` 5xx spike, but DB is reachable.
+Signals to capture (paste into proof):
+- Health/ready:
+  ```bash
+  curl -i <URL>/api/health
+  curl -i <URL>/api/ready
+  ```
+- Version:
+  ```bash
+  curl -i <URL>/api/version
+  ```
+- Logs:
+  - filter `event=request` and aggregate `status_code>=500`
+  - confirm DB is reachable (no connection errors)
 
 ### Containment
 - **K8s (fast):**
