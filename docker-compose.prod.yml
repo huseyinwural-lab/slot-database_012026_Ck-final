@@ -35,7 +35,12 @@ services:
       DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
       DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-10}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      LOG_FORMAT: ${LOG_FORMAT:-json}
+      LOG_FORMAT: ${LOG_FORMAT:-auto}
+
+      # Build metadata (set by CI/build)
+      APP_VERSION: ${APP_VERSION:-unknown}
+      GIT_SHA: ${GIT_SHA:-unknown}
+      BUILD_TIME: ${BUILD_TIME:-unknown}
 
       # Security: No defaults/fallbacks for credentials
       BOOTSTRAP_ENABLED: ${BOOTSTRAP_ENABLED:-false}
