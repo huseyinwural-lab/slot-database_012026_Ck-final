@@ -71,3 +71,13 @@ Minimum proof requirements:
   - `GET /api/ready` (200)
   - `GET /api/version` (expected)
   - basic DB sanity (tenant count, admin exists, migrations head)
+
+
+## Proof Recording
+
+After completing the drill, create a new proof file by copying:
+
+- `docs/ops/restore_drill_proof/template.md` → `docs/ops/restore_drill_proof/YYYY-MM-DD.md`
+
+Fill it with the exact commands and outputs used during the drill (redact secrets/tokens).
+A drill is considered **PASS** only if `/api/health`, `/api/ready`, `/api/version`, owner capabilities, and the UI smoke all pass.
