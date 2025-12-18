@@ -64,7 +64,7 @@ Gate:
 - allowlist updated
 
 Change:
-- Switch include: `security_headers_enforce.conf`
+- Set: `SECURITY_HEADERS_MODE=enforce`
 
 Validate:
 ```bash
