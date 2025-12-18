@@ -28,26 +28,27 @@ const SettingsPanel = () => {
   const [apiKeys, setApiKeys] = useState([]);
 
 
-  // Initial load
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = async (tab = activeTab) => {
     try {
-      if (activeTab === 'brands') setBrands((await api.get('/v1/settings/brands')).data);
-      if (activeTab === 'currencies') setCurrencies((await api.get('/v1/settings/currencies')).data);
-      if (activeTab === 'countries') setCountryRules((await api.get('/v1/settings/country-rules')).data);
-      if (activeTab === 'defaults') setPlatformDefaults((await api.get('/v1/settings/platform-defaults')).data);
-      if (activeTab === 'api-keys') setApiKeys((await api.get('/v1/settings/api-keys')).data);
+      if (tab === 'brands') setBrands((await api.get('/v1/settings/brands')).data);
+      if (tab === 'currencies') setCurrencies((await api.get('/v1/settings/currencies')).data);
+      if (tab === 'countries') setCountryRules((await api.get('/v1/settings/country-rules')).data);
+      if (tab === 'defaults') setPlatformDefaults((await api.get('/v1/settings/platform-defaults')).data);
+      if (tab === 'api-keys') setApiKeys((await api.get('/v1/settings/api-keys')).data);
     } catch (err) {
       console.error(err);
     }
   };
 
+  // Initial load
+  useEffect(() => {
+    fetchData('brands');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    fetchData();
+    fetchData(tab);
   };
 
   return (
