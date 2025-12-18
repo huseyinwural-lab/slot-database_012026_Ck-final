@@ -81,6 +81,53 @@ const Support = () => {
 
             {/* DASHBOARD */}
             <TabsContent value="dashboard" className="mt-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+                  <Card className="md:col-span-2">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Last Error (Diagnostics)</CardTitle>
+                      <CardDescription>Share the Request ID with ops to locate correlated logs.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="text-sm">
+                        <span className="font-medium">Request ID:</span>{' '}
+                        <span className="font-mono">{lastError?.request_id || 'unavailable'}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {lastError?.status ? `Status: ${lastError.status}` : ''}{lastError?.message ? ` • ${lastError.message}` : ''}
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={!lastError?.request_id}
+                          onClick={async () => {
+                            try {
+                              if (!lastError?.request_id) return;
+                              await navigator.clipboard.writeText(lastError.request_id);
+                              toast.success('Copied Request ID');
+                            } catch (e) {
+                              toast.error('Copy failed');
+                            }
+                          }}
+                        >
+                          <Copy className="w-4 h-4 mr-2" /> Copy
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            clearLastError();
+                            setLastErrorState(null);
+                            toast.success('Cleared');
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" /> Clear
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
                 {dashboard ? (
                     <div className="grid gap-4 md:grid-cols-4">
                         <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Open Tickets</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-500">{dashboard.open_tickets}</div></CardContent></Card>
