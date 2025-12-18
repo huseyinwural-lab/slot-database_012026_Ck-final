@@ -151,6 +151,18 @@ p2_audit_log_mvp_dec17:
   summary: "Phase 1: Financial Integrity & Security Update"
 
 frontend:
+  - task: "Settings -> Versions Tab UI Build Metadata and Backend Version Check"
+    implemented: true
+    working: true
+    file: "src/pages/SettingsPanel.jsx, backend/app/routes/version.py, backend/app/core/build_info.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "✅ SETTINGS -> VERSIONS TAB TESTING COMPLETE - ALL REQUIREMENTS PASSED (100% success rate): Test executed on https://game-admin-hub-1.preview.emergentagent.com as requested. Step 1) ✅ Login successful with admin@casino.com/Admin123! - authentication working correctly. Step 2) ✅ Navigation to /settings successful - Settings Panel page loads with proper title and tab structure. Step 3) ✅ Versions tab accessible and clickable - found in tab list and successfully clicked to display content. Step 4) ✅ UI build metadata display verified - All 3 required labels render correctly: 'UI Version: unknown', 'UI Git SHA: unknown', 'UI Build Time: unknown'. Values show 'unknown' as expected in preview environment, but labels are properly displayed. Step 5) ✅ Check Backend Version functionality working - Button found and clickable, triggers GET /api/version API call with 200 OK response, displays success toast 'Backend: unknown (unknown)' with backend version and git SHA information. TECHNICAL VALIDATION: Frontend uses process.env.REACT_APP_VERSION, REACT_APP_GIT_SHA, REACT_APP_BUILD_TIME environment variables for UI metadata display. Backend /api/version endpoint implemented in app/routes/version.py using get_build_info() from app/core/build_info.py, returns service, version, git_sha, build_time fields from environment variables. Toast functionality working correctly with proper success message format. All Settings -> Versions tab requirements met successfully for production deployment."
+
   - task: "Support Panel Diagnostics Card - Last Error Request ID Testing"
     implemented: true
     working: true
