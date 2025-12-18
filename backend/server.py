@@ -121,10 +121,13 @@ app.include_router(flags.router)
 # Startup Event
 @app.on_event("startup")
 async def on_startup():
+    from app.core.build_info import get_build_info
+
     logger.info(
-        "app.startup",
+        "service.boot",
         extra={
-            "event": "app.startup",
+            "event": "service.boot",
+            **get_build_info(service="backend"),
             "env": settings.env,
             "log_format": settings.get_log_format(),
         },
