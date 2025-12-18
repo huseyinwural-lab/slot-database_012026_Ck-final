@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { setLastError } from './supportDiagnostics';
 
 // Prefer explicit env var; otherwise use same-origin (works with Nginx /api reverse proxy in prod images)
 const RAW_API_URL = process.env.REACT_APP_BACKEND_URL
