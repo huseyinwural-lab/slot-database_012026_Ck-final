@@ -2,6 +2,11 @@
 
 > Use this page during an incident. It is intentionally short and command-driven.
 
+Role assignment (who does what):
+- **Incident Commander (IC):** drives decisions + timeline
+- **Ops/Responder:** runs commands + collects outputs
+- **Comms owner:** updates stakeholders
+
 References:
 - Runbook: `docs/ops/dr_runbook.md`
 - RTO/RPO targets: `docs/ops/dr_rto_rpo.md`
