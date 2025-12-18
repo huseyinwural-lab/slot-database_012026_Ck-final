@@ -7,7 +7,7 @@ import json
 def test_finance_endpoints():
     """Test finance endpoints individually"""
     
-    base_url = "https://multi-tenant-panel.preview.emergentagent.com"
+    base_url = "https://casino-ops-headers.preview.emergentagent.com"
     
     # Test 1: Auto-Scheduler Config
     print("1. Testing Auto-Scheduler Config...")
@@ -63,7 +63,7 @@ def test_finance_endpoints():
 def test_chargeback_creation(transactions):
     """Test chargeback creation with risk score integration"""
     
-    base_url = "https://multi-tenant-panel.preview.emergentagent.com"
+    base_url = "https://casino-ops-headers.preview.emergentagent.com"
     
     print("\n4. Testing Chargeback Creation...")
     
@@ -104,7 +104,7 @@ def test_chargeback_creation(transactions):
 def test_reconciliation_simple():
     """Test reconciliation endpoints without file upload"""
     
-    base_url = "https://multi-tenant-panel.preview.emergentagent.com"
+    base_url = "https://casino-ops-headers.preview.emergentagent.com"
     
     print("\n5. Testing Get Reconciliation Reports...")
     try:
