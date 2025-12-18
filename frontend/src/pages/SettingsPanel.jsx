@@ -53,7 +53,7 @@ const SettingsPanel = () => {
         <Button onClick={fetchData}><RefreshCw className="w-4 h-4 mr-2" /> Yenile</Button>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <ScrollArea className="w-full whitespace-nowrap rounded-md border">
           <TabsList className="w-full flex justify-start">
             <TabsTrigger value="brands"><Building2 className="w-4 h-4 mr-2" /> Brands</TabsTrigger>
