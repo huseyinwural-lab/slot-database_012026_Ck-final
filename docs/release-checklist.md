@@ -40,3 +40,15 @@ Run:
 ## 7) Versioning / rollback recommendation
 - [ ] Tag images/releases (or keep last known-good artifacts)
 - [ ] Keep previous compose + env for rollback
+
+
+## 8) Release tag + build metadata (P3)
+- [ ] Release tag uses `vX.Y.Z-<gitsha>` (no `latest` in staging/prod)
+- [ ] Backend boot log contains `event=service.boot` with `version/git_sha/build_time`
+- [ ] Backend version endpoint: `GET /api/version` returns expected `service, version, git_sha, build_time`
+- [ ] Admin UI Settings → Versions tab shows UI version + git sha + build time
+
+## 9) Critical smoke (app)
+- [ ] Login success writes `auth.login_success` audit event
+- [ ] Tenants list + create works (owner)
+- [ ] Audit list works: `GET /api/v1/audit/events?since_hours=1&limit=10`
