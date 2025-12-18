@@ -1,4 +1,6 @@
 const KEY = 'support_last_error';
+// NOTE: We persist last error for ops triage in Support panel
+
 
 export function setLastError({ requestId, message, status } = {}) {
   try {
