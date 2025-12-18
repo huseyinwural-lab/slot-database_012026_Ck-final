@@ -69,6 +69,32 @@ stg_secheaders_01_staging_readme_dec18:
     priority: "high"
     needs_retesting: false
 
+
+
+frontend_eslint_react_hooks_plugin_dec18:
+  - task: "Frontend: ESLint react-hooks plugin + flat config (ESLint v9) + lint script"
+    implemented: true
+    working: true
+    file: "frontend/eslint.config.js, frontend/package.json, frontend/yarn.lock"
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Installed eslint-plugin-react-hooks, added eslint flat config (eslint.config.js) for ESLint v9, added yarn lint script. yarn lint passes (warnings only)."
+
+frontend_bonusmanagement_gt_fix_dec18:
+  - task: "Frontend: BonusManagement JSX parse fix (escape > as &gt;)"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/BonusManagement.jsx"
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Fixed JSX text tokens containing '>' that broke parsing; build now succeeds (warnings only)."
+
 p3_release_decision_tree_dec18:
   - task: "P3.1 Release & Rollback: add single decision-tree runbook"
     implemented: true
