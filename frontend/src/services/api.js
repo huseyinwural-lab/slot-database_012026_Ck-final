@@ -70,6 +70,9 @@ api.interceptors.response.use(
       message: standardizedError.message,
       status: standardizedError.status,
     });
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('support:last_error'));
+    }
 
     const hasShownToast = Boolean(originalRequest.__reqid_toast_shown);
 
