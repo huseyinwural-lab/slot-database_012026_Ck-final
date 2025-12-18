@@ -48,7 +48,7 @@ p3_alerting_baseline_dec18:
     needs_retesting: false
 
 stg_secheaders_01_report_only_enablement_dec18:
-  - task: "STG-SecHeaders-01: K8s UI-nginx security headers wiring (CSP report-only + HSTS low max-age)"
+  - task: "STG-SecHeaders-01: K8s UI-nginx security headers wiring (CSP report-only + HSTS max-age=300)"
     implemented: true
     working: true
     file: "k8s/frontend-admin-security-headers-configmap.yaml, k8s/frontend-admin-security-headers.patch.yaml, docs/ops/csp_hsts_checklist.md"
