@@ -39,8 +39,7 @@ spec:
               mountPath: /etc/nginx/snippets
               readOnly: true
             - name: frontend-admin-security-headers-active
-              mountPath: /etc/nginx/snippets/security_headers_active.conf
-              subPath: security_headers_active.conf
+              mountPath: /etc/nginx/snippets
 
             # Ensure the selector script runs before nginx starts
             - name: frontend-admin-security-headers
