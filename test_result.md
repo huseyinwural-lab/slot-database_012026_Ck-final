@@ -43,6 +43,17 @@ p3_alerting_baseline_dec18:
   - task: "P3.3 Monitoring & Alerting: baseline alerts doc"
     implemented: true
     working: true
+    file: "docs/ops/alerts.md"
+    priority: "high"
+    needs_retesting: false
+
+stg_secheaders_01_report_only_enablement_dec18:
+  - task: "STG-SecHeaders-01: K8s UI-nginx security headers wiring (CSP report-only + HSTS low max-age)"
+    implemented: true
+    working: true
+    file: "k8s/frontend-admin-security-headers-configmap.yaml, k8s/frontend-admin-security-headers.patch.yaml, docs/ops/csp_hsts_checklist.md"
+    priority: "high"
+    needs_retesting: true
 
 p3_release_decision_tree_dec18:
   - task: "P3.1 Release & Rollback: add single decision-tree runbook"
