@@ -26,12 +26,50 @@ Keep last 14 days:
 find backups -type f -name 'casino_db_*.sql.gz' -mtime +14 -delete
 ```
 
-### 1.3 Cron example
-Create `/etc/cron.d/casino-backup`:
+### 1.3 VM/Compose (Cron) "ready-to-use" example
+We ship an example cron file:
+- `docs/ops/cron/casino-backup.example`
 
-```cron
-# daily at 02:10 UTC
-10 2 * * * ubuntu /bin/bash -lc 'cd /opt/casino && ./scripts/backup_postgres.sh' >> /var/log/casino-backup.log 2>&1
+Install (on VM):
+```bash
+sudo mkdir -p /var/log/casino /var/lib/casino/backups
+sudo cp docs/ops/cron/casino-backup.example /etc/cron.d/casino-backup
+
+## 1.4 Kubernetes CronJob (example)
+We ship a "minimal edits" example:
+- `k8s/cronjob-backup.yaml`
+
+It supports:
+- PVC-backed backups (active example)
+- S3/object storage (alternative commented block)
+
+Key settings (recommended):
+- `concurrencyPolicy: Forbid` (no overlaps)
+- `backoffLimit: 2`
+- retention cleanup inside the job
+
+Install:
+```bash
+kubectl apply -f k8s/cronjob-backup.yaml
+```
+
+You must create:
+- Secret: `casino-db-backup` (DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD)
+- PVC: `casino-backups-pvc` (or edit claim name)
+
+
+sudo chmod 0644 /etc/cron.d/casino-backup
+sudo systemctl restart cron || sudo service cron restart
+```
+
+Notes:
+- overlap prevention: `flock -n /var/lock/casino-backup.lock`
+- logs: `/var/log/casino/backup.log`
+- backups: `/var/lib/casino/backups`
+
+Test run:
+```bash
+sudo -u root /bin/bash -lc 'cd /opt/casino && BACKUP_DIR=/var/lib/casino/backups RETENTION_DAYS=14 ./scripts/backup_postgres.sh'
 ```
 
 ## 2) Restore
@@ -41,6 +79,13 @@ Create `/etc/cron.d/casino-backup`:
 ```bash
 ./scripts/restore_postgres.sh backups/casino_db_YYYYMMDD_HHMMSS.sql.gz
 ```
+
+## 2.1 Kubernetes restore note
+If you run Postgres in Kubernetes:
+- Prefer platform snapshots / managed DB PITR where possible.
+- If you rely on logical backups (pg_dump), restore using a Job (psql) that targets the DB service.
+
+(We provide a K8s backup CronJob example in `k8s/cronjob-backup.yaml`; you can mirror it into a restore Job.)
 
 After restore:
 - Restart backend (to clear any in-memory state):

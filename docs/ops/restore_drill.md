@@ -51,3 +51,23 @@ Log the drill in a simple changelog:
 ## Suggested frequency
 - Staging: monthly
 - Production: quarterly (or after major schema changes)
+
+
+---
+
+## Proof Template (copy/paste)
+
+After each drill, create a proof file:
+- `docs/ops/restore_drill_proof/YYYY-MM-DD.md`
+
+Template is provided:
+- `docs/ops/restore_drill_proof/YYYY-MM-DD.md`
+
+Minimum proof requirements:
+- date/time + environment
+- backup artifact name
+- restore command output
+- validation outputs:
+  - `GET /api/ready` (200)
+  - `GET /api/version` (expected)
+  - basic DB sanity (tenant count, admin exists, migrations head)
