@@ -25,6 +25,13 @@ const Support = () => {
 
   const [canned, setCanned] = useState([]);
   const [dashboard, setDashboard] = useState(null);
+
+  // Initial load (avoid setState in effect; this is safe at render-time)
+  if (!lastError && typeof window !== 'undefined') {
+    const initial = getLastError();
+    if (initial) setLastErrorState(initial);
+  }
+
   
   // Ticket Reply
   const [selectedTicket, setSelectedTicket] = useState(null);
