@@ -31,7 +31,7 @@ p3_backup_restore_scripts_dec18:
   - task: "P3.2 Backup & Recovery: add backup_postgres.sh + restore_postgres.sh + restore drill doc"
     implemented: true
     working: true
-    file: "scripts/backup_postgres.sh, scripts/restore_postgres.sh, docs/ops/backup.md, docs/ops/restore_drill.md"
+    file: "scripts/backup_postgres.sh, scripts/restore_postgres.sh, docs/ops/backup.md, docs/ops/restore_drill.md, docs/ops/cron/casino-backup.example, k8s/cronjob-backup.yaml"
     priority: "high"
     needs_retesting: false
     status_history:
