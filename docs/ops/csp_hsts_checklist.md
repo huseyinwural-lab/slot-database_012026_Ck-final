@@ -12,15 +12,27 @@ Canonical references:
 
 ## 1) Enable CSP Report-Only
 
+## STG-SecHeaders-01 (staging enablement)
+
+Kubernetes UI-nginx wiring assumption:
+- ConfigMap mounted into frontend-admin nginx:
+  - `k8s/frontend-admin-security-headers-configmap.yaml`
+- Rollback lever (single switch):
+  - `SECURITY_HEADERS_MODE=off|report-only|enforce`
+
+
+
 Change:
 - Enable include: `security_headers_report_only.conf`
 
 Validate (headers):
 ```bash
-curl -I https://<admin-domain>/ | grep -i content-security-policy
+export STAGING_DOMAIN="<fill-me>"
+curl -I "https://${STAGING_DOMAIN}/" | egrep -i "content-security-policy|strict-transport-security"
 ```
 Expected:
 - `Content-Security-Policy-Report-Only` exists
+- `Strict-Transport-Security` exists (low max-age)
 
 Validate (UI):
 - Login

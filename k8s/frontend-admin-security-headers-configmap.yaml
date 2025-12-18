@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-admin-security-headers
+data:
+  # Overrides default nginx server config to include a dynamically selected security headers snippet.
+  default.conf: |
+    server {
+      listen 80;
+      server_name _;
+
+      root /usr/share/nginx/html;
+      index index.html;
+
+      # Security headers are selected at container start based on SECURITY_HEADERS_MODE.
+      # The selector script writes /etc/nginx/snippets/security_headers_active.conf.
+      include /etc/nginx/snippets/security_headers_active.conf;
+
+      # Reverse proxy API to backend service (same-origin for browser)
+      location /api/ {
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_pass http://backend:8001;
+      }
+
+      # SPA fallback (React Router)
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+    }
+
+  # Selector script executed by nginx docker-entrypoint (mounted into /docker-entrypoint.d/)
+  99-security-headers.sh: |
+    #!/bin/sh
+    set -eu
+
+    MODE="${SECURITY_HEADERS_MODE:-off}"
+
+    case "${MODE}" in
+      off|report-only|enforce)
+        ;;
+      *)
+        echo "[security-headers] invalid SECURITY_HEADERS_MODE='${MODE}', falling back to off" >&2
+        MODE="off"
+        ;;
+    esac
+
+    SRC="/etc/nginx/snippets/security_headers_${MODE}.conf"
+    DST="/etc/nginx/snippets/security_headers_active.conf"
+
+    if [ ! -f "${SRC}" ]; then
+      echo "[security-headers] missing ${SRC}, falling back to off" >&2
+      SRC="/etc/nginx/snippets/security_headers_off.conf"
+    fi
+
+    cp "${SRC}" "${DST}"
+    echo "[security-headers] mode=${MODE} -> ${DST}" >&2
+
+  # Mode: off (baseline only)
+  security_headers_off.conf: |
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header X-Frame-Options "DENY" always;
+
+  # Mode: report-only (STAGING enablement)
+  # - CSP is report-only
+  # - HSTS is enabled with LOW max-age (5 minutes)
+  # - includeSubDomains/preload intentionally NOT enabled
+  security_headers_report_only.conf: |
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header X-Frame-Options "DENY" always;
+
+    add_header Content-Security-Policy-Report-Only "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'report-sample'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https: wss:;" always;
+
+    add_header Strict-Transport-Security "max-age=300" always;
+
+  # Mode: enforce (kept for completeness; do not use in staging until policy is ready)
+  security_headers_enforce.conf: |
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header X-Frame-Options "DENY" always;
+
+    add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'report-sample'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https: wss:;" always;
+
+    # HSTS can also remain enabled during enforce if desired (staging default is low max-age).
+    add_header Strict-Transport-Security "max-age=300" always;

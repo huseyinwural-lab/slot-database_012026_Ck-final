@@ -1,0 +1,44 @@
+# Strategic-merge patch example for a Kubernetes Deployment named "frontend-admin".
+#
+# Goal: wire ConfigMap-based security headers at the UI nginx level.
+# Rollback lever: set SECURITY_HEADERS_MODE=off (or revert patch).
+#
+# Apply with your tooling (kubectl patch / kustomize overlay).
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-admin
+spec:
+  template:
+    spec:
+      volumes:
+        - name: frontend-admin-security-headers
+          configMap:
+            name: frontend-admin-security-headers
+            defaultMode: 0755
+      containers:
+        - name: frontend-admin
+          env:
+            # STAGING enablement:
+            # - CSP report-only
+            # - HSTS max-age=300
+            - name: SECURITY_HEADERS_MODE
+              value: "report-only"
+          volumeMounts:
+            # Override nginx default server config
+            - name: frontend-admin-security-headers
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+
+            # Provide header snippets + active file destination
+            - name: frontend-admin-security-headers
+              mountPath: /etc/nginx/snippets
+              readOnly: true
+
+            # Ensure the selector script runs before nginx starts
+            - name: frontend-admin-security-headers
+              mountPath: /docker-entrypoint.d/99-security-headers.sh
+              subPath: 99-security-headers.sh
+              readOnly: true
