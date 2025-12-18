@@ -1,0 +1,42 @@
+# /etc/cron.d/casino-backup
+#
+# Daily Postgres backup for Docker Compose deployment.
+#
+# Features:
+# - Uses flock to prevent overlap
+# - Writes logs to /var/log/casino/backup.log
+# - Stores backups under /var/lib/casino/backups by default
+#
+# Install (on VM):
+# 1) sudo mkdir -p /var/log/casino /var/lib/casino/backups
+# 2) sudo chown -R root:root /var/log/casino /var/lib/casino/backups
+# 3) sudo chmod 0755 /var/log/casino /var/lib/casino/backups
+# 4) sudo cp docs/ops/cron/casino-backup.example /etc/cron.d/casino-backup
+# 5) sudo chmod 0644 /etc/cron.d/casino-backup
+# 6) sudo service cron reload  (or: sudo systemctl restart cron)
+#
+# Test run (manual):
+#   sudo -u root /bin/bash -lc 'cd /opt/casino && BACKUP_DIR=/var/lib/casino/backups RETENTION_DAYS=14 ./scripts/backup_postgres.sh'
+#
+# Expected output:
+#   Backup written: /var/lib/casino/backups/casino_db_YYYYMMDD_HHMMSS.sql.gz
+#   Retention applied: deleted backups older than 14 days (if any)
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# daily at 02:10 UTC
+10 2 * * * root flock -n /var/lock/casino-backup.lock /bin/bash -lc '
+  set -euo pipefail
+  cd /opt/casino
+
+  # Required: docker compose must work from this directory
+  # Optional overrides:
+  export COMPOSE_FILE=/opt/casino/docker-compose.prod.yml
+  export BACKUP_DIR=/var/lib/casino/backups
+  export RETENTION_DAYS=14
+  export DB_NAME=casino_db
+  export DB_USER=postgres
+
+  ./scripts/backup_postgres.sh
+' >> /var/log/casino/backup.log 2>&1

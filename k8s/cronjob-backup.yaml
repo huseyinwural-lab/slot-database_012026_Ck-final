@@ -1,0 +1,128 @@
+# Kubernetes CronJob example: Postgres logical backups via pg_dump
+#
+# Notes:
+# - Uses Secret for DB creds
+# - Writes backups to a PVC (ACTIVE example)
+# - Includes an S3/object storage alternative as a commented block
+# - ConcurrencyPolicy: Forbid (no overlaps)
+#
+# Apply:
+#   kubectl apply -f k8s/cronjob-backup.yaml
+#
+# Create secret (example):
+#   kubectl create secret generic casino-db-backup \
+#     --from-literal=DB_HOST=postgres.default.svc.cluster.local \
+#     --from-literal=DB_PORT=5432 \
+#     --from-literal=DB_NAME=casino_db \
+#     --from-literal=DB_USER=postgres \
+#     --from-literal=DB_PASSWORD='<password>'
+#
+# PVC example (create separately):
+#   kubectl apply -f k8s/pvc-backups.yaml
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: casino-postgres-backup
+spec:
+  # daily at 02:10 UTC
+  schedule: "10 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pg-backup
+              image: postgres:15-alpine
+              imagePullPolicy: IfNotPresent
+              envFrom:
+                - secretRef:
+                    name: casino-db-backup
+              env:
+                - name: RETENTION_DAYS
+                  value: "14"
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "128Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
+              command:
+                - /bin/sh
+                - -lc
+                - |
+                  set -euo pipefail
+
+                  # Ensure tooling
+                  apk add --no-cache gzip coreutils > /dev/null
+
+                  TS=$(date -u +%Y%m%d_%H%M%S)
+                  FILE=/backups/${DB_NAME}_${TS}.sql.gz
+
+                  echo "[backup] writing: ${FILE}"
+
+                  # pg_dump to gzip
+                  PGPASSWORD="${DB_PASSWORD}" pg_dump \
+                    -h "${DB_HOST}" -p "${DB_PORT}" \
+                    -U "${DB_USER}" -d "${DB_NAME}" \
+                    | gzip > "${FILE}"
+
+                  # Retention cleanup
+                  find /backups -type f -name "${DB_NAME}_*.sql.gz" -mtime "+${RETENTION_DAYS}" -delete || true
+
+                  echo "[backup] done"
+
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: casino-backups-pvc
+
+---
+# --- OPTIONAL: S3 / object storage alternative (commented) ---
+#
+# Strategy options:
+# 1) Use an image that has BOTH pg_dump + awscli (or install them on startup).
+# 2) Stream directly to S3: pg_dump | gzip | aws s3 cp - s3://bucket/path/file.sql.gz
+#
+# Example (pseudo):
+#
+# apiVersion: batch/v1
+# kind: CronJob
+# metadata:
+#   name: casino-postgres-backup-s3
+# spec:
+#   schedule: "10 2 * * *"
+#   concurrencyPolicy: Forbid
+#   jobTemplate:
+#     spec:
+#       template:
+#         spec:
+#           restartPolicy: Never
+#           containers:
+#             - name: backup
+#               image: amazon/aws-cli:2
+#               envFrom:
+#                 - secretRef:
+#                     name: casino-db-backup
+#                 - secretRef:
+#                     name: casino-s3-creds
+#               command: ["/bin/sh","-lc"]
+#               args:
+#                 - |
+#                   set -euo pipefail
+#                   # install pg client inside container (example)
+#                   yum install -y postgresql15 || true
+#                   TS=$(date -u +%Y%m%d_%H%M%S)
+#                   KEY="casino/${DB_NAME}_${TS}.sql.gz"
+#                   PGPASSWORD="${DB_PASSWORD}" pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" \
+#                     | gzip | aws s3 cp - "s3://${S3_BUCKET}/${KEY}"
+#                   echo "uploaded s3://${S3_BUCKET}/${KEY}"
