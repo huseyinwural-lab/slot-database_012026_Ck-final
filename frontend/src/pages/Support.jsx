@@ -48,13 +48,25 @@ const Support = () => {
   };
 
   useEffect(() => {
+    const sync = () => setLastErrorState(getLastError());
+
     const onStorage = (e) => {
-      if (e.key === 'support_last_error') {
-        setLastErrorState(getLastError());
-      }
+      if (e.key === 'support_last_error') sync();
     };
+
+    // Same-tab updates: listen to a custom event dispatched by interceptor
+    const onLocalUpdate = () => sync();
+
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener('support:last_error', onLocalUpdate);
+
+    // initial sync
+    sync();
+
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('support:last_error', onLocalUpdate);
+    };
   }, []);
 
   const handleReply = async () => {
