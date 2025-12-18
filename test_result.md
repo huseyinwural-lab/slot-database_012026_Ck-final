@@ -15,15 +15,15 @@ version_endpoint_unknown_dec18:
     working: true
     file: "backend/app/core/build_info.py, frontend/src/pages/SettingsPanel.jsx"
     priority: "highest"
-    needs_retesting: true
+    needs_retesting: false
 
 p0_owner_portal_redirect_dec18:
   - task: "P0 Owner portal: admin@casino.com should see Platform Admin (not Tenant Portal)"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "frontend/src/context/CapabilitiesContext.jsx, frontend/src/components/Layout.jsx, backend/app/models/sql_models.py"
     priority: "highest"
-    needs_retesting: true
+    needs_retesting: false
 
 p0_ci_curl_sanity_step_dec16:
   - task: "P0.1 CI Curl Login Sanity Step - Simplify to HTTP code check"
