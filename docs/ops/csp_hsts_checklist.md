@@ -130,5 +130,5 @@ curl -I https://<prod-admin-domain>/ | grep -i strict-transport-security
 ```
 
 Rollback (< 5 min):
-- Remove/disable HSTS line and reload.
+- Set: `SECURITY_HEADERS_MODE=off` and redeploy/restart the frontend-admin pod.
 
