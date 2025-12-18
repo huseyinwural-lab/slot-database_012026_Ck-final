@@ -47,6 +47,11 @@ jobs:
       # Frontend build args
       # Browser should talk same-origin (frontend nginx proxies /api -> backend)
       REACT_APP_BACKEND_URL: "http://localhost:3000"
+      # Build metadata
+      APP_VERSION: "0.0.0-ci"
+      GIT_SHA: "ci"
+      BUILD_TIME: "ci"
+
       VITE_API_URL: "http://localhost:3000/api/v1"
 
     steps:
