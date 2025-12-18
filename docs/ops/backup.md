@@ -34,30 +34,6 @@ Install (on VM):
 ```bash
 sudo mkdir -p /var/log/casino /var/lib/casino/backups
 sudo cp docs/ops/cron/casino-backup.example /etc/cron.d/casino-backup
-
-## 1.4 Kubernetes CronJob (example)
-We ship a "minimal edits" example:
-- `k8s/cronjob-backup.yaml`
-
-It supports:
-- PVC-backed backups (active example)
-- S3/object storage (alternative commented block)
-
-Key settings (recommended):
-- `concurrencyPolicy: Forbid` (no overlaps)
-- `backoffLimit: 2`
-- retention cleanup inside the job
-
-Install:
-```bash
-kubectl apply -f k8s/cronjob-backup.yaml
-```
-
-You must create:
-- Secret: `casino-db-backup` (DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD)
-- PVC: `casino-backups-pvc` (or edit claim name)
-
-
 sudo chmod 0644 /etc/cron.d/casino-backup
 sudo systemctl restart cron || sudo service cron restart
 ```
