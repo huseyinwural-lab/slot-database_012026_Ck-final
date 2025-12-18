@@ -48,27 +48,6 @@ Test run:
 sudo -u root /bin/bash -lc 'cd /opt/casino && BACKUP_DIR=/var/lib/casino/backups RETENTION_DAYS=14 ./scripts/backup_postgres.sh'
 ```
 
-## 2) Restore
-
-> WARNING: restore overwrites data. Always confirm you target the correct DB.
-
-```bash
-./scripts/restore_postgres.sh backups/casino_db_YYYYMMDD_HHMMSS.sql.gz
-```
-
-## 2.1 Kubernetes restore note
-If you run Postgres in Kubernetes:
-- Prefer platform snapshots / managed DB PITR where possible.
-- If you rely on logical backups (pg_dump), restore using a Job (psql) that targets the DB service.
-
-(We provide a K8s backup CronJob example in `k8s/cronjob-backup.yaml`; you can mirror it into a restore Job.)
-
-After restore:
-- Restart backend (to clear any in-memory state):
-  - `docker compose -f docker-compose.prod.yml restart backend`
-- Validate:
-  - `curl -fsS https://admin.domain.tld/api/health`
-
 ## 1.4 Kubernetes CronJob (example)
 We ship a "minimal edits" example:
 - `k8s/cronjob-backup.yaml`
@@ -89,6 +68,27 @@ kubectl apply -f k8s/cronjob-backup.yaml
 You must create:
 - Secret: `casino-db-backup` (DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD)
 - PVC: `casino-backups-pvc` (or edit claim name)
+
+## 2) Restore
+
+> WARNING: restore overwrites data. Always confirm you target the correct DB.
+
+```bash
+./scripts/restore_postgres.sh backups/casino_db_YYYYMMDD_HHMMSS.sql.gz
+```
+
+## 2.1 Kubernetes restore note
+If you run Postgres in Kubernetes:
+- Prefer platform snapshots / managed DB PITR where possible.
+- If you rely on logical backups (pg_dump), restore using a Job (psql) that targets the DB service.
+
+(We provide a K8s backup CronJob example in `k8s/cronjob-backup.yaml`; you can mirror it into a restore Job.)
+
+After restore:
+- Restart backend (to clear any in-memory state):
+  - `docker compose -f docker-compose.prod.yml restart backend`
+- Validate:
+  - `curl -fsS https://admin.domain.tld/api/health`
 
 ## 3) Rollback
 
