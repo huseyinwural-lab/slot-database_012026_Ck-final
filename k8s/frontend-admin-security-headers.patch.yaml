@@ -17,6 +17,8 @@ spec:
           configMap:
             name: frontend-admin-security-headers
             defaultMode: 0755
+        - name: frontend-admin-security-headers-active
+          emptyDir: {}
       containers:
         - name: frontend-admin
           env:
