@@ -11,6 +11,12 @@ ENV_NAME="${ENV:-dev}"
 echo "[start_prod] $(date -Iseconds) Starting up..."
 echo "[start_prod] ENV=$ENV_NAME"
 
+
+# Build metadata (safe to log)
+echo "[start_prod] APP_VERSION=${APP_VERSION:-unknown}"
+echo "[start_prod] GIT_SHA=${GIT_SHA:-unknown}"
+echo "[start_prod] BUILD_TIME=${BUILD_TIME:-unknown}"
+
 # Helper function for retrying commands
 retry_cmd() {
     cmd="$@"
