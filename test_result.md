@@ -281,6 +281,18 @@ backend:
         -agent: "testing"
         -comment: "✅ QUICK REGRESSION - CI WORKFLOW ENV UPDATES - ALL TESTS PASSED (3/3 - 100% success rate): Test 1) Health Endpoints Validation: ✅ GET /api/health returns 200 OK with status='healthy', ✅ GET /api/ready returns 200 OK with status='ready'. Test 2) Password Policy Validation: ✅ POST /api/v1/admin/create-tenant-admin without password returns 400 with error_code=PASSWORD_REQUIRED as expected, ✅ POST /api/v1/auth/player/register with password shorter than 8 characters returns 400 with password validation message. Authentication issue resolved by resetting admin password hash and failed_login_attempts to 0. All quick regression checks passed successfully after CI workflow environment updates (bootstrap owner vars + HTML reporter changes)."
 
+  - task: "P3-REL-002 Build Metadata Visibility"
+    implemented: true
+    working: true
+    file: "backend/app/routes/version.py, backend/app/core/build_info.py, backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ P3-REL-002 BUILD METADATA VISIBILITY VALIDATION COMPLETE - ALL TESTS PASSED (3/3 - 100% success rate): Test 1) Version Endpoint Safe Fields: ✅ GET /api/version returns 200 OK with only safe fields (service=backend, version=unknown, git_sha=unknown, build_time=unknown), no sensitive environment variables or config data leaked. Test 2) Boot Log Validation: ✅ Backend boot log contains event=service.boot entry as required, structured logging includes build metadata keys (values show 'unknown' in dev environment as expected). Test 3) No Sensitive Data Leak: ✅ Verified /api/version response and headers contain no sensitive patterns (database_url, jwt_secret, cors_origins, debug flags, localhost, passwords, tokens, etc.). All P3-REL-002 requirements met: /api/version endpoint returns only safe build metadata fields, boot log contains proper service.boot event with version/git_sha/build_time keys, no environment/hostname/config secrets are exposed. Build metadata visibility is secure and ready for production deployment."
+
   - task: "Final Backend Regression Tests - Release Hardening"
     implemented: true
     working: true
