@@ -25,6 +25,32 @@ p0_owner_portal_redirect_dec18:
     priority: "highest"
     needs_retesting: false
 
+
+# --- P3 Ops Backlog completion (Dec 18) ---
+p3_backup_restore_scripts_dec18:
+  - task: "P3.2 Backup & Recovery: add backup_postgres.sh + restore_postgres.sh + restore drill doc"
+    implemented: true
+    working: true
+    file: "scripts/backup_postgres.sh, scripts/restore_postgres.sh, docs/ops/backup.md, docs/ops/restore_drill.md"
+    priority: "high"
+    needs_retesting: true
+
+p3_alerting_baseline_dec18:
+  - task: "P3.3 Monitoring & Alerting: baseline alerts doc"
+    implemented: true
+    working: true
+    file: "docs/ops/alerts.md"
+    priority: "high"
+    needs_retesting: false
+
+p3_compose_yaml_fix_frontend_player_dec18:
+  - task: "P3.1 Compose hardening: fix invalid depends_on block in frontend-player service"
+    implemented: true
+    working: true
+    file: "docker-compose.prod.yml"
+    priority: "high"
+    needs_retesting: false
+
 p0_ci_curl_sanity_step_dec16:
   - task: "P0.1 CI Curl Login Sanity Step - Simplify to HTTP code check"
     implemented: true
