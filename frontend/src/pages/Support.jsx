@@ -21,6 +21,8 @@ const Support = () => {
   const [tickets, setTickets] = useState([]);
   const [chats, setChats] = useState([]);
   const [kb, setKb] = useState([]);
+  const [lastError, setLastErrorState] = useState(getLastError());
+
   const [canned, setCanned] = useState([]);
   const [dashboard, setDashboard] = useState(null);
   
