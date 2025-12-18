@@ -40,7 +40,10 @@ const Support = () => {
     } catch (err) { console.error(err); }
   };
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  useEffect(() => {
+    fetchData();
+    setLastErrorState(getLastError());
+  }, [activeTab]);
 
   const handleReply = async () => {
     if (!selectedTicket || !replyText) return;
