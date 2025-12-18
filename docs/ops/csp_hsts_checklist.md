@@ -21,7 +21,7 @@ Kubernetes UI-nginx wiring assumption:
 
 
 Change:
-- Enable include: `security_headers_report_only.conf`
+- Set: `SECURITY_HEADERS_MODE=report-only`
 
 Validate (headers):
 ```bash
