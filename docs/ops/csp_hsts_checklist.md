@@ -95,17 +95,20 @@ Rollback (< 5 min):
 
 ## 5) HSTS staging
 
-Change:
-- Enable `Strict-Transport-Security` on staging:
+Default (this task):
+- HSTS is already enabled in `SECURITY_HEADERS_MODE=report-only` with:
   - `max-age=300`
+  - no includeSubDomains
+  - no preload
 
 Validate:
 ```bash
-curl -I https://<staging-admin-domain>/ | grep -i strict-transport-security
+export STAGING_DOMAIN="<fill-me>"
+curl -I "https://${STAGING_DOMAIN}/" | grep -i strict-transport-security
 ```
 
 Rollback (< 5 min):
-- Remove HSTS line and reload.
+- Set: `SECURITY_HEADERS_MODE=off` and redeploy/restart the frontend-admin pod.
 
 ---
 
