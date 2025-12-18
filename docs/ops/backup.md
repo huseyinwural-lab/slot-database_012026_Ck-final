@@ -10,15 +10,13 @@ Target assumption: Single VM (Ubuntu) + Docker Compose + Postgres container.
 From repo root:
 
 ```bash
-mkdir -p backups
-TS=$(date -u +%Y%m%d_%H%M%S)
-FILE=backups/casino_db_${TS}.sql.gz
+./scripts/backup_postgres.sh
+```
 
-docker compose -f docker-compose.prod.yml exec -T postgres \
-  pg_dump -U postgres -d casino_db \
-  | gzip > "$FILE"
+Optional retention cleanup (example: keep 14 days):
 
-echo "Backup written: $FILE"
+```bash
+RETENTION_DAYS=14 ./scripts/backup_postgres.sh
 ```
 
 ### 1.2 Retention (simple)
