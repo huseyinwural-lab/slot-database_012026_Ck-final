@@ -256,8 +256,8 @@ const BonusManagement = () => {
                                 <SelectItem value="manual">Manual Assignment</SelectItem>
                                 <SelectItem value="registration">Registration</SelectItem>
                                 <SelectItem value="first_deposit">First Deposit</SelectItem>
-                                <SelectItem value="deposit_amount">Deposit > X</SelectItem>
-                                <SelectItem value="loss_amount">Loss > X</SelectItem>
+                                <SelectItem value="deposit_amount">Deposit &gt; X</SelectItem>
+                                <SelectItem value="loss_amount">Loss &gt; X</SelectItem>
                                 <SelectItem value="vip_level_up">VIP Level Up</SelectItem>
                                 <SelectItem value="referral">Referral</SelectItem>
                             </SelectContent>
