@@ -85,10 +85,21 @@ def test_selector_script_logic():
         
         # Test 1: Valid mode handling
         valid_modes = ['off', 'report-only', 'enforce']
-        for mode in valid_modes:
-            if f'case "${{MODE}}" in' in script_content and f'{mode}|' in script_content:
+        case_line = None
+        for line in script_content.split('\n'):
+            if 'case "${MODE}" in' in line:
+                # Find the next line with the mode options
+                lines = script_content.split('\n')
+                idx = lines.index(line)
+                if idx + 1 < len(lines):
+                    case_line = lines[idx + 1].strip()
+                break
+        
+        if case_line and 'off|report-only|enforce' in case_line:
+            for mode in valid_modes:
                 results.append(f"✅ Script handles valid mode: {mode}")
-            else:
+        else:
+            for mode in valid_modes:
                 results.append(f"❌ Script missing handling for mode: {mode}")
         
         # Test 2: Invalid mode fallback
