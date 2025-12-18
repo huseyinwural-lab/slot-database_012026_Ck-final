@@ -40,9 +40,10 @@ const Support = () => {
     } catch (err) { console.error(err); }
   };
 
-  useEffect(() => {
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
     fetchData();
-  }, [activeTab]);
+  };
 
   useEffect(() => {
     const onStorage = (e) => {
@@ -51,8 +52,6 @@ const Support = () => {
       }
     };
     window.addEventListener('storage', onStorage);
-    // initial load
-    setLastErrorState(getLastError());
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
