@@ -32,10 +32,13 @@ spec:
               subPath: default.conf
               readOnly: true
 
-            # Provide header snippets + active file destination
+            # Provide header snippets (mounted read-only) + active file destination (writable)
             - name: frontend-admin-security-headers
               mountPath: /etc/nginx/snippets
               readOnly: true
+            - name: frontend-admin-security-headers-active
+              mountPath: /etc/nginx/snippets/security_headers_active.conf
+              subPath: security_headers_active.conf
 
             # Ensure the selector script runs before nginx starts
             - name: frontend-admin-security-headers
