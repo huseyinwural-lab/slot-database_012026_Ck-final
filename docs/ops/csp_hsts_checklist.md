@@ -10,8 +10,6 @@ Canonical references:
 
 ---
 
-## 1) Enable CSP Report-Only
-
 ## STG-SecHeaders-01 (staging enablement)
 
 Kubernetes UI-nginx wiring assumption:
