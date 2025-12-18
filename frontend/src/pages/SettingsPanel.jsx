@@ -39,7 +39,10 @@ const SettingsPanel = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    fetchData();
+  };
 
   return (
     <div className="space-y-6">
