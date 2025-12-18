@@ -34,10 +34,12 @@ spec:
               subPath: default.conf
               readOnly: true
 
-            # Provide header snippets (mounted read-only) + active file destination (writable)
+            # Provide header snippets (read-only source)
             - name: frontend-admin-security-headers
-              mountPath: /etc/nginx/snippets
+              mountPath: /etc/nginx/snippets-src
               readOnly: true
+
+            # Active snippets directory (writable destination)
             - name: frontend-admin-security-headers-active
               mountPath: /etc/nginx/snippets
 

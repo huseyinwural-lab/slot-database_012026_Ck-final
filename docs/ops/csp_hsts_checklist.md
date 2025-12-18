@@ -68,7 +68,8 @@ Change:
 
 Validate:
 ```bash
-curl -I https://<admin-domain>/ | grep -i content-security-policy
+export STAGING_DOMAIN="<fill-me>"
+curl -I "https://${STAGING_DOMAIN}/" | grep -i content-security-policy
 ```
 Expected:
 - `Content-Security-Policy` exists

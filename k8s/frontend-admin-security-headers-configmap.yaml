@@ -49,12 +49,12 @@ data:
         ;;
     esac
 
-    SRC="/etc/nginx/snippets/security_headers_${MODE}.conf"
+    SRC="/etc/nginx/snippets-src/security_headers_${MODE}.conf"
     DST="/etc/nginx/snippets/security_headers_active.conf"
 
     if [ ! -f "${SRC}" ]; then
       echo "[security-headers] missing ${SRC}, falling back to off" >&2
-      SRC="/etc/nginx/snippets/security_headers_off.conf"
+      SRC="/etc/nginx/snippets-src/security_headers_off.conf"
     fi
 
     cp "${SRC}" "${DST}"
