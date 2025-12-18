@@ -12,6 +12,10 @@ Also see:
 - Release decision tree: `docs/ops/release.md`
 - Backup/restore: `docs/ops/backup.md`
 
+
+Operator entrypoint:
+- Use the 1-page incident flow: `docs/ops/dr_checklist.md`
+
 ---
 
 ## Global prerequisites (before you start)
