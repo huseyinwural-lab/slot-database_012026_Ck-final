@@ -72,6 +72,28 @@ After restore:
 ## 3) Rollback
 
 ### 3.1 App-only rollback (no DB restore)
+
+## 1.4 Kubernetes CronJob (example)
+We ship a "minimal edits" example:
+- `k8s/cronjob-backup.yaml`
+
+It supports:
+- PVC-backed backups (active example)
+- S3/object storage (alternative commented block)
+
+Key settings (recommended):
+- `concurrencyPolicy: Forbid` (no overlaps)
+- `backoffLimit: 2`
+
+Install:
+```bash
+kubectl apply -f k8s/cronjob-backup.yaml
+```
+
+You must create:
+- Secret: `casino-db-backup` (DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD)
+- PVC: `casino-backups-pvc` (or edit claim name)
+
 If you tag/push images (recommended), rollback is:
 - set compose image tags back to the previous known-good version
 - `docker compose -f docker-compose.prod.yml up -d`
