@@ -43,6 +43,23 @@ p3_alerting_baseline_dec18:
   - task: "P3.3 Monitoring & Alerting: baseline alerts doc"
     implemented: true
     working: true
+
+p3_release_decision_tree_dec18:
+  - task: "P3.1 Release & Rollback: add single decision-tree runbook"
+    implemented: true
+    working: true
+    file: "docs/ops/release.md, docs/ops/rollback.md, docs/ops/migrations.md"
+    priority: "high"
+    needs_retesting: false
+
+p3_restore_drill_proof_template_dec18:
+  - task: "P3.2 Restore drill: add proof template + suggested file structure"
+    implemented: true
+    working: true
+    file: "docs/ops/restore_drill.md, docs/ops/restore_drill_proof/YYYY-MM-DD.md"
+    priority: "high"
+    needs_retesting: false
+
     file: "docs/ops/alerts.md"
     priority: "high"
     needs_retesting: false
