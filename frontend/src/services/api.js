@@ -64,6 +64,13 @@ api.interceptors.response.use(
       request_id: requestId,
     };
 
+    // Persist last error for Support panel
+    setLastError({
+      requestId: standardizedError.request_id,
+      message: standardizedError.message,
+      status: standardizedError.status,
+    });
+
     const hasShownToast = Boolean(originalRequest.__reqid_toast_shown);
 
     const formatRequestId = () => `Request ID: ${standardizedError.request_id || 'unavailable'}`;
