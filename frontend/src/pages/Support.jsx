@@ -42,8 +42,19 @@ const Support = () => {
 
   useEffect(() => {
     fetchData();
-    setLastErrorState(getLastError());
   }, [activeTab]);
+
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'support_last_error') {
+        setLastErrorState(getLastError());
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    // initial load
+    setLastErrorState(getLastError());
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const handleReply = async () => {
     if (!selectedTicket || !replyText) return;
