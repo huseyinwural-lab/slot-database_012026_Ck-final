@@ -118,6 +118,12 @@ frontend/node_modules/.cache/default-development/1.pack
 # Environment files
 *.env
 *.env.*
+
+# Backup artifacts must never be committed
+*.dump
+*.sql
+backups/
+
 -e 
 # Environment files
 *.env

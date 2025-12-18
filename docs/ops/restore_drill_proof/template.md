@@ -1,6 +1,10 @@
 # Restore Drill Proof — YYYY-MM-DD
 
 ## Context
+
+> Redaction required: Do not commit secrets. Mask tokens/passwords/keys and any credential-bearing URLs.
+> Use `***` for sensitive values.
+
 - Environment: staging / production / prod-compose
 - Operator: <name>
 - Backup Artifact:

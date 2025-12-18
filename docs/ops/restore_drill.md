@@ -55,13 +55,13 @@ Log the drill in a simple changelog:
 
 ---
 
-## Proof Template (copy/paste)
+## Proof Template (canonical)
 
-After each drill, create a proof file:
-- `docs/ops/restore_drill_proof/YYYY-MM-DD.md`
+Canonical template:
+- `docs/ops/restore_drill_proof/template.md`
 
-Template is provided:
-- `docs/ops/restore_drill_proof/YYYY-MM-DD.md`
+Create a new proof file:
+- `docs/ops/restore_drill_proof/template.md` → `docs/ops/restore_drill_proof/YYYY-MM-DD.md`
 
 Minimum proof requirements:
 - date/time + environment
@@ -81,3 +81,12 @@ After completing the drill, create a new proof file by copying:
 
 Fill it with the exact commands and outputs used during the drill (redact secrets/tokens).
 A drill is considered **PASS** only if `/api/health`, `/api/ready`, `/api/version`, owner capabilities, and the UI smoke all pass.
+
+### Redaction Rules (must-follow)
+
+Before committing proof files:
+
+- Replace any bearer tokens with `Bearer ***`.
+- Remove or mask secrets and passwords (`*****`).
+- Do not paste full connection strings that contain credentials.
+- If logs include headers, redact `Authorization`, `Cookie`, and any `X-Api-Key`-like values.
