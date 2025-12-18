@@ -82,10 +82,6 @@ services:
         BUILD_TIME: ${BUILD_TIME:-unknown}
     restart: always
     depends_on:
-        APP_VERSION: ${APP_VERSION:-unknown}
-        GIT_SHA: ${GIT_SHA:-unknown}
-        BUILD_TIME: ${BUILD_TIME:-unknown}
-
       backend:
         condition: service_healthy
     ports:
