@@ -88,6 +88,16 @@ stg_secheaders_01_proof_template_dec19:
     needs_retesting: false
 
     needs_retesting: false
+
+
+p4_3_phase2_observed_violations_template_dec19:
+  - task: "P4.3 Phase 2: Observed Violations standardizasyonu (template + README)"
+    implemented: true
+    working: true
+    file: "docs/ops/proofs/csp/P4.3-Phase2-observed-violations.template.md, docs/ops/proofs/csp/README.md"
+    priority: "high"
+    needs_retesting: false
+
     status_history:
         -working: true
         -agent: "main"
