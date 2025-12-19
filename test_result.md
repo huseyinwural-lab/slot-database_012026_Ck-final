@@ -77,6 +77,16 @@ frontend_eslint_react_hooks_plugin_dec18:
     working: true
     file: "frontend/eslint.config.js, frontend/package.json, frontend/yarn.lock"
     priority: "high"
+
+
+stg_secheaders_01_proof_template_dec19:
+  - task: "STG-SecHeaders-01: proof template + README proof recording standard"
+    implemented: true
+    working: true
+    file: "docs/ops/proofs/secheaders/STG-SecHeaders-01.template.md, k8s/README-staging-secheaders.md"
+    priority: "high"
+    needs_retesting: false
+
     needs_retesting: false
     status_history:
         -working: true
