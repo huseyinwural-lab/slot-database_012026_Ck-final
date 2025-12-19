@@ -80,6 +80,26 @@ Beklenen:
 - `Content-Security-Policy-Report-Only` header’ı görünür
 - `Strict-Transport-Security` header’ı görünür (staging için düşük max-age, örn. `max-age=300`)
 
+### 3.1.1 Proof Recording (repo’ya kanıt)
+Operatör kanıtı **repo’ya** şu standart formatla kaydeder:
+
+1) Template’i kopyala:
+```bash
+cp docs/ops/proofs/secheaders/STG-SecHeaders-01.template.md \
+  docs/ops/proofs/secheaders/$(date -u +%F).md
+```
+
+2) Template içindeki `Metadata/Target` alanlarını doldur.
+
+3) `secheaders-proof.txt` içeriğini (curl çıktısı) ilgili bölüme **aynen** yapıştır.
+
+4) Pod log kontrol komutunun çıktısını (selector script) ilgili bölüme yapıştır.
+
+PASS kriteri (kanıt dosyasında açıkça işaretlenmeli):
+- `Content-Security-Policy-Report-Only` mevcut
+- `Strict-Transport-Security` mevcut
+- Pod log’larında `mode=report-only` seçimi görülüyor
+
 ### 3.2 Pod log kontrolü (selector script çalıştı mı?)
 Selector script, container start’ında mode seçip şunu loglar:
 - `[security-headers] mode=... -> /etc/nginx/snippets/security_headers_active.conf`
