@@ -102,6 +102,20 @@ frontend_bonusmanagement_gt_fix_dec18:
         -comment: "✅ FRONTEND BONUSMANAGEMENT JSX PARSE FIX VALIDATION COMPLETE - ALL REQUIREMENTS PASSED (4/4 - 100% success rate): Test 1) ✅ Bonus Management page renders correctly - Page loads without blank screen, displays 'Bonus Campaigns' title and form elements properly. Test 2) ✅ JSX fixes working correctly - 'Threshold Deposit (>Amount)' option visible in Bonus Type dropdown, escaped '>' characters properly rendered. Test 3) ✅ No compilation errors - No 'Compiled with problems' overlay, no webpack compilation issues detected. Test 4) ✅ Build succeeds with warnings only - yarn lint passes with 0 errors and 28 warnings (expected behavior). TECHNICAL VALIDATION: JSX text tokens containing '>' characters properly escaped as '&gt;' in lines 140 and 259-260 of BonusManagement.jsx, dropdown options render correctly showing 'Threshold Deposit (>Amount)', 'Deposit > X', and 'Loss > X' options. All JSX parsing issues resolved successfully."
 
 p3_release_decision_tree_dec18:
+
+
+ci_fe_01_frontend_lint_job_dec18:
+  - task: "CI-FE-01: Frontend lint job (PR gating)"
+    implemented: true
+    working: true
+    file: ".github/workflows/frontend-lint.yml"
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Added minimal GitHub Actions workflow to run frontend yarn install --frozen-lockfile + yarn lint on PR/push; warnings do not fail (warn level), errors fail the job."
+
   - task: "P3.1 Release & Rollback: add single decision-tree runbook"
     implemented: true
     working: true
