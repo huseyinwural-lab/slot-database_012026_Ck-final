@@ -118,6 +118,20 @@ p3_release_decision_tree_dec18:
 
 ci_fe_01_frontend_lint_job_dec18:
   - task: "CI-FE-01: Frontend lint job (PR gating)"
+
+
+ci_fe_01_paths_filter_dec18:
+  - task: "CI-FE-01: frontend-lint workflow paths filter (maliyet azaltma)"
+    implemented: true
+    working: true
+    file: ".github/workflows/frontend-lint.yml"
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Added paths filter so frontend lint runs only when frontend/**, k8s/**, or docs/ops/** change (for PR + main/master push)."
+
     implemented: true
     working: true
     file: ".github/workflows/frontend-lint.yml"
