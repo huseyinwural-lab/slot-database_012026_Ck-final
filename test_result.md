@@ -110,6 +110,16 @@ p4_3_phase2_policy_canonical_section_dec19:
     priority: "high"
     needs_retesting: false
 
+
+
+p4_3_p2_sched_01_dec19:
+  - task: "P4.3-P2-SCHED-01: CSP violation raporlama takvimi (D0/D2/D4/D6/D7)"
+    implemented: true
+    working: true
+    file: "docs/ops/proofs/csp/schedule.md"
+    priority: "high"
+    needs_retesting: false
+
         -agent: "main"
         -comment: "Installed eslint-plugin-react-hooks, added eslint flat config (eslint.config.js) for ESLint v9, added yarn lint script. yarn lint passes (warnings only)."
         -working: true
