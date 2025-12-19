@@ -100,6 +100,16 @@ p4_3_phase2_observed_violations_template_dec19:
 
     status_history:
         -working: true
+
+
+p4_3_phase2_policy_canonical_section_dec19:
+  - task: "P4.3 Phase 2: csp_policy.md canonical Observed→Approved additions bölümü"
+    implemented: true
+    working: true
+    file: "docs/ops/csp_policy.md"
+    priority: "high"
+    needs_retesting: false
+
         -agent: "main"
         -comment: "Installed eslint-plugin-react-hooks, added eslint flat config (eslint.config.js) for ESLint v9, added yarn lint script. yarn lint passes (warnings only)."
         -working: true
