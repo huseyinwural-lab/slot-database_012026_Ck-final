@@ -72,6 +72,9 @@ Notlar:
 ### 3.1 Header doğrulama (curl)
 ```bash
 curl -I "https://${STAGING_DOMAIN}/" | egrep -i "content-security-policy|strict-transport-security"
+
+# proof için dosyaya yazdır
+curl -I "https://${STAGING_DOMAIN}/" | egrep -i "content-security-policy|strict-transport-security" | tee secheaders-proof.txt
 ```
 Beklenen:
 - `Content-Security-Policy-Report-Only` header’ı görünür
