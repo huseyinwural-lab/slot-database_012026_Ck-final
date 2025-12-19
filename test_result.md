@@ -84,6 +84,16 @@ stg_secheaders_01_proof_template_dec19:
     implemented: true
     working: true
     file: "docs/ops/proofs/secheaders/STG-SecHeaders-01.template.md, k8s/README-staging-secheaders.md"
+
+
+stg_secheaders_template_false_positive_hardening_dec19:
+  - task: "STG-SecHeaders-01 template: report-only doğrulama filtresi + HSTS satırı kontrol komutu"
+    implemented: true
+    working: true
+    file: "docs/ops/proofs/secheaders/STG-SecHeaders-01.template.md"
+    priority: "high"
+    needs_retesting: false
+
     priority: "high"
     needs_retesting: false
 
