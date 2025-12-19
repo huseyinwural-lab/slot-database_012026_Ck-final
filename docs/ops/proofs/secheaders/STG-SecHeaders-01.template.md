@@ -33,7 +33,12 @@
 Command:
 ```bash
 export STAGING_DOMAIN="<fill-me>"
-curl -I "https://${STAGING_DOMAIN}/" | egrep -i "content-security-policy|strict-transport-security" | tee secheaders-proof.txt
+
+# Report-Only + HSTS (yanlış pozitifleri azaltmak için CSP-Report-Only'yi hedefle)
+curl -I "https://${STAGING_DOMAIN}/" | egrep -i "content-security-policy-report-only|strict-transport-security" | tee secheaders-proof.txt
+
+# HSTS satırını net doğrula (max-age=300 ve includeSubDomains/preload olmamalı)
+curl -I "https://${STAGING_DOMAIN}/" | egrep -i "^strict-transport-security:"
 ```
 
 Output (paste exact content from `secheaders-proof.txt`):
