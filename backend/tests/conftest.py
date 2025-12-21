@@ -47,16 +47,35 @@ def db_session(sync_engine):
         db.close()
 
 
+def make_override_get_current_player(db_session):
+    def _override(request: Request):
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing token")
+
+        token = auth.split(" ", 1)[1].strip()
+        try:
+            payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        except JWTError:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        player_id = payload.get("sub")
+        tenant_id = payload.get("tenant_id")
+        if not player_id or not tenant_id:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+
+        player = db_session.get(Player, player_id)
+        if not player:
+            raise HTTPException(status_code=401, detail="Player not found")
+        return player
+
+    return _override
+
+
 @pytest.fixture(scope="function")
 def client(db_session):
-    # App'in DB dependency'sini test session'a override et
-    def override_get_session():
-        try:
-            yield db_session
-        finally:
-            pass
-
-    app.dependency_overrides[get_session] = override_get_session
+    # Sadece auth dependency'sini override et; DB async yapısı uygulamada aynı kalır.
+    app.dependency_overrides[get_current_player] = make_override_get_current_player(db_session)
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
