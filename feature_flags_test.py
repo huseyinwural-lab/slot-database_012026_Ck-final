@@ -9,7 +9,7 @@ import json
 import sys
 
 class FeatureFlagsEnforcementTester:
-    def __init__(self, base_url="https://casino-ops-headers.preview.emergentagent.com"):
+    def __init__(self, base_url="https://headers-ops-ready.preview.emergentagent.com"):
         self.base_url = base_url
         self.access_token = None
 

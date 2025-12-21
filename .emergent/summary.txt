@@ -1,157 +1,170 @@
 <analysis>**original_problem_statement:**
-The user's goal is to finalize a production-grade, multi-tenant casino admin panel for a staging release. The primary objective is to resolve all P0/P1 release blockers, ensure the  CI/CD pipeline passes successfully, clean up the repository configuration, and produce comprehensive deployment and operations documentation. The user has provided a comprehensive Go/No-Go master checklist detailing all requirements.
+The user's initial problem was to finalize a production-grade, multi-tenant casino admin panel. After resolving P0/P1 blockers, the focus shifted to implementing P2 (Observability, Auditing), P3 (Release Management, Backup/Recovery), and P4 (DR, Logging, Security) tasks from a master checklist.
+
+This session focused on hardening the operational processes around the P4.3 task: enabling CSP and HSTS headers in staging. This involved fixing a critical Docker build failure, introducing a CI linting job, and creating a comprehensive, auditable process for an operator to verify the security header implementation and report on CSP violations. The session ended with the agent blocked, waiting for the user (acting as the operator) to provide the verification proof from the staging environment.
 
 **PRODUCT REQUIREMENTS:**
-- All P0/P1 security, operational, and documentation tasks from the user's MASTER checklist must be completed.
-- The  CI/CD pipeline must be GREEN.
-- The application must be release-ready for a staging environment, with clear documentation for deployment, maintenance, and security.
-- The repository must be configured with clean  files without any default credentials or fallbacks.
+- Systematically implement all approved P3 and P4 tasks for production readiness.
+- Create deterministic, operator-friendly documentation, scripts, and verification processes.
+- Implement security headers (CSP, HSTS) in a phased, safe manner, starting with staging.
+- Ensure all configurations and scripts are ready for both Docker Compose and Kubernetes environments.
+- Add a linting step to the CI pipeline to improve code quality and catch errors early.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The project is a monorepo with a FastAPI backend and a React frontend. All P0 and P1 tasks have been completed. The CI/CD pipeline (), which was previously a major blocker, is now stable and passing, as confirmed by the user. The agent has implemented extensive documentation for deployment, operations (backup/restore), and security configurations. Security hardening measures like rate limiting on the login endpoint and stricter CORS policies are in place. The codebase is now considered release-ready for staging.
+The project is a FastAPI and React monorepo undergoing production-hardening. All P2 and P3 tasks are complete. P4 documentation is largely complete.
+Key assets from this session include:
+- A new CI workflow at  that runs ESLint on frontend code changes.
+- A fix for the  build, which was failing due to a  mismatch. The dependency  was pinned and the lockfile was regenerated.
+- A comprehensive set of documentation and templates under  to standardize the proof-gathering for security header implementation (STG-SecHeaders-01) and CSP violation reporting (P4.3 Phase 2). This includes templates, a reporting schedule, and updates to the canonical .
+- A detailed README () with copy-paste commands for an operator to apply, verify, and roll back the staging security headers.
 
 **Last working item**:
-- **Last item agent was working:** The agent resolved the final CI pipeline failure. The backend container was repeatedly failing its health check () in the CI environment. The agent correctly diagnosed the issue was a misconfigured  environment variable in the  file and corrected it.
-- **Status:** USER VERIFICATION PENDING
-- **Agent Testing Done:** Y (Agent diagnosed the issue from CI artifacts and logs, then implemented the fix in the workflow YAML.)
-- **Which testing method agent to use?** The user must be asked to run the  GitHub Actions workflow one final time to confirm the fix.
-- **User Testing Done:** Y (The user ran the CI pipeline after the agent's latest fix and confirmed with pass ok.)
+- **Last item agent was working:** Finalizing the operator process for **Task STG-SecHeaders-01 — Report-Only enablement (staging)**. The agent's work is complete, but the task is blocked. The agent was trying to guide the user on how to generate the required proof artifact since the agent itself does not have access to the user's staging environment. The user repeatedly provided the template file instead of the filled-out proof with actual command outputs.
+- **Status:** BLOCKED
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** Manual testing by an operator. The operator must use  and  as detailed in  and .
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-None. All P0 and P1 issues have been resolved.
-
-**Issues Detail:**
-None.
+- **Issue 1:** Docker build failure in  (P0)
+  - **Description:** The  service build was failing with a yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.11s. error because the  file was out of sync after adding .
+  - **Attempted fixes:** The agent successfully resolved this by pinning  to version  in , deleting , and running yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. to regenerate a consistent  file.
+  - **Next debug checklist:** The user needs to verify the fix by running the build command they provided: .
+  - **Why fix this issue and what will be achieved with the fix?** This was a critical blocker preventing any containerized build or deployment of the frontend application.
+  - **Status:** USER VERIFICATION PENDING
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** The fix is verified by a successful Docker build.
 
 **In progress Task List**:
-None.
+- **Task 1:** Complete STG-SecHeaders-01 — Report-Only enablement (staging) (P0)
+  - **Description:** This task involves enabling CSP in  mode and HSTS in the staging environment.
+  - **Where to resume:** The agent is waiting for the user/operator to provide the proof of implementation. The operator needs to follow the instructions in  and use the template at  to create a new file named . This file must contain the actual outputs of the  and  commands executed against the staging environment.
+  - **What will be achieved with this?** The task will be formally closed with audit-ready proof, confirming the security headers are correctly deployed and marking the start of the CSP violation monitoring phase.
+  - **Status:** BLOCKED
+  - **Should Test frontend/backend/both after fix?** Frontend (via operator  check).
+  - **Blocked on something:** Waiting for the user (acting as operator) to perform actions in their private staging environment and provide the resulting proof file.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks (P2 from user's list):**
-    - **P2.1 Security Hardening:**
-        - Audit JWT expiry and implement a refresh token strategy.
-        - Add audit logs for critical admin endpoints.
-    - **P2.2 Observability:**
-        - Enhance structured logging to include request IDs across services.
-        - Improve error classification in logs.
-- **Future Tasks (P3 from user's list):**
-    - **P3.1 Backup/Recovery:**
-        - Schedule and test the PostgreSQL database restore strategy defined in .
-    - **P3.2 Release & Rollback:**
-        - Formalize Git version tagging and release procedures.
+- **Upcoming Tasks:**
+    - **P4.3 Phase 2 (P1):** Begin the 7-day monitoring period for CSP violations in staging, using the newly created templates and schedule. The first step is for the operator to create the D0 (Day 0) report based on .
+    - **P4.3 Phase 3 (P1):** After monitoring and updating the allowlist in , switch CSP from  to  mode in the staging environment.
+    - **P4.3 Phase 4 (P1):** Incrementally increase the HSTS  in staging.
+    - **P4.3 Phase 5 (P2):** Begin the entire security header rollout process for the production environment.
+- **Future Tasks:**
+    - Execute and document a full restore drill using the created templates ().
 
 **Completed work in this session**
-- **CI/CD Pipeline Stabilization (P0):**
-    - **Fixed  error:** Resolved multiple root causes for the backend container failing in CI, with the final fix being the correction of the  in .
-    - **Fixed :** Corrected the logger initialization order in  to prevent crashes in staging/prod environments.
-    - **Made CI Secrets Optional:** The workflow now generates ephemeral bootstrap credentials if GitHub secrets are not present, preventing the pipeline from blocking on new forks or repos.
-    - **Hardened  Sanity Check:** Replaced a fragile JSON parsing script with a robust check for the  HTTP status code.
-
-- **Deployment Documentation & Hardening (P1):**
-    - **Created :** A comprehensive guide for setting up the project on a single VM with Docker Compose.
-    - **Created Reverse Proxy Examples:** Added example configurations for Nginx and Traefik in , including logic for separate admin/player domains, TLS termination, and security headers.
-    - **Created Operations Docs & Scripts:** Added backup/restore procedures () and helper scripts (, Usage: scripts/restore_postgres.sh <backup.sql.gz>).
-    - **Created **.
-
-- **Security Hardening (P1):**
-    - **Implemented Rate Limiting:** Added FastAPI middleware () to limit login attempts to 5 per minute per IP, returning a  error.
-    - **Tightened CORS Policy:** Configured the backend to fail-closed in production if  is not explicitly set, removing the  wildcard.
-    - **Added Security Headers:** Added , , and  to the Nginx configurations.
-    - **Hardened Bootstrap Logic:** Added warnings in  to discourage leaving  in production.
-
-- **Configuration Cleanup (P0):**
-    - Created and cleaned all  files to serve as secure, empty templates.
-    - Ensured no fallback credentials exist for bootstrap secrets in .
-    - Refactored frontend API services to use same-origin paths () by default, relying on the Nginx reverse proxy.
+- **CI/CD & Linting:**
+  - **CI-FE-01 Task:** Created  to run yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. on relevant file changes (, , ) for PRs and pushes to .
+  - **ESLint Configuration:** Added and configured  and created  and  for the frontend.
+- **Bug Fixes:**
+  - **Docker Build Failure:** Resolved the yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. error by pinning the  dependency to  and regenerating .
+  - **JSX Error:** Fixed an invalid  character in .
+- **P4.3 Process Hardening (Security Headers):**
+  - **Operator README:** Created  with step-by-step operator commands.
+  - **Proof Standardization:** Created and refined  to standardize proof collection for the initial rollout.
+  - **CSP Violation Reporting:**
+    - Created  for reporting.
+    - Created  and  to define the process and cadence.
+    - Updated  to include an Observed → Approved additions section for tracking policy changes.
 
 **Earlier issues found/mentioned but not fixed**
 None.
 
 **Known issue recurrence from previous fork**
-- **Issue:** The  CI workflow was a recurring blocker, failing repeatedly for different reasons (application bugs, curl scripts, secret handling, container health checks).
-- **Recurrence count:** 4+ times during the session.
-- **Status:** RESOLVED. The agent systematically addressed each root cause, culminating in a stable, passing pipeline confirmed by the user.
+None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **CI/CD Debugging:** Using artifacts from GitHub Actions (, ) to diagnose and resolve complex pipeline failures systematically.
-- **Nginx Reverse Proxy:** Using Nginx within frontend containers to proxy  calls to the backend, and providing external reverse proxy examples for production deployment.
-- **FastAPI Middleware:** Implementing custom middleware for rate limiting based on client IP.
-- **Secure Configuration:** Hardening the application by removing default credentials, using  templates, and implementing fail-closed security policies (e.g., CORS).
+- **CI/CD:** Introduced a linting job () with GitHub Actions, using  filtering to optimize runs.
+- **Dependency Management:** Resolved a yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. error in a Docker build by pinning a sub-dependency version in  and regenerating the  file.
+- **GitOps/IaC:** Extended the principle of Infrastructure as Code to Operations as Code by creating version-controlled templates () to standardize manual verification and proof-gathering for operational tasks.
+- **Security Header Rollout:** Focused on creating a robust, auditable, and operator-friendly process for a phased security rollout, emphasizing documentation, proof collection, and reporting schedules.
 
 **key DB schema**
-No changes were made to the database schema in this session.
+No changes were made to the database schema.
 
 **changes in tech stack**
-None.
+- **ESLint:** The  package was added to the frontend development stack.
 
 **All files of reference**
-- **Primary CI/CD File:** 
-- **Primary Backend Fixes:** , 
-- **New Backend Middleware:** 
-- **Primary Documentation:** , 
-- **New Scripts:** , Usage: /app/scripts/restore_postgres.sh <backup.sql.gz>
-- **Configuration Templates:** All  files.
-- **Proxy Examples:** , 
+- **Current Blocker (Proof Generation):**
+  - 
+  - 
+- **CI/CD:**
+  - 
+- **Dependency Fix Verification:**
+  - 
+  - 
+  - 
+- **CSP Rollout Process Documentation:**
+  -  (entire directory)
+  - 
 
 **Areas that need refactoring**:
-- The documentation is comprehensive but spread across multiple files in the  directory (, , etc.). These could potentially be consolidated into the main  or a more structured  site for easier navigation.
+None.
 
 **key api endpoints**
-- : Now has a rate limit of 5 requests/minute per IP.
-- : Used by Docker health checks and smoke tests.
+No new API endpoints were created or modified.
 
 **Critical Info for New Agent**
-- The project's CI pipeline () is now STABLE and PASSING. All P0 and P1 items from the user's checklist are complete.
-- The project is considered release-ready. The next phase of work involves P2/P3 tasks, such as enhancing security (JWT refresh tokens, audit logs) and observability.
-- The user is highly technical and prefers clear, structured updates. Always confirm your plan before implementation.
-- The primary method of verification for any changes is for the user to run the  workflow on GitHub Actions.
+- **You are Blocked:** The immediate next step requires action from the user. You are waiting for them to act as an operator, run commands in their staging environment, and provide you with the output. You cannot proceed without this.
+- **User is the Operator:** The user has access to the staging Kubernetes cluster; you do not. Your role is to provide clear, copy-paste-ready commands and documentation for the user to execute.
+- **Clarify Proof vs. Template:** The user has repeatedly confused the proof *template* () with the actual *proof* (a file created from the template, filled with real data). If the user sends a template again, you must gently but clearly state that you need the *output* from the commands, not the template itself.
+- **Verify Docker Build Fix:** Remind the user to run  to confirm that the previous build failure is resolved.
 
-**documents created in this job**
-- /app/DEPLOYMENT.md
-- /app/docs/release-checklist.md
-- /app/docs/ops/backup.md
-- /app/docs/reverse-proxy/nginx.example.conf
-- /app/docs/reverse-proxy/traefik.example.yml
-- /app/scripts/backup_postgres.sh
-- /app/scripts/restore_postgres.sh
+**documents and test_reports created in this job**
+- 
+- 
+- 
+- 
+- 
+- 
+- 
+- 
 
-**Last 10 User Messages and any pending user messages**
-- The user confirmed the documentation updates were suitable and approved moving to P1 security tasks.
-- The user provided detailed requirements for rate limiting and CORS.
-- The user reported a CI failure where the backend container was .
-- The agent diagnosed a  in , fixed it, and asked the user to re-run the CI.
-- The user reported the *same*  CI failure again.
-- The agent re-analyzed the artifacts and found the true root cause was a misconfigured  in the workflow file.
-- The agent explained and applied the new fix, asking the user to re-run the CI.
-- The user confirmed the final fix worked with **pass ok**.
-- The user then said **devam** (continue), signaling approval to move on from the P0/P1 tasks.
-- **Pending:** The agent needs to propose a plan for the next set of tasks (P2/P3) and get user approval.
+**Last 10 User Messages and any pending HUMAN messages**
+The last several user messages demonstrate a misunderstanding where the user repeatedly provides the proof *template* file when the agent is asking for the *actual proof* (the template filled with command outputs from staging). The user also asked why a proof file with a specific date doesn't exist, leading the agent to explain that the file must be created by the operator. The agent's final messages are all variations of explaining this process and waiting for the user to provide the correct artifact.
+
+**Pending Message:** The agent is waiting for the user to provide the content of the filled-out proof file, , containing the real  and  outputs from the staging environment.
 
 **Project Health Check:**
-- **Broken:** None.
+- **Broken:** The  for  was broken and has been fixed. The fix is pending user verification.
 - **Mocked:** None.
 
 **3rd Party Integrations**
-- **PostgreSQL:** Primary database.
-- **SQLModel/SQLAlchemy:** ORM.
-- **Alembic:** Database migration tool.
-- **Playwright:** E2E testing framework.
-- **GitHub Actions:** CI/CD platform.
-- **OpenAI GPT-4o:** Integrated for fraud detection. Uses Emergent LLM Key.
+- PostgreSQL
+- SQLModel/SQLAlchemy
+- Alembic
+- Playwright
+- GitHub Actions
+- OpenAI GPT-4o (Uses Emergent LLM Key)
 
 **Testing status**
 - **Testing agent used after significant changes:** NO
 - **Troubleshoot agent used after agent stuck in loop:** NO
 - **Test files created:** None.
-- **Known regressions:** None. The previous recurring regression (CI failure) has been resolved.
+- **Known regressions:** The  Docker build was failing due to a dependency issue. This is believed to be fixed, pending user verification.
 
 **Credentials to test flow:**
-The CI pipeline now generates its own ephemeral credentials ( / ) if  secrets are not found in the repository. This allows the pipeline to run without manual setup.
+N/A
 
 **What agent forgot to execute**
-The agent has successfully completed all P0 and P1 tasks requested by the user. No tasks were forgotten.</analysis>
+Nothing. The agent is blocked by the need for user action in an external environment. The agent correctly identified its limitations and has been attempting to guide the user to provide the necessary information.</analysis>
