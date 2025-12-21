@@ -1,53 +1,74 @@
 import os
-import sys
 from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
 from jose import jwt
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 
-sys.path.append(os.path.abspath("/app/backend"))
-
 from config import settings
-from app.core.database import engine, async_session
-from app.models.sql_models import Player, Tenant
 from server import app
+from app.models.sql_models import Player, Tenant
+from app.core.database import get_session
+
+
+TEST_DB_PATH = os.path.join(os.path.dirname(__file__), "..", "test_casino.db")
+TEST_DB_URL = f"sqlite:///{os.path.abspath(TEST_DB_PATH)}"
 
 
 @pytest.fixture(scope="session")
-def db_engine():
-    # Use the same engine as the app (sqlite test db)
+def sync_engine():
+    # Temiz test DB'si ile başla
+    if os.path.exists(TEST_DB_PATH):
+        os.remove(TEST_DB_PATH)
+
+    engine = create_engine(
+        TEST_DB_URL,
+        connect_args={"check_same_thread": False},
+        future=True,
+    )
+    SQLModel.metadata.create_all(engine)
     return engine
 
 
 @pytest.fixture(scope="function")
-async def db_session(db_engine) -> AsyncSession:
-    async_session_local = sessionmaker(db_engine, class_=AsyncSession, expire_on_commit=False)
-    async with async_session_local() as session:
-        # Ensure tables exist
-        await db_engine.begin()
-        yield session
-        await session.rollback()
+def db_session(sync_engine):
+    SessionLocal = sessionmaker(bind=sync_engine, autoflush=False, autocommit=False, future=True)
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.rollback()
+        db.close()
 
 
 @pytest.fixture(scope="function")
-def client():
-    return TestClient(app)
+def client(db_session):
+    # App'in DB dependency'sini test session'a override et
+    def override_get_session():
+        try:
+            yield db_session
+        finally:
+            pass
+
+    app.dependency_overrides[get_session] = override_get_session
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
 
 
-async def _create_tenant(session: AsyncSession, name: str = "Test Casino") -> Tenant:
-    tenant = Tenant(name=name, type="owner", features={})
-    session.add(tenant)
-    await session.commit()
-    await session.refresh(tenant)
+def create_tenant(db, name: str = "Test Casino", ttype: str = "owner") -> Tenant:
+    tenant = Tenant(name=name, type=ttype, features={})
+    db.add(tenant)
+    db.commit()
+    db.refresh(tenant)
     return tenant
 
 
-async def _create_player(
-    session: AsyncSession,
+def create_player(
+    db,
     tenant_id: str,
     email: str = "player@test.com",
     username: str = "player",
@@ -63,28 +84,27 @@ async def _create_player(
         balance_real_available=balance_available,
         balance_real_held=balance_held,
         kyc_status=kyc_status,
-        registered_at=datetime.utcnow(),
+        registered_at=datetime.now(timezone.utc),
     )
-    session.add(player)
-    await session.commit()
-    await session.refresh(player)
+    db.add(player)
+    db.commit()
+    db.refresh(player)
     return player
 
 
-def _make_player_token(player: Player, tenant_id: str) -> str:
+def make_player_token(player_id: str, tenant_id: str) -> str:
     payload = {
-        "sub": player.id,
+        "sub": player_id,
         "tenant_id": tenant_id,
         "role": "player",
-        "exp": datetime.utcnow() + timedelta(days=1),
+        "exp": datetime.now(timezone.utc) + timedelta(days=1),
     }
-    token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
-    return token
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 @pytest.fixture
-async def player_with_token(db_session):
-    tenant = await _create_tenant(db_session)
-    player = await _create_player(db_session, tenant_id=tenant.id)
-    token = _make_player_token(player, tenant.id)
+def player_with_token(db_session):
+    tenant = create_tenant(db_session)
+    player = create_player(db_session, tenant_id=tenant.id)
+    token = make_player_token(player.id, tenant.id)
     return tenant, player, token
