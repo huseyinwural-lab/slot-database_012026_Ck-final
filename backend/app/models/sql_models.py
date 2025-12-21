@@ -47,7 +47,7 @@ class Player(SQLModel, table=True):
     username: str = Field(index=True)
     email: str = Field(index=True)
     password_hash: str
-    # Legacy aggregate balance fields (will be deprecated in favor of available/held)
+    # Legacy aggregate balance fields (kept for backward compatibility)
     balance_real: float = 0.0
     balance_bonus: float = 0.0
     # New split balances for prod-grade wallet
