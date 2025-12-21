@@ -98,6 +98,14 @@ def client(async_session_factory):
 
 
 async def _create_tenant(session: AsyncSession, name="Test Casino", ttype="owner") -> Tenant:
+    # Try find existing tenant by name to avoid UNIQUE constraint issues in tests
+    from sqlmodel import select
+
+    result = await session.execute(select(Tenant).where(Tenant.name == name))
+    tenant = result.scalars().first()
+    if tenant:
+        return tenant
+
     tenant = Tenant(name=name, type=ttype, features={})
     session.add(tenant)
     await session.commit()
