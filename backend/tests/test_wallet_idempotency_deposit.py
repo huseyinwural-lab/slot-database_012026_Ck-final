@@ -1,18 +1,15 @@
-import pytest
-from httpx import AsyncClient
+from fastapi.testclient import TestClient
 
 import sys, os
 sys.path.append(os.path.abspath("/app/backend"))
 
-from config import settings
-from app.models.sql_models import Player
-from app.core.database import get_session
 from server import app
 
 
-@pytest.mark.asyncio
-async def test_deposit_idempotency_same_key_returns_same_tx_and_no_duplicate(monkeypatch):
-    async with AsyncClient(base_url="http://test") as client:
+client = TestClient(app)
+
+
+def test_deposit_idempotency_same_key_returns_same_tx_and_no_duplicate():
         # Register + login player
         register_payload = {"email": "idem@test.com", "password": "password123", "username": "idem"}
         r = await client.post("/api/v1/auth/player/register", json=register_payload)
