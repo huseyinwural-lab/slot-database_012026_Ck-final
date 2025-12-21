@@ -187,7 +187,7 @@ async def create_withdrawal(
         status="pending",
         state="requested",
         method=method,
-        metadata={"request_hash": req_hash, "address": address},
+        wallet_metadata={"request_hash": req_hash, "address": address},
         balance_after=(current_player.balance_real_available - amount) + current_player.balance_real_held,
     )
 
