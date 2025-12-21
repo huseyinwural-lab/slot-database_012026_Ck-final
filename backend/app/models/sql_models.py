@@ -47,8 +47,12 @@ class Player(SQLModel, table=True):
     username: str = Field(index=True)
     email: str = Field(index=True)
     password_hash: str
+    # Legacy aggregate balance fields (will be deprecated in favor of available/held)
     balance_real: float = 0.0
     balance_bonus: float = 0.0
+    # New split balances for prod-grade wallet
+    balance_real_available: float = 0.0
+    balance_real_held: float = 0.0
     status: str = "active"
     kyc_status: str = "pending"
     risk_score: str = "low"
@@ -83,10 +87,23 @@ class Transaction(SQLModel, table=True):
     amount: float
     currency: str = "USD"
     status: str 
+    # New state machine field (created/pending_provider/completed/failed/reversed, requested/under_review/approved/paid/rejected/canceled)
+    state: str = "created"
     method: Optional[str] = None
     provider_tx_id: Optional[str] = None
+    # Idempotency and provider event identifiers
+    idempotency_key: Optional[str] = None
+    provider: Optional[str] = None
+    provider_event_id: Optional[str] = None
+    # Review / manual intervention metadata
+    review_reason: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    # Extra metadata (e.g. webhook payload hashes)
+    metadata: Dict = Field(default={}, sa_column=Column(JSON))
     balance_after: float = 0.0
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     player: Player = Relationship(back_populates="transactions")
 
