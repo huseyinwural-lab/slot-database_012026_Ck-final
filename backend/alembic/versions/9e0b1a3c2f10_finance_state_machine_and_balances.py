@@ -86,9 +86,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Drop unique constraints
-    op.drop_constraint("uq_transaction_provider_event_not_null", "transaction", type_="unique")
-    op.drop_constraint("uq_transaction_player_id_idempotency_key_not_null", "transaction", type_="unique")
+    # Drop partial unique indexes
+    op.drop_index("ux_tx_provider_event_not_null", table_name="transaction")
+    op.drop_index("ux_tx_player_id_idempotency_key_not_null", table_name="transaction")
 
     # Drop transaction extension columns
     op.drop_column("transaction", "updated_at")
