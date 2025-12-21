@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     sendgrid_from_email: str = "admin@casino.com"
     emergent_llm_key: Optional[str] = None
 
+    # KYC / wallet
+    kyc_unverified_daily_deposit_cap: float = 100.0
+
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
         if not raw:
