@@ -12,6 +12,9 @@ from config import settings
 from server import app
 from app.models.sql_models import Player, Tenant
 from app.core.database import get_session
+from app.utils.auth_player import get_current_player
+from fastapi import Request, HTTPException
+from jose import jwt, JWTError
 
 
 TEST_DB_PATH = os.path.join(os.path.dirname(__file__), "..", "test_casino.db")
