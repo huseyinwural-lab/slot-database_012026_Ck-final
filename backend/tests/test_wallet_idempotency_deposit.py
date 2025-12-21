@@ -17,6 +17,9 @@ def test_deposit_idempotency_same_key_returns_same_tx_and_no_duplicate(client, p
 
     # Second deposit with same key and same payload
     r2 = client.post("/api/v1/player/wallet/deposit", json={"amount": 10, "method": "card"}, headers=headers)
-    # Should be treated as idempotent replay (FIN_IDEMPOTENCY_HIT) but still 200-level
-    assert r2.status_code in (200, 409, 400)
+    # Same payload + same key => 200 and same transaction id
+    assert r2.status_code == 200
+    body1 = r1.json()
+    body2 = r2.json()
+    assert body2["transaction"]["id"] == body1["transaction"]["id"]
 
