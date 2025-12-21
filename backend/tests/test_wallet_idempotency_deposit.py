@@ -1,10 +1,13 @@
 import pytest
 from httpx import AsyncClient
 
-from backend.config import settings
-from backend.app.models.sql_models import Player
-from backend.app.core.database import get_session
-from backend.main import app
+import sys, os
+sys.path.append(os.path.abspath("/app/backend"))
+
+from config import settings
+from app.models.sql_models import Player
+from app.core.database import get_session
+from server import app
 
 
 @pytest.mark.asyncio
