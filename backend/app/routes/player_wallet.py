@@ -12,6 +12,7 @@ from app.core.database import get_session
 from app.utils.auth_player import get_current_player
 from app.models.common import PaginatedResponse
 from app.core.errors import AppError
+from app.services.audit import audit
 from config import settings
 
 router = APIRouter(prefix="/api/v1/player/wallet", tags=["player_wallet"])
