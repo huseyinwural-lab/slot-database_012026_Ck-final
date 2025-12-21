@@ -98,7 +98,7 @@ async def create_deposit(
         method=method,
         provider_tx_id="MockGateway",
         idempotency_key=idempotency_key,
-        wallet_metadata={"request_hash": req_hash},
+        metadata={"request_hash": req_hash},
         balance_after=current_player.balance_real_available + amount,
     )
 
