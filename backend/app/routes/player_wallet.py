@@ -70,7 +70,7 @@ async def create_deposit(
     )
     existing = (await session.execute(stmt)).scalars().first()
     if existing:
-        meta = existing.metadata or {}
+        meta = existing.metadata_json or {}
         existing_hash = meta.get("request_hash")
         if existing_hash and existing_hash != req_hash:
             raise AppError(
@@ -162,7 +162,7 @@ async def create_withdrawal(
     )
     existing = (await session.execute(stmt)).scalars().first()
     if existing:
-        meta = existing.metadata or {}
+        meta = existing.metadata_json or {}
         existing_hash = meta.get("request_hash")
         if existing_hash and existing_hash != req_hash:
             raise AppError(
