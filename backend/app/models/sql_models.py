@@ -100,7 +100,7 @@ class Transaction(SQLModel, table=True):
     reviewed_by: Optional[str] = None
     reviewed_at: Optional[datetime] = None
     # Extra metadata (e.g. webhook payload hashes)
-    metadata: Dict = Field(default={}, sa_column=Column(JSON))
+    wallet_metadata: Dict = Field(default={}, sa_column=Column(JSON))
     balance_after: float = 0.0
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
