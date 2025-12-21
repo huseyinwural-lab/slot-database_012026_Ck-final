@@ -1,54 +1,63 @@
 import os
+import asyncio
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from fastapi import Request, HTTPException, Depends
 from fastapi.testclient import TestClient
-from jose import jwt
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from jose import jwt, JWTError
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlmodel import SQLModel
 
 from config import settings
 from server import app
-from app.models.sql_models import Player, Tenant
 from app.core.database import get_session
+from app.models.sql_models import Tenant, Player
 from app.utils.auth_player import get_current_player
-from fastapi import Request, HTTPException
-from jose import jwt, JWTError
 
 
-TEST_DB_PATH = os.path.join(os.path.dirname(__file__), "..", "test_casino.db")
-TEST_DB_URL = f"sqlite:///{os.path.abspath(TEST_DB_PATH)}"
+# ---------- Test DB (async sqlite) ----------
+TEST_DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "test_casino.db"))
+TEST_DB_URL = f"sqlite+aiosqlite:///{TEST_DB_PATH}"
+
+
+def _run(coro):
+    return asyncio.run(coro)
 
 
 @pytest.fixture(scope="session")
-def sync_engine():
-    # Temiz test DB'si ile başla
+def async_engine():
+    # Her test koşusunda temiz DB
     if os.path.exists(TEST_DB_PATH):
         os.remove(TEST_DB_PATH)
 
-    engine = create_engine(
-        TEST_DB_URL,
-        connect_args={"check_same_thread": False},
-        future=True,
-    )
-    SQLModel.metadata.create_all(engine)
+    engine = create_async_engine(TEST_DB_URL, future=True)
+
+    async def _init():
+        async with engine.begin() as conn:
+            await conn.run_sync(SQLModel.metadata.create_all)
+
+    _run(_init())
     return engine
 
 
-@pytest.fixture(scope="function")
-def db_session(sync_engine):
-    SessionLocal = sessionmaker(bind=sync_engine, autoflush=False, autocommit=False, future=True)
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.rollback()
-        db.close()
+@pytest.fixture(scope="session")
+def async_session_factory(async_engine):
+    return async_sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
 
-def make_override_get_current_player(db_session):
-    def _override(request: Request):
+# ---------- Dependency overrides ----------
+
+def make_override_get_session(async_session_factory):
+    async def _override():
+        async with async_session_factory() as session:
+            yield session
+
+    return _override
+
+
+def override_get_current_player_factory():
+    async def _override(request: Request, session: AsyncSession = Depends(get_session)):
         auth = request.headers.get("Authorization", "")
         if not auth.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Missing token")
@@ -64,7 +73,7 @@ def make_override_get_current_player(db_session):
         if not player_id or not tenant_id:
             raise HTTPException(status_code=401, detail="Invalid token payload")
 
-        player = db_session.get(Player, player_id)
+        player = await session.get(Player, player_id)
         if not player:
             raise HTTPException(status_code=401, detail="Player not found")
         return player
@@ -73,30 +82,37 @@ def make_override_get_current_player(db_session):
 
 
 @pytest.fixture(scope="function")
-def client(db_session):
-    # Sadece auth dependency'sini override et; DB async yapısı uygulamada aynı kalır.
-    app.dependency_overrides[get_current_player] = make_override_get_current_player(db_session)
+def client(async_session_factory):
+    # Override DB session provider
+    app.dependency_overrides[get_session] = make_override_get_session(async_session_factory)
+    # Override auth so it loads Player via SAME AsyncSession
+    app.dependency_overrides[get_current_player] = override_get_current_player_factory()
+
     with TestClient(app) as c:
         yield c
+
     app.dependency_overrides.clear()
 
 
-def create_tenant(db, name: str = "Test Casino", ttype: str = "owner") -> Tenant:
+# ---------- Seed helpers ----------
+
+
+async def _create_tenant(session: AsyncSession, name="Test Casino", ttype="owner") -> Tenant:
     tenant = Tenant(name=name, type=ttype, features={})
-    db.add(tenant)
-    db.commit()
-    db.refresh(tenant)
+    session.add(tenant)
+    await session.commit()
+    await session.refresh(tenant)
     return tenant
 
 
-def create_player(
-    db,
+async def _create_player(
+    session: AsyncSession,
     tenant_id: str,
-    email: str = "player@test.com",
-    username: str = "player",
-    kyc_status: str = "verified",
-    balance_available: float = 0.0,
-    balance_held: float = 0.0,
+    email="player@test.com",
+    username="player",
+    kyc_status="verified",
+    balance_available=0.0,
+    balance_held=0.0,
 ) -> Player:
     player = Player(
         tenant_id=tenant_id,
@@ -108,13 +124,13 @@ def create_player(
         kyc_status=kyc_status,
         registered_at=datetime.now(timezone.utc),
     )
-    db.add(player)
-    db.commit()
-    db.refresh(player)
+    session.add(player)
+    await session.commit()
+    await session.refresh(player)
     return player
 
 
-def make_player_token(player_id: str, tenant_id: str) -> str:
+def _make_player_token(player_id: str, tenant_id: str) -> str:
     payload = {
         "sub": player_id,
         "tenant_id": tenant_id,
@@ -124,9 +140,13 @@ def make_player_token(player_id: str, tenant_id: str) -> str:
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-@pytest.fixture
-def player_with_token(db_session):
-    tenant = create_tenant(db_session)
-    player = create_player(db_session, tenant_id=tenant.id)
-    token = make_player_token(player.id, tenant.id)
-    return tenant, player, token
+@pytest.fixture(scope="function")
+def player_with_token(async_session_factory):
+    async def _seed():
+        async with async_session_factory() as session:
+            tenant = await _create_tenant(session)
+            player = await _create_player(session, tenant_id=tenant.id)
+            token = _make_player_token(player.id, tenant.id)
+            return tenant, player, token
+
+    return _run(_seed())
