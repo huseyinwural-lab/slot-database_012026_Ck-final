@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Header
+from fastapi import APIRouter, Depends, HTTPException, Body, Header, Request
 from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
@@ -46,14 +46,15 @@ async def get_balance(
 
 @router.post("/deposit", response_model=WalletTxResponse)
 async def create_deposit(
+    request: Request,
     amount: float = Body(..., embed=True),
     method: str = Body(..., embed=True),
     idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
     current_player: Player = Depends(get_current_player),
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ):
     if not idempotency_key:
-        raise AppError("IDEMPOTENCY_KEY_REQUIRED", "Idempotency-Key header is required", status_code=400)
+        raise HTTPException(status_code=400, detail={"error_code": "IDEMPOTENCY_KEY_REQUIRED"})
 
     if amount <= 0:
         raise HTTPException(400, "Amount must be positive")
@@ -61,7 +62,8 @@ async def create_deposit(
     await session.refresh(current_player)
 
     # Compute request hash for conflict detection
-    req_hash = _compute_request_hash("POST", "/api/v1/player/wallet/deposit", {"amount": amount, "method": method})
+    body = {"amount": amount, "method": method}
+    req_hash = _compute_request_hash("POST", "/api/v1/player/wallet/deposit", body)
 
     # Check existing transaction by idempotency key
     stmt = select(Transaction).where(
@@ -70,22 +72,64 @@ async def create_deposit(
         Transaction.type == "deposit",
     )
     existing = (await session.execute(stmt)).scalars().first()
+    request_id = request.headers.get("X-Request-Id", "unknown")
+    ip = request.client.host if request.client else None
+
     if existing:
         meta = existing.metadata_json or {}
         existing_hash = meta.get("request_hash")
+        # 1a) Conflict: same key but different payload
         if existing_hash and existing_hash != req_hash:
-            raise AppError(
-                "IDEMPOTENCY_KEY_REUSE_CONFLICT",
-                "Idempotency key reused with different payload",
-                status_code=409,
+            await audit.log_event(
+                session=session,
+                request_id=request_id,
+                actor_user_id=current_player.id,
+                tenant_id=current_player.tenant_id,
+                action="FIN_IDEMPOTENCY_CONFLICT",
+                resource_type="wallet_deposit",
+                resource_id=existing.id,
+                result="conflict",
+                details={
+                    "tx_id": existing.id,
+                    "player_id": current_player.id,
+                    "idempotency_key": idempotency_key,
+                    "existing_request_hash": existing_hash,
+                    "incoming_request_hash": req_hash,
+                },
+                ip_address=ip,
             )
-        # Idempotent replay
-        raise AppError(
-            "FIN_IDEMPOTENCY_HIT",
-            "Idempotent replay",
-            status_code=200,
-            details={"transaction_id": existing.id},
+            raise HTTPException(
+                status_code=409,
+                detail={"error_code": "IDEMPOTENCY_KEY_REUSE_CONFLICT", "tx_id": existing.id},
+            )
+
+        # 1b) Replay: normal success response with same transaction
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=current_player.id,
+            tenant_id=current_player.tenant_id,
+            action="FIN_IDEMPOTENCY_HIT",
+            resource_type="wallet_deposit",
+            resource_id=existing.id,
+            result="success",
+            details={
+                "tx_id": existing.id,
+                "player_id": current_player.id,
+                "idempotency_key": idempotency_key,
+                "state": existing.state,
+            },
+            ip_address=ip,
         )
+        total_real = (current_player.balance_real_available or 0) + (current_player.balance_real_held or 0)
+        return {
+            "transaction": existing,
+            "balance": {
+                "available_real": current_player.balance_real_available,
+                "held_real": current_player.balance_real_held,
+                "total_real": total_real,
+            },
+        }
 
     tx_id = str(uuid.uuid4())
 
@@ -100,7 +144,7 @@ async def create_deposit(
         method=method,
         provider_tx_id="MockGateway",
         idempotency_key=idempotency_key,
-        metadata_json={"request_hash": req_hash},
+        metadata_json={"request_hash": req_hash, "method": method},
         balance_after=current_player.balance_real_available + amount,
     )
 
@@ -114,6 +158,24 @@ async def create_deposit(
 
     session.add(tx)
     session.add(current_player)
+
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=current_player.id,
+        tenant_id=current_player.tenant_id,
+        action="FIN_DEPOSIT_COMPLETED",
+        resource_type="wallet_deposit",
+        resource_id=tx.id,
+        result="success",
+        details={
+            "tx_id": tx.id,
+            "player_id": current_player.id,
+            "amount": amount,
+            "idempotency_key": idempotency_key,
+        },
+        ip_address=ip,
+    )
 
     await session.commit()
     await session.refresh(tx)
