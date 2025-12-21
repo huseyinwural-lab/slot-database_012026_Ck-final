@@ -44,7 +44,7 @@ async def get_balance(
     }
 
 
-@router.post("/deposit")
+@router.post("/deposit", response_model=WalletTxResponse)
 async def create_deposit(
     amount: float = Body(..., embed=True),
     method: str = Body(..., embed=True),
