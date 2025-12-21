@@ -2,6 +2,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON, Text
+from sqlalchemy.dialects.postgresql import JSONB
 import uuid
 
 # --- SHARED MODELS ---
