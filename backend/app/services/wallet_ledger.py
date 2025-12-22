@@ -110,12 +110,13 @@ async def apply_wallet_delta_with_ledger(
     # directly under the same transaction.
     now = datetime.utcnow()
     if not bal:
+        # Initialise snapshot from the current Player balances, then apply deltas
         bal = WalletBalance(
             tenant_id=tenant_id,
             player_id=player_id,
             currency=currency,
-            balance_real_available=float(delta_available),
-            balance_real_pending=float(delta_held),
+            balance_real_available=float(player.balance_real_available) + float(delta_available),
+            balance_real_pending=float(player.balance_real_held) + float(delta_held),
             updated_at=now,
         )
         session.add(bal)
