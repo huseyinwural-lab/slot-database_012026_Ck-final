@@ -197,7 +197,8 @@ async def test_mark_paid_from_approved_reduces_held(client, async_session_factor
 
 
 @pytest.mark.usefixtures("client")
-def test_invalid_state_transitions_return_409(client, async_session_factory):
+@pytest.mark.asyncio
+async def test_invalid_state_transitions_return_409(client, async_session_factory):
     tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-4"}
