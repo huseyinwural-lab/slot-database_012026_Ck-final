@@ -81,7 +81,7 @@ async def test_approve_requested_withdraw_does_not_change_balance(client, async_
             db_player = await session.get(Player, player.id)
             return db_player.balance_real_available, db_player.balance_real_held
 
-    before_available, before_held = asyncio.run(_load_before())
+    before_available, before_held = await _load_before()
 
     # Admin approves
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
@@ -125,7 +125,7 @@ async def test_reject_requested_withdraw_rolls_back_hold(client, async_session_f
             db_player = await session.get(Player, player.id)
             return db_player.balance_real_available, db_player.balance_real_held
 
-    before_available, before_held = asyncio.run(_load_before())
+    before_available, before_held = await _load_before()
 
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_rej = client.post(
@@ -175,7 +175,7 @@ async def test_mark_paid_from_approved_reduces_held(client, async_session_factor
             db_player = await session.get(Player, player.id)
             return db_player.balance_real_available, db_player.balance_real_held
 
-    before_available, before_held = asyncio.run(_load_before())
+    before_available, before_held = await _load_before()
 
     r_paid = client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/mark-paid",
