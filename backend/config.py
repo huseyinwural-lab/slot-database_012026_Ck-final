@@ -65,6 +65,14 @@ class Settings(BaseSettings):
     # KYC / wallet
     kyc_unverified_daily_deposit_cap: float = 100.0
 
+    # Reconciliation runner / queue
+    redis_url: str = "redis://redis:6379/0"  # REDIS_URL
+    recon_runner: str = "background"  # RECON_RUNNER: "queue" or "background"
+
+    @property
+    def arq_redis_settings(self) -> RedisSettings:
+        return RedisSettings.from_dsn(self.redis_url)
+
     # Test-only payment methods gate
     allow_test_payment_methods: bool = True  # ALLOW_TEST_PAYMENT_METHODS
 
