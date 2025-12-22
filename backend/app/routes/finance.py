@@ -140,13 +140,10 @@ async def review_withdrawal(
     before_held = player.balance_real_held
     old_state = tx.state
 
-    # Approve
+    # Approve/Reject – state change is validated by the shared state machine
     if action == "approve":
-        tx.state = "approved"
         tx.review_reason = None
-    # Reject with rollback
     else:
-        tx.state = "rejected"
         tx.review_reason = reason
         # held rollback: held -= amount, available += amount
 
