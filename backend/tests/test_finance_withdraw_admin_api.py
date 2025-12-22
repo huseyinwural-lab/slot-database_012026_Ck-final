@@ -217,7 +217,7 @@ async def test_invalid_state_transitions_return_409(client, async_session_factor
         headers=headers_admin,
     )
     assert r_paid.status_code == 409
-    assert r_paid.json().get("detail", {}).get("error_code") == "INVALID_STATE_TRANSITION"
+    assert r_paid.json().get("detail", {}).get("error_code") == "ILLEGAL_TRANSACTION_STATE_TRANSITION"
 
     # Approve first
     r_app = await client.post(
