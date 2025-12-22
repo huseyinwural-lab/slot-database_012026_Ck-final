@@ -205,10 +205,16 @@ async def create_deposit(
         balance_after=current_player.balance_real_available + amount,
     )
 
+    from app.services.transaction_state_machine import (
+        STATE_PENDING_PROVIDER,
+        STATE_COMPLETED,
+        transition_transaction,
+    )
+
     # Simulated state machine: created -> pending_provider -> completed
-    tx.state = "pending_provider"
+    transition_transaction(tx, STATE_PENDING_PROVIDER)
     # ... here a real provider integration would be called ...
-    tx.state = "completed"
+    transition_transaction(tx, STATE_COMPLETED)
 
     # Update Player Balance only on completed
     current_player.balance_real_available += amount
