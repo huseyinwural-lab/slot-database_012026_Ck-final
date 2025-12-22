@@ -39,11 +39,14 @@ def test_webhook_idempotency(client, async_session_factory):
     r2 = client.post("/api/v1/payments/webhook/mock", json=payload)
     assert r2.status_code == 200
 
-    async with async_session_factory() as session:
-        txs = (await session.execute(select(Transaction))).scalars().all()
-        assert len(txs) == 1
+    async def _check_db():
+        async with async_session_factory() as session:
+            txs = (await session.execute(select(Transaction))).scalars().all()
+            events = (await session.execute(select(AuditEvent))).scalars().all()
+            return txs, events
 
-        events = (await session.execute(select(AuditEvent))).scalars().all()
-        actions = [e.action for e in events]
-        assert "FIN_WEBHOOK_RECEIVED" in actions
-        assert "FIN_IDEMPOTENCY_HIT" in actions
+    txs, events = asyncio.run(_check_db())
+    assert len(txs) == 1
+    actions = [e.action for e in events]
+    assert "FIN_WEBHOOK_RECEIVED" in actions
+    assert "FIN_IDEMPOTENCY_HIT" in actions
