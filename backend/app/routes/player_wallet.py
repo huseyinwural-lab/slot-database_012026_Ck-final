@@ -240,11 +240,22 @@ async def create_deposit(
     old_state = tx.state
     transition_transaction(tx, STATE_COMPLETED)
 
-    # Update Player Balance only on completed
-    current_player.balance_real_available += amount
-
     session.add(tx)
-    session.add(current_player)
+
+    # Apply deposit success via canonical wallet+ledger service
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+
+    await apply_wallet_delta_with_ledger(
+        session,
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        tx_id=str(tx.id),
+        event_type="deposit_succeeded",
+        delta_available=float(amount),
+        delta_held=0.0,
+        currency=tx.currency or "USD",
+        idempotency_key=idempotency_key,
+    )
 
     # Audit: deposit completed
     await audit.log_event(
