@@ -59,6 +59,13 @@ async def create_deposit(
     if amount <= 0:
         raise HTTPException(400, "Amount must be positive")
 
+    # Test-only payment method gate: allow "test" only in dev/local/test or when flag enabled
+    from config import settings
+    env = (settings.env or "").lower()
+    is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test"}
+    if method == "test" and not is_test_mode:
+        raise HTTPException(status_code=400, detail={"error_code": "PAYMENT_METHOD_NOT_ALLOWED"})
+
     await session.refresh(current_player)
 
     # Compute request hash for conflict detection

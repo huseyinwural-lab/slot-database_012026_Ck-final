@@ -64,6 +64,9 @@ class Settings(BaseSettings):
     # KYC / wallet
     kyc_unverified_daily_deposit_cap: float = 100.0
 
+    # Test-only payment methods gate
+    allow_test_payment_methods: bool = True  # ALLOW_TEST_PAYMENT_METHODS
+
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
         if not raw:
