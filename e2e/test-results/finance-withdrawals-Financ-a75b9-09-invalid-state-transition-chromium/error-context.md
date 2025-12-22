@@ -1,7 +1,7 @@
 # Page snapshot
 
 ```yaml
-- generic [active] [ref=e1]:
+- generic [ref=e1]:
   - generic [ref=e3]:
     - complementary [ref=e4]:
       - generic [ref=e5]:
@@ -66,11 +66,11 @@
           - generic [ref=e79]:
             - generic [ref=e80]:
               - text: Email
-              - textbox "Email" [ref=e81]
+              - textbox "Email" [ref=e81]: admin@casino.com
             - generic [ref=e82]:
               - text: Password
               - generic [ref=e83]:
-                - textbox "Password" [ref=e84]
+                - textbox "Password" [active] [ref=e84]: Admin123!
                 - button [ref=e85] [cursor=pointer]:
                   - img [ref=e86]
             - button "Sign In" [ref=e89] [cursor=pointer]
@@ -81,10 +81,10 @@
       - img [ref=e92]
       - paragraph [ref=e93]: Made with Emergent
   - iframe [ref=e94]:
-    - generic [ref=f5e2]:
-      - generic [ref=f5e3]: "Compiled with problems:"
-      - button "Dismiss" [ref=f5e4] [cursor=pointer]: ×
-      - generic [ref=f5e6]:
-        - generic [ref=f5e7]: ERROR
-        - generic [ref=f5e8]: "[eslint] src/pages/FinanceWithdrawals.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect Search for the keywords to learn more about each error."
+    - generic [ref=f1e2]:
+      - generic [ref=f1e3]: "Compiled with problems:"
+      - button "Dismiss" [ref=f1e4] [cursor=pointer]: ×
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]: ERROR
+        - generic [ref=f1e8]: "[eslint] src/pages/FinanceWithdrawals.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect Search for the keywords to learn more about each error."
 ```
