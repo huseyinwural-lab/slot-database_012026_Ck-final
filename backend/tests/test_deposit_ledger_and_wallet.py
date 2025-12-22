@@ -4,8 +4,8 @@ import pytest
 from httpx import AsyncClient
 
 from server import app
-from app.models.sql_models import WalletBalance, LedgerTransaction, Player, Transaction
-from app.repositories.ledger_repo import get_balance
+from app.repositories.ledger_repo import WalletBalance, LedgerTransaction
+from app.models.sql_models import Player, Transaction
 from sqlalchemy import select
 
 
