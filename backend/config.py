@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 import json
+from arq.connections import RedisSettings
 
 class Settings(BaseSettings):
     # Environment
