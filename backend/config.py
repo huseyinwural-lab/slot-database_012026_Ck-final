@@ -70,6 +70,7 @@ class Settings(BaseSettings):
     # Ledger feature flags
     ledger_shadow_write: bool = True
     ledger_enforce_balance: bool = False
+    ledger_balance_mismatch_log: bool = True
 
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()

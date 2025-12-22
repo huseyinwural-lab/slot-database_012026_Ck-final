@@ -16,6 +16,8 @@ from app.services.audit import audit
 from app.models.wallet import WalletTxResponse
 from config import settings
 from app.services.ledger_shadow import shadow_append_event, shadow_apply_delta
+from app.repositories.ledger_repo import get_balance
+from app.services import ledger_telemetry
 
 router = APIRouter(prefix="/api/v1/player/wallet", tags=["player_wallet"])
 
