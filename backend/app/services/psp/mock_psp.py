@@ -44,6 +44,31 @@ class MockPSP:
         self._store[key] = result
         return result
 
+    def export_events(self) -> list[Dict[str, Any]]:
+        """Export all PSP events for reconciliation and debugging.
+
+        Returns a list of dicts with provider, provider_event_id, provider_ref,
+        action, tx_id and psp_idem_key. Amount/currency are not currently
+        tracked here; reconciliation focuses on presence/absence per event id.
+        """
+
+        events: list[Dict[str, Any]] = []
+        for (action, psp_idem_key), res in self._store.items():
+            raw = res.raw or {}
+            events.append(
+                {
+                    "provider": res.provider,
+                    "provider_event_id": res.provider_event_id,
+                    "provider_ref": res.provider_ref,
+                    "action": raw.get("action", action),
+                    "tx_id": raw.get("tx_id"),
+                    "psp_idem_key": raw.get("psp_idem_key", psp_idem_key),
+                    "status": str(res.status),
+                    "raw": raw,
+                }
+            )
+        return events
+
     async def authorize_deposit(
         self,
         *,
