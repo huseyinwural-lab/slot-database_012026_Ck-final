@@ -33,6 +33,14 @@
 
 ## Paket-1 — STG-MIG (MIG-01B/C) kanıt paketi (zorunlu)
 
+**Paket-1 Minimum Kanıt**
+
+- `alembic current` çıktısı
+- `alembic history | tail -n 30` çıktısı
+- `alembic upgrade head` tam çıktısı
+- `psql \\d reconciliation_findings` çıktısı
+- UNIQUE constraint query çıktısı
+
 **Aksiyon (staging backend pod/VM)**
 
 ```bash
@@ -75,6 +83,14 @@ alembic upgrade head
 ---
 
 ## Paket-2 — STG-ROLL (zorunlu)
+
+**Paket-2 Minimum Kanıt**
+
+- Flag’lerin set edildiğini gösteren kanıt (metin/log)
+- Backfill dry-run stdout
+- Backfill real-run stdout
+- E2E withdrawals smoke PASS log
+- 401 spike var/yok kanıtı
 
 **Aksiyon (staging)**
 
