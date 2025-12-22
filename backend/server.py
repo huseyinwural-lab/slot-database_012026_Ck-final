@@ -142,6 +142,7 @@ async def on_startup():
         from app.core.database import engine
         from sqlalchemy.ext.asyncio import AsyncSession
         from app.routes.admin import seed_admin
+        from app.queue.arq_client import init_queue
         
         # Initialize DB
         # Prod/staging: Alembic is the single source of truth.
