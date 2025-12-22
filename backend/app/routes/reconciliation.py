@@ -36,6 +36,10 @@ async def create_reconciliation_run(
         idempotency_key=payload.idempotency_key,
         created_by_admin_id=str(current_admin.id),
     )
+
+    # Fire-and-forget background execution (current process only)
+    background_tasks.add_task(run_reconciliation_for_run_id, run.id)
+
     return ReconciliationRunOut(
         id=run.id,
         provider=run.provider,
