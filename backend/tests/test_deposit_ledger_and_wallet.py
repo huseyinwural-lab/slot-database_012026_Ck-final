@@ -7,8 +7,6 @@ from app.repositories.ledger_repo import WalletBalance, LedgerTransaction
 from app.models.sql_models import Player, Transaction
 from sqlalchemy import select
 
-from tests.conftest import async_session_factory  # type: ignore
-
 
 @pytest.mark.usefixtures("client", "player_with_token")
 @pytest.mark.asyncio
