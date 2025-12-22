@@ -6,6 +6,7 @@ from typing import Optional
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import SQLModel, Field, select
+from typing import Tuple
 
 import uuid
 
@@ -71,26 +72,28 @@ async def append_event(
     provider: Optional[str] = None,
     provider_ref: Optional[str] = None,
     provider_event_id: Optional[str] = None,
-) -> LedgerTransaction:
+) -> Tuple[LedgerTransaction, bool]:
     """Append a ledger event, enforcing idempotency.
+
+    Returns a tuple (event, created):
+    - created = True if a new row was inserted
+    - created = False if an existing row was reused (idempotency hit)
 
     Idempotency rules (LEDGER-01):
     - (tenant_id, player_id, type, idempotency_key) is unique when idempotency_key is not null
     - (provider, provider_event_id) is unique when provider_event_id is not null
-
-    We first check for an existing row using these keys; if found we return it.
-    If not found, we attempt an insert and, on IntegrityError, re-fetch the
-    existing row. This makes the helper robust even if database constraints are
-    missing in some environments (e.g. legacy SQLite files).
     """
 
+    existing: Optional[LedgerTransaction] = None
+
     # Fast path: look for existing event by provider_event_id or idempotency_key
-    stmt = None
     if provider and provider_event_id:
         stmt = select(LedgerTransaction).where(
             LedgerTransaction.provider == provider,
             LedgerTransaction.provider_event_id == provider_event_id,
         )
+        res = await session.execute(stmt)
+        existing = res.scalars().first()
     elif idempotency_key:
         stmt = select(LedgerTransaction).where(
             LedgerTransaction.tenant_id == tenant_id,
@@ -98,12 +101,11 @@ async def append_event(
             LedgerTransaction.type == type,
             LedgerTransaction.idempotency_key == idempotency_key,
         )
-
-    if stmt is not None:
         res = await session.execute(stmt)
         existing = res.scalars().first()
-        if existing:
-            return existing
+
+    if existing:
+        return existing, False
 
     # No existing event found; try to insert
     event = LedgerTransaction(
@@ -125,11 +127,12 @@ async def append_event(
 
     try:
         await session.commit()
+        await session.refresh(event)
+        return event, True
     except IntegrityError:
         await session.rollback()
 
         # Try to load the existing event again by the same keys
-        stmt = None
         if provider and provider_event_id:
             stmt = select(LedgerTransaction).where(
                 LedgerTransaction.provider == provider,
@@ -142,21 +145,17 @@ async def append_event(
                 LedgerTransaction.type == type,
                 LedgerTransaction.idempotency_key == idempotency_key,
             )
-
-        if stmt is None:
-            # No idempotency selector available; re-raise
+        else:
+            # No idempotency selector available; bubble up
             raise
 
         res = await session.execute(stmt)
-        existing = res.scalars().first()
-        if not existing:
-            # If we still cannot find, bubble up
+        existing2 = res.scalars().first()
+        if not existing2:
+            # If we still cannot find, there is a real consistency issue
             raise
 
-        return existing
-
-    await session.refresh(event)
-    return event
+        return existing2, False
 
 
 async def get_balance(
