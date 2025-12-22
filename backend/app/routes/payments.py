@@ -258,6 +258,34 @@ async def list_reconciliation_findings(
             {
                 "id": f.id,
                 "provider": f.provider,
+
+
+@router.post("/reconciliation/run")
+async def run_reconciliation(
+    request: Request,
+    provider: str = "mockpsp",
+    tenant_id: Optional[str] = None,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Trigger reconciliation job for a given provider/tenant.
+
+    This is an admin-only endpoint intended for ops usage.
+    """
+
+    effective_tenant_id = tenant_id or await get_current_tenant_id(
+        request, current_admin, session=session
+    )
+
+    from app.jobs.reconcile_psp import reconcile_mockpsp_vs_ledger
+
+    if provider != "mockpsp":
+        raise HTTPException(status_code=400, detail={"error_code": "UNSUPPORTED_PROVIDER"})
+
+    await reconcile_mockpsp_vs_ledger(session, tenant_id=effective_tenant_id)
+
+    return {"status": "ok"}
+
                 "tenant_id": f.tenant_id,
                 "player_id": f.player_id,
                 "tx_id": f.tx_id,
