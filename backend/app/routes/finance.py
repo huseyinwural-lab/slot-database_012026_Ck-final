@@ -63,6 +63,192 @@ async def list_withdrawals(
     if date_from:
         count_query = count_query.where(Transaction.created_at >= date_from)
     if date_to:
+
+
+@router.post("/withdrawals/{tx_id}/review")
+async def review_withdrawal(
+    request: Request,
+    tx_id: str,
+    payload: dict = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Approve or reject a requested withdrawal.
+
+    - approve: requested -> approved (no balance change)
+    - reject: requested -> rejected (held rollback)
+    """
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    action = (payload.get("action") or "").strip().lower()
+    reason = (payload.get("reason") or "").strip() or None
+
+    if action not in {"approve", "reject"}:
+        raise HTTPException(status_code=400, detail={"error_code": "INVALID_ACTION"})
+
+    if action == "reject" and not reason:
+        raise HTTPException(status_code=400, detail={"error_code": "REASON_REQUIRED"})
+
+    # Load transaction and player
+    stmt = select(Transaction).where(
+        Transaction.id == tx_id,
+        Transaction.tenant_id == tenant_id,
+        Transaction.type == "withdrawal",
+    )
+    tx = (await session.execute(stmt)).scalars().first()
+    if not tx:
+        raise HTTPException(status_code=404, detail={"error_code": "TX_NOT_FOUND"})
+
+    if tx.state != "requested":
+        raise HTTPException(status_code=409, detail={"error_code": "INVALID_STATE_TRANSITION"})
+
+    player = await session.get(Player, tx.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail={"error_code": "PLAYER_NOT_FOUND"})
+
+    before_available = player.balance_real_available
+    before_held = player.balance_real_held
+    old_state = tx.state
+
+    # Approve
+    if action == "approve":
+        tx.state = "approved"
+        tx.review_reason = None
+    # Reject with rollback
+    else:
+        tx.state = "rejected"
+        tx.review_reason = reason
+        # held rollback: held -= amount, available += amount
+        player.balance_real_held -= tx.amount
+        player.balance_real_available += tx.amount
+
+    tx.reviewed_by = current_admin.id
+    tx.reviewed_at = datetime.now(timezone.utc)
+
+    session.add(tx)
+    session.add(player)
+
+    request_id = getattr(request.state, "request_id", "unknown")
+    ip = request.client.host if request.client else None
+
+    after_available = player.balance_real_available
+    after_held = player.balance_real_held
+
+    audit_action = "FIN_WITHDRAW_APPROVED" if action == "approve" else "FIN_WITHDRAW_REJECTED"
+
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(current_admin.id),
+        tenant_id=tenant_id,
+        action=audit_action,
+        resource_type="wallet_withdraw",
+        resource_id=tx.id,
+        result="success",
+        details={
+            "tx_id": tx.id,
+            "player_id": tx.player_id,
+            "amount": tx.amount,
+            "currency": tx.currency,
+            "old_state": old_state,
+            "new_state": tx.state,
+            "reviewed_by": str(current_admin.id),
+            "reviewed_at": tx.reviewed_at.isoformat(),
+            "request_id": request_id,
+            "balance_available_before": before_available,
+            "balance_available_after": after_available,
+            "balance_held_before": before_held,
+            "balance_held_after": after_held,
+            "reason": reason,
+        },
+        ip_address=ip,
+    )
+
+    await session.commit()
+    await session.refresh(tx)
+
+    return {"transaction": tx}
+
+
+@router.post("/withdrawals/{tx_id}/mark-paid")
+async def mark_withdrawal_paid(
+    request: Request,
+    tx_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Mark an approved withdrawal as paid.
+
+    - approved -> paid
+    - held -= amount (available unchanged)
+    """
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    stmt = select(Transaction).where(
+        Transaction.id == tx_id,
+        Transaction.tenant_id == tenant_id,
+        Transaction.type == "withdrawal",
+    )
+    tx = (await session.execute(stmt)).scalars().first()
+    if not tx:
+        raise HTTPException(status_code=404, detail={"error_code": "TX_NOT_FOUND"})
+
+    if tx.state != "approved":
+        raise HTTPException(status_code=409, detail={"error_code": "INVALID_STATE_TRANSITION"})
+
+    player = await session.get(Player, tx.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail={"error_code": "PLAYER_NOT_FOUND"})
+
+    before_available = player.balance_real_available
+    before_held = player.balance_real_held
+    old_state = tx.state
+
+    # held -= amount, total düşer
+    player.balance_real_held -= tx.amount
+    tx.state = "paid"
+
+    session.add(player)
+    session.add(tx)
+
+    request_id = getattr(request.state, "request_id", "unknown")
+    ip = request.client.host if request.client else None
+
+    after_available = player.balance_real_available
+    after_held = player.balance_real_held
+
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(current_admin.id),
+        tenant_id=tenant_id,
+        action="FIN_WITHDRAW_MARK_PAID",
+        resource_type="wallet_withdraw",
+        resource_id=tx.id,
+        result="success",
+        details={
+            "tx_id": tx.id,
+            "player_id": tx.player_id,
+            "amount": tx.amount,
+            "currency": tx.currency,
+            "old_state": old_state,
+            "new_state": tx.state,
+            "reviewed_by": str(current_admin.id),
+            "reviewed_at": datetime.now(timezone.utc).isoformat(),
+            "request_id": request_id,
+            "balance_available_before": before_available,
+            "balance_available_after": after_available,
+            "balance_held_before": before_held,
+            "balance_held_after": after_held,
+            "reason": None,
+        },
+        ip_address=ip,
+    )
+
+    await session.commit()
+    await session.refresh(tx)
+
+    return {"transaction": tx}
+
         count_query = count_query.where(Transaction.created_at <= date_to)
 
     total = (await session.execute(count_query)).scalar() or 0
