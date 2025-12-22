@@ -16,7 +16,7 @@ async def test_deposit_success_updates_wallet_and_ledger(client: AsyncClient, pl
     tenant, player, token = player_with_token
 
     # No initial snapshot
-    async with _async_session_factory() as session:  # type: ignore[func-returns-value]
+    async with async_session_factory() as session:  # type: ignore[func-returns-value]
         wb = (
             await session.execute(
                 select(WalletBalance).where(
@@ -36,7 +36,7 @@ async def test_deposit_success_updates_wallet_and_ledger(client: AsyncClient, pl
     )
     assert r.status_code in (200, 201)
 
-    async with _async_session_factory() as session:  # type: ignore[func-returns-value]
+    async with async_session_factory() as session:  # type: ignore[func-returns-value]
         # Player balances
         player_db = await session.get(Player, player.id)
         assert player_db is not None
@@ -87,7 +87,7 @@ async def test_deposit_fail_outcome_has_net_zero_effect(client: AsyncClient, pla
     tenant, player, token = player_with_token
 
     # Initial Player balance and no snapshot
-    async with _async_session_factory() as session:  # type: ignore[func-returns-value]
+    async with async_session_factory() as session:  # type: ignore[func-returns-value]
         player_db = await session.get(Player, player.id)
         assert player_db is not None
         starting_available = float(player_db.balance_real_available)
@@ -118,7 +118,7 @@ async def test_deposit_fail_outcome_has_net_zero_effect(client: AsyncClient, pla
     # Even on PSP fail we expect HTTP 200/201 but net-zero balance change
     assert r.status_code in (200, 201)
 
-    async with _async_session_factory() as session:  # type: ignore[func-returns-value]
+    async with async_session_factory() as session:  # type: ignore[func-returns-value]
         player_db = await session.get(Player, player.id)
         assert player_db is not None
         assert player_db.balance_real_available == pytest.approx(starting_available)
