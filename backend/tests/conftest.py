@@ -203,3 +203,15 @@ def session(async_session_factory):
             return session
 
     return _run(_get_session())
+
+
+@pytest.fixture(scope="function")
+def player_with_token(async_session_factory):
+    async def _seed():
+        async with async_session_factory() as session:
+            tenant = await _create_tenant(session)
+            player = await _create_player(session, tenant_id=tenant.id)
+            token = _make_player_token(player.id, tenant.id)
+            return tenant, player, token
+
+    return _run(_seed())
