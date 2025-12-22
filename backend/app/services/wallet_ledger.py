@@ -4,11 +4,11 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from datetime import datetime
 
 from app.models.sql_models import Player
 from app.repositories.ledger_repo import (
     append_event,
-    apply_balance_delta,
     WalletBalance,
 )
 
