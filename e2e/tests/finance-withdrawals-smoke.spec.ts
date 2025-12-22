@@ -235,7 +235,7 @@ test.describe('Finance Withdrawals Smoke', () => {
     const { res: reqRes, json: reqJson, text: reqText } = await playerRequestWithdraw(
       BACKEND_URL,
       playerToken,
-      { amount, method: 'bank', address: 'e2e-test-bank' },
+      { amount, method: 'test_bank', address: 'e2e-test-bank' },
     );
 
     if (!reqRes.ok()) {
