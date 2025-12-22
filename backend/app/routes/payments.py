@@ -53,7 +53,7 @@ async def payments_webhook(
     # for strong replay guarantees. Here we just map the event_type to a
     # canonical ledger status + delta.
 
-    # For MVP, support only deposit_captured and withdraw_paid
+    # For MVP, support deposit_captured and withdraw_paid
     status = event.event_type or ""
 
     # Deposit captured -> credit available
