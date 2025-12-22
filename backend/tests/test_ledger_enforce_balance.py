@@ -28,7 +28,8 @@ def extract_tx_id(json_body: dict) -> str:
 
 
 @pytest.mark.usefixtures("client")
-def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client, async_session_factory):
+@pytest.mark.asyncio
+async def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client, async_session_factory):
     """Enforce ON: same Idempotency-Key replays same tx and single hold in ledger."""
     settings.ledger_shadow_write = True
     settings.ledger_enforce_balance = True
