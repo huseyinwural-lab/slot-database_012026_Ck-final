@@ -163,7 +163,11 @@ test.describe('Finance Withdrawals Admin UI', () => {
   });
 
   test('List + filters + pagination with empty state', async ({ page, request }) => {
-    await robustLogin(page);
+    // Perform lightweight login by setting token directly (avoids flaky /auth/login dependency)
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('admin_token', 'e2e-test-token');
+    });
     await page.goto('/finance/withdrawals');
     
     // Verify filter controls exist

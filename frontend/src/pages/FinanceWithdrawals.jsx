@@ -235,8 +235,9 @@ const FinanceWithdrawals = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label>Date from</Label>
+              <Label htmlFor="date_from">Date from</Label>
               <Input
+                id="date_from"
                 type="date"
                 value={filters.date_from}
                 onChange={(e) => setFilters((f) => ({ ...f, date_from: e.target.value }))}
@@ -245,8 +246,9 @@ const FinanceWithdrawals = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label>Date to</Label>
+              <Label htmlFor="date_to">Date to</Label>
               <Input
+                id="date_to"
                 type="date"
                 value={filters.date_to}
                 onChange={(e) => setFilters((f) => ({ ...f, date_to: e.target.value }))}
