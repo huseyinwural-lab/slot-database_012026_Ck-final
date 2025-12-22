@@ -89,7 +89,26 @@ const Layout = ({ children }) => {
               <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" activeClassName={theme.activeItem} />
               <SidebarItem to="/players" icon={Users} label="Players" activeClassName={theme.activeItem} />
               {isOwner && (
-                <SidebarItem to="/finance" icon={CreditCard} label="Finance" activeClassName={theme.activeItem} />
+                <li>
+                  <Link
+                    to="/finance"
+                    className={linkClass("/finance")}
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    <span>Finance</span>
+                  </Link>
+                </li>
+              )}
+              {isOwner && (
+                <li>
+                  <Link
+                    to="/finance/withdrawals"
+                    className={linkClass("/finance/withdrawals")}
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    <span>Withdrawals</span>
+                  </Link>
+                </li>
               )}
               {isOwner && (
                 <SidebarItem to="/revenue/all-tenants" icon={TrendingUp} label="All Revenue" activeClassName={theme.activeItem} />
