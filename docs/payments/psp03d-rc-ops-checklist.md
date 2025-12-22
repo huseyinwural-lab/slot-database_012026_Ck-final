@@ -132,6 +132,14 @@ alembic upgrade head
 
 ## Paket-3 — PSP-03D Queue enablement (zorunlu)
 
+**Paket-3 Minimum Kanıt**
+
+- Redis healthcheck çıktısı
+- Worker start log ilk 20 satır
+- POST `reconciliation/runs` response (run_id)
+- Worker log (aynı run_id ile started + completed/failed)
+- GET run response (lifecycle)
+
 ### 3.1 Infra: Redis + Worker
 
 **Aksiyon**
