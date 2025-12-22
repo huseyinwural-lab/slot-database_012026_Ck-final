@@ -63,6 +63,23 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, passw
       throw new Error(`player register failed ${reg.status()} body=${body}`);
     }
 
+    // After registration, manually verify KYC via admin endpoint
+    const adminToken = await apiLoginAdmin(apiBaseUrl, OWNER_EMAIL, OWNER_PASSWORD);
+    const adminCtx = await pwRequest.newContext({
+      baseURL: apiBaseUrl,
+      extraHTTPHeaders: authHeaders(adminToken),
+    });
+
+    // Fetch pending KYC queue and approve the first entry for this email
+    const queueRes = await adminCtx.get('/api/v1/kyc/queue');
+    const queueJson: any[] = await queueRes.json();
+    const matching = queueJson.find((p) => p.email === email);
+    if (matching) {
+      await adminCtx.post(`/api/v1/kyc/documents/${matching.id}/review`, {
+        data: { status: 'approved' },
+      });
+    }
+
     res = await ctx.post('/api/v1/auth/player/login', {
       data: { email, password, tenant_id: 'default_casino' },
     });
