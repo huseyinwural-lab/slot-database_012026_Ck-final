@@ -39,28 +39,28 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()),
     )
 
-    # Idempotency / lookup indices
-    op.create_index(
-        "ix_ledger_tx_player_created_at",
-        "ledgertransaction",
-        ["player_id", "created_at"],
-    )
-    op.create_index("ix_ledger_tx_tx_id", "ledgertransaction", ["tx_id"])
-    op.create_index("ix_ledger_tx_provider_ref", "ledgertransaction", ["provider_ref"])
+        # Idempotency / lookup indices
+        op.create_index(
+            "ix_ledger_tx_player_created_at",
+            "ledgertransaction",
+            ["player_id", "created_at"],
+        )
+        op.create_index("ix_ledger_tx_tx_id", "ledgertransaction", ["tx_id"])
+        op.create_index("ix_ledger_tx_provider_ref", "ledgertransaction", ["provider_ref"])
 
-    # Unique on (tenant_id, player_id, type, idempotency_key) when idempotency_key IS NOT NULL
-    op.create_unique_constraint(
-        "uq_ledger_tx_idempotency",
-        "ledgertransaction",
-        ["tenant_id", "player_id", "type", "idempotency_key"],
-    )
+        # Unique on (tenant_id, player_id, type, idempotency_key)
+        op.create_unique_constraint(
+            "uq_ledger_tx_idempotency",
+            "ledgertransaction",
+            ["tenant_id", "player_id", "type", "idempotency_key"],
+        )
 
-    # Unique on (provider, provider_event_id) when provider_event_id IS NOT NULL
-    op.create_unique_constraint(
-        "uq_ledger_tx_provider_event",
-        "ledgertransaction",
-        ["provider", "provider_event_id"],
-    )
+        # Unique on (provider, provider_event_id)
+        op.create_unique_constraint(
+            "uq_ledger_tx_provider_event",
+            "ledgertransaction",
+            ["provider", "provider_event_id"],
+        )
 
     op.create_table(
         "walletbalance",
