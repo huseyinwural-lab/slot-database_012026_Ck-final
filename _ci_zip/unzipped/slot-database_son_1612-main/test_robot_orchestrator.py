@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 class RobotOrchestratorTester:
-    def __init__(self, base_url="https://casino-finance-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://wallet-admin-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
