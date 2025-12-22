@@ -84,13 +84,13 @@ def override_get_current_player_factory():
 
 
 @pytest.fixture(scope="function")
-def client(async_session_factory):
+async def client(async_session_factory):
     # Override DB session provider
     app.dependency_overrides[get_session] = make_override_get_session(async_session_factory)
     # Override auth so it loads Player via SAME AsyncSession
     app.dependency_overrides[get_current_player] = override_get_current_player_factory()
 
-    with TestClient(app) as c:
+    async with AsyncClient(app=app, base_url="http://testserver") as c:
         yield c
 
     app.dependency_overrides.clear()
