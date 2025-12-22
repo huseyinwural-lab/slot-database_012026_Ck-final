@@ -1,6 +1,6 @@
 # 🔴 Ops/Infra CHECKLIST – PSP-03D RC Kapanış (Paket-0/1/2/3)
 
-Bu doküman, **PSP-03D + ledger** RC kapanışı için Ops/Infra ekibinin uygulayacağı **zorunlu checklist**’tir.
+**Yetki/Sınır:** Bu checklist, RC kapanışı için gerekli kanıt paketlerini (Paket-0/1/2/3) üretmek içindir. Bu doküman “rehberlik” değil **“uygulama talimatı”**dır. Buradaki adımlar tamamlanmadan ilgili ticket **kapanmayacaktır**.
 
 > **Kanut standardı (mutlaka):**
 >
@@ -11,6 +11,11 @@ Bu doküman, **PSP-03D + ledger** RC kapanışı için Ops/Infra ekibinin uygula
 ---
 
 ## Paket-0 — CI Postgres job (zorunlu)
+
+**Paket-0 Minimum Kanıt**
+
+- Job sonucu (GREEN/RED) + job linki
+- RED ise en üst hata bloğu
 
 **Aksiyon**
 
