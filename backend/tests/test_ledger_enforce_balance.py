@@ -95,7 +95,8 @@ async def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client,
 
 
 @pytest.mark.usefixtures("client")
-def test_B02_enforce_on_insufficient_funds_is_ledger_authority_fail_closed(client, async_session_factory):
+@pytest.mark.asyncio
+async def test_B02_enforce_on_insufficient_funds_is_ledger_authority_fail_closed(client, async_session_factory):
     """Enforce ON: insufficient funds decision comes from ledger snapshot (fail-closed)."""
     settings.ledger_shadow_write = True
     settings.ledger_enforce_balance = True
@@ -127,7 +128,8 @@ def test_B02_enforce_on_insufficient_funds_is_ledger_authority_fail_closed(clien
 
 
 @pytest.mark.usefixtures("client")
-def test_B03_enforce_off_legacy_behavior_and_mismatch_telemetry(client, async_session_factory):
+@pytest.mark.asyncio
+async def test_B03_enforce_off_legacy_behavior_and_mismatch_telemetry(client, async_session_factory):
     """Enforce OFF: legacy behavior preserved, mismatch telemetry still records."""
     settings.ledger_shadow_write = True
     settings.ledger_enforce_balance = False
@@ -166,7 +168,8 @@ def test_B03_enforce_off_legacy_behavior_and_mismatch_telemetry(client, async_se
 
 
 @pytest.mark.usefixtures("client")
-def test_B04_enforce_on_walletbalance_missing_is_fail_closed(client, async_session_factory):
+@pytest.mark.asyncio
+async def test_B04_enforce_on_walletbalance_missing_is_fail_closed(client, async_session_factory):
     """Enforce ON: when walletbalance row is missing, treat available as 0 and 400."""
     settings.ledger_shadow_write = True
     settings.ledger_enforce_balance = True
