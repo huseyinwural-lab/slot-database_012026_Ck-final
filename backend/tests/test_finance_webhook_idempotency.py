@@ -41,11 +41,21 @@ def test_webhook_idempotency(client, async_session_factory):
 
     async def _check_db():
         async with async_session_factory() as session:
-            txs = (await session.execute(select(Transaction))).scalars().all()
+            # Only count transactions created by this webhook provider/event
+            txs = (
+                await session.execute(
+                    select(Transaction).where(
+                        Transaction.provider == "mock",
+                        Transaction.provider_event_id == "evt-123",
+                    )
+                )
+            ).scalars().all()
+
             events = (await session.execute(select(AuditEvent))).scalars().all()
             return txs, events
 
     txs, events = asyncio.run(_check_db())
+    # Exactly one transaction for this provider_event_id
     assert len(txs) == 1
     actions = [e.action for e in events]
     assert "FIN_WEBHOOK_RECEIVED" in actions
