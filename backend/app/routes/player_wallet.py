@@ -131,6 +131,54 @@ async def create_deposit(
             },
         }
 
+    # Daily cap for unverified players
+    cap = float(settings.kyc_unverified_daily_deposit_cap)
+    if current_player.kyc_status != "verified":
+        # Calculate today's completed deposits
+        from datetime import datetime, timezone, timedelta
+        now = datetime.now(timezone.utc)
+        start = datetime(year=now.year, month=now.month, day=now.day, tzinfo=timezone.utc)
+        end = start + timedelta(days=1)
+
+        cap_stmt = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
+            Transaction.player_id == current_player.id,
+            Transaction.type == "deposit",
+            Transaction.state == "completed",
+            Transaction.created_at >= start,
+            Transaction.created_at < end,
+        )
+        current_total = (await session.execute(cap_stmt)).scalar_one() or 0.0
+        if current_total + amount > cap:
+            await audit.log_event(
+                session=session,
+                request_id=request_id,
+                actor_user_id=current_player.id,
+                tenant_id=current_player.tenant_id,
+                action="FIN_KYC_DEPOSIT_LIMIT_BLOCK",
+                resource_type="wallet_deposit",
+                resource_id=None,
+                result="blocked",
+                details={
+                    "tx_id": None,
+                    "player_id": current_player.id,
+                    "amount": amount,
+                    "currency": "USD",
+                    "old_state": None,
+                    "new_state": None,
+                    "idempotency_key": idempotency_key,
+                    "request_id": request_id,
+                    "balance_available_before": current_player.balance_real_available,
+                    "balance_available_after": current_player.balance_real_available,
+                    "balance_held_before": current_player.balance_real_held,
+                    "balance_held_after": current_player.balance_real_held,
+                },
+                ip_address=ip,
+            )
+            raise HTTPException(
+                status_code=403,
+                detail={"error_code": "KYC_DEPOSIT_LIMIT"},
+            )
+
     tx_id = str(uuid.uuid4())
 
     tx = Transaction(
