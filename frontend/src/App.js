@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import PlayerList from './pages/PlayerList';
 import PlayerDetail from './pages/PlayerDetail';
 import Finance from './pages/Finance';
+import FinanceWithdrawals from './pages/FinanceWithdrawals';
 import ApprovalQueue from './pages/ApprovalQueue';
 import GameManagement from './pages/GameManagement';
 import BonusManagement from './pages/BonusManagement';
