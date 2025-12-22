@@ -15,7 +15,7 @@ async def test_deposit_success_updates_wallet_and_ledger(client: AsyncClient, pl
     tenant, player, token = player_with_token
 
     # No initial snapshot
-    async with async_session_factory() as session:  # type: ignore[func-returns-value]
+    async with _async_session_factory() as session:  # type: ignore[func-returns-value]
         wb = (
             await session.execute(
                 select(WalletBalance).where(
