@@ -115,13 +115,17 @@ def test_reject_requested_withdraw_rolls_back_hold(client, async_session_factory
     )
     assert r_rej.status_code == 200
 
-    async with async_session_factory() as session:
-        tx = await session.get(Transaction, tx_id)
-        db_player = await session.get(Player, player.id)
+    async def _load_after():
+        async with async_session_factory() as session:
+            tx = await session.get(Transaction, tx_id)
+            db_player = await session.get(Player, player.id)
+            return tx, db_player
 
-        assert tx.state == "rejected"
-        assert db_player.balance_real_available == pytest.approx(before_available + tx.amount)
-        assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
+    tx, db_player = asyncio.run(_load_after())
+
+    assert tx.state == "rejected"
+    assert db_player.balance_real_available == pytest.approx(before_available + tx.amount)
+    assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
 
 
 @pytest.mark.usefixtures("client")
