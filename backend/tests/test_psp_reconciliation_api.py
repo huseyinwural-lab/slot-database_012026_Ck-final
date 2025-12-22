@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from server import app  # noqa: F401
 from app.models.reconciliation import ReconciliationFinding
-from backend.tests.test_finance_withdraw_admin_api import _seed_admin_and_player
+from tests.test_finance_withdraw_admin_api import _seed_admin_and_player
 
 
 @pytest.mark.usefixtures("client")
