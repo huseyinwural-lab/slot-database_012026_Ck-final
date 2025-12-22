@@ -138,6 +138,12 @@ def test_C2_postgres_concurrent_withdraw_single_success(async_session_factory, c
             assert wb.balance_real_available == pytest.approx(20.0)
             assert wb.balance_real_pending == pytest.approx(80.0)
 
+            # Legacy Player aggregate must agree with WalletBalance snapshot
+            db_player = await session.get(Player, player.id)
+            assert db_player is not None
+            assert db_player.balance_real_available == pytest.approx(wb.balance_real_available)
+            assert db_player.balance_real_held == pytest.approx(wb.balance_real_pending)
+
     try:
         asyncio.run(_run())
     finally:
