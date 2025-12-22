@@ -128,7 +128,7 @@ async def test_reject_requested_withdraw_rolls_back_hold(client, async_session_f
     before_available, before_held = await _load_before()
 
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
-    r_rej = client.post(
+    r_rej = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
         json={"action": "reject", "reason": "test"},
         headers=headers_admin,
