@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from app.core.errors import AppError
 from app.models.sql_models import Transaction, Player
 from app.services.audit import audit
+from app.services.ledger_shadow import shadow_append_event, shadow_apply_delta
 
 
 from app.core.database import get_session
