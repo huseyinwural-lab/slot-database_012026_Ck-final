@@ -652,14 +652,24 @@ async def create_withdrawal(
         balance_after=(before_available - amount) + before_held,
     )
 
-    # Hold accounting: move from available to held
-    current_player.balance_real_available = before_available - amount
-    current_player.balance_real_held = before_held + amount
-
     session.add(tx)
-    session.add(current_player)
 
-    # Audit withdraw requested
+    # Apply hold move via canonical wallet+ledger service
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+
+    applied = await apply_wallet_delta_with_ledger(
+        session,
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        tx_id=tx_id,
+        event_type="withdraw_requested",
+        delta_available=-float(amount),
+        delta_held=+float(amount),
+        currency=currency,
+        idempotency_key=idempotency_key,
+    )
+
+    # Audit withdraw requested (idempotent on our side; API level idem zaten yukarıda)
     await audit.log_event(
         session=session,
         request_id=request_id,
@@ -688,29 +698,6 @@ async def create_withdrawal(
 
     await session.commit()
     await session.refresh(tx)
-
-    # Shadow ledger write (withdraw requested + hold)
-    res = await shadow_append_event(
-        session=session,
-        tenant_id=current_player.tenant_id,
-        player_id=current_player.id,
-        tx_id=str(tx.id),
-        type="withdraw",
-        direction="debit",
-        amount=float(amount),
-        currency=tx.currency or "USD",
-        status="withdraw_requested",
-        idempotency_key=idempotency_key,
-    )
-    if res and res.created:
-        await shadow_apply_delta(
-            session=session,
-            tenant_id=current_player.tenant_id,
-            player_id=current_player.id,
-            currency=tx.currency or "USD",
-            delta_available=-float(amount),
-            delta_pending=+float(amount),
-        )
 
     total_real = current_player.balance_real_available + current_player.balance_real_held
     return {

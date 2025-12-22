@@ -145,90 +145,26 @@ async def review_withdrawal(
         tx.review_reason = None
     else:
         tx.review_reason = reason
-        # held rollback: held -= amount, available += amount
 
-    # Shadow ledger event for approve/reject
-    if action == "approve":
-        await shadow_append_event(
-            session=session,
+        # held rollback: held -= amount, available += amount via canonical service
+        from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+
+        await apply_wallet_delta_with_ledger(
+            session,
             tenant_id=tenant_id,
             player_id=tx.player_id,
             tx_id=str(tx.id),
-            type="withdraw",
-            direction="debit",
-            amount=float(tx.amount),
+            event_type="withdraw_rejected",
+            delta_available=float(tx.amount),
+            delta_held=-float(tx.amount),
             currency=tx.currency or "USD",
-            status="withdraw_approved",
-            idempotency_key=f"withdraw_review:approve:{tx.id}",
-        )
-    else:
-        res = await shadow_append_event(
-            session=session,
-            tenant_id=tenant_id,
-            player_id=tx.player_id,
-            tx_id=str(tx.id),
-            type="withdraw",
-            direction="debit",
-            amount=float(tx.amount),
-            currency=tx.currency or "USD",
-            status="withdraw_rejected",
             idempotency_key=f"withdraw_review:reject:{tx.id}",
         )
-        if res and res.created:
-            await shadow_apply_delta(
-                session=session,
-                tenant_id=tenant_id,
-                player_id=tx.player_id,
-                currency=tx.currency or "USD",
-                delta_available=float(tx.amount),
-                delta_pending=-float(tx.amount),
-            )
-
-        player.balance_real_held -= tx.amount
-        player.balance_real_available += tx.amount
 
     tx.reviewed_by = current_admin.id
     tx.reviewed_at = datetime.now(timezone.utc)
 
     session.add(tx)
-    session.add(player)
-
-    # Shadow ledger event for approve/reject
-    if action == "approve":
-        await shadow_append_event(
-            session=session,
-            tenant_id=tenant_id,
-            player_id=tx.player_id,
-            tx_id=str(tx.id),
-            type="withdraw",
-            direction="debit",
-            amount=float(tx.amount),
-            currency=tx.currency or "USD",
-            status="withdraw_approved",
-            idempotency_key=f"withdraw_review:approve:{tx.id}",
-        )
-    else:
-        res = await shadow_append_event(
-            session=session,
-            tenant_id=tenant_id,
-            player_id=tx.player_id,
-            tx_id=str(tx.id),
-            type="withdraw",
-            direction="debit",
-            amount=float(tx.amount),
-            currency=tx.currency or "USD",
-            status="withdraw_rejected",
-            idempotency_key=f"withdraw_review:reject:{tx.id}",
-        )
-        if res and res.created:
-            await shadow_apply_delta(
-                session=session,
-                tenant_id=tenant_id,
-                player_id=tx.player_id,
-                currency=tx.currency or "USD",
-                delta_available=float(tx.amount),
-                delta_pending=-float(tx.amount),
-            )
 
     request_id = getattr(request.state, "request_id", "unknown")
     ip = request.client.host if request.client else None
