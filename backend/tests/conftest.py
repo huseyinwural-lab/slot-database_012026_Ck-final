@@ -149,13 +149,57 @@ def _make_player_token(player_id: str, tenant_id: str) -> str:
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
+async def _create_admin(
+    session: AsyncSession,
+    tenant_id: str,
+    email="admin@test.com",
+    username="admin",
+    role="Admin",
+    is_platform_owner=False,
+) -> AdminUser:
+    # Try find existing admin by email to avoid UNIQUE constraint issues in tests
+    result = await session.execute(select(AdminUser).where(AdminUser.email == email))
+    admin = result.scalars().first()
+    if admin:
+        return admin
+
+    admin = AdminUser(
+        tenant_id=tenant_id,
+        username=username,
+        email=email,
+        full_name="Test Admin",
+        password_hash="noop_hash",
+        role=role,
+        is_platform_owner=is_platform_owner,
+    )
+    session.add(admin)
+    await session.commit()
+    await session.refresh(admin)
+    return admin
+
+
+def _make_admin_token(admin_id: str, tenant_id: str) -> str:
+    return create_access_token(
+        data={"sub": admin_id, "tenant_id": tenant_id, "role": "Admin"}
+    )
+
+
 @pytest.fixture(scope="function")
-def player_with_token(async_session_factory):
+def admin_token(async_session_factory):
     async def _seed():
         async with async_session_factory() as session:
             tenant = await _create_tenant(session)
-            player = await _create_player(session, tenant_id=tenant.id)
-            token = _make_player_token(player.id, tenant.id)
-            return tenant, player, token
+            admin = await _create_admin(session, tenant_id=tenant.id)
+            token = _make_admin_token(admin.id, tenant.id)
+            return token
 
     return _run(_seed())
+
+
+@pytest.fixture(scope="function")
+def session(async_session_factory):
+    async def _get_session():
+        async with async_session_factory() as session:
+            return session
+
+    return _run(_get_session())
