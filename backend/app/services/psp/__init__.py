@@ -5,6 +5,9 @@ from config import settings
 from .mock_psp import MockPSP
 
 
+_psp_singleton: MockPSP | None = None
+
+
 def get_psp() -> MockPSP:
     """Return the active PSP adapter instance.
 
@@ -14,5 +17,8 @@ def get_psp() -> MockPSP:
     """
 
     # In a future phase this might inspect settings.psp_provider.
-    # For now we always use MockPSP.
-    return MockPSP()
+    # For now we always use a process-level MockPSP singleton.
+    global _psp_singleton
+    if _psp_singleton is None:
+        _psp_singleton = MockPSP()
+    return _psp_singleton
