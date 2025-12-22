@@ -532,10 +532,10 @@ ledger_enforce_balance_dec22:
 ledger_withdrawals_e2e_smoke_dec22:
   - task: "LEDGER-02B: Finance withdrawals E2E smoke (admin UI lifecycle)"
     implemented: true
-    working: false
+    working: true
     file: "e2e/tests/finance-withdrawals-smoke.spec.ts"
     priority: "highest"
-    needs_retesting: true
+    needs_retesting: false
 
         -agent: "testing"
         -comment: "✅ LEDGER-02B BACKEND LEDGER ENFORCE BALANCE FEATURE VALIDATION COMPLETE - ALL TESTS PASSED (10/10 - 100% success rate): Test Suite 1) tests/test_ledger_repo.py: ✅ 4/4 tests passed - ledger repository functions (append_event idempotency, balance snapshots, transaction indexing) working correctly. Test Suite 2) tests/test_ledger_shadow_flows.py: ✅ 2/2 tests passed - shadow write functionality (withdraw creates holds in both player and ledger, idempotent requests don't double-apply holds) working correctly. Test Suite 3) tests/test_ledger_enforce_balance.py: ✅ 4/4 tests passed covering B01-B04 scenarios - B01: Idempotent withdraw requests (same Idempotency-Key) return same transaction and apply single hold to WalletBalance, B02: With ledger_enforce_balance=True, insufficient funds decisions based on WalletBalance.balance_real_available with fail-closed behavior when no WalletBalance row exists, B03: With ledger_enforce_balance=False, legacy player.balance_real_available used for funds checks but mismatches logged via ledger_telemetry.mismatch_counter, B04: When WalletBalance row missing, system treats available as 0 and returns 400 INSUFFICIENT_FUNDS. BEHAVIOR CONFIRMATION: All described behaviors in review request validated - ledger enforce balance feature working correctly with proper fail-closed behavior, idempotency handling, and mismatch telemetry logging. All pytest executions completed without errors, only deprecation warnings present (non-critical). Ledger enforce balance feature ready for production use."
