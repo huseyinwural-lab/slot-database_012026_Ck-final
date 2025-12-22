@@ -204,6 +204,8 @@ async def create_deposit(
         metadata_json={"request_hash": req_hash, "method": method},
         balance_after=current_player.balance_real_available + amount,
     )
+    session.add(tx)
+    await session.flush()
 
     from app.services.transaction_state_machine import (
         STATE_PENDING_PROVIDER,
