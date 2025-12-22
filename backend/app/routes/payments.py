@@ -61,7 +61,7 @@ async def payments_webhook(
         # Append ledger event; created flag controls delta
         from app.repositories.ledger_repo import append_event
 
-        if not (event.tenant_id and event.player_id):
+        if not (event.tenant_id and event.player_id and event.tx_id):
             raise HTTPException(status_code=400, detail={"error_code": "MISSING_IDS"})
 
         ledger_event, created = await append_event(
@@ -90,7 +90,40 @@ async def payments_webhook(
                 delta_pending=0.0,
             )
 
-    # withdraw_paid and other statuses can be wired here later in PSP-02D/PSP-04.
+    elif status == "withdraw_paid":
+        # Payout confirmed -> finalize pending (debit)
+        from app.repositories.ledger_repo import append_event
+
+        if not (event.tenant_id and event.player_id and event.tx_id):
+            raise HTTPException(status_code=400, detail={"error_code": "MISSING_IDS"})
+
+        ledger_event, created = await append_event(
+            session,
+            tenant_id=event.tenant_id,
+            player_id=event.player_id,
+            tx_id=event.tx_id,
+            type="withdraw",
+            direction="debit",
+            amount=event.amount,
+            currency=event.currency,
+            status="withdraw_paid",
+            provider=event.provider,
+            provider_ref=event.provider_ref,
+            provider_event_id=event.provider_event_id,
+        )
+
+        if created:
+            # Created-gated: finalize pending only once
+            await shadow_apply_delta(
+                session=session,
+                tenant_id=event.tenant_id,
+                player_id=event.player_id,
+                currency=event.currency,
+                delta_available=0.0,
+                delta_pending=-event.amount,
+            )
+
+    # Other statuses (failed/reversed) can be wired in PSP-04.
 
     # 3) Minimal Transaction record for audit/debug (existing behavior)
     # (Re-use old skeleton semantics: idempotent on (provider, provider_event_id))
