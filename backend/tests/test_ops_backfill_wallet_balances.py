@@ -172,22 +172,24 @@ def test_backfill_tenant_scoped(async_session_factory):
     asyncio.run(_run())
 
 
-@pytest.mark.asyncio
-async def test_backfill_dry_run_does_not_modify_db(async_session_factory):
-    async with async_session_factory() as session:
-        tenant = await _create_tenant(session)
-        player = await _create_player(session, tenant.id, balance_available=33.0, balance_held=7.0)
+def test_backfill_dry_run_does_not_modify_db(async_session_factory):
+    async def _run():
+        async with async_session_factory() as session:
+            tenant = await _create_tenant(session)
+            player = await _create_player(session, tenant.id, balance_available=33.0, balance_held=7.0)
 
-    await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=True, force=False)
+        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=True, force=False)
 
-    async with async_session_factory() as session:
-        wb = (
-            await session.execute(
-                select(WalletBalance).where(
-                    WalletBalance.tenant_id == tenant.id,
-                    WalletBalance.player_id == player.id,
-                    WalletBalance.currency == "USD",
+        async with async_session_factory() as session:
+            wb = (
+                await session.execute(
+                    select(WalletBalance).where(
+                        WalletBalance.tenant_id == tenant.id,
+                        WalletBalance.player_id == player.id,
+                        WalletBalance.currency == "USD",
+                    )
                 )
-            )
-        ).scalars().first()
-        assert wb is None
+            ).scalars().first()
+            assert wb is None
+
+    asyncio.run(_run())
