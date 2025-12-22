@@ -302,23 +302,6 @@ async def run_reconciliation(
 
     return {"status": "ok"}
 
-                "tenant_id": f.tenant_id,
-                "player_id": f.player_id,
-                "tx_id": f.tx_id,
-                "provider_event_id": f.provider_event_id,
-                "provider_ref": f.provider_ref,
-                "finding_type": f.finding_type,
-                "severity": f.severity,
-                "status": f.status,
-                "message": f.message,
-                "created_at": f.created_at,
-                "updated_at": f.updated_at,
-            }
-            for f in items
-        ],
-        "meta": {"total": total, "limit": limit, "offset": offset},
-    }
-
 
 @router.post("/reconciliation/findings/{finding_id}/resolve")
 async def resolve_reconciliation_finding(
