@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from config import settings
 from app.repositories.ledger_repo import WalletBalance
+from app.models.sql_models import Player
 from tests.conftest import _create_tenant, _create_player, _make_player_token
 from server import app  # noqa: F401  - ensure app import for fixtures
 
