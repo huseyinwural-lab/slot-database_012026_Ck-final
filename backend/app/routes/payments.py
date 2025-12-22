@@ -192,6 +192,125 @@ async def payments_webhook(
         ip_address=ip,
     )
 
+
+
+@router.get("/reconciliation/findings")
+async def list_reconciliation_findings(
+    request: Request,
+    provider: Optional[str] = None,
+    status: Optional[str] = None,
+    tenant_id: Optional[str] = None,
+    finding_type: Optional[str] = None,
+    severity: Optional[str] = None,
+    player_id: Optional[str] = None,
+    tx_id: Optional[str] = None,
+    provider_event_id: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """List reconciliation findings for the current tenant.
+
+    - Admin auth is required.
+    - Results are scoped to the admin's tenant unless an explicit tenant_id is
+      provided (for multi-tenant/platform owners).
+    """
+
+    # Clamp pagination
+    if limit <= 0:
+        limit = 50
+    limit = min(limit, 200)
+    if offset < 0:
+        offset = 0
+
+    effective_tenant_id = tenant_id or await get_current_tenant_id(
+        request, current_admin, session=session
+    )
+
+    query = select(ReconciliationFinding).where(
+        ReconciliationFinding.tenant_id == effective_tenant_id
+    )
+
+    if provider:
+        query = query.where(ReconciliationFinding.provider == provider)
+    if status:
+        query = query.where(ReconciliationFinding.status == status)
+    if finding_type:
+        query = query.where(ReconciliationFinding.finding_type == finding_type)
+    if severity:
+        query = query.where(ReconciliationFinding.severity == severity)
+    if player_id:
+        query = query.where(ReconciliationFinding.player_id == player_id)
+    if tx_id:
+        query = query.where(ReconciliationFinding.tx_id == tx_id)
+    if provider_event_id:
+        query = query.where(ReconciliationFinding.provider_event_id == provider_event_id)
+
+    total_query = query.with_only_columns(func.count()).order_by(None)
+    total = (await session.execute(total_query)).scalar() or 0
+
+    query = query.order_by(ReconciliationFinding.created_at.desc()).offset(offset).limit(limit)
+    items = (await session.execute(query)).scalars().all()
+
+    return {
+        "items": [
+            {
+                "id": f.id,
+                "provider": f.provider,
+                "tenant_id": f.tenant_id,
+                "player_id": f.player_id,
+                "tx_id": f.tx_id,
+                "provider_event_id": f.provider_event_id,
+                "provider_ref": f.provider_ref,
+                "finding_type": f.finding_type,
+                "severity": f.severity,
+                "status": f.status,
+                "message": f.message,
+                "created_at": f.created_at,
+                "updated_at": f.updated_at,
+            }
+            for f in items
+        ],
+        "meta": {"total": total, "limit": limit, "offset": offset},
+    }
+
+
+@router.post("/reconciliation/findings/{finding_id}/resolve")
+async def resolve_reconciliation_finding(
+    finding_id: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Mark a reconciliation finding as RESOLVED.
+
+    - Admin auth required.
+    - If finding.tenant_id is set, it must match the admin's tenant.
+    - If tenant_id is None, allow resolve but rely on audit/logs for tracking.
+    """
+
+    effective_tenant_id = await get_current_tenant_id(
+        request, current_admin, session=session
+    )
+
+    finding = await session.get(ReconciliationFinding, finding_id)
+    if not finding:
+        raise HTTPException(status_code=404, detail={"error_code": "FINDING_NOT_FOUND"})
+
+    if finding.tenant_id and finding.tenant_id != effective_tenant_id:
+        raise HTTPException(status_code=403, detail={"error_code": "FORBIDDEN"})
+
+    finding.status = "RESOLVED"
+    from datetime import datetime as dt
+
+    finding.updated_at = dt.utcnow()
+    session.add(finding)
+    await session.commit()
+    await session.refresh(finding)
+
+    return {"id": finding.id, "status": finding.status}
+
     await session.commit()
 
     return {"status": "ok", "idempotent": False, "tx_id": tx.id}
