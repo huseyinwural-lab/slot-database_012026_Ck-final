@@ -14,24 +14,40 @@ from config import settings
 from app.utils.auth import create_access_token
 
 
+async def _get_or_create_admin(session, tenant_id: str, email: str) -> AdminUser:
+    existing = (
+        await session.execute(
+            select(AdminUser).where(AdminUser.email == email)
+        )
+    ).scalars().first()
+    if existing:
+        return existing
+
+    admin = AdminUser(
+        tenant_id=tenant_id,
+        username=email.split("@")[0],
+        email=email,
+        full_name="Test Admin",
+        password_hash="noop",
+        role="Admin",
+        is_platform_owner=False,
+    )
+    session.add(admin)
+    await session.commit()
+    await session.refresh(admin)
+    return admin
+
+
 async def _seed_admin_and_player(async_session_factory):
     async with async_session_factory() as session:
         tenant = await _create_tenant(session)
         player = await _create_player(session, tenant.id, kyc_status="verified", balance_available=100)
 
-        # Create admin bound to same tenant
-        admin = AdminUser(
-            tenant_id=tenant.id,
-            username="admin",
-            email="admin@test.com",
-            full_name="Test Admin",
-            password_hash="noop",
-            role="Admin",
-            is_platform_owner=False,
-        )
-        session.add(admin)
-        await session.commit()
-        await session.refresh(admin)
+        # Create admin bound to same tenant (idempotent)
+        import uuid
+
+        admin_email = f"admin+{uuid.uuid4().hex}@test.local"
+        admin = await _get_or_create_admin(session, tenant_id=tenant.id, email=admin_email)
 
         player_token = _make_player_token(player.id, tenant.id)
         # Admin token uses email in payload per get_current_admin
