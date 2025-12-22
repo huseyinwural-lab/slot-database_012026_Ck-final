@@ -45,6 +45,13 @@ async def _get_or_create_admin(session, tenant_id: str, email: str) -> AdminUser
 
 
 async def _seed_admin_and_player(async_session_factory):
+    # For admin withdraw tests we rely on legacy Player-based funds checks,
+    # not ledger-enforced balance. Ensure enforce is OFF here so that previous
+    # tests (e.g. LEDGER-02B) don't leak their settings into this suite.
+    settings.ledger_enforce_balance = False
+    settings.ledger_balance_mismatch_log = False
+    settings.ledger_shadow_write = True
+
     async with async_session_factory() as session:
         tenant = await _create_tenant(session)
         player = await _create_player(session, tenant.id, kyc_status="verified", balance_available=100)
