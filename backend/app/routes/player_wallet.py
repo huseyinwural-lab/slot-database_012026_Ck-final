@@ -281,7 +281,9 @@ async def create_deposit(
     await session.commit()
     await session.refresh(tx)
 
-    # PSP integration (MockPSP) + ledger events: authorize + capture
+    # PSP integration (MockPSP) is still called for side-effects and provider
+    # references, but no longer drives balance changes directly; those are
+    # handled exclusively via the wallet+ledger service above.
     from app.services.psp import get_psp
     from app.services.psp.psp_interface import build_psp_idem_key
 
@@ -297,33 +299,18 @@ async def create_deposit(
             # Real PSP implementations won't expose this hook.
             pass
 
-    # Authorize step (no balance delta)
-    psp_auth = await psp.authorize_deposit(
+    # Authorize + capture steps remain for provider simulation but do not
+    # perform wallet/ledger deltas anymore.
+    await psp.authorize_deposit(
         tx_id=str(tx.id),
         tenant_id=current_player.tenant_id,
         player_id=current_player.id,
         amount=float(amount),
         currency=tx.currency or "USD",
         psp_idem_key=psp_idem_key,
-    )
-    await shadow_append_event(
-        session=session,
-        tenant_id=current_player.tenant_id,
-        player_id=current_player.id,
-        tx_id=str(tx.id),
-        type="deposit",
-        direction="credit",
-        amount=float(amount),
-        currency=tx.currency or "USD",
-        status="deposit_authorized",
-        idempotency_key=f"{psp_idem_key}:authorize",
-        provider=psp_auth.provider,
-        provider_ref=psp_auth.provider_ref,
-        provider_event_id=psp_auth.provider_event_id,
     )
 
-    # Capture step (created-gated delta)
-    psp_cap = await psp.capture_deposit(
+    await psp.capture_deposit(
         tx_id=str(tx.id),
         tenant_id=current_player.tenant_id,
         player_id=current_player.id,
@@ -331,30 +318,6 @@ async def create_deposit(
         currency=tx.currency or "USD",
         psp_idem_key=psp_idem_key,
     )
-    res = await shadow_append_event(
-        session=session,
-        tenant_id=current_player.tenant_id,
-        player_id=current_player.id,
-        tx_id=str(tx.id),
-        type="deposit",
-        direction="credit",
-        amount=float(amount),
-        currency=tx.currency or "USD",
-        status="deposit_captured",
-        idempotency_key=f"{psp_idem_key}:capture",
-        provider=psp_cap.provider,
-        provider_ref=psp_cap.provider_ref,
-        provider_event_id=psp_cap.provider_event_id,
-    )
-    if res and res.created:
-        await shadow_apply_delta(
-            session=session,
-            tenant_id=current_player.tenant_id,
-            player_id=current_player.id,
-            currency=tx.currency or "USD",
-            delta_available=float(amount),
-            delta_pending=0.0,
-        )
 
     total_real = current_player.balance_real_available + current_player.balance_real_held
     return {
