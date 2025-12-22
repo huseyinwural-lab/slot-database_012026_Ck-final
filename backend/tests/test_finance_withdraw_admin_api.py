@@ -189,7 +189,7 @@ async def test_mark_paid_from_approved_reduces_held(client, async_session_factor
             db_player = await session.get(Player, player.id)
             return tx, db_player
 
-    tx, db_player = asyncio.run(_load_after_paid())
+    tx, db_player = await _load_after_paid()
 
     assert tx.state == "paid"
     assert db_player.balance_real_available == pytest.approx(before_available)
