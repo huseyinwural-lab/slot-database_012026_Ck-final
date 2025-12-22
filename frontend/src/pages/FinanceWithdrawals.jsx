@@ -77,7 +77,7 @@ const FinanceWithdrawals = () => {
         offset,
       };
 
-      if (filters.state) params.state = filters.state;
+      if (filters.state && filters.state !== 'all') params.state = filters.state;
       if (filters.player_id) params.player_id = filters.player_id;
       if (filters.date_from) params.date_from = filters.date_from;
       if (filters.date_to) params.date_to = filters.date_to;
