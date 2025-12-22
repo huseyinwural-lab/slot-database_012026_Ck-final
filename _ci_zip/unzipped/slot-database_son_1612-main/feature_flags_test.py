@@ -9,7 +9,7 @@ import json
 import sys
 
 class FeatureFlagsEnforcementTester:
-    def __init__(self, base_url="https://wallet-admin-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://wallet-admin-2.preview.emergentagent.com"):
         self.base_url = base_url
         self.access_token = None
 

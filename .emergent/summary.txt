@@ -1,491 +1,166 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was to build a production-grade MVP for a casino admin panel's finance/wallet functionality. The project is being developed in phases.
-
-- **Phase 1 (PR-1):** Database schema updates for a financial state machine. (DONE)
-- **Phase 2 (PR-2):** Player-facing wallet logic with idempotency, KYC limits, and auditing. (DONE)
-- **Phase 3 (PR-3):** Admin-facing withdrawal approval workflow, including backend APIs, a webhook skeleton, and a new Admin UI. (DONE in this session)
-- **Hardening (NEXT-01, NEXT-02):** Standardized test-only payment methods and made the E2E KYC helper more robust. (DONE in this session)
-- **Ledger Implementation (LEDGER-01, LEDGER-02A, LEDGER-02B):**
-    - **LEDGER-01:** Created the foundational  and  tables and repository. (DONE in this session)
-    - **LEDGER-02A:** Implemented shadow writing to the new ledger tables from existing wallet handlers, including an idempotent hold model for withdrawals. (DONE in this session)
-    - **LEDGER-02B:** Currently in progress. The goal is to switch the insufficient funds check to use the new  table as the canonical source of truth, controlled by a feature flag.
+The user's initial goal was to build a production-grade MVP for a casino admin panel's finance/wallet functionality. The project is being developed in phases, with the current session focused on completing the ledger migration and building out the core components for a Payment Service Provider (PSP) integration.
 
 **PRODUCT REQUIREMENTS:**
-- Implement a production-grade finance and wallet system.
-- Build the admin withdrawal approval flow (APIs, UI, tests).
-- Harden the test suite and payment flows.
-- Incrementally build and migrate to a canonical ledger system for all financial transactions.
+- **Ledger Implementation:** Finalize the incremental migration to a canonical ledger system for all financial transactions, including balance checks and concurrency hardening.
+- **PSP Integration (MVP):** Build the foundational components for PSP integration, including a mock provider, ledger integration, webhook handling, and reconciliation capabilities.
+- **Operational Readiness:** Create the necessary scripts and documentation for a safe, phased rollout of the new ledger system into production.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The application is a FastAPI/React monorepo. The core finance MVP is now significantly advanced.
-- **PR-3 (Admin Withdrawal Flow)** is complete. This includes:
-    - Backend APIs (, , ) for admin actions.
-    - A new Admin UI page () for managing the queue.
-    - A new E2E smoke test () that verifies the full lifecycle by bypassing UI login and using API calls.
-- **Hardening tasks (NEXT-01, NEXT-02)** are complete. Payment methods in tests are standardized, and the KYC E2E helper is now idempotent.
-- **Ledger Implementation:**
-    - **LEDGER-01:** New  and  tables exist, along with an Alembic migration and a  repository.
-    - **LEDGER-02A:** All relevant handlers (, , , ) now perform shadow writes to the ledger tables. Balance updates are idempotent, using a created-gated delta pattern where deltas are only applied if the corresponding ledger event is new.
+The application is a feature-complete MVP for a casino finance panel. All major development tasks for the ledger migration and mock PSP integration are finished. This includes:
+- **Ledger System:** The ledger is now the canonical source of truth for withdrawal balance checks (), with concurrency hardening () in place. The system uses shadow writes and created-gated deltas for idempotency.
+- **Mock PSP:** A full mock PSP () integration is complete, covering deposit, withdrawal payout, and webhook handling.
+- **Webhook Handling:** A robust webhook endpoint () exists with replay protection and a framework for signature verification. It correctly maps  and  events to ledger updates.
+- **Reconciliation:** A reconciliation job () can find discrepancies between the mock PSP and the ledger. Findings are stored in a new  table and can be viewed and resolved via a new admin API.
+- **Operational Tooling:** A backfill script () to populate ledger data and extensive runbook documentation for the production rollout are complete.
+- **Testing:** The entire system is covered by a comprehensive suite of backend tests (30/30 passed) and a core E2E smoke test that remains green.
 
 **Last working item**:
-- **Last item agent was working:** The agent is implementing **LEDGER-02B**. This task involves modifying the withdrawal handler () to use the  ledger table as the source of truth for insufficient funds checks. This behavior is controlled by a new  feature flag. The agent has added the required config flags, a telemetry service for logging balance mismatches, and created a new test file, .
-- **Status:** IN PROGRESS
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** backend testing agent. The agent should run 
-no tests ran in 0.00s to validate the fix.
+- **Last item agent was working:** The agent completed the final development phase by running a full backend regression test suite and the E2E smoke test to validate all recent changes. It then performed a final audit of the feature flag defaults in . This marked the end of the development work and the transition to the final Release Candidate verification stage.
+- **Status:** COMPLETED
+- **Agent Testing Done:** Y
+- **Which testing method agent to use?** NA
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Tests for LEDGER-02B are failing (P0)**
-  - **Description**: The tests in the newly created file  are failing. The agent was in the process of implementing the logic and fixing the corresponding tests. The errors seen in logs included  and test failures, indicating issues with test setup, fixture usage, or incorrect implementation of the core logic.
-  - **Status:** IN PROGRESS
+- **Issue 1: Alembic migration chain needs real-world validation (P0)**
+  - **Description**: The agent has created all necessary Alembic migration files ( table, unique index). However, it cannot verify the migration chain in a real Postgres environment. The  values in the migration files are placeholders or best-effort guesses based on the available files.
+  - **Status:** BLOCKED
   - **Is recurring issue?** N
   - **Should Test frontend/backend/both after fix?** backend
 
   **Issues Detail:**
-  - **Issue 1: Tests for LEDGER-02B are failing**
-     - **Attempted fixes:** The agent created the necessary files ( flags, , ) and modified . It ran ============================= test session starts ==============================
-platform linux -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0
-rootdir: /app
-plugins: anyio-4.11.0
-collected 56 items / 30 errors
-
-==================================== ERRORS ====================================
-_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py _
-ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
-_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py _
-ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
-_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py _
-ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
-________________________ ERROR collecting backend/tests ________________________
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-<frozen importlib._bootstrap>:1204: in _gcd_import
-    ???
-<frozen importlib._bootstrap>:1176: in _find_and_load
-    ???
-<frozen importlib._bootstrap>:1140: in _find_and_load_unlocked
-    ???
-E   ModuleNotFoundError: No module named 'tests.conftest'
-_______________________ ERROR collecting backend_test.py _______________________
-import file mismatch:
-imported module 'backend_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py
-which is not the same as the test file we want to collect:
-  /app/backend_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-____________________ ERROR collecting feature_flags_test.py ____________________
-import file mismatch:
-imported module 'feature_flags_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/feature_flags_test.py
-which is not the same as the test file we want to collect:
-  /app/feature_flags_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_________________ ERROR collecting focused_regression_test.py __________________
-import file mismatch:
-imported module 'focused_regression_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/focused_regression_test.py
-which is not the same as the test file we want to collect:
-  /app/focused_regression_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-______________________ ERROR collecting jwt_auth_test.py _______________________
-import file mismatch:
-imported module 'jwt_auth_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/jwt_auth_test.py
-which is not the same as the test file we want to collect:
-  /app/jwt_auth_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-______________________ ERROR collecting p0_patch1_test.py ______________________
-import file mismatch:
-imported module 'p0_patch1_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/p0_patch1_test.py
-which is not the same as the test file we want to collect:
-  /app/p0_patch1_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-____________________ ERROR collecting patch1_smoke_test.py _____________________
-import file mismatch:
-imported module 'patch1_smoke_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch1_smoke_test.py
-which is not the same as the test file we want to collect:
-  /app/patch1_smoke_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_______________________ ERROR collecting patch2_test.py ________________________
-import file mismatch:
-imported module 'patch2_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch2_test.py
-which is not the same as the test file we want to collect:
-  /app/patch2_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-__________________ ERROR collecting player_management_test.py __________________
-import file mismatch:
-imported module 'player_management_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/player_management_test.py
-which is not the same as the test file we want to collect:
-  /app/player_management_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_______________________ ERROR collecting reports_test.py _______________________
-import file mismatch:
-imported module 'reports_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/reports_test.py
-which is not the same as the test file we want to collect:
-  /app/reports_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-__________________ ERROR collecting tenant_isolation_test.py ___________________
-import file mismatch:
-imported module 'tenant_isolation_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_isolation_test.py
-which is not the same as the test file we want to collect:
-  /app/tenant_isolation_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_________________ ERROR collecting tenant_kill_switch_test.py __________________
-import file mismatch:
-imported module 'tenant_kill_switch_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_kill_switch_test.py
-which is not the same as the test file we want to collect:
-  /app/tenant_kill_switch_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_______________________ ERROR collecting tenant_test.py ________________________
-import file mismatch:
-imported module 'tenant_test' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_test.py
-which is not the same as the test file we want to collect:
-  /app/tenant_test.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-____________________ ERROR collecting test_api_key_robot.py ____________________
-import file mismatch:
-imported module 'test_api_key_robot' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_api_key_robot.py
-which is not the same as the test file we want to collect:
-  /app/test_api_key_robot.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-____________________ ERROR collecting test_bonus_config.py _____________________
-import file mismatch:
-imported module 'test_bonus_config' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_config.py
-which is not the same as the test file we want to collect:
-  /app/test_bonus_config.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-____________________ ERROR collecting test_bonus_trigger.py ____________________
-import file mismatch:
-imported module 'test_bonus_trigger' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_trigger.py
-which is not the same as the test file we want to collect:
-  /app/test_bonus_trigger.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-____________________ ERROR collecting test_client_upload.py ____________________
-ImportError while importing test module '/app/test_client_upload.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_client_upload.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
-_________________ ERROR collecting test_client_upload_clean.py _________________
-import file mismatch:
-imported module 'test_client_upload_clean' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload_clean.py
-which is not the same as the test file we want to collect:
-  /app/test_client_upload_clean.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_____________________ ERROR collecting test_dice_fixed.py ______________________
-ImportError while importing test module '/app/test_dice_fixed.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_dice_fixed.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
-______________________ ERROR collecting test_dice_only.py ______________________
-ImportError while importing test module '/app/test_dice_only.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_dice_only.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
-___________________ ERROR collecting test_ff_enforcement.py ____________________
-import file mismatch:
-imported module 'test_ff_enforcement' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_ff_enforcement.py
-which is not the same as the test file we want to collect:
-  /app/test_ff_enforcement.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-__________________ ERROR collecting test_finance_endpoints.py __________________
-import file mismatch:
-imported module 'test_finance_endpoints' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_finance_endpoints.py
-which is not the same as the test file we want to collect:
-  /app/test_finance_endpoints.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-__________________ ERROR collecting test_game_assets_only.py ___________________
-import file mismatch:
-imported module 'test_game_assets_only' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_game_assets_only.py
-which is not the same as the test file we want to collect:
-  /app/test_game_assets_only.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_________________ ERROR collecting test_reconciliation_only.py _________________
-import file mismatch:
-imported module 'test_reconciliation_only' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_reconciliation_only.py
-which is not the same as the test file we want to collect:
-  /app/test_reconciliation_only.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-__________________ ERROR collecting test_redaction_direct.py ___________________
-ImportError while importing test module '/app/test_redaction_direct.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_redaction_direct.py:11: in <module>
-    from app.services.audit import AuditLogger
-backend/app/services/audit.py:6: in <module>
-    from app.models.sql_models import AdminUser, AuditEvent
-E   ImportError: cannot import name 'AuditEvent' from 'app.models.sql_models' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend/app/models/sql_models.py)
-___________________ ERROR collecting test_review_specific.py ___________________
-import file mismatch:
-imported module 'test_review_specific' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_review_specific.py
-which is not the same as the test file we want to collect:
-  /app/test_review_specific.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-_________________ ERROR collecting test_robot_orchestrator.py __________________
-import file mismatch:
-imported module 'test_robot_orchestrator' has this __file__ attribute:
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_robot_orchestrator.py
-which is not the same as the test file we want to collect:
-  /app/test_robot_orchestrator.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
-=============================== warnings summary ===============================
-_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17
-  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: _ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
-    class TestResult:
-
-backend_regression_test.py:21
-  /app/backend_regression_test.py:21: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: backend_regression_test.py)
-    class TestResult:
-
-p2_observability_final_test.py:30
-  /app/p2_observability_final_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_final_test.py)
-    class TestResult:
-
-p2_observability_test.py:30
-  /app/p2_observability_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_test.py)
-    class TestResult:
-
-test_audit_comprehensive.py:27
-  /app/test_audit_comprehensive.py:27: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: test_audit_comprehensive.py)
-    class TestResult:
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-=========================== short test summary info ============================
-ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py
-ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py
-ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py
-ERROR backend/tests - ModuleNotFoundError: No module named 'tests.conftest'
-ERROR backend_test.py
-ERROR feature_flags_test.py
-ERROR focused_regression_test.py
-ERROR jwt_auth_test.py
-ERROR p0_patch1_test.py
-ERROR patch1_smoke_test.py
-ERROR patch2_test.py
-ERROR player_management_test.py
-ERROR reports_test.py
-ERROR tenant_isolation_test.py
-ERROR tenant_kill_switch_test.py
-ERROR tenant_test.py
-ERROR test_api_key_robot.py
-ERROR test_bonus_config.py
-ERROR test_bonus_trigger.py
-ERROR test_client_upload.py
-ERROR test_client_upload_clean.py
-ERROR test_dice_fixed.py
-ERROR test_dice_only.py
-ERROR test_ff_enforcement.py
-ERROR test_finance_endpoints.py
-ERROR test_game_assets_only.py
-ERROR test_reconciliation_only.py
-ERROR test_redaction_direct.py
-ERROR test_review_specific.py
-ERROR test_robot_orchestrator.py
-!!!!!!!!!!!!!!!!!!! Interrupted: 30 errors during collection !!!!!!!!!!!!!!!!!!!
-======================== 5 warnings, 30 errors in 0.92s ======================== and encountered failures, which it was actively debugging.
-     - **Next debug checklist:**
-        1.  **Review Handler Logic**: Carefully re-read the user's final, detailed instructions for LEDGER-02B. In , verify the  function logic. Specifically, ensure the order of operations is **EXACTLY**: 1. KYC gate, 2. Idempotency early-return, 3. Balance check (gated by ), 4. Transaction creation, 5. Shadow write.
-        2.  **Review Test File**: Examine . The user provided a complete, drop-in test file. Compare the agent's created file with the user's version to spot discrepancies in fixtures, test logic, or assertions.
-        3.  **Check Fixtures**: The  often points to a problem with a test fixture not returning the expected object or the agent using it incorrectly. Verify that fixtures like  and  are used as intended in the new test file.
-     - **Why fix this issue and what will be achieved with the fix?** Fixing this is required to complete LEDGER-02B, which makes the new ledger the canonical source for balance checks, a critical step towards a fully ledger-based system.
+  - **Issue 1: Alembic migration chain needs real-world validation**
+     - **Attempted fixes:** The agent correctly set the  pointers based on the files it created but noted that this must be verified against the user's actual repository migration history.
+     - **Next debug checklist:** The user must perform these steps in their staging/production environment:
+        1. Run  to find the correct revision ID for the last migration before the ones created in this session.
+        2. Update the  value in  to point to the correct revision ID.
+        3. Run  to apply the new migrations.
+        4. Verify in the Postgres database that the  table and its unique constraint () have been created correctly.
+     - **Why fix this issue and what will be achieved with the fix?** This is a release blocker. Without a valid migration chain, the new database schema cannot be deployed to staging or production, preventing the entire feature set from being used.
      - **Blocked on other issue:** None
 
 **In progress Task List**:
-- **Task 1: Complete LEDGER-02B - Ledger-Enforced Balance (P0)**
-     - **Where to resume:** Resume by debugging and fixing the failing tests in . Follow the user's last detailed plan precisely.
-     - **What will be achieved with this?** The withdrawal flow will use the ledger snapshot for balance checks, making the system more robust and closer to the final ledger architecture.
-     - **Status:** IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** backend (unit/integration tests) and a final regression check with the E2E smoke test.
-     - **Blocked on something:** Blocked by Tests for LEDGER-02B are failing issue.
+- None. All development tasks are complete.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-    - **LEDGER-02B Concurrency Hardening (P1):** Implement  in  to prevent race conditions during balance checks, as suggested by the user. This is a production-hardening step.
-    - **PSP-01: Provider Adapter & Mock (P1):** Begin the Payment Service Provider integration by creating a  adapter. This is the first step of the EPIC outlined in .
+- **Upcoming Tasks (P0 - Release Blockers):**
+    - **MIG-01: Finalize Alembic Chain:** User needs to verify and correct the  IDs in the new migration files and run  in a staging environment. (Reference: Alembic migration chain needs real-world validation issue).
+    - **RC-CLOSURE: Prepare Release Candidate Closure Message:** The agent was asked to prepare a final summary document for the release candidate.
+    - **STG-ROLL: Staging Rollout:** User needs to execute the  plan in the staging environment. This includes enabling telemetry, running the backfill script, enabling signature enforcement, and finally enabling ledger balance enforcement.
+- **Future Tasks (P1 - Production Hardening):**
+    - **C3: Transaction Boundary Tightening:** Refactor the withdrawal flow to wrap , transaction creation, and ledger updates in a single, tighter transaction boundary.
+    - **PSP-04: Failure State Handling:** Implement ledger/snapshot updates for failed/reversed deposits and withdrawals.
+    - **Observability:** Connect  counter to a real metrics system.
+    - **Security:** Implement webhook rate-limiting and secret rotation plans.
+- **Future Tasks (P2 - Full Product):**
+    - **PSP-10: Real PSP Integration:** Replace  with a real provider like Stripe or Adyen.
+    - **Admin Ops UI:** Build frontend interfaces for the reconciliation findings.
 
-- **Future Tasks:**
-    - **PSP-02:** Implement a full webhook receiver with signature verification and idempotent event processing.
-    - **Real PSP Integration:** Integrate a real payment provider like Stripe or Adyen.
-    - **Ledger Amount Refactor (P2):** Migrate  fields from  to / for financial precision.
-    - **Reconciliation Job (OPS-01, P2):** Create a periodic job to reconcile ledger data with provider reports.
-    seminar
 **Completed work in this session**
-- **PR-3: Admin Withdrawal Approval Flow:**
-  - **Backend:** Created admin APIs (, , ), a webhook skeleton (), and associated audit events.
-  - **Frontend:** Created a new Admin UI page at  with filtering, pagination, and action modals.
-  - **Testing:** Wrote 6 passing backend tests (, ) and a passing E2E smoke test ().
-
-- **Hardening (NEXT-01, NEXT-02):**
-  - Standardized test-only payment methods (, ) gated by a feature flag.
-  - Made the E2E KYC approval helper robust by using  instead of email.
-
-- **Ledger Implementation (Phase 1 & 2A):**
-  - **LEDGER-01:** Created  and  tables via an Alembic migration and implemented  with idempotent .
-  - **LEDGER-02A:** Implemented shadow writing to the ledger tables from all wallet/finance handlers, using a created-gated delta pattern to ensure idempotency of balance updates. Validated with .
+- **LEDGER-02B:** Completed the ledger-enforced balance check for withdrawals, controlled by the  flag.
+- **LEDGER-02B-C1:** Implemented concurrency hardening using  in .
+- **LEDGER-02B-C2:** Prepared a Postgres-only concurrency test (skipped in CI) to validate the row lock.
+- **PSP-01:** Built the foundational  adapter, including the interface, deterministic implementation, and integration with the deposit and withdrawal flows.
+- **PSP-02:** Created a canonical webhook endpoint with replay protection and a signature verification framework. Mapped  and  events to the ledger.
+- **OPS-01:** Created a robust, idempotent backfill script () with dry-run, force, and tenant-scoping capabilities.
+- **OPS-02:** Created comprehensive rollout documentation, including a runbook, decision matrix, and secrets checklist.
+- **PSP-03:** Implemented a full reconciliation MVP, including:
+    -  DB table and model.
+    - A reconciliation job to find discrepancies between  and the ledger.
+    - A full-featured admin API (, ) for managing findings.
+    - An admin endpoint () to trigger the job.
 
 **Earlier issues found/mentioned but not fixed**
--   **Global Test Failures:** Tests in unrelated modules like  and  still fail due to an admin authentication issue in the test environment. Per user instruction, these should continue to be ignored, and testing should focus only on the modules being worked on.
+-   **Global Test Failures:** Tests in unrelated modules like  and  were mentioned in the initial handoff as failing due to an admin authentication issue in the test environment. Per user instruction, these were ignored.
 
 **Known issue recurrence from previous fork**
--   None.
+- None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Incremental Migration:** Building the new ledger system alongside the old one, using feature flags (, ) to manage the rollout.
--   **Shadow Writing:** Writing data to a new system (ledger tables) in parallel with the old system, without the new system's state affecting the primary application logic. This allows for safe, production-level verification.
--   **Idempotent Deltas (Created-Gated):** A pattern where a balance-changing operation () is only applied if the event triggering it was newly created. This is achieved by having the event-appending function return a  flag, preventing double-spending/crediting on retries.
--   **API-driven E2E Testing:** Bypassing unreliable UI login flows in Playwright by using the API request context to fetch authentication tokens and inject them directly into browser .
--   **Feature Flags for Rollout:** Using boolean flags in  to enable/disable new logic, allowing for safe deployment and quick rollbacks.
+- **Incremental Migration & Shadow Writing:** Building and validating the new ledger system in parallel with the old one, managed by feature flags.
+- **Idempotency Patterns:** Using created-gated deltas for balance updates and DB-level unique constraints for replay protection in webhooks and reconciliation findings.
+- **Concurrency Control:** Using  to implement pessimistic row-level locking for critical balance checks.
+- **Provider Abstraction:** Creating a  to decouple application logic from specific PSP implementations ().
+- **Operational Tooling:** Building CLI scripts () and runbook documentation for safe production rollouts.
+- **Reconciliation Job:** A background process to ensure data consistency between the internal ledger and external provider records.
 
 **key DB schema**
--   **ledgertransaction:**
-    -   , , , , , , , , , , , 
-    -   Unique on 
-    -   Unique on 
--   **walletbalance:**
-    -   
-    -   
-    -   
--   **player:** (Legacy)
-    -   , 
--   **transaction:** (Legacy)
-    -   uid=0(root) gid=0(root) groups=0(root), , , etc.
+- **reconciliation_findings:**
+    - , , , , , , , , 
+    - Unique on 
 
 **changes in tech stack**
 - None.
 
 **All files of reference**
-- **In-Progress (LEDGER-02B):**
-    -  (Specifically the  function)
-    -  (The failing test file)
-    -  (For  flag)
-    -  (For mismatch logging)
-    -  (Specifically  function)
-- **Completed (Reference):**
+- **Core Logic:**
+    -  (deposit/withdraw handlers)
+    -  (admin mark-paid handler)
+    -  (webhook and reconciliation API)
+    -  (reconciliation logic)
+- **Operational Tooling:**
+    - 
+    - 
+- **New Tests:**
+    - 
+    - 
     - 
     - 
 
 **key api endpoints**
-- **To Be Finalized (LEDGER-02B):**
-  - : The insufficient funds logic is being refactored.
-- **Completed in this session:**
-  - : List withdrawal requests for admins.
-  - : Approve/reject withdrawals.
-  - : Mark withdrawals as paid.
-  - : Skeleton for provider webhooks.
+- : Canonical webhook receiver.
+- : List reconciliation findings.
+- : Mark a finding as resolved.
+- : Trigger the reconciliation job.
 
 **Critical Info for New Agent**
-- **Your immediate task is to complete LEDGER-02B.** This means fixing the failing tests in .
-- **Follow the user's plan.** The user has provided extremely detailed, non-negotiable plans. The last user message contains the exact implementation and test strategy for LEDGER-02B. Adhere to it strictly.
-- **Idempotency First is a critical rule.** In the  handler, the check for an existing idempotent transaction MUST run *before* any balance checks. This prevents false  errors on retried requests.
-- **Fail-closed behavior is intended.** If a  record doesn't exist for a player,  returns 0. When  is on, this should correctly result in an  error. This is expected and ensures the backfill script is mandatory for production rollout.
-- Continue to ignore unrelated test failures in , etc.
+- The project is feature-complete for its MVP/RC milestone. All planned development work is done.
+- The next crucial step, **MIG-01**, is operational and must be performed by the user in a staging/Postgres environment. You cannot proceed with this task. Your main goal is to support the user through the rollout phases defined in the documentation.
+- The user has provided extremely detailed, non-negotiable plans throughout the project. Continue to adhere to this collaborative model.
+- Always refer to the created documentation () for operational procedures.
 
 **documents and test_reports created in this job**
 - 
+- 
+- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1. User provides a complete implementation and testing plan for LEDGER-02B, including a drop-in test file.
-2. Agent confirms understanding of the LEDGER-02B plan and asks for user verification.
-3. User clarifies that the agent must self-verify using the provided protocol and not ask for user verification.
-4. Agent acknowledges and lays out the plan to implement LEDGER-02B.
-5. User provides a final, detailed checklist and closure message template for LEDGER-02A.
-6. Agent confirms understanding of the LEDGER-02A plan.
-7. User provides a very detailed implementation plan for LEDGER-02A, including the created-gated delta pattern.
-8. Agent provides a closure summary for LEDGER-01 and asks for the next step.
-9. User provides a detailed plan for LEDGER-02A (Shadow Write).
-10. Agent provides a final closure summary for all completed work (PR-3, Hardening, Ledger-01, Ledger-02A).
+10. User confirms  is closed and says to proceed with .
+9. User approves the plan for .
+8. User confirms  is closed and gives a detailed plan for  (Admin API).
+7. User approves the plan for  with critical fixes for idempotency and Alembic chaining.
+6. User confirms  is closed but requests two critical quality fixes before proceeding.
+5. User confirms  is closed and provides a detailed plan for  (Reconciliation).
+4. User confirms  is complete and provides the plan for  (Runbook).
+3. User confirms  is complete and provides a detailed roadmap for , , and .
+2. User provides the final roadmap for RC/Prod, with  (Alembic finalization) as the next key task.
+1. User provides a final, detailed checklist for project completion, emphasizing the need to validate the Alembic chain (MIG-01) in a real Postgres environment.
 
 **Project Health Check:**
-- **Broken:** The in-progress feature LEDGER-02B is broken, as indicated by the failing tests in .
-- **Mocked:** Payment provider interactions are still mocked. The webhook endpoint is a skeleton.
+- **Broken:** Nothing is broken.
+- **Mocked:** The entire Payment Service Provider (PSP) interaction is mocked via . This is by design for the current MVP.
 
 **3rd Party Integrations**
-- PostgreSQL
-- SQLModel/SQLAlchemy
-- Alembic
+- PostgreSQL / SQLModel / Alembic
+- FastAPI
+- React
 - Playwright
-- OpenAI GPT-4o (Uses Emergent LLM Key)
 
 **Testing status**
-- **Testing agent used after significant changes:** NO
+- **Testing agent used after significant changes:** YES (For E2E smoke tests)
 - **Troubleshoot agent used after agent stuck in loop:** NO
 - **Test files created:**
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-- **Known regressions:** None.
+    - A comprehensive suite of backend test files covering every new feature. See Code Architecture for the full list (11 new test files).
+- **Known regressions:** None. The full backend suite (30 tests) and E2E smoke test are passing.
 
 **Credentials to test flow:**
-- Use the fixtures in  to create tenants, players, and admins for testing. For E2E tests, the  script seeds its own credentials and uses API login.
+- Backend tests use fixtures in  (e.g., ) to create and authenticate users and admins.
 
 **What agent forgot to execute**
-- Nothing was explicitly forgotten, but the agent is currently in the middle of implementing and debugging the **LEDGER-02B** task. The next agent must pick this up and complete it.</analysis>
+- Nothing. The agent successfully completed all assigned development tasks according to the user's detailed specifications. The remaining tasks are operational and require user action in a different environment.</analysis>
