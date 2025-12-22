@@ -96,7 +96,7 @@ def test_backfill_force_overwrites_existing(async_session_factory):
             tenant = await _create_tenant(session)
             player = await _create_player(session, tenant.id, balance_available=10.0, balance_held=5.0)
 
-        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False)
+        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False, session_factory=async_session_factory)
 
         async with async_session_factory() as session:
             wb1 = (
