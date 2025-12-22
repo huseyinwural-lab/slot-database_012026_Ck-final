@@ -52,6 +52,15 @@ class MockPSP:
         if key in self._store:
             return self._store[key]
 
+        # Determine effective status with optional outcome override.
+        effective_status = status
+        env = (settings.env or "").lower()
+        if env in {"dev", "local", "test"}:
+            override = self._outcome_overrides.get(psp_idem_key)
+            if override == "fail":
+                # Map fail outcome to provider-agnostic FAILED status.
+                effective_status = PSPStatus.FAILED
+
         provider_ref = f"{_PROVIDER_NAME}:{tx_id}"
         idem_hash = self._hash_idem(psp_idem_key)
         provider_event_id = f"{action}:{tx_id}:{idem_hash}"
@@ -60,7 +69,7 @@ class MockPSP:
             provider=_PROVIDER_NAME,
             provider_ref=provider_ref,
             provider_event_id=provider_event_id,
-            status=status,
+            status=effective_status,
             raw={"action": action, "tx_id": tx_id, "psp_idem_key": psp_idem_key},
         )
         self._store[key] = result
