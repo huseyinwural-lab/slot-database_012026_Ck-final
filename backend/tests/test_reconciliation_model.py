@@ -7,8 +7,7 @@ from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from app.app import app  # noqa: F401
-from app.core.database import async_session
+from server import app  # noqa: F401
 from app.models.reconciliation import (
     ReconciliationFinding,
     create_finding,
