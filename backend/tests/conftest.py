@@ -91,7 +91,10 @@ async def client(async_session_factory):
     # Override auth so it loads Player via SAME AsyncSession
     app.dependency_overrides[get_current_player] = override_get_current_player_factory()
 
-    async with AsyncClient(app=app, base_url="http://testserver") as c:
+    from httpx import ASGITransport
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://testserver") as c:
         yield c
 
     app.dependency_overrides.clear()
