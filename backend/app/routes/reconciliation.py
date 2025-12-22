@@ -15,6 +15,7 @@ from app.schemas.reconciliation import (
     ReconciliationRunListResponse,
 )
 from app.services.reconciliation_runs import create_run, get_run, list_runs
+from app.jobs.reconciliation_run_job import run_reconciliation_for_run_id
 
 router = APIRouter(prefix="/api/v1/reconciliation", tags=["reconciliation"])
 
