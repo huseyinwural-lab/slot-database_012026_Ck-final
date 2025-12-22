@@ -17,6 +17,30 @@ from app.utils.tenant import get_current_tenant_id
 
 router = APIRouter(prefix="/api/v1/finance", tags=["finance_advanced"])
 
+@router.get("/withdrawals")
+async def list_withdrawals(
+    request: Request,
+    state: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    query = select(Transaction).where(
+        Transaction.tenant_id == tenant_id,
+        Transaction.type == "withdrawal",
+    )
+    if state:
+        query = query.where(Transaction.state == state)
+
+    query = query.order_by(Transaction.created_at.desc()).offset(offset).limit(limit)
+    result = await session.execute(query)
+    return result.scalars().all()
+
+
+
 @router.get("/reconciliation")
 async def get_reconciliations(
     request: Request,
