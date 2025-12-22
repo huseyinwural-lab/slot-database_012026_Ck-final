@@ -313,7 +313,6 @@ async def mark_withdrawal_paid(
 
     # held -= amount, total düşer
     player.balance_real_held -= tx.amount
-    tx.state = "paid"
 
     session.add(player)
     session.add(tx)
