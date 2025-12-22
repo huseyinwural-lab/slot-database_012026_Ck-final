@@ -19,6 +19,25 @@ class MockPSP:
     """
 
     def __init__(self) -> None:
+    def register_outcome_override(self, psp_idem_key: str, outcome: str) -> None:
+        """Register a deterministic outcome override for a given idempotency key.
+
+        Only used in dev/test environments. The first non-empty outcome wins
+        and is reused for all subsequent calls with the same key.
+        """
+
+        env = (settings.env or "").lower()
+        if env not in {"dev", "local", "test"}:
+            # In staging/prod, ignore any attempt to override outcomes.
+            return
+
+        outcome = (outcome or "").strip().lower()
+        if outcome not in {"success", "fail"}:
+            return
+
+        if psp_idem_key not in self._outcome_overrides:
+            self._outcome_overrides[psp_idem_key] = outcome
+
         # In-memory idempotency store: (action, psp_idem_key) -> PSPResult
         self._store: Dict[Tuple[str, str], PSPResult] = {}
         # In-memory outcome overrides: psp_idem_key -> "success"|"fail"
