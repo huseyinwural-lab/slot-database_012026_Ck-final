@@ -18,9 +18,9 @@ try:
                 BASE_URL = line.split("=", 1)[1].strip()
                 break
         else:
-            BASE_URL = "https://wallet-admin-2.preview.emergentagent.com"
+            BASE_URL = "https://pspreconcile.preview.emergentagent.com"
 except:
-    BASE_URL = "https://wallet-admin-2.preview.emergentagent.com"
+    BASE_URL = "https://pspreconcile.preview.emergentagent.com"
 
 API_BASE = f"{BASE_URL}/api"
 

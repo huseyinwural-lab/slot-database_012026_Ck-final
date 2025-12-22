@@ -1,80 +1,89 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was to build a production-grade MVP for a casino admin panel's finance/wallet functionality. The project is being developed in phases, with the current session focused on completing the ledger migration and building out the core components for a Payment Service Provider (PSP) integration.
+The user's goal was to build a production-grade MVP for a casino admin panel's finance/wallet functionality. The initial session focused on finalizing a ledger migration and building core components for a Payment Service Provider (PSP) integration.
+
+In this session, the user requested the implementation of a feature (PSP-03D) to allow operations teams to trigger reconciliation jobs via an API. The user also requested that the job execution be moved to a persistent queue system. The final goal was to prepare the application for a staging rollout by creating a comprehensive execution and acceptance plan for the Ops/Infra teams.
 
 **PRODUCT REQUIREMENTS:**
-- **Ledger Implementation:** Finalize the incremental migration to a canonical ledger system for all financial transactions, including balance checks and concurrency hardening.
-- **PSP Integration (MVP):** Build the foundational components for PSP integration, including a mock provider, ledger integration, webhook handling, and reconciliation capabilities.
-- **Operational Readiness:** Create the necessary scripts and documentation for a safe, phased rollout of the new ledger system into production.
+- **Ledger Implementation:** Finalize the incremental migration to a canonical ledger system for all financial transactions.
+- **PSP Integration (MVP):** Build the foundational components for PSP integration, including a mock provider, ledger integration, and webhook handling.
+- **Reconciliation Job API (PSP-03D):** Create an API endpoint for triggering reconciliation jobs, with a persistent, queue-based backend for execution.
+- **Operational Readiness:** Create all necessary scripts, documentation, and a final execution plan for a safe, phased rollout into staging and production.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The application is a feature-complete MVP for a casino finance panel. All major development tasks for the ledger migration and mock PSP integration are finished. This includes:
-- **Ledger System:** The ledger is now the canonical source of truth for withdrawal balance checks (), with concurrency hardening () in place. The system uses shadow writes and created-gated deltas for idempotency.
-- **Mock PSP:** A full mock PSP () integration is complete, covering deposit, withdrawal payout, and webhook handling.
-- **Webhook Handling:** A robust webhook endpoint () exists with replay protection and a framework for signature verification. It correctly maps  and  events to ledger updates.
-- **Reconciliation:** A reconciliation job () can find discrepancies between the mock PSP and the ledger. Findings are stored in a new  table and can be viewed and resolved via a new admin API.
-- **Operational Tooling:** A backfill script () to populate ledger data and extensive runbook documentation for the production rollout are complete.
-- **Testing:** The entire system is covered by a comprehensive suite of backend tests (30/30 passed) and a core E2E smoke test that remains green.
+The application is a feature-complete MVP for a casino finance panel. All major development for the ledger migration, mock PSP, and reconciliation is finished.
+- A new **Reconciliation Runs (PSP-03D)** feature has been fully implemented on the backend. This allows triggering reconciliation jobs via a new API ().
+- The backend job execution has been integrated with a persistent queue system (**ARQ + Redis**). The runner is configurable via an environment variable () to use the new  or fallback to in-process  tasks for testing.
+- The application lifecycle has been updated to manage the queue connection pool.
+- All new code is covered by backend tests, which were fixed to be compatible with Pytest 9 and to handle database dialect differences (SQLite vs. Postgres).
+- A new GitHub Actions workflow () was created to test the new feature against a real Postgres database in CI.
+- A final, comprehensive **Execution Plan + Acceptance Criteria** document has been created for the Ops/Infra teams to perform the staging rollout.
 
 **Last working item**:
-- **Last item agent was working:** The agent completed the final development phase by running a full backend regression test suite and the E2E smoke test to validate all recent changes. It then performed a final audit of the feature flag defaults in . This marked the end of the development work and the transition to the final Release Candidate verification stage.
+- **Last item agent was working:** The agent's final action was to create and present a comprehensive Execution Plan + Acceptance document, as requested by the user. This document serves as a final handover checklist for the Ops/Infra teams, detailing all the steps required to verify the application in CI and deploy/validate it on staging. This completed all development and documentation tasks for the current scope.
 - **Status:** COMPLETED
 - **Agent Testing Done:** Y
-- **Which testing method agent to use?** NA
+- **Which testing method agent to use?** NA (The next steps are for the user/ops team to execute in their staging/prod environments as per the provided plan.)
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Alembic migration chain needs real-world validation (P0)**
-  - **Description**: The agent has created all necessary Alembic migration files ( table, unique index). However, it cannot verify the migration chain in a real Postgres environment. The  values in the migration files are placeholders or best-effort guesses based on the available files.
-  - **Status:** BLOCKED
-  - **Is recurring issue?** N
-  - **Should Test frontend/backend/both after fix?** backend
+The following are not code issues but P0 operational tasks that are release blockers and must be executed by the user's Ops/Infra team. They are detailed in the  document.
 
-  **Issues Detail:**
-  - **Issue 1: Alembic migration chain needs real-world validation**
-     - **Attempted fixes:** The agent correctly set the  pointers based on the files it created but noted that this must be verified against the user's actual repository migration history.
-     - **Next debug checklist:** The user must perform these steps in their staging/production environment:
-        1. Run  to find the correct revision ID for the last migration before the ones created in this session.
-        2. Update the  value in  to point to the correct revision ID.
-        3. Run  to apply the new migrations.
-        4. Verify in the Postgres database that the  table and its unique constraint () have been created correctly.
-     - **Why fix this issue and what will be achieved with the fix?** This is a release blocker. Without a valid migration chain, the new database schema cannot be deployed to staging or production, preventing the entire feature set from being used.
-     - **Blocked on other issue:** None
+- **Issue 1: RC Kapanış Execution Plan (P0)**
+  - **Description**: The user's Ops/Infra team must execute the final acceptance plan to verify and close the Release Candidate. This is a release-blocker.
+  - **Status**: NOT STARTED
+  - **Issues Detail**:
+    - **Sub-Issue 1: CI Postgres Job Verification (Paket-0)**
+        - **Next debug checklist**: Run the  workflow on GitHub Actions and confirm it passes. This validates the PSP-03D feature against a real Postgres DB.
+        - **Status**: NOT STARTED
+    - **Sub-Issue 2: Staging DB Migration (STG-MIG / Paket-1)**
+        - **Next debug checklist**: Run the  command in the staging environment to apply the new  and  table migrations. Verify the schema in Postgres.
+        - **Status**: NOT STARTED
+    - **Sub-Issue 3: Staging Feature Rollout (STG-ROLL / Paket-2)**
+        - **Next debug checklist**: Sequentially enable all feature flags (, , , etc.) in staging, run the backfill script, and execute the E2E smoke tests.
+        - **Status**: NOT STARTED
+    - **Sub-Issue 4: Staging Queue System Verification (Paket-3)**
+        - **Next debug checklist**: Deploy Redis and the ARQ worker service to staging. Set  and verify that a reconciliation run triggered via the API is correctly processed by the worker by checking API responses and worker logs.
+        - **Status**: NOT STARTED
 
 **In progress Task List**:
-- None. All development tasks are complete.
+- None.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks (P0 - Release Blockers):**
-    - **MIG-01: Finalize Alembic Chain:** User needs to verify and correct the  IDs in the new migration files and run  in a staging environment. (Reference: Alembic migration chain needs real-world validation issue).
-    - **RC-CLOSURE: Prepare Release Candidate Closure Message:** The agent was asked to prepare a final summary document for the release candidate.
-    - **STG-ROLL: Staging Rollout:** User needs to execute the  plan in the staging environment. This includes enabling telemetry, running the backfill script, enabling signature enforcement, and finally enabling ledger balance enforcement.
-- **Future Tasks (P1 - Production Hardening):**
-    - **C3: Transaction Boundary Tightening:** Refactor the withdrawal flow to wrap , transaction creation, and ledger updates in a single, tighter transaction boundary.
-    - **PSP-04: Failure State Handling:** Implement ledger/snapshot updates for failed/reversed deposits and withdrawals.
-    - **Observability:** Connect  counter to a real metrics system.
-    - **Security:** Implement webhook rate-limiting and secret rotation plans.
-- **Future Tasks (P2 - Full Product):**
-    - **PSP-10: Real PSP Integration:** Replace  with a real provider like Stripe or Adyen.
-    - **Admin Ops UI:** Build frontend interfaces for the reconciliation findings.
+- **Upcoming Tasks (P0 - User/Ops Execution):**
+    - **Execute **: This is the highest priority and includes all items from the Pending Issue list above. The user's team must complete this plan to close the RC.
+
+- **Future Tasks (P1/P2 - Post-Release Backlog):**
+    - **P1-MT-01 (Tenant-Scope):** Decide if  should be tenant-scoped and implement the necessary schema/API changes.
+    - **C3 (Transaction Boundary):** Refactor the withdrawal flow to tighten the database transaction boundary.
+    - **PSP-04 (Failure Handling):** Implement ledger/snapshot updates for failed/reversed PSP events.
+    - **Docs:** Fully integrate the PSP-03D  endpoint into the operations runbook with  examples and playbooks.
+    - **UI:** Build a frontend Admin UI for listing and creating reconciliation runs.
+    - **Observability:** Integrate job queue and application metrics with a monitoring system (e.g., Prometheus, Datadog).
 
 **Completed work in this session**
-- **LEDGER-02B:** Completed the ledger-enforced balance check for withdrawals, controlled by the  flag.
-- **LEDGER-02B-C1:** Implemented concurrency hardening using  in .
-- **LEDGER-02B-C2:** Prepared a Postgres-only concurrency test (skipped in CI) to validate the row lock.
-- **PSP-01:** Built the foundational  adapter, including the interface, deterministic implementation, and integration with the deposit and withdrawal flows.
-- **PSP-02:** Created a canonical webhook endpoint with replay protection and a signature verification framework. Mapped  and  events to the ledger.
-- **OPS-01:** Created a robust, idempotent backfill script () with dry-run, force, and tenant-scoping capabilities.
-- **OPS-02:** Created comprehensive rollout documentation, including a runbook, decision matrix, and secrets checklist.
-- **PSP-03:** Implemented a full reconciliation MVP, including:
-    -  DB table and model.
-    - A reconciliation job to find discrepancies between  and the ledger.
-    - A full-featured admin API (, ) for managing findings.
-    - An admin endpoint () to trigger the job.
+- **PSP-03D Backend Implementation:**
+  - Created  table via Alembic migration: .
+  - Implemented  model and schemas: , .
+  - Created new API endpoints: .
+  - Implemented service layer with dialect-aware idempotency: .
+- **P1-JOB-01 (Persistent Job Queue Integration):**
+  - Integrated **ARQ (Redis-based queue)** for executing reconciliation jobs.
+  - Created ARQ client and worker entrypoint: , .
+  - Updated  to be configurable via  and  environment variables.
+  - Updated  to manage the ARQ connection pool during application startup/shutdown.
+- **P1-TEST-01 (Test Suite Fixes):**
+  - Resolved **Pytest 9 compatibility issues** in .
+  - Fixed  usage for FastAPI testing.
+  - Made idempotency tests pass on **SQLite** by implementing a dialect-aware fallback, ensuring all  tests pass.
+- **CI/CD:**
+  - Created a new GitHub Actions workflow for Postgres testing: .
+- **Documentation:**
+  - Created a final, comprehensive **** for the Ops/Infra team, consolidating all remaining rollout and verification steps into a single checklist.
 
 **Earlier issues found/mentioned but not fixed**
--   **Global Test Failures:** Tests in unrelated modules like  and  were mentioned in the initial handoff as failing due to an admin authentication issue in the test environment. Per user instruction, these were ignored.
+-   **Global Test Failures:** Tests in unrelated modules (, ) were mentioned in the initial handoff as failing. Per user instruction, these were ignored and not touched.
 
 **Known issue recurrence from previous fork**
 - None.
@@ -83,84 +92,83 @@ The application is a feature-complete MVP for a casino finance panel. All major 
 
 
 **Key Technical Concepts**
-- **Incremental Migration & Shadow Writing:** Building and validating the new ledger system in parallel with the old one, managed by feature flags.
-- **Idempotency Patterns:** Using created-gated deltas for balance updates and DB-level unique constraints for replay protection in webhooks and reconciliation findings.
-- **Concurrency Control:** Using  to implement pessimistic row-level locking for critical balance checks.
-- **Provider Abstraction:** Creating a  to decouple application logic from specific PSP implementations ().
-- **Operational Tooling:** Building CLI scripts () and runbook documentation for safe production rollouts.
-- **Reconciliation Job:** A background process to ensure data consistency between the internal ledger and external provider records.
+- **Persistent Job Queues:** Using ARQ over Redis for durable, out-of-process background job execution, replacing FastAPI's .
+- **Configuration-driven Behavior:** Using environment variables () to switch between different execution paths (queue vs. in-process) for different environments (prod vs. test).
+- **Dialect-Aware Repositories:** Writing database logic () that adapts to the underlying database dialect (Postgres vs. SQLite) to support both production and testing environments.
+- **Operational Handover:** Creating detailed, actionable execution plans and acceptance criteria for Ops/Infra teams to ensure smooth and verifiable rollouts.
 
 **key DB schema**
-- **reconciliation_findings:**
+- **reconciliation_runs:**
     - , , , , , , , , 
-    - Unique on 
+    - Partial Unique on  for Postgres.
 
 **changes in tech stack**
-- None.
+-  and  were added to  to support the persistent job queue.
 
 **All files of reference**
-- **Core Logic:**
-    -  (deposit/withdraw handlers)
-    -  (admin mark-paid handler)
-    -  (webhook and reconciliation API)
-    -  (reconciliation logic)
-- **Operational Tooling:**
+- **Final Execution Plan:** The user's last messages define the final plan.  is also highly relevant.
+- **New Feature Code:**
     - 
     - 
-- **New Tests:**
+    -  (all files)
+- **New Test File:**
     - 
+- **New CI File:**
     - 
-    - 
-    - 
+
+**Areas that need refactoring**:
+- The  endpoint currently uses . The user suggested changing this to a direct  call within the request-response cycle for better error handling. This was deferred to keep the changes minimal but is a valid future improvement.
 
 **key api endpoints**
-- : Canonical webhook receiver.
-- : List reconciliation findings.
-- : Mark a finding as resolved.
-- : Trigger the reconciliation job.
+- : Creates and enqueues a new reconciliation run.
+- : Lists existing reconciliation runs.
+- : Gets the status and details of a specific run.
 
 **Critical Info for New Agent**
-- The project is feature-complete for its MVP/RC milestone. All planned development work is done.
-- The next crucial step, **MIG-01**, is operational and must be performed by the user in a staging/Postgres environment. You cannot proceed with this task. Your main goal is to support the user through the rollout phases defined in the documentation.
-- The user has provided extremely detailed, non-negotiable plans throughout the project. Continue to adhere to this collaborative model.
-- Always refer to the created documentation () for operational procedures.
+- **Your primary role is to guide the user's Ops/Infra team through the .** All development work for the current scope is complete. Do not start new features from the backlog.
+- Your main task is to wait for the user to provide the outputs from the execution plan (CI results,  outputs, logs from staging) and help them interpret the results.
+- If any step in the execution plan fails, your job is to analyze the provided logs and propose a minimal, targeted fix.
+- The application's job execution is now configurable. Tests run using the  runner. Staging/Prod are intended to use the  runner, which is what the Ops team needs to verify.
 
 **documents and test_reports created in this job**
 - 
 - 
+-  (This contains the core of the final execution plan).
 - 
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. User confirms  is closed and says to proceed with .
-9. User approves the plan for .
-8. User confirms  is closed and gives a detailed plan for  (Admin API).
-7. User approves the plan for  with critical fixes for idempotency and Alembic chaining.
-6. User confirms  is closed but requests two critical quality fixes before proceeding.
-5. User confirms  is closed and provides a detailed plan for  (Reconciliation).
-4. User confirms  is complete and provides the plan for  (Runbook).
-3. User confirms  is complete and provides a detailed roadmap for , , and .
-2. User provides the final roadmap for RC/Prod, with  (Alembic finalization) as the next key task.
-1. User provides a final, detailed checklist for project completion, emphasizing the need to validate the Alembic chain (MIG-01) in a real Postgres environment.
+10. **Final Request:** The user provides a final, detailed checklist (Execution Plan + Acceptance) and asks the agent to use it.
+9.  **User agrees on the plan:** The user accepts the agent's proposal and asks to finalize it as a single-page document.
+8.  **Agent's final proposal:** The agent presents the final execution plan in a clear, actionable format for Ops/Infra teams.
+7.  **User asks to finalize:** The user instructs the agent to go to the final.
+6.  **Agent summarizes P1-JOB-01 backend completion:** The agent confirms the backend work for the queue integration is done and asks for confirmation to create infra examples (compose/k8s).
+5.  **User provides detailed plan for P1-JOB-01:** The user gives a detailed breakdown of how to complete the queue integration, including config, lifecycle management, and infra changes.
+4.  **Agent summarizes P1-TEST-01 completion:** The agent reports that the idempotency test is now fixed and passing, and asks for the next step.
+3.  **User details next steps:** The user confirms the test fix plan and outlines the next steps: adding a Postgres CI job and implementing the persistent worker.
+2.  **Agent summarizes test failure:** The agent explains that the idempotency test is failing on SQLite due to a dialect-specific  clause and proposes a fix.
+1.  **User provides a prioritized task list:** After the agent completes the initial implementation, the user provides a detailed P0/P1 task list, prioritizing fixing test failures (P1-TEST-01) and productionizing the job runner (P1-JOB-01).
 
 **Project Health Check:**
-- **Broken:** Nothing is broken.
-- **Mocked:** The entire Payment Service Provider (PSP) interaction is mocked via . This is by design for the current MVP.
+- **Broken:** Nothing is broken. The application is in a Release Candidate state.
+- **Mocked:** The PSP is still mocked (by design).
+- **Unverified:** The new -based job runner path is unverified in a real staging environment with Redis + a separate worker process. This is the goal of Paket-3 in the execution plan.
 
 **3rd Party Integrations**
 - PostgreSQL / SQLModel / Alembic
 - FastAPI
 - React
 - Playwright
+- **ARQ / Redis** (Newly added for persistent job queue)
 
 **Testing status**
-- **Testing agent used after significant changes:** YES (For E2E smoke tests)
+- **Testing agent used after significant changes:** NO (Agent performed self-testing)
 - **Troubleshoot agent used after agent stuck in loop:** NO
 - **Test files created:**
-    - A comprehensive suite of backend test files covering every new feature. See Code Architecture for the full list (11 new test files).
-- **Known regressions:** None. The full backend suite (30 tests) and E2E smoke test are passing.
+    - 
+- **Known regressions:** None. The new tests pass, and no existing functionality was reported as broken.
 
 **Credentials to test flow:**
-- Backend tests use fixtures in  (e.g., ) to create and authenticate users and admins.
+- Backend tests use fixtures in  (e.g., ) to create and authenticate users.
 
 **What agent forgot to execute**
-- Nothing. The agent successfully completed all assigned development tasks according to the user's detailed specifications. The remaining tasks are operational and require user action in a different environment.</analysis>
+- Nothing. The agent successfully followed the user's detailed instructions, completed the requested feature (PSP-03D), fixed all related test issues, and delivered the final execution plan as the concluding task.</analysis>
