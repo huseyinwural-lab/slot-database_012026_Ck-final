@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
-from sqlmodel import select
+from sqlmodel import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from datetime import datetime, timezone
