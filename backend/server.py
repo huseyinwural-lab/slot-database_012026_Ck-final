@@ -165,6 +165,14 @@ async def on_startup():
             logger.info("Startup complete: Database initialized and seeded.")
         else:
             logger.info("Startup complete: Database initialized. Seeding skipped.")
+
+        # Initialise ARQ queue only when explicitly configured
+        if settings.recon_runner == "queue":
+            try:
+                await init_queue()
+                logger.info("Reconciliation ARQ queue initialised.")
+            except Exception as exc:  # pragma: no cover - defensive
+                logger.exception("Failed to initialise ARQ queue", exc_info=exc)
     except Exception as e:
         logger.critical(f"Startup failed: {e}")
 
