@@ -43,49 +43,51 @@ def test_backfill_creates_walletbalance_when_missing(async_session_factory):
     asyncio.run(_run())
 
 
-@pytest.mark.asyncio
-async def test_backfill_idempotent_without_force(async_session_factory):
-    async with async_session_factory() as session:
-        tenant = await _create_tenant(session)
-        player = await _create_player(session, tenant.id, balance_available=10.0, balance_held=5.0)
+def test_backfill_idempotent_without_force(async_session_factory):
+    async def _run():
+        async with async_session_factory() as session:
+            tenant = await _create_tenant(session)
+            player = await _create_player(session, tenant.id, balance_available=10.0, balance_held=5.0)
 
-    # First run creates WB
-    await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False)
+        # First run creates WB
+        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False)
 
-    async with async_session_factory() as session:
-        wb1 = (
-            await session.execute(
-                select(WalletBalance).where(
-                    WalletBalance.tenant_id == tenant.id,
-                    WalletBalance.player_id == player.id,
-                    WalletBalance.currency == "USD",
+        async with async_session_factory() as session:
+            wb1 = (
+                await session.execute(
+                    select(WalletBalance).where(
+                        WalletBalance.tenant_id == tenant.id,
+                        WalletBalance.player_id == player.id,
+                        WalletBalance.currency == "USD",
+                    )
                 )
-            )
-        ).scalars().first()
-        assert wb1 is not None
+            ).scalars().first()
+            assert wb1 is not None
 
-    # Change player balances
-    async with async_session_factory() as session:
-        db_player = await session.get(Player, player.id)
-        db_player.balance_real_available = 99.0
-        db_player.balance_real_held = 77.0
-        await session.commit()
+        # Change player balances
+        async with async_session_factory() as session:
+            db_player = await session.get(Player, player.id)
+            db_player.balance_real_available = 99.0
+            db_player.balance_real_held = 77.0
+            await session.commit()
 
-    # Second run without force should not overwrite WB
-    await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False)
+        # Second run without force should not overwrite WB
+        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False)
 
-    async with async_session_factory() as session:
-        wb2 = (
-            await session.execute(
-                select(WalletBalance).where(
-                    WalletBalance.tenant_id == tenant.id,
-                    WalletBalance.player_id == player.id,
-                    WalletBalance.currency == "USD",
+        async with async_session_factory() as session:
+            wb2 = (
+                await session.execute(
+                    select(WalletBalance).where(
+                        WalletBalance.tenant_id == tenant.id,
+                        WalletBalance.player_id == player.id,
+                        WalletBalance.currency == "USD",
+                    )
                 )
-            )
-        ).scalars().first()
-        assert wb2.balance_real_available == pytest.approx(wb1.balance_real_available)
-        assert wb2.balance_real_pending == pytest.approx(wb1.balance_real_pending)
+            ).scalars().first()
+            assert wb2.balance_real_available == pytest.approx(wb1.balance_real_available)
+            assert wb2.balance_real_pending == pytest.approx(wb1.balance_real_pending)
+
+    asyncio.run(_run())
 
 
 @pytest.mark.asyncio
