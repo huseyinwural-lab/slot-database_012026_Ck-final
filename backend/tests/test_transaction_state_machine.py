@@ -6,6 +6,12 @@ import pytest
 
 from app.models.sql_models import Transaction
 from app.services.transaction_state_machine import (
+    STATE_CREATED,
+    STATE_PENDING_PROVIDER,
+    STATE_COMPLETED,
+    STATE_REQUESTED,
+    STATE_APPROVED,
+    STATE_PAID,
     transition_transaction,
     ILLEGAL_STATE_ERROR_CODE,
 )
