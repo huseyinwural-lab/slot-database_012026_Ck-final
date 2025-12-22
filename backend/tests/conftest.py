@@ -183,9 +183,9 @@ async def _create_admin(
     return admin
 
 
-def _make_admin_token(admin_id: str, tenant_id: str) -> str:
+def _make_admin_token(admin_id: str, tenant_id: str, email: str) -> str:
     return create_access_token(
-        data={"sub": admin_id, "tenant_id": tenant_id, "role": "Admin"},
+        data={"sub": admin_id, "email": email, "tenant_id": tenant_id, "role": "Admin"},
         expires_delta=timedelta(days=1)
     )
 
@@ -196,7 +196,7 @@ def admin_token(async_session_factory):
         async with async_session_factory() as session:
             tenant = await _create_tenant(session)
             admin = await _create_admin(session, tenant_id=tenant.id)
-            token = _make_admin_token(admin.id, tenant.id)
+            token = _make_admin_token(admin.id, tenant.id, admin.email)
             return token
 
     return _run(_seed())
