@@ -558,6 +558,15 @@ ledger_withdrawals_e2e_smoke_dec22:
     stuck_count: 0
     priority: "high"
     needs_retesting: false
+
+psp_mock_adapter_dec22:
+  - task: "PSP-01: MockPSP adapter + ledger integration (deposit/mark-paid)"
+    implemented: true
+    working: true
+    file: "backend/app/services/psp/*, backend/tests/test_psp_mock_adapter.py, backend/tests/test_psp_ledger_integration.py, backend/app/routes/player_wallet.py, backend/app/routes/finance.py"
+    priority: "high"
+    needs_retesting: false
+
     status_history:
         -working: true
         -agent: "testing"
