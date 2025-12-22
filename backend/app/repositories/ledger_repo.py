@@ -72,6 +72,7 @@ async def append_event(
     provider: Optional[str] = None,
     provider_ref: Optional[str] = None,
     provider_event_id: Optional[str] = None,
+    autocommit: bool = True,
 ) -> Tuple[LedgerTransaction, bool]:
     """Append a ledger event, enforcing idempotency.
 
@@ -82,6 +83,11 @@ async def append_event(
     Idempotency rules (LEDGER-01):
     - (tenant_id, player_id, type, idempotency_key) is unique when idempotency_key is not null
     - (provider, provider_event_id) is unique when provider_event_id is not null
+
+    ``autocommit=True`` preserves existing behaviour (each call has its own
+    transaction). When ``autocommit=False``, the caller is responsible for the
+    surrounding transaction and this function will avoid rolling back the outer
+    transaction when handling integrity errors.
     """
 
     existing: Optional[LedgerTransaction] = None
@@ -125,21 +131,14 @@ async def append_event(
 
     session.add(event)
 
-    try:
-        await session.commit()
-        await session.refresh(event)
-        return event, True
-    except IntegrityError:
-        await session.rollback()
-
-        # Try to load the existing event again by the same keys
+    async def _load_existing_again() -> LedgerTransaction:
         if provider and provider_event_id:
-            stmt = select(LedgerTransaction).where(
+            stmt2 = select(LedgerTransaction).where(
                 LedgerTransaction.provider == provider,
                 LedgerTransaction.provider_event_id == provider_event_id,
             )
         elif idempotency_key:
-            stmt = select(LedgerTransaction).where(
+            stmt2 = select(LedgerTransaction).where(
                 LedgerTransaction.tenant_id == tenant_id,
                 LedgerTransaction.player_id == player_id,
                 LedgerTransaction.type == type,
@@ -149,12 +148,32 @@ async def append_event(
             # No idempotency selector available; bubble up
             raise
 
-        res = await session.execute(stmt)
-        existing2 = res.scalars().first()
+        res2 = await session.execute(stmt2)
+        existing2 = res2.scalars().first()
         if not existing2:
             # If we still cannot find, there is a real consistency issue
             raise
+        return existing2
 
+    if autocommit:
+        try:
+            await session.commit()
+            await session.refresh(event)
+            return event, True
+        except IntegrityError:
+            await session.rollback()
+            existing2 = await _load_existing_again()
+            return existing2, False
+
+    # autocommit=False: use a SAVEPOINT so we don't roll back the outer tx
+    try:
+        async with session.begin_nested():  # SAVEPOINT
+            await session.flush()
+        # If flush succeeded, event is staged in the outer transaction; refresh is optional
+        return event, True
+    except IntegrityError:
+        # The nested transaction is rolled back automatically; outer tx stays alive
+        existing2 = await _load_existing_again()
         return existing2, False
 
 
@@ -207,11 +226,13 @@ async def apply_balance_delta(
     currency: str,
     delta_available: float = 0.0,
     delta_pending: float = 0.0,
+    autocommit: bool = True,
 ) -> WalletBalance:
     """Apply deltas to the wallet snapshot, creating the row if needed.
 
-    This is intentionally simple for LEDGER-01. More strict invariants (e.g.
-    preventing negative balances) will be added in LEDGER-02.
+    ``autocommit=True`` preserves existing behaviour (each call has its own
+    transaction). When ``autocommit=False``, the caller is expected to manage
+    the surrounding transaction, and this function will only flush changes.
     """
 
     stmt = select(WalletBalance).where(
@@ -240,6 +261,10 @@ async def apply_balance_delta(
         bal.updated_at = now
         session.add(bal)
 
-    await session.commit()
-    await session.refresh(bal)
+    if autocommit:
+        await session.commit()
+        await session.refresh(bal)
+        return bal
+
+    await session.flush()
     return bal
