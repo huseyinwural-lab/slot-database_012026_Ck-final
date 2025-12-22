@@ -18,6 +18,7 @@ async def _backfill_wallet_balances(
     batch_size: int,
     dry_run: bool,
     force: bool,
+    session_factory=None,
 ) -> None:
     """Backfill WalletBalance rows from Player aggregates.
 
@@ -36,7 +37,9 @@ async def _backfill_wallet_balances(
     updated_forced = 0
     errors = 0
 
-    async with async_session() as session:
+    factory = session_factory or async_session
+
+    async with factory() as session:
         offset = 0
         while True:
             stmt = select(Player)
