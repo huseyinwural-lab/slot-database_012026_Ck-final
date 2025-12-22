@@ -236,6 +236,30 @@ async def create_deposit(
     await session.commit()
     await session.refresh(tx)
 
+    # Shadow ledger write (deposit captured)
+    res = await shadow_append_event(
+        session=session,
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        tx_id=str(tx.id),
+        type="deposit",
+        direction="credit",
+        amount=float(amount),
+        currency=tx.currency or "USD",
+        status="deposit_captured",
+        idempotency_key=idempotency_key,
+        provider="mock",
+    )
+    if res and res.created:
+        await shadow_apply_delta(
+            session=session,
+            tenant_id=current_player.tenant_id,
+            player_id=current_player.id,
+            currency=tx.currency or "USD",
+            delta_available=float(amount),
+            delta_pending=0.0,
+        )
+
     total_real = current_player.balance_real_available + current_player.balance_real_held
     return {
         "transaction": tx,
