@@ -11,8 +11,8 @@ from typing import Dict, Any
 import httpx
 import os
 
-# Get backend URL from frontend .env
-BACKEND_URL = "https://wallet-admin-2.preview.emergentagent.com"
+# Use local backend for testing
+BACKEND_URL = "http://localhost:8001"
 
 class ReconciliationRunsAPITest:
     def __init__(self):
