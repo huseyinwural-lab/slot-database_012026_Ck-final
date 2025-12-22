@@ -262,6 +262,13 @@ async def create_withdrawal(
     if amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be positive")
 
+    # Test-only withdraw method gate: allow "test_bank" only in dev/local/test or when flag enabled
+    from config import settings
+    env = (settings.env or "").lower()
+    is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test"}
+    if method == "test_bank" and not is_test_mode:
+        raise HTTPException(status_code=400, detail={"error_code": "WITHDRAW_METHOD_NOT_ALLOWED"})
+
     await session.refresh(current_player)
 
     request_id = request.headers.get("X-Request-Id", "unknown")
