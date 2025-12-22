@@ -5,7 +5,7 @@ from httpx import AsyncClient
 
 from app.repositories.ledger_repo import WalletBalance, LedgerTransaction
 from app.models.sql_models import Player, Transaction
-from tests.conftest import async_session_factory  # type: ignore
+from tests.conftest import async_session_factory as _async_session_factory  # type: ignore
 from sqlalchemy import select
 
 
