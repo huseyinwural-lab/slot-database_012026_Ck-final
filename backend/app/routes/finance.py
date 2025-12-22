@@ -274,34 +274,6 @@ async def mark_withdrawal_paid(
 
     return {"transaction": tx}
 
-        count_query = count_query.where(Transaction.created_at <= date_to)
-
-    total = (await session.execute(count_query)).scalar() or 0
-
-    return {
-        "items": [
-            {
-                "tx_id": tx.id,
-                "player_id": tx.player_id,
-                "amount": tx.amount,
-                "currency": tx.currency,
-                "state": tx.state,
-                "status": tx.status,
-                "created_at": tx.created_at,
-                "reviewed_by": tx.reviewed_by,
-                "reviewed_at": tx.reviewed_at,
-                "balance_after": tx.balance_after,
-            }
-            for tx in items
-        ],
-        "meta": {
-            "total": total,
-            "limit": limit,
-            "offset": offset,
-        },
-    }
-
-
 
 @router.get("/reconciliation")
 async def get_reconciliations(
