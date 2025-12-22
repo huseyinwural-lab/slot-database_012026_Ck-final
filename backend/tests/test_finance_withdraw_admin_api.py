@@ -228,7 +228,7 @@ async def test_invalid_state_transitions_return_409(client, async_session_factor
     assert r_app.status_code == 200
 
     # Second approve should be 409
-    r_app2 = client.post(
+    r_app2 = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
         json={"action": "approve"},
         headers=headers_admin,
