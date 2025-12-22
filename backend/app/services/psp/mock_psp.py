@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 from typing import Any, Dict, Tuple
 
+from config import settings
 from .psp_interface import PSPResult, PSPStatus
 
 
