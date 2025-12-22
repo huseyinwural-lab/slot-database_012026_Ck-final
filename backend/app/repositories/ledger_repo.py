@@ -170,6 +170,9 @@ async def get_balance(
 
     `lock_for_update=True` is a no-op on SQLite tests but will translate to a
     row lock (SELECT ... FOR UPDATE) on Postgres in production.
+
+    When enforcement is enabled and no row exists, this zero snapshot will lead
+    to a fail-closed "INSUFFICIENT_FUNDS" decision in the withdraw handler.
     """
 
     stmt = select(WalletBalance).where(
