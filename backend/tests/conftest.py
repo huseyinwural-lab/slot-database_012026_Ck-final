@@ -7,13 +7,14 @@ from fastapi import Request, HTTPException, Depends
 from fastapi.testclient import TestClient
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, select
 
 from config import settings
 from server import app
 from app.core.database import get_session
-from app.models.sql_models import Tenant, Player
+from app.models.sql_models import Tenant, Player, AdminUser
 from app.utils.auth_player import get_current_player
+from app.utils.auth import create_access_token
 
 
 # ---------- Test DB (async sqlite) ----------
