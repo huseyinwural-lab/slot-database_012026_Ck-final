@@ -13,32 +13,34 @@ from scripts.backfill_wallet_balances import _backfill_wallet_balances
 from tests.conftest import _create_tenant, _create_player
 
 
-@pytest.mark.asyncio
-async def test_backfill_creates_walletbalance_when_missing(async_session_factory):
-    async with async_session_factory() as session:
-        tenant = await _create_tenant(session)
-        player = await _create_player(session, tenant.id, balance_available=50.0, balance_held=20.0)
+def test_backfill_creates_walletbalance_when_missing(async_session_factory):
+    async def _run():
+        async with async_session_factory() as session:
+            tenant = await _create_tenant(session)
+            player = await _create_player(session, tenant.id, balance_available=50.0, balance_held=20.0)
 
-    await _backfill_wallet_balances(
-        tenant_id=None,
-        batch_size=100,
-        dry_run=False,
-        force=False,
-    )
+        await _backfill_wallet_balances(
+            tenant_id=None,
+            batch_size=100,
+            dry_run=False,
+            force=False,
+        )
 
-    async with async_session_factory() as session:
-        wb = (
-            await session.execute(
-                select(WalletBalance).where(
-                    WalletBalance.tenant_id == tenant.id,
-                    WalletBalance.player_id == player.id,
-                    WalletBalance.currency == "USD",
+        async with async_session_factory() as session:
+            wb = (
+                await session.execute(
+                    select(WalletBalance).where(
+                        WalletBalance.tenant_id == tenant.id,
+                        WalletBalance.player_id == player.id,
+                        WalletBalance.currency == "USD",
+                    )
                 )
-            )
-        ).scalars().first()
-        assert wb is not None
-        assert wb.balance_real_available == pytest.approx(50.0)
-        assert wb.balance_real_pending == pytest.approx(20.0)
+            ).scalars().first()
+            assert wb is not None
+            assert wb.balance_real_available == pytest.approx(50.0)
+            assert wb.balance_real_pending == pytest.approx(20.0)
+
+    asyncio.run(_run())
 
 
 @pytest.mark.asyncio
