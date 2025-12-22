@@ -5,7 +5,7 @@ from typing import Optional
 from arq import create_pool
 from arq.connections import RedisSettings, ArqRedis
 
-from app.config import settings
+from config import settings
 
 
 class ReconciliationJobQueue:
