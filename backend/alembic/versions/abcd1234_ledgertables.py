@@ -17,9 +17,13 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        "ledgertransaction",
-        sa.Column("id", sa.String(), primary_key=True),
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+
+    if "ledgertransaction" not in inspector.get_table_names():
+        op.create_table(
+            "ledgertransaction",
+            sa.Column("id", sa.String(), primary_key=True),
         sa.Column("tx_id", sa.String(), nullable=True),
         sa.Column("tenant_id", sa.String(), nullable=False),
         sa.Column("player_id", sa.String(), nullable=False),
