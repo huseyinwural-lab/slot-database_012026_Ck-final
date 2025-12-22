@@ -56,4 +56,5 @@ def test_unverified_deposit_cap(client, async_session_factory, monkeypatch):
     )
     assert r3.status_code == 403
     body = r3.json()
-    assert body.get("error_code") == "KYC_DEPOSIT_LIMIT"
+    # AppError handler vs HTTPException(detail={error_code})
+    assert body.get("error_code") == "KYC_DEPOSIT_LIMIT" or body.get("detail", {}).get("error_code") == "KYC_DEPOSIT_LIMIT"
