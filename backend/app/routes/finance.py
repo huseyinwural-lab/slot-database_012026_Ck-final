@@ -311,6 +311,22 @@ async def mark_withdrawal_paid(
     session.add(player)
     session.add(tx)
 
+    # PSP integration (MockPSP) + ledger: payout + withdraw_paid
+    from app.services.psp import get_psp
+    from app.services.psp.psp_interface import build_psp_idem_key
+
+    psp = get_psp()
+    psp_idem_key = build_psp_idem_key(str(tx.id))
+
+    psp_res = await psp.payout_withdrawal(
+        tx_id=str(tx.id),
+        tenant_id=tenant_id,
+        player_id=tx.player_id,
+        amount=float(tx.amount),
+        currency=tx.currency or "USD",
+        psp_idem_key=psp_idem_key,
+    )
+
     # Shadow ledger: withdraw_paid + finalize pending
     res = await shadow_append_event(
         session=session,
@@ -323,6 +339,9 @@ async def mark_withdrawal_paid(
         currency=tx.currency or "USD",
         status="withdraw_paid",
         idempotency_key=f"withdraw_mark_paid:{tx.id}",
+        provider=psp_res.provider,
+        provider_ref=psp_res.provider_ref,
+        provider_event_id=psp_res.provider_event_id,
     )
     if res and res.created:
         await shadow_apply_delta(
