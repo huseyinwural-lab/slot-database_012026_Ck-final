@@ -1,12 +1,11 @@
 import os
 import sys
+import asyncio
 
 import pytest
 from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
-
-from fastapi.testclient import TestClient
 
 from server import app
 from tests.conftest import _create_tenant, _create_player, _make_player_token
@@ -43,14 +42,9 @@ async def _seed_admin_and_player(async_session_factory):
         return tenant, player, admin, player_token, admin_token
 
 
-def _make_client():
-    return TestClient(app)
-
-
-@pytest.mark.asyncio
-async def test_approve_requested_withdraw_does_not_change_balance(async_session_factory):
-    client = _make_client()
-    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+@pytest.mark.usefixtures("client")
+def test_approve_requested_withdraw_does_not_change_balance(client, async_session_factory):
+    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
 
     # Player makes a withdrawal request
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-1"}
@@ -89,10 +83,9 @@ async def test_approve_requested_withdraw_does_not_change_balance(async_session_
         assert db_player.balance_real_held == pytest.approx(before_held)
 
 
-@pytest.mark.asyncio
-async def test_reject_requested_withdraw_rolls_back_hold(async_session_factory):
-    client = _make_client()
-    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+@pytest.mark.usefixtures("client")
+def test_reject_requested_withdraw_rolls_back_hold(client, async_session_factory):
+    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-2"}
     r_wd = client.post(
