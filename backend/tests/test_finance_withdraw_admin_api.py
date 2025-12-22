@@ -251,7 +251,7 @@ async def test_withdrawals_list_pagination_and_fields(client, async_session_fact
         )
 
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
-    r_list = client.get(
+    r_list = await client.get(
         "/api/v1/finance/withdrawals",
         params={"state": "requested", "limit": 10, "offset": 0},
         headers=headers_admin,
