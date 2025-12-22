@@ -100,6 +100,25 @@ async def apply_wallet_delta_with_ledger(
         autocommit=False,
     )
 
+    # Temporary debug log to understand idempotency behaviour in tests
+    # (can be removed or downgraded later).
+    try:
+        from logging import getLogger
+
+        logger = getLogger("wallet_ledger")
+        logger.info(
+            "wallet_ledger_append_event",
+            extra={
+                "event_type": event_type,
+                "idempotency_key": idempotency_key,
+                "provider_event_id": provider_event_id,
+                "created": created,
+            },
+        )
+    except Exception:
+        # Logging must never break the main flow
+        pass
+
     if not created:
         # Idempotency hit: do not re-apply deltas.
         return False
