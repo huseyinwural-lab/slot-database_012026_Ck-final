@@ -81,7 +81,7 @@ async def test_deposit_success_updates_wallet_and_ledger(client: AsyncClient, as
 
 @pytest.mark.usefixtures("client", "player_with_token")
 @pytest.mark.asyncio
-async def test_deposit_fail_outcome_has_net_zero_effect(client: AsyncClient, player_with_token):
+async def test_deposit_fail_outcome_has_net_zero_effect(client: AsyncClient, async_session_factory, player_with_token):
     tenant, player, token = player_with_token
 
     # Initial Player balance and no snapshot
