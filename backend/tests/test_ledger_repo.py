@@ -38,7 +38,7 @@ def test_append_event_idempotency_client(async_session_factory):
                 idempotency_key="idem-1",
             )
 
-            e2 = await append_event(
+            e2, created2 = await append_event(
                 session,
                 tenant_id=tenant.id,
                 player_id=player.id,
@@ -83,7 +83,7 @@ def test_append_event_idempotency_provider(async_session_factory):
                 provider_event_id="evt_1",
             )
 
-            e2 = await append_event(
+            e2, created2 = await append_event(
                 session,
                 tenant_id=tenant.id,
                 player_id=player.id,
