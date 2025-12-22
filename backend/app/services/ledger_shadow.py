@@ -56,6 +56,7 @@ async def shadow_append_event(
             provider=provider,
             provider_ref=provider_ref,
             provider_event_id=provider_event_id,
+            autocommit=True,
         )
         return AppendResult(event=event, created=created)
     except Exception:
@@ -88,6 +89,7 @@ async def shadow_apply_delta(
             currency=currency,
             delta_available=delta_available,
             delta_pending=delta_pending,
+            autocommit=True,
         )
     except Exception:
         return
