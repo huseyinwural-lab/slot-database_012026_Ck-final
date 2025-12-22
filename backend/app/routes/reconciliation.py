@@ -38,8 +38,14 @@ async def create_reconciliation_run(
         created_by_admin_id=str(current_admin.id),
     )
 
-    # Fire-and-forget background execution (current process only)
-    background_tasks.add_task(run_reconciliation_for_run_id, run.id)
+    # Decide runner: queue (ARQ) vs background task fallback
+    from app.config import settings as app_settings
+
+    if getattr(app_settings, "recon_runner", "queue") == "queue":
+        queue = get_queue()
+        background_tasks.add_task(queue.enqueue_reconciliation_run, run.id)
+    else:
+        background_tasks.add_task(run_reconciliation_for_run_id, run.id)
 
     return ReconciliationRunOut(
         id=run.id,
