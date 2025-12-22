@@ -50,7 +50,7 @@ def test_backfill_idempotent_without_force(async_session_factory):
             player = await _create_player(session, tenant.id, balance_available=10.0, balance_held=5.0)
 
         # First run creates WB
-        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False)
+        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=False, force=False, session_factory=async_session_factory)
 
         async with async_session_factory() as session:
             wb1 = (
