@@ -247,24 +247,6 @@ async def mark_withdrawal_paid(
     before_held = player.balance_real_held
     old_state = tx.state
 
-    # held -= amount, total düşer – via canonical wallet+ledger service
-    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
-
-    await apply_wallet_delta_with_ledger(
-        session,
-        tenant_id=tenant_id,
-        player_id=tx.player_id,
-        tx_id=str(tx.id),
-        event_type="withdraw_paid",
-        delta_available=0.0,
-        delta_held=-float(tx.amount),
-        currency=tx.currency or "USD",
-        idempotency_key=f"withdraw_mark_paid:{tx.id}",
-        provider=psp_res.provider,
-        provider_ref=psp_res.provider_ref,
-        provider_event_id=psp_res.provider_event_id,
-    )
-
     session.add(player)
     session.add(tx)
 
