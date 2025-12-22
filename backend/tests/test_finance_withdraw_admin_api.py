@@ -164,13 +164,17 @@ def test_mark_paid_from_approved_reduces_held(client, async_session_factory):
     )
     assert r_paid.status_code == 200
 
-    async with async_session_factory() as session:
-        tx = await session.get(Transaction, tx_id)
-        db_player = await session.get(Player, player.id)
+    async def _load_after_paid():
+        async with async_session_factory() as session:
+            tx = await session.get(Transaction, tx_id)
+            db_player = await session.get(Player, player.id)
+            return tx, db_player
 
-        assert tx.state == "paid"
-        assert db_player.balance_real_available == pytest.approx(before_available)
-        assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
+    tx, db_player = asyncio.run(_load_after_paid())
+
+    assert tx.state == "paid"
+    assert db_player.balance_real_available == pytest.approx(before_available)
+    assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
 
 
 @pytest.mark.usefixtures("client")
