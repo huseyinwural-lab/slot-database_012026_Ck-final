@@ -8,7 +8,7 @@ from sqlmodel import select
 sys.path.append(os.path.abspath("/app/backend"))
 
 from config import settings
-from tests.conftest import _create_tenant, _create_player, _make_player_token, async_session_factory
+from tests.conftest import _create_tenant, _create_player, _make_player_token
 from app.repositories.ledger_repo import WalletBalance, LedgerTransaction, apply_balance_delta
 from app.services import ledger_telemetry
 from server import app  # noqa: F401  - ensures app is imported for client fixture
@@ -28,7 +28,7 @@ def extract_tx_id(json_body: dict) -> str:
 
 
 @pytest.mark.usefixtures("client")
-def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client):
+def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client, async_session_factory):
     """Enforce ON: same Idempotency-Key replays same tx and single hold in ledger."""
     settings.ledger_shadow_write = True
     settings.ledger_enforce_balance = True
