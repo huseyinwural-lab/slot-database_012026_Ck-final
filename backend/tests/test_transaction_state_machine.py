@@ -20,11 +20,11 @@ from app.services.transaction_state_machine import (
 @pytest.mark.parametrize(
     "tx_type, start_state, next_state",
     [
-        ("deposit", "created", "pending_provider"),
-        ("deposit", "pending_provider", "completed"),
-        ("withdrawal", "requested", "approved"),
-        ("withdrawal", "requested", "rejected"),
-        ("withdrawal", "approved", "paid"),
+        ("deposit", STATE_CREATED, STATE_PENDING_PROVIDER),
+        ("deposit", STATE_PENDING_PROVIDER, STATE_COMPLETED),
+        ("withdrawal", STATE_REQUESTED, STATE_APPROVED),
+        ("withdrawal", STATE_REQUESTED, "rejected"),
+        ("withdrawal", STATE_APPROVED, STATE_PAID),
     ],
 )
 @pytest.mark.asyncio
