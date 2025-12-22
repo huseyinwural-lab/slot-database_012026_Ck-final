@@ -88,8 +88,8 @@ async def test_idempotent_same_state_is_noop():
         amount=10.0,
         currency="USD",
         status="pending",
-        state="created",
+        state=STATE_CREATED,
     )
 
-    transition_transaction(tx, "created")
-    assert tx.state == "created"
+    transition_transaction(tx, STATE_CREATED)
+    assert tx.state == STATE_CREATED
