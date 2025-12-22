@@ -85,7 +85,7 @@ async def test_approve_requested_withdraw_does_not_change_balance(client, async_
 
     # Admin approves
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
-    r_app = client.post(
+    r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
         json={"action": "approve"},
         headers=headers_admin,
@@ -163,7 +163,7 @@ async def test_mark_paid_from_approved_reduces_held(client, async_session_factor
     tx_id = r_wd.json()["transaction"]["id"]
 
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
-    r_app = client.post(
+    r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
         json={"action": "approve"},
         headers=headers_admin,
@@ -220,7 +220,7 @@ async def test_invalid_state_transitions_return_409(client, async_session_factor
     assert r_paid.json().get("detail", {}).get("error_code") == "INVALID_STATE_TRANSITION"
 
     # Approve first
-    r_app = client.post(
+    r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
         json={"action": "approve"},
         headers=headers_admin,
