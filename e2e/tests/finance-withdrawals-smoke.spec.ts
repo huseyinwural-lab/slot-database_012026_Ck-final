@@ -40,13 +40,23 @@ async function apiLoginAdmin(apiBaseUrl: string, email: string, password: string
   return token as string;
 }
 
-async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, password: string) {
+type PlayerAuth = { token: string; playerId: string };
+
+async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, password: string): Promise<PlayerAuth> {
   const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
+
+  const extractToken = (json: any): string | null =>
+    json?.access_token || json?.token || json?.data?.access_token || json?.data?.token || null;
+
+  const extractPlayerId = (json: any): string | null =>
+    json?.player_id || json?.user?.id || json?.data?.player_id || json?.data?.user?.id || null;
 
   // Try login first
   let res = await ctx.post('/api/v1/auth/player/login', {
     data: { email, password, tenant_id: 'default_casino' },
   });
+
+  let playerId: string | null = null;
 
   if (res.status() === 401) {
     // Register then login
@@ -64,22 +74,8 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, passw
       throw new Error(`player register failed ${reg.status()} body=${body}`);
     }
 
-    // After registration, manually verify KYC via admin endpoint
-    const adminToken = await apiLoginAdmin(apiBaseUrl, OWNER_EMAIL, OWNER_PASSWORD);
-    const adminCtx = await pwRequest.newContext({
-      baseURL: apiBaseUrl,
-      extraHTTPHeaders: authHeaders(adminToken),
-    });
-
-    // Fetch pending KYC queue and approve the first entry for this email
-    const queueRes = await adminCtx.get('/api/v1/kyc/queue');
-    const queueJson: any[] = await queueRes.json();
-    const matching = queueJson.find((p) => p.email === email);
-    if (matching) {
-      await adminCtx.post(`/api/v1/kyc/documents/${matching.id}/review`, {
-        data: { status: 'approved' },
-      });
-    }
+    const regJson: any = await reg.json().catch(async () => ({ raw: await reg.text() }));
+    playerId = extractPlayerId(regJson) || regJson?.player_id || null;
 
     res = await ctx.post('/api/v1/auth/player/login', {
       data: { email, password, tenant_id: 'default_casino' },
@@ -92,12 +88,20 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, passw
   }
 
   const json: any = await res.json();
-  const token = json.access_token;
+  const token = extractToken(json);
   if (!token) {
-    throw new Error(`player login response missing access_token: ${JSON.stringify(json)}`);
+    throw new Error(`player login response missing token: ${JSON.stringify(json)}`);
   }
 
-  return token as string;
+  if (!playerId) {
+    playerId = extractPlayerId(json);
+  }
+
+  if (!playerId) {
+    throw new Error(`player id missing in auth responses for email=${email}`);
+  }
+
+  return { token, playerId };
 }
 
 function idemKey(prefix: string) {
@@ -168,6 +172,49 @@ async function adminMarkPaid(apiBaseUrl: string, token: string, txId: string) {
 
   const res = await ctx.post(`/api/v1/finance/withdrawals/${txId}/mark-paid`);
   return res;
+}
+
+async function adminApproveKycForPlayerId(apiBaseUrl: string, adminToken: string, playerId: string) {
+  const ctx = await pwRequest.newContext({
+    baseURL: apiBaseUrl,
+    extraHTTPHeaders: authHeaders(adminToken),
+  });
+
+  const qRes = await ctx.get('/api/v1/kyc/queue');
+  const qText = await qRes.text();
+  let qJson: any = [];
+  try { qJson = JSON.parse(qText); } catch {
+    throw new Error(`KYC queue parse failed body=${qText}`);
+  }
+
+  const items: any[] = Array.isArray(qJson)
+    ? qJson
+    : (qJson.items || qJson.data?.items || []);
+
+  const match = items.find((i: any) => String(i.player_id) === String(playerId));
+  if (!match) {
+    throw new Error(`KYC queue: player_id not found. playerId=${playerId}`);
+  }
+
+  const docs: any[] = match.documents || match.data?.documents || [];
+  if (!docs.length) {
+    throw new Error(`KYC queue: no documents for playerId=${playerId}`);
+  }
+
+  const doc = docs.find((d: any) => (d.status || d.state) !== 'approved') || docs[0];
+  const docId = doc.id || doc.document_id || doc.kyc_document_id;
+  if (!docId) throw new Error(`KYC queue: document id missing for playerId=${playerId}`);
+
+  const reviewRes = await ctx.post(`/api/v1/kyc/documents/${docId}/review`, {
+    data: { status: 'approved' },
+  });
+
+  const rText = await reviewRes.text();
+  if (!reviewRes.ok()) {
+    throw new Error(`KYC review failed ${reviewRes.status()} body=${rText}`);
+  }
+
+  return { docId };
 }
 
 async function playerRequestWithdraw(apiBaseUrl: string, token: string, payload: any) {
