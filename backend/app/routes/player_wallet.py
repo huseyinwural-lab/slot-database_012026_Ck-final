@@ -193,52 +193,146 @@ async def create_deposit(
 
 @router.post("/withdraw")
 async def create_withdrawal(
+    request: Request,
     amount: float = Body(..., embed=True),
     method: str = Body(..., embed=True),
     address: str = Body(..., embed=True),
     idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
     current_player: Player = Depends(get_current_player),
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ):
     if not idempotency_key:
-        raise AppError("IDEMPOTENCY_KEY_REQUIRED", "Idempotency-Key header is required", status_code=400)
+        raise HTTPException(status_code=400, detail={"error_code": "IDEMPOTENCY_KEY_REQUIRED"})
 
     if amount <= 0:
-        raise HTTPException(400, "Amount must be positive")
+        raise HTTPException(status_code=400, detail="Amount must be positive")
 
     await session.refresh(current_player)
 
+    request_id = request.headers.get("X-Request-Id", "unknown")
+    ip = request.client.host if request.client else None
+
     # KYC gate
     if current_player.kyc_status != "verified":
-        raise AppError("KYC_REQUIRED_FOR_WITHDRAWAL", "KYC verification required for withdrawal", status_code=403)
+        # Blocked withdraw due to KYC
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=current_player.id,
+            tenant_id=current_player.tenant_id,
+            action="FIN_KYC_WITHDRAW_BLOCK",
+            resource_type="wallet_withdraw",
+            resource_id=None,
+            result="blocked",
+            details={
+                "tx_id": None,
+                "player_id": current_player.id,
+                "amount": amount,
+                "currency": "USD",
+                "old_state": None,
+                "new_state": None,
+                "idempotency_key": idempotency_key,
+                "request_id": request_id,
+                "balance_available_before": current_player.balance_real_available,
+                "balance_available_after": current_player.balance_real_available,
+                "balance_held_before": current_player.balance_real_held,
+                "balance_held_after": current_player.balance_real_held,
+            },
+            ip_address=ip,
+        )
+        raise HTTPException(
+            status_code=403,
+            detail={"error_code": "KYC_REQUIRED_FOR_WITHDRAWAL"},
+        )
 
     # Balance check on available only
     if current_player.balance_real_available < amount:
-        raise HTTPException(400, "Insufficient funds")
+        raise HTTPException(status_code=400, detail={"error_code": "INSUFFICIENT_FUNDS"})
 
     # Idempotency check
-    req_hash = _compute_request_hash("POST", "/api/v1/player/wallet/withdraw", {"amount": amount, "method": method, "address": address})
+    body = {"amount": amount, "method": method, "address": address}
+    req_hash = _compute_request_hash("POST", "/api/v1/player/wallet/withdraw", body)
     stmt = select(Transaction).where(
         Transaction.player_id == current_player.id,
         Transaction.idempotency_key == idempotency_key,
         Transaction.type == "withdrawal",
     )
     existing = (await session.execute(stmt)).scalars().first()
+
     if existing:
         meta = existing.metadata_json or {}
         existing_hash = meta.get("request_hash")
         if existing_hash and existing_hash != req_hash:
-            raise AppError(
-                "IDEMPOTENCY_KEY_REUSE_CONFLICT",
-                "Idempotency key reused with different payload",
-                status_code=409,
+            # Conflict
+            await audit.log_event(
+                session=session,
+                request_id=request_id,
+                actor_user_id=current_player.id,
+                tenant_id=current_player.tenant_id,
+                action="FIN_IDEMPOTENCY_CONFLICT",
+                resource_type="wallet_withdraw",
+                resource_id=existing.id,
+                result="conflict",
+                details={
+                    "tx_id": existing.id,
+                    "player_id": current_player.id,
+                    "amount": existing.amount,
+                    "currency": existing.currency,
+                    "old_state": existing.state,
+                    "new_state": existing.state,
+                    "idempotency_key": idempotency_key,
+                    "request_id": request_id,
+                    "balance_available_before": current_player.balance_real_available,
+                    "balance_available_after": current_player.balance_real_available,
+                    "balance_held_before": current_player.balance_real_held,
+                    "balance_held_after": current_player.balance_real_held,
+                },
+                ip_address=ip,
             )
-        raise AppError(
-            "FIN_IDEMPOTENCY_HIT",
-            "Idempotent replay",
-            status_code=200,
-            details={"transaction_id": existing.id},
+            raise HTTPException(
+                status_code=409,
+                detail={"error_code": "IDEMPOTENCY_CONFLICT", "tx_id": existing.id},
+            )
+
+        # Replay: return same tx, no state/balance change
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=current_player.id,
+            tenant_id=current_player.tenant_id,
+            action="FIN_IDEMPOTENCY_HIT",
+            resource_type="wallet_withdraw",
+            resource_id=existing.id,
+            result="success",
+            details={
+                "tx_id": existing.id,
+                "player_id": current_player.id,
+                "amount": existing.amount,
+                "currency": existing.currency,
+                "old_state": existing.state,
+                "new_state": existing.state,
+                "idempotency_key": idempotency_key,
+                "request_id": request_id,
+                "balance_available_before": current_player.balance_real_available,
+                "balance_available_after": current_player.balance_real_available,
+                "balance_held_before": current_player.balance_real_held,
+                "balance_held_after": current_player.balance_real_held,
+            },
+            ip_address=ip,
         )
+        total_real = (current_player.balance_real_available or 0) + (current_player.balance_real_held or 0)
+        return {
+            "transaction": existing,
+            "balance": {
+                "available_real": current_player.balance_real_available,
+                "held_real": current_player.balance_real_held,
+                "total_real": total_real,
+            },
+        }
+
+    # New withdrawal
+    before_available = current_player.balance_real_available
+    before_held = current_player.balance_real_held
 
     tx_id = str(uuid.uuid4())
 
@@ -248,19 +342,47 @@ async def create_withdrawal(
         player_id=current_player.id,
         type="withdrawal",
         amount=amount,
+        currency="USD",
         status="pending",
         state="requested",
         method=method,
         metadata_json={"request_hash": req_hash, "address": address},
-        balance_after=(current_player.balance_real_available - amount) + current_player.balance_real_held,
+        balance_after=(before_available - amount) + before_held,
     )
 
     # Hold accounting: move from available to held
-    current_player.balance_real_available -= amount
-    current_player.balance_real_held += amount
+    current_player.balance_real_available = before_available - amount
+    current_player.balance_real_held = before_held + amount
 
     session.add(tx)
     session.add(current_player)
+
+    # Audit withdraw requested
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=current_player.id,
+        tenant_id=current_player.tenant_id,
+        action="FIN_WITHDRAW_REQUESTED",
+        resource_type="wallet_withdraw",
+        resource_id=tx.id,
+        result="success",
+        details={
+            "tx_id": tx.id,
+            "player_id": current_player.id,
+            "amount": amount,
+            "currency": "USD",
+            "old_state": "requested",
+            "new_state": "requested",
+            "idempotency_key": idempotency_key,
+            "request_id": request_id,
+            "balance_available_before": before_available,
+            "balance_available_after": current_player.balance_real_available,
+            "balance_held_before": before_held,
+            "balance_held_after": current_player.balance_real_held,
+        },
+        ip_address=ip,
+    )
 
     await session.commit()
     await session.refresh(tx)
