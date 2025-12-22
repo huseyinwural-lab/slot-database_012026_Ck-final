@@ -1,0 +1,478 @@
+import React, { useEffect, useState } from 'react';
+import api from '../services/api';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from '@/components/ui/pagination';
+import { toast } from 'sonner';
+import { ArrowDownRight, CheckCircle2, XCircle, Copy } from 'lucide-react';
+
+const PAGE_SIZE = 50;
+
+const formatDateTime = (value) => {
+  if (!value) return '-';
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return String(value);
+  }
+};
+
+const formatAmount = (amount, currency) => {
+  if (amount == null) return '-';
+  try {
+    const n = Number(amount);
+    const formatted = n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    return `${formatted} ${currency || ''}`.trim();
+  } catch {
+    return `${amount} ${currency || ''}`.trim();
+  }
+};
+
+const FinanceWithdrawals = () => {
+  const [filters, setFilters] = useState({
+    state: 'requested',
+    player_id: '',
+    date_from: '',
+    date_to: '',
+  });
+
+  const [items, setItems] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, limit: PAGE_SIZE, offset: 0 });
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const handleCopyTxId = async (txId) => {
+    try {
+      await navigator.clipboard.writeText(txId);
+      toast.success('Transaction ID copied');
+    } catch {
+      // ignore
+    }
+  };
+
+  const fetchWithdrawals = async (pageOverride) => {
+    const nextPage = pageOverride || page;
+    const limit = PAGE_SIZE;
+    const offset = (nextPage - 1) * limit;
+
+    setLoading(true);
+    try {
+      const params = {
+        limit,
+        offset,
+      };
+
+      if (filters.state) params.state = filters.state;
+      if (filters.player_id) params.player_id = filters.player_id;
+      if (filters.date_from) params.date_from = filters.date_from;
+      if (filters.date_to) params.date_to = filters.date_to;
+
+      const res = await api.get('/v1/finance/withdrawals', { params });
+      setItems(res.data.items || []);
+      setMeta(res.data.meta || { total: 0, limit, offset });
+      setPage(nextPage);
+    } catch (err) {
+      const message = err?.standardized?.message || 'Failed to load withdrawals';
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Initial load
+    fetchWithdrawals(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const applyFilters = () => {
+    fetchWithdrawals(1);
+  };
+
+  const handleOpenDetail = (tx) => {
+    setSelectedTx(tx);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+  };
+
+  const handleActionError = async (err) => {
+    const status = err?.response?.status;
+    const code = err?.standardized?.code;
+    const message = err?.standardized?.message || 'Action failed';
+
+    if (status === 409 || code === 'INVALID_STATE_TRANSITION') {
+      toast.warning('Invalid state transition', { description: message });
+      await fetchWithdrawals(1);
+      return;
+    }
+
+    // Other errors (401/403/5xx) are already handled by interceptor; still show a local toast.
+    toast.error(message);
+  };
+
+  const handleApprove = async (tx) => {
+    setActionLoading(true);
+    try {
+      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/review`, { action: 'approve' });
+      toast.success('Withdrawal approved');
+      await fetchWithdrawals(page);
+    } catch (err) {
+      await handleActionError(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openRejectModal = (tx) => {
+    setSelectedTx(tx);
+    setRejectReason('');
+    setRejectModalOpen(true);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!selectedTx || !rejectReason.trim()) return;
+    setActionLoading(true);
+    try {
+      await api.post(`/v1/finance/withdrawals/${selectedTx.tx_id}/review`, {
+        action: 'reject',
+        reason: rejectReason.trim(),
+      });
+      toast.success('Withdrawal rejected');
+      setRejectModalOpen(false);
+      setRejectReason('');
+      setSelectedTx(null);
+      await fetchWithdrawals(page);
+    } catch (err) {
+      await handleActionError(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleMarkPaid = async (tx) => {
+    setActionLoading(true);
+    try {
+      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/mark-paid`);
+      toast.success('Withdrawal marked as paid');
+      await fetchWithdrawals(page);
+    } catch (err) {
+      await handleActionError(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const totalPages = meta.limit ? Math.max(1, Math.ceil((meta.total || 0) / meta.limit)) : 1;
+
+  const canApproveOrReject = (tx) => tx.state === 'requested';
+  const canMarkPaid = (tx) => tx.state === 'approved';
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <ArrowDownRight className="w-7 h-7 text-emerald-500" /> Withdrawals
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Review, approve or reject player withdrawal requests and track payout status.
+          </p>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+          <CardDescription>Filter withdrawal requests by state, player and date range.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="w-40">
+              <Label htmlFor="state">State</Label>
+              <Select
+                value={filters.state}
+                onValueChange={(v) => setFilters((f) => ({ ...f, state: v }))}
+              >
+                <SelectTrigger id="state">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All</SelectItem>
+                  <SelectItem value="requested">Requested</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-56">
+              <Label htmlFor="player_id">Player ID</Label>
+              <Input
+                id="player_id"
+                placeholder="Player ID (optional)"
+                value={filters.player_id}
+                onChange={(e) => setFilters((f) => ({ ...f, player_id: e.target.value }))}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label>Date from</Label>
+              <Input
+                type="date"
+                value={filters.date_from}
+                onChange={(e) => setFilters((f) => ({ ...f, date_from: e.target.value }))}
+                className="w-40"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label>Date to</Label>
+              <Input
+                type="date"
+                value={filters.date_to}
+                onChange={(e) => setFilters((f) => ({ ...f, date_to: e.target.value }))}
+                className="w-40"
+              />
+            </div>
+
+            <Button onClick={applyFilters} disabled={loading} className="ml-auto">
+              Apply
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Withdrawal Requests</CardTitle>
+            <CardDescription>
+              {meta.total || 0} total result{(meta.total || 0) === 1 ? '' : 's'}. Page {page} of {totalPages}.
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-md overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tx ID</TableHead>
+                  <TableHead>Player ID</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>State</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Reviewed By</TableHead>
+                  <TableHead>Reviewed At</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                      Loading withdrawals...
+                    </TableCell>
+                  </TableRow>
+                ) : items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                      No withdrawals found for current filters.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  items.map((tx) => (
+                    <TableRow key={tx.tx_id} className="cursor-pointer" onClick={() => handleOpenDetail(tx)}>
+                      <TableCell className="font-mono text-xs" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2">
+                          <span>{tx.tx_id}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyTxId(tx.tx_id);
+                            }}
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{tx.player_id}</TableCell>
+                      <TableCell>{formatAmount(tx.amount, tx.currency)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="uppercase text-[10px]">
+                          {tx.state}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">{formatDateTime(tx.created_at)}</TableCell>
+                      <TableCell className="text-xs">{tx.reviewed_by || '-'}</TableCell>
+                      <TableCell className="text-xs">{formatDateTime(tx.reviewed_at)}</TableCell>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-end gap-2">
+                          {canApproveOrReject(tx) && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={actionLoading}
+                                onClick={() => handleApprove(tx)}
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                disabled={actionLoading}
+                                onClick={() => openRejectModal(tx)}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" /> Reject
+                              </Button>
+                            </>
+                          )}
+                          {canMarkPaid(tx) && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              disabled={actionLoading}
+                              onClick={() => handleMarkPaid(tx)}
+                            >
+                              <CheckCircle2 className="w-4 h-4 mr-1" /> Mark Paid
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+              <div>
+                Showing {meta.offset + 1}–
+                {Math.min(meta.offset + (meta.limit || PAGE_SIZE), meta.total || 0)} of {meta.total || 0}
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => page > 1 && fetchWithdrawals(page - 1)}
+                      className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => page < totalPages && fetchWithdrawals(page + 1)}
+                      className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Detail Modal */}
+      <Dialog open={isDetailOpen && !!selectedTx} onOpenChange={(open) => !open && handleCloseDetail()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Withdrawal Detail</DialogTitle>
+            <DialogDescription>
+              Transaction ID: <span className="font-mono text-xs">{selectedTx?.tx_id}</span>
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTx && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="font-semibold">Player ID:</span> {selectedTx.player_id}
+                </div>
+                <div>
+                  <span className="font-semibold">Amount:</span> {formatAmount(selectedTx.amount, selectedTx.currency)}
+                </div>
+                <div>
+                  <span className="font-semibold">State:</span> {selectedTx.state}
+                </div>
+                <div>
+                  <span className="font-semibold">Created At:</span> {formatDateTime(selectedTx.created_at)}
+                </div>
+                <div>
+                  <span className="font-semibold">Reviewed By:</span> {selectedTx.reviewed_by || '-'}
+                </div>
+                <div>
+                  <span className="font-semibold">Reviewed At:</span> {formatDateTime(selectedTx.reviewed_at)}
+                </div>
+              </div>
+              <div>
+                <span className="font-semibold">Balance snapshot after tx:</span>{' '}
+                {selectedTx.balance_after != null ? selectedTx.balance_after : '-'}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Modal */}
+      <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Withdrawal</DialogTitle>
+            <DialogDescription>
+              Please provide a reason for rejecting this withdrawal request.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="reject-reason">Reason</Label>
+            <Textarea
+              id="reject-reason"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Enter rejection reason..."
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRejectModalOpen(false)}
+              disabled={actionLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectConfirm}
+              disabled={actionLoading || !rejectReason.trim()}
+            >
+              Reject
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default FinanceWithdrawals;
