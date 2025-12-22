@@ -119,6 +119,9 @@ app.include_router(dashboard.router)
 app.include_router(tables.router)
 app.include_router(kill_switch.router)
 app.include_router(flags.router)
+from app.routes import reconciliation as reconciliation_router
+app.include_router(reconciliation_router.router)
+
 
 
 # Startup Event
