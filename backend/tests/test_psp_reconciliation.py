@@ -16,13 +16,10 @@ from app.services.psp import get_psp, _reset_psp_singleton_for_tests
 from app.services.psp.psp_interface import PSPStatus
 
 
-def _count_findings(async_session_factory):
-    async def _run():
-        async with async_session_factory() as session:
-            res = await session.execute(select(ReconciliationFinding))
-            return len(res.scalars().all())
-
-    return asyncio.run(_run())
+async def _count_findings(async_session_factory):
+    async with async_session_factory() as session:
+        res = await session.execute(select(ReconciliationFinding))
+        return len(res.scalars().all())
 
 
 def test_psp_reconciliation_missing_in_ledger_and_missing_in_psp(async_session_factory):
