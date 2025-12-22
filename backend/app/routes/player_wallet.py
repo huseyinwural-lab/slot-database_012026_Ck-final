@@ -419,11 +419,15 @@ async def create_withdrawal(
     # Ledger snapshot for enforce / telemetry
     ledger_wb = None
     if settings.ledger_enforce_balance or settings.ledger_balance_mismatch_log:
+        # When enforcement is ON, take a row lock on the wallet snapshot to
+        # reduce race windows on concurrent withdraws. Telemetry-only reads
+        # (enforce OFF) stay lock-free.
         ledger_wb = await get_balance(
             session,
             tenant_id=current_player.tenant_id,
             player_id=current_player.id,
             currency=currency,
+            lock_for_update=bool(settings.ledger_enforce_balance),
         )
 
     # Telemetry: always record mismatch when enabled

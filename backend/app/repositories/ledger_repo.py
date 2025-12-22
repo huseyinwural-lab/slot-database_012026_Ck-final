@@ -159,15 +159,27 @@ async def append_event(
 
 
 async def get_balance(
-    session: AsyncSession, *, tenant_id: str, player_id: str, currency: str = "USD"
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    player_id: str,
+    currency: str = "USD",
+    lock_for_update: bool = False,
 ) -> WalletBalance:
-    """Return current wallet snapshot; if none exists, return a zeroed one (not persisted)."""
+    """Return current wallet snapshot; if none exists, return a zeroed one (not persisted).
+
+    `lock_for_update=True` is a no-op on SQLite tests but will translate to a
+    row lock (SELECT ... FOR UPDATE) on Postgres in production.
+    """
 
     stmt = select(WalletBalance).where(
         WalletBalance.tenant_id == tenant_id,
         WalletBalance.player_id == player_id,
         WalletBalance.currency == currency,
     )
+    if lock_for_update:
+        stmt = stmt.with_for_update()
+
     res = await session.execute(stmt)
     bal = res.scalars().first()
     if bal:
