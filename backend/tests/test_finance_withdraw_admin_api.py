@@ -61,7 +61,7 @@ async def _seed_admin_and_player(async_session_factory):
 @pytest.mark.usefixtures("client")
 @pytest.mark.asyncio
 async def test_approve_requested_withdraw_does_not_change_balance(client, async_session_factory):
-    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     # Player makes a withdrawal request
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-1"}
@@ -108,7 +108,7 @@ async def test_approve_requested_withdraw_does_not_change_balance(client, async_
 
 @pytest.mark.usefixtures("client")
 def test_reject_requested_withdraw_rolls_back_hold(client, async_session_factory):
-    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-2"}
     r_wd = client.post(
@@ -149,7 +149,7 @@ def test_reject_requested_withdraw_rolls_back_hold(client, async_session_factory
 
 @pytest.mark.usefixtures("client")
 def test_mark_paid_from_approved_reduces_held(client, async_session_factory):
-    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-3"}
     r_wd = client.post(
@@ -196,7 +196,7 @@ def test_mark_paid_from_approved_reduces_held(client, async_session_factory):
 
 @pytest.mark.usefixtures("client")
 def test_invalid_state_transitions_return_409(client, async_session_factory):
-    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-4"}
     r_wd = client.post(
@@ -235,7 +235,7 @@ def test_invalid_state_transitions_return_409(client, async_session_factory):
 
 @pytest.mark.usefixtures("client")
 def test_withdrawals_list_pagination_and_fields(client, async_session_factory):
-    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-5"}
     # create two withdrawals
