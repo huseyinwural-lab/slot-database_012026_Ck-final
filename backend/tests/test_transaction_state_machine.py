@@ -47,10 +47,10 @@ async def test_allowed_transitions_succeed(tx_type: str, start_state: str, next_
 @pytest.mark.parametrize(
     "tx_type, start_state, next_state",
     [
-        ("deposit", "created", "completed"),  # skip pending_provider
-        ("deposit", "completed", "pending_provider"),
-        ("withdrawal", "approved", "rejected"),
-        ("withdrawal", "paid", "approved"),
+        ("deposit", STATE_CREATED, STATE_COMPLETED),  # skip pending_provider
+        ("deposit", STATE_COMPLETED, STATE_PENDING_PROVIDER),
+        ("withdrawal", STATE_APPROVED, "rejected"),
+        ("withdrawal", STATE_PAID, STATE_APPROVED),
     ],
 )
 @pytest.mark.asyncio
