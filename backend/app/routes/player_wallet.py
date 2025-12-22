@@ -461,6 +461,7 @@ async def create_withdrawal(
         status="pending",
         state="requested",
         method=method,
+        idempotency_key=idempotency_key,
         metadata_json={"request_hash": req_hash, "address": address},
         balance_after=(before_available - amount) + before_held,
     )
@@ -558,6 +559,7 @@ async def create_withdrawal(
         status="pending",
         state="requested",
         method=method,
+        idempotency_key=idempotency_key,
         metadata_json={"request_hash": req_hash, "address": address},
         balance_after=(before_available - amount) + before_held,
     )
