@@ -21,6 +21,8 @@ class MockPSP:
     def __init__(self) -> None:
         # In-memory idempotency store: (action, psp_idem_key) -> PSPResult
         self._store: Dict[Tuple[str, str], PSPResult] = {}
+        # In-memory outcome overrides: psp_idem_key -> "success"|"fail"
+        self._outcome_overrides: Dict[str, str] = {}
 
     def _hash_idem(self, psp_idem_key: str) -> str:
         h = hashlib.sha256(psp_idem_key.encode("utf-8")).hexdigest()
