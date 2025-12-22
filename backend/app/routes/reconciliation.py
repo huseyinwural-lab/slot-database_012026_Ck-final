@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.app_dependencies import get_session
+from app.core.database import get_session
 from app.models.sql_models import AdminUser
 from app.routes.auth_snippet import get_current_admin
 from app.schemas.reconciliation import (
