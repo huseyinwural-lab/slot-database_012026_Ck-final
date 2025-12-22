@@ -39,11 +39,20 @@ async def create_reconciliation_run(
     )
 
     # Decide runner: queue (ARQ) vs background task fallback
-    from app.config import settings as app_settings
+    # For tests / dev we default to background to avoid needing Redis.
+    try:
+        from config import settings as app_settings  # type: ignore
+        use_queue = getattr(app_settings, "recon_runner", "queue") == "queue"
+    except Exception:  # pragma: no cover - config import fallback
+        use_queue = False
 
-    if getattr(app_settings, "recon_runner", "queue") == "queue":
-        queue = get_queue()
-        background_tasks.add_task(queue.enqueue_reconciliation_run, run.id)
+    if use_queue:
+        try:
+            queue = get_queue()
+            background_tasks.add_task(queue.enqueue_reconciliation_run, run.id)
+        except RuntimeError:
+            # Queue not initialised, fall back to in-process background task
+            background_tasks.add_task(run_reconciliation_for_run_id, run.id)
     else:
         background_tasks.add_task(run_reconciliation_for_run_id, run.id)
 
