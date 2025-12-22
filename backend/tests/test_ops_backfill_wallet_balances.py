@@ -144,7 +144,7 @@ def test_backfill_tenant_scoped(async_session_factory):
             player2 = await _create_player(session, tenant2.id, balance_available=20.0, balance_held=2.0)
 
         # Run only for tenant1
-        await _backfill_wallet_balances(tenant_id=tenant1.id, batch_size=100, dry_run=False, force=False)
+        await _backfill_wallet_balances(tenant_id=tenant1.id, batch_size=100, dry_run=False, force=False, session_factory=async_session_factory)
 
         async with async_session_factory() as session:
             wb1 = (
