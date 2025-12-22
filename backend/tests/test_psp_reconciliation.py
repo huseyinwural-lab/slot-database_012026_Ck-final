@@ -114,6 +114,6 @@ def test_psp_reconciliation_idempotent(async_session_factory):
             await reconcile_mockpsp_vs_ledger(session)
 
         second_count = await _count_findings(async_session_factory)
-        assert second_count >= first_count
+        assert second_count == first_count
 
     asyncio.run(_run())

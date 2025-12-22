@@ -34,9 +34,45 @@ class ReconciliationFinding(SQLModel, table=True):
 
 
 async def create_finding(session, **kwargs) -> ReconciliationFinding:
+    """Idempotent create helper for reconciliation findings.
+
+    Uniqueness key (MVP): (provider, provider_event_id, finding_type).
+    If a finding with the same triple already exists, it is returned instead
+    of inserting a new row.
+    """
+
+    from sqlmodel import select
+    from sqlalchemy.exc import IntegrityError
+
+    provider = kwargs.get("provider")
+    provider_event_id = kwargs.get("provider_event_id")
+    finding_type = kwargs.get("finding_type")
+
+    stmt = None
+    if provider and provider_event_id and finding_type:
+        stmt = select(ReconciliationFinding).where(
+            ReconciliationFinding.provider == provider,
+            ReconciliationFinding.provider_event_id == provider_event_id,
+            ReconciliationFinding.finding_type == finding_type,
+        )
+        res = await session.execute(stmt)
+        existing = res.scalars().first()
+        if existing:
+            return existing
+
     finding = ReconciliationFinding(**kwargs)
     session.add(finding)
-    await session.commit()
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        if stmt is not None:
+            res = await session.execute(stmt)
+            existing = res.scalars().first()
+            if existing:
+                return existing
+        raise
+
     await session.refresh(finding)
     return finding
 
