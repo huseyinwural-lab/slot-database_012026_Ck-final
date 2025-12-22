@@ -40,6 +40,8 @@ async def payments_webhook(
             payload=payload,
             headers={k: v for k, v in request.headers.items()} if request else {},
         )
+    except WebhookSignatureError as exc:
+        raise HTTPException(status_code=401, detail={"error_code": "WEBHOOK_SIGNATURE_INVALID", "message": str(exc)})
     except Exception as exc:
         raise HTTPException(status_code=400, detail={"error_code": "INVALID_WEBHOOK", "message": str(exc)})
 
