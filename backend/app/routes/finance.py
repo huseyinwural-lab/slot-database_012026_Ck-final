@@ -144,6 +144,44 @@ async def review_withdrawal(
         tx.state = "rejected"
         tx.review_reason = reason
         # held rollback: held -= amount, available += amount
+
+    # Shadow ledger event for approve/reject
+    if action == "approve":
+        await shadow_append_event(
+            session=session,
+            tenant_id=tenant_id,
+            player_id=tx.player_id,
+            tx_id=str(tx.id),
+            type="withdraw",
+            direction="debit",
+            amount=float(tx.amount),
+            currency=tx.currency or "USD",
+            status="withdraw_approved",
+            idempotency_key=f"withdraw_review:approve:{tx.id}",
+        )
+    else:
+        res = await shadow_append_event(
+            session=session,
+            tenant_id=tenant_id,
+            player_id=tx.player_id,
+            tx_id=str(tx.id),
+            type="withdraw",
+            direction="debit",
+            amount=float(tx.amount),
+            currency=tx.currency or "USD",
+            status="withdraw_rejected",
+            idempotency_key=f"withdraw_review:reject:{tx.id}",
+        )
+        if res and res.created:
+            await shadow_apply_delta(
+                session=session,
+                tenant_id=tenant_id,
+                player_id=tx.player_id,
+                currency=tx.currency or "USD",
+                delta_available=float(tx.amount),
+                delta_pending=-float(tx.amount),
+            )
+
         player.balance_real_held -= tx.amount
         player.balance_real_available += tx.amount
 
