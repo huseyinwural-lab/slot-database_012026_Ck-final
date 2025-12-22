@@ -242,22 +242,8 @@ async def create_deposit(
 
     session.add(tx)
 
-    # Apply deposit success via canonical wallet+ledger service
-    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
-
-    await apply_wallet_delta_with_ledger(
-        session,
-        tenant_id=current_player.tenant_id,
-        player_id=current_player.id,
-        tx_id=str(tx.id),
-        event_type="deposit_succeeded",
-        delta_available=float(amount),
-        delta_held=0.0,
-        currency=tx.currency or "USD",
-        idempotency_key=idempotency_key,
-    )
-
-    # Audit: deposit completed
+    # Audit: deposit completed (logical success). Actual wallet/ledger delta
+    # will only be applied after PSP capture confirms success.
     await audit.log_event(
         session=session,
         request_id=request_id,
