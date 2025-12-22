@@ -3,8 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional, Dict, Any
 
-from sqlalchemy import Column, text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, text, JSON
 from sqlmodel import SQLModel, Field
 import uuid
 
@@ -31,10 +30,10 @@ class ReconciliationRun(SQLModel, table=True):
     idempotency_key: Optional[str] = Field(default=None, index=True)
 
     stats_json: Optional[Dict[str, Any]] = Field(
-        default=None, sa_column=Column(JSONB, nullable=True)
+        default=None, sa_column=Column(JSON, nullable=True)
     )
     error_json: Optional[Dict[str, Any]] = Field(
-        default=None, sa_column=Column(JSONB, nullable=True)
+        default=None, sa_column=Column(JSON, nullable=True)
     )
 
     created_at: datetime = Field(
