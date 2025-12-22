@@ -124,8 +124,13 @@ async def review_withdrawal(
     if not tx:
         raise HTTPException(status_code=404, detail={"error_code": "TX_NOT_FOUND"})
 
-    if tx.state != "requested":
-        raise HTTPException(status_code=409, detail={"error_code": "INVALID_STATE_TRANSITION"})
+    from app.services.transaction_state_machine import transition_transaction
+
+    try:
+        transition_transaction(tx, "approved" if action == "approve" else "rejected")
+    except HTTPException as exc:
+        # Bubble up 409 with canonical error code
+        raise exc
 
     player = await session.get(Player, tx.player_id)
     if not player:
