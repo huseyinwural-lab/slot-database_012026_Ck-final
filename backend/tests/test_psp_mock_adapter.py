@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from app.services.psp.psp_interface import PSPStatus, build_psp_idem_key
 from app.services.psp.mock_psp import MockPSP
+from app.services.psp import _reset_psp_singleton_for_tests
 
 
 def test_psp_mock_idempotent_results_per_action_and_idem_key():

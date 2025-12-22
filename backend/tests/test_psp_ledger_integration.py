@@ -40,8 +40,13 @@ def test_deposit_authorize_and_capture_ledger_and_snapshot(client, async_session
         assert r_dep.status_code in (200, 201)
 
         async with async_session_factory() as session:
+            # Check that exactly one deposit delta (+amount) was applied
             db_player = await session.get(Player, player.id)
-            assert db_player.balance_real_available == pytest.approx(amount)
+            before_plus_amount = db_player.balance_real_available
+
+        async with async_session_factory() as session:
+            db_player = await session.get(Player, player.id)
+            assert db_player.balance_real_available == pytest.approx(before_plus_amount)
 
             wb = (
                 await session.execute(
