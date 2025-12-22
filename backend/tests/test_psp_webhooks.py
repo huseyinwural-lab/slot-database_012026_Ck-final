@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from server import app  # noqa: F401
 from config import settings
-from tests.conftest import _create_tenant, _create_player
+from tests.conftest import _create_tenant, _create_player, _make_player_token
 from app.repositories.ledger_repo import LedgerTransaction, WalletBalance
 from app.services.psp.webhook_parser import _verify_mockpsp_signature, WebhookSignatureError
 
