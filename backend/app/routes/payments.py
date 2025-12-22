@@ -337,7 +337,3 @@ async def resolve_reconciliation_finding(
     await session.refresh(finding)
 
     return {"id": finding.id, "status": finding.status}
-
-    await session.commit()
-
-    return {"status": "ok", "idempotent": False, "tx_id": tx.id}
