@@ -7,7 +7,11 @@ from typing import Optional
 from app.core.database import get_session
 from app.models.sql_models import Transaction, Player
 from app.services.audit import audit
-from app.services.psp.webhook_parser import verify_signature_and_parse, PSPWebhookEvent
+from app.services.psp.webhook_parser import (
+    verify_signature_and_parse,
+    PSPWebhookEvent,
+    WebhookSignatureError,
+)
 from app.services.ledger_shadow import shadow_append_event, shadow_apply_delta
 
 router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
