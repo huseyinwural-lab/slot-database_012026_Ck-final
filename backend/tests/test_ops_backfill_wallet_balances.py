@@ -135,39 +135,41 @@ def test_backfill_force_overwrites_existing(async_session_factory):
     asyncio.run(_run())
 
 
-@pytest.mark.asyncio
-async def test_backfill_tenant_scoped(async_session_factory):
-    async with async_session_factory() as session:
-        tenant1 = await _create_tenant(session)
-        tenant2 = await _create_tenant(session)
-        player1 = await _create_player(session, tenant1.id, balance_available=10.0, balance_held=1.0)
-        player2 = await _create_player(session, tenant2.id, balance_available=20.0, balance_held=2.0)
+def test_backfill_tenant_scoped(async_session_factory):
+    async def _run():
+        async with async_session_factory() as session:
+            tenant1 = await _create_tenant(session)
+            tenant2 = await _create_tenant(session)
+            player1 = await _create_player(session, tenant1.id, balance_available=10.0, balance_held=1.0)
+            player2 = await _create_player(session, tenant2.id, balance_available=20.0, balance_held=2.0)
 
-    # Run only for tenant1
-    await _backfill_wallet_balances(tenant_id=tenant1.id, batch_size=100, dry_run=False, force=False)
+        # Run only for tenant1
+        await _backfill_wallet_balances(tenant_id=tenant1.id, batch_size=100, dry_run=False, force=False)
 
-    async with async_session_factory() as session:
-        wb1 = (
-            await session.execute(
-                select(WalletBalance).where(
-                    WalletBalance.tenant_id == tenant1.id,
-                    WalletBalance.player_id == player1.id,
-                    WalletBalance.currency == "USD",
+        async with async_session_factory() as session:
+            wb1 = (
+                await session.execute(
+                    select(WalletBalance).where(
+                        WalletBalance.tenant_id == tenant1.id,
+                        WalletBalance.player_id == player1.id,
+                        WalletBalance.currency == "USD",
+                    )
                 )
-            )
-        ).scalars().first()
-        wb2 = (
-            await session.execute(
-                select(WalletBalance).where(
-                    WalletBalance.tenant_id == tenant2.id,
-                    WalletBalance.player_id == player2.id,
-                    WalletBalance.currency == "USD",
+            ).scalars().first()
+            wb2 = (
+                await session.execute(
+                    select(WalletBalance).where(
+                        WalletBalance.tenant_id == tenant2.id,
+                        WalletBalance.player_id == player2.id,
+                        WalletBalance.currency == "USD",
+                    )
                 )
-            )
-        ).scalars().first()
+            ).scalars().first()
 
-        assert wb1 is not None
-        assert wb2 is None
+            assert wb1 is not None
+            assert wb2 is None
+
+    asyncio.run(_run())
 
 
 @pytest.mark.asyncio
