@@ -211,9 +211,33 @@ async def create_deposit(
         transition_transaction,
     )
 
-    # Simulated state machine: created -> pending_provider -> completed
+    # --- State machine: created -> pending_provider -> completed ---
+    old_state = tx.state
     transition_transaction(tx, STATE_PENDING_PROVIDER)
-    # ... here a real provider integration would be called ...
+
+    # Audit: deposit moved to pending_provider
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=current_player.id,
+        tenant_id=current_player.tenant_id,
+        action="FIN_DEPOSIT_PENDING_PROVIDER",
+        resource_type="wallet_deposit",
+        resource_id=tx.id,
+        result="success",
+        details={
+            "tx_id": tx.id,
+            "player_id": current_player.id,
+            "amount": amount,
+            "idempotency_key": idempotency_key,
+            "old_state": old_state,
+            "new_state": tx.state,
+        },
+        ip_address=ip,
+    )
+
+    # Finalise to completed
+    old_state = tx.state
     transition_transaction(tx, STATE_COMPLETED)
 
     # Update Player Balance only on completed
@@ -222,6 +246,7 @@ async def create_deposit(
     session.add(tx)
     session.add(current_player)
 
+    # Audit: deposit completed
     await audit.log_event(
         session=session,
         request_id=request_id,
@@ -236,6 +261,8 @@ async def create_deposit(
             "player_id": current_player.id,
             "amount": amount,
             "idempotency_key": idempotency_key,
+            "old_state": old_state,
+            "new_state": tx.state,
         },
         ip_address=ip,
     )
