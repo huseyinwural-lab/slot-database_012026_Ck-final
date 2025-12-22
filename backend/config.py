@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     # Test-only payment methods gate
     allow_test_payment_methods: bool = True  # ALLOW_TEST_PAYMENT_METHODS
 
+    # Ledger feature flags
+    ledger_shadow_write: bool = True
+    ledger_enforce_balance: bool = False
+
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
         if not raw:
