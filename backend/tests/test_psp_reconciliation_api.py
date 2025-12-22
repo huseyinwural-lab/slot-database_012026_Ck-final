@@ -9,9 +9,6 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from server import app  # noqa: F401
 from app.models.reconciliation import ReconciliationFinding
-from app.jobs.reconcile_psp import reconcile_mockpsp_vs_ledger
-from app.services.psp import get_psp, _reset_psp_singleton_for_tests
-from tests.conftest import async_session_factory as _async_session_factory
 from backend.tests.test_finance_withdraw_admin_api import _seed_admin_and_player
 
 
