@@ -84,8 +84,7 @@ def override_get_current_player_factory():
     return _override
 
 
-@pytest.fixture(scope="function")
-@pytest.mark.asyncio
+@pytest_asyncio.fixture(scope="function")
 async def client(async_session_factory):
     # Override DB session provider
     app.dependency_overrides[get_session] = make_override_get_session(async_session_factory)
