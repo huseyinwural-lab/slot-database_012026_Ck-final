@@ -13,6 +13,12 @@ from app.models.sql_models import Transaction, Player, AuditEvent, AdminUser
 from config import settings
 from app.utils.auth import create_access_token
 
+# Ensure withdraw admin tests run with legacy funds check (enforce OFF) while
+# still writing shadow ledger for telemetry.
+settings.ledger_shadow_write = True
+settings.ledger_enforce_balance = False
+settings.ledger_balance_mismatch_log = False
+
 
 async def _get_or_create_admin(session, tenant_id: str, email: str) -> AdminUser:
     existing = (
