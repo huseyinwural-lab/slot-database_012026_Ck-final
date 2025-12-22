@@ -59,7 +59,8 @@ async def _seed_admin_and_player(async_session_factory):
 
 
 @pytest.mark.usefixtures("client")
-def test_approve_requested_withdraw_does_not_change_balance(client, async_session_factory):
+@pytest.mark.asyncio
+async def test_approve_requested_withdraw_does_not_change_balance(client, async_session_factory):
     tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
 
     # Player makes a withdrawal request
