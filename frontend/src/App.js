@@ -55,6 +55,7 @@ function App() {
               <Route path="/players/:id" element={<RequireAuth><PlayerDetail /></RequireAuth>} />
               <Route path="/finance" element={<RequireAuth><Finance /></RequireAuth>} />
               <Route path="/approvals" element={<RequireAuth><ApprovalQueue /></RequireAuth>} />
+              <Route path="/finance/withdrawals" element={<RequireAuth><FinanceWithdrawals /></RequireAuth>} />
               <Route path="/games" element={<RequireAuth><GameManagement /></RequireAuth>} />
               <Route path="/vip-games" element={<RequireAuth><VipGames /></RequireAuth>} />
               
