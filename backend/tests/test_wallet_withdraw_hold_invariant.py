@@ -11,13 +11,14 @@ from tests.conftest import player_with_token
 
 
 @pytest.mark.usefixtures("client", "player_with_token")
-def test_withdraw_hold_invariant(client, player_with_token):
+@pytest.mark.asyncio
+async def test_withdraw_hold_invariant(client, player_with_token):
     tenant, player, token = player_with_token
 
     # Seed initial balance
     # For simplicity, call deposit once to give player balance
     headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "dep-001"}
-    r_dep = client.post(
+    r_dep = await client.post(
         "/api/v1/player/wallet/deposit",
         json={"amount": 100, "method": "card"},
         headers=headers,
