@@ -26,10 +26,9 @@ def test_deposit_authorize_and_capture_ledger_and_snapshot(client, async_session
     settings.ledger_shadow_write = True
 
     async def _run():
-        async with async_session_factory() as session:
-            tenant = await _create_tenant(session)
-            player = await _create_player(session, tenant.id, balance_available=0.0, kyc_status="verified")
-            token = _make_player_token(player.id, tenant.id)
+        # Reuse existing helper to seed tenant, player and admin + tokens
+        tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+        token = player_token
 
         headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "idem-psp-dep-1"}
         amount = 50.0
