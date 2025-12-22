@@ -43,6 +43,38 @@ async def create_run(
         await session.refresh(run)
         return run
 
+    # Dialect-aware idempotency implementation
+    bind = session.get_bind()
+    dialect_name = bind.dialect.name if bind is not None else None
+
+    # SQLite path: select-first + insert with IntegrityError fallback
+    if dialect_name == "sqlite":
+        # 1) Try to find existing run for (provider, idempotency_key)
+        query = select(ReconciliationRun).where(
+            ReconciliationRun.provider == provider,
+            ReconciliationRun.idempotency_key == idempotency_key,
+        )
+        existing = (await session.execute(query)).scalars().first()
+        if existing:
+            return existing
+
+        # 2) Insert new row; if a concurrent insert happens and a UNIQUE
+        #    constraint exists, fall back to reading the existing row.
+        run = ReconciliationRun(**values)
+        session.add(run)
+        try:
+            await session.commit()
+        except IntegrityError:
+            await session.rollback()
+            existing = (await session.execute(query)).scalars().first()
+            if existing:
+                return existing
+            raise
+
+        await session.refresh(run)
+        return run
+
+    # Postgres (or other) path: keep ON CONFLICT behavior
     stmt = (
         insert(ReconciliationRun)
         .values(**values)
