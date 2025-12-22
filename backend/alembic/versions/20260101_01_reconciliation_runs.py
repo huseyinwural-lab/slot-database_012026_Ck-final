@@ -27,8 +27,8 @@ def upgrade() -> None:
         sa.Column("dry_run", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("status", sa.String(length=32), nullable=False, server_default="queued"),
         sa.Column("idempotency_key", sa.String(length=128), nullable=True),
-        sa.Column("stats_json", sa.dialects.postgresql.JSONB, nullable=True),
-        sa.Column("error_json", sa.dialects.postgresql.JSONB, nullable=True),
+        sa.Column("stats_json", sa.JSON(), nullable=True),
+        sa.Column("error_json", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
     )
