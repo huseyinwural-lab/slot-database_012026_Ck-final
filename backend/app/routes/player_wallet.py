@@ -286,7 +286,7 @@ async def create_deposit(
             pass
 
     # Authorize step (no balance delta)
-    psp_auth = await psp.authorize_deposit(
+    await psp.authorize_deposit(
         tx_id=str(tx.id),
         tenant_id=current_player.tenant_id,
         player_id=current_player.id,
