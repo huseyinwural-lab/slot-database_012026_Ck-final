@@ -18,15 +18,14 @@ from app.utils.tenant import get_current_tenant_id
 router = APIRouter(prefix="/api/v1/finance", tags=["finance_advanced"])
 
 @router.get("/withdrawals")
-    player_id: str | None = None,
-    date_from: datetime | None = None,
-    date_to: datetime | None = None,
-
 async def list_withdrawals(
     request: Request,
     state: str | None = None,
     limit: int = 50,
     offset: int = 0,
+    player_id: str | None = None,
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
