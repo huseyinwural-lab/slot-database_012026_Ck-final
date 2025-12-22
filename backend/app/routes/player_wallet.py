@@ -242,8 +242,6 @@ async def create_deposit(
     old_state = tx.state
     transition_transaction(tx, STATE_COMPLETED)
 
-    session.add(tx)
-
     # Audit: deposit completed (logical success). Actual wallet/ledger delta
     # will only be applied after PSP capture confirms success.
     await audit.log_event(
