@@ -33,7 +33,7 @@ def _compute_request_hash(method: str, path: str, body: dict) -> str:
 
 
 @router.get("/balance")
-async def get_balance(
+async def get_player_balance(
     current_player: Player = Depends(get_current_player),
     session: AsyncSession = Depends(get_session)
 ):
