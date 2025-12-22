@@ -23,6 +23,7 @@ router = APIRouter(prefix="/api/v1/reconciliation", tags=["reconciliation"])
 @router.post("/runs", response_model=ReconciliationRunOut)
 async def create_reconciliation_run(
     payload: ReconciliationRunCreate,
+    background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
