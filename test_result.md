@@ -518,6 +518,15 @@ backend:
     priority: "high"
     needs_retesting: false
     status_history:
+
+ledger_enforce_balance_dec22:
+  - task: "LEDGER-02B: ledger_enforce_balance withdraw flow tests (B01-B04)"
+    implemented: true
+    working: false
+    file: "backend/app/routes/player_wallet.py, backend/tests/test_ledger_enforce_balance.py"
+    priority: "highest"
+    needs_retesting: true
+
         -working: "NA"
         -agent: "testing"
         -comment: "✅ QUICK REGRESSION - CI WORKFLOW ENV UPDATES - ALL TESTS PASSED (3/3 - 100% success rate): Test 1) Health Endpoints Validation: ✅ GET /api/health returns 200 OK with status='healthy', ✅ GET /api/ready returns 200 OK with status='ready'. Test 2) Password Policy Validation: ✅ POST /api/v1/admin/create-tenant-admin without password returns 400 with error_code=PASSWORD_REQUIRED as expected, ✅ POST /api/v1/auth/player/register with password shorter than 8 characters returns 400 with password validation message. Authentication issue resolved by resetting admin password hash and failed_login_attempts to 0. All quick regression checks passed successfully after CI workflow environment updates (bootstrap owner vars + HTML reporter changes)."
