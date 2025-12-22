@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 from fastapi.testclient import TestClient
 
 from server import app
-from tests.conftest import async_session_factory, _create_tenant, _create_player
+from tests.conftest import _create_tenant, _create_player
 from app.models.sql_models import Transaction, AuditEvent
 
 
