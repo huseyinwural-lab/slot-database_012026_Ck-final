@@ -15,7 +15,7 @@ from app.repositories.ledger_repo import (
     apply_balance_delta,
 )
 from server import app
-from tests.conftest import async_session_factory, _create_tenant, _create_player
+from tests.conftest import _create_tenant, _create_player
 
 
 @pytest.mark.usefixtures("client")
