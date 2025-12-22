@@ -287,7 +287,6 @@ async def create_withdrawal(
         raise HTTPException(status_code=400, detail="Amount must be positive")
 
     # Test-only withdraw method gate: allow "test_bank" only in dev/local/test or when flag enabled
-    from config import settings
     env = (settings.env or "").lower()
     is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test"}
     if method == "test_bank" and not is_test_mode:
