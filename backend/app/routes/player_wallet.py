@@ -237,7 +237,47 @@ async def create_deposit(
     await session.commit()
     await session.refresh(tx)
 
-    # Shadow ledger write (deposit captured)
+    # PSP integration (MockPSP) + ledger events: authorize + capture
+    from app.services.psp import get_psp
+    from app.services.psp.psp_interface import build_psp_idem_key
+
+    psp = get_psp()
+    psp_idem_key = build_psp_idem_key(str(tx.id))
+
+    # Authorize step (no balance delta)
+    psp_auth = await psp.authorize_deposit(
+        tx_id=str(tx.id),
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        amount=float(amount),
+        currency=tx.currency or "USD",
+        psp_idem_key=psp_idem_key,
+    )
+    await shadow_append_event(
+        session=session,
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        tx_id=str(tx.id),
+        type="deposit",
+        direction="credit",
+        amount=float(amount),
+        currency=tx.currency or "USD",
+        status="deposit_authorized",
+        idempotency_key=f"{psp_idem_key}:authorize",
+        provider=psp_auth.provider,
+        provider_ref=psp_auth.provider_ref,
+        provider_event_id=psp_auth.provider_event_id,
+    )
+
+    # Capture step (created-gated delta)
+    psp_cap = await psp.capture_deposit(
+        tx_id=str(tx.id),
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        amount=float(amount),
+        currency=tx.currency or "USD",
+        psp_idem_key=psp_idem_key,
+    )
     res = await shadow_append_event(
         session=session,
         tenant_id=current_player.tenant_id,
@@ -248,8 +288,10 @@ async def create_deposit(
         amount=float(amount),
         currency=tx.currency or "USD",
         status="deposit_captured",
-        idempotency_key=idempotency_key,
-        provider="mock",
+        idempotency_key=f"{psp_idem_key}:capture",
+        provider=psp_cap.provider,
+        provider_ref=psp_cap.provider_ref,
+        provider_event_id=psp_cap.provider_event_id,
     )
     if res and res.created:
         await shadow_apply_delta(
