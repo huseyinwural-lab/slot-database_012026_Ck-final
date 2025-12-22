@@ -180,7 +180,8 @@ async def _create_admin(
 
 def _make_admin_token(admin_id: str, tenant_id: str) -> str:
     return create_access_token(
-        data={"sub": admin_id, "tenant_id": tenant_id, "role": "Admin"}
+        data={"sub": admin_id, "tenant_id": tenant_id, "role": "Admin"},
+        expires_delta=timedelta(days=1)
     )
 
 
