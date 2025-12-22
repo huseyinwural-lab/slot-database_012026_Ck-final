@@ -21,8 +21,18 @@ def test_withdraw_requested_creates_hold_in_player_and_ledger(client, async_sess
     async def _run():
         async with async_session_factory() as session:
             tenant = await _create_tenant(session)
-            player = await _create_player(session, tenant.id, balance_available=100.0, kyc_status="verified")
+            # Start with zero balance in DB; fund via deposit so ledger snapshot sees it
+            player = await _create_player(session, tenant.id, balance_available=0.0, kyc_status="verified")
             token = _make_player_token(player.id, tenant.id)
+
+        # Fund via deposit so both player and ledger start from 100 available
+        dep_headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "idem-deposit-1"}
+        r_dep = client.post(
+            "/api/v1/player/wallet/deposit",
+            json={"amount": 100.0, "method": "test"},
+            headers=dep_headers,
+        )
+        assert r_dep.status_code in (200, 201)
 
         headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "idem-withdraw-1"}
         r = client.post(
@@ -71,8 +81,17 @@ def test_withdraw_idempotent_request_does_not_double_apply_hold(client, async_se
     async def _run():
         async with async_session_factory() as session:
             tenant = await _create_tenant(session)
-            player = await _create_player(session, tenant.id, balance_available=100.0, kyc_status="verified")
+            player = await _create_player(session, tenant.id, balance_available=0.0, kyc_status="verified")
             token = _make_player_token(player.id, tenant.id)
+
+        # Fund via deposit so both player and ledger start from 100 available
+        dep_headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "idem-deposit-2"}
+        r_dep = client.post(
+            "/api/v1/player/wallet/deposit",
+            json={"amount": 100.0, "method": "test"},
+            headers=dep_headers,
+        )
+        assert r_dep.status_code in (200, 201)
 
         headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "idem-withdraw-dup"}
         payload = {"amount": 10.0, "method": "test_bank", "address": "e2e"}
