@@ -23,6 +23,7 @@ def test_backfill_creates_walletbalance_when_missing(async_session_factory):
             batch_size=100,
             dry_run=False,
             force=False,
+            session_factory=async_session_factory,
         )
 
         async with async_session_factory() as session:
