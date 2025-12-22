@@ -306,8 +306,9 @@ async def create_deposit(
     )
 
     from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+    from app.services.psp.psp_interface import PSPStatus
 
-    if str(psp_cap.status) == "PSPStatus.CAPTURED":
+    if psp_cap.status == PSPStatus.CAPTURED:
         await apply_wallet_delta_with_ledger(
             session,
             tenant_id=current_player.tenant_id,
