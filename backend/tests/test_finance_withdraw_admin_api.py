@@ -99,7 +99,7 @@ async def test_approve_requested_withdraw_does_not_change_balance(client, async_
             db_player = await session.get(Player, player.id)
             return tx, db_player
 
-    tx, db_player = asyncio.run(_load_after())
+    tx, db_player = await _load_after()
 
     assert tx.state == "approved"
     assert db_player.balance_real_available == pytest.approx(before_available)
@@ -141,7 +141,7 @@ async def test_reject_requested_withdraw_rolls_back_hold(client, async_session_f
             db_player = await session.get(Player, player.id)
             return tx, db_player
 
-    tx, db_player = asyncio.run(_load_after())
+    tx, db_player = await _load_after()
 
     assert tx.state == "rejected"
     assert db_player.balance_real_available == pytest.approx(before_available + tx.amount)
