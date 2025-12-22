@@ -105,15 +105,25 @@ async def apply_wallet_delta_with_ledger(
         return False
 
     # WalletBalance: "pending" is our held-equivalent in the ledger snapshot.
-    bal = await apply_balance_delta(
-        session,
-        tenant_id=tenant_id,
-        player_id=player_id,
-        currency=currency,
-        delta_available=float(delta_available),
-        delta_pending=float(delta_held),
-        autocommit=False,
-    )
+    # We do not rely on the previous apply_balance_delta helper here because it
+    # performs its own commit/flush semantics. Instead we update the snapshot
+    # directly under the same transaction.
+    now = datetime.utcnow()
+    if not bal:
+        bal = WalletBalance(
+            tenant_id=tenant_id,
+            player_id=player_id,
+            currency=currency,
+            balance_real_available=float(delta_available),
+            balance_real_pending=float(delta_held),
+            updated_at=now,
+        )
+        session.add(bal)
+    else:
+        bal.balance_real_available = float(bal.balance_real_available) + float(delta_available)
+        bal.balance_real_pending = float(bal.balance_real_pending) + float(delta_held)
+        bal.updated_at = now
+        session.add(bal)
 
     # Mirror the same deltas onto the Player aggregate balances.
     player.balance_real_available = float(player.balance_real_available) + float(
