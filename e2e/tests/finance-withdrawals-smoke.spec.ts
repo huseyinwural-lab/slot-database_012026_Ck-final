@@ -222,8 +222,15 @@ test.describe('Finance Withdrawals Smoke', () => {
     // UI route açıldı mı? (gate)
     await expect(page.getByRole('heading', { name: /withdrawals/i })).toBeVisible();
 
-    // 3) Player withdraw request oluştur (API)
-    const amount = Number(process.env.WITHDRAW_AMOUNT || '10');
+    // 3) Player funding (deposit) before withdraw to avoid INSUFFICIENT_FUNDS
+    const withdrawAmount = Number(process.env.WITHDRAW_AMOUNT || '10');
+    const depositBuffer = Number(process.env.DEPOSIT_BUFFER || '5');
+    const depositAmount = withdrawAmount + depositBuffer;
+
+    await playerDeposit(BACKEND_URL, playerToken, depositAmount);
+
+    // 4) Player withdraw request oluştur (API)
+    const amount = withdrawAmount;
 
     const { res: reqRes, json: reqJson, text: reqText } = await playerRequestWithdraw(
       BACKEND_URL,
