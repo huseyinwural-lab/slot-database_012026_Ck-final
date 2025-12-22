@@ -311,6 +311,29 @@ async def mark_withdrawal_paid(
     session.add(player)
     session.add(tx)
 
+    # Shadow ledger: withdraw_paid + finalize pending
+    res = await shadow_append_event(
+        session=session,
+        tenant_id=tenant_id,
+        player_id=tx.player_id,
+        tx_id=str(tx.id),
+        type="withdraw",
+        direction="debit",
+        amount=float(tx.amount),
+        currency=tx.currency or "USD",
+        status="withdraw_paid",
+        idempotency_key=f"withdraw_mark_paid:{tx.id}",
+    )
+    if res and res.created:
+        await shadow_apply_delta(
+            session=session,
+            tenant_id=tenant_id,
+            player_id=tx.player_id,
+            currency=tx.currency or "USD",
+            delta_available=0.0,
+            delta_pending=-float(tx.amount),
+        )
+
     request_id = getattr(request.state, "request_id", "unknown")
     ip = request.client.host if request.client else None
 
