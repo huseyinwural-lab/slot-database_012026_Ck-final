@@ -162,6 +162,21 @@ test.describe('Finance Withdrawals Smoke', () => {
     const ownerToken = await apiLoginAdmin(BACKEND_URL, OWNER_EMAIL, OWNER_PASSWORD);
     const playerToken = await apiRegisterOrLoginPlayer(BACKEND_URL, PLAYER_EMAIL, PLAYER_PASSWORD);
 
+    // Ensure KYC is verified via admin KYC queue
+    const adminToken = await apiLoginAdmin(BACKEND_URL, OWNER_EMAIL, OWNER_PASSWORD);
+    const adminCtx = await pwRequest.newContext({
+      baseURL: BACKEND_URL,
+      extraHTTPHeaders: authHeaders(adminToken),
+    });
+    const queueRes = await adminCtx.get('/api/v1/kyc/queue');
+    const queueJson: any[] = await queueRes.json();
+    const matching = queueJson.find((p) => p.email === PLAYER_EMAIL);
+    if (matching) {
+      await adminCtx.post(`/api/v1/kyc/documents/${matching.id}/review`, {
+        data: { status: 'approved' },
+      });
+    }
+
     // 2) Admin token’ı UI localStorage’a enjekte et (UI login yok)
     await page.addInitScript(
       ({ key, token }) => {
