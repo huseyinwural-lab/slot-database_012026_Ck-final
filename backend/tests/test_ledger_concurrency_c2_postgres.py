@@ -54,8 +54,11 @@ def test_C2_postgres_concurrent_withdraw_single_success(async_session_factory, c
         )
 
     # Enforce ledger snapshot for funds checks and ensure shadow writes are on.
-    settings.ledger_enforce_balance = True
-    settings.ledger_shadow_write = True
+    old_enforce = settings.ledger_enforce_balance
+    old_shadow = settings.ledger_shadow_write
+    try:
+        settings.ledger_enforce_balance = True
+        settings.ledger_shadow_write = True
 
     async def _run():
         async with async_session_factory() as session:
@@ -134,4 +137,9 @@ def test_C2_postgres_concurrent_withdraw_single_success(async_session_factory, c
             assert wb.balance_real_available == pytest.approx(20.0)
             assert wb.balance_real_pending == pytest.approx(80.0)
 
-    asyncio.run(_run())
+    try:
+        asyncio.run(_run())
+    finally:
+        # Restore global settings to avoid leaking state into other tests.
+        settings.ledger_enforce_balance = old_enforce
+        settings.ledger_shadow_write = old_shadow
