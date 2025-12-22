@@ -56,11 +56,11 @@ async def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client,
         w_headers = {"Idempotency-Key": idem, **bearer(token)}
         payload = {"amount": 10.0, "method": "test_bank", "address": "e2e"}
 
-        r1 = client.post("/api/v1/player/wallet/withdraw", json=payload, headers=w_headers)
+        r1 = await client.post("/api/v1/player/wallet/withdraw", json=payload, headers=w_headers)
         assert r1.status_code in (200, 201)
         tx1 = extract_tx_id(r1.json())
 
-        r2 = client.post("/api/v1/player/wallet/withdraw", json=payload, headers=w_headers)
+        r2 = await client.post("/api/v1/player/wallet/withdraw", json=payload, headers=w_headers)
         assert r2.status_code in (200, 201)
         tx2 = extract_tx_id(r2.json())
 
