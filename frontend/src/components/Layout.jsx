@@ -86,43 +86,88 @@ const Layout = ({ children }) => {
         <ScrollArea className="flex-1 px-4">
           <div className="space-y-1 mb-6">
               <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Core</div>
-              <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" activeClassName={theme.activeItem} />
-              <SidebarItem to="/players" icon={Users} label="Players" activeClassName={theme.activeItem} />
-              {isOwner && (
+              <ul className="space-y-1">
                 <li>
                   <Link
-                    to="/finance"
-                    className={linkClass("/finance")}
+                    to="/"
+                    className={linkClass("/")}
                   >
-                    <DollarSign className="w-4 h-4" />
-                    <span>Finance</span>
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
                   </Link>
                 </li>
-              )}
-              {isOwner && (
                 <li>
                   <Link
-                    to="/finance/withdrawals"
-                    className={linkClass("/finance/withdrawals")}
+                    to="/players"
+                    className={linkClass("/players")}
                   >
-                    <DollarSign className="w-4 h-4" />
-                    <span>Withdrawals</span>
+                    <Users className="w-4 h-4" />
+                    <span>Players</span>
                   </Link>
                 </li>
-              )}
-              {isOwner && (
-                <SidebarItem to="/revenue/all-tenants" icon={TrendingUp} label="All Revenue" activeClassName={theme.activeItem} />
-              )}
-              {!isOwner && (
-                <SidebarItem to="/revenue/my-tenant" icon={TrendingUp} label="My Revenue" activeClassName={theme.activeItem} />
-              )}
-              <SidebarItem to="/games" icon={Gamepad2} label="Games" activeClassName={theme.activeItem} />
-              <SidebarItem
-                to="/vip-games"
-                icon={Crown}
-                label="VIP Games"
-                activeClassName="bg-yellow-500/20 text-yellow-500 border border-yellow-500/50"
-              />
+                {isOwner && (
+                  <li>
+                    <Link
+                      to="/finance"
+                      className={linkClass("/finance")}
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      <span>Finance</span>
+                    </Link>
+                  </li>
+                )}
+                {isOwner && (
+                  <li>
+                    <Link
+                      to="/finance/withdrawals"
+                      className={linkClass("/finance/withdrawals")}
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      <span>Withdrawals</span>
+                    </Link>
+                  </li>
+                )}
+                {isOwner && (
+                  <li>
+                    <Link
+                      to="/revenue/all-tenants"
+                      className={linkClass("/revenue/all-tenants")}
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      <span>All Revenue</span>
+                    </Link>
+                  </li>
+                )}
+                {!isOwner && (
+                  <li>
+                    <Link
+                      to="/revenue/my-tenant"
+                      className={linkClass("/revenue/my-tenant")}
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      <span>My Revenue</span>
+                    </Link>
+                  </li>
+                )}
+                <li>
+                  <Link
+                    to="/games"
+                    className={linkClass("/games")}
+                  >
+                    <Gamepad2 className="w-4 h-4" />
+                    <span>Games</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/vip-games"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors bg-yellow-500/20 text-yellow-500 border border-yellow-500/50"
+                  >
+                    <Crown className="w-4 h-4" />
+                    <span>VIP Games</span>
+                  </Link>
+                </li>
+              </ul>
           </div>
 
           <div className="space-y-1 mb-6">
