@@ -45,7 +45,7 @@ async def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client,
 
         # fund via deposit so walletbalance has funds
         dep_headers = {"Idempotency-Key": "idem-dep-b01", **bearer(token)}
-        dep = client.post(
+        dep = await client.post(
             "/api/v1/player/wallet/deposit",
             json={"amount": 100.0, "method": "test"},
             headers=dep_headers,
