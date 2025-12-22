@@ -268,9 +268,10 @@ async def mark_withdrawal_paid(
     session.add(player)
     session.add(tx)
 
-    # PSP integration (MockPSP) + ledger: payout + withdraw_paid
+    # PSP integration (MockPSP): payout call (no direct balance delta here)
     from app.services.psp import get_psp
     from app.services.psp.psp_interface import build_psp_idem_key
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 
     psp = get_psp()
     psp_idem_key = build_psp_idem_key(str(tx.id))
@@ -284,31 +285,21 @@ async def mark_withdrawal_paid(
         psp_idem_key=psp_idem_key,
     )
 
-    # Shadow ledger: withdraw_paid + finalize pending
-    res = await shadow_append_event(
-        session=session,
+    # held -= amount, total düşer – via canonical wallet+ledger service
+    await apply_wallet_delta_with_ledger(
+        session,
         tenant_id=tenant_id,
         player_id=tx.player_id,
         tx_id=str(tx.id),
-        type="withdraw",
-        direction="debit",
-        amount=float(tx.amount),
+        event_type="withdraw_paid",
+        delta_available=0.0,
+        delta_held=-float(tx.amount),
         currency=tx.currency or "USD",
-        status="withdraw_paid",
         idempotency_key=f"withdraw_mark_paid:{tx.id}",
         provider=psp_res.provider,
         provider_ref=psp_res.provider_ref,
         provider_event_id=psp_res.provider_event_id,
     )
-    if res and res.created:
-        await shadow_apply_delta(
-            session=session,
-            tenant_id=tenant_id,
-            player_id=tx.player_id,
-            currency=tx.currency or "USD",
-            delta_available=0.0,
-            delta_pending=-float(tx.amount),
-        )
 
     request_id = getattr(request.state, "request_id", "unknown")
     ip = request.client.host if request.client else None
