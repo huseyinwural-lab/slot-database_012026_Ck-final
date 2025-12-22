@@ -72,6 +72,10 @@ class Settings(BaseSettings):
     ledger_enforce_balance: bool = False
     ledger_balance_mismatch_log: bool = True
 
+    # Webhook / PSP security
+    webhook_signature_enforced: bool = False
+    webhook_secret_mockpsp: str = "changeme-mockpsp-secret"
+
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
         if not raw:
