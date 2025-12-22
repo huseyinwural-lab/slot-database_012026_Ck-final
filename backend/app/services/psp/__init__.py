@@ -8,6 +8,17 @@ from .mock_psp import MockPSP
 _psp_singleton: MockPSP | None = None
 
 
+def _reset_psp_singleton_for_tests() -> None:
+    """Reset the PSP singleton.
+
+    Intended for test code to avoid cross-test state leakage from MockPSP's
+    in-memory idempotency store.
+    """
+
+    global _psp_singleton
+    _psp_singleton = None
+
+
 def get_psp() -> MockPSP:
     """Return the active PSP adapter instance.
 
