@@ -102,10 +102,12 @@ def test_reject_requested_withdraw_rolls_back_hold(client, async_session_factory
     assert r_wd.status_code in (200, 201)
     tx_id = r_wd.json()["transaction"]["id"]
 
-    async with async_session_factory() as session:
-        db_player = await session.get(Player, player.id)
-        before_available = db_player.balance_real_available
-        before_held = db_player.balance_real_held
+    async def _load_before():
+        async with async_session_factory() as session:
+            db_player = await session.get(Player, player.id)
+            return db_player.balance_real_available, db_player.balance_real_held
+
+    before_available, before_held = asyncio.run(_load_before())
 
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_rej = client.post(
@@ -149,10 +151,12 @@ def test_mark_paid_from_approved_reduces_held(client, async_session_factory):
     )
     assert r_app.status_code == 200
 
-    async with async_session_factory() as session:
-        db_player = await session.get(Player, player.id)
-        before_available = db_player.balance_real_available
-        before_held = db_player.balance_real_held
+    async def _load_before():
+        async with async_session_factory() as session:
+            db_player = await session.get(Player, player.id)
+            return db_player.balance_real_available, db_player.balance_real_held
+
+    before_available, before_held = asyncio.run(_load_before())
 
     r_paid = client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/mark-paid",
