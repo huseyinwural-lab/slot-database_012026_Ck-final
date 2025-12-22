@@ -1,0 +1,79 @@
+"""create ledger_transactions and wallet_balances tables
+
+Revision ID: abcd1234_ledgertables
+Revises: 9e0b1a3c2f10
+Create Date: 2025-12-22
+"""
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision = "abcd1234_ledgertables"
+down_revision = "9e0b1a3c2f10"
+branch_labels = None
+depends_on = None
+
+
+def upgrade() -> None:
+    op.create_table(
+        "ledgertransaction",
+        sa.Column("id", sa.String(), primary_key=True),
+        sa.Column("tx_id", sa.String(), nullable=True, index=True),
+        sa.Column("tenant_id", sa.String(), nullable=False, index=True),
+        sa.Column("player_id", sa.String(), nullable=False, index=True),
+        sa.Column("type", sa.String(), nullable=False),
+        sa.Column("direction", sa.String(), nullable=False),
+        sa.Column("amount", sa.Float(), nullable=False),
+        sa.Column("currency", sa.String(length=3), nullable=False, server_default="USD"),
+        sa.Column("status", sa.String(), nullable=False),
+        sa.Column("idempotency_key", sa.String(), nullable=True),
+        sa.Column("provider", sa.String(), nullable=True),
+        sa.Column("provider_ref", sa.String(), nullable=True),
+        sa.Column("provider_event_id", sa.String(), nullable=True),
+        sa.Column("created_at", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()),
+    )
+
+    # Idempotency / lookup indices
+    op.create_index(
+        "ix_ledger_tx_player_created_at",
+        "ledgertransaction",
+        ["player_id", "created_at"],
+    )
+    op.create_index("ix_ledger_tx_tx_id", "ledgertransaction", ["tx_id"])
+    op.create_index("ix_ledger_tx_provider_ref", "ledgertransaction", ["provider_ref"])
+
+    # Unique on (tenant_id, player_id, type, idempotency_key) when idempotency_key IS NOT NULL
+    op.create_unique_constraint(
+        "uq_ledger_tx_idempotency",
+        "ledgertransaction",
+        ["tenant_id", "player_id", "type", "idempotency_key"],
+    )
+
+    # Unique on (provider, provider_event_id) when provider_event_id IS NOT NULL
+    op.create_unique_constraint(
+        "uq_ledger_tx_provider_event",
+        "ledgertransaction",
+        ["provider", "provider_event_id"],
+    )
+
+    op.create_table(
+        "walletbalance",
+        sa.Column("tenant_id", sa.String(), primary_key=True),
+        sa.Column("player_id", sa.String(), primary_key=True),
+        sa.Column("currency", sa.String(length=3), primary_key=True, server_default="USD"),
+        sa.Column("balance_real_available", sa.Float(), nullable=False, server_default="0"),
+        sa.Column("balance_real_pending", sa.Float(), nullable=False, server_default="0"),
+        sa.Column("updated_at", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()),
+    )
+
+
+def downgrade() -> None:
+    op.drop_table("walletbalance")
+    op.drop_constraint("uq_ledger_tx_provider_event", "ledgertransaction", type_="unique")
+    op.drop_constraint("uq_ledger_tx_idempotency", "ledgertransaction", type_="unique")
+    op.drop_index("ix_ledger_tx_provider_ref", table_name="ledgertransaction")
+    op.drop_index("ix_ledger_tx_tx_id", table_name="ledgertransaction")
+    op.drop_index("ix_ledger_tx_player_created_at", table_name="ledgertransaction")
+    op.drop_table("ledgertransaction")
