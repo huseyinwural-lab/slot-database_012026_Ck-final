@@ -118,21 +118,20 @@ def test_mark_paid_adds_psp_metadata_and_finalizes_pending(client, async_session
         tx_id = r_w.json().get("transaction", {}).get("id") or r_w.json().get("tx_id")
         assert tx_id
 
-        # Admin approve then mark-paid via finance endpoints
-        async with async_session_factory() as session:
-            tenant2 = tenant  # same tenant
-        # Use existing admin helper via direct HTTP (from other tests conventions)
-        # For brevity, assume there is a seeded admin; finance smoke tests rely on same.
+        # Admin approve then mark-paid via finance endpoints using seeded admin token
+        admin_headers = {"Authorization": f"Bearer {admin_token}"}
 
-        # Approve
         r_rev = client.post(
             f"/api/v1/finance/withdrawals/{tx_id}/review",
             json={"action": "approve"},
+            headers=admin_headers,
         )
         assert r_rev.status_code in (200, 201)
 
-        # Mark paid
-        r_paid = client.post(f"/api/v1/finance/withdrawals/{tx_id}/mark-paid")
+        r_paid = client.post(
+            f"/api/v1/finance/withdrawals/{tx_id}/mark-paid",
+            headers=admin_headers,
+        )
         assert r_paid.status_code in (200, 201)
 
         async with async_session_factory() as session:
