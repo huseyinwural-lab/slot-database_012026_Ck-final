@@ -6,7 +6,6 @@ from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from app.core.database import async_session
 from app.models.sql_models import Player
 from app.repositories.ledger_repo import WalletBalance
 from scripts.backfill_wallet_balances import _backfill_wallet_balances
