@@ -294,7 +294,74 @@ yarn test:e2e -- tests/finance-withdrawals-smoke.spec.ts
 
 ---
 
-## 8. Komut Örnekleri (Kopyala-Çalıştır)
+## 8. Reconciliation (PSP-03) İşletimi
+
+Reconciliation, PSP ile ledger arasındaki farkları tespit etmek için
+periyodik veya isteğe bağlı olarak çalıştırılır.
+
+### 8.1 Reconciliation job'ı tetiklemek (admin endpoint)
+
+Staging/prod ortamında, admin-only endpoint üzerinden reconcile tetiklenebilir:
+
+```bash
+cd /app/backend
+# Varsayılan provider: mockpsp, tenant scope: current tenant
+curl -X POST \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  /api/v1/payments/reconciliation/run
+```
+
+Belirli bir tenant için manuel tetikleme:
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"provider": "mockpsp", "tenant_id": "<tenant_uuid>"}' \
+  /api/v1/payments/reconciliation/run
+```
+
+### 8.2 Findings okuma ve aksiyon alma
+
+1. **Findings listesini çekin**
+
+```bash
+curl -X GET \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  "/api/v1/payments/reconciliation/findings?provider=mockpsp&status=OPEN&limit=50&offset=0"
+```
+
+Dönüşte göreceğiniz tipler:
+- `missing_in_ledger`
+- `missing_in_psp`
+
+2. **Örnek aksiyonlar**
+
+- `missing_in_ledger`:
+  - PSP'de görünen event için ledger tarafında neden event olmadığı incelenir
+    (webhook log'ları, append_event hataları vb.).
+  - Gerekirse ilgili tx için manuel ledger düzeltmesi yapılır.
+
+- `missing_in_psp`:
+  - Ledger'da görünen event için PSP portal/raporları kontrol edilir.
+  - Gerçek para hareketi yoksa ledger event'i veya snapshot düzeltmesi gerekir.
+
+3. **Finding resolve akışı**
+
+İncelenip aksiyon alınmış bulguları `RESOLVED` işaretlemek için:
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  /api/v1/payments/reconciliation/findings/<finding_id>/resolve
+```
+
+Bu, future run'larda aynı bulguyu tekrar tekrar manuel gözden geçirmenizi
+engeller; yalnızca yeni bulgulara odaklanmanızı sağlar.
+
+---
+
+## 9. Komut Örnekleri (Kopyala-Çalıştır)
 
 ### 8.1 Backfill dry-run (tüm tenant'lar)
 
