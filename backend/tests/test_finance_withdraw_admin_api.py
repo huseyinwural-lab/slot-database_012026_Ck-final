@@ -177,7 +177,7 @@ async def test_mark_paid_from_approved_reduces_held(client, async_session_factor
 
     before_available, before_held = await _load_before()
 
-    r_paid = client.post(
+    r_paid = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/mark-paid",
         headers=headers_admin,
     )
@@ -212,7 +212,7 @@ async def test_invalid_state_transitions_return_409(client, async_session_factor
 
     # Try mark-paid directly from requested -> should be 409
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
-    r_paid = client.post(
+    r_paid = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/mark-paid",
         headers=headers_admin,
     )
