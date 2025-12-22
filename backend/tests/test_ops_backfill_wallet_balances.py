@@ -178,7 +178,7 @@ def test_backfill_dry_run_does_not_modify_db(async_session_factory):
             tenant = await _create_tenant(session)
             player = await _create_player(session, tenant.id, balance_available=33.0, balance_held=7.0)
 
-        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=True, force=False)
+        await _backfill_wallet_balances(tenant_id=None, batch_size=100, dry_run=True, force=False, session_factory=async_session_factory)
 
         async with async_session_factory() as session:
             wb = (
