@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useNavigate, NavLink, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, CreditCard, ShieldAlert, 
   Gamepad2, Gift, MessageSquare, Settings, LogOut,
