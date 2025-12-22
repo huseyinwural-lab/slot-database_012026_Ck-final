@@ -118,10 +118,9 @@ def test_reject_requested_withdraw_rolls_back_hold(client, async_session_factory
         assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
 
 
-@pytest.mark.asyncio
-async def test_mark_paid_from_approved_reduces_held(async_session_factory):
-    client = _make_client()
-    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+@pytest.mark.usefixtures("client")
+def test_mark_paid_from_approved_reduces_held(client, async_session_factory):
+    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-3"}
     r_wd = client.post(
@@ -160,10 +159,9 @@ async def test_mark_paid_from_approved_reduces_held(async_session_factory):
         assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
 
 
-@pytest.mark.asyncio
-async def test_invalid_state_transitions_return_409(async_session_factory):
-    client = _make_client()
-    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+@pytest.mark.usefixtures("client")
+def test_invalid_state_transitions_return_409(client, async_session_factory):
+    tenant, player, admin, player_token, admin_token = asyncio.run(_seed_admin_and_player(async_session_factory))
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-4"}
     r_wd = client.post(
