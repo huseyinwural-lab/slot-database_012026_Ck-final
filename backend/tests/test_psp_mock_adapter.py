@@ -13,6 +13,7 @@ from app.services.psp import _reset_psp_singleton_for_tests
 
 def test_psp_mock_idempotent_results_per_action_and_idem_key():
     async def _run():
+        _reset_psp_singleton_for_tests()
         psp = MockPSP()
         tx_id = "tx-123"
         idem = build_psp_idem_key(tx_id)
@@ -63,6 +64,7 @@ def test_psp_mock_idempotent_results_per_action_and_idem_key():
 
 def test_psp_mock_payout_and_refund_statuses():
     async def _run():
+        _reset_psp_singleton_for_tests()
         psp = MockPSP()
         tx_id = "tx-456"
         idem = build_psp_idem_key(tx_id)
