@@ -1,0 +1,247 @@
+import os, sys
+
+import pytest
+from sqlmodel import select
+
+sys.path.append(os.path.abspath("/app/backend"))
+
+from fastapi.testclient import TestClient
+
+from server import app
+from tests.conftest import async_session_factory, _create_tenant, _create_player, _make_player_token
+from app.models.sql_models import Transaction, Player, AuditEvent, AdminUser
+from config import settings
+from app.utils.auth import create_access_token
+
+
+async def _seed_admin_and_player(async_session_factory):
+    async with async_session_factory() as session:
+        tenant = await _create_tenant(session)
+        player = await _create_player(session, tenant.id, kyc_status="verified", balance_available=100)
+
+        # Create admin bound to same tenant
+        admin = AdminUser(
+            tenant_id=tenant.id,
+            username="admin",
+            email="admin@test.com",
+            full_name="Test Admin",
+            password_hash="noop",
+            role="Admin",
+            is_platform_owner=False,
+        )
+        session.add(admin)
+        await session.commit()
+        await session.refresh(admin)
+
+        player_token = _make_player_token(player.id, tenant.id)
+        # Admin token uses email in payload per get_current_admin
+        from datetime import timedelta
+
+        admin_token = create_access_token({"email": admin.email}, timedelta(minutes=60))
+
+        return tenant, player, admin, player_token, admin_token
+
+
+def _make_client():
+    return TestClient(app)
+
+
+@pytest.mark.asyncio
+async def test_approve_requested_withdraw_does_not_change_balance(async_session_factory):
+    client = _make_client()
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+
+    # Player makes a withdrawal request
+    headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-1"}
+    r_wd = client.post(
+        "/api/v1/player/wallet/withdraw",
+        json={"amount": 30, "method": "bank", "address": "addr"},
+        headers=headers_player,
+    )
+    assert r_wd.status_code in (200, 201)
+
+    body = r_wd.json()
+    tx_id = body["transaction"]["id"]
+
+    # Snapshot balances before admin action
+    async with async_session_factory() as session:
+        db_player = await session.get(Player, player.id)
+        before_available = db_player.balance_real_available
+        before_held = db_player.balance_real_held
+
+    # Admin approves
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    r_app = client.post(
+        f"/api/v1/finance/withdrawals/{tx_id}/review",
+        json={"action": "approve"},
+        headers=headers_admin,
+    )
+    assert r_app.status_code == 200
+
+    # Verify state and balances
+    async with async_session_factory() as session:
+        tx = await session.get(Transaction, tx_id)
+        db_player = await session.get(Player, player.id)
+
+        assert tx.state == "approved"
+        assert db_player.balance_real_available == pytest.approx(before_available)
+        assert db_player.balance_real_held == pytest.approx(before_held)
+
+
+@pytest.mark.asyncio
+async def test_reject_requested_withdraw_rolls_back_hold(async_session_factory):
+    client = _make_client()
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+
+    headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-2"}
+    r_wd = client.post(
+        "/api/v1/player/wallet/withdraw",
+        json={"amount": 40, "method": "bank", "address": "addr"},
+        headers=headers_player,
+    )
+    assert r_wd.status_code in (200, 201)
+    tx_id = r_wd.json()["transaction"]["id"]
+
+    async with async_session_factory() as session:
+        db_player = await session.get(Player, player.id)
+        before_available = db_player.balance_real_available
+        before_held = db_player.balance_real_held
+
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    r_rej = client.post(
+        f"/api/v1/finance/withdrawals/{tx_id}/review",
+        json={"action": "reject", "reason": "test"},
+        headers=headers_admin,
+    )
+    assert r_rej.status_code == 200
+
+    async with async_session_factory() as session:
+        tx = await session.get(Transaction, tx_id)
+        db_player = await session.get(Player, player.id)
+
+        assert tx.state == "rejected"
+        assert db_player.balance_real_available == pytest.approx(before_available + tx.amount)
+        assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
+
+
+@pytest.mark.asyncio
+async def test_mark_paid_from_approved_reduces_held(async_session_factory):
+    client = _make_client()
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+
+    headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-3"}
+    r_wd = client.post(
+        "/api/v1/player/wallet/withdraw",
+        json={"amount": 25, "method": "bank", "address": "addr"},
+        headers=headers_player,
+    )
+    assert r_wd.status_code in (200, 201)
+    tx_id = r_wd.json()["transaction"]["id"]
+
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    r_app = client.post(
+        f"/api/v1/finance/withdrawals/{tx_id}/review",
+        json={"action": "approve"},
+        headers=headers_admin,
+    )
+    assert r_app.status_code == 200
+
+    async with async_session_factory() as session:
+        db_player = await session.get(Player, player.id)
+        before_available = db_player.balance_real_available
+        before_held = db_player.balance_real_held
+
+    r_paid = client.post(
+        f"/api/v1/finance/withdrawals/{tx_id}/mark-paid",
+        headers=headers_admin,
+    )
+    assert r_paid.status_code == 200
+
+    async with async_session_factory() as session:
+        tx = await session.get(Transaction, tx_id)
+        db_player = await session.get(Player, player.id)
+
+        assert tx.state == "paid"
+        assert db_player.balance_real_available == pytest.approx(before_available)
+        assert db_player.balance_real_held == pytest.approx(before_held - tx.amount)
+
+
+@pytest.mark.asyncio
+async def test_invalid_state_transitions_return_409(async_session_factory):
+    client = _make_client()
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+
+    headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-4"}
+    r_wd = client.post(
+        "/api/v1/player/wallet/withdraw",
+        json={"amount": 10, "method": "bank", "address": "addr"},
+        headers=headers_player,
+    )
+    assert r_wd.status_code in (200, 201)
+    tx_id = r_wd.json()["transaction"]["id"]
+
+    # Try mark-paid directly from requested -> should be 409
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    r_paid = client.post(
+        f"/api/v1/finance/withdrawals/{tx_id}/mark-paid",
+        headers=headers_admin,
+    )
+    assert r_paid.status_code == 409
+    assert r_paid.json().get("detail", {}).get("error_code") == "INVALID_STATE_TRANSITION"
+
+    # Approve first
+    r_app = client.post(
+        f"/api/v1/finance/withdrawals/{tx_id}/review",
+        json={"action": "approve"},
+        headers=headers_admin,
+    )
+    assert r_app.status_code == 200
+
+    # Second approve should be 409
+    r_app2 = client.post(
+        f"/api/v1/finance/withdrawals/{tx_id}/review",
+        json={"action": "approve"},
+        headers=headers_admin,
+    )
+    assert r_app2.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_withdrawals_list_pagination_and_fields(async_session_factory):
+    client = _make_client()
+    tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+
+    headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-5"}
+    # create two withdrawals
+    for i in range(2):
+        client.post(
+            "/api/v1/player/wallet/withdraw",
+            json={"amount": 5 + i, "method": "bank", "address": "addr"},
+            headers={**headers_player, "Idempotency-Key": f"wd-admin-5-{i}"},
+        )
+
+    headers_admin = {"Authorization": f"Bearer {admin_token}"}
+    r_list = client.get(
+        "/api/v1/finance/withdrawals",
+        params={"state": "requested", "limit": 10, "offset": 0},
+        headers=headers_admin,
+    )
+    assert r_list.status_code == 200
+    data = r_list.json()
+    assert "items" in data and "meta" in data
+    assert data["meta"]["total"] >= 2
+
+    item = data["items"][0]
+    for key in [
+        "tx_id",
+        "player_id",
+        "amount",
+        "currency",
+        "state",
+        "status",
+        "created_at",
+        "reviewed_by",
+        "reviewed_at",
+        "balance_after",
+    ]:
+        assert key in item
