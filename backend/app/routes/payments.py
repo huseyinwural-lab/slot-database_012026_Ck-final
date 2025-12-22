@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, func
 from datetime import datetime, timezone
 from typing import Optional
 
 from app.core.database import get_session
-from app.models.sql_models import Transaction, Player
+from app.models.sql_models import Transaction, Player, AdminUser
+from app.models.reconciliation import ReconciliationFinding
 from app.services.audit import audit
+from app.utils.auth import get_current_admin
+from app.utils.tenant import get_current_tenant_id
 from app.services.psp.webhook_parser import (
     verify_signature_and_parse,
     PSPWebhookEvent,
