@@ -1,29 +1,26 @@
 import os
 import sys
+import asyncio
 
 import pytest
 from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from fastapi.testclient import TestClient
-
 from server import app
 from tests.conftest import _create_tenant, _create_player
 from app.models.sql_models import Transaction, AuditEvent
 
 
-def _make_client():
-    return TestClient(app)
+@pytest.mark.usefixtures("client")
+def test_webhook_idempotency(client, async_session_factory):
+    async def _seed():
+        async with async_session_factory() as session:
+            tenant = await _create_tenant(session)
+            player = await _create_player(session, tenant.id, kyc_status="verified", balance_available=0)
+            return tenant, player
 
-
-@pytest.mark.asyncio
-async def test_webhook_idempotency(async_session_factory):
-    client = _make_client()
-
-    async with async_session_factory() as session:
-        tenant = await _create_tenant(session)
-        player = await _create_player(session, tenant.id, kyc_status="verified", balance_available=0)
+    tenant, player = asyncio.run(_seed())
 
     payload = {
         "provider_event_id": "evt-123",
