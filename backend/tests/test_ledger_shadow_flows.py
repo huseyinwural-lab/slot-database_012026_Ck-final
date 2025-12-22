@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from config import settings
 from server import app
-from tests.conftest import _create_tenant, _create_player, _make_player_token, async_session_factory
+from tests.conftest import _create_tenant, _create_player, _make_player_token
 from app.models.sql_models import Player
 from app.repositories.ledger_repo import LedgerTransaction, WalletBalance
 
