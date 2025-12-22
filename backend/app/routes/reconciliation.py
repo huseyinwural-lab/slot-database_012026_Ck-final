@@ -16,7 +16,7 @@ from app.schemas.reconciliation import (
 )
 from app.services.reconciliation_runs import create_run, get_run, list_runs
 
-router = APIRouter(prefix="/reconciliation", tags=["reconciliation"])
+router = APIRouter(prefix="/api/v1/reconciliation", tags=["reconciliation"])
 
 
 @router.post("/runs", response_model=ReconciliationRunOut)
