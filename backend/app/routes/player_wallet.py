@@ -285,9 +285,8 @@ async def create_deposit(
             # Real PSP implementations won't expose this hook.
             pass
 
-    # Authorize + capture steps remain for provider simulation but do not
-    # perform wallet/ledger deltas anymore.
-    await psp.authorize_deposit(
+    # Authorize step (no balance delta)
+    psp_auth = await psp.authorize_deposit(
         tx_id=str(tx.id),
         tenant_id=current_player.tenant_id,
         player_id=current_player.id,
@@ -296,7 +295,8 @@ async def create_deposit(
         psp_idem_key=psp_idem_key,
     )
 
-    await psp.capture_deposit(
+    # Capture step: only on PSP success do we apply the wallet+ledger delta.
+    psp_cap = await psp.capture_deposit(
         tx_id=str(tx.id),
         tenant_id=current_player.tenant_id,
         player_id=current_player.id,
@@ -304,6 +304,24 @@ async def create_deposit(
         currency=tx.currency or "USD",
         psp_idem_key=psp_idem_key,
     )
+
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+
+    if str(psp_cap.status) == "PSPStatus.CAPTURED":
+        await apply_wallet_delta_with_ledger(
+            session,
+            tenant_id=current_player.tenant_id,
+            player_id=current_player.id,
+            tx_id=str(tx.id),
+            event_type="deposit_succeeded",
+            delta_available=float(amount),
+            delta_held=0.0,
+            currency=tx.currency or "USD",
+            idempotency_key=f"{psp_idem_key}:capture",
+            provider=psp_cap.provider,
+            provider_ref=psp_cap.provider_ref,
+            provider_event_id=psp_cap.provider_event_id,
+        )
 
     total_real = current_player.balance_real_available + current_player.balance_real_held
     return {
