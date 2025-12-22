@@ -65,7 +65,7 @@ async def test_approve_requested_withdraw_does_not_change_balance(client, async_
 
     # Player makes a withdrawal request
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-1"}
-    r_wd = client.post(
+    r_wd = await client.post(
         "/api/v1/player/wallet/withdraw",
         json={"amount": 30, "method": "bank", "address": "addr"},
         headers=headers_player,
@@ -112,7 +112,7 @@ async def test_reject_requested_withdraw_rolls_back_hold(client, async_session_f
     tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-2"}
-    r_wd = client.post(
+    r_wd = await client.post(
         "/api/v1/player/wallet/withdraw",
         json={"amount": 40, "method": "bank", "address": "addr"},
         headers=headers_player,
@@ -154,7 +154,7 @@ async def test_mark_paid_from_approved_reduces_held(client, async_session_factor
     tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-3"}
-    r_wd = client.post(
+    r_wd = await client.post(
         "/api/v1/player/wallet/withdraw",
         json={"amount": 25, "method": "bank", "address": "addr"},
         headers=headers_player,
@@ -202,7 +202,7 @@ async def test_invalid_state_transitions_return_409(client, async_session_factor
     tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
 
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-4"}
-    r_wd = client.post(
+    r_wd = await client.post(
         "/api/v1/player/wallet/withdraw",
         json={"amount": 10, "method": "bank", "address": "addr"},
         headers=headers_player,
