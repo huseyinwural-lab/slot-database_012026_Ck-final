@@ -127,3 +127,37 @@ def test_psp_mock_outcome_override_fail_and_idempotency():
 
     asyncio.run(_run())
 
+
+
+
+def test_psp_mock_payout_fail_with_outcome_override():
+    async def _run():
+        _reset_psp_singleton_for_tests()
+        psp = MockPSP()
+        tx_id = "tx-999"
+        idem = build_psp_idem_key(tx_id)
+
+        # Force a fail outcome for this idempotency key
+        psp.register_outcome_override(idem, "fail")
+
+        payout1 = await psp.payout_withdrawal(
+            tx_id=tx_id,
+            tenant_id="t1",
+            player_id="p1",
+            amount=50.0,
+            currency="USD",
+            psp_idem_key=idem,
+        )
+        payout2 = await psp.payout_withdrawal(
+            tx_id=tx_id,
+            tenant_id="t1",
+            player_id="p1",
+            amount=50.0,
+            currency="USD",
+            psp_idem_key=idem,
+        )
+
+        assert payout1 is payout2
+        assert payout1.status == PSPStatus.FAILED
+
+    asyncio.run(_run())
