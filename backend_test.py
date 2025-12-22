@@ -45,7 +45,7 @@ class ReconciliationRunsAPITest:
     
     async def test_create_reconciliation_run(self) -> Dict[str, Any]:
         """Test POST /api/v1/reconciliation/runs"""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             now = datetime.now(timezone.utc)
             payload = {
                 "provider": "mockpsp",
