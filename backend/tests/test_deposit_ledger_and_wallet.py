@@ -3,9 +3,9 @@ from __future__ import annotations
 import pytest
 from httpx import AsyncClient
 
-from server import app
 from app.repositories.ledger_repo import WalletBalance, LedgerTransaction
 from app.models.sql_models import Player, Transaction
+from tests.conftest import async_session_factory  # type: ignore
 from sqlalchemy import select
 
 
@@ -15,7 +15,7 @@ async def test_deposit_success_updates_wallet_and_ledger(client: AsyncClient, pl
     tenant, player, token = player_with_token
 
     # No initial snapshot
-    async with client.app.state.async_session_factory() as session:  # type: ignore[attr-defined]
+    async with async_session_factory() as session:  # type: ignore[func-returns-value]
         wb = (
             await session.execute(
                 select(WalletBalance).where(
