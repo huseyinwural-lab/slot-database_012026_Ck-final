@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
 async def payments_webhook(
     provider: str,
     payload: dict = Body(...),
-    request: Request | None = None,
+    request: Optional[Request] = None,
     session: AsyncSession = Depends(get_session),
 ):
     """PSP-02 webhook endpoint.
