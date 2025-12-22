@@ -32,4 +32,5 @@ def test_kyc_withdraw_block(client, async_session_factory):
     )
     assert r.status_code == 403
     body = r.json()
-    assert body.get("error_code") == "KYC_REQUIRED_FOR_WITHDRAWAL"
+    # AppError handler wraps error_code at top level; HTTPException(detail={error_code}) puts it under 'detail'
+    assert body.get("error_code") == "KYC_REQUIRED_FOR_WITHDRAWAL" or body.get("detail", {}).get("error_code") == "KYC_REQUIRED_FOR_WITHDRAWAL"
