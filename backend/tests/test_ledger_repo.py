@@ -25,7 +25,7 @@ def test_append_event_idempotency_client(async_session_factory):
             tenant = await _create_tenant(session)
             player = await _create_player(session, tenant.id)
 
-            e1 = await append_event(
+            e1, created1 = await append_event(
                 session,
                 tenant_id=tenant.id,
                 player_id=player.id,
@@ -67,7 +67,7 @@ def test_append_event_idempotency_provider(async_session_factory):
             tenant = await _create_tenant(session)
             player = await _create_player(session, tenant.id)
 
-            e1 = await append_event(
+            e1, created1 = await append_event(
                 session,
                 tenant_id=tenant.id,
                 player_id=player.id,
