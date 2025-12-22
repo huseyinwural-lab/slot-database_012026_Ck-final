@@ -30,7 +30,7 @@ class ReconciliationFinding(SQLModel, table=True):
     status: str = Field(default="OPEN", index=True)  # OPEN, RESOLVED
 
     message: Optional[str] = None
-    raw: Dict = Field(default={}, sa_column=Column(JSON))
+    raw: Dict = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 async def create_finding(session, **kwargs) -> ReconciliationFinding:
