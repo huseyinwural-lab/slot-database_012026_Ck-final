@@ -264,13 +264,6 @@ async def create_deposit(
         ip_address=ip,
     )
 
-    await session.commit()
-    await session.refresh(tx)
-
-    # NOTE: For now, deposit funding is driven entirely by the PSP capture
-    # phase below; the initial commit above only persists the Transaction
-    # record and its state.
-
     # PSP integration (MockPSP) is still called for side-effects and provider
     # references, but no longer drives balance changes directly; those are
     # handled exclusively via the wallet+ledger service above.
@@ -327,6 +320,11 @@ async def create_deposit(
             provider_ref=psp_cap.provider_ref,
             provider_event_id=psp_cap.provider_event_id,
         )
+
+    # Persist all changes (transaction, audit logs, wallet+ledger deltas)
+    await session.commit()
+    await session.refresh(tx)
+    await session.refresh(current_player)
 
     total_real = current_player.balance_real_available + current_player.balance_real_held
     return {
