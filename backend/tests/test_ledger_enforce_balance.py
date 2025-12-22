@@ -111,7 +111,7 @@ async def test_B02_enforce_on_insufficient_funds_is_ledger_authority_fail_closed
             token = _make_player_token(player.id, tenant.id)
 
         # No deposit => walletbalance is missing/zero → fail-closed
-        r = client.post(
+        r = await client.post(
             "/api/v1/player/wallet/withdraw",
             json={"amount": 10.0, "method": "test_bank", "address": "e2e"},
             headers={"Idempotency-Key": "idem-withdraw-b02", **bearer(token)},
@@ -153,7 +153,7 @@ async def test_B03_enforce_off_legacy_behavior_and_mismatch_telemetry(client, as
                 delta_pending=0.0,
             )
 
-        r = client.post(
+        r = await client.post(
             "/api/v1/player/wallet/withdraw",
             json={"amount": 10.0, "method": "test_bank", "address": "e2e"},
             headers={"Idempotency-Key": "idem-withdraw-b03", **bearer(token)},
@@ -183,7 +183,7 @@ async def test_B04_enforce_on_walletbalance_missing_is_fail_closed(client, async
             player = await _create_player(session, tenant.id, balance_available=100.0, kyc_status="verified")
             token = _make_player_token(player.id, tenant.id)
 
-        r = client.post(
+        r = await client.post(
             "/api/v1/player/wallet/withdraw",
             json={"amount": 10.0, "method": "test_bank", "address": "e2e"},
             headers={"Idempotency-Key": "idem-withdraw-b04", **bearer(token)},
