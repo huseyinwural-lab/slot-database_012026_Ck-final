@@ -244,7 +244,7 @@ async def test_withdrawals_list_pagination_and_fields(client, async_session_fact
     headers_player = {"Authorization": f"Bearer {player_token}", "Idempotency-Key": "wd-admin-5"}
     # create two withdrawals
     for i in range(2):
-        client.post(
+        await client.post(
             "/api/v1/player/wallet/withdraw",
             json={"amount": 5 + i, "method": "bank", "address": "addr"},
             headers={**headers_player, "Idempotency-Key": f"wd-admin-5-{i}"},
