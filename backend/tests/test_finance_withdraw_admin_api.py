@@ -59,10 +59,12 @@ def test_approve_requested_withdraw_does_not_change_balance(client, async_sessio
     tx_id = body["transaction"]["id"]
 
     # Snapshot balances before admin action
-    async with async_session_factory() as session:
-        db_player = await session.get(Player, player.id)
-        before_available = db_player.balance_real_available
-        before_held = db_player.balance_real_held
+    async def _load_before():
+        async with async_session_factory() as session:
+            db_player = await session.get(Player, player.id)
+            return db_player.balance_real_available, db_player.balance_real_held
+
+    before_available, before_held = asyncio.run(_load_before())
 
     # Admin approves
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
@@ -74,13 +76,17 @@ def test_approve_requested_withdraw_does_not_change_balance(client, async_sessio
     assert r_app.status_code == 200
 
     # Verify state and balances
-    async with async_session_factory() as session:
-        tx = await session.get(Transaction, tx_id)
-        db_player = await session.get(Player, player.id)
+    async def _load_after():
+        async with async_session_factory() as session:
+            tx = await session.get(Transaction, tx_id)
+            db_player = await session.get(Player, player.id)
+            return tx, db_player
 
-        assert tx.state == "approved"
-        assert db_player.balance_real_available == pytest.approx(before_available)
-        assert db_player.balance_real_held == pytest.approx(before_held)
+    tx, db_player = asyncio.run(_load_after())
+
+    assert tx.state == "approved"
+    assert db_player.balance_real_available == pytest.approx(before_available)
+    assert db_player.balance_real_held == pytest.approx(before_held)
 
 
 @pytest.mark.usefixtures("client")
