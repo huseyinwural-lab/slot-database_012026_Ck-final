@@ -23,6 +23,7 @@ Kapsam:
 - OPS-01 backfill script'i:
   - `python -m backend.scripts.backfill_wallet_balances ...`
 - PSP-01/02 entegrasyonları (MockPSP + webhook)
+- PSP-03D: reconciliation run endpoint + runs tablosu (PSP reconciliation operability)
 
 ---
 
