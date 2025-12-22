@@ -9,8 +9,8 @@ from tests.conftest import _create_tenant, _create_player
 from server import app  # noqa: F401  - ensure app import for fixtures
 
 
-@pytest.mark.asyncio
-async def test_C1_01_get_balance_lock_flag_does_not_change_result(async_session_factory, client):
+@pytest.mark.usefixtures("client")
+def test_C1_01_get_balance_lock_flag_does_not_change_result(async_session_factory):
     """C1-01: get_balance(lock_for_update=True) returns same values as without lock.
 
     This is a functional regression guard for the new lock_for_update parameter.
