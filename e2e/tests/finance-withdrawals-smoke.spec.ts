@@ -1,4 +1,5 @@
-import { test, expect, request as pwRequest } from '@playwright/test';
+import { test, expect, request as pwRequest, APIResponse } from '@playwright/test';
+import crypto from 'crypto';
 
 // LocalStorage token key used by admin UI
 const LS_TOKEN_KEY = process.env.LS_TOKEN_KEY || 'admin_token';
@@ -99,8 +100,39 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, passw
   return token as string;
 }
 
+function idemKey(prefix: string) {
+  return `${prefix}-${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
+}
+
 function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
+}
+
+async function playerDeposit(apiBaseUrl: string, playerToken: string, amount: number) {
+  const ctx = await pwRequest.newContext({
+    baseURL: apiBaseUrl,
+    extraHTTPHeaders: {
+      Authorization: `Bearer ${playerToken}`,
+      'Idempotency-Key': idemKey('e2e-deposit'),
+    },
+  });
+
+  const res: APIResponse = await ctx.post('/api/v1/player/wallet/deposit', {
+    data: {
+      amount,
+      method: 'card',
+    },
+  });
+
+  const text = await res.text();
+  let json: any = null;
+  try { json = JSON.parse(text); } catch {}
+
+  if (!res.ok()) {
+    throw new Error(`deposit failed ${res.status()} body=${text}`);
+  }
+
+  return { res, json, text };
 }
 
 async function adminListWithdrawals(apiBaseUrl: string, token: string, params: Record<string, any>) {
