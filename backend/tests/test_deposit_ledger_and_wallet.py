@@ -10,7 +10,7 @@ from sqlalchemy import select
 
 @pytest.mark.usefixtures("client", "player_with_token")
 @pytest.mark.asyncio
-async def test_deposit_success_updates_wallet_and_ledger(client: AsyncClient, player_with_token):
+async def test_deposit_success_updates_wallet_and_ledger(client: AsyncClient, async_session_factory, player_with_token):
     tenant, player, token = player_with_token
 
     # No initial snapshot
