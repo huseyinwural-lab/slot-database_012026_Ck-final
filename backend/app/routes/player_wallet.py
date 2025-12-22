@@ -657,7 +657,7 @@ async def create_withdrawal(
     # Apply hold move via canonical wallet+ledger service
     from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 
-    applied = await apply_wallet_delta_with_ledger(
+    await apply_wallet_delta_with_ledger(
         session,
         tenant_id=current_player.tenant_id,
         player_id=current_player.id,
