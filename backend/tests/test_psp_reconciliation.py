@@ -105,7 +105,7 @@ def test_psp_reconciliation_idempotent(async_session_factory):
         async with async_session_factory() as session:
             await reconcile_mockpsp_vs_ledger(session)
 
-        first_count = _count_findings(async_session_factory)
+        first_count = await _count_findings(async_session_factory)
 
         # Second run should not change count in an ideal idempotent implementation,
         # but current MVP does not enforce DB-level uniqueness. This test ensures
