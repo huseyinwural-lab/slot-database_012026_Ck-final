@@ -218,6 +218,9 @@ p3_compose_yaml_fix_frontend_player_dec18:
   - task: "P3.1 Compose hardening: fix invalid depends_on block in frontend-player service"
     implemented: true
     working: true
+
+- 2025-12-22: Starting PR-3 finance withdrawals admin UI + E2E Playwright testing session.
+
     file: "docker-compose.prod.yml"
     priority: "high"
     needs_retesting: false
