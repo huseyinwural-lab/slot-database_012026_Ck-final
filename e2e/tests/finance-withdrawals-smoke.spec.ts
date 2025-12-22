@@ -120,7 +120,7 @@ async function playerDeposit(apiBaseUrl: string, playerToken: string, amount: nu
   const res: APIResponse = await ctx.post('/api/v1/player/wallet/deposit', {
     data: {
       amount,
-      method: 'card',
+      method: 'test',
     },
   });
 
