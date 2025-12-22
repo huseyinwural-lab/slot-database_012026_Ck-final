@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from fastapi import Request, HTTPException, Depends
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlmodel import SQLModel, select
