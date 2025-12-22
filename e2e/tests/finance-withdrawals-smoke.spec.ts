@@ -191,7 +191,7 @@ async function adminApproveKycForPlayerId(apiBaseUrl: string, adminToken: string
     ? qJson
     : (qJson.items || qJson.data?.items || []);
 
-  const match = items.find((i: any) => String(i.player_id) === String(playerId));
+  const match = items.find((i: any) => String(i.player_id || i.id) === String(playerId));
   if (!match) {
     throw new Error(`KYC queue: player_id not found. playerId=${playerId}`);
   }
