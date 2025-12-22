@@ -91,7 +91,7 @@ async def test_B01_enforce_on_idempotency_replay_same_tx_and_single_hold(client,
             ).scalars().all()
             assert len(evs) == 1
 
-    asyncio.run(_run())
+    await _run()
 
 
 @pytest.mark.usefixtures("client")
@@ -123,7 +123,7 @@ def test_B02_enforce_on_insufficient_funds_is_ledger_authority_fail_closed(clien
         # mismatch recorded (player 100 vs ledger 0)
         assert ledger_telemetry.mismatch_counter >= 1
 
-    asyncio.run(_run())
+    await _run()
 
 
 @pytest.mark.usefixtures("client")
@@ -162,7 +162,7 @@ def test_B03_enforce_off_legacy_behavior_and_mismatch_telemetry(client, async_se
 
         assert ledger_telemetry.mismatch_counter >= 1
 
-    asyncio.run(_run())
+    await _run()
 
 
 @pytest.mark.usefixtures("client")
@@ -203,4 +203,4 @@ def test_B04_enforce_on_walletbalance_missing_is_fail_closed(client, async_sessi
             if wb is not None:
                 assert wb.balance_real_available == pytest.approx(0.0)
 
-    asyncio.run(_run())
+    await _run()
