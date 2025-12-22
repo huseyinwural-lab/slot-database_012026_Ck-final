@@ -94,10 +94,9 @@ def test_mark_paid_adds_psp_metadata_and_finalizes_pending(client, async_session
     settings.ledger_shadow_write = True
 
     async def _run():
-        async with async_session_factory() as session:
-            tenant = await _create_tenant(session)
-            player = await _create_player(session, tenant.id, balance_available=0.0, kyc_status="verified")
-            token = _make_player_token(player.id, tenant.id)
+        # Reuse existing helper to seed tenant, player and admin + tokens
+        tenant, player, admin, player_token, admin_token = await _seed_admin_and_player(async_session_factory)
+        token = player_token
 
         # Fund via deposit 100
         dep_headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "idem-psp-dep-2"}
