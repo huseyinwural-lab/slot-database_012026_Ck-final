@@ -21,7 +21,7 @@ class ReconciliationRunsAPITest:
         
     async def login_admin(self) -> str:
         """Login as admin and get JWT token"""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             login_data = {
                 "email": "admin@casino.com",
                 "password": "Admin123!"
