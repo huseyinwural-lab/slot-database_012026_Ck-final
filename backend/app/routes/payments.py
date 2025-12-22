@@ -192,6 +192,10 @@ async def payments_webhook(
         ip_address=ip,
     )
 
+    await session.commit()
+
+    return {"status": "ok", "idempotent": False, "tx_id": tx.id}
+
 
 
 @router.get("/reconciliation/findings")
