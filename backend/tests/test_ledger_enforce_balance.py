@@ -165,7 +165,7 @@ def test_B03_enforce_off_legacy_behavior_and_mismatch_telemetry(client, async_se
 
 
 @pytest.mark.usefixtures("client")
-def test_B04_enforce_on_walletbalance_missing_is_fail_closed(client):
+def test_B04_enforce_on_walletbalance_missing_is_fail_closed(client, async_session_factory):
     """Enforce ON: when walletbalance row is missing, treat available as 0 and 400."""
     settings.ledger_shadow_write = True
     settings.ledger_enforce_balance = True
