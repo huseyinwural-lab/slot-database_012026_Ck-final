@@ -219,6 +219,18 @@ async def readiness_check():
         raise HTTPException(
             status_code=503,
             detail={"status": "degraded", "dependencies": {"database": "unreachable", "migrations": "unknown"}},
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    from app.queue.arq_client import close_queue
+
+    try:
+        await close_queue()
+    except Exception:
+        # Best-effort cleanup; don't block shutdown
+        pass
+
         )
 
 
