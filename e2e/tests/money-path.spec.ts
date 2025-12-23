@@ -523,8 +523,8 @@ test('P06-204: Replay / dedupe for payout and webhook', async ({ context, reques
     expect(json.transaction.state).toBe('paid');
   }
 
-  // For webhook testing, create a separate transaction that uses webhook flow
-  // Use unique player for webhook test to avoid balance conflicts
+  // Test webhook replay with a different transaction to avoid balance conflicts
+  // Create a separate transaction for webhook testing
   const uniqueEmail = `e2e_webhook_${Date.now()}@test.local`;
   const { token: webhookPlayerToken, playerId: webhookPlayerId } = await apiRegisterOrLoginPlayer(BACKEND_URL, uniqueEmail, PLAYER_PASSWORD);
   await adminApproveKycForPlayerId(BACKEND_URL, adminToken, webhookPlayerId);
@@ -532,12 +532,8 @@ test('P06-204: Replay / dedupe for payout and webhook', async ({ context, reques
   await playerDeposit(BACKEND_URL, webhookPlayerToken, 15, 'success');
   const { txId: webhookTxId } = await playerWithdraw(BACKEND_URL, webhookPlayerToken, 10);
   await adminApproveWithdraw(BACKEND_URL, adminToken, webhookTxId);
-  
-  // Start payout with success to put it in payout_pending state, then use webhook
-  const webhookPayoutKey = idemKey('e2e-webhook-payout');
-  await adminStartPayout(BACKEND_URL, adminToken, webhookTxId, webhookPayoutKey, 'success');
 
-  // Webhook replay dedupe - test idempotency on already paid transaction
+  // Test webhook idempotency by calling the same webhook twice
   const providerEventId = `e2e-webhook-${Date.now()}`;
   const webhookPayload = {
     withdraw_tx_id: webhookTxId,
@@ -546,13 +542,13 @@ test('P06-204: Replay / dedupe for payout and webhook', async ({ context, reques
     status: 'paid' as const,
   };
 
-  // First webhook call should be idempotent (no-op since already paid)
+  // First webhook call should succeed
   const firstWebhook = await callPayoutWebhook(BACKEND_URL, adminToken, webhookPayload);
   expect(firstWebhook.status).toBe('ok');
 
-  // Second webhook call should also be idempotent
+  // Second webhook call with same provider_event_id should be deduplicated
   const secondWebhook = await callPayoutWebhook(BACKEND_URL, adminToken, webhookPayload);
-  expect(secondWebhook.status).toBe('ok');
+  expect(secondWebhook.replay).toBeTruthy();
 
   await context.tracing.stop({ path: `${ARTIFACT_DIR}/money-path-trace.zip` });
 });
