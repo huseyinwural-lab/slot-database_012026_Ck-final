@@ -429,6 +429,35 @@ async def create_withdrawal(
     if amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be positive")
 
+    # Tenant payment policy enforcement (withdraw)
+    from app.utils.tenant import get_current_tenant_id
+    from app.models.sql_models import Tenant
+
+    tenant_id = await get_current_tenant_id(request, None, session=session)
+    tenant = await session.get(Tenant, tenant_id)
+    if tenant:
+        dec_amount = Decimal(str(amount))
+        if tenant.min_withdraw is not None and dec_amount < Decimal(str(tenant.min_withdraw)):
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error_code": "LIMIT_EXCEEDED",
+                    "limit_name": "min_withdraw",
+                    "limit_value": float(tenant.min_withdraw),
+                    "attempted": float(amount),
+                },
+            )
+        if tenant.max_withdraw is not None and dec_amount > Decimal(str(tenant.max_withdraw)):
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error_code": "LIMIT_EXCEEDED",
+                    "limit_name": "max_withdraw",
+                    "limit_value": float(tenant.max_withdraw),
+                    "attempted": float(amount),
+                },
+            )
+
     # Test-only withdraw method gate: allow "test_bank" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
     is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test"}
