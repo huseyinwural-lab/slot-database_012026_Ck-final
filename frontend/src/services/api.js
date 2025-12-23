@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { setLastError } from './supportDiagnostics';
-import { makeIdempotencyKey } from './idempotency';
 
 // Prefer explicit env var; otherwise use same-origin (works with Nginx /api reverse proxy in prod images)
 const RAW_API_URL = process.env.REACT_APP_BACKEND_URL
@@ -40,7 +39,7 @@ api.interceptors.request.use((config) => {
     // Money-path default Idempotency-Key generation:
     // For critical endpoints (deposit/withdraw/admin finance actions) we want
     // every request to carry an Idempotency-Key. If the caller has not set one
-    // explicitly, generate a uuid4 here.
+    // explicitly, generate a random UUID here.
     const url = config.url || '';
     const method = (config.method || 'get').toLowerCase();
     const isMoneyPath =
@@ -50,7 +49,11 @@ api.interceptors.request.use((config) => {
         url.includes('/finance/withdrawals'));
 
     if (isMoneyPath && !config.headers['Idempotency-Key']) {
-      config.headers['Idempotency-Key'] = makeIdempotencyKey();
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        config.headers['Idempotency-Key'] = crypto.randomUUID();
+      } else {
+        config.headers['Idempotency-Key'] = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
     }
   } catch (e) {
     // localStorage not available; ignore
