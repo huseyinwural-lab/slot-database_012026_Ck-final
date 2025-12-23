@@ -157,7 +157,7 @@ class IdempotencyTestSuite:
                 
                 for creds in test_credentials:
                     response = await client.post(
-                        f"{self.base_url}/player/auth/login",
+                        f"{self.base_url}/auth/player/login",
                         json=creds
                     )
                     
