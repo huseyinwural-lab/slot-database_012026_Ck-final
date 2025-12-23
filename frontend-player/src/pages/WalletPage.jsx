@@ -42,15 +42,42 @@ const WalletPage = () => {
     e.preventDefault();
     setProcessing(true);
     setMessage(null);
+
+    const storedPlayer = localStorage.getItem('player_user');
+    const player = storedPlayer ? JSON.parse(storedPlayer) : null;
+    const playerId = player?.id || 'self';
+    const scope = PLAYER_SCOPE;
+    const action = 'deposit';
+
+    const key = `${scope}:${playerId}:${action}`;
+    setActionStatus((prev) => ({ ...prev, [key]: { status: 'in_flight' } }));
+
     try {
-      await api.post('/player/wallet/deposit', {
-        amount: parseFloat(depositAmount),
-        method: 'credit_card' // Mock method
+      await callMoneyAction({
+        scope,
+        id: playerId,
+        action,
+        requestFn: (idemKey) =>
+          api.post('/player/wallet/deposit', {
+            amount: parseFloat(depositAmount),
+            method: 'credit_card', // Mock method
+          }, {
+            headers: {
+              'Idempotency-Key': idemKey,
+            },
+          }),
+        onStatus: (status) => {
+          setActionStatus((prev) => ({
+            ...prev,
+            [key]: { status: status.status || status, message: status.message },
+          }));
+        },
       });
       setMessage({ type: 'success', text: 'Deposit successful!' });
       setDepositAmount('');
       fetchWalletData(); // Refresh balance
     } catch (err) {
+      console.error(err);
       setMessage({ type: 'error', text: err.response?.data?.detail || 'Deposit failed' });
     } finally {
       setProcessing(false);
