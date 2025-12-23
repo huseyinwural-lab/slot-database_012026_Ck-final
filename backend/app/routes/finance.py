@@ -397,6 +397,152 @@ async def start_payout(
                 request_id=request_id,
                 actor_user_id=str(current_admin.id),
                 tenant_id=tenant_id,
+
+
+@router.post("/withdrawals/payout/webhook")
+async def payout_webhook(
+    payload: PayoutWebhookPayload,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Generic PSP payout webhook handler with replay dedupe (P4).
+
+    Behaviour:
+    - provider_event_id is the primary dedupe key.
+    - First call for a given event id applies the same success/fail semantics as
+      the /payout endpoint (ledger + state machine).
+    - Replays with the same provider_event_id are 200 OK no-ops.
+    """
+
+    request_id = getattr(request.state, "request_id", "unknown")
+    ip = request.client.host if request.client else None
+
+    # Find existing payout attempt by provider_event_id
+    stmt = select(PayoutAttempt).where(
+        PayoutAttempt.provider == payload.provider,
+        PayoutAttempt.provider_event_id == payload.provider_event_id,
+    )
+    existing = (await session.execute(stmt)).scalars().first()
+
+    # Idempotent replay: if we already processed this provider_event_id, no-op
+    if existing:
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=existing.tenant_id,
+            action="FIN_IDEMPOTENCY_HIT",
+            resource_type="wallet_payout_webhook",
+            resource_id=existing.withdraw_tx_id,
+            result="success",
+            details={
+                "withdraw_tx_id": existing.withdraw_tx_id,
+                "payout_attempt_id": existing.id,
+                "provider": payload.provider,
+                "provider_event_id": payload.provider_event_id,
+                "status": existing.status,
+            },
+            ip_address=ip,
+        )
+        await session.commit()
+        return {"status": "ok", "replay": True}
+
+    # Otherwise, create a payout attempt stub and delegate to the same state
+    # machine/ledger semantics as /payout. We re-run the /payout endpoint logic
+    # indirectly by mimicking a success/fail outcome.
+
+    # Load the withdrawal transaction
+    tx = await session.get(Transaction, payload.withdraw_tx_id)
+    if not tx:
+        # Unknown transaction; still 200 to avoid PSP retries storm, but log.
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=current_admin.tenant_id,
+            action="FIN_PAYOUT_WEBHOOK_ORPHAN",
+            resource_type="wallet_payout_webhook",
+            resource_id=payload.withdraw_tx_id,
+            result="failure",
+            details={
+                "provider": payload.provider,
+                "provider_event_id": payload.provider_event_id,
+                "status": payload.status,
+                "error_code": payload.error_code,
+            },
+            ip_address=ip,
+        )
+        await session.commit()
+        return {"status": "ok", "orphan": True}
+
+    # For simplicity, we reuse the same mechanics by constructing a
+    # PayoutAttempt row and then applying the same state+ledger logic inline.
+    attempt = PayoutAttempt(
+        withdraw_tx_id=tx.id,
+        tenant_id=current_admin.tenant_id,
+        provider=payload.provider,
+        provider_event_id=payload.provider_event_id,
+        idempotency_key=None,
+        status="pending",
+        error_code=payload.error_code,
+    )
+    session.add(attempt)
+
+    from app.services.transaction_state_machine import transition_transaction
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+
+    # Ensure we are in payout_pending before applying terminal transitions.
+    if tx.state == "approved":
+        transition_transaction(tx, "payout_pending")
+
+    if payload.status == "paid":
+        transition_transaction(tx, "paid")
+        await apply_wallet_delta_with_ledger(
+            session,
+            tenant_id=current_admin.tenant_id,
+            player_id=tx.player_id,
+            tx_id=str(tx.id),
+            event_type="withdraw_paid",
+            delta_available=0.0,
+            delta_held=-float(tx.amount),
+            currency=tx.currency or "USD",
+            idempotency_key=f"withdraw_payout_paid_webhook:{tx.id}:{payload.provider_event_id}",
+            provider=payload.provider,
+            provider_ref=payload.provider_ref,
+            provider_event_id=payload.provider_event_id,
+        )
+    else:
+        # failed
+        transition_transaction(tx, "payout_failed")
+
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(current_admin.id),
+        tenant_id=current_admin.tenant_id,
+        action="FIN_PAYOUT_WEBHOOK_PROCESSED",
+        resource_type="wallet_payout_webhook",
+        resource_id=tx.id,
+        result="success" if payload.status == "paid" else "failure",
+        details={
+            "withdraw_tx_id": tx.id,
+            "payout_attempt_id": attempt.id,
+            "provider": payload.provider,
+            "provider_event_id": payload.provider_event_id,
+            "status": payload.status,
+            "error_code": payload.error_code,
+        },
+        ip_address=ip,
+    )
+
+    session.add(tx)
+    await session.commit()
+    await session.refresh(tx)
+    await session.refresh(attempt)
+
+    return {"status": "ok", "transaction": tx, "payout_attempt": attempt}
+
                 action="FIN_IDEMPOTENCY_HIT",
                 resource_type="wallet_payout",
                 resource_id=tx.id,
