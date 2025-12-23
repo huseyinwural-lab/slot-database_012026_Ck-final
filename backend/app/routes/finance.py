@@ -332,12 +332,20 @@ async def start_payout(
 ):
     """Start a payout attempt for an approved withdrawal (idempotent).
 
-    - Only allowed from state=approved.
-    - Creates or reuses a PayoutAttempt row keyed by (withdraw_tx_id, idempotency_key).
-    - On first creation, transitions withdrawal state to payout_pending.
+    Semantics (P0-5 P3):
+    - First call from state=approved creates a PayoutAttempt(status=pending),
+      transitions withdrawal -> payout_pending and triggers MockPSP payout.
+    - PSP outcome:
+        * success  -> ledger withdraw_paid + held -= amount, state -> paid
+        * fail     -> NO ledger, held unchanged, state -> payout_failed
+    - Replays with the same Idempotency-Key are safe no-ops that return the
+      existing attempt + transaction without double-debit.
     """
 
     from app.services.transaction_state_machine import transition_transaction
+    from app.services.psp import get_psp
+    from app.services.psp.psp_interface import build_psp_idem_key, PSPStatus
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
 
@@ -355,7 +363,23 @@ async def start_payout(
     if not tx:
         raise HTTPException(status_code=404, detail={"error_code": "TX_NOT_FOUND"})
 
-    # Enforce state precondition: must be approved
+    # Idempotent behaviour based on attempt + tx state
+    pa_stmt = select(PayoutAttempt).where(
+        PayoutAttempt.withdraw_tx_id == tx_id,
+        PayoutAttempt.idempotency_key == idem_key,
+    )
+    existing_attempt = (await session.execute(pa_stmt)).scalars().first()
+
+    if existing_attempt:
+        # If tx is already in a terminal state for this flow, treat as replay.
+        if tx.state in {"paid", "payout_failed"}:
+            return {"transaction": tx, "payout_attempt": existing_attempt}
+        # If still pending, also treat as replay/no-op at this layer; webhook or
+        # subsequent calls will drive it to terminal states.
+        if tx.state == "payout_pending":
+            return {"transaction": tx, "payout_attempt": existing_attempt}
+
+    # Enforce state precondition for first call: must be approved
     if tx.state != "approved":
         raise HTTPException(
             status_code=409,
@@ -367,28 +391,85 @@ async def start_payout(
             },
         )
 
-    # Check for existing attempt with same idempotency key
-    pa_stmt = select(PayoutAttempt).where(
-        PayoutAttempt.withdraw_tx_id == tx_id,
-        PayoutAttempt.idempotency_key == idem_key,
-    )
-    existing_attempt = (await session.execute(pa_stmt)).scalars().first()
+    # Determine mock outcome: default success, override via header in dev/test
+    outcome = request.headers.get("X-Mock-Outcome", "success").strip().lower()
+    if outcome not in {"success", "fail"}:
+        outcome = "success"
 
-    if existing_attempt:
-        # Idempotent replay: return existing state
-        return {"transaction": tx, "payout_attempt": existing_attempt}
+    psp = get_psp()
+    psp_idem_key = build_psp_idem_key(str(tx.id))
 
-    # Create new attempt and move state to payout_pending
-    attempt = PayoutAttempt(
-        withdraw_tx_id=tx.id,
+    # For tests, allow deterministic fail via MockPSP override
+    if outcome == "fail":
+        try:
+            psp.register_outcome_override(psp_idem_key, "fail")  # type: ignore[attr-defined]
+        except Exception:
+            # In prod, ignore if override is not supported
+            pass
+
+    # Trigger PSP payout
+    psp_res = await psp.payout_withdrawal(
+        tx_id=str(tx.id),
         tenant_id=tenant_id,
-        provider="mock_psp",
-        idempotency_key=idem_key,
-        status="pending",
+        player_id=tx.player_id,
+        amount=float(tx.amount),
+        currency=tx.currency or "USD",
+        psp_idem_key=psp_idem_key,
     )
 
-    transition_transaction(tx, "payout_pending")
+    # Create or reuse attempt row
+    if existing_attempt:
+        attempt = existing_attempt
+    else:
+        attempt = PayoutAttempt(
+            withdraw_tx_id=tx.id,
+            tenant_id=tenant_id,
+            provider=psp_res.provider,
+            provider_event_id=psp_res.provider_event_id,
+            idempotency_key=idem_key,
+            status="pending",
+        )
+        session.add(attempt)
 
+    # Update attempt status based on PSP result
+    if psp_res.status == PSPStatus.PAID:
+        attempt.status = "succeeded"
+        attempt.error_code = None
+    else:
+        attempt.status = "failed"
+        attempt.error_code = "PSP_PAYOUT_FAILED"
+
+    # Apply state + ledger transitions under a single transaction
+    player = await session.get(Player, tx.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail={"error_code": "PLAYER_NOT_FOUND"})
+
+    # First time from approved -> payout_pending
+    if tx.state == "approved":
+        transition_transaction(tx, "payout_pending")
+
+    if psp_res.status == PSPStatus.PAID:
+        # Success path: payout_pending -> paid + single withdraw_paid ledger
+        transition_transaction(tx, "paid")
+        await apply_wallet_delta_with_ledger(
+            session,
+            tenant_id=tenant_id,
+            player_id=tx.player_id,
+            tx_id=str(tx.id),
+            event_type="withdraw_paid",
+            delta_available=0.0,
+            delta_held=-float(tx.amount),
+            currency=tx.currency or "USD",
+            idempotency_key=f"withdraw_payout_paid:{tx.id}:{idem_key}",
+            provider=psp_res.provider,
+            provider_ref=psp_res.provider_ref,
+            provider_event_id=psp_res.provider_event_id,
+        )
+    else:
+        # Fail path: payout_pending -> payout_failed, NO ledger write, held unchanged
+        transition_transaction(tx, "payout_failed")
+
+    # Persist changes
     session.add(tx)
     session.add(attempt)
     await session.commit()
