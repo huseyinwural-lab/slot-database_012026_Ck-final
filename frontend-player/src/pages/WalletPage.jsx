@@ -21,6 +21,7 @@ const WalletPage = () => {
   
   // Form States
   const [depositAmount, setDepositAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('stripe');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -55,7 +56,25 @@ const WalletPage = () => {
   useEffect(() => {
     fetchWalletData(1);
     checkReturnFromStripe();
+    checkReturnFromAdyen();
   }, []);
+
+  const checkReturnFromAdyen = () => {
+      const query = new URLSearchParams(window.location.search);
+      const provider = query.get('provider');
+      const resultCode = query.get('resultCode');
+      
+      if (provider === 'adyen') {
+          if (resultCode === 'Authorised') {
+               setMessage({ type: 'success', text: 'Adyen Payment Authorised! Balance will update shortly.' });
+               window.history.replaceState({}, document.title, window.location.pathname);
+               fetchWalletData(1);
+          } else if (resultCode) {
+               setMessage({ type: 'error', text: `Adyen Payment Result: ${resultCode}` });
+               window.history.replaceState({}, document.title, window.location.pathname);
+          }
+      }
+  };
 
   const checkReturnFromStripe = () => {
       const query = new URLSearchParams(window.location.search);
@@ -120,15 +139,19 @@ const WalletPage = () => {
     setProcessing(true);
     setMessage(null);
 
-    // Direct Stripe Integration
     try {
-       const res = await api.post('/payments/stripe/checkout/session', {
+       let endpoint = '/payments/stripe/checkout/session';
+       if (paymentMethod === 'adyen') {
+           endpoint = '/payments/adyen/checkout/session';
+       }
+
+       const res = await api.post(endpoint, {
            amount: parseFloat(depositAmount),
            currency: 'USD'
        });
        
        if (res.data.url) {
-           // Redirect to Stripe
+           // Redirect
            window.location.href = res.data.url;
        } else {
            throw new Error("No redirect URL returned");
@@ -274,6 +297,28 @@ const WalletPage = () => {
                 <h3 className="text-xl font-semibold flex items-center gap-2">
                   <ArrowDownLeft className="text-green-500" /> Deposit Funds
                 </h3>
+                
+                {/* Method Selector */}
+                <div>
+                   <label className="block text-sm text-muted-foreground mb-1">Payment Method</label>
+                   <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('stripe')}
+                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${paymentMethod === 'stripe' ? 'bg-primary/20 border-primary text-primary' : 'bg-black/20 border-white/10 hover:bg-white/5'}`}
+                      >
+                         Credit Card (Stripe)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('adyen')}
+                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${paymentMethod === 'adyen' ? 'bg-primary/20 border-primary text-primary' : 'bg-black/20 border-white/10 hover:bg-white/5'}`}
+                      >
+                         Adyen (All Methods)
+                      </button>
+                   </div>
+                </div>
+
                 <div>
                   <label className="block text-sm text-muted-foreground mb-1">Amount ($)</label>
                   <div className="relative">
@@ -303,10 +348,10 @@ const WalletPage = () => {
                   ))}
                 </div>
                 <button type="submit" disabled={processing} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50">
-                  {processing ? 'Redirecting to Stripe...' : 'Pay with Stripe'}
+                  {processing ? 'Redirecting...' : `Pay with ${paymentMethod === 'stripe' ? 'Stripe' : 'Adyen'}`}
                 </button>
                 <p className="text-xs text-center text-muted-foreground mt-2">
-                  <CreditCard className="w-3 h-3 inline mr-1" /> Secure Payment via Stripe
+                  <CreditCard className="w-3 h-3 inline mr-1" /> Secure Payment via {paymentMethod === 'stripe' ? 'Stripe' : 'Adyen'}
                 </p>
               </form>
             ) : (
