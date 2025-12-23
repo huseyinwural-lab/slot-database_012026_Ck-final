@@ -169,6 +169,41 @@ const FinanceWithdrawals = () => {
     toast.error(message);
   };
 
+  const handleStartOrRetryPayout = async (tx) => {
+    setActionLoading(true);
+    try {
+      const action = tx.state === 'payout_failed' ? 'retry' : 'start';
+      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/payout`, null, {
+        headers: {
+          'Idempotency-Key': makeIdemKey(tx.tx_id, `payout:${action}`),
+        },
+      });
+      toast.success(action === 'retry' ? 'Payout retried' : 'Payout started');
+      await fetchWithdrawals(page);
+    } catch (err) {
+      await handleActionError(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRecheck = async (tx) => {
+    setActionLoading(true);
+    try {
+      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/recheck`, null, {
+        headers: {
+          'Idempotency-Key': makeIdemKey(tx.tx_id, 'recheck'),
+        },
+      });
+      toast.success('Recheck requested');
+      await fetchWithdrawals(page);
+    } catch (err) {
+      await handleActionError(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleApprove = async (tx) => {
     setActionLoading(true);
     try {
