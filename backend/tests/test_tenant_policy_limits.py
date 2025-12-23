@@ -63,21 +63,19 @@ async def test_withdraw_limit_exceeded_returns_422(client, player_with_token):
 
     headers = {"Authorization": f"Bearer {player_token}", "Content-Type": "application/json", "Idempotency-Key": "w1"}
 
-    async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        res1 = await ac.post(
-            "/api/v1/player/wallet/withdraw",
-            json={"amount": 20.0, "method": "crypto", "address": "addr1"},
-            headers=headers,
-        )
-        assert res1.status_code in (200, 201)
+    res1 = await client.post(
+        "/api/v1/player/wallet/withdraw",
+        json={"amount": 20.0, "method": "crypto", "address": "addr1"},
+        headers=headers,
+    )
+    assert res1.status_code in (200, 201)
 
     headers["Idempotency-Key"] = "w2"
-    async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        res2 = await ac.post(
-            "/api/v1/player/wallet/withdraw",
-            json={"amount": 15.0, "method": "crypto", "address": "addr2"},
-            headers=headers,
-        )
+    res2 = await client.post(
+        "/api/v1/player/wallet/withdraw",
+        json={"amount": 15.0, "method": "crypto", "address": "addr2"},
+        headers=headers,
+    )
 
     assert res2.status_code == 422
     body = res2.json()["detail"]
@@ -90,7 +88,8 @@ async def test_withdraw_limit_exceeded_returns_422(client, player_with_token):
 
 
 @pytest.mark.asyncio
-async def test_no_policy_allows_transactions(client, tenant, player_token):
+async def test_no_policy_allows_transactions(client, player_with_token):
+    tenant, player, player_token = player_with_token
     # Ensure policy fields are None
     async with async_session() as session:
         db_tenant = await session.get(Tenant, tenant.id)
