@@ -296,6 +296,8 @@ const FinanceWithdrawals = () => {
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="requested">Requested</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="payout_pending">Payout Pending</SelectItem>
+                  <SelectItem value="payout_failed">Payout Failed</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
                 </SelectContent>
