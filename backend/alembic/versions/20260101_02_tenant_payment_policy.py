@@ -20,10 +20,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Monetary limits stored as NUMERIC(18, 2) to match existing amount semantics
-    op.add_column("tenant", sa.Column("min_deposit", sa.Numeric(18, 2), nullable=True))
-    op.add_column("tenant", sa.Column("max_deposit", sa.Numeric(18, 2), nullable=True))
-    op.add_column("tenant", sa.Column("min_withdraw", sa.Numeric(18, 2), nullable=True))
-    op.add_column("tenant", sa.Column("max_withdraw", sa.Numeric(18, 2), nullable=True))
     op.add_column("tenant", sa.Column("daily_deposit_limit", sa.Numeric(18, 2), nullable=True))
     op.add_column("tenant", sa.Column("daily_withdraw_limit", sa.Numeric(18, 2), nullable=True))
     op.add_column("tenant", sa.Column("payout_retry_limit", sa.Integer(), nullable=True))
