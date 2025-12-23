@@ -104,6 +104,8 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
     
     // 8. Verify Balance Update
     console.log('Verifying balance...');
-    await expect(page.locator('text=$50.00')).toBeVisible();
+    // Look for first occurrence or specific container
+    // We expect at least one "$50.00"
+    await expect(page.locator('text=$50.00').first()).toBeVisible();
   });
 });
