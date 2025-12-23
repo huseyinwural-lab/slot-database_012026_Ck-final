@@ -15,6 +15,16 @@ class Tenant(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
+    # Per-tenant payment policy (TENANT-POLICY-001)
+    min_deposit: Optional[float] = None
+    max_deposit: Optional[float] = None
+    min_withdraw: Optional[float] = None
+    max_withdraw: Optional[float] = None
+    daily_deposit_limit: Optional[float] = None
+    daily_withdraw_limit: Optional[float] = None
+    payout_retry_limit: Optional[int] = None
+    payout_cooldown_seconds: Optional[int] = None
+
     admins: List["AdminUser"] = Relationship(back_populates="tenant")
     players: List["Player"] = Relationship(back_populates="tenant")
     games: List["Game"] = Relationship(back_populates="tenant")
