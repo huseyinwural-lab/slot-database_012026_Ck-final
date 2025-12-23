@@ -536,6 +536,15 @@ ledger_withdrawals_e2e_smoke_dec22:
     file: "e2e/tests/finance-withdrawals-smoke.spec.ts"
     priority: "highest"
     needs_retesting: false
+
+ledger_ops_001_reconciliation_fix_dec23:
+  - task: "LEDGER-OPS-001: Fix reconciliation service tests and verify logic"
+    implemented: true
+    working: true
+    file: "backend/tests/test_reconciliation.py, backend/app/services/reconciliation.py"
+    priority: "highest"
+    needs_retesting: true
+
     status_history:
         -working: true
         -agent: "testing"
