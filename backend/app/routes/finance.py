@@ -389,14 +389,29 @@ async def start_payout(
     if existing_attempt:
         # If tx is already in a terminal state for this flow, treat as replay.
         if tx.state in {"paid", "payout_failed"}:
-            # Audit idempotent hit
-            request_id = getattr(request.state, "request_id", "unknown")
-            ip = request.client.host if request.client else None
             await audit.log_event(
                 session=session,
                 request_id=request_id,
                 actor_user_id=str(current_admin.id),
                 tenant_id=tenant_id,
+                action="FIN_IDEMPOTENCY_HIT",
+                resource_type="wallet_payout",
+                resource_id=tx.id,
+                result="success",
+                details={
+                    "tx_id": tx.id,
+                    "payout_attempt_id": existing_attempt.id,
+                    "idempotency_key": idem_key,
+                    "state": tx.state,
+                },
+                ip_address=ip,
+            )
+            await session.commit()
+            return {"transaction": tx, "payout_attempt": existing_attempt}
+        # If still pending, also treat as replay/no-op at this layer; webhook or
+        # subsequent calls will drive it to terminal states.
+        if tx.state == "payout_pending":
+            return {"transaction": tx, "payout_attempt": existing_attempt}
 
 
 @router.post("/withdrawals/payout/webhook")
