@@ -159,9 +159,9 @@ class IdempotencyTestSuite:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 # Try common test credentials
                 test_credentials = [
-                    {"username": "testplayer", "password": "TestPass123!"},
-                    {"username": "player1", "password": "Player123!"},
-                    {"email": "player@test.com", "password": "TestPass123!"}
+                    {"email": "testplayer123@example.com", "password": "TestPass123!"},
+                    {"email": "player@test.com", "password": "TestPass123!"},
+                    {"email": "test@example.com", "password": "TestPass123!"}
                 ]
                 
                 for creds in test_credentials:
