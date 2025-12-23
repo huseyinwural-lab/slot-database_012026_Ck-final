@@ -139,6 +139,11 @@ const SettingsPanel = () => {
         </TabsContent>
 
         <TabsContent value="payment" className="mt-4">
+        <TabsContent value="payments-policy" className="mt-4">
+          <PaymentsPolicySettings />
+        </TabsContent>
+
+
           <Card><CardHeader><CardTitle>Payment Settings</CardTitle></CardHeader>
           <CardContent><p className="text-muted-foreground">Ödeme sağlayıcı yönetimi yakında eklenecek</p></CardContent></Card>
         </TabsContent>
