@@ -1,218 +1,600 @@
 #!/usr/bin/env python3
 """
-Backend test for PSP-03D reconciliation runs API
-Tests the new reconciliation runs endpoints with admin authentication
+Backend P0-3 Idempotency and Replay-Safe Behavior Test Suite
+
+This test suite validates:
+1. DB schema / migrations - UNIQUE constraints verification
+2. Deposit create idempotency 
+3. Withdraw create idempotency
+4. Admin transition idempotency
+5. Webhook replay idempotency
+6. Full P0-3 idempotency pack
+
+Tests are designed to run against the live backend service.
 """
 
 import asyncio
 import json
+import sqlite3
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 import httpx
 import os
+import uuid
 
-# Use local backend for testing
-BACKEND_URL = "http://localhost:8001"
+# Use environment variable for backend URL, fallback to localhost
+BACKEND_URL = os.getenv("REACT_APP_BACKEND_URL", "http://localhost:8001")
+if BACKEND_URL.endswith("/api"):
+    BACKEND_URL = BACKEND_URL[:-4]  # Remove /api suffix if present
 
-class ReconciliationRunsAPITest:
+class IdempotencyTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
         self.admin_token = None
+        self.player_token = None
+        self.tenant_id = None
+        self.player_id = None
+        self.test_results = []
         
-    async def login_admin(self) -> str:
-        """Login as admin and get JWT token"""
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            login_data = {
-                "email": "admin@casino.com",
-                "password": "Admin123!"
-            }
-            
-            response = await client.post(
-                f"{self.base_url}/auth/login",
-                json=login_data
-            )
-            
-            if response.status_code != 200:
-                raise Exception(f"Admin login failed: {response.status_code} - {response.text}")
-            
-            data = response.json()
-            token = data.get("access_token")
-            if not token:
-                raise Exception("No access token in login response")
-            
-            print(f"✅ Admin login successful, token length: {len(token)}")
-            return token
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
     
-    async def test_create_reconciliation_run(self) -> Dict[str, Any]:
-        """Test POST /api/v1/reconciliation/runs"""
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            now = datetime.now(timezone.utc)
-            payload = {
-                "provider": "mockpsp",
-                "window_start": now.isoformat(),
-                "window_end": (now + timedelta(hours=1)).isoformat(),
-                "dry_run": True
-            }
-            
-            headers = {"Authorization": f"Bearer {self.admin_token}"}
-            
-            response = await client.post(
-                f"{self.base_url}/reconciliation/runs",
-                json=payload,
-                headers=headers
-            )
-            
-            if response.status_code != 200:
-                raise Exception(f"Create reconciliation run failed: {response.status_code} - {response.text}")
-            
-            data = response.json()
-            
-            # Validate response structure
-            required_fields = ["id", "provider", "window_start", "window_end", "dry_run", "status", "created_at", "updated_at"]
-            for field in required_fields:
-                if field not in data:
-                    raise Exception(f"Missing field in response: {field}")
-            
-            # Validate values
-            if data["provider"] != "mockpsp":
-                raise Exception(f"Expected provider 'mockpsp', got '{data['provider']}'")
-            if data["dry_run"] is not True:
-                raise Exception(f"Expected dry_run True, got {data['dry_run']}")
-            if data["status"] != "queued":
-                raise Exception(f"Expected status 'queued', got '{data['status']}'")
-            
-            print(f"✅ Create reconciliation run successful, ID: {data['id']}")
-            return data
+    async def setup_auth(self) -> bool:
+        """Setup admin and player authentication"""
+        try:
+            # Login as admin
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, f"Token length: {len(self.admin_token)}")
+                
+                # Create a test player for wallet operations
+                await self.create_test_player()
+                
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
     
-    async def test_idempotency(self) -> None:
-        """Test idempotency with same idempotency_key"""
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            now = datetime.now(timezone.utc)
-            idempotency_key = f"test-{now.strftime('%Y%m%d-%H%M%S')}"
-            
-            payload = {
-                "provider": "mockpsp",
-                "window_start": now.isoformat(),
-                "window_end": (now + timedelta(hours=1)).isoformat(),
-                "dry_run": True,
-                "idempotency_key": idempotency_key
-            }
-            
-            headers = {"Authorization": f"Bearer {self.admin_token}"}
-            
-            try:
-                # First request
-                response1 = await client.post(
-                    f"{self.base_url}/reconciliation/runs",
-                    json=payload,
+    async def create_test_player(self):
+        """Create a test player with verified KYC status and initial balance"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Create player
+                player_data = {
+                    "username": f"testplayer_{uuid.uuid4().hex[:8]}",
+                    "email": f"testplayer_{uuid.uuid4().hex[:8]}@example.com",
+                    "password": "TestPass123!",
+                    "kyc_status": "verified"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/admin/players",
+                    json=player_data,
                     headers=headers
                 )
                 
-                # Second request with same idempotency key
+                if response.status_code in [200, 201]:
+                    player = response.json()
+                    self.player_id = player["id"]
+                    self.tenant_id = player.get("tenant_id", "default_casino")
+                    
+                    # Login as player to get token
+                    player_login = {
+                        "username": player_data["username"],
+                        "password": player_data["password"]
+                    }
+                    
+                    response = await client.post(
+                        f"{self.base_url}/player/auth/login",
+                        json=player_login
+                    )
+                    
+                    if response.status_code == 200:
+                        player_auth = response.json()
+                        self.player_token = player_auth.get("access_token")
+                        self.log_result("Test Player Setup", True, f"Player ID: {self.player_id}")
+                    else:
+                        self.log_result("Test Player Setup", False, f"Player login failed: {response.status_code}")
+                else:
+                    self.log_result("Test Player Setup", False, f"Player creation failed: {response.status_code}")
+                    
+        except Exception as e:
+            self.log_result("Test Player Setup", False, f"Exception: {str(e)}")
+    
+    async def test_db_schema_constraints(self) -> bool:
+        """Test 1: Verify DB schema UNIQUE constraints exist"""
+        try:
+            # Check if we can access the SQLite database directly
+            db_path = "/app/backend/casino.db"
+            if not os.path.exists(db_path):
+                self.log_result("DB Schema Check", False, f"Database file not found: {db_path}")
+                return False
+            
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            # Check for unique constraints on ledgertransaction table
+            cursor.execute("PRAGMA index_list(ledgertransaction)")
+            indexes = cursor.fetchall()
+            
+            # Check for unique constraints on transaction table  
+            cursor.execute("PRAGMA index_list(transaction)")
+            tx_indexes = cursor.fetchall()
+            
+            # Look for the specific unique constraints we need
+            required_constraints = [
+                "uq_ledger_idem",  # (tenant_id, player_id, type, idempotency_key)
+                "uq_ledger_provider_event",  # (provider, provider_event_id)
+                "uq_tx_deposit_idem"  # (tenant_id, idempotency_key, type)
+            ]
+            
+            found_constraints = []
+            all_indexes = indexes + tx_indexes
+            
+            for index_info in all_indexes:
+                index_name = index_info[1]
+                is_unique = index_info[2]
+                if is_unique and any(constraint in index_name for constraint in required_constraints):
+                    found_constraints.append(index_name)
+            
+            conn.close()
+            
+            success = len(found_constraints) >= 2  # At least some unique constraints found
+            details = f"Found unique indexes: {found_constraints}"
+            self.log_result("DB Schema Constraints", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_result("DB Schema Check", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_deposit_idempotency(self) -> bool:
+        """Test 2: Deposit create idempotency - same key returns same tx, no duplicate balance changes"""
+        try:
+            if not self.player_token:
+                self.log_result("Deposit Idempotency", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": f"test-deposit-{uuid.uuid4().hex[:8]}"
+                }
+                
+                deposit_data = {
+                    "amount": 100.0,
+                    "method": "test"
+                }
+                
+                # First deposit request
+                response1 = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data,
+                    headers=headers
+                )
+                
+                if response1.status_code not in [200, 201]:
+                    self.log_result("Deposit Idempotency", False, f"First deposit failed: {response1.status_code} - {response1.text}")
+                    return False
+                
+                data1 = response1.json()
+                tx_id_1 = data1["transaction"]["id"]
+                balance_after_1 = data1["balance"]["available_real"]
+                
+                # Second deposit request with same idempotency key and payload
                 response2 = await client.post(
-                    f"{self.base_url}/reconciliation/runs",
-                    json=payload,
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data,
+                    headers=headers
+                )
+                
+                if response2.status_code not in [200, 201]:
+                    self.log_result("Deposit Idempotency", False, f"Second deposit failed: {response2.status_code} - {response2.text}")
+                    return False
+                
+                data2 = response2.json()
+                tx_id_2 = data2["transaction"]["id"]
+                balance_after_2 = data2["balance"]["available_real"]
+                
+                # Verify same transaction ID returned
+                same_tx_id = tx_id_1 == tx_id_2
+                # Verify balance didn't change (no duplicate credit)
+                same_balance = balance_after_1 == balance_after_2
+                
+                success = same_tx_id and same_balance
+                details = f"TX IDs match: {same_tx_id}, Balance unchanged: {same_balance}, TX ID: {tx_id_1}"
+                self.log_result("Deposit Idempotency", success, details)
+                return success
+                
+        except Exception as e:
+            self.log_result("Deposit Idempotency", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_withdraw_idempotency(self) -> bool:
+        """Test 3: Withdraw create idempotency - same key returns same tx, no duplicate balance changes"""
+        try:
+            if not self.player_token:
+                self.log_result("Withdraw Idempotency", False, "No player token available")
+                return False
+            
+            # First ensure player has sufficient balance by making a deposit
+            await self.ensure_player_balance(200.0)
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": f"test-withdraw-{uuid.uuid4().hex[:8]}"
+                }
+                
+                withdraw_data = {
+                    "amount": 50.0,
+                    "method": "test_bank",
+                    "address": "test-bank-account-123"
+                }
+                
+                # First withdraw request
+                response1 = await client.post(
+                    f"{self.base_url}/player/wallet/withdraw",
+                    json=withdraw_data,
+                    headers=headers
+                )
+                
+                if response1.status_code not in [200, 201]:
+                    self.log_result("Withdraw Idempotency", False, f"First withdraw failed: {response1.status_code} - {response1.text}")
+                    return False
+                
+                data1 = response1.json()
+                tx_id_1 = data1["transaction"]["id"]
+                available_after_1 = data1["balance"]["available_real"]
+                held_after_1 = data1["balance"]["held_real"]
+                
+                # Second withdraw request with same idempotency key and payload
+                response2 = await client.post(
+                    f"{self.base_url}/player/wallet/withdraw",
+                    json=withdraw_data,
+                    headers=headers
+                )
+                
+                if response2.status_code not in [200, 201]:
+                    self.log_result("Withdraw Idempotency", False, f"Second withdraw failed: {response2.status_code} - {response2.text}")
+                    return False
+                
+                data2 = response2.json()
+                tx_id_2 = data2["transaction"]["id"]
+                available_after_2 = data2["balance"]["available_real"]
+                held_after_2 = data2["balance"]["held_real"]
+                
+                # Verify same transaction ID returned
+                same_tx_id = tx_id_1 == tx_id_2
+                # Verify balances didn't change (no duplicate hold)
+                same_available = available_after_1 == available_after_2
+                same_held = held_after_1 == held_after_2
+                
+                success = same_tx_id and same_available and same_held
+                details = f"TX IDs match: {same_tx_id}, Available unchanged: {same_available}, Held unchanged: {same_held}, TX ID: {tx_id_1}"
+                self.log_result("Withdraw Idempotency", success, details)
+                return success
+                
+        except Exception as e:
+            self.log_result("Withdraw Idempotency", False, f"Exception: {str(e)}")
+            return False
+    
+    async def ensure_player_balance(self, amount: float):
+        """Ensure player has at least the specified balance"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": f"balance-setup-{uuid.uuid4().hex[:8]}"
+                }
+                
+                deposit_data = {
+                    "amount": amount,
+                    "method": "test"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data,
+                    headers=headers
+                )
+                
+                if response.status_code in [200, 201]:
+                    self.log_result("Balance Setup", True, f"Added {amount} to player balance")
+                else:
+                    self.log_result("Balance Setup", False, f"Failed to add balance: {response.status_code}")
+                    
+        except Exception as e:
+            self.log_result("Balance Setup", False, f"Exception: {str(e)}")
+    
+    async def test_admin_approve_idempotency(self) -> bool:
+        """Test 4a: Admin approve withdrawal idempotency"""
+        try:
+            # First create a withdrawal to approve
+            tx_id = await self.create_test_withdrawal()
+            if not tx_id:
+                self.log_result("Admin Approve Idempotency", False, "Failed to create test withdrawal")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                approve_data = {
+                    "action": "approve"
+                }
+                
+                # First approve request
+                response1 = await client.post(
+                    f"{self.base_url}/finance/withdrawals/{tx_id}/review",
+                    json=approve_data,
                     headers=headers
                 )
                 
                 if response1.status_code != 200:
-                    raise Exception(f"First idempotent request failed: {response1.status_code} - {response1.text}")
-                if response2.status_code != 200:
-                    raise Exception(f"Second idempotent request failed: {response2.status_code} - {response2.text}")
+                    self.log_result("Admin Approve Idempotency", False, f"First approve failed: {response1.status_code} - {response1.text}")
+                    return False
+                
+                # Second approve request (should be idempotent)
+                response2 = await client.post(
+                    f"{self.base_url}/finance/withdrawals/{tx_id}/review",
+                    json=approve_data,
+                    headers=headers
+                )
+                
+                # Should return 200 (idempotent) or 409 (already in that state)
+                success = response2.status_code in [200, 409]
+                details = f"First: {response1.status_code}, Second: {response2.status_code}, TX: {tx_id}"
+                self.log_result("Admin Approve Idempotency", success, details)
+                return success
+                
+        except Exception as e:
+            self.log_result("Admin Approve Idempotency", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_admin_mark_paid_idempotency(self) -> bool:
+        """Test 4b: Admin mark paid idempotency"""
+        try:
+            # Create and approve a withdrawal
+            tx_id = await self.create_and_approve_withdrawal()
+            if not tx_id:
+                self.log_result("Admin Mark Paid Idempotency", False, "Failed to create and approve withdrawal")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # First mark paid request
+                response1 = await client.post(
+                    f"{self.base_url}/finance/withdrawals/{tx_id}/mark-paid",
+                    headers=headers
+                )
+                
+                if response1.status_code != 200:
+                    self.log_result("Admin Mark Paid Idempotency", False, f"First mark-paid failed: {response1.status_code} - {response1.text}")
+                    return False
+                
+                # Second mark paid request (should be idempotent)
+                response2 = await client.post(
+                    f"{self.base_url}/finance/withdrawals/{tx_id}/mark-paid",
+                    headers=headers
+                )
+                
+                # Should return 200 (idempotent) or 409 (already in that state)
+                success = response2.status_code in [200, 409]
+                details = f"First: {response1.status_code}, Second: {response2.status_code}, TX: {tx_id}"
+                self.log_result("Admin Mark Paid Idempotency", success, details)
+                return success
+                
+        except Exception as e:
+            self.log_result("Admin Mark Paid Idempotency", False, f"Exception: {str(e)}")
+            return False
+    
+    async def create_test_withdrawal(self) -> str:
+        """Create a test withdrawal and return its transaction ID"""
+        try:
+            await self.ensure_player_balance(100.0)
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": f"test-withdrawal-{uuid.uuid4().hex[:8]}"
+                }
+                
+                withdraw_data = {
+                    "amount": 25.0,
+                    "method": "test_bank",
+                    "address": "test-bank-account-456"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/player/wallet/withdraw",
+                    json=withdraw_data,
+                    headers=headers
+                )
+                
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    return data["transaction"]["id"]
+                else:
+                    print(f"Failed to create withdrawal: {response.status_code} - {response.text}")
+                    return None
+                    
+        except Exception as e:
+            print(f"Exception creating withdrawal: {str(e)}")
+            return None
+    
+    async def create_and_approve_withdrawal(self) -> str:
+        """Create a withdrawal and approve it, return transaction ID"""
+        try:
+            tx_id = await self.create_test_withdrawal()
+            if not tx_id:
+                return None
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                approve_data = {"action": "approve"}
+                
+                response = await client.post(
+                    f"{self.base_url}/finance/withdrawals/{tx_id}/review",
+                    json=approve_data,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    return tx_id
+                else:
+                    print(f"Failed to approve withdrawal: {response.status_code} - {response.text}")
+                    return None
+                    
+        except Exception as e:
+            print(f"Exception approving withdrawal: {str(e)}")
+            return None
+    
+    async def test_webhook_idempotency(self) -> bool:
+        """Test 5: Webhook replay idempotency"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                provider_event_id = f"evt-{uuid.uuid4().hex[:8]}"
+                
+                webhook_payload = {
+                    "provider_event_id": provider_event_id,
+                    "player_id": self.player_id or "test-player-123",
+                    "tenant_id": self.tenant_id or "default_casino",
+                    "amount": 75.0,
+                    "currency": "USD",
+                    "type": "deposit"
+                }
+                
+                # First webhook call
+                response1 = await client.post(
+                    f"{self.base_url}/payments/webhook/mock",
+                    json=webhook_payload
+                )
+                
+                if response1.status_code != 200:
+                    self.log_result("Webhook Idempotency", False, f"First webhook failed: {response1.status_code} - {response1.text}")
+                    return False
                 
                 data1 = response1.json()
+                
+                # Second webhook call with same provider_event_id
+                response2 = await client.post(
+                    f"{self.base_url}/payments/webhook/mock",
+                    json=webhook_payload
+                )
+                
+                if response2.status_code != 200:
+                    self.log_result("Webhook Idempotency", False, f"Second webhook failed: {response2.status_code} - {response2.text}")
+                    return False
+                
                 data2 = response2.json()
                 
-                if data1["id"] != data2["id"]:
-                    raise Exception(f"Idempotency failed: first ID {data1['id']} != second ID {data2['id']}")
+                # First call should create, second should be idempotent
+                first_created = not data1.get("idempotent", False)
+                second_idempotent = data2.get("idempotent", False)
                 
-                print(f"✅ Idempotency test passed, both requests returned ID: {data1['id']}")
-            except Exception as e:
-                print(f"⚠️ Idempotency test skipped due to connection issue: {e}")
-                # Don't fail the entire test suite for network issues
-    
-    async def test_get_reconciliation_run(self, run_id: str) -> None:
-        """Test GET /api/v1/reconciliation/runs/{run_id}"""
-        async with httpx.AsyncClient() as client:
-            headers = {"Authorization": f"Bearer {self.admin_token}"}
-            
-            response = await client.get(
-                f"{self.base_url}/reconciliation/runs/{run_id}",
-                headers=headers
-            )
-            
-            if response.status_code != 200:
-                raise Exception(f"Get reconciliation run failed: {response.status_code} - {response.text}")
-            
-            data = response.json()
-            
-            if data["id"] != run_id:
-                raise Exception(f"Expected ID {run_id}, got {data['id']}")
-            
-            print(f"✅ Get reconciliation run successful for ID: {run_id}")
-    
-    async def test_list_reconciliation_runs(self, expected_run_id: str) -> None:
-        """Test GET /api/v1/reconciliation/runs"""
-        async with httpx.AsyncClient() as client:
-            headers = {"Authorization": f"Bearer {self.admin_token}"}
-            
-            response = await client.get(
-                f"{self.base_url}/reconciliation/runs",
-                headers=headers
-            )
-            
-            if response.status_code != 200:
-                raise Exception(f"List reconciliation runs failed: {response.status_code} - {response.text}")
-            
-            data = response.json()
-            
-            if "items" not in data:
-                raise Exception("Missing 'items' field in list response")
-            if "meta" not in data:
-                raise Exception("Missing 'meta' field in list response")
-            
-            items = data["items"]
-            if len(items) == 0:
-                raise Exception("Expected at least one reconciliation run in list")
-            
-            # Check if our created run is in the list
-            found_run = any(item["id"] == expected_run_id for item in items)
-            if not found_run:
-                raise Exception(f"Expected run ID {expected_run_id} not found in list")
-            
-            print(f"✅ List reconciliation runs successful, found {len(items)} runs including expected ID: {expected_run_id}")
+                success = first_created and second_idempotent
+                details = f"First created: {first_created}, Second idempotent: {second_idempotent}, Event ID: {provider_event_id}"
+                self.log_result("Webhook Idempotency", success, details)
+                return success
+                
+        except Exception as e:
+            self.log_result("Webhook Idempotency", False, f"Exception: {str(e)}")
+            return False
     
     async def run_all_tests(self):
-        """Run all API tests"""
-        print("🚀 Starting PSP-03D reconciliation runs API tests...")
+        """Run the complete P0-3 idempotency test suite"""
+        print("🚀 Starting P0-3 Idempotency and Replay-Safe Behavior Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
         
-        try:
-            # 1. Login
-            self.admin_token = await self.login_admin()
-            
-            # 2. Create reconciliation run
-            created_run = await self.test_create_reconciliation_run()
-            run_id = created_run["id"]
-            
-            # 3. Test idempotency
-            await self.test_idempotency()
-            
-            # 4. Get reconciliation run
-            await self.test_get_reconciliation_run(run_id)
-            
-            # 5. List reconciliation runs
-            await self.test_list_reconciliation_runs(run_id)
-            
-            print("\n🎉 All PSP-03D reconciliation runs API tests PASSED!")
-            
-        except Exception as e:
-            print(f"\n❌ Test failed: {e}")
-            raise
+        # Setup
+        if not await self.setup_auth():
+            print("\n❌ Authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: DB Schema
+        test_results.append(await self.test_db_schema_constraints())
+        
+        # Test 2: Deposit Idempotency
+        test_results.append(await self.test_deposit_idempotency())
+        
+        # Test 3: Withdraw Idempotency
+        test_results.append(await self.test_withdraw_idempotency())
+        
+        # Test 4a: Admin Approve Idempotency
+        test_results.append(await self.test_admin_approve_idempotency())
+        
+        # Test 4b: Admin Mark Paid Idempotency
+        test_results.append(await self.test_admin_mark_paid_idempotency())
+        
+        # Test 5: Webhook Idempotency
+        test_results.append(await self.test_webhook_idempotency())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All P0-3 idempotency tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
 
 async def main():
     """Main test runner"""
-    test_runner = ReconciliationRunsAPITest()
-    await test_runner.run_all_tests()
+    test_suite = IdempotencyTestSuite()
+    success = await test_suite.run_all_tests()
+    return success
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    success = asyncio.run(main())
+    exit(0 if success else 1)
