@@ -22,21 +22,22 @@ def upgrade() -> None:
     bind = op.get_bind()
     dialect = bind.dialect.name
 
-    op.create_table(
-        "payoutattempt",
-        sa.Column("id", sa.String(length=36), primary_key=True),
-        sa.Column("withdraw_tx_id", sa.String(length=36), nullable=False, index=True),
-        sa.Column("tenant_id", sa.String(length=36), nullable=False, index=True),
-        sa.Column("provider", sa.String(length=64), nullable=False, index=True),
-        sa.Column("provider_event_id", sa.String(length=128), nullable=True, index=True),
-        sa.Column("idempotency_key", sa.String(length=128), nullable=True, index=True),
-        sa.Column("status", sa.String(length=32), nullable=False, index=True),
-        sa.Column("error_code", sa.String(length=64), nullable=True),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(["withdraw_tx_id"], ["transaction.id"]),
-        sa.ForeignKeyConstraint(["tenant_id"], ["tenant.id"]),
-    )
+    if not bind.dialect.has_table(bind, "payoutattempt"):
+        op.create_table(
+            "payoutattempt",
+            sa.Column("id", sa.String(length=36), primary_key=True),
+            sa.Column("withdraw_tx_id", sa.String(length=36), nullable=False, index=True),
+            sa.Column("tenant_id", sa.String(length=36), nullable=False, index=True),
+            sa.Column("provider", sa.String(length=64), nullable=False, index=True),
+            sa.Column("provider_event_id", sa.String(length=128), nullable=True, index=True),
+            sa.Column("idempotency_key", sa.String(length=128), nullable=True, index=True),
+            sa.Column("status", sa.String(length=32), nullable=False, index=True),
+            sa.Column("error_code", sa.String(length=64), nullable=True),
+            sa.Column("created_at", sa.DateTime(), nullable=False),
+            sa.Column("updated_at", sa.DateTime(), nullable=False),
+            sa.ForeignKeyConstraint(["withdraw_tx_id"], ["transaction.id"]),
+            sa.ForeignKeyConstraint(["tenant_id"], ["tenant.id"]),
+        )
 
     # SQLite does not support partial indexes; we still add simple uniques to
     # catch obvious mistakes in dev. In Postgres, ops can replace these with
