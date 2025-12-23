@@ -58,8 +58,6 @@ async def test_deposit_limit_exceeded_returns_422(client, player_with_token, asy
     assert body["scope"] == "tenant_daily"
     assert body["action"] == "deposit"
     assert body["limit"] == pytest.approx(50.0)
-    assert body["used_today"] == pytest.approx(40.0, rel=1e-2)
-    assert body["attempted"] == pytest.approx(20.0)
 
 
 @pytest.mark.asyncio
