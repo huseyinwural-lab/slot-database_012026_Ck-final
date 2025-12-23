@@ -23,6 +23,8 @@ async def _seed_admin_player_and_balance(async_session_factory):
     """Create tenant + player with balance and an admin token for tests.
 
     We bypass KYC caps by marking the player as verified and seeding balance
+    directly on the Player model.
+    """
 
 
 def _sign_webhook_payload(payload: dict) -> dict:
