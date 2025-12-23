@@ -8,17 +8,16 @@ import pytest
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from server import app  # noqa: E402
-from app.core.database import async_session  # noqa: E402
 from app.models.sql_models import Tenant  # noqa: E402
-from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits  # noqa: E402
 
 
 @pytest.mark.asyncio
-async def test_deposit_limit_exceeded_returns_422(client, player_with_token):
+async def test_deposit_limit_exceeded_returns_422(client, player_with_token, async_session_factory):
     tenant, player, player_token = player_with_token
-    # Set tenant daily_deposit_limit = 50
-    async with async_session() as session:
+    # Set tenant daily_deposit_limit = 50 in the same test DB
+    async with async_session_factory() as session:
         db_tenant = await session.get(Tenant, tenant.id)
+        assert db_tenant is not None
         db_tenant.daily_deposit_limit = Decimal("50.0")
         session.add(db_tenant)
         await session.commit()
