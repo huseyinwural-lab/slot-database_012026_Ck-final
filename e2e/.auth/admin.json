@@ -2,10 +2,10 @@
   "cookies": [
     {
       "name": "ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog",
-      "value": "%7B%22distinct_id%22%3A%22019b4bb2-a02c-7b0e-84a7-8e1b750fd879%22%2C%22%24sesid%22%3A%5B1766501557568%2C%22019b4bb2-a0f1-755a-a873-7cb12a656951%22%2C1766501556465%5D%7D",
+      "value": "%7B%22distinct_id%22%3A%22019b4bb4-b66b-78d6-83a1-86a2f87baac0%22%2C%22%24sesid%22%3A%5B1766501694309%2C%22019b4bb4-b712-7c49-b809-1073e3dcef5c%22%2C1766501693202%5D%7D",
       "domain": "localhost",
       "path": "/",
-      "expires": 1798037557,
+      "expires": 1798037694,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
@@ -17,7 +17,7 @@
       "localStorage": [
         {
           "name": "ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog",
-          "value": "{\"distinct_id\":\"019b4bb2-a02c-7b0e-84a7-8e1b750fd879\",\"$sesid\":[1766501557568,\"019b4bb2-a0f1-755a-a873-7cb12a656951\",1766501556465],\"$initialization_time\":\"2025-12-23T14:52:37.442Z\",\"$configured_session_timeout_ms\":1800000,\"$device_id\":\"019b4bb2-a02c-7b0e-84a7-8e1b750fd879\",\"$user_state\":\"anonymous\",\"$session_recording_remote_config\":{\"enabled\":true,\"endpoint\":\"/s/\",\"consoleLogRecordingEnabled\":true,\"recorderVersion\":\"v2\",\"sampleRate\":0.01,\"minimumDurationMilliseconds\":30000,\"linkedFlag\":null,\"networkPayloadCapture\":{\"capturePerformance\":{\"network_timing\":false,\"web_vitals\":true,\"web_vitals_allowed_metrics\":null}},\"masking\":null,\"urlTriggers\":[],\"scriptConfig\":{\"script\":\"posthog-recorder\"},\"urlBlocklist\":[],\"eventTriggers\":[],\"triggerMatchType\":null,\"canvasRecording\":{}},\"$autocapture_disabled_server_side\":true,\"$heatmaps_enabled_server_side\":false,\"$web_vitals_enabled_server_side\":true,\"$web_vitals_allowed_metrics\":null,\"$exception_capture_enabled_server_side\":false,\"$error_tracking_suppression_rules\":[],\"$dead_clicks_enabled_server_side\":false,\"$active_feature_flags\":[],\"$enabled_feature_flags\":{},\"$feature_flag_payloads\":{},\"$feature_flag_details\":{},\"$feature_flag_request_id\":\"dced5d29-de41-4dce-b44e-f89f8b0ade60\",\"$feature_flag_evaluated_at\":1766501557465,\"$client_session_props\":{\"sessionId\":\"019b4bb2-a0f1-755a-a873-7cb12a656951\",\"props\":{\"r\":\"$direct\",\"u\":\"http://localhost:3000/login\"}},\"$session_is_sampled\":false}"
+          "value": "{\"distinct_id\":\"019b4bb4-b66b-78d6-83a1-86a2f87baac0\",\"$sesid\":[1766501694309,\"019b4bb4-b712-7c49-b809-1073e3dcef5c\",1766501693202],\"$initialization_time\":\"2025-12-23T14:54:54.184Z\",\"$configured_session_timeout_ms\":1800000,\"$device_id\":\"019b4bb4-b66b-78d6-83a1-86a2f87baac0\",\"$user_state\":\"anonymous\",\"$session_recording_remote_config\":{\"enabled\":true,\"endpoint\":\"/s/\",\"consoleLogRecordingEnabled\":true,\"recorderVersion\":\"v2\",\"sampleRate\":0.01,\"minimumDurationMilliseconds\":30000,\"linkedFlag\":null,\"networkPayloadCapture\":{\"capturePerformance\":{\"network_timing\":false,\"web_vitals\":true,\"web_vitals_allowed_metrics\":null}},\"masking\":null,\"urlTriggers\":[],\"scriptConfig\":{\"script\":\"posthog-recorder\"},\"urlBlocklist\":[],\"eventTriggers\":[],\"triggerMatchType\":null,\"canvasRecording\":{}},\"$autocapture_disabled_server_side\":true,\"$heatmaps_enabled_server_side\":false,\"$web_vitals_enabled_server_side\":true,\"$web_vitals_allowed_metrics\":null,\"$exception_capture_enabled_server_side\":false,\"$error_tracking_suppression_rules\":[],\"$dead_clicks_enabled_server_side\":false,\"$active_feature_flags\":[],\"$enabled_feature_flags\":{},\"$feature_flag_payloads\":{},\"$feature_flag_details\":{},\"$feature_flag_request_id\":\"cf3ce92d-e86e-4604-8c53-ee66426d37d3\",\"$feature_flag_evaluated_at\":1766501694213,\"$client_session_props\":{\"sessionId\":\"019b4bb4-b712-7c49-b809-1073e3dcef5c\",\"props\":{\"r\":\"$direct\",\"u\":\"http://localhost:3000/login\"}},\"$session_is_sampled\":false}"
         },
         {
           "name": "admin_user",
@@ -25,7 +25,7 @@
         },
         {
           "name": "admin_token",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MDU2OTkxYy04YjU4LTRlYTUtOGJhNC0wOTEyMDdjMDZhMzkiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NjU4Nzk1N30.gGAlosw36QyDMI-u3r5m6AntFDvEYahBvI96I8guSdM"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MDU2OTkxYy04YjU4LTRlYTUtOGJhNC0wOTEyMDdjMDZhMzkiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NjU4ODA5NH0.soW6H6lPzhkBBFIklMVToxmPrzKAWpKnawgmfv8IJ-Q"
         }
       ]
     }
