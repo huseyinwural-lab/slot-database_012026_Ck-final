@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 
 from app.core.errors import AppError
-from app.models.sql_models import Transaction, Player
+from app.models.sql_models import Transaction, Player, PayoutAttempt
 from app.services.audit import audit
 from app.services.ledger_shadow import shadow_append_event, shadow_apply_delta
 
@@ -337,7 +337,6 @@ async def start_payout(
     - On first creation, transitions withdrawal state to payout_pending.
     """
 
-    from app.models.sql_models import PayoutAttempt  # local import to avoid cycles
     from app.services.transaction_state_machine import transition_transaction
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
