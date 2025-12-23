@@ -106,10 +106,6 @@ async def get_payments_policy(
 
     return {
         "tenant_id": tenant.id,
-        "min_deposit": tenant.min_deposit,
-        "max_deposit": tenant.max_deposit,
-        "min_withdraw": tenant.min_withdraw,
-        "max_withdraw": tenant.max_withdraw,
         "daily_deposit_limit": tenant.daily_deposit_limit,
         "daily_withdraw_limit": tenant.daily_withdraw_limit,
         "payout_retry_limit": tenant.payout_retry_limit,
@@ -131,10 +127,6 @@ async def update_payments_policy(
         raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
 
     before = {
-        "min_deposit": tenant.min_deposit,
-        "max_deposit": tenant.max_deposit,
-        "min_withdraw": tenant.min_withdraw,
-        "max_withdraw": tenant.max_withdraw,
         "daily_deposit_limit": tenant.daily_deposit_limit,
         "daily_withdraw_limit": tenant.daily_withdraw_limit,
         "payout_retry_limit": tenant.payout_retry_limit,
