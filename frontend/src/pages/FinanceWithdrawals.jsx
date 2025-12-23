@@ -445,7 +445,7 @@ const FinanceWithdrawals = () => {
                                 size="sm"
                                 variant="outline"
                                 disabled={actionLoading}
-                                onClick={() => handleApprove(tx)}
+                                onClick={() => openActionModal(tx, 'approve')}
                               >
                                 <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
                               </Button>
@@ -453,7 +453,7 @@ const FinanceWithdrawals = () => {
                                 size="sm"
                                 variant="destructive"
                                 disabled={actionLoading}
-                                onClick={() => openRejectModal(tx)}
+                                onClick={() => openActionModal(tx, 'reject')}
                               >
                                 <XCircle className="w-4 h-4 mr-1" /> Reject
                               </Button>
@@ -464,7 +464,7 @@ const FinanceWithdrawals = () => {
                               size="sm"
                               variant="default"
                               disabled={actionLoading}
-                              onClick={() => handleMarkPaid(tx)}
+                              onClick={() => openActionModal(tx, 'mark_paid')}
                             >
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Mark Paid
                             </Button>
@@ -591,38 +591,40 @@ const FinanceWithdrawals = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Reject Modal */}
-      <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+      {/* Action Modal */}
+      <Dialog open={actionModal.open} onOpenChange={(open) => !open && setActionModal(prev => ({ ...prev, open: false }))}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Withdrawal</DialogTitle>
+            <DialogTitle className="capitalize">
+              {actionModal.type === 'mark_paid' ? 'Mark as Paid' : actionModal.type} Withdrawal
+            </DialogTitle>
             <DialogDescription>
-              Please provide a reason for rejecting this withdrawal request.
+              Please provide a reason for this action. This will be logged to the audit trail.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="reject-reason">Reason</Label>
+            <Label htmlFor="action-reason">Reason (Required)</Label>
             <Textarea
-              id="reject-reason"
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Enter rejection reason..."
+              id="action-reason"
+              value={actionReason}
+              onChange={(e) => setActionReason(e.target.value)}
+              placeholder="Enter reason..."
             />
           </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setRejectModalOpen(false)}
+              onClick={() => setActionModal(prev => ({ ...prev, open: false }))}
               disabled={actionLoading}
             >
               Cancel
             </Button>
             <Button
-              variant="destructive"
-              onClick={handleRejectConfirm}
-              disabled={actionLoading || !rejectReason.trim()}
+              variant={actionModal.type === 'reject' ? 'destructive' : 'default'}
+              onClick={handleActionConfirm}
+              disabled={actionLoading || !actionReason.trim()}
             >
-              Reject
+              Confirm
             </Button>
           </DialogFooter>
         </DialogContent>
