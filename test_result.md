@@ -540,15 +540,18 @@ ledger_withdrawals_e2e_smoke_dec22:
 ledger_ops_001_reconciliation_fix_dec23:
   - task: "LEDGER-OPS-001: Fix reconciliation service tests and verify logic"
     implemented: true
-    working: true
-    file: "backend/tests/test_reconciliation.py, backend/app/services/reconciliation.py"
+    working: false
+    file: "backend/tests/test_reconciliation.py, backend/app/services/reconciliation.py, backend/app/routes/finance.py"
     priority: "highest"
-    needs_retesting: true
+    needs_retesting: false
 
     status_history:
         -working: true
         -agent: "testing"
         -comment: "✅ P0-4 PANEL BÜTÜNLÜĞÜ E2E TESTING COMPLETE - ALL TESTS PASSED (5/5 - 100% success rate): Test 1) ✅ finance-withdrawals-smoke.spec.ts: 1/1 PASS - Finance Withdrawals Smoke test validates complete player withdraw -> admin approve -> admin mark-paid lifecycle with state transitions and balance invariants. Test 2) ✅ money-path.spec.ts: 4/4 PASS - All money path tests pass including P06-201 (Admin login + Withdrawals page smoke), P06-202 (Deposit success increases balance, fail is net-zero), P06-203 (Withdraw -> approve -> payout fail -> retry success), P06-204 (Replay / dedupe for payout and webhook). FIXES APPLIED: Fixed P06-202 robustLogin timeout by using existing storageState authentication instead of redundant login, Fixed P06-204 webhook balance invariant violation by using separate transactions for webhook testing to avoid double-processing, Enhanced global-setup.ts with increased timeouts (45s URL wait, 20s token wait) and rate limiting delays (2s pre-click, 8s post-click) to handle backend rate limiting (5/min limit). TECHNICAL VALIDATION: Global setup creates real UI login with storageState persistence, all tests use proper API authentication with admin/player tokens, balance invariants maintained throughout withdrawal lifecycle, idempotency testing working for both payout and webhook operations. E2E test infrastructure robust and ready for production CI/CD pipeline with deterministic results."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ LEDGER-OPS-001 RECONCILIATION API TESTING FAILED - CRITICAL DATABASE CONSTRAINT ISSUE (3/5 tests passed - 60% success rate): ✅ PASSED TESTS: 1) backend/tests/test_reconciliation.py - All 4 unit tests pass (test_paid_tx_missing_withdraw_paid_finding, test_duplicate_withdraw_paid_finding, test_ledger_present_but_tx_not_paid, test_duplicate_provider_event_attempt_finding), 2) GET /api/v1/finance/reconciliation/summary?date={TODAY} - Returns 200 OK with proper structure (run_id, counts_by_finding_code, counts_by_severity, scanned_tx_count), 3) GET /api/v1/finance/reconciliation/findings?date={TODAY} - Returns 200 OK with proper pagination structure. ❌ FAILED TESTS: 1) POST /api/v1/finance/reconciliation/run?date={TODAY} - Returns 520 Internal Server Error due to database constraint violation: 'NOT NULL constraint failed: auditevent.tenant_id'. ROOT CAUSE: Line 1020 in backend/app/routes/finance.py passes tenant_id=None to audit.log_event() for reconciliation run operations, but AuditEvent table requires non-null tenant_id. This is a critical bug preventing reconciliation runs from executing. 2) POST /api/v1/finance/reconciliation/run (without date) - Same database constraint error. TECHNICAL ANALYSIS: The reconciliation service logic (compute_daily_findings) works correctly, but the API endpoint fails during audit logging. The summary and findings endpoints work because they read from existing reconciliation runs that were created before the audit constraint was enforced. RECOMMENDATION: Fix tenant_id handling in reconciliation run audit logging - either provide a valid tenant_id or make audit events for system-level operations (like reconciliation runs) allow null tenant_id."
 
 ledger_money_path_e2e_dec22:
   - task: "LEDGER-02B: Money path E2E tests (P06-201 to P06-204)"
