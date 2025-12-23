@@ -115,7 +115,7 @@ async def test_payout_success_transitions_to_paid_and_writes_single_withdraw_pai
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
@@ -179,7 +179,7 @@ async def test_payout_fail_transitions_to_payout_failed_and_writes_no_ledger(
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
@@ -236,7 +236,7 @@ async def test_payout_replay_same_idempotency_key_no_duplicate_ledger_or_attempt
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
@@ -309,7 +309,7 @@ async def test_payout_webhook_replay_no_duplicate_paid_ledger(client, async_sess
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
@@ -399,7 +399,7 @@ async def test_payout_webhook_replay_no_duplicate_effect_failed(client, async_se
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200

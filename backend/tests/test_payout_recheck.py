@@ -91,7 +91,7 @@ async def test_recheck_paid_finalizes_pending_and_writes_single_withdraw_paid_le
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
@@ -157,7 +157,7 @@ async def test_recheck_failed_transitions_to_payout_failed_and_writes_no_ledger(
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
@@ -219,7 +219,7 @@ async def test_recheck_pending_outcome_keeps_payout_pending_and_writes_no_ledger
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
@@ -281,7 +281,7 @@ async def test_recheck_replay_same_idempotency_key_is_noop(
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
