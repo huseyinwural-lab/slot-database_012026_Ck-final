@@ -107,7 +107,7 @@ class IdempotencyTestSuite:
                 if response.status_code not in [200, 201]:
                     # Try player registration endpoint
                     response = await client.post(
-                        f"{self.base_url}/player/auth/register",
+                        f"{self.base_url}/auth/player/register",
                         json=player_data
                     )
                 
