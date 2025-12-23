@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-Backend P0-4 Panel Bütünlüğü Test Suite
+Backend LEDGER-OPS-001 Reconciliation Test Suite
 
 This test suite validates:
-1. /api/v1/finance/withdrawals (list_withdrawals) - query parameter combinations
-2. /api/v1/player/wallet/balance and /api/v1/player/wallet/transactions - wallet functionality  
-3. Idempotency behavior for withdraw operations
-4. Existing unit tests for admin idempotency
+1. POST /api/v1/finance/reconciliation/run?date={TODAY} - should return 200 OK (previously 520)
+2. GET /api/v1/finance/reconciliation/summary?date={TODAY} - confirm results
+3. Unit tests in backend/tests/test_reconciliation.py still pass
 
 Tests are designed to run against the localhost backend service.
 """
