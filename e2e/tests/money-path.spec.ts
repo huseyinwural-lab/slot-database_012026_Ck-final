@@ -1,4 +1,4 @@
-import { test, expect, request as pwRequest, APIResponse } from '@playwright/test';
+import { test, expect, request as pwRequest, APIResponse, APIRequestContext } from '@playwright/test';
 import crypto from 'crypto';
 
 // --- CONFIGURATION ----------------------------------------------------------
