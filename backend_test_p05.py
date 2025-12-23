@@ -284,6 +284,13 @@ class P05TestSuite:
                     headers=withdraw_headers
                 )
                 
+                # Handle KYC requirement error - this is expected for unverified players
+                if withdraw_response.status_code == 403:
+                    error_detail = withdraw_response.json().get("detail", {})
+                    if isinstance(error_detail, dict) and error_detail.get("error_code") == "KYC_REQUIRED_FOR_WITHDRAWAL":
+                        print("KYC requirement enforced - cannot create withdrawal for testing")
+                        return None
+                
                 if withdraw_response.status_code not in [200, 201]:
                     print(f"Withdraw creation failed: {withdraw_response.status_code} - {withdraw_response.text}")
                     return None
