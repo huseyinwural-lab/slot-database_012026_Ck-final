@@ -73,16 +73,29 @@ async def test_withdraw_limit_exceeded_returns_422(client, player_with_token, as
         session.add(db_tenant)
         await session.commit()
 
-    headers = {"Authorization": f"Bearer {player_token}", "Content-Type": "application/json", "Idempotency-Key": "w1"}
+    headers = {"Authorization": f"Bearer {player_token}", "Content-Type": "application/json", "Idempotency-Key": "w2"}
 
-    res1 = await client.post(
-        "/api/v1/player/wallet/withdraw",
-        json={"amount": 20.0, "method": "crypto", "address": "addr1"},
-        headers=headers,
-    )
-    assert res1.status_code in (200, 201)
+    # Seed usage by inserting a requested withdrawal of 20 directly
+    async with async_session_factory() as session:
+        from app.models.sql_models import Transaction
+        from datetime import datetime, timezone
 
-    headers["Idempotency-Key"] = "w2"
+        tx = Transaction(
+            tenant_id=tenant.id,
+            player_id=player.id,
+            type="withdrawal",
+            amount=20.0,
+            currency="USD",
+            status="pending",
+            state="requested",
+            method="crypto",
+            idempotency_key="seed-wd-20",
+            created_at=datetime.now(timezone.utc),
+            balance_after=0.0,
+        )
+        session.add(tx)
+        await session.commit()
+
     res2 = await client.post(
         "/api/v1/player/wallet/withdraw",
         json={"amount": 15.0, "method": "crypto", "address": "addr2"},
