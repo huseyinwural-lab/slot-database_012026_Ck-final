@@ -113,12 +113,21 @@ class IdempotencyTestSuite:
                 
                 if response.status_code in [200, 201]:
                     player = response.json()
-                    self.player_id = player.get("id") or player.get("user_id")
+                    # Handle different response formats
+                    if "player_id" in player:
+                        self.player_id = player["player_id"]
+                    elif "id" in player:
+                        self.player_id = player["id"]
+                    elif "user_id" in player:
+                        self.player_id = player["user_id"]
+                    else:
+                        self.player_id = "unknown"
+                    
                     self.tenant_id = player.get("tenant_id", "default_casino")
                     
                     # Login as player to get token
                     player_login = {
-                        "username": player_data["username"],
+                        "email": player_data["email"],
                         "password": player_data["password"]
                     }
                     
