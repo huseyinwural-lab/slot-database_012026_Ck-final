@@ -523,10 +523,24 @@ test('P06-204: Replay / dedupe for payout and webhook', async ({ context, reques
     expect(json.transaction.state).toBe('paid');
   }
 
+  // For webhook testing, create a separate transaction that uses webhook flow
+  // Use unique player for webhook test to avoid balance conflicts
+  const uniqueEmail = `e2e_webhook_${Date.now()}@test.local`;
+  const { token: webhookPlayerToken, playerId: webhookPlayerId } = await apiRegisterOrLoginPlayer(BACKEND_URL, uniqueEmail, PLAYER_PASSWORD);
+  await adminApproveKycForPlayerId(BACKEND_URL, adminToken, webhookPlayerId);
+  
+  await playerDeposit(BACKEND_URL, webhookPlayerToken, 15, 'success');
+  const { txId: webhookTxId } = await playerWithdraw(BACKEND_URL, webhookPlayerToken, 10);
+  await adminApproveWithdraw(BACKEND_URL, adminToken, webhookTxId);
+  
+  // Start payout with fail to leave it in payout_failed state for webhook to complete
+  const webhookPayoutKey = idemKey('e2e-webhook-payout');
+  await adminStartPayout(BACKEND_URL, adminToken, webhookTxId, webhookPayoutKey, 'fail');
+
   // Webhook replay dedupe
   const providerEventId = `e2e-webhook-${Date.now()}`;
   const webhookPayload = {
-    withdraw_tx_id: txId,
+    withdraw_tx_id: webhookTxId,
     provider: 'mockpsp',
     provider_event_id: providerEventId,
     status: 'paid' as const,
