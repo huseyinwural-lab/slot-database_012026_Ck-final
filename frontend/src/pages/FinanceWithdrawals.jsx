@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { callMoneyAction, buildIdempotencyKey, getActionStatus } from '../services/moneyActions';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,9 @@ import { toast } from 'sonner';
 import { ArrowDownRight, CheckCircle2, XCircle, Copy } from 'lucide-react';
 
 
-const makeIdemKey = (txId, action) => `${txId}:${action}`;
+const ADMIN_SCOPE = 'admin';
+
+const makeRowKey = (txId, action) => `${ADMIN_SCOPE}:${txId}:${action}`;
 
 const STATE_LABELS = {
   requested: 'Requested',
