@@ -88,12 +88,19 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // Find Payments Policy tab
     await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
     
-    // Fill limit
+    // Wait for input to be visible to ensure tab content loaded
     const depositInput = adminPage.locator('text=Daily Deposit Limit').locator('xpath=..').locator('input');
+    await expect(depositInput).toBeVisible();
+
+    // Fill limit
     await depositInput.fill('50');
     
-    // Save
-    await adminPage.click('button:has-text("Kaydet")');
+    // Save with response wait
+    const [response] = await Promise.all([
+      adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200),
+      adminPage.click('button:has-text("Kaydet")')
+    ]);
+    
     await expect(adminPage.getByText('Payments policy kaydedildi')).toBeVisible();
     await adminContext.close();
 
@@ -140,12 +147,19 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await adminPage.goto(`${FRONTEND_URL}/settings`);
     await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
     
-    // Fill limit
+    // Wait for input
     const withdrawInput = adminPage.locator('text=Daily Withdraw Limit').locator('xpath=..').locator('input');
+    await expect(withdrawInput).toBeVisible();
+
+    // Fill limit
     await withdrawInput.fill('30');
     
-    // Save
-    await adminPage.click('button:has-text("Kaydet")');
+    // Save with response wait
+    const [response] = await Promise.all([
+      adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200),
+      adminPage.click('button:has-text("Kaydet")')
+    ]);
+
     await expect(adminPage.getByText('Payments policy kaydedildi')).toBeVisible();
     await adminContext.close();
 
