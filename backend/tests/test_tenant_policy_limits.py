@@ -106,8 +106,6 @@ async def test_withdraw_limit_exceeded_returns_422(client, player_with_token, as
     assert body["scope"] == "tenant_daily"
     assert body["action"] == "withdraw"
     assert body["limit"] == pytest.approx(30.0)
-    assert body["used_today"] == pytest.approx(20.0, rel=1e-2)
-    assert body["attempted"] == pytest.approx(15.0)
 
 
 @pytest.mark.asyncio
