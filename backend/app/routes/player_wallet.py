@@ -188,52 +188,6 @@ async def create_deposit(
         )
         current_total = (await session.execute(cap_stmt)).scalar_one() or 0.0
         if current_total + amount > cap:
-    # Tenant-level daily deposit limit (verified + unverified birlikte)
-    if tenant and tenant.daily_deposit_limit is not None:
-        from datetime import timedelta
-        now = datetime.now(timezone.utc)
-        start = datetime(year=now.year, month=now.month, day=now.day, tzinfo=timezone.utc)
-        end = start + timedelta(days=1)
-
-        cap_stmt = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
-            Transaction.player_id == current_player.id,
-            Transaction.tenant_id == tenant.id,
-            Transaction.type == "deposit",
-            Transaction.state == "completed",
-            Transaction.created_at >= start,
-            Transaction.created_at < end,
-        )
-        current_total = (await session.execute(cap_stmt)).scalar_one() or 0.0
-        if Decimal(str(current_total)) + Decimal(str(amount)) > Decimal(str(tenant.daily_deposit_limit)):
-            from app.services.audit import audit
-
-            await audit.log_event(
-                session=session,
-                request_id=request_id,
-                actor_user_id=current_player.id,
-                tenant_id=current_player.tenant_id,
-                action="FIN_LIMIT_BLOCKED",
-                resource_type="wallet_deposit",
-                resource_id=None,
-                result="blocked",
-                details={
-                    "limit_name": "daily_deposit_limit",
-                    "limit_value": float(tenant.daily_deposit_limit),
-                    "attempted": float(amount),
-                },
-                ip_address=ip,
-            )
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error_code": "LIMIT_EXCEEDED",
-                    "limit_name": "daily_deposit_limit",
-                    "limit_value": float(tenant.daily_deposit_limit),
-                    "attempted": float(amount),
-                },
-            )
-
-
             await audit.log_event(
                 session=session,
                 request_id=request_id,
