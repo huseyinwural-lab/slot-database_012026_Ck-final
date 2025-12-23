@@ -159,6 +159,10 @@ async def get_checkout_status(
 
     # Check if already processed
     if tx.status == "completed":
+        # If DB says completed, we override stripe response to ensure frontend sees "paid"
+        # This handles the simulation case where real Stripe is still "unpaid"
+        status_response.payment_status = "paid"
+        status_response.status = "complete"
         return status_response
 
     # Update logic
