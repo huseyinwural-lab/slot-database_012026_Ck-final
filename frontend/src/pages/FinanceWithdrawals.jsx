@@ -118,8 +118,18 @@ const FinanceWithdrawals = () => {
     const code = err?.standardized?.code;
     const message = err?.standardized?.message || 'Action failed';
 
-    if (status === 409 || code === 'INVALID_STATE_TRANSITION') {
-      toast.warning('Invalid state transition', { description: message });
+    if (status === 409 && code === 'IDEMPOTENCY_KEY_REUSE_CONFLICT') {
+      toast.warning('Aynı işlem anahtarı farklı istekle kullanıldı.', {
+        description: 'Sayfayı yenileyip tekrar deneyin.',
+      });
+      await fetchWithdrawals(1);
+      return;
+    }
+
+    if (status === 409 && code === 'INVALID_STATE_TRANSITION') {
+      toast.warning('Kayıt durumu değişti. Liste yenilendi.', {
+        description: message,
+      });
       await fetchWithdrawals(1);
       return;
     }
