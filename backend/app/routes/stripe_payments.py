@@ -19,8 +19,6 @@ from pydantic import BaseModel, Field
 router = APIRouter(prefix="/api/v1/payments/stripe", tags=["payments", "stripe"])
 logger = logging.getLogger(__name__)
 
-# Initialize StripeCheckout
-# We load the key from env inside the endpoints or globally if robust
 # Using global init for efficiency, but need to ensure env is loaded.
 STRIPE_API_KEY = settings.stripe_api_key
 webhook_url = "/api/v1/payments/stripe/webhook" # Relative path, will be constructed with host
@@ -182,10 +180,18 @@ async def get_checkout_status(
             provider_event_id=session_id
         )
         
-        # Update Tx status (apply_wallet_delta handles ledger, but we verify tx status)
-        # The apply_wallet_delta does NOT update the Transaction model itself if it's separate?
-        # Check player_wallet.py: it calls apply_wallet_delta... AND updates psp_cap?
-        # Wait, apply_wallet_delta_with_ledger is for ledger shadow.
+        tx.status = "completed"
+        tx.state = "completed"
+        session.add(tx)
+        await session.commit()
+        
+    elif status_response.status == "expired":
+        tx.status = "failed"
+        tx.state = "expired"
+        session.add(tx)
+        await session.commit()
+
+    return status_response
 
 @router.post("/test-trigger-webhook")
 async def test_trigger_webhook(
@@ -232,20 +238,6 @@ async def test_trigger_webhook(
              return {"status": "simulated_success", "tx_id": tx.id}
     
     return {"status": "ignored"}
-        # We also need to update the Transaction record state.
-        
-        tx.status = "completed"
-        tx.state = "completed"
-        session.add(tx)
-        await session.commit()
-        
-    elif status_response.status == "expired":
-        tx.status = "failed"
-        tx.state = "expired"
-        session.add(tx)
-        await session.commit()
-
-    return status_response
 
 @router.post("/webhook")
 async def stripe_webhook(
