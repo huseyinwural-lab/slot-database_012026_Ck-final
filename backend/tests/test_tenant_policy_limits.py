@@ -3,7 +3,7 @@ import sys
 from decimal import Decimal
 
 import pytest
-from httpx import AsyncClient
+# Async client is provided via the shared `client` fixture in conftest.
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
@@ -14,7 +14,8 @@ from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_li
 
 
 @pytest.mark.asyncio
-async def test_deposit_limit_exceeded_returns_422(client, tenant, player_token):
+async def test_deposit_limit_exceeded_returns_422(client, player_with_token):
+    tenant, player, player_token = player_with_token
     # Set tenant daily_deposit_limit = 50
     async with async_session() as session:
         db_tenant = await session.get(Tenant, tenant.id)
