@@ -68,7 +68,10 @@ ALLOWED_TRANSITIONS: Dict[str, Dict[str, List[str]]] = {
     },
     "withdrawal": {
         STATE_REQUESTED: [STATE_APPROVED, STATE_REJECTED, STATE_CANCELED],
-        STATE_APPROVED: [STATE_PAID],
+        # P0-5 payout states
+        STATE_APPROVED: ["payout_pending"],
+        "payout_pending": [STATE_PAID, "payout_failed"],
+        "payout_failed": ["payout_pending", STATE_REJECTED],
     },
 }
 
