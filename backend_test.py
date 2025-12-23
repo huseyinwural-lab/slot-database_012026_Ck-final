@@ -88,23 +88,32 @@ class IdempotencyTestSuite:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 headers = {"Authorization": f"Bearer {self.admin_token}"}
                 
-                # Create player
+                # Create player using the correct endpoint
                 player_data = {
                     "username": f"testplayer_{uuid.uuid4().hex[:8]}",
                     "email": f"testplayer_{uuid.uuid4().hex[:8]}@example.com",
                     "password": "TestPass123!",
+                    "full_name": "Test Player",
                     "kyc_status": "verified"
                 }
                 
+                # Try the admin users endpoint first
                 response = await client.post(
-                    f"{self.base_url}/admin/players",
+                    f"{self.base_url}/admin/users",
                     json=player_data,
                     headers=headers
                 )
                 
+                if response.status_code not in [200, 201]:
+                    # Try player registration endpoint
+                    response = await client.post(
+                        f"{self.base_url}/player/auth/register",
+                        json=player_data
+                    )
+                
                 if response.status_code in [200, 201]:
                     player = response.json()
-                    self.player_id = player["id"]
+                    self.player_id = player.get("id") or player.get("user_id")
                     self.tenant_id = player.get("tenant_id", "default_casino")
                     
                     # Login as player to get token
@@ -123,12 +132,47 @@ class IdempotencyTestSuite:
                         self.player_token = player_auth.get("access_token")
                         self.log_result("Test Player Setup", True, f"Player ID: {self.player_id}")
                     else:
-                        self.log_result("Test Player Setup", False, f"Player login failed: {response.status_code}")
+                        # If login fails, we'll use a known test player
+                        self.log_result("Test Player Setup", False, f"Player login failed: {response.status_code}, will use existing player")
+                        await self.use_existing_test_player()
                 else:
-                    self.log_result("Test Player Setup", False, f"Player creation failed: {response.status_code}")
+                    self.log_result("Test Player Setup", False, f"Player creation failed: {response.status_code} - {response.text}")
+                    # Try to use existing test player
+                    await self.use_existing_test_player()
                     
         except Exception as e:
             self.log_result("Test Player Setup", False, f"Exception: {str(e)}")
+            await self.use_existing_test_player()
+    
+    async def use_existing_test_player(self):
+        """Try to login with a known test player"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Try common test credentials
+                test_credentials = [
+                    {"username": "testplayer", "password": "TestPass123!"},
+                    {"username": "player1", "password": "Player123!"},
+                    {"email": "player@test.com", "password": "TestPass123!"}
+                ]
+                
+                for creds in test_credentials:
+                    response = await client.post(
+                        f"{self.base_url}/player/auth/login",
+                        json=creds
+                    )
+                    
+                    if response.status_code == 200:
+                        player_auth = response.json()
+                        self.player_token = player_auth.get("access_token")
+                        self.player_id = "existing-test-player"
+                        self.tenant_id = "default_casino"
+                        self.log_result("Existing Player Login", True, "Using existing test player")
+                        return
+                
+                self.log_result("Existing Player Login", False, "No existing test player found")
+                
+        except Exception as e:
+            self.log_result("Existing Player Login", False, f"Exception: {str(e)}")
     
     async def test_db_schema_constraints(self) -> bool:
         """Test 1: Verify DB schema UNIQUE constraints exist via API behavior"""
