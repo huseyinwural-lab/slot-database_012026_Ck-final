@@ -93,6 +93,7 @@ async def test_ledger_present_but_tx_not_paid(client, admin_token, async_session
             tenant_id="tenant1",
             player_id="player1",
             type="withdrawal",
+            status="completed",
             state="payout_failed",
             amount=75.0,
             currency="USD",
