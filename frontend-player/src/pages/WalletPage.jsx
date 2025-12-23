@@ -132,6 +132,8 @@ const WalletPage = () => {
         action,
         requestFn: (idemKey) =>
           api.post('/player/wallet/withdraw', {
+  const totalPages = Math.ceil(pagination.total / pagination.limit);
+
             amount: parseFloat(withdrawAmount),
             method: 'crypto',
             address: withdrawAddress,
