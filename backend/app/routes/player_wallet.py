@@ -6,6 +6,7 @@ import hashlib
 import json
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func
+from decimal import Decimal
 
 from app.models.sql_models import Transaction, Player
 from app.core.database import get_session
