@@ -7,10 +7,14 @@ To prevent spamming PSPs and mitigate risk, the system enforces limits on withdr
 
 ### Error Codes
 
-| HTTP Status | Error Code | Description |
-| :--- | :--- | :--- |
-| **422 Unprocessable Entity** | `PAYMENT_RETRY_LIMIT_EXCEEDED` | The maximum number of retry attempts (defined by `tenant.payout_retry_limit`) has been reached. |
-| **429 Too Many Requests** | `PAYMENT_COOLDOWN_ACTIVE` | The required cooldown period (defined by `tenant.payout_cooldown_seconds`) since the last attempt has not yet passed. |
+| Error Code | HTTP Status | Message | Where | Remediation |
+| :--- | :--- | :--- | :--- | :--- |
+| `LIMIT_EXCEEDED` | 400 | Transaction limit exceeded | `/api/v1/payments/*` | Reduce transaction amount or contact support to increase limits. |
+| `TENANT_PAYOUT_RETRY_LIMIT_EXCEEDED` | 422 | Max payout retries exceeded | `/api/v1/finance-actions/withdrawals/{tx_id}/retry` | Do not retry automatically. Investigate reason for failure or create new withdrawal. |
+| `TENANT_PAYOUT_COOLDOWN_ACTIVE` | 429 | Payout cooldown active | `/api/v1/finance-actions/withdrawals/{tx_id}/retry` | Wait for cooldown period (default 60s) before retrying. |
+| `IDEMPOTENCY_KEY_REQUIRED` | 400 | Idempotency-Key header missing | Critical financial actions | Add `Idempotency-Key: <uuid>` header to request. |
+| `IDEMPOTENCY_KEY_REUSE_CONFLICT` | 409 | Idempotency Key reused with different params | Critical financial actions | Generate new key for new request, or retry with same params for same key. |
+| `ILLEGAL_TRANSACTION_STATE_TRANSITION` | 400 | Invalid state transition | Transaction State Machine | Verify current transaction state before attempting action. |
 
 ### Audit Events
 
