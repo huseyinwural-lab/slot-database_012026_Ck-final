@@ -535,6 +535,31 @@ const FinanceWithdrawals = () => {
                             </Button>
                           )}
                         </div>
+                        {/* Row-level inline status for money-path actions */}
+                        <div className="mt-1 text-right text-[11px] text-muted-foreground min-h-[1rem]">
+                          {(() => {
+                            const approveKey = makeRowKey(tx.tx_id, 'approve');
+                            const rejectKey = makeRowKey(tx.tx_id, 'reject');
+                            const markPaidKey = makeRowKey(tx.tx_id, 'mark_paid');
+                            const payoutStartKey = makeRowKey(tx.tx_id, 'payout_start');
+                            const payoutRetryKey = makeRowKey(tx.tx_id, 'payout_retry');
+                            const recheckKey = makeRowKey(tx.tx_id, 'recheck');
+                            const statusEntry =
+                              rowStatus[approveKey] ||
+                              rowStatus[rejectKey] ||
+                              rowStatus[markPaidKey] ||
+                              rowStatus[payoutStartKey] ||
+                              rowStatus[payoutRetryKey] ||
+                              rowStatus[recheckKey];
+
+                            if (!statusEntry) return null;
+                            if (statusEntry.status === 'in_flight') return 'İşlem yürütülüyor...';
+                            if (statusEntry.status === 'failed')
+                              return statusEntry.message || 'İşlem sırasında hata oluştu.';
+                            if (statusEntry.status === 'done') return 'İşlem tamamlandı.';
+                            return null;
+                          })()}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
