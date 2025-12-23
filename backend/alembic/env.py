@@ -3,9 +3,9 @@ from __future__ import annotations
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import pool
+from sqlalchemy import pool, create_engine
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.engine.url import make_url
 
 # P1-001: Correct import path for settings
 from app.core.database import SQLModel # Use absolute path
@@ -48,25 +48,41 @@ def do_run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 
-async def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
+def _get_sync_url(async_url: str) -> str:
+    """Normalize async URLs (aiosqlite/asyncpg) to sync drivers for Alembic.
 
-    connectable = async_engine_from_config(
-        {
-            "sqlalchemy.url": settings.database_url,
-        },
-        prefix="sqlalchemy.",
+    Alembic uses synchronous DB drivers under the hood. This helper ensures that
+    we can point migrations at the same database as the async application layer
+    without requiring async drivers in the migration context.
+    """
+
+    url = make_url(async_url)
+    drivername = url.drivername
+
+    if drivername.endswith("+aiosqlite"):
+        url = url.set(drivername="sqlite")
+    elif drivername.endswith("+asyncpg"):
+        url = url.set(drivername="postgresql")
+
+    return str(url)
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode using a synchronous engine."""
+
+    sync_url = _get_sync_url(settings.database_url)
+
+    connectable = create_engine(
+        sync_url,
         poolclass=pool.NullPool,
+        future=True,
     )
 
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-
-    await connectable.dispose()
+    with connectable.connect() as connection:
+        do_run_migrations(connection)
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    import asyncio
-    asyncio.run(run_migrations_online())
+    run_migrations_online()
