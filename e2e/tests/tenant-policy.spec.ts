@@ -84,6 +84,11 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
       localStorage.setItem(key, token);
     }, { key: LS_TOKEN_KEY, token: adminToken });
 
+    // Debug console
+    adminPage.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    adminPage.on('requestfailed', req => console.log('REQ FAILED:', req.url(), req.failure().errorText));
+    adminPage.on('response', resp => console.log('RESP:', resp.url(), resp.status()));
+
     await adminPage.goto(`${FRONTEND_URL}/settings`);
     // Find Payments Policy tab
     await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
@@ -97,18 +102,14 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await expect(depositInput).toHaveValue('50');
     
     const saveButton = adminPage.locator('button:has-text("Kaydet")');
+    await expect(saveButton).toBeVisible();
     await expect(saveButton).toBeEnabled();
 
     // Save with response wait
     const [response] = await Promise.all([
-      adminPage.waitForResponse(resp => resp.url().includes('/policy')),
-      saveButton.click()
+      adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200),
+      saveButton.click({ force: true })
     ]);
-    
-    if (response.status() !== 200) {
-        console.log(`Save failed with status ${response.status()}`);
-        // throw new Error(`Save failed: ${response.status()}`);
-    }
     
     await expect(adminPage.getByText('Payments policy kaydedildi')).toBeVisible();
     await adminContext.close();
@@ -153,6 +154,9 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
       localStorage.setItem(key, token);
     }, { key: LS_TOKEN_KEY, token: adminToken });
 
+    // Debug
+    adminPage.on('console', msg => console.log('PAGE LOG:', msg.text()));
+
     await adminPage.goto(`${FRONTEND_URL}/settings`);
     await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
     
@@ -165,17 +169,14 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await expect(withdrawInput).toHaveValue('30');
     
     const saveButton = adminPage.locator('button:has-text("Kaydet")');
+    await expect(saveButton).toBeVisible();
     await expect(saveButton).toBeEnabled();
 
     // Save with response wait
     const [response] = await Promise.all([
-      adminPage.waitForResponse(resp => resp.url().includes('/policy')),
-      saveButton.click()
+      adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200),
+      saveButton.click({ force: true })
     ]);
-
-    if (response.status() !== 200) {
-        console.log(`Save failed with status ${response.status()}`);
-    }
 
     await expect(adminPage.getByText('Payments policy kaydedildi')).toBeVisible();
     await adminContext.close();
