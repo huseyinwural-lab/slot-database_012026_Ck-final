@@ -64,7 +64,7 @@ async def test_webhook_invalid_signature_returns_401(client):
   # Use wrong secret so that signature does not match
   wrong_sig = sign(body_bytes, ts, "other_secret")
 
-  res = client.post(
+  res = await client.post(
     "/api/v1/finance/withdrawals/payout/webhook",
     json=payload,
     headers={
@@ -94,7 +94,7 @@ async def test_webhook_valid_signature_allows_handler_execution(client):
 
   sig = sign(body_bytes, ts, "test_webhook_secret")
 
-  res = client.post(
+  res = await client.post(
     "/api/v1/finance/withdrawals/payout/webhook",
     json=payload,
     headers={
