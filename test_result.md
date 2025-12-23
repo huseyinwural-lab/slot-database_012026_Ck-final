@@ -551,7 +551,11 @@ admin_review_reason_dec23:
     working: true
     file: "backend/app/routes/finance.py, frontend/src/pages/FinanceWithdrawals.jsx"
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ADMIN-REVIEW-002 WITHDRAWAL REVIEW API VALIDATION COMPLETE - ALL TESTS PASSED (5/5 - 100% success rate): Test 1) ✅ Admin Login: Successfully authenticated as admin@casino.com/Admin123! with token length 268 chars. Test 2) ✅ Test Player Setup: Created test player (ID: 6da1a9ea-ae8a-43ca-85fa-09992631bb80) via /api/v1/auth/player/register, updated KYC status to 'verified' via /api/v1/kyc/documents/{id}/review, funded account with 1000.0 via test deposit, created withdrawal request for 100.0 (ID: c7c2b584-f8e6-47a1-963a-f9a08657be29, state: requested). Test 3) ✅ Approve Without Reason: POST /api/v1/finance/withdrawals/{id}/review with action='approve' but NO reason correctly returned 400 with error_code='REASON_REQUIRED' as expected. Test 4) ✅ Approve With Reason: POST /api/v1/finance/withdrawals/{id}/review with action='approve' and reason='Good to go' returned 200 OK, withdrawal state changed to 'approved' successfully. Test 5) ✅ Mark Paid Without Reason: POST /api/v1/finance/withdrawals/{id}/mark-paid with empty body correctly returned 400 with error_code='REASON_REQUIRED' as expected. Test 6) ✅ Mark Paid With Reason: POST /api/v1/finance/withdrawals/{id}/mark-paid with reason='Done' returned 200 OK, withdrawal state changed to 'paid' successfully. Test 7) ✅ Audit Logs Verification: GET /api/v1/audit/events?resource_id={withdrawal_id} found 3 audit events including FIN_WITHDRAW_APPROVED with reason='Good to go' and FIN_WITHDRAW_MARK_PAID with reason='Done', confirming audit logging is working correctly. TECHNICAL VALIDATION: All ADMIN-REVIEW-002 requirements met - reason field is mandatory for both approve/reject and mark-paid operations, proper 400 REASON_REQUIRED errors returned when reason is missing, successful operations log reasons to audit events, complete withdrawal lifecycle working from requested → approved → paid states. Backend API endpoints fully compliant with review requirements."
 
 
     status_history:
