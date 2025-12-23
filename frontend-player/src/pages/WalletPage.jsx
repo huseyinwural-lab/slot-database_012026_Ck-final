@@ -17,6 +17,8 @@ const WalletPage = () => {
   const [message, setMessage] = useState(null);
   const [actionStatus, setActionStatus] = useState({}); // key -> { status, message }
 
+  const PLAYER_SCOPE = 'player';
+
   const fetchWalletData = async () => {
     try {
       const [balRes, txRes] = await Promise.all([
