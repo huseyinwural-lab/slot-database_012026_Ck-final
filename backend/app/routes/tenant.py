@@ -87,6 +87,91 @@ async def get_capabilities(
     }
 
 
+def require_tenant_policy_admin(admin: AdminUser) -> None:
+    """Allow platform owner or tenant_admin to edit payment policy."""
+    if not (admin.is_platform_owner or (admin.tenant_role or "") == "tenant_admin"):
+        raise HTTPException(status_code=403, detail={"error_code": "UNAUTHORIZED"})
+
+
+@router.get("/payments/policy")
+async def get_payments_policy(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    tenant = await session.get(Tenant, tenant_id)
+    if not tenant:
+        raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
+
+    return {
+        "tenant_id": tenant.id,
+        "min_deposit": tenant.min_deposit,
+        "max_deposit": tenant.max_deposit,
+        "min_withdraw": tenant.min_withdraw,
+        "max_withdraw": tenant.max_withdraw,
+        "daily_deposit_limit": tenant.daily_deposit_limit,
+        "daily_withdraw_limit": tenant.daily_withdraw_limit,
+        "payout_retry_limit": tenant.payout_retry_limit,
+        "payout_cooldown_seconds": tenant.payout_cooldown_seconds,
+    }
+
+
+@router.put("/payments/policy")
+async def update_payments_policy(
+    request: Request,
+    payload: dict,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    require_tenant_policy_admin(current_admin)
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    tenant = await session.get(Tenant, tenant_id)
+    if not tenant:
+        raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
+
+    before = {
+        "min_deposit": tenant.min_deposit,
+        "max_deposit": tenant.max_deposit,
+        "min_withdraw": tenant.min_withdraw,
+        "max_withdraw": tenant.max_withdraw,
+        "daily_deposit_limit": tenant.daily_deposit_limit,
+        "daily_withdraw_limit": tenant.daily_withdraw_limit,
+        "payout_retry_limit": tenant.payout_retry_limit,
+        "payout_cooldown_seconds": tenant.payout_cooldown_seconds,
+    }
+
+    for field in before.keys():
+        if field in payload:
+            setattr(tenant, field, payload[field])
+
+    after = {k: getattr(tenant, k) for k in before.keys()}
+
+    session.add(tenant)
+
+    # Audit event for policy update
+    from app.services.audit import audit
+
+    await audit.log_event(
+        session=session,
+        request_id=getattr(request.state, "request_id", "unknown"),
+        actor_user_id=str(current_admin.id),
+        tenant_id=tenant.id,
+        action="TENANT_POLICY_UPDATED",
+        resource_type="tenant_policy",
+        resource_id=tenant.id,
+        result="success",
+        details={"before": before, "after": after},
+        ip_address=request.client.host if request.client else None,
+    )
+
+    await session.commit()
+    await session.refresh(tenant)
+
+    return {"message": "UPDATED", "policy": after}
+
+
+
 @router.patch("/{tenant_id}")
 async def update_tenant_features(
     request: Request,
