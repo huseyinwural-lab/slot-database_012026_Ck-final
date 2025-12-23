@@ -420,10 +420,12 @@ async def test_payout_webhook_replay_no_duplicate_effect_failed(client, async_se
     }
 
     # First webhook call (failed)
+    sig_headers = _sign_webhook_payload(payload)
+
     r_wh_1 = await client.post(
         "/api/v1/finance/withdrawals/payout/webhook",
         json=payload,
-        headers=headers_admin,
+        headers={**headers_admin, **sig_headers},
     )
     assert r_wh_1.status_code == 200
 
