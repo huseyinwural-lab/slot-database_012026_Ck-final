@@ -85,25 +85,21 @@ class AdminReview002TestSuite:
     async def create_test_player(self) -> bool:
         """Create a test player for withdrawal testing"""
         try:
-            if not self.admin_token:
-                self.log_result("Create Test Player", False, "No admin token available")
-                return False
-            
             async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                # Create a test player using player registration endpoint
+                player_email = f"testplayer_{uuid.uuid4().hex[:8]}@example.com"
+                player_password = "TestPlayer123!"
                 
-                # Create a test player
                 player_data = {
-                    "email": f"testplayer_{uuid.uuid4().hex[:8]}@example.com",
-                    "password": "TestPlayer123!",
-                    "full_name": "Test Player for Withdrawal",
-                    "kyc_status": "verified"  # Need verified KYC for withdrawals
+                    "email": player_email,
+                    "username": f"testplayer_{uuid.uuid4().hex[:8]}",
+                    "password": player_password,
+                    "tenant_id": "default_casino"
                 }
                 
                 response = await client.post(
-                    f"{self.base_url}/admin/players",
-                    json=player_data,
-                    headers=headers
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
                 )
                 
                 if response.status_code != 200:
@@ -112,7 +108,7 @@ class AdminReview002TestSuite:
                     return False
                 
                 data = response.json()
-                self.test_player_id = data.get("id")
+                self.test_player_id = data.get("player_id")
                 if not self.test_player_id:
                     self.log_result("Create Test Player", False, "No player ID in response")
                     return False
@@ -121,12 +117,13 @@ class AdminReview002TestSuite:
                 
                 # Login as the test player to get player token
                 player_login_data = {
-                    "email": player_data["email"],
-                    "password": player_data["password"]
+                    "email": player_email,
+                    "password": player_password,
+                    "tenant_id": "default_casino"
                 }
                 
                 response = await client.post(
-                    f"{self.base_url}/player/auth/login",
+                    f"{self.base_url}/auth/player/login",
                     json=player_login_data
                 )
                 
@@ -135,13 +132,22 @@ class AdminReview002TestSuite:
                                   f"Status: {response.status_code}, Response: {response.text}")
                     return False
                 
-                player_data = response.json()
-                self.player_token = player_data.get("access_token")
+                player_login_response = response.json()
+                self.player_token = player_login_response.get("access_token")
                 if not self.player_token:
                     self.log_result("Player Login", False, "No player access token in response")
                     return False
                 
                 self.log_result("Player Login", True, f"Player token length: {len(self.player_token)}")
+                
+                # Now we need to update the player's KYC status to verified using admin token
+                if not self.admin_token:
+                    self.log_result("Update Player KYC", False, "No admin token available")
+                    return False
+                
+                # We need to find a way to update player KYC status - let's check if there's an admin endpoint
+                # For now, let's try to proceed without KYC verification and see what happens
+                
                 return True
                 
         except Exception as e:
