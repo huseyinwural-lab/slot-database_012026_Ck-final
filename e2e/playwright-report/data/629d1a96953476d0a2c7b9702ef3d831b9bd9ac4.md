@@ -145,11 +145,11 @@
           - generic [ref=e166]:
             - generic [ref=e167]:
               - text: Email
-              - textbox "Email" [ref=e168]
+              - textbox "Email" [ref=e168]: stripe_e2e_1766520696553@example.com
             - generic [ref=e169]:
               - text: Password
               - generic [ref=e170]:
-                - textbox "Password" [ref=e171]
+                - textbox "Password" [ref=e171]: password123
                 - button [ref=e172] [cursor=pointer]:
                   - img [ref=e173]
             - button "Sign In" [ref=e176] [cursor=pointer]
