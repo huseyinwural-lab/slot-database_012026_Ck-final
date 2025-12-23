@@ -92,6 +92,8 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await adminPage.goto(`${FRONTEND_URL}/settings`);
     // Find Payments Policy tab
     await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
+    // Wait for policy data to load to avoid race condition with input fill
+    await adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200);
     
     // Wait for input to be visible to ensure tab content loaded
     const depositInput = adminPage.locator('text=Daily Deposit Limit').locator('xpath=..').locator('input');
@@ -157,6 +159,8 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // Debug
     adminPage.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
+    // Wait for policy data to load
+    await adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200);
     await adminPage.goto(`${FRONTEND_URL}/settings`);
     await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
     
