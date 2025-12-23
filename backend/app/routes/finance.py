@@ -91,6 +91,10 @@ async def list_withdrawals(
         count_query = count_query.where(Transaction.created_at >= date_from)
     if date_to:
         count_query = count_query.where(Transaction.created_at <= date_to)
+    if min_amount is not None:
+        count_query = count_query.where(Transaction.amount >= min_amount)
+    if max_amount is not None:
+        count_query = count_query.where(Transaction.amount <= max_amount)
 
     total = (await session.execute(count_query)).scalar() or 0
 
