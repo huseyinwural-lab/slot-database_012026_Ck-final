@@ -7,12 +7,80 @@ import uuid
 from app.models.sql_models import Tenant, Player, Transaction, AuditEvent, AdminUser
 from app.utils.auth import create_access_token
 
-# Helper to get admin token
-def get_admin_token(admin_email):
-    return create_access_token(data={"sub": admin_email, "type": "admin"})
+# Re-using helpers from conftest or defining locally if needed
+async def _create_tenant(session, name="Test Casino Audit", ttype="owner") -> Tenant:
+    # Try find existing tenant by name to avoid UNIQUE constraint issues in tests
+    result = await session.execute(select(Tenant).where(Tenant.name == name))
+    tenant = result.scalars().first()
+    if tenant:
+        return tenant
+
+    tenant = Tenant(name=name, type=ttype, features={})
+    session.add(tenant)
+    await session.commit()
+    await session.refresh(tenant)
+    return tenant
+
+async def _create_player(session, tenant_id, email="audit_player@test.com", username="audit_player") -> Player:
+    result = await session.execute(select(Player).where(Player.email == email))
+    player = result.scalars().first()
+    if player:
+        return player
+
+    player = Player(
+        tenant_id=tenant_id,
+        email=email,
+        username=username,
+        password_hash="noop_hash",
+        balance_real_available=0.0,
+        balance_real_held=0.0,
+        kyc_status="verified",
+        registered_at=datetime.now(timezone.utc),
+    )
+    session.add(player)
+    await session.commit()
+    await session.refresh(player)
+    return player
+
+async def _create_admin(session, tenant_id, email="audit_admin@test.com", username="audit_admin") -> AdminUser:
+    result = await session.execute(select(AdminUser).where(AdminUser.email == email))
+    admin = result.scalars().first()
+    if admin:
+        return admin
+
+    admin = AdminUser(
+        tenant_id=tenant_id,
+        username=username,
+        email=email,
+        full_name="Audit Admin",
+        password_hash="noop_hash",
+        role="Admin",
+        is_platform_owner=True,
+    )
+    session.add(admin)
+    await session.commit()
+    await session.refresh(admin)
+    return admin
+
+@pytest.fixture
+async def session(async_session_factory):
+    async with async_session_factory() as session:
+        yield session
+
+@pytest.fixture
+async def db_tenant(session):
+    return await _create_tenant(session)
+
+@pytest.fixture
+async def db_player(session, db_tenant):
+    return await _create_player(session, db_tenant.id)
+
+@pytest.fixture
+async def db_admin_user(session, db_tenant):
+    return await _create_admin(session, db_tenant.id)
 
 @pytest.mark.asyncio
-async def test_audit_tenant_limit_block_deposit(async_client: AsyncClient, session, db_admin_user: AdminUser, db_player: Player, db_tenant: Tenant):
+async def test_audit_tenant_limit_block_deposit(client: AsyncClient, session, db_admin_user: AdminUser, db_player: Player, db_tenant: Tenant):
     """
     Test-1: Deposit limit block audit
     - Tenant daily_deposit_limit=50
@@ -42,7 +110,7 @@ async def test_audit_tenant_limit_block_deposit(async_client: AsyncClient, sessi
     await session.commit()
 
     # 3. Attempt Deposit causing Limit Exceeded (40 + 20 > 50)
-    token = create_access_token(data={"sub": db_player.id, "type": "player"})
+    token = create_access_token(data={"sub": db_player.id, "tenant_id": db_tenant.id, "role": "player"}, expires_delta=timedelta(days=1))
     headers = {
         "Authorization": f"Bearer {token}",
         "Idempotency-Key": str(uuid.uuid4()),
@@ -50,7 +118,7 @@ async def test_audit_tenant_limit_block_deposit(async_client: AsyncClient, sessi
     }
     
     payload = {"amount": 20.0, "method": "test"}
-    resp = await async_client.post("/api/v1/player/wallet/deposit", json=payload, headers=headers)
+    resp = await client.post("/api/v1/player/wallet/deposit", json=payload, headers=headers)
     
     # Assert HTTP 422
     assert resp.status_code == 422
@@ -74,11 +142,11 @@ async def test_audit_tenant_limit_block_deposit(async_client: AsyncClient, sessi
     assert float(details["limit"]) == 50.0
     assert float(details["used_today"]) == 40.0
     assert float(details["attempted"]) == 20.0
-    assert details["reason_code"] == "LIMIT_EXCEEDED" if "reason_code" in details else details["error_code"] == "LIMIT_EXCEEDED" 
+    assert details.get("reason_code") == "LIMIT_EXCEEDED" or details.get("error_code") == "LIMIT_EXCEEDED"
 
 
 @pytest.mark.asyncio
-async def test_audit_tenant_limit_block_withdraw(async_client: AsyncClient, session, db_admin_user: AdminUser, db_player: Player, db_tenant: Tenant):
+async def test_audit_tenant_limit_block_withdraw(client: AsyncClient, session, db_admin_user: AdminUser, db_player: Player, db_tenant: Tenant):
     """
     Test-2: Withdraw limit block audit
     - Tenant daily_withdraw_limit=30
@@ -112,7 +180,7 @@ async def test_audit_tenant_limit_block_withdraw(async_client: AsyncClient, sess
     await session.commit()
 
     # 3. Attempt Withdraw causing Limit Exceeded (20 + 15 > 30)
-    token = create_access_token(data={"sub": db_player.id, "type": "player"})
+    token = create_access_token(data={"sub": db_player.id, "tenant_id": db_tenant.id, "role": "player"}, expires_delta=timedelta(days=1))
     headers = {
         "Authorization": f"Bearer {token}",
         "Idempotency-Key": str(uuid.uuid4()),
@@ -120,7 +188,7 @@ async def test_audit_tenant_limit_block_withdraw(async_client: AsyncClient, sess
     }
     
     payload = {"amount": 15.0, "method": "test_bank", "address": "TR123"}
-    resp = await async_client.post("/api/v1/player/wallet/withdraw", json=payload, headers=headers)
+    resp = await client.post("/api/v1/player/wallet/withdraw", json=payload, headers=headers)
     
     # Assert HTTP 422
     assert resp.status_code == 422
@@ -129,29 +197,29 @@ async def test_audit_tenant_limit_block_withdraw(async_client: AsyncClient, sess
     stmt = select(AuditEvent).where(
         AuditEvent.action == "FIN_TENANT_LIMIT_BLOCKED",
         AuditEvent.resource_type == "wallet_transaction",
-        AuditEvent.actor_user_id == db_player.id,
-        AuditEvent.details["action"].as_string() == "withdraw"
+        AuditEvent.actor_user_id == db_player.id
     ).order_by(AuditEvent.timestamp.desc())
     
     audit_log = (await session.execute(stmt)).scalars().first()
     assert audit_log is not None
     assert audit_log.result == "failure"
+    assert audit_log.details["action"] == "withdraw"
     assert float(audit_log.details["limit"]) == 30.0
 
 
 @pytest.mark.asyncio
-async def test_audit_reconciliation_run(async_client: AsyncClient, session, db_admin_user: AdminUser, db_tenant: Tenant):
+async def test_audit_reconciliation_run(client: AsyncClient, session, db_admin_user: AdminUser, db_tenant: Tenant):
     """
     Test-3: Reconciliation run audit
     - POST /finance/reconciliation/run
     - Assert STARTED and COMPLETED events
     - Assert details include run_id, inserted, scanned
     """
-    token = get_admin_token(db_admin_user.email)
+    token = create_access_token(data={"sub": db_admin_user.id, "email": db_admin_user.email, "tenant_id": db_tenant.id, "role": "Admin"}, expires_delta=timedelta(days=1))
     headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": db_tenant.id}
     
     # 1. Run Recon
-    resp = await async_client.post("/api/v1/finance/reconciliation/run", headers=headers)
+    resp = await client.post("/api/v1/finance/reconciliation/run", headers=headers)
     assert resp.status_code == 200
     run_id = resp.json()["run_id"]
 
@@ -163,8 +231,7 @@ async def test_audit_reconciliation_run(async_client: AsyncClient, session, db_a
     start_log = (await session.execute(stmt_start)).scalars().first()
     assert start_log is not None
     assert start_log.details["provider"] == "wallet_ledger"
-    # Ensure run_id is in details? Requirement says yes.
-    # Currently code puts it in resource_id. We'll check details if needed.
+    # Note: run_id might not be in details yet, as per my analysis.
     
     # 3. Assert COMPLETED
     stmt_end = select(AuditEvent).where(
@@ -179,7 +246,7 @@ async def test_audit_reconciliation_run(async_client: AsyncClient, session, db_a
 
 
 @pytest.mark.asyncio
-async def test_audit_admin_review_reason(async_client: AsyncClient, session, db_admin_user: AdminUser, db_player: Player, db_tenant: Tenant):
+async def test_audit_admin_review_reason(client: AsyncClient, session, db_admin_user: AdminUser, db_player: Player, db_tenant: Tenant):
     """
     Test-4: Admin approve/mark-paid reason audit
     - Create withdrawal
@@ -201,13 +268,13 @@ async def test_audit_admin_review_reason(async_client: AsyncClient, session, db_
     session.add(tx)
     await session.commit()
 
-    token = get_admin_token(db_admin_user.email)
+    token = create_access_token(data={"sub": db_admin_user.id, "email": db_admin_user.email, "tenant_id": db_tenant.id, "role": "Admin"}, expires_delta=timedelta(days=1))
     headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": db_tenant.id}
 
     # 2. Approve with Reason
     approve_reason = "KYC OK - Approved"
     payload = {"action": "approve", "reason": approve_reason}
-    resp = await async_client.post(f"/api/v1/finance/withdrawals/{tx_id}/review", json=payload, headers=headers)
+    resp = await client.post(f"/api/v1/finance/withdrawals/{tx_id}/review", json=payload, headers=headers)
     assert resp.status_code == 200
 
     # Assert Audit
@@ -222,7 +289,7 @@ async def test_audit_admin_review_reason(async_client: AsyncClient, session, db_
     # 3. Mark Paid with Reason
     paid_reason = "Sent via Bank"
     payload_paid = {"reason": paid_reason}
-    resp = await async_client.post(f"/api/v1/finance/withdrawals/{tx_id}/mark-paid", json=payload_paid, headers=headers)
+    resp = await client.post(f"/api/v1/finance/withdrawals/{tx_id}/mark-paid", json=payload_paid, headers=headers)
     assert resp.status_code == 200
 
     # Assert Audit
