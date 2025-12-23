@@ -1118,6 +1118,70 @@ async def get_wallet_reconciliation_summary(
             session=session,
             request_id=request_id,
             actor_user_id=str(current_admin.id),
+
+
+@router.get("/reconciliation/findings")
+async def list_wallet_reconciliation_findings(
+    date: Optional[str] = None,
+    finding_code: Optional[str] = None,
+    severity: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    from datetime import date as date_cls
+    from app.models.reconciliation_run import ReconciliationRun
+    from app.models.reconciliation import ReconciliationFinding
+
+    provider = "wallet_ledger"
+
+    if date:
+        target_date = date_cls.fromisoformat(date)
+    else:
+        now = datetime.now(timezone.utc)
+        target_date = date_cls(year=now.year, month=now.month, day=now.day)
+
+    day_start = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc)
+
+    # Latest run for this provider and date
+    query = select(ReconciliationRun).where(
+        ReconciliationRun.provider == provider,
+        ReconciliationRun.window_start >= day_start,
+    ).order_by(ReconciliationRun.created_at.desc())
+    run = (await session.execute(query)).scalars().first()
+    if not run:
+        return {"items": [], "meta": {"total": 0, "limit": limit, "offset": offset}}
+
+    stmt = select(ReconciliationFinding).where(
+        ReconciliationFinding.provider == provider,
+        ReconciliationFinding.raw["run_id"].as_string() == run.id,
+    )
+    if finding_code:
+        stmt = stmt.where(ReconciliationFinding.finding_type == finding_code)
+    if severity:
+        stmt = stmt.where(ReconciliationFinding.severity == severity)
+
+    total = (await session.execute(stmt.with_only_columns(func.count()))).scalar_one()
+
+    stmt = stmt.order_by(ReconciliationFinding.created_at.desc()).limit(limit).offset(offset)
+    items = (await session.execute(stmt)).scalars().all()
+
+    # Serialize minimal fields
+    payload_items = [
+        {
+            "tenant_id": it.tenant_id,
+            "tx_id": it.tx_id,
+            "finding_type": it.finding_type,
+            "severity": it.severity,
+            "status": it.status,
+            "raw": it.raw,
+        }
+        for it in items
+    ]
+
+    return {"items": payload_items, "meta": {"total": total, "limit": limit, "offset": offset}}
+
             tenant_id=None,
             action="FIN_RECONCILIATION_RUN_COMPLETED",
             resource_type="reconciliation_run",
