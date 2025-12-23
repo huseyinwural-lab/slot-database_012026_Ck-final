@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # Initialize StripeCheckout
 # We load the key from env inside the endpoints or globally if robust
 # Using global init for efficiency, but need to ensure env is loaded.
-STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+STRIPE_API_KEY = settings.stripe_api_key
 webhook_url = "/api/v1/payments/stripe/webhook" # Relative path, will be constructed with host
 
 # We need to instantiate this per request or lazily if we want to capture host_url correctly
