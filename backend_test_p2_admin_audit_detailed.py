@@ -15,7 +15,7 @@ import hashlib
 from typing import Dict, Any, Optional
 
 # Configuration - Use frontend .env for external URL
-BASE_URL = "https://financepulse-8.preview.emergentagent.com"  # Default
+BASE_URL = "https://cash-flow-319.preview.emergentagent.com"  # Default
 try:
     with open("/app/frontend/.env", "r") as f:
         for line in f:

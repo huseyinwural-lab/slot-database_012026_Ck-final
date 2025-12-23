@@ -5,7 +5,7 @@ import sys
 
 def test_client_upload_scenarios():
     """Test Client Upload Flow - Turkish Review Request P0-E"""
-    base_url = "https://financepulse-8.preview.emergentagent.com"
+    base_url = "https://cash-flow-319.preview.emergentagent.com"
     test_game_id = "f78ddf21-c759-4b8c-a5fb-28c90b3645ab"  # Test Slot Game (QA)
     
     print("📤 CLIENT UPLOAD FLOW TESTS - P0-E")

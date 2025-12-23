@@ -21,7 +21,7 @@ import os
 import uuid
 
 # Use the production backend URL from frontend env
-BACKEND_URL = "https://financepulse-8.preview.emergentagent.com"
+BACKEND_URL = "https://cash-flow-319.preview.emergentagent.com"
 
 class P05TestSuite:
     def __init__(self):

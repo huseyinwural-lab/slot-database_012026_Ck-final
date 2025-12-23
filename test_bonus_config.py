@@ -5,7 +5,7 @@ import sys
 import json
 
 class BonusConfigTester:
-    def __init__(self, base_url="https://financepulse-8.preview.emergentagent.com"):
+    def __init__(self, base_url="https://cash-flow-319.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
