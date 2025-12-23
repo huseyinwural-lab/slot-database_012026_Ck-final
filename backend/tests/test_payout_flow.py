@@ -46,9 +46,6 @@ def _sign_webhook_payload(payload: dict) -> dict:
     }
 
 
-    directly on the Player model.
-    """
-
     async with async_session_factory() as session:
         tenant = await _create_tenant(session)
         player = await _create_player(
