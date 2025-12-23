@@ -12,6 +12,7 @@ export const moneyPathErrorMessage = (error) => {
     PLAYER_NOT_FOUND: 'Oyuncu kaydı bulunamadı.',
     FEATURE_DISABLED: 'Bu özellik bu tenant için devre dışı.',
     UNAUTHORIZED: 'Oturumunuzun süresi dolmuş olabilir. Lütfen tekrar giriş yapın.',
+    LIMIT_EXCEEDED: 'Günlük işlem limiti aşıldı.',
   };
 
   if (status === 401) {

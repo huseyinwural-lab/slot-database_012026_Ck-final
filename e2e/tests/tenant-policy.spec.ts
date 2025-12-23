@@ -144,7 +144,7 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.click('button:has-text("Pay Now")');
 
     // Assert Failure
-    await expect(playerPage.getByText(/limit exceeded/i)).toBeVisible(); // Check specific error message if possible
+    await expect(playerPage.getByText(/limit/i)).toBeVisible(); // Matches 'Günlük işlem limiti aşıldı.'
     // Ideally verify network response too, but UI check satisfies requirement
     
     await playerContext.close();
@@ -222,7 +222,7 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.click('button:has-text("Request Payout")');
 
     // Assert Failure
-    await expect(playerPage.getByText(/limit exceeded/i)).toBeVisible();
+    await expect(playerPage.getByText(/limit/i)).toBeVisible();
     
     await playerContext.close();
   });
