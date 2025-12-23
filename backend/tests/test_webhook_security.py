@@ -77,7 +77,8 @@ async def test_webhook_invalid_signature_returns_401(client):
   assert body["detail"]["error_code"] == "WEBHOOK_SIGNATURE_INVALID"
 
 
-def test_webhook_valid_signature_allows_handler_execution():
+@pytest.mark.asyncio
+async def test_webhook_valid_signature_allows_handler_execution(client):
   payload = {
     "provider": "mockpsp",
     "provider_event_id": "evt_valid",
