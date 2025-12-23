@@ -510,6 +510,52 @@ async def create_withdrawal(
     req_hash = _compute_request_hash("POST", "/api/v1/player/wallet/withdraw", body)
     stmt = select(Transaction).where(
         Transaction.player_id == current_player.id,
+    # Tenant-level daily withdraw limit
+    if tenant and tenant.daily_withdraw_limit is not None:
+        from datetime import timedelta
+        now = datetime.now(timezone.utc)
+        start = datetime(year=now.year, month=now.month, day=now.day, tzinfo=timezone.utc)
+        end = start + timedelta(days=1)
+
+        cap_stmt = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
+            Transaction.player_id == current_player.id,
+            Transaction.tenant_id == tenant.id,
+            Transaction.type == "withdrawal",
+            Transaction.state.in_(["requested", "approved", "paid"]),
+            Transaction.created_at >= start,
+            Transaction.created_at < end,
+        )
+        current_total = (await session.execute(cap_stmt)).scalar_one() or 0.0
+        if Decimal(str(current_total)) + Decimal(str(amount)) > Decimal(str(tenant.daily_withdraw_limit)):
+            from app.services.audit import audit
+
+            await audit.log_event(
+                session=session,
+                request_id=request_id,
+                actor_user_id=current_player.id,
+                tenant_id=current_player.tenant_id,
+                action="FIN_LIMIT_BLOCKED",
+                resource_type="wallet_withdraw",
+                resource_id=None,
+                result="blocked",
+                details={
+                    "limit_name": "daily_withdraw_limit",
+                    "limit_value": float(tenant.daily_withdraw_limit),
+                    "attempted": float(amount),
+                },
+                ip_address=ip,
+            )
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error_code": "LIMIT_EXCEEDED",
+                    "limit_name": "daily_withdraw_limit",
+                    "limit_value": float(tenant.daily_withdraw_limit),
+                    "attempted": float(amount),
+                },
+            )
+
+
         Transaction.idempotency_key == idempotency_key,
         Transaction.type == "withdrawal",
     )
