@@ -86,7 +86,7 @@ async def test_payout_retry_after_fail_reduces_held_once(client, async_session_f
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
     r_app = await client.post(
         f"/api/v1/finance/withdrawals/{tx_id}/review",
-        json={"action": "approve"},
+        json={"action": "approve", "reason": "test:legacy_fix"},
         headers=headers_admin,
     )
     assert r_app.status_code == 200
