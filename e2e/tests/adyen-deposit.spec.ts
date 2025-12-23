@@ -50,7 +50,9 @@ test.describe('Adyen Deposit Flow', () => {
     await expect(page.locator('text=Adyen Payment Authorised!')).toBeVisible();
 
     // 7. Extract tx_id from URL
-    const url = new URL(page.url());
+    const currentUrl = page.url();
+    console.log('Current URL:', currentUrl);
+    const url = new URL(currentUrl);
     const txId = url.searchParams.get('tx_id');
     expect(txId).toBeTruthy();
 
