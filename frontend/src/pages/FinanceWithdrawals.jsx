@@ -138,6 +138,7 @@ const FinanceWithdrawals = () => {
   }, []);
 
   const applyFilters = () => {
+    // Filter change -> offset reset (page 1)
     fetchWithdrawals(1);
   };
 
