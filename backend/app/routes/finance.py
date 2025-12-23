@@ -499,8 +499,9 @@ async def start_payout(
     if not player:
         raise HTTPException(status_code=404, detail={"error_code": "PLAYER_NOT_FOUND"})
 
-    # First time from approved -> payout_pending
-    if tx.state == "approved":
+    # Move from approved/payout_failed into payout_pending before applying
+    # terminal success/fail transitions.
+    if tx.state in {"approved", "payout_failed"}:
         transition_transaction(tx, "payout_pending")
 
     if psp_res.status == PSPStatus.PAID:
