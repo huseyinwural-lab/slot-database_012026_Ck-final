@@ -363,9 +363,7 @@ const FinanceWithdrawals = () => {
                       <TableCell className="font-mono text-xs">{tx.player_id}</TableCell>
                       <TableCell>{formatAmount(tx.amount, tx.currency)}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="uppercase text-[10px]">
-                          {tx.state}
-                        </Badge>
+                        {renderStateBadge(tx.state)}
                       </TableCell>
                       <TableCell className="text-xs">{formatDateTime(tx.created_at)}</TableCell>
                       <TableCell className="text-xs">{tx.reviewed_by || '-'}</TableCell>
