@@ -56,7 +56,9 @@ async def test_webhook_invalid_signature_returns_401(client):
     "error_code": None,
     "provider_ref": None,
   }
-  body_bytes = client._encode_json(payload, "utf-8")  # type: ignore[attr-defined]
+  # Recreate JSON body exactly as FastAPI/Starlette would encode it
+  import json
+  body_bytes = json.dumps(payload, separators=(",", ":")).encode("utf-8")
   ts = int(time.time())
 
   # Use wrong secret so that signature does not match
@@ -84,7 +86,9 @@ def test_webhook_valid_signature_allows_handler_execution():
     "error_code": None,
     "provider_ref": None,
   }
-  body_bytes = client._encode_json(payload, "utf-8")  # type: ignore[attr-defined]
+  # Recreate JSON body exactly as FastAPI/Starlette would encode it
+  import json
+  body_bytes = json.dumps(payload, separators=(",", ":")).encode("utf-8")
   ts = int(time.time())
 
   sig = sign(body_bytes, ts, "test_webhook_secret")
