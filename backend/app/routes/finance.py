@@ -518,6 +518,194 @@ async def start_payout(
             currency=tx.currency or "USD",
             idempotency_key=f"withdraw_payout_paid:{tx.id}:{idem_key}",
             provider=psp_res.provider,
+
+
+@router.post("/withdrawals/{tx_id}/recheck")
+async def recheck_payout(
+    request: Request,
+    tx_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Manually recheck a stuck payout (idempotent).
+
+    Semantics (O1):
+    - Only callable when withdrawal.state in {payout_pending, payout_failed}.
+    - Uses Idempotency-Key to guard against double-processing.
+    - Mock provider status is driven by X-Mock-Outcome: paid|failed|pending.
+        * paid   -> finalize as paid (single withdraw_paid ledger, held -= amount)
+        * failed -> payout_failed (no ledger, balances unchanged)
+        * pending-> no-op on state/ledger
+    - Replay with the same Idempotency-Key is a safe no-op and logged via
+      FIN_IDEMPOTENCY_HIT.
+    """
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    request_id = getattr(request.state, "request_id", "unknown")
+    ip = request.client.host if request.client else None
+
+    idem_key = request.headers.get("Idempotency-Key")
+    if not idem_key:
+        raise HTTPException(status_code=400, detail={"error_code": "IDEMPOTENCY_KEY_REQUIRED"})
+
+    # Load withdrawal transaction
+    stmt = select(Transaction).where(
+        Transaction.id == tx_id,
+        Transaction.tenant_id == tenant_id,
+        Transaction.type == "withdrawal",
+    )
+    tx = (await session.execute(stmt)).scalars().first()
+    if not tx:
+        raise HTTPException(status_code=404, detail={"error_code": "TX_NOT_FOUND"})
+
+    # Recheck idempotency: if an attempt with this key already exists, treat as replay
+    pa_stmt = select(PayoutAttempt).where(
+        PayoutAttempt.withdraw_tx_id == tx_id,
+        PayoutAttempt.idempotency_key == idem_key,
+    )
+    existing_attempt = (await session.execute(pa_stmt)).scalars().first()
+    if existing_attempt:
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=tenant_id,
+            action="FIN_IDEMPOTENCY_HIT",
+            resource_type="wallet_payout_recheck",
+            resource_id=tx.id,
+            result="success",
+            details={
+                "tx_id": tx.id,
+                "payout_attempt_id": existing_attempt.id,
+                "idempotency_key": idem_key,
+                "state": tx.state,
+                "attempt_status": existing_attempt.status,
+            },
+            ip_address=ip,
+        )
+        await session.commit()
+        return {"transaction": tx, "payout_attempt": existing_attempt, "replay": True}
+
+    # Enforce state precondition for first call
+    if tx.state not in {"payout_pending", "payout_failed"}:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error_code": "INVALID_STATE_TRANSITION",
+                "from_state": tx.state,
+                "to_state": tx.state,
+                "tx_type": "withdrawal",
+            },
+        )
+
+    # Determine mock outcome: default pending, override via header in dev/test
+    outcome = request.headers.get("X-Mock-Outcome", "pending").strip().lower()
+    if outcome not in {"paid", "failed", "pending"}:
+        outcome = "pending"
+
+    # Audit: recheck started
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(current_admin.id),
+        tenant_id=tenant_id,
+        action="FIN_PAYOUT_RECHECK_STARTED",
+        resource_type="wallet_payout_recheck",
+        resource_id=tx.id,
+        result="pending",
+        details={
+            "tx_id": tx.id,
+            "player_id": tx.player_id,
+            "amount": tx.amount,
+            "currency": tx.currency,
+            "idempotency_key": idem_key,
+            "outcome_hint": outcome,
+            "state_before": tx.state,
+        },
+        ip_address=ip,
+    )
+
+    from app.services.transaction_state_machine import transition_transaction
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+
+    # Create a payout attempt record for this recheck
+    attempt = PayoutAttempt(
+        withdraw_tx_id=tx.id,
+        tenant_id=tenant_id,
+        provider="mockpsp",
+        provider_event_id=None,
+        idempotency_key=idem_key,
+        status="pending",
+    )
+    session.add(attempt)
+
+    # Apply outcome-specific logic
+    player = await session.get(Player, tx.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail={"error_code": "PLAYER_NOT_FOUND"})
+
+    # Ensure we are in payout_pending before finalizing paid/failed from PSP
+    state_before = tx.state
+
+    if outcome == "paid" and tx.state == "payout_pending":
+        transition_transaction(tx, "paid")
+        await apply_wallet_delta_with_ledger(
+            session,
+            tenant_id=tenant_id,
+            player_id=tx.player_id,
+            tx_id=str(tx.id),
+            event_type="withdraw_paid",
+            delta_available=0.0,
+            delta_held=-float(tx.amount),
+            currency=tx.currency or "USD",
+            idempotency_key=f"withdraw_payout_paid_recheck:{tx.id}:{idem_key}",
+            provider="mockpsp",
+            provider_ref=None,
+            provider_event_id=None,
+        )
+        attempt.status = "succeeded"
+        attempt.error_code = None
+    elif outcome == "failed" and tx.state == "payout_pending":
+        transition_transaction(tx, "payout_failed")
+        attempt.status = "failed"
+        attempt.error_code = "PSP_PAYOUT_FAILED"
+    else:
+        # pending outcome or unsupported combination: no state/ledger change
+        attempt.status = "pending"
+
+    # Audit: result
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(current_admin.id),
+        tenant_id=tenant_id,
+        action="FIN_PAYOUT_RECHECK_RESULT",
+        resource_type="wallet_payout_recheck",
+        resource_id=tx.id,
+        result="success" if outcome == "paid" and tx.state == "paid" else (
+            "failure" if tx.state == "payout_failed" else "pending"
+        ),
+        details={
+            "tx_id": tx.id,
+            "player_id": tx.player_id,
+            "amount": tx.amount,
+            "currency": tx.currency,
+            "idempotency_key": idem_key,
+            "outcome": outcome,
+            "state_before": state_before,
+            "state_after": tx.state,
+            "payout_attempt_id": attempt.id,
+        },
+        ip_address=ip,
+    )
+
+    session.add(tx)
+    await session.commit()
+    await session.refresh(tx)
+    await session.refresh(attempt)
+
+    return {"transaction": tx, "payout_attempt": attempt}
+
             provider_ref=psp_res.provider_ref,
             provider_event_id=psp_res.provider_event_id,
         )
