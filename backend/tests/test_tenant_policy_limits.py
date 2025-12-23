@@ -22,18 +22,30 @@ async def test_deposit_limit_exceeded_returns_422(client, player_with_token, asy
         session.add(db_tenant)
         await session.commit()
 
-    headers = {"Authorization": f"Bearer {player_token}", "Content-Type": "application/json", "Idempotency-Key": "k1"}
+    headers = {"Authorization": f"Bearer {player_token}", "Content-Type": "application/json", "Idempotency-Key": "k2"}
 
-    # First deposit 40 (ok)
-    res1 = await client.post(
-        "/api/v1/player/wallet/deposit",
-        json={"amount": 40.0, "method": "test"},
-        headers=headers,
-    )
-    assert res1.status_code in (200, 201)
+    # Seed usage by inserting a completed deposit of 40 directly (simulate PSP success)
+    async with async_session_factory() as session:
+        from app.models.sql_models import Transaction
+        from datetime import datetime, timezone
 
-    # Second deposit 20 (should fail, used_today ~40, limit 50)
-    headers["Idempotency-Key"] = "k2"
+        tx = Transaction(
+            tenant_id=tenant.id,
+            player_id=player.id,
+            type="deposit",
+            amount=40.0,
+            currency="USD",
+            status="completed",
+            state="completed",
+            method="test",
+            idempotency_key="seed-dep-40",
+            created_at=datetime.now(timezone.utc),
+            balance_after=0.0,
+        )
+        session.add(tx)
+        await session.commit()
+
+    # Deposit 20 should now fail because limit 50 is exceeded (40 + 20)
     res2 = await client.post(
         "/api/v1/player/wallet/deposit",
         json={"amount": 20.0, "method": "test"},
