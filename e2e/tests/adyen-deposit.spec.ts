@@ -39,23 +39,23 @@ test.describe('Adyen Deposit Flow', () => {
     // 4. Enter Amount
     await page.fill('input[placeholder="Min $10.00"]', '55');
 
-    // 5. Submit
-    // Since backend returns a mock URL that redirects back to /wallet, we just click and wait.
-    await page.click('button:has-text("Pay with Adyen")');
+    // 5. Submit & Intercept Response
+    const [response] = await Promise.all([
+      page.waitForResponse(res => res.url().includes('/api/v1/payments/adyen/checkout/session') && res.status() === 200),
+      page.click('button:has-text("Pay with Adyen")')
+    ]);
 
-    // 6. Wait for success params
-    await page.waitForURL(/wallet\?provider=adyen.*resultCode=Authorised/);
-    
-    // Check UI message
-    await expect(page.locator('text=Adyen Payment Authorised!')).toBeVisible();
-
-    // 7. Extract tx_id from URL
-    const currentUrl = page.url();
-    console.log('Current URL:', currentUrl);
-    const url = new URL(currentUrl);
-    const txId = url.searchParams.get('tx_id');
+    const json = await response.json();
+    const redirectUrl = new URL(json.url);
+    const txId = redirectUrl.searchParams.get('tx_id');
     expect(txId).toBeTruthy();
 
+    // 6. Wait for success UI (URL might be cleared by then)
+    await page.waitForURL(/wallet/); // Just wait for any wallet url, or specific success state
+    await expect(page.locator('text=Adyen Payment Authorised!')).toBeVisible();
+
+    // 7. (Skip URL extraction since we have txId)
+    
     // 8. Simulate Webhook
     // Note: The UI says "Authorised" but the balance doesn't update until webhook.
     const webhookRes = await request.post(`${API_URL}/api/v1/payments/adyen/test-trigger-webhook`, {
