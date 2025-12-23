@@ -75,18 +75,26 @@ export default async function globalSetup(config: FullConfig) {
 
   // Go directly to login page
   await page.goto(`${FRONTEND_URL}/login`, { waitUntil: 'networkidle' });
+  console.log('[global-setup] Navigated to login page');
 
   // Fill login form and submit
   await page.fill('#email', OWNER_EMAIL);
   await page.fill('#password', OWNER_PASSWORD);
+  console.log('[global-setup] Filled login form');
+  
   await page.click('button:has-text("Sign In")');
+  console.log('[global-setup] Clicked sign in button');
 
   // Wait a bit for the login to process and any redirects
   await page.waitForTimeout(5000);
+  console.log('[global-setup] Waited for login processing');
 
   // Wait until we are no longer on /login and token is present in localStorage
+  console.log('[global-setup] Current URL:', page.url());
   await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30000 });
+  console.log('[global-setup] URL changed from login');
   await page.waitForFunction(() => !!localStorage.getItem('admin_token'), { timeout: 15000 });
+  console.log('[global-setup] Token found in localStorage');
 
   // Persist storageState for all tests
   await context.storageState({ path: path.join(authDir, 'admin.json') });
