@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import uuid
 
 from app.models.sql_models import Tenant, Player, Transaction, AuditEvent, AdminUser
-from app.core.security import create_access_token
+from app.utils.auth import create_access_token
 
 # Helper to get admin token
 def get_admin_token(admin_email):
