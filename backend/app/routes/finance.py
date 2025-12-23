@@ -452,7 +452,10 @@ async def start_payout(
     )
 
     psp = get_psp()
-    psp_idem_key = build_psp_idem_key(str(tx.id))
+    # PSP idempotency is bound to both transaction and API Idempotency-Key so
+    # that distinct payout attempts (fail vs retry) are treated as separate
+    # provider calls, while replays with the same key remain safe.
+    psp_idem_key = build_psp_idem_key(f"{tx.id}:{idem_key}")
 
     # For tests, allow deterministic fail via MockPSP override
     if outcome == "fail":
