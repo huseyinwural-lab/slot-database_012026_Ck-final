@@ -83,6 +83,9 @@ app.include_router(core.router)
 from app.routes import payments
 app.include_router(payments.router)
 
+from app.routes import stripe_payments
+app.include_router(stripe_payments.router)
+
 # 4. Modules (Refactored to SQL or Stubbed)
 from app.routes import fraud_detection, email_notification, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, version as version_router, audit as audit_router, game_config, game_import, game_config_presets, robot, revenue, finance, finance_actions, feature_flags, simulation_lab, settings as settings_router, dashboard, tables, kill_switch, flags
 
