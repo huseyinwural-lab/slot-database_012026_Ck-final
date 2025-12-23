@@ -186,6 +186,52 @@ async def get_checkout_status(
         # The apply_wallet_delta does NOT update the Transaction model itself if it's separate?
         # Check player_wallet.py: it calls apply_wallet_delta... AND updates psp_cap?
         # Wait, apply_wallet_delta_with_ledger is for ledger shadow.
+
+@router.post("/test-trigger-webhook")
+async def test_trigger_webhook(
+    payload: dict = Body(...),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Test-only endpoint to simulate a Stripe Webhook event.
+    Only available in non-prod environments.
+    """
+    if settings.env in {"prod", "production"}:
+        raise HTTPException(status_code=403, detail="Not available in production")
+
+    event_type = payload.get("type")
+    session_id = payload.get("session_id")
+
+    if event_type == "checkout.session.completed":
+        # Idempotency check
+        stmt = select(Transaction).where(
+            Transaction.provider_event_id == session_id,
+            Transaction.provider == "stripe"
+        )
+        tx = (await session.execute(stmt)).scalars().first()
+
+        if tx and tx.status != "completed":
+             await apply_wallet_delta_with_ledger(
+                session,
+                tenant_id=tx.tenant_id,
+                player_id=tx.player_id,
+                tx_id=tx.id,
+                event_type="deposit_succeeded",
+                delta_available=tx.amount,
+                delta_held=0.0,
+                currency=tx.currency,
+                idempotency_key=f"stripe:{session_id}:capture",
+                provider="stripe",
+                provider_ref=session_id,
+                provider_event_id=session_id
+            )
+             tx.status = "completed"
+             tx.state = "completed"
+             session.add(tx)
+             await session.commit()
+             return {"status": "simulated_success", "tx_id": tx.id}
+    
+    return {"status": "ignored"}
         # We also need to update the Transaction record state.
         
         tx.status = "completed"
