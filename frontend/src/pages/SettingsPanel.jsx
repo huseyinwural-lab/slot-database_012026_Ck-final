@@ -66,7 +66,8 @@ const SettingsPanel = () => {
             <TabsTrigger value="brands"><Building2 className="w-4 h-4 mr-2" /> Brands</TabsTrigger>
             <TabsTrigger value="domains"><Globe className="w-4 h-4 mr-2" /> Domains</TabsTrigger>
             <TabsTrigger value="currencies"><DollarSign className="w-4 h-4 mr-2" /> Currencies</TabsTrigger>
-            <TabsTrigger value="payment"><CreditCard className="w-4 h-4 mr-2" /> Payment</TabsTrigger>
+            <TabsTrigger value="payment"><CreditCard className="w-4 h-4 mr-2" /> Payment Providers</TabsTrigger>
+            <TabsTrigger value="payments-policy"><Scale className="w-4 h-4 mr-2" /> Payments Policy</TabsTrigger>
             <TabsTrigger value="countries"><Shield className="w-4 h-4 mr-2" /> Countries</TabsTrigger>
             <TabsTrigger value="games"><Gamepad2 className="w-4 h-4 mr-2" /> Games</TabsTrigger>
             <TabsTrigger value="communication"><Mail className="w-4 h-4 mr-2" /> Communication</TabsTrigger>
