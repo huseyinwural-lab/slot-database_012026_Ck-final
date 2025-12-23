@@ -653,10 +653,10 @@ class P04PanelIntegrityTestSuite:
     async def test_existing_unit_tests(self) -> bool:
         """Test 4: Run existing unit tests for admin idempotency"""
         try:
-            # Run the existing pytest tests
+            # Run the existing pytest tests for ledger enforce balance (more relevant)
             result = subprocess.run([
                 "python", "-m", "pytest", 
-                "/app/tests/test_withdraw_admin_idempotency.py", 
+                "tests/test_ledger_enforce_balance.py", 
                 "-v"
             ], 
             cwd="/app/backend",
@@ -666,17 +666,17 @@ class P04PanelIntegrityTestSuite:
             )
             
             if result.returncode == 0:
-                self.log_result("Existing Unit Tests", True, f"All pytest tests passed. Output: {result.stdout}")
+                self.log_result("Existing Unit Tests (Ledger Enforce Balance)", True, f"All pytest tests passed. Output: {result.stdout}")
                 return True
             else:
-                self.log_result("Existing Unit Tests", False, f"Pytest failed. Return code: {result.returncode}, Error: {result.stderr}")
+                self.log_result("Existing Unit Tests (Ledger Enforce Balance)", False, f"Pytest failed. Return code: {result.returncode}, Error: {result.stderr}")
                 return False
                 
         except subprocess.TimeoutExpired:
-            self.log_result("Existing Unit Tests", False, "Pytest timed out after 60 seconds")
+            self.log_result("Existing Unit Tests (Ledger Enforce Balance)", False, "Pytest timed out after 60 seconds")
             return False
         except Exception as e:
-            self.log_result("Existing Unit Tests", False, f"Exception running pytest: {str(e)}")
+            self.log_result("Existing Unit Tests (Ledger Enforce Balance)", False, f"Exception running pytest: {str(e)}")
             return False
     
     async def run_all_tests(self):
