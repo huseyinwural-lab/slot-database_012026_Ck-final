@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Protocol
 
 
 class PSPStatus(str, Enum):
@@ -36,6 +36,65 @@ class PSPResult:
     provider_event_id: str
     status: PSPStatus
     raw: Optional[Dict[str, Any]] = None
+
+
+class PaymentProvider(Protocol):
+    """High-level PSP adapter contract.
+
+    Any real PSP implementation (Stripe, Adyen, etc.) or the MockPSP must
+    conform to this interface so that business logic can remain provider
+    agnostic.
+    """
+
+    async def authorize_deposit(
+        self,
+        *,
+        tx_id: str,
+        tenant_id: str,
+        player_id: str,
+        amount: float,
+        currency: str,
+        psp_idem_key: str,
+    ) -> "PSPResult":
+        ...
+
+    async def capture_deposit(
+        self,
+        *,
+        tx_id: str,
+        tenant_id: str,
+        player_id: str,
+        amount: float,
+        currency: str,
+        psp_idem_key: str,
+    ) -> "PSPResult":
+        ...
+
+    async def payout_withdrawal(
+        self,
+        *,
+        tx_id: str,
+        tenant_id: str,
+        player_id: str,
+        amount: float,
+        currency: str,
+        psp_idem_key: str,
+    ) -> "PSPResult":
+        ...
+
+    async def refund_deposit(
+        self,
+        *,
+        tx_id: str,
+        tenant_id: str,
+        player_id: str,
+        amount: float,
+        currency: str,
+        psp_idem_key: str,
+    ) -> "PSPResult":
+        ...
+
+
 
 
 def build_psp_idem_key(tx_id: str) -> str:
