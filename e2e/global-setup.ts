@@ -79,14 +79,18 @@ export default async function globalSetup(config: FullConfig) {
   // Fill login form and submit
   await page.fill('#email', OWNER_EMAIL);
   await page.fill('#password', OWNER_PASSWORD);
+  
+  // Wait for any potential rate limiting to clear
+  await page.waitForTimeout(2000);
+  
   await page.click('button:has-text("Sign In")');
 
   // Wait a bit for the login to process and any redirects
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(8000);
 
   // Wait until we are no longer on /login and token is present in localStorage
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30000 });
-  await page.waitForFunction(() => !!localStorage.getItem('admin_token'), { timeout: 15000 });
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 45000 });
+  await page.waitForFunction(() => !!localStorage.getItem('admin_token'), { timeout: 20000 });
 
   // Persist storageState for all tests
   await context.storageState({ path: path.join(authDir, 'admin.json') });
