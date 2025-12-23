@@ -12,14 +12,9 @@ logger = logging.getLogger(__name__)
 
 async def startup(ctx):
     logger.info("Worker starting...")
-    # Initialize DB engine or other resources if needed
-    # Note: get_session uses a global engine from app.core.database if initialized?
-    # actually app.core.database.engine is init in app startup. 
-    # In worker process, we might need to init it if it's separate process.
-    # But usually arq worker is run via 'arq app.worker.WorkerSettings'.
-    # So we need to ensure DB is init.
-    from app.core.database import init_db_connection
-    await init_db_connection()
+    # Engine is initialized at module level in app.core.database
+    from app.core.database import engine
+    logger.info(f"DB Engine initialized: {engine.url}")
 
 async def shutdown(ctx):
     logger.info("Worker shutting down...")
