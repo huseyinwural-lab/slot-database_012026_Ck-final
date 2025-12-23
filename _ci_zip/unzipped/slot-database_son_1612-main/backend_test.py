@@ -11,7 +11,7 @@ import os
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://cash-flow-319.preview.emergentagent.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://fintech-ops-2.preview.emergentagent.com")
 API_BASE = f"{BASE_URL}/api"
 
 class TestResult:
