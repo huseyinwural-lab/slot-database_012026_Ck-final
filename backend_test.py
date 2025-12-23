@@ -23,7 +23,7 @@ import os
 import uuid
 
 # Use the production backend URL from frontend env
-BACKEND_URL = "https://payout-system-7.preview.emergentagent.com"
+BACKEND_URL = "https://moneypath-6.preview.emergentagent.com"
 
 class IdempotencyTestSuite:
     def __init__(self):

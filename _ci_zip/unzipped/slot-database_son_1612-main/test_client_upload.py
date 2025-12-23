@@ -8,7 +8,7 @@ from backend_test import CasinoAdminAPITester
 
 def main():
     # Use the production URL from frontend/.env
-    base_url = "https://payout-system-7.preview.emergentagent.com"
+    base_url = "https://moneypath-6.preview.emergentagent.com"
     
     tester = CasinoAdminAPITester(base_url)
     

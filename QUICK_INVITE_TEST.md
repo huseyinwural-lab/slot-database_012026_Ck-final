@@ -22,7 +22,7 @@
 2. **"Invite link copied!"** toast mesajını görmelisiniz
 3. Linki bir yere yapıştırın (örnek: notepad)
 
-**Link formatı:** `https://payout-system-7.preview.emergentagent.com/accept-invite?token=ey...`
+**Link formatı:** `https://moneypath-6.preview.emergentagent.com/accept-invite?token=ey...`
 
 ---
 
