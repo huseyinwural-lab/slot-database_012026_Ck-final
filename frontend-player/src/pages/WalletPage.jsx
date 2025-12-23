@@ -15,6 +15,7 @@ const WalletPage = () => {
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState(null);
+  const [actionStatus, setActionStatus] = useState({}); // key -> { status, message }
 
   const fetchWalletData = async () => {
     try {
