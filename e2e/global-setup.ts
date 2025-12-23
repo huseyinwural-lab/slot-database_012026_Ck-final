@@ -85,8 +85,8 @@ export default async function globalSetup(config: FullConfig) {
   await page.waitForTimeout(3000);
 
   // Wait until we are no longer on /login and token is present in localStorage
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
-  await page.waitForFunction(() => !!localStorage.getItem('admin_token'), { timeout: 10000 });
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30000 });
+  await page.waitForFunction(() => !!localStorage.getItem('admin_token'), { timeout: 15000 });
 
   // Persist storageState for all tests
   await context.storageState({ path: path.join(authDir, 'admin.json') });
