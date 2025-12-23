@@ -116,6 +116,8 @@ const FinanceWithdrawals = () => {
       if (filters.player_id) params.player_id = filters.player_id;
       if (filters.date_from) params.date_from = filters.date_from;
       if (filters.date_to) params.date_to = filters.date_to;
+      // Backend defaults to created_at DESC; make it explicit for contract clarity.
+      params.sort = 'created_at_desc';
 
       const res = await api.get('/v1/finance/withdrawals', { params });
       setItems(res.data.items || []);
