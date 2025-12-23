@@ -49,7 +49,7 @@
                 - generic [ref=e49]: Amount ($)
                 - generic [ref=e50]:
                   - img [ref=e51]
-                  - spinbutton [ref=e53]: "20"
+                  - spinbutton [ref=e53]: "40"
               - generic [ref=e54]:
                 - button "$50" [ref=e55] [cursor=pointer]
                 - button "$100" [ref=e56] [cursor=pointer]
