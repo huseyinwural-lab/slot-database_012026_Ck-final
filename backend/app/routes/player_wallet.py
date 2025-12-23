@@ -368,6 +368,9 @@ async def create_withdrawal(
     if amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be positive")
 
+    idempotency_key = request.headers.get("Idempotency-Key")
+    currency = "USD"  # TODO: support multi-currency when introduced
+
     # Tenant daily withdraw limit enforcement (TENANT-POLICY-001)
     from app.utils.tenant import get_current_tenant_id
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
@@ -425,9 +428,6 @@ async def create_withdrawal(
             status_code=403,
             detail={"error_code": "KYC_REQUIRED_FOR_WITHDRAWAL"},
         )
-
-    idempotency_key = request.headers.get("Idempotency-Key")
-    currency = "USD"  # TODO: support multi-currency when introduced
 
     # Idempotency check (early-return BEFORE balance checks)
     body = {"amount": amount, "method": method, "address": address}
