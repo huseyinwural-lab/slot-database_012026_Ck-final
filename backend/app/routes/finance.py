@@ -1147,20 +1147,6 @@ async def get_wallet_reconciliation_summary(
         "scanned_tx_count": scanned,
     }
 
-                },
-            )
-            session.add(rec)
-            inserted += 1
-
-        run.status = "completed"
-        run.stats_json = {"inserted": inserted, "scanned": scanned}
-        await session.commit()
-
-        await audit.log_event(
-            session=session,
-            request_id=request_id,
-            actor_user_id=str(current_admin.id),
-
 
 @router.get("/reconciliation/findings")
 async def list_wallet_reconciliation_findings(
