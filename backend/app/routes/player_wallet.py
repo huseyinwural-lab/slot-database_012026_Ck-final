@@ -63,34 +63,19 @@ async def create_deposit(
     if amount <= 0:
         raise HTTPException(400, "Amount must be positive")
 
-    # Tenant payment policy enforcement (deposit)
+    # Tenant daily deposit limit enforcement (TENANT-POLICY-001)
     from app.utils.tenant import get_current_tenant_id
-    from app.models.sql_models import Tenant
+    from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
     tenant_id = await get_current_tenant_id(request, None, session=session)
-    tenant = await session.get(Tenant, tenant_id)
-    if tenant:
-        dec_amount = Decimal(str(amount))
-        if tenant.min_deposit is not None and dec_amount < Decimal(str(tenant.min_deposit)):
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error_code": "LIMIT_EXCEEDED",
-                    "limit_name": "min_deposit",
-                    "limit_value": float(tenant.min_deposit),
-                    "attempted": float(amount),
-                },
-            )
-        if tenant.max_deposit is not None and dec_amount > Decimal(str(tenant.max_deposit)):
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error_code": "LIMIT_EXCEEDED",
-                    "limit_name": "max_deposit",
-                    "limit_value": float(tenant.max_deposit),
-                    "attempted": float(amount),
-                },
-            )
+    await ensure_within_tenant_daily_limits(
+        session,
+        tenant_id=tenant_id,
+        player_id=current_player.id,
+        action="deposit",
+        amount=amount,
+        currency="USD",
+    )
 
     # Test-only payment method gate: allow "test" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
@@ -383,34 +368,19 @@ async def create_withdrawal(
     if amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be positive")
 
-    # Tenant payment policy enforcement (withdraw)
+    # Tenant daily withdraw limit enforcement (TENANT-POLICY-001)
     from app.utils.tenant import get_current_tenant_id
-    from app.models.sql_models import Tenant
+    from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
     tenant_id = await get_current_tenant_id(request, None, session=session)
-    tenant = await session.get(Tenant, tenant_id)
-    if tenant:
-        dec_amount = Decimal(str(amount))
-        if tenant.min_withdraw is not None and dec_amount < Decimal(str(tenant.min_withdraw)):
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error_code": "LIMIT_EXCEEDED",
-                    "limit_name": "min_withdraw",
-                    "limit_value": float(tenant.min_withdraw),
-                    "attempted": float(amount),
-                },
-            )
-        if tenant.max_withdraw is not None and dec_amount > Decimal(str(tenant.max_withdraw)):
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error_code": "LIMIT_EXCEEDED",
-                    "limit_name": "max_withdraw",
-                    "limit_value": float(tenant.max_withdraw),
-                    "attempted": float(amount),
-                },
-            )
+    await ensure_within_tenant_daily_limits(
+        session,
+        tenant_id=tenant_id,
+        player_id=current_player.id,
+        action="withdraw",
+        amount=amount,
+        currency=currency,
+    )
 
     # Test-only withdraw method gate: allow "test_bank" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
