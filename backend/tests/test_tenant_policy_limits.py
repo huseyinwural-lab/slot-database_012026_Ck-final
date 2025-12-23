@@ -51,11 +51,12 @@ async def test_deposit_limit_exceeded_returns_422(client, player_with_token, asy
 
 
 @pytest.mark.asyncio
-async def test_withdraw_limit_exceeded_returns_422(client, player_with_token):
+async def test_withdraw_limit_exceeded_returns_422(client, player_with_token, async_session_factory):
     tenant, player, player_token = player_with_token
-    # Set tenant daily_withdraw_limit = 30
-    async with async_session() as session:
+    # Set tenant daily_withdraw_limit = 30 in the same test DB
+    async with async_session_factory() as session:
         db_tenant = await session.get(Tenant, tenant.id)
+        assert db_tenant is not None
         db_tenant.daily_withdraw_limit = Decimal("30.0")
         session.add(db_tenant)
         await session.commit()
@@ -87,11 +88,12 @@ async def test_withdraw_limit_exceeded_returns_422(client, player_with_token):
 
 
 @pytest.mark.asyncio
-async def test_no_policy_allows_transactions(client, player_with_token):
+async def test_no_policy_allows_transactions(client, player_with_token, async_session_factory):
     tenant, player, player_token = player_with_token
-    # Ensure policy fields are None
-    async with async_session() as session:
+    # Ensure policy fields are None in the same test DB
+    async with async_session_factory() as session:
         db_tenant = await session.get(Tenant, tenant.id)
+        assert db_tenant is not None
         db_tenant.daily_deposit_limit = None
         db_tenant.daily_withdraw_limit = None
         session.add(db_tenant)
