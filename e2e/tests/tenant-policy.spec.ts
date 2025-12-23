@@ -161,12 +161,16 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // Debug
     adminPage.on('console', msg => console.log('PAGE LOG:', msg.text()));
 
-    // Wait for policy data to load
-    await adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200);
     await adminPage.goto(`${FRONTEND_URL}/settings`);
+    
+    // Click tab and wait for response
+    await Promise.all([
+      adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200),
+      adminPage.click('button[role="tab"]:has-text("Payments Policy")')
+    ]);
+    
     // Wait for React to process the response
     await adminPage.waitForTimeout(1000);
-    await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
     
     // Wait for input
     const withdrawInput = adminPage.locator('text=Daily Withdraw Limit').locator('xpath=..').locator('input');
