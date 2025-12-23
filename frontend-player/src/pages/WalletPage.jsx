@@ -88,17 +88,44 @@ const WalletPage = () => {
     e.preventDefault();
     setProcessing(true);
     setMessage(null);
+
+    const storedPlayer = localStorage.getItem('player_user');
+    const player = storedPlayer ? JSON.parse(storedPlayer) : null;
+    const playerId = player?.id || 'self';
+    const scope = PLAYER_SCOPE;
+    const action = 'withdraw';
+
+    const key = `${scope}:${playerId}:${action}`;
+    setActionStatus((prev) => ({ ...prev, [key]: { status: 'in_flight' } }));
+
     try {
-      await api.post('/player/wallet/withdraw', {
-        amount: parseFloat(withdrawAmount),
-        method: 'crypto',
-        address: withdrawAddress
+      await callMoneyAction({
+        scope,
+        id: playerId,
+        action,
+        requestFn: (idemKey) =>
+          api.post('/player/wallet/withdraw', {
+            amount: parseFloat(withdrawAmount),
+            method: 'crypto',
+            address: withdrawAddress,
+          }, {
+            headers: {
+              'Idempotency-Key': idemKey,
+            },
+          }),
+        onStatus: (status) => {
+          setActionStatus((prev) => ({
+            ...prev,
+            [key]: { status: status.status || status, message: status.message },
+          }));
+        },
       });
       setMessage({ type: 'success', text: 'Withdrawal requested successfully!' });
       setWithdrawAmount('');
       setWithdrawAddress('');
       fetchWalletData();
     } catch (err) {
+      console.error(err);
       setMessage({ type: 'error', text: err.response?.data?.detail || 'Withdrawal failed' });
     } finally {
       setProcessing(false);
