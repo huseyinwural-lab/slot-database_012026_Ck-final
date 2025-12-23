@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Adyen Deposit Flow', () => {
   test('should successfully deposit via Adyen (Mock)', async ({ page, request }) => {
     test.setTimeout(60000);
-    const PLAYER_APP_URL = 'http://localhost:3000';
+    const PLAYER_APP_URL = 'http://localhost:3001';
     const API_URL = 'http://localhost:8001';
 
     const uniqueId = Date.now();
