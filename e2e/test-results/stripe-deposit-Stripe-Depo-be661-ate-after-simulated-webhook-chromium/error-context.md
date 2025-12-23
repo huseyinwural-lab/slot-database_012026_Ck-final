@@ -19,7 +19,7 @@
           - /url: /promotions
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: user1766520849508
+          - generic [ref=e17]: user1766520929376
           - generic [ref=e18]: $0.00
         - button [ref=e19] [cursor=pointer]:
           - img [ref=e20]
@@ -36,7 +36,7 @@
       - generic [ref=e39]:
         - generic [ref=e40]:
           - generic [ref=e41]: Available Balance
-          - generic [ref=e42]: $0.00
+          - generic [ref=e42]: $50.00
           - generic [ref=e43]:
             - img [ref=e44]
             - text: Ready to play or withdraw
@@ -49,7 +49,7 @@
         - generic [ref=e52]:
           - img [ref=e54]
           - generic [ref=e58]: Total Balance
-          - generic [ref=e59]: $0.00
+          - generic [ref=e59]: $50.00
           - generic [ref=e60]: Net Asset Value
       - generic [ref=e61]:
         - generic [ref=e62]:
@@ -59,7 +59,7 @@
           - generic [ref=e66]:
             - generic [ref=e67]:
               - img [ref=e68]
-              - text: Verifying payment...
+              - text: Payment Successful!
             - generic [ref=e70]:
               - heading "Deposit Funds" [level=3] [ref=e71]:
                 - img [ref=e72]
@@ -73,7 +73,7 @@
                 - button "$50" [ref=e82] [cursor=pointer]
                 - button "$100" [ref=e83] [cursor=pointer]
                 - button "$500" [ref=e84] [cursor=pointer]
-              - button "Redirecting to Stripe..." [disabled] [ref=e85]
+              - button "Pay with Stripe" [ref=e85] [cursor=pointer]
               - paragraph [ref=e86]:
                 - img [ref=e87]
                 - text: Secure Payment via Stripe
@@ -92,18 +92,18 @@
                 - columnheader "Date" [ref=e105]
                 - columnheader "ID" [ref=e106]
             - rowgroup [ref=e107]:
-              - row "deposit +$50.00 pending_provider 12/23/2025, 8:14:10 PM d3e4d560..." [ref=e108]:
+              - row "deposit +$50.00 completed 12/23/2025, 8:15:30 PM 4bbd7105..." [ref=e108]:
                 - cell "deposit" [ref=e109]:
                   - generic [ref=e110]:
                     - img [ref=e111]
                     - generic [ref=e114]: deposit
                 - cell "+$50.00" [ref=e115]
-                - cell "pending_provider" [ref=e116]:
-                  - generic [ref=e117]: pending_provider
-                - cell "12/23/2025, 8:14:10 PM" [ref=e118]
-                - cell "d3e4d560..." [ref=e119]:
-                  - button "d3e4d560..." [ref=e120] [cursor=pointer]:
-                    - text: d3e4d560...
+                - cell "completed" [ref=e116]:
+                  - generic [ref=e117]: completed
+                - cell "12/23/2025, 8:15:30 PM" [ref=e118]
+                - cell "4bbd7105..." [ref=e119]:
+                  - button "4bbd7105..." [ref=e120] [cursor=pointer]:
+                    - text: 4bbd7105...
                     - img [ref=e121]
           - generic [ref=e124]:
             - button "Previous Page" [disabled] [ref=e125]:
