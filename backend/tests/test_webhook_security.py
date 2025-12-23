@@ -28,7 +28,8 @@ def _set_webhook_secret(monkeypatch):
   monkeypatch.setenv("WEBHOOK_SECRET", "test_webhook_secret")
 
 
-def test_webhook_missing_signature_headers_returns_400():
+@pytest.mark.asyncio
+async def test_webhook_missing_signature_headers_returns_400(client):
   payload = {
     "provider": "mockpsp",
     "provider_event_id": "evt_1",
