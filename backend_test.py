@@ -22,10 +22,8 @@ import httpx
 import os
 import uuid
 
-# Use environment variable for backend URL, fallback to localhost
-BACKEND_URL = os.getenv("REACT_APP_BACKEND_URL", "http://localhost:8001")
-if BACKEND_URL.endswith("/api"):
-    BACKEND_URL = BACKEND_URL[:-4]  # Remove /api suffix if present
+# Use the production backend URL from frontend env
+BACKEND_URL = "https://finpay-guard.preview.emergentagent.com"
 
 class IdempotencyTestSuite:
     def __init__(self):
