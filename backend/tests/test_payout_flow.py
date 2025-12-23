@@ -33,18 +33,27 @@ async def _seed_admin_player_and_balance(async_session_factory):
         # Create a simple admin bound to the same tenant
         from app.models.sql_models import AdminUser
 
-        admin = AdminUser(
-            tenant_id=tenant.id,
-            username="payout-admin",
-            email="payout-admin@test.local",
-            full_name="Payout Admin",
-            password_hash="noop",
-            role="Admin",
-            is_platform_owner=False,
-        )
-        session.add(admin)
-        await session.commit()
-        await session.refresh(admin)
+        # Get-or-create semantics to avoid unique email violation across tests
+        existing = (
+            await session.execute(
+                select(AdminUser).where(AdminUser.email == "payout-admin@test.local")
+            )
+        ).scalars().first()
+        if existing:
+            admin = existing
+        else:
+            admin = AdminUser(
+                tenant_id=tenant.id,
+                username="payout-admin",
+                email="payout-admin@test.local",
+                full_name="Payout Admin",
+                password_hash="noop",
+                role="Admin",
+                is_platform_owner=False,
+            )
+            session.add(admin)
+            await session.commit()
+            await session.refresh(admin)
 
         from datetime import timedelta
 
