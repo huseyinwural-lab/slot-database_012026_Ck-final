@@ -493,8 +493,6 @@ test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ pa
 // P06-204  Replay / Dedupe proof (payout + webhook)
 
 test('P06-204: Replay / dedupe for payout and webhook', async ({ context, request, page }) => {
-  await context.tracing.start({ snapshots: true, sources: true });
-
   // Reuse global admin token from storageState written in global-setup.
   const fs = await import('fs');
   const path = await import('path');
