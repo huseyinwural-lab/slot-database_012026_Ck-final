@@ -7,7 +7,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.main import app
+from server import app
 
 
 client = TestClient(app)
