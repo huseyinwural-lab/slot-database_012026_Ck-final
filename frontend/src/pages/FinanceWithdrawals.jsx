@@ -215,7 +215,7 @@ const FinanceWithdrawals = () => {
     try {
       await api.post(`/v1/finance/withdrawals/${tx.tx_id}/recheck`, null, {
         headers: {
-          'Idempotency-Key': makeIdemKey(tx.tx_id, 'recheck'),
+          'Idempotency-Key': buildIdempotencyKey(ADMIN_SCOPE, tx.tx_id, 'recheck'),
         },
       });
       toast.success('Recheck requested');
