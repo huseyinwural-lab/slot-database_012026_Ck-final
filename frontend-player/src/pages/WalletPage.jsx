@@ -79,7 +79,7 @@ const WalletPage = () => {
       fetchWalletData(); // Refresh balance
     } catch (err) {
       console.error(err);
-      setMessage({ type: 'error', text: err.response?.data?.detail || 'Deposit failed' });
+      setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
     } finally {
       setProcessing(false);
     }
