@@ -246,6 +246,37 @@ class GameAsset(SQLModel, table=True):
     metadata_json: Dict = Field(default={}, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
+# --- PAYOUT ATTEMPTS (P0-5) ---
+
+class PayoutAttempt(SQLModel, table=True):
+    """Tracks each attempt to send a withdrawal payout to a PSP.
+
+    This decouples withdrawal review from the actual provider payout so that we
+    can model retries, failures and webhook replay safety.
+    """
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+
+    # Which withdrawal this attempt belongs to
+    withdraw_tx_id: str = Field(foreign_key="transaction.id", index=True)
+
+    # Tenant scoping (copied from the parent transaction for convenience)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
+
+    # PSP information
+    provider: str = Field(index=True)
+    provider_event_id: Optional[str] = Field(default=None, index=True)
+
+    # Idempotency for start_payout calls
+    idempotency_key: Optional[str] = Field(default=None, index=True)
+
+    status: str = Field(default="pending", index=True)
+    error_code: Optional[str] = None
+
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+
+
 # --- FINANCE MODELS (EXTENDED) ---
 
 class ReconciliationReport(SQLModel, table=True):
