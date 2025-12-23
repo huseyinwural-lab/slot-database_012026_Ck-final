@@ -1111,7 +1111,7 @@ async def get_wallet_reconciliation_summary(
         target_date = date_cls(year=now.year, month=now.month, day=now.day)
 
     # Latest run for this provider and window_start date
-    day_start, day_end = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc), None
+    day_start = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc)
 
     query = select(ReconciliationRun).where(
         ReconciliationRun.provider == provider,
