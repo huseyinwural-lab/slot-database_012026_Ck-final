@@ -225,6 +225,8 @@ const FinanceWithdrawals = () => {
 
   const canApproveOrReject = (tx) => tx.state === 'requested';
   const canMarkPaid = (tx) => tx.state === 'approved';
+  const canStartOrRetryPayout = (tx) => tx.state === 'approved' || tx.state === 'payout_failed';
+  const canRecheck = (tx) => tx.state === 'payout_pending';
 
   return (
     <div className="space-y-6">
