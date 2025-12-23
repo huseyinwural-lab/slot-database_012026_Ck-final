@@ -420,6 +420,27 @@ async def start_payout(
     if outcome not in {"success", "fail"}:
         outcome = "success"
 
+    # Audit: payout started (only on the path where we actually trigger PSP)
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(current_admin.id),
+        tenant_id=tenant_id,
+        action="FIN_PAYOUT_STARTED",
+        resource_type="wallet_payout",
+        resource_id=tx.id,
+        result="pending",
+        details={
+            "tx_id": tx.id,
+            "player_id": tx.player_id,
+            "amount": tx.amount,
+            "currency": tx.currency,
+            "idempotency_key": idem_key,
+            "outcome_hint": outcome,
+        },
+        ip_address=ip,
+    )
+
     psp = get_psp()
     psp_idem_key = build_psp_idem_key(str(tx.id))
 
