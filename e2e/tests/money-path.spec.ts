@@ -375,15 +375,9 @@ const ARTIFACT_DIR = 'artifacts';
 
 // P06-201  Admin login + withdrawals smoke
 
-test('P06-201: Admin login + Withdrawals page smoke', async ({ page, request }) => {
-  const adminToken = await apiLoginAdmin(BACKEND_URL, OWNER_EMAIL, OWNER_PASSWORD);
-
-  // Simulate login by injecting a valid admin token into localStorage
-  await page.goto('/');
-  await page.evaluate(([key, token]) => {
-    localStorage.setItem(key, token as string);
-  }, [LS_TOKEN_KEY, adminToken]);
-
+test('P06-201: Admin login + Withdrawals page smoke', async ({ page }) => {
+  // Global storageState already contains admin_token + tenant context from
+  // global-setup. We can directly navigate to withdrawals.
   await page.goto('/finance/withdrawals');
   await expect(page.getByRole('heading', { name: /withdrawals/i })).toBeVisible();
   await expect(page.getByText('Review, approve or reject player withdrawal requests').first()).toBeVisible();
