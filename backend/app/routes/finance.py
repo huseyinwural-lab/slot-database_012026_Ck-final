@@ -1026,7 +1026,7 @@ async def run_wallet_reconciliation(
         resource_type="reconciliation_run",
         resource_id=run.id,
         result="started",
-        details={"provider": provider, "date": target_date.isoformat()},
+        details={"provider": provider, "date": target_date.isoformat(), "run_id": run.id},
         ip_address=ip,
     )
 
@@ -1070,7 +1070,7 @@ async def run_wallet_reconciliation(
             resource_type="reconciliation_run",
             resource_id=run.id,
             result="success",
-            details={"provider": provider, "date": target_date.isoformat(), "inserted": inserted, "scanned": scanned},
+            details={"provider": provider, "date": target_date.isoformat(), "inserted": inserted, "scanned": scanned, "run_id": run.id},
             ip_address=ip,
         )
         await session.commit()
@@ -1089,7 +1089,7 @@ async def run_wallet_reconciliation(
             resource_type="reconciliation_run",
             resource_id=run.id,
             result="failed",
-            details={"provider": provider, "date": target_date.isoformat(), "error": str(exc)},
+            details={"provider": provider, "date": target_date.isoformat(), "error": str(exc), "run_id": run.id},
             ip_address=ip,
         )
         await session.commit()
