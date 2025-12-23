@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-Backend P0-3 Idempotency and Replay-Safe Behavior Test Suite
+Backend P0-4 Panel Bütünlüğü Test Suite
 
 This test suite validates:
-1. DB schema / migrations - UNIQUE constraints verification
-2. Deposit create idempotency 
-3. Withdraw create idempotency
-4. Admin transition idempotency
-5. Webhook replay idempotency
-6. Full P0-3 idempotency pack
+1. /api/v1/finance/withdrawals (list_withdrawals) - query parameter combinations
+2. /api/v1/player/wallet/balance and /api/v1/player/wallet/transactions - wallet functionality  
+3. Idempotency behavior for withdraw operations
+4. Existing unit tests for admin idempotency
 
-Tests are designed to run against the live backend service.
+Tests are designed to run against the localhost backend service.
 """
 
 import asyncio
@@ -21,9 +19,10 @@ from typing import Dict, Any, List, Tuple
 import httpx
 import os
 import uuid
+import subprocess
 
-# Use the production backend URL from frontend env
-BACKEND_URL = "https://moneypath-6.preview.emergentagent.com"
+# Use localhost backend for testing as requested
+BACKEND_URL = "http://localhost:8001"
 
 class IdempotencyTestSuite:
     def __init__(self):
