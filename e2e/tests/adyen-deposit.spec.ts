@@ -39,22 +39,27 @@ test.describe('Adyen Deposit Flow', () => {
     // 4. Enter Amount
     await page.fill('input[placeholder="Min $10.00"]', '55');
 
-    // 5. Submit & Intercept Response
-    const [response] = await Promise.all([
-      page.waitForResponse(res => res.url().includes('/api/v1/payments/adyen/checkout/session') && res.status() === 200),
-      page.click('button:has-text("Pay with Adyen")')
-    ]);
+    // 5. Submit & Capture Redirect URL
+    let capturedUrl;
+    const urlListener = request => {
+        if (request.url().includes('provider=adyen') && request.url().includes('tx_id')) {
+            capturedUrl = request.url();
+        }
+    };
+    page.on('request', urlListener);
 
-    const json = await response.json();
-    const redirectUrl = new URL(json.url);
-    const txId = redirectUrl.searchParams.get('tx_id');
+    await page.click('button:has-text("Pay with Adyen")');
+
+    // 6. Wait for success UI
+    await expect(page.locator('text=Adyen Payment Authorised!')).toBeVisible({ timeout: 15000 });
+    
+    page.off('request', urlListener);
+
+    expect(capturedUrl).toBeTruthy();
+    const txId = new URL(capturedUrl).searchParams.get('tx_id');
     expect(txId).toBeTruthy();
 
-    // 6. Wait for success UI (URL might be cleared by then)
-    await page.waitForURL(/wallet/); // Just wait for any wallet url, or specific success state
-    await expect(page.locator('text=Adyen Payment Authorised!')).toBeVisible();
-
-    // 7. (Skip URL extraction since we have txId)
+    // 7. Simulate Webhook
     
     // 8. Simulate Webhook
     // Note: The UI says "Authorised" but the balance doesn't update until webhook.
