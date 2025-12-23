@@ -426,25 +426,29 @@ test('P06-202: Deposit success increases balance, fail is net-zero', async ({ re
 
 // P06-203  Withdraw > approve > payout fail > retry success
 
-test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ page }) => {
+test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ page, request }) => {
   const adminToken = await apiLoginAdmin(BACKEND_URL, OWNER_EMAIL, OWNER_PASSWORD);
-  const { token: playerToken, playerId } = await apiRegisterOrLoginPlayer(BACKEND_URL, PLAYER_EMAIL, PLAYER_PASSWORD);
+
+  // Her koşumda benzersiz player ile izolasyon
+  const uniqueEmail = `e2e_p06_203_${Date.now()}@test.local`;
+  const { token: playerToken, playerId } = await apiRegisterOrLoginPlayer(BACKEND_URL, uniqueEmail, PLAYER_PASSWORD);
   await adminApproveKycForPlayerId(BACKEND_URL, adminToken, playerId);
 
-  const before = await playerBalance(BACKEND_URL, playerToken);
   const withdrawAmount = 30;
 
-  // Ensure funds
-  await playerDeposit(BACKEND_URL, playerToken, withdrawAmount + 10, 'success');
+  // Başlangıç: 0 balance, tek deposit + tek withdraw ile izole akış
+  const before = await getBalanceNoCache(request, BACKEND_URL, playerToken);
 
-  const afterDeposit = await playerBalance(BACKEND_URL, playerToken);
+  await playerDeposit(BACKEND_URL, playerToken, withdrawAmount + 10, 'success');
+  const afterDeposit = await getBalanceNoCache(request, BACKEND_URL, playerToken);
 
   // 1) Withdraw requested
   const { txId } = await playerWithdraw(BACKEND_URL, playerToken, withdrawAmount);
 
-  const afterRequested = await playerBalance(BACKEND_URL, playerToken);
-  expect(afterRequested.available_real).toBeCloseTo(afterDeposit.available_real - withdrawAmount, 2);
-  expect(afterRequested.held_real).toBeCloseTo(afterDeposit.held_real + withdrawAmount, 2);
+  const afterRequested = await getBalanceNoCache(request, BACKEND_URL, playerToken);
+  // Beklenen: held ≈ withdrawAmount, available ≈ afterDeposit.available - withdrawAmount
+  expect(afterRequested.available_real).toBeCloseTo(afterDeposit.available_real - withdrawAmount, 6);
+  expect(afterRequested.held_real).toBeCloseTo(withdrawAmount, 6);
 
   // 2) Approve (requested -> approved)
   await adminApproveWithdraw(BACKEND_URL, adminToken, txId);
@@ -453,34 +457,35 @@ test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ pa
   const wApproved = (listApproved.items || []).find((w: any) => w.tx_id === txId || w.id === txId);
   expect(wApproved, 'approved withdrawal must appear').toBeTruthy();
 
-  // UI evidence is covered by P06-201; here we keep the flow API-only to avoid
-  // flakiness from UI waitForResponse. A separate UI smoke proves the page.
-
   // 3) Start payout fail
   const payoutKeyFail = idemKey('e2e-payout-fail');
   await adminStartPayout(BACKEND_URL, adminToken, txId, payoutKeyFail, 'fail');
 
-  const afterFailPayout = await playerBalance(BACKEND_URL, playerToken);
+  const afterFailPayout = await getBalanceNoCache(request, BACKEND_URL, playerToken);
   // Held should remain same as afterRequested
-  expect(afterFailPayout.available_real).toBeCloseTo(afterRequested.available_real, 2);
-  expect(afterFailPayout.held_real).toBeCloseTo(afterRequested.held_real, 2);
+  expect(afterFailPayout.available_real).toBeCloseTo(afterRequested.available_real, 6);
+  expect(afterFailPayout.held_real).toBeCloseTo(afterRequested.held_real, 6);
 
   const listFailed = await adminListWithdrawals(BACKEND_URL, adminToken, { state: 'payout_failed', limit: 50, offset: 0 });
   const wFailed = (listFailed.items || []).find((w: any) => w.tx_id === txId || w.id === txId);
   expect(wFailed, 'payout_failed withdrawal must appear').toBeTruthy();
 
-  // UI evidence for failed state is covered indirectly by P06-201 + Admin UI tests.
-  // Here we stay API-only to keep this flow robust.
   await page.screenshot({ path: `${ARTIFACT_DIR}/05-payout-failed.png`, fullPage: false });
 
   // 4) Retry payout success
   const payoutKeySuccess = idemKey('e2e-payout-success');
   await adminStartPayout(BACKEND_URL, adminToken, txId, payoutKeySuccess, 'success');
 
-  const afterSuccessPayout = await playerBalance(BACKEND_URL, playerToken);
-  // Held should drop by amount vs afterFailPayout, available unchanged
-  expect(afterSuccessPayout.available_real).toBeCloseTo(afterFailPayout.available_real, 2);
-  expect(afterSuccessPayout.held_real).toBeCloseTo(afterFailPayout.held_real - withdrawAmount, 2);
+  // Poll until state paid ve held ≈ 0
+  const finalBalance = await pollUntil(
+    () => getBalanceNoCache(request, BACKEND_URL, playerToken),
+    (b) => closeTo(b.held_real, 0, 6),
+    { timeoutMs: 15000, intervalMs: 300, label: 'payout-success-held' },
+  );
+
+  // Held ≈ 0, available sabit kalmalı (afterFailPayout.available)
+  expect(finalBalance.available_real).toBeCloseTo(afterFailPayout.available_real, 6);
+  expect(finalBalance.held_real).toBeCloseTo(0, 6);
 
   const listPaid = await adminListWithdrawals(BACKEND_URL, adminToken, { state: 'paid', limit: 50, offset: 0 });
   const wPaid = (listPaid.items || []).find((w: any) => w.tx_id === txId || w.id === txId);
