@@ -421,7 +421,12 @@ test('P06-202: Deposit success increases balance, fail is net-zero', async ({ re
 // P06-203  Withdraw > approve > payout fail > retry success
 
 test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ page, request }) => {
-  const adminToken = await apiLoginAdmin(BACKEND_URL, OWNER_EMAIL, OWNER_PASSWORD);
+  // Reuse global admin token from storageState written in global-setup.
+  const fs = await import('fs');
+  const path = await import('path');
+  const tokenPath = path.resolve(__dirname, '../.auth/admin-token.json');
+  const raw = fs.readFileSync(tokenPath, 'utf-8');
+  const adminToken = JSON.parse(raw).token as string;
 
   // Her koşumda benzersiz player ile izolasyon
   const uniqueEmail = `e2e_p06_203_${Date.now()}@test.local`;
