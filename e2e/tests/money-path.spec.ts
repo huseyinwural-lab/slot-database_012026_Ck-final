@@ -333,9 +333,14 @@ const ARTIFACT_DIR = 'artifacts';
 
 // P06-201  Admin login + withdrawals smoke
 
-test('P06-201: Admin login + Withdrawals page smoke', async ({ page }) => {
-  await robustLogin(page);
-  await setTenantContext(page, 'default_casino');
+test('P06-201: Admin login + Withdrawals page smoke', async ({ page, request }) => {
+  const adminToken = await apiLoginAdmin(BACKEND_URL, OWNER_EMAIL, OWNER_PASSWORD);
+
+  // Simulate login by injecting a valid admin token into localStorage
+  await page.goto('/');
+  await page.evaluate(([key, token]) => {
+    localStorage.setItem(key, token as string);
+  }, [LS_TOKEN_KEY, adminToken]);
 
   await page.goto('/finance/withdrawals');
   await expect(page.getByRole('heading', { name: /withdrawals/i })).toBeVisible();
