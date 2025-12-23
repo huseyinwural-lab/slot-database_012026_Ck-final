@@ -54,6 +54,9 @@ app.add_middleware(RateLimitMiddleware)
 
 # Request logging & correlation ID (outermost middleware; runs before rate limiting)
 app.add_middleware(RequestLoggingMiddleware)
+# Metrics Middleware
+from app.middleware.metrics_middleware import MetricsMiddleware
+app.add_middleware(MetricsMiddleware)
 
 # Exception Handlers
 app.add_exception_handler(AppError, app_exception_handler)
@@ -123,6 +126,8 @@ app.include_router(settings_router.router)
 app.include_router(dashboard.router)
 app.include_router(tables.router)
 app.include_router(kill_switch.router)
+from app.routes import ops
+app.include_router(ops.router)
 app.include_router(flags.router)
 from app.routes import reconciliation as reconciliation_router
 app.include_router(reconciliation_router.router)
