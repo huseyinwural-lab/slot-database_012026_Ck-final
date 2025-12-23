@@ -167,12 +167,6 @@ function closeTo(a: number, b: number, precision = 6) {
 }
 
 
-  const rText = await reviewRes.text();
-  if (!reviewRes.ok()) {
-    throw new Error(`KYC review failed ${reviewRes.status()} body=${rText}`);
-  }
-}
-
 async function playerBalance(apiBaseUrl: string, playerToken: string) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
