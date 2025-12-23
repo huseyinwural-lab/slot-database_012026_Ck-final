@@ -63,6 +63,35 @@ async def create_deposit(
     if amount <= 0:
         raise HTTPException(400, "Amount must be positive")
 
+    # Tenant payment policy enforcement (deposit)
+    from app.utils.tenant import get_current_tenant_id
+    from app.models.sql_models import Tenant
+
+    tenant_id = await get_current_tenant_id(request, None, session=session)
+    tenant = await session.get(Tenant, tenant_id)
+    if tenant:
+        dec_amount = Decimal(str(amount))
+        if tenant.min_deposit is not None and dec_amount < Decimal(str(tenant.min_deposit)):
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error_code": "LIMIT_EXCEEDED",
+                    "limit_name": "min_deposit",
+                    "limit_value": float(tenant.min_deposit),
+                    "attempted": float(amount),
+                },
+            )
+        if tenant.max_deposit is not None and dec_amount > Decimal(str(tenant.max_deposit)):
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error_code": "LIMIT_EXCEEDED",
+                    "limit_name": "max_deposit",
+                    "limit_value": float(tenant.max_deposit),
+                    "attempted": float(amount),
+                },
+            )
+
     # Test-only payment method gate: allow "test" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
     is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test"}
