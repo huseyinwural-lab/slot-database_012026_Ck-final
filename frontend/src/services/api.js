@@ -39,7 +39,8 @@ api.interceptors.request.use((config) => {
     // Money-path default Idempotency-Key generation:
     // For critical endpoints (deposit/withdraw/admin finance actions) we want
     // every request to carry an Idempotency-Key. If the caller has not set one
-    // explicitly, generate a random UUID here.
+    // explicitly, leave it empty here and let higher-level helpers (e.g.
+    // moneyAction) manage deterministic keys per click.
     const url = config.url || '';
     const method = (config.method || 'get').toLowerCase();
     const isMoneyPath =
@@ -49,11 +50,7 @@ api.interceptors.request.use((config) => {
         url.includes('/finance/withdrawals'));
 
     if (isMoneyPath && !config.headers['Idempotency-Key']) {
-      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        config.headers['Idempotency-Key'] = crypto.randomUUID();
-      } else {
-        config.headers['Idempotency-Key'] = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      }
+      // no-op: rely on callers for Idempotency-Key
     }
   } catch (e) {
     // localStorage not available; ignore
