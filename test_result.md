@@ -38,7 +38,19 @@
     - **E2E**: `e2e/tests/adyen-deposit.spec.ts` passed.
     - **Docs**: `docs/payments/adyen-integration.md`.
 
+## 5. Ops & Monitoring (Sprint 2 - PR1)
+- **Status**: ✅ COMPLETED & VERIFIED
+- **Features**:
+    - **Monitoring**: `app/services/metrics.py` + `metrics_middleware.py`.
+    - **Dashboard**: `GET /api/v1/ops/dashboard` (JSON).
+    - **Alerting**: Logs `[ALERT]` on critical findings.
+    - **Recon Automation**: `app/worker.py` (ARQ Cron Job @ 2AM).
+- **Verification**:
+    - `pytest tests/test_ops_metrics.py`: **PASSED** (Metrics & Dashboard).
+    - `pytest tests/test_worker_recon.py`: **PASSED** (Cron Job logic).
+
 ## Artifacts
-- `docs/payments/real-psp-integration.md`: Integration guide.
+- `app/backend/app/worker.py`: Worker entrypoint.
+- `app/backend/app/services/metrics.py`: Metrics service.
 -   `e2e/tests/stripe-deposit.spec.ts`: New E2E test.
 -   `backend/tests/test_tenant_policy_enforcement.py`: New backend policy test.
