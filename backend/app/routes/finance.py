@@ -558,25 +558,6 @@ async def payout_webhook(
 
     return {"status": "ok", "transaction": tx, "payout_attempt": attempt}
 
-                action="FIN_IDEMPOTENCY_HIT",
-                resource_type="wallet_payout",
-                resource_id=tx.id,
-                result="success",
-                details={
-                    "tx_id": tx.id,
-                    "payout_attempt_id": existing_attempt.id,
-                    "idempotency_key": idem_key,
-                    "state": tx.state,
-                },
-                ip_address=ip,
-            )
-            await session.commit()
-            return {"transaction": tx, "payout_attempt": existing_attempt}
-        # If still pending, also treat as replay/no-op at this layer; webhook or
-        # subsequent calls will drive it to terminal states.
-        if tx.state == "payout_pending":
-            return {"transaction": tx, "payout_attempt": existing_attempt}
-
     # Enforce state precondition for first call: must be approved
     if tx.state != "approved":
         raise HTTPException(
