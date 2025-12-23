@@ -228,9 +228,27 @@ const FinanceWithdrawals = () => {
   };
 
   const handleApprove = async (tx) => {
+    const logicalAction = 'approve';
     setActionLoading(true);
+    updateRowStatus(tx.tx_id, logicalAction, 'in_flight');
+
     try {
-      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/review`, { action: 'approve' });
+      await callMoneyAction({
+        scope: ADMIN_SCOPE,
+        id: tx.tx_id,
+        action: logicalAction,
+        requestFn: (idemKey) =>
+          api.post(`/v1/finance/withdrawals/${tx.tx_id}/review`, {
+            action: 'approve',
+          }, {
+            headers: {
+              'Idempotency-Key': idemKey,
+            },
+          }),
+        onStatus: (status) => {
+          updateRowStatus(tx.tx_id, logicalAction, status.status || status, status.message);
+        },
+      });
       toast.success('Withdrawal approved');
       await fetchWithdrawals(page);
     } catch (err) {
@@ -248,11 +266,28 @@ const FinanceWithdrawals = () => {
 
   const handleRejectConfirm = async () => {
     if (!selectedTx || !rejectReason.trim()) return;
+    const txId = selectedTx.tx_id;
+    const logicalAction = 'reject';
     setActionLoading(true);
+    updateRowStatus(txId, logicalAction, 'in_flight');
+
     try {
-      await api.post(`/v1/finance/withdrawals/${selectedTx.tx_id}/review`, {
-        action: 'reject',
-        reason: rejectReason.trim(),
+      await callMoneyAction({
+        scope: ADMIN_SCOPE,
+        id: txId,
+        action: logicalAction,
+        requestFn: (idemKey) =>
+          api.post(`/v1/finance/withdrawals/${txId}/review`, {
+            action: 'reject',
+            reason: rejectReason.trim(),
+          }, {
+            headers: {
+              'Idempotency-Key': idemKey,
+            },
+          }),
+        onStatus: (status) => {
+          updateRowStatus(txId, logicalAction, status.status || status, status.message);
+        },
       });
       toast.success('Withdrawal rejected');
       setRejectModalOpen(false);
