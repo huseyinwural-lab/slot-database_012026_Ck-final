@@ -62,20 +62,22 @@ async def _create_admin(session, tenant_id, email="audit_admin@test.com", userna
     await session.refresh(admin)
     return admin
 
-@pytest.fixture
+import pytest_asyncio
+
+@pytest_asyncio.fixture
 async def session(async_session_factory):
     async with async_session_factory() as session:
         yield session
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_tenant(session):
     return await _create_tenant(session)
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_player(session, db_tenant):
     return await _create_player(session, db_tenant.id)
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_admin_user(session, db_tenant):
     return await _create_admin(session, db_tenant.id)
 
