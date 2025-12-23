@@ -733,7 +733,7 @@ class P04PanelIntegrityTestSuite:
 
 async def main():
     """Main test runner"""
-    test_suite = IdempotencyTestSuite()
+    test_suite = P04PanelIntegrityTestSuite()
     success = await test_suite.run_all_tests()
     return success
 
