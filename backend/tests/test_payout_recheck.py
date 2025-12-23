@@ -97,7 +97,7 @@ async def test_recheck_paid_finalizes_pending_and_writes_single_withdraw_paid_le
     assert r_app.status_code == 200
 
     # Force state to payout_pending (simulate stuck payout)
-    tx_pending = await _force_state_payout_pending(async_session_factory, tx_id)
+    await _force_state_payout_pending(async_session_factory, tx_id)
 
     # Snapshot balances before recheck
     async with async_session_factory() as session:
