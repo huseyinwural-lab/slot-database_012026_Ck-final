@@ -964,3 +964,129 @@ async def get_chargebacks(
     query = select(ChargebackCase).where(ChargebackCase.tenant_id == tenant_id)
     result = await session.execute(query)
     return result.scalars().all()
+
+
+@router.post("/reconciliation/run")
+async def run_wallet_reconciliation(
+    request: Request,
+    date: Optional[str] = None,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Run wallet-ledger reconciliation for a given UTC day.
+
+    This computes money-path invariants and persists findings into
+    reconciliation_findings tied to a ReconciliationRun.
+    """
+
+    from datetime import date as date_cls
+    from app.models.reconciliation_run import ReconciliationRun
+    from app.models.reconciliation import ReconciliationFinding
+    from app.services.reconciliation import compute_daily_findings
+    from app.services.reconciliation_runs import create_run, get_run
+    from app.services.audit import audit
+
+    provider = "wallet_ledger"
+
+    # Parse date or default to today (UTC)
+    if date:
+        target_date = date_cls.fromisoformat(date)
+    else:
+        now = datetime.now(timezone.utc)
+        target_date = date_cls(year=now.year, month=now.month, day=now.day)
+
+    day_start = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc)
+    day_end = day_start + timedelta(days=1)
+
+    # Create reconciliation run
+    run = await create_run(
+        session,
+        provider=provider,
+        window_start=day_start,
+        window_end=day_end,
+        dry_run=False,
+        idempotency_key=None,
+        created_by_admin_id=str(current_admin.id),
+    )
+
+    request_id = getattr(request.state, "request_id", "unknown")
+    ip = request.client.host if request.client else None
+
+    await audit.log_event(
+        session=session,
+        request_id=request_id,
+        actor_user_id=str(current_admin.id),
+        tenant_id=None,
+        action="FIN_RECONCILIATION_RUN_STARTED",
+        resource_type="reconciliation_run",
+        resource_id=run.id,
+        result="started",
+        details={"provider": provider, "date": target_date.isoformat()},
+        ip_address=ip,
+    )
+
+    inserted = 0
+    scanned = 0
+
+    try:
+        findings = await compute_daily_findings(session, day=target_date)
+        scanned = len(findings)
+
+        for f in findings:
+            rec = ReconciliationFinding(
+                provider=provider,
+                tenant_id=f.tenant_id,
+                tx_id=f.tx_id,
+                finding_type=f.finding_code,
+                severity=f.severity,
+                status="OPEN",
+                message=None,
+                raw={
+                    "run_id": run.id,
+                    "date": target_date.isoformat(),
+                    "tenant_id": f.tenant_id,
+                    "tx_id": f.tx_id,
+                    "details": f.details,
+                },
+            )
+            session.add(rec)
+            inserted += 1
+
+        run.status = "completed"
+        run.stats_json = {"inserted": inserted, "scanned": scanned}
+        await session.commit()
+
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=None,
+            action="FIN_RECONCILIATION_RUN_COMPLETED",
+            resource_type="reconciliation_run",
+            resource_id=run.id,
+            result="success",
+            details={"provider": provider, "date": target_date.isoformat(), "inserted": inserted, "scanned": scanned},
+            ip_address=ip,
+        )
+
+    except Exception as exc:  # noqa: BLE001
+        run.status = "failed"
+        run.stats_json = {"inserted": inserted, "scanned": scanned, "error": str(exc)}
+        await session.commit()
+
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=None,
+            action="FIN_RECONCILIATION_RUN_FAILED",
+            resource_type="reconciliation_run",
+            resource_id=run.id,
+            result="failed",
+            details={"provider": provider, "date": target_date.isoformat(), "error": str(exc)},
+            ip_address=ip,
+        )
+        raise
+
+    return {"run_id": run.id, "inserted": inserted, "scanned": scanned}
+
