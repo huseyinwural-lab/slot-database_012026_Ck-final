@@ -28,7 +28,17 @@
 - **Verification**:
     - `tests/test_crm_aff_endpoints.py` passed (2/2 tests).
 
+## 4. Adyen Integration (PSP-ADAPTER-002)
+- **Status**: ✅ COMPLETED & VERIFIED
+- **Features**:
+    - Backend Adapter: `app.services.adyen_psp.AdyenPSP` (supports Mock).
+    - Endpoints: `/api/v1/payments/adyen/checkout/session`, `/webhook`.
+    - Frontend: Added "Pay with Adyen" to Wallet.
+- **Verification**:
+    - **E2E**: `e2e/tests/adyen-deposit.spec.ts` passed.
+    - **Docs**: `docs/payments/adyen-integration.md`.
+
 ## Artifacts
--   `docs/payments/real-psp-integration.md`: Integration guide.
+- `docs/payments/real-psp-integration.md`: Integration guide.
 -   `e2e/tests/stripe-deposit.spec.ts`: New E2E test.
 -   `backend/tests/test_tenant_policy_enforcement.py`: New backend policy test.
