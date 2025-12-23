@@ -145,8 +145,30 @@ class AdminReview002TestSuite:
                     self.log_result("Update Player KYC", False, "No admin token available")
                     return False
                 
-                # We need to find a way to update player KYC status - let's check if there's an admin endpoint
-                # For now, let's try to proceed without KYC verification and see what happens
+                # Update KYC status to verified using the KYC review endpoint
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                kyc_payload = {"status": "approved"}
+                
+                response = await client.post(
+                    f"{self.base_url}/kyc/documents/{self.test_player_id}/review",
+                    json=kyc_payload,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Update Player KYC", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                kyc_data = response.json()
+                player_status = kyc_data.get("player_status")
+                
+                if player_status != "verified":
+                    self.log_result("Update Player KYC", False, 
+                                  f"Expected 'verified', got '{player_status}'")
+                    return False
+                
+                self.log_result("Update Player KYC", True, f"Player KYC status: {player_status}")
                 
                 return True
                 
