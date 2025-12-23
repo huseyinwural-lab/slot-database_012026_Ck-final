@@ -5,12 +5,16 @@ from hashlib import sha256
 
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from server import app
+from app.core.database import async_session
 
 
-client = TestClient(app)
+@pytest.fixture
+async def client():
+  async with AsyncClient(app=app, base_url="http://testserver") as c:
+    yield c
 
 
 def sign(body: bytes, ts: int, secret: str) -> str:
