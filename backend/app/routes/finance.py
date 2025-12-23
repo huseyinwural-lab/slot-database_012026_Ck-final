@@ -1210,23 +1210,6 @@ async def list_wallet_reconciliation_findings(
 
     return {"items": payload_items, "meta": {"total": total, "limit": limit, "offset": offset}}
 
-            tenant_id=None,
-            action="FIN_RECONCILIATION_RUN_COMPLETED",
-            resource_type="reconciliation_run",
-            resource_id=run.id,
-            result="success",
-            details={"provider": provider, "date": target_date.isoformat(), "inserted": inserted, "scanned": scanned},
-            ip_address=ip,
-        )
-
-    except Exception as exc:  # noqa: BLE001
-        run.status = "failed"
-        run.stats_json = {"inserted": inserted, "scanned": scanned, "error": str(exc)}
-        await session.commit()
-
-        await audit.log_event(
-            session=session,
-
 
 @router.get("/reconciliation/tx/{tx_id}")
 async def get_wallet_reconciliation_tx_snapshot(
