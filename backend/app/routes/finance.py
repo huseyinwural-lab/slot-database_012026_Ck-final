@@ -496,6 +496,7 @@ async def start_payout(
     if psp_res.status == PSPStatus.PAID:
         # Success path: payout_pending -> paid + single withdraw_paid ledger
         transition_transaction(tx, "paid")
+
         await apply_wallet_delta_with_ledger(
             session,
             tenant_id=tenant_id,
