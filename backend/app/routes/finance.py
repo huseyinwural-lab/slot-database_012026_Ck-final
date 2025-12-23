@@ -40,6 +40,9 @@ async def list_withdrawals(
     player_id: str | None = None,
     date_from: datetime | None = None,
     date_to: datetime | None = None,
+    min_amount: float | None = None,
+    max_amount: float | None = None,
+    sort: str = "created_at_desc",
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
@@ -60,7 +63,18 @@ async def list_withdrawals(
     if date_to:
         query = query.where(Transaction.created_at <= date_to)
 
-    query = query.order_by(Transaction.created_at.desc()).offset(offset).limit(limit)
+    if min_amount is not None:
+        query = query.where(Transaction.amount >= min_amount)
+    if max_amount is not None:
+        query = query.where(Transaction.amount <= max_amount)
+
+    # Sorting contract: default created_at DESC; support created_at_asc if requested
+    if sort == "created_at_asc":
+        query = query.order_by(Transaction.created_at.asc())
+    else:
+        query = query.order_by(Transaction.created_at.desc())
+
+    query = query.offset(offset).limit(limit)
     result = await session.execute(query)
     items = result.scalars().all()
 
