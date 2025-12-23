@@ -100,19 +100,17 @@ async def test_no_policy_allows_transactions(client, player_with_token):
 
     headers = {"Authorization": f"Bearer {player_token}", "Content-Type": "application/json", "Idempotency-Key": "np1"}
 
-    async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        res1 = await ac.post(
-            "/api/v1/player/wallet/deposit",
-            json={"amount": 100.0, "method": "test"},
-            headers=headers,
-        )
-        assert res1.status_code in (200, 201)
+    res1 = await client.post(
+        "/api/v1/player/wallet/deposit",
+        json={"amount": 100.0, "method": "test"},
+        headers=headers,
+    )
+    assert res1.status_code in (200, 201)
 
     headers["Idempotency-Key"] = "np2"
-    async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        res2 = await ac.post(
-            "/api/v1/player/wallet/withdraw",
-            json={"amount": 80.0, "method": "crypto", "address": "addr"},
-            headers=headers,
-        )
-        assert res2.status_code in (200, 201)
+    res2 = await client.post(
+        "/api/v1/player/wallet/withdraw",
+        json={"amount": 80.0, "method": "crypto", "address": "addr"},
+        headers=headers,
+    )
+    assert res2.status_code in (200, 201)
