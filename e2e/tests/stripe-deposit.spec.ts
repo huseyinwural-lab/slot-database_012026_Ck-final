@@ -4,6 +4,8 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
   test('User can initiate deposit and see balance update after simulated webhook', async ({ page, request }) => {
     test.setTimeout(90000);
     
+    const PLAYER_APP_URL = 'http://localhost:3001';
+
     // Debug console logs from browser
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
@@ -24,22 +26,21 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
     });
     expect(registerRes.ok()).toBeTruthy();
 
-    // 2. Login via Frontend
+    // 2. Login via Frontend (Player App)
     console.log('Navigating to login...');
-    await page.goto('/login');
+    await page.goto(`${PLAYER_APP_URL}/login`);
     
     // Wait for ANY input to ensure page loaded
     await page.waitForSelector('input', { timeout: 20000 });
     
     console.log('Filling credentials...');
-    // Use layout-agnostic selectors if possible, or fallback
     await page.fill('input[type="email"]', email);
     await page.fill('input[type="password"]', password);
     await page.click('button[type="submit"]');
 
     // 3. Verify Landing on Wallet
     console.log('Waiting for wallet redirect...');
-    await expect(page).toHaveURL(/\/wallet/, { timeout: 30000 });
+    await expect(page).toHaveURL(new RegExp(`${PLAYER_APP_URL}/wallet`), { timeout: 30000 });
 
     // 4. Initiate Deposit
     console.log('Initiating deposit...');
@@ -54,7 +55,7 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
       await route.fulfill({
         json: {
             ...json,
-            url: `${page.url()}?session_id=${sessionId}&status=success`
+            url: `${PLAYER_APP_URL}/wallet?session_id=${sessionId}&status=success`
         }
       });
     });
