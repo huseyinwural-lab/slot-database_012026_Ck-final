@@ -349,6 +349,9 @@ async def start_payout(
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
 
+    request_id = getattr(request.state, "request_id", "unknown")
+    ip = request.client.host if request.client else None
+
     idem_key = request.headers.get("Idempotency-Key")
     if not idem_key:
         raise HTTPException(status_code=400, detail={"error_code": "IDEMPOTENCY_KEY_REQUIRED"})
