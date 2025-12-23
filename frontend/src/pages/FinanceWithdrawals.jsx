@@ -437,6 +437,27 @@ const FinanceWithdrawals = () => {
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Mark Paid
                             </Button>
                           )}
+                          {canStartOrRetryPayout(tx) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={actionLoading}
+                              onClick={() => handleStartOrRetryPayout(tx)}
+                            >
+                              <CheckCircle2 className="w-4 h-4 mr-1" />
+                              {tx.state === 'payout_failed' ? 'Retry Payout' : 'Start Payout'}
+                            </Button>
+                          )}
+                          {canRecheck(tx) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={actionLoading}
+                              onClick={() => handleRecheck(tx)}
+                            >
+                              Recheck
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
