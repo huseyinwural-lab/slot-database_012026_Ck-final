@@ -32,7 +32,7 @@ async def _create_player(session, tenant_id, email="audit_player@test.com", user
         email=email,
         username=username,
         password_hash="noop_hash",
-        balance_real_available=0.0,
+        balance_real_available=1000.0,
         balance_real_held=0.0,
         kyc_status="verified",
         registered_at=datetime.now(timezone.utc),
@@ -256,6 +256,10 @@ async def test_audit_admin_review_reason(client: AsyncClient, session, db_admin_
     - Admin Mark Paid with reason -> Assert audit has reason
     """
     # 1. Setup Withdrawal (requested)
+    # Ensure player has held balance for this withdrawal
+    db_player.balance_real_held = 100.0
+    session.add(db_player)
+    
     tx_id = str(uuid.uuid4())
     tx = Transaction(
         id=tx_id,
