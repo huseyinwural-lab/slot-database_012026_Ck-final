@@ -118,6 +118,12 @@ async function adminApproveKycForPlayerId(apiBaseUrl: string, adminToken: string
   const reviewRes = await ctx.post(`/api/v1/kyc/documents/${playerId}/review`, {
     data: { status: 'approved' },
   });
+  const rText = await reviewRes.text();
+  if (!reviewRes.ok()) {
+    throw new Error(`KYC review failed ${reviewRes.status()} body=${rText}`);
+  }
+}
+
 async function getBalanceNoCache(request: APIRequestContext, apiBaseUrl: string, playerToken: string) {
   const res = await request.get(`${apiBaseUrl}/api/v1/player/wallet/balance?t=${Date.now()}`, {
     headers: {
