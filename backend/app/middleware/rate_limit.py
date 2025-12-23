@@ -24,8 +24,17 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # key -> deque[timestamps]
         self._buckets: Dict[Tuple[str, str], Deque[float]] = defaultdict(deque)
         # Per-path limits: (max_requests, window_seconds)
+        # Relax limits in dev/local/test to avoid blocking integration tests
+        try:
+            from config import settings
+            is_dev = getattr(settings, "env", "dev") in {"dev", "local", "test"}
+        except Exception:
+            is_dev = False
+
+        login_limit = (100, 60.0) if is_dev else (5, 60.0)
+        
         self._limits = {
-            "/api/v1/auth/login": (5, 60.0),  # 5 login attempts / minute per IP
+            "/api/v1/auth/login": login_limit,
         }
 
     def _get_client_ip(self, request: Request) -> str:
