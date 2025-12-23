@@ -1,0 +1,37 @@
+{
+  "cookies": [
+    {
+      "name": "ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog",
+      "value": "%7B%22distinct_id%22%3A%22019b4b6b-3f04-7822-a572-2adeead3ea5a%22%7D",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1798032878,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "impersonate_tenant_id",
+          "value": "default_casino"
+        },
+        {
+          "name": "ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog",
+          "value": "{\"$initialization_time\":\"2025-12-23T13:34:38.338Z\",\"$configured_session_timeout_ms\":1800000,\"distinct_id\":\"019b4b6b-3f04-7822-a572-2adeead3ea5a\",\"$device_id\":\"019b4b6b-3f04-7822-a572-2adeead3ea5a\",\"$user_state\":\"anonymous\"}"
+        },
+        {
+          "name": "admin_user",
+          "value": "{\"email\":\"admin@casino.com\"}"
+        },
+        {
+          "name": "admin_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MDU2OTkxYy04YjU4LTRlYTUtOGJhNC0wOTEyMDdjMDZhMzkiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NjU4MzI3N30.iA9kvQybaLCOWhiKb6b-V1_d3AuLUy5A-OxGk9ajUZ8"
+        }
+      ]
+    }
+  ]
+}
