@@ -85,6 +85,12 @@ class Settings(BaseSettings):
     webhook_signature_enforced: bool = False
     webhook_secret_mockpsp: str = "changeme-mockpsp-secret"
     stripe_api_key: Optional[str] = None
+    
+    # Adyen Config
+    adyen_api_key: Optional[str] = None
+    adyen_merchant_account: Optional[str] = None
+    adyen_client_key: Optional[str] = None
+    adyen_hmac_key: Optional[str] = None
 
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
