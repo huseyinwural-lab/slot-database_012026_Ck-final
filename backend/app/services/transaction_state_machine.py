@@ -68,8 +68,9 @@ ALLOWED_TRANSITIONS: Dict[str, Dict[str, List[str]]] = {
     },
     "withdrawal": {
         STATE_REQUESTED: [STATE_APPROVED, STATE_REJECTED, STATE_CANCELED],
-        # P0-5 payout states
-        STATE_APPROVED: ["payout_pending"],
+        # P0-5 payout states: keep legacy approved->paid path for mark-paid while
+        # introducing payout_pending / payout_failed.
+        STATE_APPROVED: [STATE_PAID, "payout_pending"],
         "payout_pending": [STATE_PAID, "payout_failed"],
         "payout_failed": ["payout_pending", STATE_REJECTED],
     },
