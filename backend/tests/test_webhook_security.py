@@ -40,7 +40,7 @@ async def test_webhook_missing_signature_headers_returns_400(client):
   }
 
   # No timestamp/signature headers
-  res = client.post("/api/v1/finance/withdrawals/payout/webhook", json=payload)
+  res = await client.post("/api/v1/finance/withdrawals/payout/webhook", json=payload)
   assert res.status_code == status.HTTP_400_BAD_REQUEST
   body = res.json()
   assert body["detail"]["error_code"] == "WEBHOOK_SIGNATURE_MISSING"
