@@ -302,9 +302,25 @@ const FinanceWithdrawals = () => {
   };
 
   const handleMarkPaid = async (tx) => {
+    const logicalAction = 'mark_paid';
     setActionLoading(true);
+    updateRowStatus(tx.tx_id, logicalAction, 'in_flight');
+
     try {
-      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/mark-paid`);
+      await callMoneyAction({
+        scope: ADMIN_SCOPE,
+        id: tx.tx_id,
+        action: logicalAction,
+        requestFn: (idemKey) =>
+          api.post(`/v1/finance/withdrawals/${tx.tx_id}/mark-paid`, null, {
+            headers: {
+              'Idempotency-Key': idemKey,
+            },
+          }),
+        onStatus: (status) => {
+          updateRowStatus(tx.tx_id, logicalAction, status.status || status, status.message);
+        },
+      });
       toast.success('Withdrawal marked as paid');
       await fetchWithdrawals(page);
     } catch (err) {
