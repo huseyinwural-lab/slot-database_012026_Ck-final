@@ -81,8 +81,8 @@ export default async function globalSetup(config: FullConfig) {
   await page.fill('#password', OWNER_PASSWORD);
   await page.click('button:has-text("Sign In")');
 
-  // Wait a bit for the login to process
-  await page.waitForTimeout(3000);
+  // Wait a bit for the login to process and any redirects
+  await page.waitForTimeout(5000);
 
   // Wait until we are no longer on /login and token is present in localStorage
   await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30000 });
