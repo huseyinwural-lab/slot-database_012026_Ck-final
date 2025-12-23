@@ -31,7 +31,3 @@ def downgrade() -> None:
     op.drop_column("tenant", "payout_retry_limit")
     op.drop_column("tenant", "daily_withdraw_limit")
     op.drop_column("tenant", "daily_deposit_limit")
-    op.drop_column("tenant", "max_withdraw")
-    op.drop_column("tenant", "min_withdraw")
-    op.drop_column("tenant", "max_deposit")
-    op.drop_column("tenant", "min_deposit")
