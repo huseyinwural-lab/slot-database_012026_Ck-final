@@ -518,6 +518,63 @@ async def start_payout(
             currency=tx.currency or "USD",
             idempotency_key=f"withdraw_payout_paid:{tx.id}:{idem_key}",
             provider=psp_res.provider,
+            provider_ref=psp_res.provider_ref,
+            provider_event_id=psp_res.provider_event_id,
+        )
+
+        # Audit success
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=tenant_id,
+            action="FIN_PAYOUT_SUCCEEDED",
+            resource_type="wallet_payout",
+            resource_id=tx.id,
+            result="success",
+            details={
+                "tx_id": tx.id,
+                "player_id": tx.player_id,
+                "amount": tx.amount,
+                "currency": tx.currency,
+                "idempotency_key": idem_key,
+                "payout_attempt_id": attempt.id,
+            },
+            ip_address=ip,
+        )
+    else:
+        # Fail path: payout_pending -> payout_failed, NO ledger write, held unchanged
+        transition_transaction(tx, "payout_failed")
+
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=tenant_id,
+            action="FIN_PAYOUT_FAILED",
+            resource_type="wallet_payout",
+            resource_id=tx.id,
+            result="failure",
+            details={
+                "tx_id": tx.id,
+                "player_id": tx.player_id,
+                "amount": tx.amount,
+                "currency": tx.currency,
+                "idempotency_key": idem_key,
+                "payout_attempt_id": attempt.id,
+                "error_code": attempt.error_code,
+            },
+            ip_address=ip,
+        )
+
+    # Persist changes
+    session.add(tx)
+    session.add(attempt)
+    await session.commit()
+    await session.refresh(tx)
+    await session.refresh(attempt)
+
+    return {"transaction": tx, "payout_attempt": attempt}
 
 
 @router.post("/withdrawals/{tx_id}/recheck")
