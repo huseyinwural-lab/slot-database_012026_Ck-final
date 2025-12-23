@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from datetime import datetime, timedelta
 import uuid
@@ -12,7 +13,7 @@ from server import app
 def anyio_backend():
     return 'asyncio'
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="function")
 async def async_client(async_session_factory):
     from conftest import make_override_get_session, override_get_current_player_factory
     app.dependency_overrides[get_session] = make_override_get_session(async_session_factory)
@@ -22,17 +23,17 @@ async def async_client(async_session_factory):
         yield c
     app.dependency_overrides.clear()
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="function")
 async def session(async_session_factory):
     async with async_session_factory() as s:
         yield s
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="function")
 async def test_tenant(session):
     from conftest import _create_tenant
     return await _create_tenant(session, name="PolicyTenant_" + str(uuid.uuid4()))
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="function")
 async def admin_token_headers(session, test_tenant):
     from conftest import _create_admin, _make_admin_token
     admin = await _create_admin(session, tenant_id=test_tenant.id, email=f"admin_{uuid.uuid4()}@test.com")
