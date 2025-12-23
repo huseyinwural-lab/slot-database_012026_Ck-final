@@ -67,21 +67,25 @@ export default async function globalSetup(config: FullConfig) {
   }
   fs.writeFileSync(path.join(authDir, 'admin-token.json'), JSON.stringify({ token: adminToken }), 'utf-8');
 
-  // Create storageState with admin_token + impersonate_tenant_id in localStorage
+  // Create storageState by performing a real UI login so that
+  // localStorage + any auth-related state is consistent with production flows.
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await page.goto(FRONTEND_URL, { waitUntil: 'load' });
-  await page.evaluate(
-    ([token, tenantId]) => {
-      localStorage.setItem('admin_token', token as string);
-      localStorage.setItem('admin_user', JSON.stringify({ email: 'admin@casino.com' }));
-      localStorage.setItem('impersonate_tenant_id', tenantId as string);
-    },
-    [adminToken, 'default_casino'],
-  );
+  // Go directly to login page
+  await page.goto(`${FRONTEND_URL}/login`, { waitUntil: 'networkidle' });
 
+  // Fill login form and submit
+  await page.fill('#email', OWNER_EMAIL);
+  await page.fill('#password', OWNER_PASSWORD);
+  await page.click('button:has-text("Sign In")');
+
+  // Wait until we are no longer on /login and token is present in localStorage
+  await page.waitForURL((url) => !url.pathname.includes('/login'));
+  await page.waitForFunction(() => !!localStorage.getItem('admin_token'));
+
+  // Persist storageState for all tests
   await context.storageState({ path: path.join(authDir, 'admin.json') });
   await browser.close();
 }
