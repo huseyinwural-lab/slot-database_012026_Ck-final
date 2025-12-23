@@ -15,6 +15,7 @@ from config import settings
 import os
 from pydantic import BaseModel, Field
 
+from app.services.metrics import metrics
 # Initialize router
 router = APIRouter(prefix="/api/v1/payments/stripe", tags=["payments", "stripe"])
 logger = logging.getLogger(__name__)
@@ -269,7 +270,10 @@ async def stripe_webhook(
         raise HTTPException(status_code=400, detail=f"Webhook Error: {e}")
 
     # Process event
-    if webhook_response.event_type == "checkout.session.completed":
+    event_type = webhook_response.event_type
+    metrics.record_webhook_event("stripe", event_type)
+
+    if event_type == "checkout.session.completed":
         session_id = webhook_response.session_id
         
         # Idempotency check

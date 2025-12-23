@@ -13,6 +13,7 @@ from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from app.services.adyen_psp import AdyenPSP
 from config import settings
 from pydantic import BaseModel, Field
+from app.services.metrics import metrics
 
 # Initialize router
 router = APIRouter(prefix="/api/v1/payments/adyen", tags=["payments", "adyen"])
@@ -111,9 +112,13 @@ async def adyen_webhook(
     
     for item in notification_items:
         req_item = item.get("NotificationRequestItem", {})
+        event_code = req_item.get("eventCode")
+        
+        # Metric recording
+        metrics.record_webhook_event("adyen", event_code or "unknown")
         
         # We process 'AUTHORISATION' event
-        if req_item.get("eventCode") == "AUTHORISATION":
+        if event_code == "AUTHORISATION":
              tx_id = req_item.get("merchantReference")
              success = req_item.get("success") == "true"
              psp_reference = req_item.get("pspReference")
