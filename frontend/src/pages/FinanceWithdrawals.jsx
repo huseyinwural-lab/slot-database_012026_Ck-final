@@ -232,101 +232,52 @@ const FinanceWithdrawals = () => {
     }
   };
 
-  const handleApprove = async (tx) => {
-    const logicalAction = 'approve';
-    setActionLoading(true);
-    updateRowStatus(tx.tx_id, logicalAction, 'in_flight');
-
-    try {
-      await callMoneyAction({
-        scope: ADMIN_SCOPE,
-        id: tx.tx_id,
-        action: logicalAction,
-        requestFn: (idemKey) =>
-          api.post(`/v1/finance/withdrawals/${tx.tx_id}/review`, {
-            action: 'approve',
-          }, {
-            headers: {
-              'Idempotency-Key': idemKey,
-            },
-          }),
-        onStatus: (status) => {
-          updateRowStatus(tx.tx_id, logicalAction, status.status || status, status.message);
-        },
-      });
-      toast.success('Withdrawal approved');
-      await fetchWithdrawals(page);
-    } catch (err) {
-      await handleActionError(err);
-    } finally {
-      setActionLoading(false);
-    }
+  const openActionModal = (tx, type) => {
+    setActionModal({ open: true, type, tx });
+    setActionReason('');
   };
 
-  const openRejectModal = (tx) => {
-    setSelectedTx(tx);
-    setRejectReason('');
-    setRejectModalOpen(true);
-  };
-
-  const handleRejectConfirm = async () => {
-    if (!selectedTx || !rejectReason.trim()) return;
-    const txId = selectedTx.tx_id;
-    const logicalAction = 'reject';
+  const handleActionConfirm = async () => {
+    const { type, tx } = actionModal;
+    if (!tx || !actionReason.trim()) return;
+    
+    const txId = tx.tx_id;
     setActionLoading(true);
-    updateRowStatus(txId, logicalAction, 'in_flight');
+    updateRowStatus(txId, type, 'in_flight');
 
     try {
       await callMoneyAction({
         scope: ADMIN_SCOPE,
         id: txId,
-        action: logicalAction,
-        requestFn: (idemKey) =>
-          api.post(`/v1/finance/withdrawals/${txId}/review`, {
-            action: 'reject',
-            reason: rejectReason.trim(),
-          }, {
-            headers: {
-              'Idempotency-Key': idemKey,
-            },
-          }),
+        action: type,
+        requestFn: (idemKey) => {
+          const headers = { 'Idempotency-Key': idemKey };
+          
+          if (type === 'approve') {
+             return api.post(`/v1/finance/withdrawals/${txId}/review`, { action: 'approve', reason: actionReason.trim() }, { headers });
+          }
+          if (type === 'reject') {
+             return api.post(`/v1/finance/withdrawals/${txId}/review`, { action: 'reject', reason: actionReason.trim() }, { headers });
+          }
+          if (type === 'mark_paid') {
+             return api.post(`/v1/finance/withdrawals/${txId}/mark-paid`, { reason: actionReason.trim() }, { headers });
+          }
+          throw new Error('Unknown action type');
+        },
         onStatus: (status) => {
-          updateRowStatus(txId, logicalAction, status.status || status, status.message);
+          updateRowStatus(txId, type, status.status || status, status.message);
         },
       });
-      toast.success('Withdrawal rejected');
-      setRejectModalOpen(false);
-      setRejectReason('');
-      setSelectedTx(null);
-      await fetchWithdrawals(page);
-    } catch (err) {
-      await handleActionError(err);
-    } finally {
-      setActionLoading(false);
-    }
-  };
 
-  const handleMarkPaid = async (tx) => {
-    const logicalAction = 'mark_paid';
-    setActionLoading(true);
-    updateRowStatus(tx.tx_id, logicalAction, 'in_flight');
-
-    try {
-      await callMoneyAction({
-        scope: ADMIN_SCOPE,
-        id: tx.tx_id,
-        action: logicalAction,
-        requestFn: (idemKey) =>
-          api.post(`/v1/finance/withdrawals/${tx.tx_id}/mark-paid`, null, {
-            headers: {
-              'Idempotency-Key': idemKey,
-            },
-          }),
-        onStatus: (status) => {
-          updateRowStatus(tx.tx_id, logicalAction, status.status || status, status.message);
-        },
-      });
-      toast.success('Withdrawal marked as paid');
+      const successMsgs = {
+        approve: 'Withdrawal approved',
+        reject: 'Withdrawal rejected',
+        mark_paid: 'Withdrawal marked as paid',
+      };
+      toast.success(successMsgs[type] || 'Action completed');
+      
+      setActionModal({ open: false, type: null, tx: null });
+      setActionReason('');
       await fetchWithdrawals(page);
     } catch (err) {
       await handleActionError(err);
