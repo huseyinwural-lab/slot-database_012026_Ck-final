@@ -123,7 +123,7 @@ class IdempotencyTestSuite:
                     }
                     
                     response = await client.post(
-                        f"{self.base_url}/player/auth/login",
+                        f"{self.base_url}/auth/player/login",
                         json=player_login
                     )
                     
