@@ -413,8 +413,8 @@ async def start_payout(
         if tx.state == "payout_pending":
             return {"transaction": tx, "payout_attempt": existing_attempt}
 
-    # Enforce state precondition for first call: must be approved
-    if tx.state != "approved":
+    # Enforce state precondition for first call: must be approved or payout_failed
+    if tx.state not in {"approved", "payout_failed"}:
         raise HTTPException(
             status_code=409,
             detail={

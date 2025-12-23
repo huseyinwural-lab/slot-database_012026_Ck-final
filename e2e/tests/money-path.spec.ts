@@ -334,10 +334,10 @@ const ARTIFACT_DIR = 'artifacts';
 // P06-201  Admin login + withdrawals smoke
 
 test('P06-201: Admin login + Withdrawals page smoke', async ({ page }) => {
-  // For this flow we do not strictly need UI state verification; keep it API-only
-  // to avoid flakiness from UI login. If needed, a separate UI-only smoke covers
-  // navigation.
-  await page.goto('/');
+  await robustLogin(page);
+  await setTenantContext(page, 'default_casino');
+
+  await page.goto('/finance/withdrawals');
   await expect(page.getByRole('heading', { name: /withdrawals/i })).toBeVisible();
   await expect(page.getByText('Review, approve or reject player withdrawal requests').first()).toBeVisible();
 
