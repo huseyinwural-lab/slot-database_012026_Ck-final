@@ -18,6 +18,7 @@ import BrandSettings from '../components/settings/BrandSettings';
 import CurrencySettings from '../components/settings/CurrencySettings';
 import CountrySettings from '../components/settings/CountrySettings';
 import ApiKeySettings from '../components/settings/ApiKeySettings';
+import PaymentsPolicySettings from '../components/settings/PaymentsPolicySettings';
 
 const SettingsPanel = () => {
   const [activeTab, setActiveTab] = useState("brands");
