@@ -20,24 +20,37 @@ const api = axios.create({
   },
 });
 
-// Attach JWT token if available
+// Attach JWT token if available + money-path Idempotency-Key if caller didn't set one
 api.interceptors.request.use((config) => {
   try {
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
     const tenantId = typeof window !== 'undefined' ? localStorage.getItem('impersonate_tenant_id') : null;
 
-     
     config.headers = config.headers || {};
 
     if (token) {
-       
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     // Owner impersonation: pass tenant context via header
     if (tenantId) {
-       
       config.headers['X-Tenant-ID'] = tenantId;
+    }
+
+    // Money-path default Idempotency-Key generation:
+    // For critical endpoints (deposit/withdraw/admin finance actions) we want
+    // every request to carry an Idempotency-Key. If the caller has not set one
+    // explicitly, generate a uuid4 here.
+    const url = config.url || '';
+    const method = (config.method || 'get').toLowerCase();
+    const isMoneyPath =
+      method === 'post' &&
+      (url.includes('/player/wallet/deposit') ||
+        url.includes('/player/wallet/withdraw') ||
+        url.includes('/finance/withdrawals'));
+
+    if (isMoneyPath && !config.headers['Idempotency-Key']) {
+      config.headers['Idempotency-Key'] = makeIdempotencyKey();
     }
   } catch (e) {
     // localStorage not available; ignore
