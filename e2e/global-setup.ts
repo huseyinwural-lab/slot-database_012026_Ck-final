@@ -1,0 +1,87 @@
+import { FullConfig, request as pwRequest, chromium } from '@playwright/test';
+
+const OWNER_EMAIL = process.env.E2E_OWNER_EMAIL || process.env.OWNER_EMAIL || 'admin@casino.com';
+const OWNER_PASSWORD = process.env.E2E_OWNER_PASSWORD || process.env.OWNER_PASSWORD || 'Admin123!';
+const API_BASE = process.env.E2E_API_BASE || process.env.BACKEND_URL || 'http://localhost:8001';
+const FRONTEND_URL = process.env.E2E_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
+
+async function loginWithRetry(apiBaseUrl: string, email: string, password: string): Promise<string> {
+  const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
+
+  let attempt = 0;
+  const maxAttempts = 5;
+
+  while (attempt < maxAttempts) {
+    attempt += 1;
+    const res = await ctx.post('/api/v1/auth/login', {
+      data: { email, password },
+    });
+
+    if (res.status() === 429) {
+      // Rate limited: respect Retry-After header or exponential backoff
+      const retryAfterHeader = res.headers()['retry-after'];
+      let delayMs = 0;
+      if (retryAfterHeader) {
+        const sec = Number(retryAfterHeader);
+        if (!Number.isNaN(sec)) delayMs = sec * 1000;
+      }
+      if (!delayMs) {
+        delayMs = Math.min(30000, 1000 * Math.pow(2, attempt - 1));
+      }
+      console.warn(`[global-setup] 429 from /auth/login, backing off for ${delayMs}ms (attempt ${attempt})`);
+      await new Promise((r) => setTimeout(r, delayMs));
+      continue;
+    }
+
+    const text = await res.text();
+    let json: any = null;
+    try {
+      json = JSON.parse(text);
+    } catch {}
+
+    if (!res.ok()) {
+      throw new Error(`[global-setup] admin login failed ${res.status()} body=${text}`);
+    }
+
+    const token =
+      json?.access_token || json?.token || json?.data?.access_token || json?.data?.token;
+    if (!token) {
+      throw new Error(`[global-setup] admin login response missing token: ${JSON.stringify(json)}`);
+    }
+
+    return token as string;
+  }
+
+  throw new Error('[global-setup] admin login failed after max retries due to rate limiting');
+}
+
+export default async function globalSetup(config: FullConfig) {
+  const adminToken = await loginWithRetry(API_BASE, OWNER_EMAIL, OWNER_PASSWORD);
+
+  // Persist token for API-based tests
+  const fs = await import('fs');
+  const path = await import('path');
+  const authDir = path.resolve(__dirname, '.auth');
+  if (!fs.existsSync(authDir)) {
+    fs.mkdirSync(authDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(authDir, 'admin-token.json'), JSON.stringify({ token: adminToken }), 'utf-8');
+
+  // Create storageState with admin_token + impersonate_tenant_id in localStorage
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  await page.goto(FRONTEND_URL, { waitUntil: 'load' });
+  await page.evaluate(
+    ([token, tenantId]) => {
+      localStorage.setItem('admin_token', token as string);
+      localStorage.setItem('admin_user', JSON.stringify({ email: 'admin@casino.com' }));
+      localStorage.setItem('impersonate_tenant_id', tenantId as string);
+    },
+    [adminToken, 'default_casino'],
+  );
+
+  await context.storageState({ path: path.join(authDir, 'admin.json') });
+  await browser.close();
+}
