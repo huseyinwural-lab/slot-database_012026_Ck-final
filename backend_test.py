@@ -350,7 +350,7 @@ class LedgerOps001ReconciliationTestSuite:
 
 async def main():
     """Main test runner"""
-    test_suite = P04PanelIntegrityTestSuite()
+    test_suite = LedgerOps001ReconciliationTestSuite()
     success = await test_suite.run_all_tests()
     return success
 
