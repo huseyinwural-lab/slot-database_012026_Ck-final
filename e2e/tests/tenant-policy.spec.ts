@@ -90,10 +90,11 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     adminPage.on('response', resp => console.log('RESP:', resp.url(), resp.status()));
 
     await adminPage.goto(`${FRONTEND_URL}/settings`);
-    // Find Payments Policy tab
-    await adminPage.click('button[role="tab"]:has-text("Payments Policy")');
-    // Wait for policy data to load to avoid race condition with input fill
-    await adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200);
+    // Find Payments Policy tab and wait for response
+    await Promise.all([
+      adminPage.waitForResponse(resp => resp.url().includes('/policy') && resp.status() === 200),
+      adminPage.click('button[role="tab"]:has-text("Payments Policy")')
+    ]);
     
     // Wait for React to process the response
     await adminPage.waitForTimeout(1000);
