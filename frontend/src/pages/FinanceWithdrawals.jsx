@@ -173,16 +173,35 @@ const FinanceWithdrawals = () => {
     toast.error(message);
   };
 
+  const updateRowStatus = (txId, action, status, message) => {
+    const key = makeRowKey(txId, action);
+    setRowStatus((prev) => ({
+      ...prev,
+      [key]: { status, message },
+    }));
+  };
+
   const handleStartOrRetryPayout = async (tx) => {
+    const logicalAction = tx.state === 'payout_failed' ? 'payout_retry' : 'payout_start';
     setActionLoading(true);
+    updateRowStatus(tx.tx_id, logicalAction, 'in_flight');
+
     try {
-      const action = tx.state === 'payout_failed' ? 'retry' : 'start';
-      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/payout`, null, {
-        headers: {
-          'Idempotency-Key': makeIdemKey(tx.tx_id, `payout:${action}`),
+      await callMoneyAction({
+        scope: ADMIN_SCOPE,
+        id: tx.tx_id,
+        action: logicalAction,
+        requestFn: (idemKey) =>
+          api.post(`/v1/finance/withdrawals/${tx.tx_id}/payout`, null, {
+            headers: {
+              'Idempotency-Key': idemKey,
+            },
+          }),
+        onStatus: (status) => {
+          updateRowStatus(tx.tx_id, logicalAction, status.status || status, status.message);
         },
       });
-      toast.success(action === 'retry' ? 'Payout retried' : 'Payout started');
+      toast.success(logicalAction === 'payout_retry' ? 'Payout retried' : 'Payout started');
       await fetchWithdrawals(page);
     } catch (err) {
       await handleActionError(err);
