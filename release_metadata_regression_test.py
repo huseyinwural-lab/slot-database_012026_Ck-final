@@ -11,7 +11,7 @@ import json
 import sys
 
 # Get external API base from frontend/.env
-BASE_URL = "https://fintech-ops-2.preview.emergentagent.com"  # Default
+BASE_URL = "https://pay-processor-2.preview.emergentagent.com"  # Default
 try:
     with open("/app/frontend/.env", "r") as f:
         for line in f:
