@@ -19,8 +19,29 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    pass
+    # LedgerTransaction idempotency unique
+    op.create_unique_constraint(
+        "uq_ledger_idem",
+        "ledgertransaction",
+        ["tenant_id", "player_id", "type", "idempotency_key"],
+    )
+
+    # Provider event unique for webhook replay-safety
+    op.create_unique_constraint(
+        "uq_ledger_provider_event",
+        "ledgertransaction",
+        ["provider", "provider_event_id"],
+    )
+
+    # Transaction (payment) create idempotency uniques
+    op.create_unique_constraint(
+        "uq_tx_deposit_idem",
+        "transaction",
+        ["tenant_id", "idempotency_key", "type"],
+    )
 
 
 def downgrade() -> None:
-    pass
+    op.drop_constraint("uq_tx_deposit_idem", "transaction", type_="unique")
+    op.drop_constraint("uq_ledger_provider_event", "ledgertransaction", type_="unique")
+    op.drop_constraint("uq_ledger_idem", "ledgertransaction", type_="unique")
