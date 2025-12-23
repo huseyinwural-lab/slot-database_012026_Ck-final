@@ -143,7 +143,7 @@ async def review_withdrawal(
     if action not in {"approve", "reject"}:
         raise HTTPException(status_code=400, detail={"error_code": "INVALID_ACTION"})
 
-    if action == "reject" and not reason:
+    if not reason:
         raise HTTPException(status_code=400, detail={"error_code": "REASON_REQUIRED"})
 
     # Load transaction and player
@@ -174,7 +174,7 @@ async def review_withdrawal(
 
     # Approve/Reject – state change is validated by the shared state machine
     if action == "approve":
-        tx.review_reason = None
+        tx.review_reason = reason
     else:
         tx.review_reason = reason
 
@@ -244,6 +244,7 @@ async def review_withdrawal(
 async def mark_withdrawal_paid(
     request: Request,
     tx_id: str,
+    payload: dict = Body(...),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
@@ -253,6 +254,9 @@ async def mark_withdrawal_paid(
     - held -= amount (available unchanged)
     """
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    reason = (payload.get("reason") or "").strip()
+    if not reason:
+        raise HTTPException(status_code=400, detail={"error_code": "REASON_REQUIRED"})
 
     stmt = select(Transaction).where(
         Transaction.id == tx_id,
@@ -344,7 +348,7 @@ async def mark_withdrawal_paid(
             "balance_available_after": after_available,
             "balance_held_before": before_held,
             "balance_held_after": after_held,
-            "reason": None,
+            "reason": reason,
         },
         ip_address=ip,
     )
