@@ -545,6 +545,15 @@ ledger_ops_001_reconciliation_fix_dec23:
     priority: "highest"
     needs_retesting: false
 
+admin_review_reason_dec23:
+  - task: "ADMIN-REVIEW-002: Make reason mandatory for Admin Approve/Reject/MarkPaid and log to audit"
+    implemented: true
+    working: true
+    file: "backend/app/routes/finance.py, frontend/src/pages/FinanceWithdrawals.jsx"
+    priority: "high"
+    needs_retesting: true
+
+
     status_history:
         -working: true
         -agent: "testing"
