@@ -451,7 +451,6 @@ test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ pa
 // P06-204  Replay / Dedupe proof (payout + webhook)
 
 test('P06-204: Replay / dedupe for payout and webhook', async ({ context, request }) => {
-  await context.tracing.start({ snapshots: true, sources: true });
 
   const adminToken = await apiLoginAdmin(BACKEND_URL, OWNER_EMAIL, OWNER_PASSWORD);
   const { token: playerToken, playerId } = await apiRegisterOrLoginPlayer(BACKEND_URL, PLAYER_EMAIL, PLAYER_PASSWORD);
