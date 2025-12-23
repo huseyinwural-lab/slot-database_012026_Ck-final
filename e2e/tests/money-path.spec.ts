@@ -403,8 +403,9 @@ test('P06-202: Deposit success increases balance, fail is net-zero', async ({ re
   expect(afterSuccess.held_real).toBeCloseTo(before.held_real, 2);
 
   // Screenshot of any admin UI context after success
-  await robustLogin(page);
+  // Use existing storageState authentication instead of robustLogin
   await page.goto('/finance/withdrawals');
+  await expect(page.getByRole('heading', { name: /withdrawals/i })).toBeVisible();
   await page.screenshot({ path: `${ARTIFACT_DIR}/02-deposit-success.png`, fullPage: false });
 
   // Fail deposit (X-Mock-Outcome=fail)
