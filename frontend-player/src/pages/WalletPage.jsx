@@ -2,13 +2,22 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { callMoneyAction } from '../services/moneyActions';
 import { moneyPathErrorMessage } from '../services/moneyPathErrors';
-import { Wallet, ArrowUpRight, ArrowDownLeft, History, CreditCard, DollarSign } from 'lucide-react';
+import { 
+  Wallet, ArrowUpRight, ArrowDownLeft, History, CreditCard, DollarSign, 
+  ChevronLeft, ChevronRight, RefreshCw, Copy, AlertCircle 
+} from 'lucide-react';
 
 const WalletPage = () => {
   const [activeTab, setActiveTab] = useState('deposit');
-  const [balance, setBalance] = useState({ balance_real: 0, currency: 'USD' });
+  const [balance, setBalance] = useState({ 
+    available_real: 0, 
+    held_real: 0, 
+    total_real: 0, 
+    currency: 'USD' 
+  });
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, total: 0, limit: 10 });
   
   // Form States
   const [depositAmount, setDepositAmount] = useState('');
@@ -20,24 +29,41 @@ const WalletPage = () => {
 
   const PLAYER_SCOPE = 'player';
 
-  const fetchWalletData = async () => {
+  const fetchWalletData = async (pageNum = 1) => {
+    setLoading(true);
     try {
       const [balRes, txRes] = await Promise.all([
         api.get('/player/wallet/balance'),
-        api.get('/player/wallet/transactions')
+        api.get(`/player/wallet/transactions?page=${pageNum}&limit=${pagination.limit}`)
       ]);
+      
       setBalance(balRes.data);
       setTransactions(txRes.data.items || []);
+      setPagination(prev => ({
+        ...prev,
+        page: pageNum,
+        total: txRes.data.meta?.total || 0
+      }));
     } catch (err) {
       console.error(err);
+      setMessage({ type: 'error', text: 'Veriler yüklenirken hata oluştu.' });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchWalletData();
+    fetchWalletData(1);
   }, []);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1) return;
+    fetchWalletData(newPage);
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
 
   const handleDeposit = async (e) => {
     e.preventDefault();
