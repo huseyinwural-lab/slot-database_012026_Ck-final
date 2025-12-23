@@ -11,7 +11,7 @@ const LS_PLAYER_TOKEN_KEY = 'player_token';
 const OWNER_EMAIL = process.env.OWNER_EMAIL || 'admin@casino.com';
 const OWNER_PASSWORD = process.env.OWNER_PASSWORD || 'Admin123!';
 
-const PLAYER_EMAIL = 'policy-test-player@example.com';
+const PLAYER_EMAIL = `policy-test-player-${Date.now()}@example.com`;
 const PLAYER_PASSWORD = 'Player123!';
 
 // --- Helpers ---
