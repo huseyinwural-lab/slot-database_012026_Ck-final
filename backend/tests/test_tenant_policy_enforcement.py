@@ -1,14 +1,17 @@
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from datetime import datetime, timedelta
 import uuid
 
 from app.models.sql_models import Transaction, PayoutAttempt, Tenant
 from app.core.database import get_session
-from httpx import ASGITransport
 from server import app
 
-# Fixture setup
+# Use pytest-asyncio strict mode compatibility
+@pytest.fixture
+def anyio_backend():
+    return 'asyncio'
+
 @pytest.fixture
 async def async_client(async_session_factory):
     from conftest import make_override_get_session, override_get_current_player_factory
@@ -37,7 +40,7 @@ async def admin_token_headers(session, test_tenant):
     return {"Authorization": f"Bearer {token}"}
 
 @pytest.mark.asyncio
-async def test_payout_retry_policy_enforcement(async_client: AsyncClient, admin_token_headers, session, test_tenant):
+async def test_payout_retry_policy_enforcement(async_client, admin_token_headers, session, test_tenant):
     # Setup Tenant Policy
     test_tenant.payout_retry_limit = 2
     test_tenant.payout_cooldown_seconds = 2
