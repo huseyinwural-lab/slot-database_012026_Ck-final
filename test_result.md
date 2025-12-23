@@ -21,8 +21,12 @@
     -   **Backend Tests**: `tests/test_tenant_policy_enforcement.py` passed (100% scenarios covered).
 
 ## 3. Legacy Regression Tests
--   `test_payout_flow.py`, `test_payout_retry.py`, etc. were fixed in previous session.
--   Current backend suite status: Mostly Green (some unrelated failures in `crm`/`affiliates` noted in backlog).
+- **Status**: ✅ COMPLETED & VERIFIED
+- **Features**:
+    - Fixed `tests/test_crm_aff_endpoints.py` by correcting rate limit middleware logic.
+    - Verified with `pytest -q tests/test_crm_aff_endpoints.py`.
+- **Verification**:
+    - `tests/test_crm_aff_endpoints.py` passed (2/2 tests).
 
 ## Artifacts
 -   `docs/payments/real-psp-integration.md`: Integration guide.
