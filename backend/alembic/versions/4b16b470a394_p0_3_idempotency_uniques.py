@@ -19,6 +19,18 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    """Add idempotency UNIQUE constraints.
+
+    SQLite does not support ALTER TABLE ADD CONSTRAINT in-place. In dev/test we
+    rely on application-level idempotency and separate Postgres hardening
+    (partial indexes documented in 3acefa8a3e7d). For real databases that do
+    support constraints (e.g. Postgres), we apply them here.
+    """
+
+    bind = op.get_bind()
+    if bind.dialect.name == "sqlite":  # no-op on SQLite
+        return
+
     # LedgerTransaction idempotency unique
     op.create_unique_constraint(
         "uq_ledger_idem",
@@ -42,6 +54,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    bind = op.get_bind()
+    if bind.dialect.name == "sqlite":  # no-op on SQLite
+        return
+
     op.drop_constraint("uq_tx_deposit_idem", "transaction", type_="unique")
     op.drop_constraint("uq_ledger_provider_event", "ledgertransaction", type_="unique")
     op.drop_constraint("uq_ledger_idem", "ledgertransaction", type_="unique")
