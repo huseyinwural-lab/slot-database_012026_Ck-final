@@ -1285,17 +1285,3 @@ async def get_wallet_reconciliation_tx_snapshot(
         ],
     }
 
-            request_id=request_id,
-            actor_user_id=str(current_admin.id),
-            tenant_id=None,
-            action="FIN_RECONCILIATION_RUN_FAILED",
-            resource_type="reconciliation_run",
-            resource_id=run.id,
-            result="failed",
-            details={"provider": provider, "date": target_date.isoformat(), "error": str(exc)},
-            ip_address=ip,
-        )
-        raise
-
-    return {"run_id": run.id, "inserted": inserted, "scanned": scanned}
-
