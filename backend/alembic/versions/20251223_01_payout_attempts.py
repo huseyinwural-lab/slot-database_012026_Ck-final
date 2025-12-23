@@ -39,40 +39,31 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(["tenant_id"], ["tenant.id"]),
         )
 
-    # SQLite does not support partial indexes; we still add simple uniques to
-    # catch obvious mistakes in dev. In Postgres, ops can replace these with
-    # partial indexes as documented in payout-state-machine.md.
+    # SQLite does not support ALTER TABLE ADD CONSTRAINT. In dev we rely on
+    # application-level idempotency checks and keep the schema simple. In
+    # Postgres, ops can enforce these via partial unique indexes.
     if dialect == "sqlite":
-        op.create_unique_constraint(
-            "uq_payoutattempt_provider_event",
-            "payoutattempt",
-            ["provider", "provider_event_id"],
-        )
-        op.create_unique_constraint(
-            "uq_payoutattempt_withdraw_idem",
-            "payoutattempt",
-            ["withdraw_tx_id", "idempotency_key"],
-        )
-    else:
-        # For Postgres or other real DBs, create the same uniques. In a
-        # production environment these can be evolved into partial indexes.
-        op.create_unique_constraint(
-            "uq_payoutattempt_provider_event",
-            "payoutattempt",
-            ["provider", "provider_event_id"],
-        )
-        op.create_unique_constraint(
-            "uq_payoutattempt_withdraw_idem",
-            "payoutattempt",
-            ["withdraw_tx_id", "idempotency_key"],
-        )
+        return
+
+    # For Postgres or other real DBs, create the same uniques. In a production
+    # environment these can be evolved into partial indexes.
+    op.create_unique_constraint(
+        "uq_payoutattempt_provider_event",
+        "payoutattempt",
+        ["provider", "provider_event_id"],
+    )
+    op.create_unique_constraint(
+        "uq_payoutattempt_withdraw_idem",
+        "payoutattempt",
+        ["withdraw_tx_id", "idempotency_key"],
+    )
 
 
 def downgrade() -> None:
     bind = op.get_bind()
     dialect = bind.dialect.name
 
-    if dialect in {"sqlite", "postgresql"}:
+    if dialect == "postgresql":
         op.drop_constraint(
             "uq_payoutattempt_withdraw_idem", "payoutattempt", type_="unique"
         )
