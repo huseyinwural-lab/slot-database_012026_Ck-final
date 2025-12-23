@@ -54,7 +54,56 @@ const WalletPage = () => {
 
   useEffect(() => {
     fetchWalletData(1);
+    checkReturnFromStripe();
   }, []);
+
+  const checkReturnFromStripe = () => {
+      const query = new URLSearchParams(window.location.search);
+      const sessionId = query.get('session_id');
+      const status = query.get('status');
+
+      if (sessionId && status === 'success') {
+          setMessage({ type: 'info', text: 'Verifying payment...' });
+          setProcessing(true); // Show processing state
+          pollPaymentStatus(sessionId);
+      } else if (status === 'cancel') {
+          setMessage({ type: 'error', text: 'Payment cancelled.' });
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+      }
+  };
+
+  const pollPaymentStatus = async (sessionId, attempts = 0) => {
+      if (attempts > 10) { // 20 seconds timeout
+          setMessage({ type: 'error', text: 'Payment status check timed out. Please check transaction history.' });
+          setProcessing(false);
+          window.history.replaceState({}, document.title, window.location.pathname);
+          fetchWalletData(1);
+          return;
+      }
+      
+      try {
+          const res = await api.get(`/payments/stripe/checkout/status/${sessionId}`);
+          if (res.data.payment_status === 'paid') {
+              setMessage({ type: 'success', text: 'Payment Successful!' });
+              setProcessing(false);
+              window.history.replaceState({}, document.title, window.location.pathname);
+              fetchWalletData(1);
+          } else if (res.data.status === 'expired' || res.data.status === 'failed') {
+               setMessage({ type: 'error', text: 'Payment failed or expired.' });
+               setProcessing(false);
+               window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+              // Retry
+              setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), 2000);
+          }
+      } catch (e) {
+          console.error(e);
+          // Retry on error
+          setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), 2000);
+      }
+  };
+
 
   const handlePageChange = (newPage) => {
     if (newPage < 1) return;
@@ -71,42 +120,23 @@ const WalletPage = () => {
     setProcessing(true);
     setMessage(null);
 
-    const storedPlayer = localStorage.getItem('player_user');
-    const player = storedPlayer ? JSON.parse(storedPlayer) : null;
-    const playerId = player?.id || 'self';
-    const scope = PLAYER_SCOPE;
-    const action = 'deposit';
-
-    const key = `${scope}:${playerId}:${action}`;
-    setActionStatus((prev) => ({ ...prev, [key]: { status: 'in_flight' } }));
-
+    // Direct Stripe Integration
     try {
-      await callMoneyAction({
-        scope,
-        id: playerId,
-        action,
-        requestFn: (idemKey) =>
-          api.post('/player/wallet/deposit', {
-            amount: parseFloat(depositAmount),
-            method: 'credit_card', 
-          }, {
-            headers: { 'Idempotency-Key': idemKey },
-          }),
-        onStatus: (status) => {
-          setActionStatus((prev) => ({
-            ...prev,
-            [key]: { status: status.status || status, message: status.message },
-          }));
-        },
-      });
-      setMessage({ type: 'success', text: 'Deposit successful!' });
-      setDepositAmount('');
-      fetchWalletData(1); 
+       const res = await api.post('/payments/stripe/checkout/session', {
+           amount: parseFloat(depositAmount),
+           currency: 'USD'
+       });
+       
+       if (res.data.url) {
+           // Redirect to Stripe
+           window.location.href = res.data.url;
+       } else {
+           throw new Error("No redirect URL returned");
+       }
     } catch (err) {
-      console.error(err);
-      setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
-    } finally {
-      setProcessing(false);
+       console.error(err);
+       setMessage({ type: 'error', text: err.response?.data?.detail || 'Failed to initiate payment' });
+       setProcessing(false);
     }
   };
 
@@ -233,8 +263,8 @@ const WalletPage = () => {
           {/* Action Forms */}
           <div className="bg-secondary/20 border border-white/5 rounded-xl p-6">
             {message && (
-              <div className={`mb-4 p-3 rounded-lg text-sm flex items-start gap-2 ${message.type === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                {message.type === 'error' && <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+              <div className={`mb-4 p-3 rounded-lg text-sm flex items-start gap-2 ${message.type === 'success' ? 'bg-green-500/20 text-green-400' : message.type === 'error' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                 {message.text}
               </div>
             )}
@@ -273,10 +303,10 @@ const WalletPage = () => {
                   ))}
                 </div>
                 <button type="submit" disabled={processing} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50">
-                  {processing ? 'Processing...' : 'Pay Now'}
+                  {processing ? 'Redirecting to Stripe...' : 'Pay with Stripe'}
                 </button>
                 <p className="text-xs text-center text-muted-foreground mt-2">
-                  <CreditCard className="w-3 h-3 inline mr-1" /> Secure Payment via MockGateway
+                  <CreditCard className="w-3 h-3 inline mr-1" /> Secure Payment via Stripe
                 </p>
               </form>
             ) : (
