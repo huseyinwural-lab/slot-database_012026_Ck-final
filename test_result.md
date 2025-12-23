@@ -596,6 +596,18 @@ psp_mock_adapter_dec22:
         -agent: "testing"
         -comment: "✅ FINAL BACKEND REGRESSION TESTS - ALL TESTS PASSED (4/4 - 100% success rate): Test 1) Alembic Baseline Migration Validation: ✅ Migration file 24e894ecb377_baseline.py contains op.create_table(...) calls for 19 core tables including tenant, adminuser, player, transaction, chargebackcase, reconciliationreport, financesettings, game, gameasset, gameconfigversion, apikey, featureflag, auditlog, approvalrequest, supportticket, riskrule, contentpage, bonus, affiliate - baseline migration is no longer empty and contains proper table creation statements. Test 2) Password Policy Validation: ✅ POST /api/v1/admin/create-tenant-admin without password returns 400 with error_code=PASSWORD_REQUIRED as expected, ✅ POST /api/v1/auth/player/register with password shorter than 8 characters returns 400 with 'Password must be at least 8 characters' validation message. Test 3) P0 Regression Pytest Execution: ✅ pytest /app/backend/tests/test_response_dto_leaks.py - 5/5 tests passed (no sensitive fields leaked in API responses, API key creation returns secret once but not in list), ✅ pytest /app/backend/tests/test_tenant_isolation.py - 5/5 tests passed (tenant admin header forbidden 403, owner invalid header 400, owner headerless default scope 200, cross-tenant detail access 404, owner impersonation works 200). Test 4) Health Endpoints Validation: ✅ GET /api/health returns 200 OK with status='healthy', ✅ GET /api/ready returns 200 OK with status='ready'. All release-hardening validation requirements met successfully. Admin authentication issue resolved by resetting admin password hash and failed_login_attempts."
 
+  - task: "Backend Payout Reliability (P0-5, P3+P4) Regression Testing"
+    implemented: true
+    working: true
+    file: "backend/tests/test_payout_flow.py"
+    stuck_count: 0
+    priority: "highest"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ BACKEND PAYOUT RELIABILITY REGRESSION TESTING COMPLETE - ALL TESTS PASSED (6/6 - 100% success rate): Executed pytest -q tests/test_payout_flow.py as requested to ensure all payout invariants and webhook replay dedupe remain green after latest UI changes. Test Results: ✅ test_payout_success_transitions_to_paid_and_writes_single_withdraw_paid_ledger - Withdraw → approve → payout success path working correctly with single ledger entry, ✅ test_payout_fail_transitions_to_payout_failed_and_writes_no_ledger - Withdraw → approve → payout fail path working correctly with no ledger entries, ✅ test_payout_replay_same_idempotency_key_no_duplicate_ledger_or_attempt - Payout replay with same Idempotency-Key produces no duplicate ledger/attempt entries, ✅ test_payout_webhook_replay_no_duplicate_paid_ledger - Webhook replay success produces no duplicate ledger/attempt entries, ✅ test_payout_webhook_replay_no_duplicate_effect_failed - Webhook replay fail produces no ledger entries and no extra attempts, ✅ test_payout_webhook_orphan_is_noop_and_audited - Webhook orphan case properly sets orphan flag + FIN_PAYOUT_WEBHOOK_ORPHAN audit with no attempt creation. CRITICAL VALIDATION: All payout invariants maintained - single ledger entries for success cases, no duplicate attempts on replay, proper state transitions (paid/payout_failed), webhook idempotency working correctly, orphan webhook handling operational. Test execution time: 1.47s with exit code 0. Only deprecation warnings present (non-critical). All P0-5 payout reliability requirements validated successfully - no regressions detected from latest UI changes."
+
   - task: "P0-3 Idempotency and Replay-Safe Behavior Verification"
     implemented: true
     working: true
