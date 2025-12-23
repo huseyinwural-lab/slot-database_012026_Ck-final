@@ -118,6 +118,48 @@ async function adminApproveKycForPlayerId(apiBaseUrl: string, adminToken: string
   const reviewRes = await ctx.post(`/api/v1/kyc/documents/${playerId}/review`, {
     data: { status: 'approved' },
   });
+async function getBalanceNoCache(request: APIRequestContext, apiBaseUrl: string, playerToken: string) {
+  const res = await request.get(`${apiBaseUrl}/api/v1/player/wallet/balance?t=${Date.now()}`, {
+    headers: {
+      Authorization: `Bearer ${playerToken}`,
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+    },
+  });
+  const text = await res.text();
+  let json: any = null;
+  try {
+    json = JSON.parse(text);
+  } catch {}
+  if (!res.ok()) {
+    throw new Error(`getBalanceNoCache failed ${res.status()} body=${text}`);
+  }
+  return json as { available_real: number; held_real: number; total_real: number };
+}
+
+async function pollUntil<T>(
+  fn: () => Promise<T>,
+  predicate: (value: T) => boolean,
+  opts: { timeoutMs?: number; intervalMs?: number; label?: string } = {},
+): Promise<T> {
+  const { timeoutMs = 15000, intervalMs = 250, label = 'poll' } = opts;
+  const start = Date.now();
+  let last: T | undefined;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    last = await fn();
+    if (predicate(last)) return last;
+    if (Date.now() - start > timeoutMs) {
+      throw new Error(`${label} timeout. last=${JSON.stringify(last)}`);
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+}
+
+function closeTo(a: number, b: number, precision = 6) {
+  return Math.abs(a - b) < Math.pow(10, -precision);
+}
+
 
   const rText = await reviewRes.text();
   if (!reviewRes.ok()) {
