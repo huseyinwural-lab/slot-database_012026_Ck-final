@@ -64,10 +64,9 @@ async def create_deposit(
         raise HTTPException(400, "Amount must be positive")
 
     # Tenant daily deposit limit enforcement (TENANT-POLICY-001)
-    from app.utils.tenant import get_current_tenant_id
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
-    tenant_id = await get_current_tenant_id(request, None, session=session)
+    tenant_id = current_player.tenant_id
     await ensure_within_tenant_daily_limits(
         session,
         tenant_id=tenant_id,
@@ -372,10 +371,9 @@ async def create_withdrawal(
     currency = "USD"  # TODO: support multi-currency when introduced
 
     # Tenant daily withdraw limit enforcement (TENANT-POLICY-001)
-    from app.utils.tenant import get_current_tenant_id
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
-    tenant_id = await get_current_tenant_id(request, None, session=session)
+    tenant_id = current_player.tenant_id
     await ensure_within_tenant_daily_limits(
         session,
         tenant_id=tenant_id,
