@@ -4,12 +4,43 @@ from datetime import datetime, timedelta
 import uuid
 
 from app.models.sql_models import Transaction, PayoutAttempt, Tenant
+from app.core.database import get_session
+from httpx import ASGITransport
+from server import app
+
+# Fixture setup
+@pytest.fixture
+async def async_client(async_session_factory):
+    from conftest import make_override_get_session, override_get_current_player_factory
+    app.dependency_overrides[get_session] = make_override_get_session(async_session_factory)
+    
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://testserver") as c:
+        yield c
+    app.dependency_overrides.clear()
+
+@pytest.fixture
+async def session(async_session_factory):
+    async with async_session_factory() as s:
+        yield s
+
+@pytest.fixture
+async def test_tenant(session):
+    from conftest import _create_tenant
+    return await _create_tenant(session, name="PolicyTenant_" + str(uuid.uuid4()))
+
+@pytest.fixture
+async def admin_token_headers(session, test_tenant):
+    from conftest import _create_admin, _make_admin_token
+    admin = await _create_admin(session, tenant_id=test_tenant.id, email=f"admin_{uuid.uuid4()}@test.com")
+    token = _make_admin_token(admin.id, test_tenant.id, admin.email)
+    return {"Authorization": f"Bearer {token}"}
 
 @pytest.mark.asyncio
 async def test_payout_retry_policy_enforcement(async_client: AsyncClient, admin_token_headers, session, test_tenant):
     # Setup Tenant Policy
     test_tenant.payout_retry_limit = 2
-    test_tenant.payout_cooldown_seconds = 5
+    test_tenant.payout_cooldown_seconds = 2
     session.add(test_tenant)
     await session.commit()
     await session.refresh(test_tenant)
@@ -33,7 +64,7 @@ async def test_payout_retry_policy_enforcement(async_client: AsyncClient, admin_
         headers=admin_token_headers,
         json={"reason": "Retrying first time"}
     )
-    assert resp.status_code == 200
+    assert resp.status_code == 200, resp.text
     
     # Attempt 2: Blocked by Cooldown
     resp = await async_client.post(
@@ -46,7 +77,7 @@ async def test_payout_retry_policy_enforcement(async_client: AsyncClient, admin_
 
     # Wait for cooldown
     import asyncio
-    await asyncio.sleep(6) # 5s + buffer
+    await asyncio.sleep(2.5) 
 
     # Attempt 2: Success (after cooldown)
     resp = await async_client.post(
@@ -57,7 +88,7 @@ async def test_payout_retry_policy_enforcement(async_client: AsyncClient, admin_
     assert resp.status_code == 200
 
     # Attempt 3: Blocked by Limit (Limit is 2, we have 2 existing attempts now)
-    await asyncio.sleep(6) # Ensure cooldown is not the blocker
+    await asyncio.sleep(2.5) # Ensure cooldown is not the blocker
     resp = await async_client.post(
         f"/api/v1/finance-actions/withdrawals/{tx.id}/retry",
         headers=admin_token_headers,
