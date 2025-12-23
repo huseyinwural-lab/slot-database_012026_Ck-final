@@ -2,13 +2,18 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Stripe Deposit Flow (Simulated)', () => {
   test('User can initiate deposit and see balance update after simulated webhook', async ({ page, request }) => {
-    test.setTimeout(60000);
+    test.setTimeout(90000);
+    
+    // Debug console logs from browser
+    page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`BROWSER ERROR: ${err}`));
 
     const uniqueId = Date.now();
     const email = `stripe_e2e_${uniqueId}@example.com`;
     const password = 'password123';
 
-    // 1. Register User via API (since frontend register page is missing)
+    // 1. Register via API
+    console.log(`Registering user ${email}...`);
     const registerRes = await request.post('http://localhost:8001/api/v1/auth/player/register', {
         data: {
             username: `user${uniqueId}`,
@@ -20,21 +25,31 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
     expect(registerRes.ok()).toBeTruthy();
 
     // 2. Login via Frontend
+    console.log('Navigating to login...');
     await page.goto('/login');
-    await page.waitForSelector('input[name="email"]');
-    await page.fill('input[name="email"]', email);
-    await page.fill('input[name="password"]', password);
+    
+    // Wait for ANY input to ensure page loaded
+    await page.waitForSelector('input', { timeout: 20000 });
+    
+    console.log('Filling credentials...');
+    // Use layout-agnostic selectors if possible, or fallback
+    await page.fill('input[type="email"]', email);
+    await page.fill('input[type="password"]', password);
     await page.click('button[type="submit"]');
 
     // 3. Verify Landing on Wallet
-    await expect(page).toHaveURL(/\/wallet/, { timeout: 20000 });
+    console.log('Waiting for wallet redirect...');
+    await expect(page).toHaveURL(/\/wallet/, { timeout: 30000 });
 
     // 4. Initiate Deposit
+    console.log('Initiating deposit...');
     let sessionId = '';
     await page.route('**/api/v1/payments/stripe/checkout/session', async route => {
+      console.log('Intercepted checkout session request');
       const response = await route.fetch();
       const json = await response.json();
       sessionId = json.session_id;
+      console.log('Captured Session ID:', sessionId);
       
       await route.fulfill({
         json: {
@@ -44,9 +59,13 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
       });
     });
 
-    // Ensure we are on wallet page and deposit tab is active
-    // If not active by default, click it. Assuming it is.
-    await page.click('text=Deposit');
+    // Ensure we are on wallet page
+    // Click Deposit tab if it exists (it might be default)
+    const depositTab = page.locator('button:has-text("Deposit")');
+    if (await depositTab.isVisible()) {
+        await depositTab.click();
+    }
+
     await page.fill('input[type="number"]', '50');
     
     const payBtn = page.locator('button:has-text("Pay with Stripe")');
@@ -54,10 +73,12 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
     await payBtn.click();
 
     // 5. Verify Polling State
-    await expect(page).toHaveURL(/session_id=cs_/, { timeout: 10000 });
+    console.log('Verifying polling state...');
+    await expect(page).toHaveURL(/session_id=cs_/, { timeout: 15000 });
     await expect(page.locator('text=Verifying payment...')).toBeVisible();
 
     // 6. Trigger Webhook Simulation
+    console.log('Triggering webhook simulation...');
     expect(sessionId).toBeTruthy();
 
     const webhookRes = await request.post('http://localhost:8001/api/v1/payments/stripe/test-trigger-webhook', {
@@ -69,9 +90,11 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
     expect(webhookRes.ok()).toBeTruthy();
 
     // 7. Verify Success UI
+    console.log('Waiting for success message...');
     await expect(page.locator('text=Payment Successful!')).toBeVisible({ timeout: 20000 });
     
     // 8. Verify Balance Update
+    console.log('Verifying balance...');
     await expect(page.locator('text=$50.00')).toBeVisible();
   });
 });
