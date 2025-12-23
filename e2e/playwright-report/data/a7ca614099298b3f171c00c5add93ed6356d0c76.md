@@ -1,0 +1,588 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - heading "Platform Admin" [level=1] [ref=e6]
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: Core
+          - list [ref=e12]:
+            - listitem [ref=e13]:
+              - link "Dashboard" [ref=e14] [cursor=pointer]:
+                - /url: /
+                - img [ref=e15]
+                - text: Dashboard
+            - listitem [ref=e20]:
+              - link "Players" [ref=e21] [cursor=pointer]:
+                - /url: /players
+                - img [ref=e22]
+                - text: Players
+            - listitem [ref=e27]:
+              - link "Finance" [ref=e28] [cursor=pointer]:
+                - /url: /finance
+                - img [ref=e29]
+                - text: Finance
+            - listitem [ref=e31]:
+              - link "Withdrawals" [ref=e32] [cursor=pointer]:
+                - /url: /finance/withdrawals
+                - img [ref=e33]
+                - text: Withdrawals
+            - listitem [ref=e35]:
+              - link "All Revenue" [ref=e36] [cursor=pointer]:
+                - /url: /revenue/all-tenants
+                - img [ref=e37]
+                - text: All Revenue
+            - listitem [ref=e40]:
+              - link "Games" [ref=e41] [cursor=pointer]:
+                - /url: /games
+                - img [ref=e42]
+                - text: Games
+            - listitem [ref=e44]:
+              - link "VIP Games" [ref=e45] [cursor=pointer]:
+                - /url: /vip-games
+                - img [ref=e46]
+                - generic [ref=e48]: VIP Games
+        - generic [ref=e49]:
+          - generic [ref=e50]: Operations
+          - link "CRM & Comms" [ref=e51] [cursor=pointer]:
+            - /url: /crm
+            - img [ref=e52]
+            - text: CRM & Comms
+          - link "Affiliates" [ref=e55] [cursor=pointer]:
+            - /url: /affiliates
+            - img [ref=e56]
+            - text: Affiliates
+          - link "Kill Switch" [ref=e61] [cursor=pointer]:
+            - /url: /kill-switch
+            - img [ref=e62]
+            - text: Kill Switch
+          - link "Support" [ref=e64] [cursor=pointer]:
+            - /url: /support
+            - img [ref=e65]
+            - text: Support
+        - generic [ref=e67]:
+          - generic [ref=e68]: Risk & Compliance
+          - link "Risk Rules" [ref=e69] [cursor=pointer]:
+            - /url: /risk
+            - img [ref=e70]
+            - text: Risk Rules
+          - link "Fraud Check" [ref=e72] [cursor=pointer]:
+            - /url: /fraud
+            - img [ref=e73]
+            - text: Fraud Check
+          - link "Approval Queue" [ref=e75] [cursor=pointer]:
+            - /url: /approvals
+            - img [ref=e76]
+            - text: Approval Queue
+          - link "Responsible Gaming" [ref=e79] [cursor=pointer]:
+            - /url: /rg
+            - img [ref=e80]
+            - text: Responsible Gaming
+        - generic [ref=e84]:
+          - generic [ref=e85]: System
+          - link "CMS" [ref=e86] [cursor=pointer]:
+            - /url: /cms
+            - img [ref=e87]
+            - text: CMS
+          - link "Reports" [ref=e90] [cursor=pointer]:
+            - /url: /reports
+            - img [ref=e91]
+            - text: Reports
+          - link "Logs" [ref=e93] [cursor=pointer]:
+            - /url: /logs
+            - img [ref=e94]
+            - text: Logs
+          - link "Audit Log" [ref=e97] [cursor=pointer]:
+            - /url: /audit
+            - img [ref=e98]
+            - text: Audit Log
+          - link "Admin Users" [ref=e101] [cursor=pointer]:
+            - /url: /admins
+            - img [ref=e102]
+            - text: Admin Users
+          - link "Tenants" [ref=e114] [cursor=pointer]:
+            - /url: /tenants
+            - img [ref=e115]
+            - text: Tenants
+          - link "API Keys" [ref=e118] [cursor=pointer]:
+            - /url: /keys
+            - img [ref=e119]
+            - text: API Keys
+          - link "Feature Flags" [ref=e122] [cursor=pointer]:
+            - /url: /features
+            - img [ref=e123]
+            - text: Feature Flags
+          - link "Settings" [ref=e126] [cursor=pointer]:
+            - /url: /settings
+            - img [ref=e127]
+            - text: Settings
+      - button "Logout" [ref=e131] [cursor=pointer]:
+        - img [ref=e132]
+        - text: Logout
+    - main [ref=e135]:
+      - generic [ref=e136]:
+        - generic [ref=e138]:
+          - img [ref=e139]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e142]
+        - generic [ref=e143]:
+          - generic [ref=e144]:
+            - img [ref=e145]
+            - combobox [ref=e148] [cursor=pointer]:
+              - generic: Global Context
+              - img [ref=e149]
+          - generic [ref=e151]:
+            - paragraph [ref=e152]: Super Owner
+            - paragraph [ref=e153]: admin@casino.com
+          - generic [ref=e154]: SO
+      - generic [ref=e155]:
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e158]:
+              - heading "Executive Dashboard" [level=2] [ref=e159]
+              - paragraph [ref=e160]: Real-time operational insights
+            - generic [ref=e161]:
+              - combobox [ref=e162] [cursor=pointer]:
+                - generic: Last 30 Days
+                - img [ref=e163]
+              - generic [ref=e169]: Live
+          - generic [ref=e170]:
+            - generic [ref=e171]:
+              - generic [ref=e172]:
+                - generic [ref=e173]: GGR (Gross Revenue)
+                - img [ref=e174]
+              - generic [ref=e176]:
+                - generic [ref=e177]: $154,200
+                - generic [ref=e178]:
+                  - generic [ref=e179]:
+                    - img [ref=e180]
+                    - text: 12.5%
+                  - generic [ref=e183]: vs yesterday
+            - generic [ref=e184]:
+              - generic [ref=e185]:
+                - generic [ref=e186]: NGR (Net Revenue)
+                - img [ref=e187]
+              - generic [ref=e190]:
+                - generic [ref=e191]: $128,500
+                - generic [ref=e192]:
+                  - generic [ref=e193]:
+                    - img [ref=e194]
+                    - text: 10.2%
+                  - generic [ref=e197]: vs yesterday
+            - generic [ref=e198]:
+              - generic [ref=e199]:
+                - generic [ref=e200]: Active Players
+                - img [ref=e201]
+              - generic [ref=e206]:
+                - generic [ref=e207]: "124"
+                - generic [ref=e208]:
+                  - generic [ref=e209]:
+                    - img [ref=e210]
+                    - text: 5.4%
+                  - generic [ref=e213]: online now
+            - generic [ref=e214]:
+              - generic [ref=e215]:
+                - generic [ref=e216]: Total Bets
+                - img [ref=e217]
+              - generic [ref=e219]:
+                - generic [ref=e220]: 45,230
+                - generic [ref=e221]:
+                  - generic [ref=e222]:
+                    - img [ref=e223]
+                    - text: 2.1%
+                  - generic [ref=e226]: vs yesterday
+          - generic [ref=e227]:
+            - generic [ref=e229]:
+              - generic [ref=e231]:
+                - img [ref=e232]
+                - text: 🔔 Critical Alerts
+              - generic [ref=e235]:
+                - generic [ref=e236]:
+                  - img [ref=e238]
+                  - generic [ref=e242]:
+                    - generic [ref=e243]:
+                      - generic [ref=e244]: PROVIDER FAILURE
+                      - generic [ref=e245]: high
+                    - paragraph [ref=e246]: Evolution Gaming API latency high
+                    - paragraph [ref=e247]: 7:57:14 PM
+                - generic [ref=e248]:
+                  - img [ref=e250]
+                  - generic [ref=e252]:
+                    - generic [ref=e253]:
+                      - generic [ref=e254]: PAYMENT GATEWAY
+                      - generic [ref=e255]: critical
+                    - paragraph [ref=e256]: Stripe failure rate > 5%
+                    - paragraph [ref=e257]: 7:47:14 PM
+                - generic [ref=e258]:
+                  - img [ref=e260]
+                  - generic [ref=e262]:
+                    - generic [ref=e263]:
+                      - generic [ref=e264]: FRAUD ENGINE
+                      - generic [ref=e265]: medium
+                    - paragraph [ref=e266]: Risk engine queue backing up
+                    - paragraph [ref=e267]: 7:17:14 PM
+                - generic [ref=e268]:
+                  - img [ref=e270]
+                  - generic [ref=e272]:
+                    - generic [ref=e273]:
+                      - generic [ref=e274]: CACHE OVERLOAD
+                      - generic [ref=e275]: medium
+                    - paragraph [ref=e276]: Redis memory usage at 85%
+                    - paragraph [ref=e277]: 7:02:14 PM
+            - generic [ref=e279]:
+              - generic [ref=e281]: 🧮 Financial Summary (Live)
+              - generic [ref=e283]:
+                - generic [ref=e284]:
+                  - generic [ref=e285]:
+                    - img [ref=e286]
+                    - text: Cash in System
+                  - generic [ref=e289]: $15,420,000
+                - generic [ref=e290]:
+                  - generic [ref=e291]:
+                    - img [ref=e292]
+                    - text: Bonus Liabilities
+                  - generic [ref=e296]: $250,000
+                - generic [ref=e297]:
+                  - generic [ref=e298]:
+                    - img [ref=e299]
+                    - text: Jackpot Pools
+                  - generic [ref=e305]: $1,200,000
+                - generic [ref=e306]:
+                  - generic [ref=e307]:
+                    - img [ref=e308]
+                    - text: Pending Withdrawals
+                  - generic [ref=e311]: $45,000
+          - generic [ref=e312]:
+            - generic [ref=e314]:
+              - generic [ref=e316]: 🔥 Deposits & Withdrawals Trend (30 Days)
+              - generic [ref=e319]:
+                - list [ref=e321]:
+                  - listitem [ref=e322]:
+                    - img "Deposits legend icon" [ref=e323]
+                    - text: Deposits
+                  - listitem [ref=e325]:
+                    - img "Net Cashflow legend icon" [ref=e326]
+                    - text: Net Cashflow
+                  - listitem [ref=e328]:
+                    - img "Withdrawals legend icon" [ref=e329]
+                    - text: Withdrawals
+                - application [ref=e331]:
+                  - generic [ref=e342]:
+                    - generic [ref=e343]:
+                      - generic [ref=e345]: Nov 25
+                      - generic [ref=e347]: Nov 29
+                      - generic [ref=e349]: Dec 3
+                      - generic [ref=e351]: Dec 6
+                      - generic [ref=e353]: Dec 10
+                      - generic [ref=e355]: Dec 14
+                      - generic [ref=e357]: Dec 18
+                      - generic [ref=e359]: Dec 23
+                    - generic [ref=e360]:
+                      - generic [ref=e362]: $-50k
+                      - generic [ref=e364]: $0k
+                      - generic [ref=e366]: $50k
+                      - generic [ref=e368]: $100k
+                      - generic [ref=e370]: $150k
+            - generic [ref=e372]:
+              - generic [ref=e373]:
+                - generic [ref=e374]:
+                  - img [ref=e375]
+                  - text: Live Bets Feed
+                - generic [ref=e377]: LIVE
+              - table [ref=e381]:
+                - rowgroup [ref=e382]:
+                  - row "Player Game Bet/Win X" [ref=e383]:
+                    - columnheader "Player" [ref=e384]
+                    - columnheader "Game" [ref=e385]
+                    - columnheader "Bet/Win" [ref=e386]
+                    - columnheader "X" [ref=e387]
+                - rowgroup [ref=e388]:
+                  - row "lucky_guy Roulette Live $242 $484 2x" [ref=e389]:
+                    - cell "lucky_guy" [ref=e390]
+                    - cell "Roulette Live" [ref=e391]
+                    - cell "$242 $484" [ref=e392]:
+                      - generic [ref=e393]: $242
+                      - generic [ref=e394]: $484
+                    - cell "2x" [ref=e395]:
+                      - generic [ref=e396]: 2x
+                  - row "user_882 Blackjack VIP $150 $0" [ref=e397]:
+                    - cell "user_882" [ref=e398]
+                    - cell "Blackjack VIP" [ref=e399]
+                    - cell "$150 $0" [ref=e400]:
+                      - generic [ref=e401]: $150
+                      - generic [ref=e402]: $0
+                    - cell [ref=e403]
+                  - row "vip_king Roulette Live $412 $4120 10x" [ref=e404]:
+                    - cell "vip_king" [ref=e405]
+                    - cell "Roulette Live" [ref=e406]
+                    - cell "$412 $4120" [ref=e407]:
+                      - generic [ref=e408]: $412
+                      - generic [ref=e409]: $4120
+                    - cell "10x" [ref=e410]:
+                      - generic [ref=e411]: 10x
+                  - row "user_882 Roulette Live $316 $0" [ref=e412]:
+                    - cell "user_882" [ref=e413]
+                    - cell "Roulette Live" [ref=e414]
+                    - cell "$316 $0" [ref=e415]:
+                      - generic [ref=e416]: $316
+                      - generic [ref=e417]: $0
+                    - cell [ref=e418]
+                  - row "poker_face Aviator $35 $0" [ref=e419]:
+                    - cell "poker_face" [ref=e420]
+                    - cell "Aviator" [ref=e421]
+                    - cell "$35 $0" [ref=e422]:
+                      - generic [ref=e423]: $35
+                      - generic [ref=e424]: $0
+                    - cell [ref=e425]
+                  - row "high_roller Aviator $95 $475 5x" [ref=e426]:
+                    - cell "high_roller" [ref=e427]
+                    - cell "Aviator" [ref=e428]
+                    - cell "$95 $475" [ref=e429]:
+                      - generic [ref=e430]: $95
+                      - generic [ref=e431]: $475
+                    - cell "5x" [ref=e432]:
+                      - generic [ref=e433]: 5x
+                  - row "lucky_guy Blackjack VIP $46 $92 2x" [ref=e434]:
+                    - cell "lucky_guy" [ref=e435]
+                    - cell "Blackjack VIP" [ref=e436]
+                    - cell "$46 $92" [ref=e437]:
+                      - generic [ref=e438]: $46
+                      - generic [ref=e439]: $92
+                    - cell "2x" [ref=e440]:
+                      - generic [ref=e441]: 2x
+                  - row "user_882 Blackjack VIP $119 $238 2x" [ref=e442]:
+                    - cell "user_882" [ref=e443]
+                    - cell "Blackjack VIP" [ref=e444]
+                    - cell "$119 $238" [ref=e445]:
+                      - generic [ref=e446]: $119
+                      - generic [ref=e447]: $238
+                    - cell "2x" [ref=e448]:
+                      - generic [ref=e449]: 2x
+                  - row "high_roller Roulette Live $491 $0" [ref=e450]:
+                    - cell "high_roller" [ref=e451]
+                    - cell "Roulette Live" [ref=e452]
+                    - cell "$491 $0" [ref=e453]:
+                      - generic [ref=e454]: $491
+                      - generic [ref=e455]: $0
+                    - cell [ref=e456]
+                  - row "lucky_guy Blackjack VIP $487 $0" [ref=e457]:
+                    - cell "lucky_guy" [ref=e458]
+                    - cell "Blackjack VIP" [ref=e459]
+                    - cell "$487 $0" [ref=e460]:
+                      - generic [ref=e461]: $487
+                      - generic [ref=e462]: $0
+                    - cell [ref=e463]
+                  - row "lucky_guy Roulette Live $268 $402 1.5x" [ref=e464]:
+                    - cell "lucky_guy" [ref=e465]
+                    - cell "Roulette Live" [ref=e466]
+                    - cell "$268 $402" [ref=e467]:
+                      - generic [ref=e468]: $268
+                      - generic [ref=e469]: $402
+                    - cell "1.5x" [ref=e470]:
+                      - generic [ref=e471]: 1.5x
+                  - row "poker_face Blackjack VIP $154 $231 1.5x" [ref=e472]:
+                    - cell "poker_face" [ref=e473]
+                    - cell "Blackjack VIP" [ref=e474]
+                    - cell "$154 $231" [ref=e475]:
+                      - generic [ref=e476]: $154
+                      - generic [ref=e477]: $231
+                    - cell "1.5x" [ref=e478]:
+                      - generic [ref=e479]: 1.5x
+                  - row "poker_face Lightning Dice $232 $1160 5x" [ref=e480]:
+                    - cell "poker_face" [ref=e481]
+                    - cell "Lightning Dice" [ref=e482]
+                    - cell "$232 $1160" [ref=e483]:
+                      - generic [ref=e484]: $232
+                      - generic [ref=e485]: $1160
+                    - cell "5x" [ref=e486]:
+                      - generic [ref=e487]: 5x
+                  - row "poker_face Roulette Live $175 $1750 10x" [ref=e488]:
+                    - cell "poker_face" [ref=e489]
+                    - cell "Roulette Live" [ref=e490]
+                    - cell "$175 $1750" [ref=e491]:
+                      - generic [ref=e492]: $175
+                      - generic [ref=e493]: $1750
+                    - cell "10x" [ref=e494]:
+                      - generic [ref=e495]: 10x
+                  - row "poker_face Lightning Dice $455 $910 2x" [ref=e496]:
+                    - cell "poker_face" [ref=e497]
+                    - cell "Lightning Dice" [ref=e498]
+                    - cell "$455 $910" [ref=e499]:
+                      - generic [ref=e500]: $455
+                      - generic [ref=e501]: $910
+                    - cell "2x" [ref=e502]:
+                      - generic [ref=e503]: 2x
+          - generic [ref=e504]:
+            - generic [ref=e505]:
+              - generic [ref=e506]:
+                - generic [ref=e507]: 📈 Retention & Churn
+                - img [ref=e508]
+              - generic [ref=e511]:
+                - generic [ref=e512]:
+                  - generic [ref=e513]:
+                    - img [ref=e514]
+                    - generic [ref=e519]: 1-Day Retention
+                  - generic [ref=e520]: 42.5%
+                - generic [ref=e521]:
+                  - generic [ref=e522]:
+                    - img [ref=e523]
+                    - generic [ref=e527]: 7-Day Retention
+                  - generic [ref=e528]: 18.2%
+                - generic [ref=e529]:
+                  - generic [ref=e530]:
+                    - img [ref=e531]
+                    - generic [ref=e534]: Churn Rate
+                  - generic [ref=e535]: 5.4%
+                - generic [ref=e536]: 12,450 returning players this week
+            - generic [ref=e537]:
+              - generic [ref=e538]:
+                - generic [ref=e539]: 💼 First Time Deposits (FTD)
+                - img [ref=e540]
+              - generic [ref=e544]:
+                - generic [ref=e545]:
+                  - generic [ref=e546]:
+                    - img [ref=e547]
+                    - generic [ref=e550]: Today
+                  - generic [ref=e551]: "145"
+                - generic [ref=e552]:
+                  - generic [ref=e553]:
+                    - img [ref=e554]
+                    - generic [ref=e556]: This Month
+                  - generic [ref=e557]: 3,200
+                - generic [ref=e558]:
+                  - generic [ref=e559]: Conversion (Reg → FTD)
+                  - generic [ref=e562]: 28.5%
+            - generic [ref=e563]:
+              - generic [ref=e565]:
+                - img [ref=e566]
+                - text: Bonus Performance
+              - generic [ref=e570]:
+                - generic [ref=e571]:
+                  - generic [ref=e572]:
+                    - generic [ref=e573]: Given Today
+                    - generic [ref=e574]: "145"
+                  - generic [ref=e575]:
+                    - generic [ref=e576]: Redeemed
+                    - generic [ref=e577]: "112"
+                  - generic [ref=e578]:
+                    - generic [ref=e579]: Total Value
+                    - generic [ref=e580]: $50,000
+                  - generic [ref=e581]:
+                    - generic [ref=e582]: Expired
+                    - generic [ref=e583]: "12"
+                - generic [ref=e584]:
+                  - generic [ref=e585]:
+                    - generic [ref=e586]:
+                      - img [ref=e587]
+                      - text: Bonus ROI
+                    - generic [ref=e590]: 12.5%
+                  - generic [ref=e591]:
+                    - generic [ref=e592]:
+                      - img [ref=e593]
+                      - text: Wagering Completion
+                    - generic [ref=e596]: 45.2%
+          - generic [ref=e597]:
+            - generic [ref=e599]:
+              - generic [ref=e601]: 🎯 Top Negative Performing Games (Loss Leaders)
+              - table [ref=e604]:
+                - rowgroup [ref=e605]:
+                  - row "Game GGR Impact RTP Provider" [ref=e606]:
+                    - columnheader "Game" [ref=e607]
+                    - columnheader "GGR Impact" [ref=e608]
+                    - columnheader "RTP" [ref=e609]
+                    - columnheader "Provider" [ref=e610]
+                - rowgroup [ref=e611]:
+                  - row "Mega Moolah -$150,000 105.2% Microgaming" [ref=e612]:
+                    - cell "Mega Moolah" [ref=e613]
+                    - cell "-$150,000" [ref=e614]
+                    - cell "105.2%" [ref=e615]:
+                      - generic [ref=e616]: 105.2%
+                    - cell "Microgaming" [ref=e617]
+                  - row "Crazy Time -$85,000 99.8% Evolution" [ref=e618]:
+                    - cell "Crazy Time" [ref=e619]
+                    - cell "-$85,000" [ref=e620]
+                    - cell "99.8%" [ref=e621]:
+                      - generic [ref=e622]: 99.8%
+                    - cell "Evolution" [ref=e623]
+                  - row "Book of Dead -$42,000 98.5% Games Global" [ref=e624]:
+                    - cell "Book of Dead" [ref=e625]
+                    - cell "-$42,000" [ref=e626]
+                    - cell "98.5%" [ref=e627]:
+                      - generic [ref=e628]: 98.5%
+                    - cell "Games Global" [ref=e629]
+                  - row "Sweet Bonanza -$20,000 97.1% Pragmatic Play" [ref=e630]:
+                    - cell "Sweet Bonanza" [ref=e631]
+                    - cell "-$20,000" [ref=e632]
+                    - cell "97.1%" [ref=e633]:
+                      - generic [ref=e634]: 97.1%
+                    - cell "Pragmatic Play" [ref=e635]
+                  - row "Starburst -$15,000 96.8% NetEnt" [ref=e636]:
+                    - cell "Starburst" [ref=e637]
+                    - cell "-$15,000" [ref=e638]
+                    - cell "96.8%" [ref=e639]:
+                      - generic [ref=e640]: 96.8%
+                    - cell "NetEnt" [ref=e641]
+            - generic [ref=e642]:
+              - generic [ref=e643]:
+                - generic [ref=e646]: Provider Health
+                - generic [ref=e648]:
+                  - generic [ref=e649]:
+                    - generic [ref=e650]:
+                      - generic [ref=e651]: Pragmatic Play
+                      - generic [ref=e652]: 45ms • None
+                    - generic [ref=e653]:
+                      - generic [ref=e654]: UP
+                      - button [ref=e655] [cursor=pointer]:
+                        - img
+                  - generic [ref=e656]:
+                    - generic [ref=e657]:
+                      - generic [ref=e658]: Evolution
+                      - generic [ref=e659]: 120ms • Timeout
+                    - generic [ref=e660]:
+                      - generic [ref=e661]: WARNING
+                      - button [ref=e662] [cursor=pointer]:
+                        - img
+                  - generic [ref=e663]:
+                    - generic [ref=e664]:
+                      - generic [ref=e665]: NetEnt
+                      - generic [ref=e666]: 35ms • None
+                    - generic [ref=e667]:
+                      - generic [ref=e668]: UP
+                      - button [ref=e669] [cursor=pointer]:
+                        - img
+              - generic [ref=e670]:
+                - generic [ref=e673]: Payment Gateway Status
+                - generic [ref=e675]:
+                  - generic [ref=e676]:
+                    - generic [ref=e677]:
+                      - generic [ref=e678]: Stripe
+                      - generic [ref=e679]: "- • Gateway Timeout"
+                    - generic [ref=e680]:
+                      - generic [ref=e681]: DOWN
+                      - button [ref=e682] [cursor=pointer]:
+                        - img
+                  - generic [ref=e683]:
+                    - generic [ref=e684]:
+                      - generic [ref=e685]: Crypto
+                      - generic [ref=e686]: 200ms • None
+                    - generic [ref=e687]:
+                      - generic [ref=e688]: UP
+                      - button [ref=e689] [cursor=pointer]:
+                        - img
+                  - generic [ref=e690]:
+                    - generic [ref=e691]:
+                      - generic [ref=e692]: Papara
+                      - generic [ref=e693]: 50ms • None
+                    - generic [ref=e694]:
+                      - generic [ref=e695]: UP
+                      - button [ref=e696] [cursor=pointer]:
+                        - img
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e697] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e698]:
+      - img [ref=e699]
+      - paragraph [ref=e700]: Made with Emergent
+  - generic [ref=e701]: $-50k
+```
