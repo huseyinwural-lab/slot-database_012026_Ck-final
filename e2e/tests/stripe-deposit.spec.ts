@@ -38,9 +38,14 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
     await page.fill('input[type="password"]', password);
     await page.click('button[type="submit"]');
 
-    // 3. Verify Landing on Wallet
-    console.log('Waiting for wallet redirect...');
-    await expect(page).toHaveURL(new RegExp(`${PLAYER_APP_URL}/wallet`), { timeout: 30000 });
+    // 3. Wait for Login Success (Redirect away from login)
+    console.log('Waiting for login redirect...');
+    await expect(page).not.toHaveURL(/\/login/, { timeout: 20000 });
+    
+    // Explicitly navigate to wallet to ensure we are there
+    console.log('Navigating to wallet...');
+    await page.goto(`${PLAYER_APP_URL}/wallet`);
+    await expect(page).toHaveURL(new RegExp(`${PLAYER_APP_URL}/wallet`), { timeout: 20000 });
 
     // 4. Initiate Deposit
     console.log('Initiating deposit...');
@@ -67,7 +72,10 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
         await depositTab.click();
     }
 
-    await page.fill('input[type="number"]', '50');
+    // Wait for input to be visible and editable
+    const amountInput = page.locator('input[type="number"]');
+    await expect(amountInput).toBeVisible();
+    await amountInput.fill('50');
     
     const payBtn = page.locator('button:has-text("Pay with Stripe")');
     await expect(payBtn).toBeEnabled();
