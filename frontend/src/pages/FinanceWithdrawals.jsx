@@ -87,8 +87,8 @@ const FinanceWithdrawals = () => {
   const [selectedTx, setSelectedTx] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
+  const [actionModal, setActionModal] = useState({ open: false, type: null, tx: null });
+  const [actionReason, setActionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [rowStatus, setRowStatus] = useState({}); // key -> { status, message }
 
