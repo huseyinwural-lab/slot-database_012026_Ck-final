@@ -25,7 +25,7 @@ const WalletPage = () => {
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState(null);
-  const [actionStatus, setActionStatus] = useState({}); // key -> { status, message }
+  const [actionStatus, setActionStatus] = useState({});
 
   const PLAYER_SCOPE = 'player';
 
@@ -62,6 +62,7 @@ const WalletPage = () => {
   };
 
   const copyToClipboard = (text) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
   };
 
@@ -87,11 +88,9 @@ const WalletPage = () => {
         requestFn: (idemKey) =>
           api.post('/player/wallet/deposit', {
             amount: parseFloat(depositAmount),
-            method: 'credit_card', // Mock method
+            method: 'credit_card', 
           }, {
-            headers: {
-              'Idempotency-Key': idemKey,
-            },
+            headers: { 'Idempotency-Key': idemKey },
           }),
         onStatus: (status) => {
           setActionStatus((prev) => ({
@@ -102,7 +101,7 @@ const WalletPage = () => {
       });
       setMessage({ type: 'success', text: 'Deposit successful!' });
       setDepositAmount('');
-      fetchWalletData(1); // Refresh balance
+      fetchWalletData(1); 
     } catch (err) {
       console.error(err);
       setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
@@ -132,15 +131,11 @@ const WalletPage = () => {
         action,
         requestFn: (idemKey) =>
           api.post('/player/wallet/withdraw', {
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
             amount: parseFloat(withdrawAmount),
             method: 'crypto',
             address: withdrawAddress,
           }, {
-            headers: {
-              'Idempotency-Key': idemKey,
-            },
+            headers: { 'Idempotency-Key': idemKey },
           }),
         onStatus: (status) => {
           setActionStatus((prev) => ({
@@ -161,9 +156,11 @@ const WalletPage = () => {
     }
   };
 
+  const totalPages = Math.ceil(pagination.total / pagination.limit);
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header & Balance */}
+    <div className="max-w-6xl mx-auto space-y-8 pb-10">
+      {/* Header */}
       <div className="bg-secondary/50 p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -171,17 +168,52 @@ const WalletPage = () => {
           </h1>
           <p className="text-muted-foreground">Manage your funds and transactions</p>
         </div>
-        <div className="bg-black/40 px-6 py-3 rounded-xl border border-primary/20 text-center">
-          <div className="text-xs text-muted-foreground uppercase tracking-wider">Total Balance</div>
-          <div className="text-3xl font-mono text-green-400 font-bold">
-            ${balance.balance_real?.toFixed(2)}
+        <button 
+          onClick={() => fetchWalletData(pagination.page)}
+          className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+          title="Refresh Data"
+        >
+          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+        </button>
+      </div>
+
+      {/* Balance Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-black/40 p-6 rounded-xl border border-white/5">
+          <div className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Available Balance</div>
+          <div className="text-3xl font-mono text-white font-bold">
+            ${(balance.available_real || 0).toFixed(2)}
+          </div>
+          <div className="text-xs text-green-400 mt-2 flex items-center gap-1">
+            <AlertCircle className="w-3 h-3" /> Ready to play or withdraw
+          </div>
+        </div>
+        <div className="bg-black/40 p-6 rounded-xl border border-white/5">
+          <div className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Held Balance</div>
+          <div className="text-3xl font-mono text-yellow-500 font-bold">
+            ${(balance.held_real || 0).toFixed(2)}
+          </div>
+          <div className="text-xs text-yellow-400/70 mt-2 flex items-center gap-1">
+            <AlertCircle className="w-3 h-3" /> Locked in pending withdrawals
+          </div>
+        </div>
+        <div className="bg-black/40 p-6 rounded-xl border border-primary/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <Wallet className="w-24 h-24 text-primary" />
+          </div>
+          <div className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Total Balance</div>
+          <div className="text-3xl font-mono text-primary font-bold">
+            ${(balance.total_real || 0).toFixed(2)}
+          </div>
+          <div className="text-xs text-primary/70 mt-2">
+            Net Asset Value
           </div>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-8">
         {/* Actions Column */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="lg:col-span-1 space-y-6">
           {/* Tabs */}
           <div className="flex bg-secondary/30 p-1 rounded-lg">
             <button 
@@ -201,7 +233,8 @@ const WalletPage = () => {
           {/* Action Forms */}
           <div className="bg-secondary/20 border border-white/5 rounded-xl p-6">
             {message && (
-              <div className={`mb-4 p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+              <div className={`mb-4 p-3 rounded-lg text-sm flex items-start gap-2 ${message.type === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                {message.type === 'error' && <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
                 {message.text}
               </div>
             )}
@@ -221,7 +254,7 @@ const WalletPage = () => {
                       step="0.01"
                       value={depositAmount}
                       onChange={e => setDepositAmount(e.target.value)}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg pl-10 p-3 focus:border-primary focus:outline-none"
+                      className="w-full bg-black/20 border border-white/10 rounded-lg pl-10 p-3 focus:border-primary focus:outline-none transition-colors"
                       placeholder="Min $10.00"
                       required 
                     />
@@ -233,13 +266,13 @@ const WalletPage = () => {
                       key={amt} 
                       type="button" 
                       onClick={() => setDepositAmount(amt)}
-                      className="bg-white/5 hover:bg-white/10 py-2 rounded-lg text-sm border border-white/5"
+                      className="bg-white/5 hover:bg-white/10 py-2 rounded-lg text-sm border border-white/5 transition-colors"
                     >
                       ${amt}
                     </button>
                   ))}
                 </div>
-                <button type="submit" disabled={processing} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                <button type="submit" disabled={processing} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50">
                   {processing ? 'Processing...' : 'Pay Now'}
                 </button>
                 <p className="text-xs text-center text-muted-foreground mt-2">
@@ -258,12 +291,12 @@ const WalletPage = () => {
                     <input 
                       type="number" 
                       min="10" 
-                      max={balance.balance_real}
+                      max={balance.available_real}
                       step="0.01"
                       value={withdrawAmount}
                       onChange={e => setWithdrawAmount(e.target.value)}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg pl-10 p-3 focus:border-primary focus:outline-none"
-                      placeholder={`Max $${balance.balance_real?.toFixed(2)}`}
+                      className="w-full bg-black/20 border border-white/10 rounded-lg pl-10 p-3 focus:border-primary focus:outline-none transition-colors"
+                      placeholder={`Max $${(balance.available_real || 0).toFixed(2)}`}
                       required 
                     />
                   </div>
@@ -274,12 +307,12 @@ const WalletPage = () => {
                     type="text" 
                     value={withdrawAddress}
                     onChange={e => setWithdrawAddress(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:border-primary focus:outline-none"
+                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:border-primary focus:outline-none transition-colors"
                     placeholder="TR..."
                     required 
                   />
                 </div>
-                <button type="submit" disabled={processing} className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors">
+                <button type="submit" disabled={processing} className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50">
                   {processing ? 'Submitting...' : 'Request Payout'}
                 </button>
               </form>
@@ -287,47 +320,101 @@ const WalletPage = () => {
           </div>
         </div>
 
-        {/* History Column */}
-        <div className="space-y-4">
-          <h3 className="font-semibold flex items-center gap-2 text-lg">
-            <History className="w-5 h-5 text-primary" /> Recent Transactions
-          </h3>
+        {/* History Column (Wider) */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold flex items-center gap-2 text-lg">
+              <History className="w-5 h-5 text-primary" /> Transaction History
+            </h3>
+            <span className="text-xs text-muted-foreground">Showing {transactions.length} records</span>
+          </div>
+          
           <div className="bg-secondary/20 rounded-xl border border-white/5 overflow-hidden">
             {transactions.length === 0 ? (
-              <div className="p-6 text-center text-muted-foreground text-sm">No transactions yet.</div>
+              <div className="p-12 text-center text-muted-foreground">
+                <History className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                <p>No transactions found.</p>
+              </div>
             ) : (
-              <div className="divide-y divide-white/5">
-                {transactions.slice(0, 5).map(tx => (
-                  <div key={tx.id} className="p-4 flex justify-between items-center hover:bg-white/5 transition-colors">
-                    <div>
-                      <div className="font-medium text-sm flex items-center gap-2 capitalize">
-                        {tx.type === 'deposit' 
-                          ? <ArrowDownLeft className="w-3 h-3 text-green-500" /> 
-                          : <ArrowUpRight className="w-3 h-3 text-red-500" />
-                        }
-                        {tx.type}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(tx.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className={`font-mono font-bold text-sm ${tx.type === 'deposit' ? 'text-green-400' : 'text-white'}`}>
-                        {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toFixed(2)}
-                      </div>
-                      <div className={`text-[10px] px-2 py-0.5 rounded-full inline-block mt-1 ${
-                        tx.status === 'completed' ? 'bg-green-500/20 text-green-400' : 
-                        tx.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 
-                        'bg-red-500/20 text-red-400'
-                      }`}>
-                        {tx.status}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-white/5 text-xs uppercase text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-3">Type</th>
+                      <th className="px-4 py-3">Amount</th>
+                      <th className="px-4 py-3">State</th>
+                      <th className="px-4 py-3">Date</th>
+                      <th className="px-4 py-3 text-right">ID</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {transactions.map(tx => (
+                      <tr key={tx.id} className="hover:bg-white/5 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            {tx.type === 'deposit' 
+                              ? <ArrowDownLeft className="w-4 h-4 text-green-500" /> 
+                              : <ArrowUpRight className="w-4 h-4 text-red-500" />
+                            }
+                            <span className="capitalize">{tx.type}</span>
+                          </div>
+                        </td>
+                        <td className={`px-4 py-3 font-mono font-bold ${tx.type === 'deposit' ? 'text-green-400' : 'text-white'}`}>
+                          {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full inline-block uppercase tracking-wide ${
+                            tx.state === 'completed' || tx.state === 'paid' ? 'bg-green-500/20 text-green-400' : 
+                            tx.state === 'pending' || tx.state === 'requested' || tx.state === 'created' ? 'bg-yellow-500/20 text-yellow-400' : 
+                            'bg-red-500/20 text-red-400'
+                          }`}>
+                            {tx.state}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground text-xs whitespace-nowrap">
+                          {new Date(tx.created_at).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button 
+                            onClick={() => copyToClipboard(tx.id)}
+                            className="text-xs text-muted-foreground hover:text-white flex items-center gap-1 ml-auto"
+                            title="Copy ID"
+                          >
+                            {tx.id.slice(0, 8)}... <Copy className="w-3 h-3" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {pagination.total > 0 && (
+            <div className="flex justify-between items-center pt-2">
+              <button 
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page === 1 || loading}
+                className="flex items-center gap-1 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                aria-label="Previous Page"
+              >
+                <ChevronLeft className="w-4 h-4" /> Previous
+              </button>
+              <span className="text-sm text-muted-foreground">
+                Page {pagination.page} of {totalPages || 1}
+              </span>
+              <button 
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page >= totalPages || loading}
+                className="flex items-center gap-1 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                aria-label="Next Page"
+              >
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
