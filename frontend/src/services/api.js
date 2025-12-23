@@ -19,7 +19,8 @@ const api = axios.create({
   },
 });
 
-// Attach JWT token if available + money-path Idempotency-Key if caller didn't set one
+// Attach JWT token if available. Money-path Idempotency-Key MUST be provided
+// explicitly by callers (UI helpers) – interceptor will never auto-generate it.
 api.interceptors.request.use((config) => {
   try {
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
@@ -36,11 +37,9 @@ api.interceptors.request.use((config) => {
       config.headers['X-Tenant-ID'] = tenantId;
     }
 
-    // Money-path default Idempotency-Key generation:
-    // For critical endpoints (deposit/withdraw/admin finance actions) we want
-    // every request to carry an Idempotency-Key. If the caller has not set one
-    // explicitly, leave it empty here and let higher-level helpers (e.g.
-    // moneyAction) manage deterministic keys per click.
+    // Money-path endpoints are identified here only for observability if needed,
+    // but Idempotency-Key generation is handled at the call site via
+    // moneyActions helpers.
     const url = config.url || '';
     const method = (config.method || 'get').toLowerCase();
     const isMoneyPath =
@@ -49,8 +48,8 @@ api.interceptors.request.use((config) => {
         url.includes('/player/wallet/withdraw') ||
         url.includes('/finance/withdrawals'));
 
-    if (isMoneyPath && !config.headers['Idempotency-Key']) {
-      // no-op: rely on callers for Idempotency-Key
+    if (isMoneyPath) {
+      // Intentionally do nothing with Idempotency-Key here.
     }
   } catch (e) {
     // localStorage not available; ignore
