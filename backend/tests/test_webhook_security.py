@@ -72,7 +72,7 @@ async def test_webhook_invalid_signature_returns_401(client, admin_token):
 
 
 @pytest.mark.asyncio
-async def test_webhook_valid_signature_allows_handler_execution(client):
+async def test_webhook_valid_signature_allows_handler_execution(client, admin_token):
   payload = {
     "provider": "mockpsp",
     "provider_event_id": "evt_valid",
@@ -92,6 +92,7 @@ async def test_webhook_valid_signature_allows_handler_execution(client):
     "/api/v1/finance/withdrawals/payout/webhook",
     json=payload,
     headers={
+      "Authorization": f"Bearer {admin_token}",
       "X-Webhook-Timestamp": str(ts),
       "X-Webhook-Signature": sig,
     },
