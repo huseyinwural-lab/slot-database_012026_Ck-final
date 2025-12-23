@@ -89,6 +89,7 @@ const FinanceWithdrawals = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [rowStatus, setRowStatus] = useState({}); // key -> { status, message }
 
   const handleCopyTxId = async (txId) => {
     try {
