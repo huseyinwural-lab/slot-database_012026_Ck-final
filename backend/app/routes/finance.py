@@ -802,6 +802,18 @@ async def payout_webhook(
     - Replays with the same provider_event_id are 200 OK no-ops.
     """
 
+    # Webhook signature verification (WEBHOOK-SEC-001)
+    from app.services.webhook_security import verify_webhook_signature
+
+    raw_body = await request.body()
+    ts_header = request.headers.get("X-Webhook-Timestamp")
+    sig_header = request.headers.get("X-Webhook-Signature")
+
+    status_code, error_code = verify_webhook_signature(ts_header, sig_header, raw_body)
+    if status_code != 200:
+        raise HTTPException(status_code=status_code, detail={"error_code": error_code})
+
+
     request_id = getattr(request.state, "request_id", "unknown")
     ip = request.client.host if request.client else None
 
