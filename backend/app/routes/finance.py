@@ -1048,6 +1048,48 @@ async def run_wallet_reconciliation(
                     "tenant_id": f.tenant_id,
                     "tx_id": f.tx_id,
                     "details": f.details,
+                },
+            )
+            session.add(rec)
+            inserted += 1
+
+        run.status = "completed"
+        run.stats_json = {"inserted": inserted, "scanned": scanned}
+        await session.commit()
+
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=None,
+            action="FIN_RECONCILIATION_RUN_COMPLETED",
+            resource_type="reconciliation_run",
+            resource_id=run.id,
+            result="success",
+            details={"provider": provider, "date": target_date.isoformat(), "inserted": inserted, "scanned": scanned},
+            ip_address=ip,
+        )
+
+    except Exception as exc:  # noqa: BLE001
+        run.status = "failed"
+        run.stats_json = {"inserted": inserted, "scanned": scanned, "error": str(exc)}
+        await session.commit()
+
+        await audit.log_event(
+            session=session,
+            request_id=request_id,
+            actor_user_id=str(current_admin.id),
+            tenant_id=None,
+            action="FIN_RECONCILIATION_RUN_FAILED",
+            resource_type="reconciliation_run",
+            resource_id=run.id,
+            result="failed",
+            details={"provider": provider, "date": target_date.isoformat(), "error": str(exc)},
+            ip_address=ip,
+        )
+        raise
+
+    return {"run_id": run.id, "inserted": inserted, "scanned": scanned}
 
 
 @router.get("/reconciliation/summary")
