@@ -1,108 +1,96 @@
-# Transaction State Machine Contract
+# Payments Transaction State Machine
 
-Bu doküman, **deposit** ve **withdraw** transactionf;lar1 iein backend taraf1nda tek kaynaktan yfnetilen durum makinesini (state machine) tanmlar. Amafoo: FE/BE drift olmamasf, invalid transition hatalarfnda tek tip error payload ve E2E akffflarfn kolay debug edilebilmesidir.
+This document defines the canonical transaction states and allowed transitions for deposit and withdrawal flows. It also documents the real-balance semantics (available/held) and how tenant daily limits count usage.
 
-Kaynak kod referansf:
-- `backend/app/services/transaction_state_machine.py`
-- `backend/app/models/sql_models.py` (Transaction)
+---
 
-Canonical state alanf: **`Transaction.state`**  
-`status` alanf legacy/yardfmci; kanonik durum her zaman `state` czerinden okunmalf.
+## 0) Canonical vs UI Labels
 
-## 1. Ortak Kavramlar
+The backend stores canonical states. The UI may display simplified labels.
 
-- **tx_type**: `Transaction.type` (`"deposit"` veya `"withdrawal"`).
-- **canonical state**: DB'ye yazflan string (`"created"`, `"requested"`, `"approved"`, `"paid"`, `"payout_pending"`, `"payout_failed"`, `"completed"`, `"failed"`, `"canceled"`, `"rejected"`).
-- **alias state**: FE veya harici sistemlerin kullandff, DB'de birebir tutulmayan ama canonical'a map edilen deferler ( ffgu. `"pending_review"`, `"succeeded"`).
+Example:
+- Deposit canonical: `created -> pending_provider -> completed|failed`
+- UI label: often shown as a single `pending` phase (covers both `created` and `pending_provider`)
 
-### 1.1. Alias Haritasf
+---
 
-```python
-STATE_ALIASES = {
-    "pending_review": "requested",
-    "succeeded": "completed",
-}
-```
+## 1) Canonical State Set
 
-`normalize_state(state)` fonksiyonu:
-- `None` veya bof state geldiffnde `"created"` dfner,
-- Alias deferleri canonical'a cevfirir,
-- Difer tcm string'leri aynen bfakf.
+### 1.1 Deposit states (core)
 
-## 2. Deposit State Machine
+- `created`
+- `pending_provider`
+- `completed`
+- `failed`
 
-Mantksal akf:
+### 1.2 Withdrawal states (core)
+
+- `requested`
+- `approved`
+- `rejected`
+- `canceled`
+
+### 1.3 Payout reliability extension (P0-5)
+
+- `payout_pending`
+- `payout_failed`
+- `paid`
+
+---
+
+## 2) Deposit State Machine
+
+### 2.1 Diagram
 
 ```text
 created -> pending_provider -> completed | failed
 ```
 
-- **created**
-  - Backend taraffndan yeni bir deposit istefi yaratfldffnda baflangfc state.
-- **pending_provider**
-  - PSP'ye fflem gfnderilmif fakat kesin sonucu henfz bilinmiyor.
-- **completed**
-  - Deposit kesin bafarfl; oyuncu available bakiyesi artmf.
-- **failed**
-  - Deposit kesin bafarfsf; bakiyede defigiklik yok.
+### 2.2 Allowed transitions (canonical)
 
-**Allowed transitions (deposit)**
+- `created → pending_provider`
+- `pending_provider → completed | failed`
 
-```python
-ALLOWED_TRANSITIONS["deposit"] = {
-    "created": ["pending_provider"],
-    "pending_provider": ["completed", "failed"],
-}
-```
+### 2.3 UI representation
 
-## 3. Withdraw State Machine
+UI may group early states:
 
-Withdraw iefleminde iki ana faz vardfr:
-- **review** (admin onay/red/cancel),
-- **payout** (PSP ccerisine para ffkf ve webhook'lar).
+- `created + pending_provider ⇒ pending` (display-only alias)
 
-Yfzlf state makinesi:
+---
+
+## 3) Withdrawal State Machine
+
+### 3.1 Modern PSP payout path
 
 ```text
-requested -> approved | rejected | canceled
-approved  -> payout_pending | paid
+requested      -> approved | rejected | canceled
+approved       -> payout_pending
 payout_pending -> paid | payout_failed
 payout_failed  -> payout_pending | rejected
 ```
 
-Afamlarf:
+### 3.2 Legacy manual settlement path
 
-- **requested**
-  - Oyuncu withdraw istefini olufturmuf, admin review bekleniyor.
-- **approved**
-  - Admin taraffndan onaylanmf, payout afamfasfna hazfr.
-- **rejected**
-  - Admin taraffndan reddedilmif, fflem kapandf.
-- **canceled**
-  - Oyuncu veya sistem taraffndan iptal edilmif.
-- **payout_pending**
-  - PSP'ye payout isteff gfnderilmif; PSP sonucu (paid/failed) bekleniyor.
-- **payout_failed**
-  - PSP payout isteffi hata ile dfndf; retry veya reject mcmkfn.
-- **paid**
-  - Payout kesin bafarfl; para PSP taraffndan oyuncunun harici hesabfna gefmif.
-
-**Allowed transitions (withdrawal)**
-
-```python
-ALLOWED_TRANSITIONS["withdrawal"] = {
-    "requested": ["approved", "rejected", "canceled"],
-    "approved": ["paid", "payout_pending"],
-    "payout_pending": ["paid", "payout_failed"],
-    "payout_failed": ["payout_pending", "rejected"],
-}
+```text
+approved -> paid
 ```
 
-Bu whitelist difffndaki tcm gefiflmeler **invalid transition** sayflfr.
+- This path is intentionally preserved for Admin **"Mark Paid"** (PSP bypass / manual settlement).
+- Modern PSP payout path remains preferred for provider-integrated payouts.
 
-## 4. Invalid Transition Hata Sfemasf
+### 3.3 Allowed transitions (canonical)
 
-Tcm gefiflmeler `transition_transaction(tx, new_state)` ccrcinden gefer. Bu fonksiyon, whitelist dfffna ffkfge ealfffda **409** fflaa (**HTTPException**) atar:
+- `requested → approved | rejected | canceled`
+- `approved → paid | payout_pending`
+- `payout_pending → paid | payout_failed`
+- `payout_failed → payout_pending | rejected`
+
+---
+
+## 4) Invalid Transition Error Contract
+
+If a transition is not whitelisted:
 
 ```json
 HTTP 409
@@ -116,42 +104,106 @@ HTTP 409
 }
 ```
 
-- `tx_type`: `"deposit"` veya `"withdrawal"`
-- `from_state`: normalize edilmif mevcut state
-- `to_state`: normalize edilmif hedef state
+Notes:
 
-**Not:** Aynf state'e gefme denemeleri (örn. approved -> approved) **idempotent no-op** olarak kabul edilir, hata atflmaz.
+- Transitioning to the same state (e.g., `approved -> approved`) is treated as idempotent no-op.
 
-## 5. FE/BE State Badge ve Guard Tablosu
+---
 
-Frontend taraffnda state badge/guard mapping'leri bu canonical state listesine birebir baflanmalf; yeni state eklemek veya defifltirmek icin **fnce bu dokfman** ve `ALLOWED_TRANSITIONS` gcncellenmelidir.
+## 5) Real Balance Semantics (Ledger / Wallet)
 
-fU an ietkin badge seti ffekildir (Admin Withdrawals ccrf.: `FinanceWithdrawals.jsx`):
+The system maintains real-money balances with the following canonical fields:
 
-```js
-STATE_LABELS = {
-  requested: 'Requested',
-  approved: 'Approved',
-  payout_pending: 'Payout Pending',
-  payout_failed: 'Payout Failed',
-  paid: 'Paid',
-  rejected: 'Rejected',
-};
+- `balance_real_available`
+- `balance_real_held`
+- `balance_real_total = balance_real_available + balance_real_held`
+
+### 5.1 Withdrawal holds and settlement semantics
+
+Let `amount` be the withdrawal amount.
+
+#### 5.1.1 On withdrawal request (`requested`)
+
+- `balance_real_available -= amount`
+- `balance_real_held += amount`
+
+Purpose: funds are reserved while awaiting approval and payout.
+
+#### 5.1.2 On rejection (`rejected`) or cancel (`canceled`)
+
+- `balance_real_available += amount`
+- `balance_real_held -= amount`
+
+Purpose: release reserved funds back to available balance.
+
+#### 5.1.3 On paid settlement (`paid`)
+
+- `balance_real_held -= amount`
+- `balance_real_available` remains unchanged
+
+Purpose: reserved funds leave the system (payout completed). The canonical ledger event is `withdraw_paid`, written exactly once.
+
+### 5.2 Deposit semantics
+
+Deposits increase available balance only upon final completion:
+
+- On `completed`:
+  - `balance_real_available += amount`
+
+Intermediate provider pending states do not change the balance unless explicitly designed (current contract: no intermediate balance movement).
+
+---
+
+## 6) Tenant Daily Limit Counting (TENANT-POLICY-001)
+
+Tenant daily policy enforcement counts usage by canonical states.
+
+### 6.1 Deposit daily usage
+
+Count deposits where:
+
+- `type = "deposit"`
+- `state = "completed"`
+
+### 6.2 Withdraw daily usage
+
+Count withdrawals where:
+
+- `type = "withdrawal"`
+- `state IN ("requested", "approved", "paid")`
+
+Notes:
+
+- `failed`, `rejected`, `canceled` do not count toward daily usage.
+- This selection is aligned with the canonical state set above and is enforced by TENANT-POLICY-001.
+
+Implementation note: TENANT-POLICY-001 enforcement is expected to follow this exact table; any change here must update both enforcement and tests.
+
+---
+
+## 7) FE/BE Alignment Requirements
+
+When adding a new state:
+
+1. Update backend `ALLOWED_TRANSITIONS` (transaction state machine),
+2. Update this document,
+3. Update FE badge mapping and action guards (Admin/Tenant/Player surfaces),
+4. Add or update tests (unit + E2E where applicable).
+
+---
+
+## 8) Proof Commands (Sprint 1 P0)
+
+**Tenant policy limits:**
+
+```bash
+cd /app/backend
+pytest -q tests/test_tenant_policy_limits.py
 ```
 
-Bu mapping, backend canonical state setiyle birebir hizadadfr.
+**Money path E2E:**
 
-## 6. Hangi State'ler Limit / Usage Hesabfnda Saylyor?
-
-Tenant gfnlcfk limit enforcement (TENANT-POLICY-001) affaki kurallara gffre uygular:
-
-- **Deposit gfnlcfk kullanfm**:  
-  `type = 'deposit' AND state = 'completed'`
-- **Withdraw gfnlcfk kullanfm**:  
-  `type = 'withdrawal' AND state IN ('requested', 'approved', 'paid')`
-
-Buna gffre:
-- Deposit fail'leri (`state='failed'`) gfnlcfk limiti tfketmez.
-- Withdraw `rejected` ve `canceled` iflemeleri gfnlcfk limitte sayffmaz; risk gerffeeklefmedifi ie faaliyetsiz kabul edilir.
-
-Bu sefme hem risk/payout taraffndan **beklenen** davranf3f hem de operasyonel olarak "neden limit doldu" sorusunu kolay aefklanabilir kfllfyor.
+```bash
+cd /app/e2e
+yarn test:e2e tests/money-path.spec.ts
+```
