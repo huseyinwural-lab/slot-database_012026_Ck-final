@@ -1,73 +1,55 @@
 <analysis>**original_problem_statement:**
-The user's primary goal is to make the application's core finance/payment functionality production-ready. This is being done through a series of prioritized Sprints. The current session's focus was to complete the remaining backend hardening tasks under **Sprint-2 (Money Path Hardening)** and prove the system's correctness with comprehensive tests.
+The user's goal is to complete a Payment/Wallet EPIC through a series of sprints to make the application's finance functionality production-ready.
 
 **PRODUCT REQUIREMENTS:**
-- **P0-5 (Payout Reliability):** Define and implement robust behavior for PSP failure scenarios, including tracking payout attempts, handling retries, and ensuring atomicity. This includes creating a  table, a new  endpoint, and a  endpoint.
-- **O2 (Admin UI):** Ensure the Admin frontend is consistent with the new backend logic, showing new payout states (, ) and providing new action buttons (, ).
-- **P0-6 (E2E Proof):** Create an end-to-end test suite (Playwright) that proves the money path invariants hold for both happy and fail paths, including deposit success/fail and the full withdrawal flow (create -> approve -> payout fail -> retry -> paid).
-- **Blocker ():** Fix the broken Alembic async runner to allow for new database schema migrations.
+This session focused on two main user directives:
+1.  **P0-4 Panel Bütünlüğü %100 Kapanış (UI + küçük backend hizası):** A comprehensive sprint to make Admin and Player money screens robust against double-clicks, retries, and race conditions. This involved standardizing idempotency keys, retry policies, error messaging, and filter/pagination behavior. It also required creating a proof pack of artifacts to validate completion.
+2.  **Sprint 1 (Payment/Wallet EPIC):** A list of 10 tickets to further harden the payment system. The user prioritized a subset of these as mandatory for the sprint:
+    *   **#4 WEBHOOK-SEC-001:** Implement webhook signature verification (P0 security).
+    *   **#7 TENANT-POLICY-001:** Implement and enforce tenant-level payment policies (P0 product/risk).
+    *   **#5 IDEM-DOC-001 & #1 TX-STATE-001:** Create canonical documentation for idempotency and the transaction state machine.
+    *   **#2 LEDGER-OPS-001:** Create a reconciliation mini-endpoint and runbook for operational visibility.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The core payment backend has been fully hardened for payout reliability (P0-5). This includes:
-- A new  model and database table to track every payout.
-- An idempotent  endpoint that handles the entire payout lifecycle (start, success, fail, retry). It correctly updates transaction states (, , ) and writes a single  ledger event only on success, ensuring atomicity and preventing double-spending.
-- An idempotent  handler that prevents duplicate processing of PSP events using the .
-- An idempotent  endpoint for manual reconciliation of stuck transactions.
-- Comprehensive backend unit and integration tests (, , ) that verify all new money path invariants, including the critical fail - success flow.
-- The Admin UI () has been updated to display the new payout states (, ) and includes functional buttons for Start/Retry Payout and Recheck that use action-based idempotency keys.
-- A full E2E Playwright test suite () that validates the entire money path from deposit to a complex withdrawal flow. The test suite uses a global authentication setup to prevent rate-limiting issues.
+The application has a robust payment backend with a hardened payout lifecycle (P0-5) and a stable E2E test suite (P0-6). This session's work added several key production-readiness features:
+- **P0-4 Panel Bütünlüğü:** The Admin () and Player () frontends were significantly hardened. A shared  helper now manages action-scoped idempotency keys (), in-flight request locking, and a standardized retry policy (for network errors/5xx codes). A central  module provides consistent error messaging.
+- **WEBHOOK-SEC-001:** The payout webhook () is now secured with HMAC-SHA256 signature verification (, ), blocking any unsigned or invalid requests before they are processed.
+- **TENANT-POLICY-001:** The backend now supports and enforces tenant-specific daily deposit and withdrawal limits. This includes DB schema changes (with Alembic heads merged and upgraded), a new service , and integration into the deposit/withdraw routes, which returns a structured  error on violation. The frontend includes a new Payments Policy tab in the Tenant Settings panel to manage these limits.
+- **IDEM-DOC-001 & TX-STATE-001:** Canonical documentation for the system's idempotency contract and transaction state machine now exists in .
+- **LEDGER-OPS-001 (In Progress):** A new reconciliation service () has been created to compute money-path invariants. New admin-only API endpoints (, , , ) have been added to  to trigger reconciliation runs, persist findings to the  table, and query results.
 
 **Last working item**:
-- **Last item agent was working:** The agent was working on the **P0-6 E2E Money Path Proof Pack**. A critical backend bug was discovered in the fail - success flow via the E2E tests. The agent wrote a new backend unit test to reproduce the bug, fixed the bug in the  endpoint's state gate, and verified the fix with both backend and E2E tests. Subsequently, the agent stabilized the E2E tests by implementing a global authentication setup to resolve 429 rate-limiting errors, resulting in a fully passing E2E suite.
-- **Status:** USER VERIFICATION PENDING
-- **Agent Testing Done:** Y
-- **Which testing method agent to use?** NA
+- **Last item agent was working:** The agent was trying to fix the newly created backend tests for the reconciliation service (). The tests were failing to verify the correct detection of ledger inconsistencies.
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** backend testing agent
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1:** Unrelated test failures. (P2)
-  - **Issues Detail:**
-    - **Description:** Initial handoffs mentioned failing tests in  and . These were not part of the core finance work and remain unfixed.
-    - **Status:** NOT STARTED
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** backend testing agent
+- **Issue 1:** Failing reconciliation tests for LEDGER-OPS-001 (P0)
+- **Issue 2:** Unrelated test failures in  and  (P2)
 
-**In progress Task List**:
-- None.
-
-**Upcoming and Future Tasks**
-
-**Upcoming Tasks:**
-- **Task 1: P0-4 tamamlayıcı cilalar (Complementary Polishes) (P1)**
-  - **Where to resume:** 
-  - **What will be achieved with this?** Standardize the  idempotency key pattern for the older admin buttons (Approve, Reject, Mark Paid) to make all money-moving UI actions consistent and robust. Also, standardize error messaging from a single point.
-
-**Future Tasks:**
-- **Task 2: Panel Bütünlüğü (P0-4) Full Implementation (P2)**
-  - **Where to resume:** 
-  - **What will be achieved with this?** Fully implement the Player Wallet/History screen by resolving player authentication issues and verifying the API connection.
-- **Task 3: Fix Unrelated Failing Tests (P2)**
-  - **Where to resume:** , 
-  - **What will be achieved with this?** Achieve a fully green test suite across the entire project.
-
-**Completed work in this session**
-- **Alembic async runner blocker () (RESOLVED):** The agent fixed  to use a synchronous engine, unblocking all database migrations.
-- **P0-5 Payout Reliability (Backend) (DONE):**
-  - ** Model & Migration ():** Created the new model and migration.
-  - ** Endpoint (, ):** Implemented the full lifecycle endpoint with success, fail, and retry logic, including correct ledger handling and audit logging. A critical bug in the fail - success flow was found and fixed.
-  - **Webhook Dedupe ():** Implemented the generic webhook handler with -based deduplication.
-  - ** Endpoint ():** Implemented the manual reconciliation endpoint.
-- **O2 Admin UI () (DONE):**
-  - Updated  with new state badges (, ) and action buttons (, ) with correct idempotency keys.
-- **P0-6 E2E Money Path Proof Pack (DONE):**
-  - Created a comprehensive Playwright test suite () covering the full money path.
-  - Stabilized the test suite against 429 rate-limit errors by implementing a global authentication setup ( and ). The suite is now .
-
-**Earlier issues found/mentioned but not fixed**
-- **Issue 1: Unrelated Test Failures**
-   - **Debug checklist:** Run ============================= test session starts ==============================
+**Issues Detail:**
+- **Issue 1:**
+  - **Description:** Two of the four tests in  are failing:  and . The issue seems to be with how the test data is seeded or how the  service queries the database within the test transaction's scope, as the expected findings are not being generated.
+  - **Attempted fixes:** The agent correctly identified the fixtures needed and attempted to seed the database with inconsistent data to trigger the findings. However, the assertions failed.
+  - **Next debug checklist:**
+    1.  Review .
+    2.  Focus on the failing tests:  and .
+    3.  Inside the tests, add print statements or use a debugger to inspect the state of the database *after* seeding the inconsistent data (e.g., duplicate ledger entries) and *before* calling the reconciliation service. Ensure the seeded data is correctly committed and visible within the session used by the service.
+    4.  Inspect the SQL queries generated by  in  during the test run to ensure they correctly query  and  tables.
+    5.  Verify the  being queried (e.g., ) matches the  being seeded in the test.
+  - **Why fix this issue and what will be achieved with the fix?** Fixing these tests is the final step to complete the  ticket, providing a trusted, automated way to verify the reconciliation service's logic.
+  - **Status:** IN PROGRESS
+  - **Is recurring issue?** N
+  - **Should Test frontend/backend/both after fix?** backend
+  - **Blocked on other issue:** None
+- **Issue 2:**
+  - **Description:** Initial handoffs mentioned failing tests in  and . These were not part of the core finance work and remain unfixed.
+  - **Attempted fixes:** None in this session.
+  - **Next debug checklist:** Run ============================= test session starts ==============================
 platform linux -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0
 rootdir: /app
 configfile: pytest.ini
@@ -385,90 +367,120 @@ ERROR test_robot_orchestrator.py
 ERROR tests/test_withdraw_admin_idempotency.py
 ERROR tests/test_withdraw_idempotency.py
 !!!!!!!!!!!!!!!!!!! Interrupted: 32 errors during collection !!!!!!!!!!!!!!!!!!!
-======================== 5 warnings, 32 errors in 0.76s ======================== on  and  to see the failures and debug. This is low priority.
-   - **Why to solve this issue?** To achieve a fully green test suite.
-   - **Should Test frontend/backend/both after fix?** Backend.
-   - **Is recurring issue?** Y
+======================== 5 warnings, 32 errors in 0.91s ======================== on the specific files to identify the root cause.
+  - **Why fix this issue and what will be achieved with the fix?** To achieve a fully green test suite across the entire project.
+  - **Status:** NOT STARTED
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** backend
 
-**Known issue recurrence from previous fork**
-- None.
+**In progress Task List**:
+- **Task 1:** Complete LEDGER-OPS-001 - Reconciliation Mini Endpoint + Runbook (P0)
+  - **Where to resume:** . The backend service and API endpoints are coded. The immediate blocker is fixing the failing tests.
+  - **What will be achieved with this?** A set of admin APIs and a supporting runbook to allow operators to check the consistency of the money path, detect anomalies like missing or duplicate ledger entries, and have confidence in the system's financial integrity.
+  - **Status:** IN PROGRESS
+  - **Should Test frontend/backend/both after fix?** backend
+  - **Blocked on something:** Blocked on fixing Issue 1 (failing tests).
+
+**Upcoming and Future Tasks**
+
+**Upcoming Tasks:**
+-   **Task 1: ADMIN-REVIEW-002 — Admin Review Reason (FE+BE+Audit) (P1):** Make the  field mandatory for Approve/Reject/MarkPaid actions and log it to the audit trail.
+-   **Task 2: AUDIT-COVERAGE-001 — Money-path Audit Kapsamını Tamamlama (P1):** Ensure all critical money-path events are audited (deposit/withdraw state changes, payout events, tenant policy changes, limit blocks).
+-   **Task 3: PLAYER-WALLET-UX-001 — Receipt alanları + History iyileştirme (P2):** Add , , etc., to the player wallet history for better transparency.
+-   **Task 4: E2E-POLICY-001 — Tenant limit block E2E (Playwright) (P1):** Add a Playwright test to verify that the UI correctly handles a  error.
+-   **Task 5: TENANT-POLICY-002 — Payout retry limit + cooldown enforcement (P2):** Implement backend enforcement for  and .
+
+**Future Tasks:**
+-   **Fix Unrelated Failing Tests (P2):** Address failures in  and .
+
+**Completed work in this session**
+-   **P0-4 Panel Bütünlüğü:** Implemented standardized idempotency key generation, request locking, and retry logic for all money-path actions in the Admin and Player frontends. Centralized error handling.
+-   **WEBHOOK-SEC-001 (P0):** Secured the payout webhook with HMAC signature verification. Implemented in  and tested in .
+-   **TENANT-POLICY-001 (P0):** Implemented tenant-level daily deposit/withdrawal limits, including DB migration, backend enforcement service (), API, and a new Payments Policy UI in the tenant settings. Verified with tests in .
+-   **Alembic Multi-Head Fix:** Resolved a multi-head conflict in Alembic by creating a merge revision, ensuring a clean migration path.
+-   **IDEM-DOC-001 & TX-STATE-001 (P0):** Created canonical documentation for the system's idempotency contract () and transaction state machine ().
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Payout State Machine:**  ->  ->  OR . Retries are possible from .
-- **Idempotent Retry/Recheck:** The  and  endpoints are fully idempotent, allowing safe retries from the UI or via automation. A bug in the retry logic was fixed.
-- **Webhook Deduplication:** The webhook handler uses  to prevent processing the same event multiple times.
-- **E2E Test Stabilization:** Implemented a  in Playwright to log in once and reuse the authentication state () across all tests, eliminating 429 rate-limit errors and making the E2E suite reliable.
-- **Test-Driven Bug Discovery:** A critical backend bug in the fail - success path was discovered and resolved only after being exposed by the comprehensive E2E test suite.
-- **Polling for Consistency:** E2E tests use a  helper to wait for backend state to be consistent before making assertions, avoiding flaky tests due to timing issues.
+-   **Webhook HMAC Signature Verification:** Webhook payloads are now verified using a timestamp and an HMAC-SHA256 signature to prevent tampering and unauthorized calls.
+-   **Tenant-Level Payment Policies:** The system can now enforce daily transaction limits (deposit/withdraw) on a per-tenant basis. The limits are stored in the  model and checked by a dedicated service.
+-   **Contract-First Provider Interface:** A  protocol was defined in  to decouple business logic from the mock PSP implementation, paving the way for adding real PSPs.
+-   **Money-Path Invariant Reconciliation:** A new service  was introduced to scan for data inconsistencies in the money path, such as missing ledger entries for paid transactions or duplicate payout attempts.
 
 **key DB schema**
-- **PayoutAttempt:** 
+-   **tenant:** Added  (Numeric),  (Numeric),  (Integer),  (Integer).
+-   **reconciliation_findings:** Used by the new reconciliation service to persist detected issues.
+-   **reconciliation_runs:** Used to track each execution of the reconciliation service.
 
 **changes in tech stack**
-- None.
+-   None.
 
 **All files of reference**
-- : Contains the core logic for , , and .
-- , , : The backend test suite proving the money path invariants.
-- : The Admin UI with the new payout features.
-- : The comprehensive Playwright E2E test proving the entire flow.
--  & : The solution for stabilizing E2E tests against rate limits.
+-   : Core logic for finding money-path inconsistencies.
+-   : Failing tests for the reconciliation service.
+-   : Contains the new reconciliation API endpoints.
+-   : Core logic for enforcing daily limits.
+-   : Backend tests for the tenant policy feature.
+-   : Core logic for webhook signature verification.
+-   : Backend tests for webhook security.
+-   : Canonical documentation for idempotency.
+-   : Canonical documentation for state transitions.
 
 **Areas that need refactoring**:
-- None identified.
+-   The  route file is complex, making it risky to modify. The agent initially broke the logic while trying to insert the policy enforcement gate. While corrected, this file could benefit from being broken down into smaller services to simplify its structure.
 
 **key api endpoints**
-- 
-- 
-- 
+-   : Triggers a reconciliation run for wallet/ledger invariants.
+-   : Returns a summary of findings from the latest run.
+-   : Returns a paginated list of findings for a specific run.
+-   : Returns a snapshot of all related financial data for a single transaction.
+-   : Updates the payment policy for the current tenant.
 
 **Critical Info for New Agent**
-- The Money Path Hardening sprint (P0-5, O1, O2, P0-6) is now functionally complete and proven by both backend and E2E tests.
-- The next logical step, as suggested by the user, is **P0-4 tamamlayıcı cilalar (Complementary Polishes)**, which involves applying the action-based idempotency key pattern to the older admin buttons (Approve/Reject).
-- The E2E test suite is now stable and reliable due to the global authentication setup. New E2E tests should follow this pattern.
-- A critical bug was found and fixed in the  ->  path. The logic now correctly allows starting a new payout attempt from either  or  states.
+-   The user provides extremely detailed, ticket-ready instructions. Adhere to them strictly, including the specified implementation order and guardrails.
+-   The current task  is blocked by failing tests in . This is the highest priority.
+-   The system has an existing generic reconciliation framework (,  models). The new work builds on top of this by adding a specific  to distinguish it from PSP-level reconciliation.
+-   The user has approved a specific, sequential plan for the rest of Sprint 1. The next task after fixing  is . Do not deviate from this order.
 
 **documents and test_reports created in this job**
-- 
+-   
+-   
 
-**Last 10 User Messages and any pending HUMAN messages**
-- **User (latest):** Provided a detailed plan to fix the P06-204 rate-limiting issue using a global auth setup in Playwright and other stabilization techniques.
-- **Agent:** Summarized the status: P06-203 is now passing after the backend bug fix, but P06-204 is failing due to 429 rate limits.
-- **User:** Provided a detailed plan to fix the P06-203  mismatch by adding a dedicated backend unit test for the fail - success scenario and then fixing the backend logic.
-- **Agent:** Reported that the E2E test P06-203 is failing on the  balance assertion after a successful retry, correctly diagnosing a likely backend bug not covered by unit tests.
-- **User:** Instructed the agent to fix the P06-203 test by isolating it with a new player each time and using a polling mechanism to read the balance, to rule out E2E flakiness.
-- **Agent:** Summarized the E2E test progress, noting that 3/4 tests passed but P06-203 was failing, and asked for guidance.
-- **User:** Provided a detailed, multi-part task order for the P0-6 E2E test suite, specifying scenarios, artifacts, and acceptance criteria.
-- **Agent:** Confirmed completion of the O1 Recheck endpoint and asked for confirmation to start P0-6.
-- **User:** Provided the task order for O1 (Recheck endpoint) and P0-6 (E2E tests).
-- **Agent:** Confirmed completion of O2 (Admin UI) and asked the user to verify.
+**Last 10 User Messages**
+- **User (latest):** Approved the plan for LEDGER-OPS-001 with a detailed checklist of guardrails and confirmed the next task is ADMIN-REVIEW-002.
+- **Agent:** Proposed a detailed plan to implement LEDGER-OPS-001 by building on the existing reconciliation framework.
+- **User:** Provided the next list of tasks for the Payment/Wallet EPIC, prioritizing PSP-CONTRACT-001.
+- **Agent:** Confirmed completion of the documentation tickets and asked for the next steps.
+- **User:** Approved the agent's plan to add more detail to the documentation tickets and provided the final, ticket-ready content for both.
+- **Agent:** Summarized the completion of WEBHOOK-SEC-001 and TENANT-POLICY-001, and proposed creating the documentation for IDEM-DOC-001 and TX-STATE-001.
+- **User:** Approved and told the agent to continue.
+- **Agent:** Provided a detailed summary of progress on TENANT-POLICY-001, including fixing the Alembic multi-head issue and getting the backend tests to pass.
+- **User:** Told the agent to continue with the specified order.
+- **Agent:** Reported a setback with the TENANT-POLICY-001 enforcement logic and asked the user to choose between a conservative approach (defer enforcement) or continuing to implement it in the current session.
 
 **Project Health Check:**
-- **Broken:** The low-priority  and  tests are still failing.
-- **Mocked:** The Payment Service Provider (PSP) is still mocked.
+-   **Broken:** Two unrelated backend test files (, ) and the new  are failing.
+-   **Mocked:** The Payment Service Provider (PSP) is still mocked, though the system is now better prepared for a real integration via the  protocol.
 
 **3rd Party Integrations**
-- PostgreSQL / SQLModel / Alembic
-- FastAPI
-- React
-- Playwright
+-   PostgreSQL / SQLModel / Alembic
+-   FastAPI
+-   React
+-   Playwright
 
 **Testing status**
-- **Testing agent used after significant changes:** YES (backend testing agent was used after initial P0-5 implementation).
-- **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:**
-  - 
-  - 
-  - 
-  - 
-  - 
-- **Known regressions:** None.
+-   **Testing agent used after significant changes:** NO
+-   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Test files created:**
+    -   
+    -   
+    -    (currently failing)
+-   **Known regressions:** None.
 
 **Credentials to test flow:**
-- N/A. Test users and credentials are created dynamically within the test suites.
+-   N/A. Test users and credentials are created dynamically within the test suites.
 
 **What agent forgot to execute**
-- The agent has successfully followed the user's detailed instructions and did not forget any major tasks. The remaining open items are part of the planned upcoming work.</analysis>
+-   The agent did not forget any tasks but is currently in the middle of implementing . The remaining tasks from the user's Sprint 1 list are pending as per the agreed-upon priority.</analysis>
