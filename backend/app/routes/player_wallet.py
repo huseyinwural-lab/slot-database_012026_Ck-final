@@ -67,14 +67,33 @@ async def create_deposit(
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
     tenant_id = current_player.tenant_id
-    await ensure_within_tenant_daily_limits(
-        session,
-        tenant_id=tenant_id,
-        player_id=current_player.id,
-        action="deposit",
-        amount=amount,
-        currency="USD",
-    )
+    try:
+        await ensure_within_tenant_daily_limits(
+            session,
+            tenant_id=tenant_id,
+            player_id=current_player.id,
+            action="deposit",
+            amount=amount,
+            currency="USD",
+        )
+    except HTTPException as e:
+        if e.status_code == 422 and isinstance(e.detail, dict) and e.detail.get("error_code") == "LIMIT_EXCEEDED":
+            request_id = request.headers.get("X-Request-Id", "unknown")
+            ip = request.client.host if request.client else None
+            await audit.log_event(
+                session=session,
+                request_id=request_id,
+                actor_user_id=current_player.id,
+                tenant_id=tenant_id,
+                action="FIN_TENANT_LIMIT_BLOCKED",
+                resource_type="wallet_transaction",
+                resource_id=current_player.id,
+                result="failure",
+                details=e.detail,
+                ip_address=ip,
+            )
+            await session.commit()
+        raise e
 
     # Test-only payment method gate: allow "test" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
@@ -374,14 +393,33 @@ async def create_withdrawal(
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
     tenant_id = current_player.tenant_id
-    await ensure_within_tenant_daily_limits(
-        session,
-        tenant_id=tenant_id,
-        player_id=current_player.id,
-        action="withdraw",
-        amount=amount,
-        currency=currency,
-    )
+    try:
+        await ensure_within_tenant_daily_limits(
+            session,
+            tenant_id=tenant_id,
+            player_id=current_player.id,
+            action="withdraw",
+            amount=amount,
+            currency=currency,
+        )
+    except HTTPException as e:
+        if e.status_code == 422 and isinstance(e.detail, dict) and e.detail.get("error_code") == "LIMIT_EXCEEDED":
+            request_id = request.headers.get("X-Request-Id", "unknown")
+            ip = request.client.host if request.client else None
+            await audit.log_event(
+                session=session,
+                request_id=request_id,
+                actor_user_id=current_player.id,
+                tenant_id=tenant_id,
+                action="FIN_TENANT_LIMIT_BLOCKED",
+                resource_type="wallet_transaction",
+                resource_id=current_player.id,
+                result="failure",
+                details=e.detail,
+                ip_address=ip,
+            )
+            await session.commit()
+        raise e
 
     # Test-only withdraw method gate: allow "test_bank" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
