@@ -599,6 +599,16 @@ psp_mock_adapter_dec22:
 p0_4_panel_integrity_dec22:
   - task: "P0-4 Panel Bütünlüğü: finance withdrawals listing + player wallet endpoints testing"
     implemented: true
+    working: false
+    file: "frontend/src/pages/FinanceWithdrawals.jsx, backend/app/routes/finance.py, backend/app/routes/player_wallet.py, e2e/global-setup.ts"
+    stuck_count: 1
+    priority: "highest"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "testing"
+        -comment: "❌ P0-4 PANEL BÜTÜNLÜĞÜ FİNALİZASYONU E2E TEST FAILED - AUTHENTICATION ISSUES BLOCKING COMPREHENSIVE TESTING: Test Execution Status: ❌ Could not complete comprehensive E2E testing due to authentication/storageState issues preventing access to admin interface. Authentication Issues: ❌ Global storageState authentication not working correctly - admin token missing from localStorage, ❌ Manual login attempts failing to persist authentication state, ❌ Console logs show 'Token check: MISSING' and 'No token, skipping capabilities fetch' errors, ❌ Unable to access /finance/withdrawals page due to authentication redirect loops. Partial Validation Completed: ✅ API token generation working correctly (admin@casino.com/Admin123! authentication successful), ✅ Backend API endpoints accessible and responding correctly, ✅ Finance withdrawals API structure validated (/api/v1/finance/withdrawals with proper filtering/pagination parameters), ✅ Player wallet API endpoints confirmed working (/api/v1/player/wallet/deposit, /api/v1/player/wallet/withdraw, /api/v1/player/wallet/balance, /api/v1/player/wallet/transactions). Requirements Coverage Analysis: ⚠️ A) Admin Withdrawals Idempotency/Retry/UI Guards - BLOCKED by authentication issues, cannot test UI button visibility, double-click protection, or network request monitoring, ⚠️ B) Admin Withdrawals Filter/Pagination Contract - BLOCKED by authentication issues, cannot test filter combinations or pagination behavior in UI, ⚠️ C) Player Wallet Live Validation + Pagination - PARTIALLY TESTED via API calls, deposit/withdrawal functionality confirmed working but UI testing blocked. CRITICAL BLOCKER: The existing e2e/global-setup.ts storageState mechanism is not properly persisting admin authentication for UI testing. This prevents comprehensive validation of the Turkish specification requirements which focus heavily on UI behavior, button visibility, and user interaction patterns. RECOMMENDATION: Fix authentication persistence in global-setup.ts or implement alternative authentication mechanism for E2E testing before proceeding with P0-4 panel integrity validation."
+    implemented: true
     working: true
     file: "backend/app/routes/finance.py, backend/app/routes/player_wallet.py, backend/tests/test_ledger_enforce_balance.py"
     priority: "highest"
