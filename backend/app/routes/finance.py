@@ -1048,6 +1048,63 @@ async def run_wallet_reconciliation(
                     "tenant_id": f.tenant_id,
                     "tx_id": f.tx_id,
                     "details": f.details,
+
+
+@router.get("/reconciliation/summary")
+async def get_wallet_reconciliation_summary(
+    date: Optional[str] = None,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    from datetime import date as date_cls
+    from app.models.reconciliation_run import ReconciliationRun
+    from app.models.reconciliation import ReconciliationFinding
+
+    provider = "wallet_ledger"
+
+    if date:
+        target_date = date_cls.fromisoformat(date)
+    else:
+        now = datetime.now(timezone.utc)
+        target_date = date_cls(year=now.year, month=now.month, day=now.day)
+
+    # Latest run for this provider and window_start date
+    day_start, day_end = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc), None
+
+    query = select(ReconciliationRun).where(
+        ReconciliationRun.provider == provider,
+        ReconciliationRun.window_start >= day_start,
+    ).order_by(ReconciliationRun.created_at.desc())
+    run = (await session.execute(query)).scalars().first()
+    if not run:
+        return {"run_id": None, "counts_by_finding_code": {}, "counts_by_severity": {}, "scanned_tx_count": 0}
+
+    # Aggregate findings for this run
+    stmt = select(
+        ReconciliationFinding.finding_type,
+        func.count().label("cnt"),
+    ).where(ReconciliationFinding.provider == provider, ReconciliationFinding.raw["run_id"].as_string() == run.id).group_by(ReconciliationFinding.finding_type)
+    rows = (await session.execute(stmt)).all()
+    counts_by_finding = {r[0]: r[1] for r in rows}
+
+    stmt2 = select(
+        ReconciliationFinding.severity,
+        func.count().label("cnt"),
+    ).where(ReconciliationFinding.provider == provider, ReconciliationFinding.raw["run_id"].as_string() == run.id).group_by(ReconciliationFinding.severity)
+    rows2 = (await session.execute(stmt2)).all()
+    counts_by_severity = {r[0]: r[1] for r in rows2}
+
+    scanned = 0
+    if run.stats_json and "scanned" in run.stats_json:
+        scanned = run.stats_json["scanned"]
+
+    return {
+        "run_id": run.id,
+        "counts_by_finding_code": counts_by_finding,
+        "counts_by_severity": counts_by_severity,
+        "scanned_tx_count": scanned,
+    }
+
                 },
             )
             session.add(rec)
