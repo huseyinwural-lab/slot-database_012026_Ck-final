@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { callMoneyAction, buildIdempotencyKey } from '../services/moneyActions';
+import { callMoneyAction } from '../services/moneyActions';
+import { moneyPathErrorMessage } from '../services/moneyPathErrors';
 import { Wallet, ArrowUpRight, ArrowDownLeft, History, CreditCard, DollarSign } from 'lucide-react';
 
 const WalletPage = () => {
