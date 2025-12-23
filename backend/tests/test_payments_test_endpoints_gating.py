@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from unittest.mock import patch
-from app.core.config import settings
+from config import settings
 
 # We need to import the app to mount it in the test client
 # But we need to patch the settings *before* the route logic might check it, 
