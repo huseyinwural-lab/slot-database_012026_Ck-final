@@ -16,6 +16,17 @@ from app.services.ledger_shadow import shadow_append_event, shadow_apply_delta
 from app.core.database import get_session
 from app.models.sql_models import ReconciliationReport, ChargebackCase, AdminUser
 from app.utils.auth import get_current_admin
+
+
+class PayoutWebhookPayload(BaseModel):
+    withdraw_tx_id: str
+    provider: str
+    provider_event_id: str
+    status: Literal["paid", "failed"]
+    provider_ref: Optional[str] = None
+    error_code: Optional[str] = None
+    raw_payload: Optional[dict] = None
+
 from app.utils.tenant import get_current_tenant_id
 
 router = APIRouter(prefix="/api/v1/finance", tags=["finance_advanced"])
