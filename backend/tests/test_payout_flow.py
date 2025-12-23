@@ -489,10 +489,12 @@ async def test_payout_webhook_orphan_is_noop_and_audited(client, async_session_f
         "status": "paid",
     }
 
+    sig_headers = _sign_webhook_payload(payload)
+
     r_wh = await client.post(
         "/api/v1/finance/withdrawals/payout/webhook",
         json=payload,
-        headers=headers_admin,
+        headers={**headers_admin, **sig_headers},
     )
     assert r_wh.status_code == 200
     body = r_wh.json()
