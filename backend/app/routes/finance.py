@@ -556,8 +556,6 @@ async def payout_webhook(
     await session.refresh(tx)
     await session.refresh(attempt)
 
-    return {"status": "ok", "transaction": tx, "payout_attempt": attempt}
-
     # Enforce state precondition for first call: must be approved
     if tx.state != "approved":
         raise HTTPException(
