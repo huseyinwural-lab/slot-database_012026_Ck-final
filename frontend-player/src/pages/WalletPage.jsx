@@ -102,7 +102,7 @@ const WalletPage = () => {
       });
       setMessage({ type: 'success', text: 'Deposit successful!' });
       setDepositAmount('');
-      fetchWalletData(); // Refresh balance
+      fetchWalletData(1); // Refresh balance
     } catch (err) {
       console.error(err);
       setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
@@ -150,7 +150,7 @@ const WalletPage = () => {
       setMessage({ type: 'success', text: 'Withdrawal requested successfully!' });
       setWithdrawAmount('');
       setWithdrawAddress('');
-      fetchWalletData();
+      fetchWalletData(1);
     } catch (err) {
       console.error(err);
       setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
