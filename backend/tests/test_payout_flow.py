@@ -65,6 +65,24 @@ async def _seed_admin_player_and_balance(async_session_factory):
 
         return tenant, player, admin, admin_token
 
+def _sign_webhook_payload(payload: dict) -> dict:
+    """Build signature headers for payout webhook tests.
+
+    Uses WEBHOOK_SECRET env var if present, otherwise sets a test secret.
+    """
+    secret = os.environ.get("WEBHOOK_SECRET") or "test_webhook_secret"
+    os.environ["WEBHOOK_SECRET"] = secret
+
+    body_bytes = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    ts = int(time.time())
+    signed_payload = f"{ts}.".encode("utf-8") + body_bytes
+    sig = hmac.new(secret.encode("utf-8"), signed_payload, sha256).hexdigest()
+
+    return {
+        "X-Webhook-Timestamp": str(ts),
+        "X-Webhook-Signature": sig,
+    }
+
 
 @pytest.mark.usefixtures("client")
 @pytest.mark.asyncio
