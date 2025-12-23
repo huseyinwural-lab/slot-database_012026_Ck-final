@@ -127,7 +127,7 @@ const WalletPage = () => {
       fetchWalletData();
     } catch (err) {
       console.error(err);
-      setMessage({ type: 'error', text: err.response?.data?.detail || 'Withdrawal failed' });
+      setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
     } finally {
       setProcessing(false);
     }
