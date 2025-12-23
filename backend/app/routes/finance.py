@@ -793,7 +793,7 @@ async def payout_webhook(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
-    """Generic PSP payout webhook handler with replay dedupe (P4).
+    """Generic PSP payout webhook handler with signature verification + replay dedupe.
 
     Behaviour:
     - provider_event_id is the primary dedupe key.
