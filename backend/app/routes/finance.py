@@ -1073,6 +1073,7 @@ async def run_wallet_reconciliation(
             details={"provider": provider, "date": target_date.isoformat(), "inserted": inserted, "scanned": scanned},
             ip_address=ip,
         )
+        await session.commit()
 
     except Exception as exc:  # noqa: BLE001
         run.status = "failed"
@@ -1091,6 +1092,7 @@ async def run_wallet_reconciliation(
             details={"provider": provider, "date": target_date.isoformat(), "error": str(exc)},
             ip_address=ip,
         )
+        await session.commit()
         raise
 
     return {"run_id": run.id, "inserted": inserted, "scanned": scanned}

@@ -146,7 +146,8 @@ async def test_admin_review_reason_persisted_in_audit_details(client, admin_toke
             username="test_audit_player",
             email="audit@player.com",
             password_hash="hash",
-            balance_real_available=1000.0
+            balance_real_available=950.0, # 1000 - 50
+            balance_real_held=50.0 # Held amount for the pending withdrawal
         )
         session.add(player)
         
