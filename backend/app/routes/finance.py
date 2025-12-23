@@ -1198,6 +1198,82 @@ async def list_wallet_reconciliation_findings(
 
         await audit.log_event(
             session=session,
+
+
+@router.get("/reconciliation/tx/{tx_id}")
+async def get_wallet_reconciliation_tx_snapshot(
+    tx_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Return a snapshot for a single transaction for reconciliation drill-down."""
+
+    from app.models.sql_models import Transaction, Player
+    from app.models.reconciliation import ReconciliationFinding
+    from app.models.sql_models import PayoutAttempt
+    from app.repositories.ledger_repo import LedgerTransaction
+
+    tx = (await session.execute(select(Transaction).where(Transaction.id == tx_id))).scalars().first()
+    if not tx:
+        raise HTTPException(status_code=404, detail={"error_code": "TX_NOT_FOUND"})
+
+    findings = (
+        await session.execute(
+            select(ReconciliationFinding).where(
+                ReconciliationFinding.tx_id == tx_id,
+            )
+        )
+    ).scalars().all()
+
+    attempts = (
+        await session.execute(
+            select(PayoutAttempt).where(PayoutAttempt.withdraw_tx_id == tx_id)
+        )
+    ).scalars().all()
+
+    ledger_events = (
+        await session.execute(select(LedgerTransaction).where(LedgerTransaction.tx_id == tx_id))
+    ).scalars().all()
+
+    return {
+        "tx": {
+            "id": tx.id,
+            "tenant_id": tx.tenant_id,
+            "player_id": tx.player_id,
+            "type": tx.type,
+            "state": tx.state,
+            "amount": float(tx.amount),
+            "currency": tx.currency,
+        },
+        "findings": [
+            {
+                "finding_type": f.finding_type,
+                "severity": f.severity,
+                "status": f.status,
+                "raw": f.raw,
+            }
+            for f in findings
+        ],
+        "payout_attempts": [
+            {
+                "id": pa.id,
+                "provider": pa.provider,
+                "provider_event_id": pa.provider_event_id,
+                "status": pa.status,
+            }
+            for pa in attempts
+        ],
+        "ledger_events": [
+            {
+                "id": ev.id,
+                "status": ev.status,
+                "amount": float(ev.amount),
+                "currency": ev.currency,
+            }
+            for ev in ledger_events
+        ],
+    }
+
             request_id=request_id,
             actor_user_id=str(current_admin.id),
             tenant_id=None,
