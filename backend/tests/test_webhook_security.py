@@ -5,16 +5,8 @@ from hashlib import sha256
 
 import pytest
 from fastapi import status
-from httpx import AsyncClient
-
 from server import app
-from app.core.database import async_session
 
-
-@pytest.fixture
-async def client():
-  async with AsyncClient(app=app, base_url="http://testserver") as c:
-    yield c
 
 
 def sign(body: bytes, ts: int, secret: str) -> str:
@@ -29,7 +21,7 @@ def _set_webhook_secret(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_webhook_missing_signature_headers_returns_400(client):
+async def test_webhook_missing_signature_headers_returns_400(client, admin_token):
   payload = {
     "provider": "mockpsp",
     "provider_event_id": "evt_1",
