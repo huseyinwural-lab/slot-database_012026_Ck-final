@@ -11,7 +11,7 @@ from datetime import datetime
 
 class P0Patch1Tester:
     def __init__(self):
-        self.base_url = "https://finpay-guard.preview.emergentagent.com"
+        self.base_url = "https://payout-system-7.preview.emergentagent.com"
         self.access_token = None
         self.tests_run = 0
         self.tests_passed = 0
