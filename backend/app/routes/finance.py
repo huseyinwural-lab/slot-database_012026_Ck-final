@@ -323,6 +323,83 @@ async def mark_withdrawal_paid(
     return {"transaction": tx}
 
 
+@router.post("/withdrawals/{tx_id}/payout")
+async def start_payout(
+    request: Request,
+    tx_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Start a payout attempt for an approved withdrawal (idempotent).
+
+    - Only allowed from state=approved.
+    - Creates or reuses a PayoutAttempt row keyed by (withdraw_tx_id, idempotency_key).
+    - On first creation, transitions withdrawal state to payout_pending.
+    """
+
+    from app.models.sql_models import PayoutAttempt  # local import to avoid cycles
+    from app.services.transaction_state_machine import transition_transaction
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    idem_key = request.headers.get("Idempotency-Key")
+    if not idem_key:
+        raise HTTPException(status_code=400, detail={"error_code": "IDEMPOTENCY_KEY_REQUIRED"})
+
+    # Load withdrawal transaction
+    stmt = select(Transaction).where(
+        Transaction.id == tx_id,
+        Transaction.tenant_id == tenant_id,
+        Transaction.type == "withdrawal",
+    )
+    tx = (await session.execute(stmt)).scalars().first()
+    if not tx:
+        raise HTTPException(status_code=404, detail={"error_code": "TX_NOT_FOUND"})
+
+    # Enforce state precondition: must be approved
+    if tx.state != "approved":
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error_code": "INVALID_STATE_TRANSITION",
+                "from_state": tx.state,
+                "to_state": "payout_pending",
+                "tx_type": "withdrawal",
+            },
+        )
+
+    # Check for existing attempt with same idempotency key
+    pa_stmt = select(PayoutAttempt).where(
+        PayoutAttempt.withdraw_tx_id == tx_id,
+        PayoutAttempt.idempotency_key == idem_key,
+    )
+    existing_attempt = (await session.execute(pa_stmt)).scalars().first()
+
+    if existing_attempt:
+        # Idempotent replay: return existing state
+        return {"transaction": tx, "payout_attempt": existing_attempt}
+
+    # Create new attempt and move state to payout_pending
+    attempt = PayoutAttempt(
+        withdraw_tx_id=tx.id,
+        tenant_id=tenant_id,
+        provider="mock_psp",
+        idempotency_key=idem_key,
+        status="pending",
+    )
+
+    transition_transaction(tx, "payout_pending")
+
+    session.add(tx)
+    session.add(attempt)
+    await session.commit()
+    await session.refresh(tx)
+    await session.refresh(attempt)
+
+    return {"transaction": tx, "payout_attempt": attempt}
+
+
+
 @router.get("/reconciliation")
 async def get_reconciliations(
     request: Request,
