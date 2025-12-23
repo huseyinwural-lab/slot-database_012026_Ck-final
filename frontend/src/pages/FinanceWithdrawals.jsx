@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { callMoneyAction, buildIdempotencyKey, getActionStatus } from '../services/moneyActions';
+import { callMoneyAction, buildIdempotencyKey } from '../services/moneyActions';
+import { moneyPathErrorMessage } from '../services/moneyPathErrors';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -154,25 +155,26 @@ const FinanceWithdrawals = () => {
   const handleActionError = async (err) => {
     const status = err?.response?.status;
     const code = err?.standardized?.code;
-    const message = err?.standardized?.message || 'Action failed';
+    const message = moneyPathErrorMessage(err);
 
     if (status === 409 && code === 'IDEMPOTENCY_KEY_REUSE_CONFLICT') {
-      toast.warning('Aynı işlem anahtarı farklı istekle kullanıldı.', {
-        description: 'Sayfayı yenileyip tekrar deneyin.',
-      });
-      await fetchWithdrawals(1);
-      return;
-    }
-
-    if (status === 409 && code === 'INVALID_STATE_TRANSITION') {
-      toast.warning('Kayıt durumu değişti. Liste yenilendi.', {
+      toast.warning('İşlem anahtarı çakışması', {
         description: message,
       });
       await fetchWithdrawals(1);
       return;
     }
 
-    // Other errors (401/403/5xx) are already handled by interceptor; still show a local toast.
+    if (status === 409 && code === 'INVALID_STATE_TRANSITION') {
+      toast.warning('Kayıt durumu değişti', {
+        description: message,
+      });
+      await fetchWithdrawals(1);
+      return;
+    }
+
+    // Other errors (401/403/5xx) interceptor zaten Request ID içeren toast basıyor;
+    // burada sadece ek, daha kullanıcı-dostu bir mesaj gösteriyoruz.
     toast.error(message);
   };
 
