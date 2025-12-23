@@ -129,6 +129,7 @@ async def test_duplicate_provider_event_attempt_finding(client, admin_token, asy
             tenant_id="tenant1",
             player_id="player1",
             type="withdrawal",
+            status="completed",
             state="payout_pending",
             amount=20.0,
             currency="USD",
