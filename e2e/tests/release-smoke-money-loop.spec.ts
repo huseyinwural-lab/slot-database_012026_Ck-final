@@ -81,13 +81,13 @@ test.describe('Release Smoke Money Loop', () => {
     // Wait for form
     await expect(page.locator('text=Request Withdrawal')).toBeVisible();
     
-    // Fill Withdrawal Form
-    await page.fill('input[name="amount"]', '50');
+    // Fill Withdrawal Form using Labels (more robust)
+    await page.getByLabel('Withdrawal Amount').fill('50');
     // Fill Bank Details
-    await page.fill('input[name="accountHolderName"]', 'Smoke Test User');
-    await page.fill('input[name="accountNumber"]', '123456789');
-    await page.fill('input[name="bankCode"]', '001');
-    await page.fill('input[name="branchCode"]', 'ABC');
+    await page.getByLabel('Account Holder Name').fill('Smoke Test User');
+    await page.getByLabel('Account Number').fill('123456789');
+    await page.getByLabel('Bank Code').fill('001');
+    await page.getByLabel('Branch Code').fill('ABC');
     await page.click('button:has-text("Request Withdrawal")');
     
     // 7. Verify Toast/Success
