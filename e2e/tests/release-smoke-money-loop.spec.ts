@@ -65,10 +65,25 @@ test.describe('Release Smoke Money Loop', () => {
 
     // === PART C: WITHDRAW ===
     // 6. Request Withdrawal
-    await page.click('button:has-text("Withdraw")'); // Assuming tab/button
+    // Ensure we are on Wallet page
+    await expect(page).toHaveURL(/\/wallet/);
+    
+    // Check if there is a "Withdraw" tab or button.
+    // Sometimes it's a tab in a TabsList.
+    const withdrawTab = page.locator('button[role="tab"]:has-text("Withdraw")');
+    if (await withdrawTab.count() > 0) {
+        await withdrawTab.click();
+    } else {
+        // Maybe a button?
+        await page.click('button:has-text("Withdraw")');
+    }
+    
+    // Wait for form
+    await expect(page.locator('text=Request Withdrawal')).toBeVisible();
+    
     // Fill Withdrawal Form
     await page.fill('input[name="amount"]', '50');
-    // Fill Bank Details (assuming form fields from Payout Playbook)
+    // Fill Bank Details
     await page.fill('input[name="accountHolderName"]', 'Smoke Test User');
     await page.fill('input[name="accountNumber"]', '123456789');
     await page.fill('input[name="bankCode"]', '001');
