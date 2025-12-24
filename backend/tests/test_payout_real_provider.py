@@ -102,10 +102,14 @@ async def test_payout_real_provider_adyen_flow(client: AsyncClient, admin_token,
         data = resp.json()
         assert data["status"] == "retry_initiated"
         assert "attempt_id" in data
+        # Confirm it went through Adyen block (which returns provider_ref)
+        # If this fails, it means it hit fallback or mock block
+        assert "provider_ref" in data, "Did not hit Adyen logic block"
         
         attempt_id = data["attempt_id"]
         
     # Check DB state
+    session.expire_all() # Force reload from DB
     await session.refresh(tx)
     assert tx.status == "payout_pending"
     assert tx.state == "payout_submitted"
