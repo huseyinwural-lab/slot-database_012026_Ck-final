@@ -137,9 +137,12 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await adminPage.fill('#email', 'admin@casino.com');
     await adminPage.fill('#password', 'Admin123!');
     await adminPage.click('button[type="submit"]');
-    await expect(adminPage).toHaveURL(/\/admin\/dashboard/, { timeout: 15000 });
+    // Login redirects to /, which is the Dashboard
+    await expect(adminPage).toHaveURL(`${ADMIN_APP_URL}/`, { timeout: 15000 });
 
-    await adminPage.click('a[href="/admin/finance/withdrawals"]');
+    // Navigate to Withdrawals directly
+    await adminPage.goto(`${ADMIN_APP_URL}/finance/withdrawals`);
+    await expect(adminPage).toHaveURL(/\/finance\/withdrawals/, { timeout: 15000 });
     
     // Find row
     const row = adminPage.locator('tr').filter({ hasText: `rcuser${uniqueId}` }).first();
