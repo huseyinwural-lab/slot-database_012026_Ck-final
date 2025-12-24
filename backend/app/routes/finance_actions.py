@@ -14,6 +14,8 @@ from app.services.psp import get_psp
 
 from config import settings
 router = APIRouter(prefix="/api/v1/finance-actions", tags=["finance_actions"])
+import logging
+logger = logging.getLogger(__name__)
 
 @router.post("/withdrawals/{tx_id}/retry")
 async def retry_payout(
