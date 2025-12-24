@@ -41,6 +41,7 @@ class MetricsService:
         self.webhook_events[key] += 1
         if status != "success":
             self.webhook_failures[provider] += 1
+
     def record_webhook_replay(self):
         self.webhook_replay_deduped += 1
 
@@ -51,25 +52,6 @@ class MetricsService:
         if success:
             self.payout_success += 1
         else:
-        # Threshold Evaluation
-        status = "healthy"
-        alerts = []
-        
-        if payout_failure_rate > 0.15:
-            status = "critical"
-            alerts.append("Payout Failure Rate > 15%")
-        elif payout_failure_rate > 0.05:
-            status = "warning"
-            alerts.append("Payout Failure Rate > 5%")
-            
-        if self.reconciliation_critical > 0:
-            status = "critical"
-            alerts.append("Critical Reconciliation Findings")
-            
-        return {
-            "status": status,
-            "alerts": alerts,
-            "http": {
             self.payout_failed += 1
 
     def record_webhook_signature_failure(self, provider: str):
@@ -90,7 +72,24 @@ class MetricsService:
         if self.payout_attempts > 0:
             payout_failure_rate = self.payout_failed / self.payout_attempts
 
+        # Threshold Evaluation
+        status = "healthy"
+        alerts = []
+        
+        if payout_failure_rate > 0.15:
+            status = "critical"
+            alerts.append("Payout Failure Rate > 15%")
+        elif payout_failure_rate > 0.05:
+            status = "warning"
+            alerts.append("Payout Failure Rate > 5%")
+            
+        if self.reconciliation_critical > 0:
+            status = "critical"
+            alerts.append("Critical Reconciliation Findings")
+
         return {
+            "status": status,
+            "alerts": alerts,
             "http": {
                 "total_requests": self.request_count,
                 "errors_4xx": self.error_count_4xx,
