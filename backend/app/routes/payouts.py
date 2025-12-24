@@ -12,7 +12,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/payouts", tags=["payouts"])
+router = APIRouter(prefix="/api/v1/payouts", tags=["payouts"])
 
 # Dependency
 def get_adyen_service():
