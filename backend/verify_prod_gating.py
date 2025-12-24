@@ -2,7 +2,7 @@ import asyncio
 import os
 from unittest.mock import patch
 from httpx import AsyncClient
-from app.backend.app.routes.server import app # Import the app
+from app.server import app # Import the app
 from config import settings
 
 # Helper to run async test
