@@ -9,7 +9,6 @@ import uuid
 import logging
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
-from app.models.sql_models import PayoutStatus # Assuming this enum exists or we use str
 
 logger = logging.getLogger(__name__)
 
