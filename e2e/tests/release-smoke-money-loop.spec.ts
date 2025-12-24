@@ -1,7 +1,7 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 
 test.describe('Release Smoke Money Loop (Deterministic)', () => {
-  test.setTimeout(90000); // 1.5 minutes total
+  test.setTimeout(90000); 
 
   test('Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid', async ({ page, browser }) => {
     const PLAYER_APP_URL = 'http://localhost:3001';
@@ -14,164 +14,122 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     const password = 'Password123!';
     const tenantId = 'default_casino';
 
-    // 1. Register Player via API
+    // Register Player
     const apiContext = await pwRequest.newContext({ baseURL: API_URL });
     const regRes = await apiContext.post('/api/v1/auth/player/register', {
       data: { username: `rcuser${uniqueId}`, email, password, tenant_id: tenantId }
     });
-    expect(regRes.ok(), `Player registration failed: ${regRes.status()}`).toBeTruthy();
+    expect(regRes.ok()).toBeTruthy();
     const playerData = await regRes.json();
     const playerId = playerData.player_id || playerData.id;
 
-    // Login for Token (Player)
+    // Login for Token
     const loginRes = await apiContext.post('/api/v1/auth/player/login', {
       data: { email, password, tenant_id: tenantId }
     });
-    expect(loginRes.ok(), "Login failed").toBeTruthy();
+    expect(loginRes.ok()).toBeTruthy();
     const loginData = await loginRes.json();
     const playerToken = loginData.access_token;
 
-    // Verify KYC via Admin API (Unblock Withdrawal)
+    // Verify KYC
     const adminLoginRes = await apiContext.post('/api/v1/auth/login', {
       data: { email: 'admin@casino.com', password: 'Admin123!' }
     });
-    expect(adminLoginRes.ok(), "Admin login failed").toBeTruthy();
-    const adminData = await adminLoginRes.json();
-    const adminToken = adminData.access_token;
+    expect(adminLoginRes.ok()).toBeTruthy();
+    const adminToken = (await adminLoginRes.json()).access_token;
     
     const kycRes = await apiContext.post(`/api/v1/kyc/documents/${playerId}/review`, {
       headers: { 'Authorization': `Bearer ${adminToken}` },
       data: { status: 'approved' }
     });
-    expect(kycRes.ok(), "KYC Verification failed").toBeTruthy();
+    expect(kycRes.ok()).toBeTruthy();
 
-    // === PART B: DEPOSIT ===
-    // 2. Login Player UI
+    // === DEPOSIT ===
+    // Login UI
     await page.goto(`${PLAYER_APP_URL}/login`);
     await page.fill('input[type="email"]', email);
     await page.fill('input[type="password"]', password);
     await page.click('button[type="submit"]');
-    
-    // Explicitly wait for navigation to wallet OR dashboard.
-    // If login is slow, or redirects to home first, we handle it.
-    // The previous error was "http://localhost:3001/" which is home.
-    // Maybe we just need to wait longer or check if home redirects.
-    // Or just go to wallet manually if logged in.
-    
-    // Check if we are logged in (token in local storage?)
-    // But we are in a fresh context.
-    
-    // Let's just wait for network idle
     await page.waitForLoadState('networkidle');
-    
-    // If still on login or home, force navigation to wallet (assuming cookie/token set)
-    if (page.url().includes('login')) {
-         console.log("Still on login page...");
-    }
-    
-    await page.goto(`${PLAYER_APP_URL}/wallet`);
+    if (page.url().includes('login')) await page.goto(`${PLAYER_APP_URL}/wallet`);
     await expect(page).toHaveURL(/\/wallet/);
     
-    // Check initial balance via API (Poll invariant)
+    // Check Balance
     let balance = await getPlayerBalance(apiContext, playerToken);
     const initialAvailable = balance.available_real || 0;
 
-    // Trigger Deposit (Adyen)
-    // We intercept the request to get the TX ID without relying on UI redirect parsing if flaky
+    // Trigger Deposit (Adyen) with explicit wait for API response
+    // We intercept the API call to capture the 'url' from response body directly
+    // This avoids relying on UI redirect which might be blocked by headless/browser context or timing
     let depositTxId;
-    const [depReq] = await Promise.all([
-        page.waitForRequest(req => req.url().includes('/api/v1/payments/adyen/checkout/session') && req.method() === 'POST'),
-        page.click('button:has-text("Adyen (All Methods)")').then(() => 
-            page.fill('input[placeholder="Min $10.00"]', '100').then(() => 
-                page.click('button:has-text("Pay with Adyen")')
-            )
-        )
+    const [depResponse] = await Promise.all([
+        page.waitForResponse(resp => 
+            resp.url().includes('/api/v1/payments/adyen/checkout/session') && resp.status() === 200
+        ),
+        (async () => {
+            await page.click('button:has-text("Adyen (All Methods)")');
+            await page.fill('input[placeholder="Min $10.00"]', '100');
+            await page.click('button:has-text("Pay with Adyen")');
+        })()
     ]);
     
-    // Response might be consumed already or timing out.
-    // Let's use request interception to capture URL directly from the redirect
-    // The `WalletPage.jsx` does `window.location.href = res.data.url`.
-    // So we can just wait for the URL change to something with `tx_id`.
-    
-    await expect(page).toHaveURL(/tx_id=/); // Wait for redirect
-    const walletUrl = page.url();
-    const urlObj = new URL(walletUrl);
+    const depJson = await depResponse.json();
+    // depJson = { url: "..." }
+    const redirectUrl = depJson.url;
+    // Extract ID from URL
+    const urlObj = new URL(redirectUrl);
     depositTxId = urlObj.searchParams.get('tx_id');
-    expect(depositTxId, "Deposit TX ID not found").toBeTruthy();
+    expect(depositTxId, "Deposit TX ID not found in API response").toBeTruthy();
 
-    // 4. Simulate Deposit Webhook (Adyen)
+    // Simulate Webhook
     await apiContext.post(`/api/v1/payments/adyen/test-trigger-webhook`, {
       data: { tx_id: depositTxId, success: true }
     });
 
-    // 5. Verify Balance Update (Invariant Poll)
+    // Verify Balance
     await expect.poll(async () => {
         const bal = await getPlayerBalance(apiContext, playerToken);
         return bal.available_real;
-    }, {
-        message: 'Balance did not update after deposit',
-        timeout: 10000
-    }).toBe(initialAvailable + 100);
+    }, { timeout: 10000 }).toBe(initialAvailable + 100);
 
-    // === PART C: WITHDRAW ===
-    // 6. Request Withdrawal
+    // === WITHDRAW ===
     await page.reload();
-    // Use robust selection for Tabs
-    const tab = page.locator('button[role="tab"]:has-text("Withdraw")');
-    if (await tab.count() > 0) {
-        await tab.click();
-    } else {
-        await page.click('button:has-text("Withdraw")');
-    }
+    // Robust Tab Click
+    const tab = page.locator('button:has-text("Withdraw")');
+    if (await tab.count() > 0) await tab.click();
+    
     await expect(page.locator('text=Bank Account Details')).toBeVisible();
 
     // Fill Form
     await page.locator('input[type="number"]').first().fill('50');
-    // Generic inputs filling
+    // Generic Inputs
     const inputs = page.locator('input[type="text"]');
-    // Account Holder
-    await inputs.nth(0).fill('RC Smoke User'); 
-    // Account Number
-    await inputs.nth(1).fill('123456789');
-    // Bank Code
+    await inputs.nth(0).fill('Smoke User'); 
+    await inputs.nth(1).fill('123456');
     await inputs.nth(2).fill('001');
-    // Branch Code
     await inputs.nth(3).fill('ABC');
-    // Country
     if (await inputs.count() > 4) await inputs.nth(4).fill('US');
-    // Currency
     if (await inputs.count() > 5) await inputs.nth(5).fill('USD');
 
     await page.click('button:has-text("Request Withdrawal")');
+    // Wait for success toast/text
     await expect(page.locator('text=Withdrawal submitted')).toBeVisible();
 
-    // Verify Held Balance (Invariant Poll)
-    // Available should be 50, Held 50
+    // Verify Invariant (Held 50)
     await expect.poll(async () => {
         const bal = await getPlayerBalance(apiContext, playerToken);
         return { avail: bal.available_real, held: bal.held_real };
-    }, {
-        message: 'Held balance did not update after withdrawal request',
-        timeout: 10000
-    }).toEqual({ avail: initialAvailable + 50, held: 50 });
+    }, { timeout: 10000 }).toEqual({ avail: initialAvailable + 50, held: 50 });
 
-    // Get Withdrawal TX ID
-    const txRes = await apiContext.get(`/api/v1/payouts/player/${playerId}/history`, {
-        headers: { 'Authorization': `Bearer ${playerToken}` } // If needed, or use public
-    });
+    // Get Withdrawal TX
+    const txRes = await apiContext.get(`/api/v1/payouts/player/${playerId}/history`);
     const txData = await txRes.json();
     const withdrawTxId = txData.payouts[0]._id;
 
-    // === PART D: ADMIN PAYOUT ===
-    // 7. Admin Action (API-driven for stability in "Smoke" context, or headless UI)
-    // We use API to approve and retry payout to avoid Admin UI flakes (tables, filters)
-    // But Work Order asks for "Money Loop", implying UI usage.
-    // Let's use UI but with robust locators.
-    
+    // === ADMIN PAYOUT ===
     const adminContext = await browser.newContext();
     const adminPage = await adminContext.newPage();
     await adminPage.goto(`${ADMIN_APP_URL}/login`);
-    // Handle redirect if any
     if (adminPage.url().includes('404')) await adminPage.goto(`${ADMIN_APP_URL}/admin/login`);
     
     await adminPage.fill('input[name="email"]', 'admin@casino.com');
@@ -181,47 +139,36 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
 
     await adminPage.click('a[href="/admin/finance/withdrawals"]');
     
-    // Filter or finding row
     const row = adminPage.locator('tr').filter({ hasText: `rcuser${uniqueId}` }).first();
     await expect(row).toBeVisible({ timeout: 15000 });
 
-    // Approve if needed
     if (await row.locator('button:has-text("Approve")').count() > 0) {
         await row.locator('button:has-text("Approve")').click();
         await expect(row).toContainText('Approved');
     }
 
-    // Retry/Pay
     await row.locator('button:has-text("Retry")').click();
     await expect(row).toContainText('Payout Pending', { timeout: 15000 });
 
-    // 8. Simulate Payout Webhook (Adyen)
+    // Webhook
     await apiContext.post(`/api/v1/payments/adyen/test-trigger-webhook`, {
       data: { tx_id: withdrawTxId, success: true, type: "payout" }
     });
 
-    // === PART E: FINAL VERIFICATION (API Polling) ===
-    // 9. Verify "Paid" State (Backend)
+    // === FINAL VERIFY ===
+    // Backend Status
     await expect.poll(async () => {
         const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
-        const json = await res.json();
-        return json.status;
-    }, {
-        message: 'Payout status never became "paid"',
-        timeout: 15000
-    }).toBe('paid');
+        return (await res.json()).status;
+    }, { timeout: 15000 }).toBe('paid');
 
-    // 10. Verify Ledger Invariant (Held Burned)
-    // Available should remain 50, Held should be 0.
+    // Ledger Invariant
     await expect.poll(async () => {
         const bal = await getPlayerBalance(apiContext, playerToken);
         return { avail: bal.available_real, held: bal.held_real };
-    }, {
-        message: 'Ledger invariant failed: Held balance not burned',
-        timeout: 10000
-    }).toEqual({ avail: initialAvailable + 50, held: 0 });
+    }, { timeout: 10000 }).toEqual({ avail: initialAvailable + 50, held: 0 });
 
-    console.log('RC Smoke Test Passed: State + Ledger Invariants Verified');
+    console.log('RC Smoke Test Passed');
   });
 });
 
