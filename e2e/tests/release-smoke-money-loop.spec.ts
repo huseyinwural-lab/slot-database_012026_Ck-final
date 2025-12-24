@@ -50,8 +50,16 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await page.fill('input[type="email"]', email);
     await page.fill('input[type="password"]', password);
     await page.click('button[type="submit"]');
-    await page.waitForLoadState('networkidle');
-    if (page.url().includes('login')) await page.goto(`${PLAYER_APP_URL}/wallet`);
+    
+    // Explicit wait for navigation
+    // It might go to home then wallet or just wallet.
+    // We check if url contains neither login nor initial url
+    await expect.poll(() => page.url(), { timeout: 15000 }).not.toContain('/login');
+    
+    // Force nav if not there
+    if (!page.url().includes('/wallet')) {
+        await page.goto(`${PLAYER_APP_URL}/wallet`);
+    }
     await expect(page).toHaveURL(/\/wallet/);
     
     // Check Balance
