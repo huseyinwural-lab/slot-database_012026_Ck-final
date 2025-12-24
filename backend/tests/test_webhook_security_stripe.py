@@ -12,16 +12,17 @@ async def test_stripe_webhook_signature_failure(client: AsyncClient, session):
     Test that invalid signature returns 401/400.
     """
     with patch("config.settings.webhook_signature_enforced", True):
-        # We need to mock the stripe.Webhook.construct_event to raise error
-        with patch("stripe.Webhook.construct_event", side_effect=stripe.error.SignatureVerificationError("Invalid sig", "sig", "body")):
-            resp = await client.post(
-                "/api/v1/payments/stripe/webhook",
-                content=b"{}",
-                headers={"stripe-signature": "invalid"}
-            )
-            # The code catches Exception and raises 400
-            assert resp.status_code == 400
-            assert "Webhook Error" in resp.json()["detail"]
+        with patch("config.settings.stripe_webhook_secret", "whsec_test"):
+            # We need to mock the stripe.Webhook.construct_event to raise error
+            with patch("stripe.Webhook.construct_event", side_effect=stripe.error.SignatureVerificationError("Invalid sig", "sig", "body")):
+                resp = await client.post(
+                    "/api/v1/payments/stripe/webhook",
+                    content=b"{}",
+                    headers={"stripe-signature": "invalid"}
+                )
+                # The code catches Exception and raises 400
+                assert resp.status_code == 400
+                assert "Webhook Error" in resp.json()["detail"]
 
 @pytest.mark.asyncio
 async def test_stripe_webhook_replay_protection(client: AsyncClient, session):
@@ -45,12 +46,12 @@ async def test_stripe_webhook_replay_protection(client: AsyncClient, session):
 
     # 2. Mock construct_event to return an event with that ID
     mock_event = MagicMock()
-    mock_event.id = "evt_replay_test"
     mock_event.type = "checkout.session.completed"
     
-    # Mocking the emergentintegrations library behavior or the route logic?
-    # The route uses emergentintegrations StripeCheckout if I recall, but I will change it to use standard verify.
-    # Let's assume I will change the code to use stripe.Webhook.construct_event manually for hardening.
+    # Nested mock object for data.object.id
+    mock_session_obj = MagicMock()
+    mock_session_obj.id = "evt_replay_test"
+    mock_event.data.object = mock_session_obj
     
     with patch("config.settings.stripe_webhook_secret", "whsec_test"):
          with patch("stripe.Webhook.construct_event", return_value=mock_event):
