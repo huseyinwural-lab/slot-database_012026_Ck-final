@@ -1,7 +1,8 @@
 import pytest
 from httpx import AsyncClient
 from unittest.mock import patch, MagicMock
-from app.models.sql_models import Transaction
+from app.models.sql_models import Transaction, AuditEvent
+from sqlmodel import select
 from config import settings
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 
@@ -32,8 +33,7 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
         status="completed",
         state="completed",
         provider="stripe",
-        provider_event_id="tx_evt_123", # Needs event id
-        provider_ref="ref_123", # Needs provider ref for ledger
+        provider_event_id="tx_evt_123", 
         balance_after=100.0
     )
     session.add(tx)
@@ -56,7 +56,7 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
     assert tx.state == "reversed"
     
     await session.refresh(player)
-    assert player.balance_real_available == 0.0 # 100 - 100 = 0
+    assert player.balance_real_available == 0.0 
     
     # 4. Verify Replay (Idempotency)
     resp2 = await client.post(
@@ -64,5 +64,48 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
         json={"reason": "Fraudulent transaction"},
         headers={"Authorization": f"Bearer {admin_token}"}
     )
-    # Should be successful/idempotent or 409 depending on logic.
-    assert resp2.status_code in (200, 400, 409)
+    # Should be 200 idempotent
+    assert resp2.status_code == 200
+    assert resp2.json()["message"] == "Already reversed"
+
+    # 5. Verify Audit Logs
+    stmt = select(AuditEvent).where(AuditEvent.resource_id == tx.id).order_by(AuditEvent.timestamp)
+    audits = (await session.execute(stmt)).scalars().all()
+    
+    actions = [a.action for a in audits]
+    assert "FIN_DEPOSIT_REFUND_REQUESTED" in actions
+    assert "FIN_DEPOSIT_REFUND_COMPLETED" in actions
+
+@pytest.mark.asyncio
+async def test_admin_refund_invalid_state(client: AsyncClient, session, admin_token):
+    # Create pending deposit
+    tx = Transaction(
+        tenant_id="default_casino",
+        player_id="player_refund_test", # Reusing player from previous test might be risky if parallel, but fixtures usually reset DB or we use different ID
+        type="deposit",
+        amount=50.0,
+        currency="USD",
+        status="pending",
+        state="pending_provider",
+        provider="stripe"
+    )
+    session.add(tx)
+    await session.commit()
+    await session.refresh(tx)
+    
+    resp = await client.post(
+        f"/api/v1/finance/deposits/{tx.id}/refund",
+        json={"reason": "Premature refund"},
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    
+    assert resp.status_code == 400
+    assert "not in completed state" in resp.json()["detail"]
+    
+    # Verify Audit REJECTED
+    stmt = select(AuditEvent).where(
+        AuditEvent.resource_id == tx.id, 
+        AuditEvent.action == "FIN_DEPOSIT_REFUND_REJECTED"
+    )
+    audit = (await session.execute(stmt)).scalars().first()
+    assert audit is not None
