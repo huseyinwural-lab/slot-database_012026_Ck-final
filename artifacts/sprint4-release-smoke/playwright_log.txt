@@ -1,21 +1,23 @@
 
 Running 1 test using 1 worker
 
-  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (492ms)
+  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (2.4s)
 
 
   1) [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
 
-    TypeError: Cannot read properties of undefined (reading 'id')
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
 
-      20 |     expect(regRes.ok(), "Player registration failed").toBeTruthy();
-      21 |     const playerData = await regRes.json();
-    > 22 |     const playerId = playerData.id || playerData.player.id; // Adjust based on actual response
-         |                                                         ^
-      23 |
-      24 |     // === PART B: DEPOSIT ===
-      25 |     // 2. Login Player
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:22:57
+    Received: [31mnull[39m
+
+      58 |     const urlObj = new URL(walletUrl);
+      59 |     depositTxId = urlObj.searchParams.get('tx_id');
+    > 60 |     expect(depositTxId).toBeTruthy();
+         |                         ^
+      61 |
+      62 |     // 4. Simulate Deposit Webhook
+      63 |     const depHookRes = await request.post(`${API_URL}/api/v1/payments/adyen/test-trigger-webhook`, {
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:60:25
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
@@ -25,7 +27,9 @@ Running 1 test using 1 worker
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
-    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    Error Context: test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/trace.zip
     Usage:
 
