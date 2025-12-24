@@ -293,3 +293,71 @@ async def test_trigger_webhook(
         session.add(tx)
         await session.commit()
         return {"status": "simulated_failure"}
+
+    if payload.get("type") == "payout":
+        # Simulate Payout Webhook
+        # We need to manually trigger the logic that happens in the real webhook
+        # Or easier: just call the internal logic?
+        # But real webhook logic is inside `adyen_webhook`. 
+        # Ideally we should just invoke the real webhook with a valid signature if possible,
+        # but generating HMAC matches the one in config might be tricky if we don't have the lib.
+        # Let's just implement the logic here for simulation.
+        
+        psp_reference = payload.get("psp_reference") or f"sim_payout_{uuid.uuid4()}"
+        merchant_reference = payload.get("merchant_reference") # Must match "payout_{attempt_id}"
+        success = payload.get("success", True)
+        
+        # We need to find the TX and Attempt.
+        # But wait, the E2E test might not know the internal "attempt_id".
+        # The E2E test knows the "tx_id".
+        # In `finance_actions.py`, we created an attempt and set provider_ref = attempt.id (via "payout_{id}")
+        # So we need to look up the Attempt by `withdraw_tx_id = tx_id`.
+        
+        from app.models.sql_models import PayoutAttempt
+        stmt = select(PayoutAttempt).where(
+            PayoutAttempt.withdraw_tx_id == tx_id
+        ).order_by(PayoutAttempt.created_at.desc())
+        attempt = (await session.execute(stmt)).scalars().first()
+        
+        if not attempt:
+             raise HTTPException(status_code=404, detail="Payout Attempt not found")
+             
+        # Mock Adyen sends merchantReference = "payout_{attempt_id}"
+        # So we use that to mimic the real webhook payload
+        
+        # Apply Logic
+        if success:
+             # Find TX
+             tx = await session.get(Transaction, tx_id)
+             if tx and tx.status != "completed":
+                 await apply_wallet_delta_with_ledger(
+                    session,
+                    tenant_id=tx.tenant_id,
+                    player_id=tx.player_id,
+                    tx_id=tx.id,
+                    event_type="withdrawal_succeeded",
+                    delta_available=0.0,
+                    delta_held=-tx.amount, 
+                    currency=tx.currency,
+                    idempotency_key=f"adyen:{psp_reference}:payout",
+                    provider="adyen",
+                    provider_ref=psp_reference,
+                    provider_event_id=psp_reference
+                )
+                 tx.status = "completed"
+                 tx.state = "paid"
+                 attempt.status = "success"
+                 session.add(tx)
+                 session.add(attempt)
+                 await session.commit()
+                 return {"status": "simulated_payout_success"}
+        else:
+             tx = await session.get(Transaction, tx_id)
+             if tx:
+                 tx.status = "payout_failed"
+                 tx.state = "payout_failed"
+                 attempt.status = "failed"
+                 session.add(tx)
+                 session.add(attempt)
+                 await session.commit()
+                 return {"status": "simulated_payout_failed"}
