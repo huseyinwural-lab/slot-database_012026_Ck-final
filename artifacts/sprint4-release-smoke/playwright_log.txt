@@ -13,14 +13,14 @@ Running 1 test using 1 worker
     [2m  - waiting for locator('input[name="amount"]')[22m
 
 
-      68 |     await page.click('button:has-text("Withdraw")'); // Assuming tab/button
-      69 |     // Fill Withdrawal Form
-    > 70 |     await page.fill('input[name="amount"]', '50');
+      83 |     
+      84 |     // Fill Withdrawal Form
+    > 85 |     await page.fill('input[name="amount"]', '50');
          |                ^
-      71 |     // Fill Bank Details (assuming form fields from Payout Playbook)
-      72 |     await page.fill('input[name="accountHolderName"]', 'Smoke Test User');
-      73 |     await page.fill('input[name="accountNumber"]', '123456789');
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:70:16
+      86 |     // Fill Bank Details
+      87 |     await page.fill('input[name="accountHolderName"]', 'Smoke Test User');
+      88 |     await page.fill('input[name="accountNumber"]', '123456789');
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:85:16
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
