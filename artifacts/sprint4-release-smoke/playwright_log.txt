@@ -1,0 +1,27 @@
+TimeoutError: apiRequestContext.post: Timeout 30000ms exceeded.
+Call log:
+  - → POST http://localhost:8001/api/v1/auth/login
+    - user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19
+    - accept: */*
+    - accept-encoding: gzip,deflate,br
+    - content-type: application/json
+    - content-length: 51
+
+
+   at ../global-setup.ts:16
+
+  14 |   while (attempt < maxAttempts) {
+  15 |     attempt += 1;
+> 16 |     const res = await ctx.post('/api/v1/auth/login', {
+     |                           ^
+  17 |       data: { email, password },
+  18 |     });
+  19 |
+    at loginWithRetry (/app/e2e/global-setup.ts:16:27)
+    at globalSetup (/app/e2e/global-setup.ts:59:22)
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.7.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+npm notice To update run: npm install -g npm@11.7.0
+npm notice
