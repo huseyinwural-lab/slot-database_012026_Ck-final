@@ -78,16 +78,27 @@ test.describe('Release Smoke Money Loop', () => {
         await page.click('button:has-text("Withdraw")');
     }
     
-    // Wait for form
-    await expect(page.locator('text=Request Withdrawal')).toBeVisible();
+    // Wait for form header
+    await expect(page.locator('h3:has-text("Request Withdrawal"), div:has-text("Request Withdrawal")').first()).toBeVisible();
     
-    // Fill Withdrawal Form using Labels (more robust)
-    await page.getByLabel('Withdrawal Amount').fill('50');
+    // Fill Withdrawal Form (Fallback to placeholders/types if labels fail)
+    // Amount
+    const amountInput = page.locator('input[placeholder="100.00"]');
+    await expect(amountInput).toBeVisible();
+    await amountInput.fill('50');
+
     // Fill Bank Details
-    await page.getByLabel('Account Holder Name').fill('Smoke Test User');
-    await page.getByLabel('Account Number').fill('123456789');
-    await page.getByLabel('Bank Code').fill('001');
-    await page.getByLabel('Branch Code').fill('ABC');
+    await page.fill('input[placeholder="John Doe"]', 'Smoke Test User');
+    await page.fill('input[placeholder="123456789"]', '123456789');
+    await page.fill('input[placeholder="021000021"]', '001');
+    await page.fill('input[placeholder="001"]', 'ABC');
+    
+    // Country/Currency often have default values or are strict.
+    // Our form has defaults US/USD. We can skip or fill if needed.
+    // If they are inputs:
+    await page.fill('input[placeholder="US"]', 'US');
+    await page.fill('input[placeholder="USD"]', 'USD');
+
     await page.click('button:has-text("Request Withdrawal")');
     
     // 7. Verify Toast/Success
