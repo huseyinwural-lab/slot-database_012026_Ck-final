@@ -6,23 +6,23 @@ Running 1 test using 1 worker
 
     Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
 
-    Expected pattern: [32m/tx_id=/[39m
-    Received string:  [31m"http://localhost:3001/wallet"[39m
+    Expected pattern: [32m/\/wallet/[39m
+    Received string:  [31m"http://localhost:3001/"[39m
     Timeout: 10000ms
 
     Call log:
     [2m  - Expect "toHaveURL" with timeout 10000ms[22m
-    [2m    14 × unexpected value "http://localhost:3001/wallet"[22m
+    [2m    14 × unexpected value "http://localhost:3001/"[22m
 
 
-      94 |     // So we can just wait for the URL change to something with `tx_id`.
-      95 |     
-    > 96 |     await expect(page).toHaveURL(/tx_id=/); // Wait for redirect
+      53 |     await page.waitForLoadState('networkidle');
+      54 |     if (page.url().includes('login')) await page.goto(`${PLAYER_APP_URL}/wallet`);
+    > 55 |     await expect(page).toHaveURL(/\/wallet/);
          |                        ^
-      97 |     const walletUrl = page.url();
-      98 |     const urlObj = new URL(walletUrl);
-      99 |     depositTxId = urlObj.searchParams.get('tx_id');
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:96:24
+      56 |     
+      57 |     // Check Balance
+      58 |     let balance = await getPlayerBalance(apiContext, playerToken);
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:55:24
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-345f3-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
