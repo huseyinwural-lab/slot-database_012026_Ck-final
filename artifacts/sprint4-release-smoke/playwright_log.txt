@@ -1,26 +1,31 @@
 
 Running 1 test using 1 worker
 
-  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (1.5m)
+  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (12.3s)
 
 
   1) [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
 
-    [31mTest timeout of 90000ms exceeded.[39m
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
 
-    Error: locator.fill: Test timeout of 90000ms exceeded.
+    Locator: locator('input[placeholder="100.00"]')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
     Call log:
-    [2m  - waiting for getByLabel('Withdrawal Amount')[22m
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('input[placeholder="100.00"]')[22m
 
 
-      83 |     
-      84 |     // Fill Withdrawal Form using Labels (more robust)
-    > 85 |     await page.getByLabel('Withdrawal Amount').fill('50');
-         |                                                ^
-      86 |     // Fill Bank Details
-      87 |     await page.getByLabel('Account Holder Name').fill('Smoke Test User');
-      88 |     await page.getByLabel('Account Number').fill('123456789');
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:85:48
+      85 |     // Amount
+      86 |     const amountInput = page.locator('input[placeholder="100.00"]');
+    > 87 |     await expect(amountInput).toBeVisible();
+         |                               ^
+      88 |     await amountInput.fill('50');
+      89 |
+      90 |     // Fill Bank Details
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:87:31
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
