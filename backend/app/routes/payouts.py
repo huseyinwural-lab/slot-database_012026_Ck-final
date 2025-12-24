@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from app.models.sql_models import PayoutAttempt
 from app.services.adyen_psp import AdyenPSP
 from app.core.database import get_session
+from sqlmodel import select
 from config import settings
 from datetime import datetime
 from typing import Dict, Any
