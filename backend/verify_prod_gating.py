@@ -1,7 +1,7 @@
 import asyncio
 import os
 from unittest.mock import patch
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from server import app # Import the app
 from config import settings
 
@@ -24,7 +24,8 @@ async def run_check():
     # We use TestClient/AsyncClient to simulate the request locally but with PATCHED settings
     # This proves the logic exists in the codebase.
     
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         # 1. Test in DEV (Should Succeed)
         print("\n[Step 1] Verifying blocked in PROD...")
         with patch("config.settings.env", "prod"):
