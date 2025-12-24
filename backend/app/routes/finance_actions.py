@@ -122,6 +122,59 @@ async def retry_payout(
         tx.status = "completed" # For simplicity in this sprint
         attempt.status = "success"
         session.add(tx)
+    # REAL PAYOUT PROVIDER INTEGRATION (PAYOUT-REAL-001)
+    if provider == "adyen":
+        # 1. Init Service
+        from app.services.adyen_psp import AdyenPSP
+        adyen_service = AdyenPSP(
+            api_key=settings.adyen_api_key or "mock_key",
+            merchant_account=settings.adyen_merchant_account or "mock_merchant"
+        )
+        
+        # 2. Prepare Data
+        # We need shopperEmail and shopperReference.
+        # Fetch Player
+        from app.models.sql_models import Player
+        player = await session.get(Player, tx.player_id)
+        if not player:
+             raise HTTPException(status_code=500, detail="Player not found for payout")
+             
+        # 3. Call Payout
+        try:
+            payout_ref = f"payout_{attempt.id}"
+            
+            payout_resp = await adyen_service.submit_payout(
+                amount=tx.amount,
+                currency=tx.currency,
+                reference=payout_ref,
+                shopper_reference=player.id,
+                shopper_email=player.email,
+                bank_account=tx.metadata_json.get("bank_account") if tx.metadata_json else None
+            )
+            
+            # 4. Update Status
+            result_code = payout_resp.get("resultCode")
+            attempt.provider_event_id = payout_resp.get("pspReference")
+            
+            if result_code in ["[payout-submit-received]", "Received"]:
+                attempt.status = "submitted"
+                tx.status = "payout_pending" 
+                tx.state = "payout_submitted"
+            else:
+                 attempt.status = "unknown_response"
+                 
+        except Exception as e:
+            logger.error(f"Adyen Payout Failed: {e}")
+            attempt.status = "failed"
+            attempt.error_code = str(e)
+            raise HTTPException(status_code=502, detail=f"Provider Error: {str(e)}")
+            
+        session.add(attempt)
+        session.add(tx)
+        await session.commit()
+        
+        return {"status": "retry_initiated", "attempt_id": attempt.id, "provider_ref": attempt.provider_event_id}
+
         session.add(attempt)
     
     await audit.log_event(
