@@ -88,13 +88,14 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
         )
     ]);
     
-    // Wait for response to get Redirect URL which usually has TX ID or we can query
-    // Actually, `checkout/session` response returns `{url: ...}`.
-    const depRes = await depReq.response();
-    const depJson = await depRes.json();
-    // The URL is like `.../wallet?provider=adyen&tx_id=...`
-    const redirectUrl = depJson.url;
-    const urlObj = new URL(redirectUrl);
+    // Response might be consumed already or timing out.
+    // Let's use request interception to capture URL directly from the redirect
+    // The `WalletPage.jsx` does `window.location.href = res.data.url`.
+    // So we can just wait for the URL change to something with `tx_id`.
+    
+    await expect(page).toHaveURL(/tx_id=/); // Wait for redirect
+    const walletUrl = page.url();
+    const urlObj = new URL(walletUrl);
     depositTxId = urlObj.searchParams.get('tx_id');
     expect(depositTxId, "Deposit TX ID not found").toBeTruthy();
 
