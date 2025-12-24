@@ -70,6 +70,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     // This avoids relying on UI redirect which might be blocked by headless/browser context or timing
     let depositTxId;
     
+    // Trigger Deposit (Adyen)
     // Setup listener before action
     const depResponsePromise = page.waitForResponse(resp => 
         resp.url().includes('/api/v1/payments/adyen/checkout/session') && resp.status() === 200
