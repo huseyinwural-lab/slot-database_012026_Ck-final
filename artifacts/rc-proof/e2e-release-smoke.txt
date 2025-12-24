@@ -4,26 +4,16 @@ Running 1 test using 1 worker
 [1A[2K[1/1] [chromium] › tests/release-smoke-money-loop.spec.ts:6:7 › Release Smoke Money Loop (Deterministic) › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid
 [1A[2K  1) [chromium] › tests/release-smoke-money-loop.spec.ts:6:7 › Release Smoke Money Loop (Deterministic) › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
 
-    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+    Error: response.json: Protocol error (Network.getResponseBody): No resource with given identifier found
 
-    Expected pattern: [32m/\/wallet|dashboard/[39m
-    Received string:  [31m"http://localhost:3001/"[39m
-    Timeout: 10000ms
-
-    Call log:
-    [2m  - Expect "toHaveURL" with timeout 10000ms[22m
-    [2m    3 × unexpected value "http://localhost:3001/login"[22m
-    [2m    11 × unexpected value "http://localhost:3001/"[22m
-
-
-      52 |     await page.fill('input[type="password"]', password);
-      53 |     await page.click('button[type="submit"]');
-    > 54 |     await expect(page).toHaveURL(/\/wallet|dashboard/); // Wait for redirect
-         |                        ^
-      55 |     
-      56 |     // 3. Deposit Flow
-      57 |     await page.goto(`${PLAYER_APP_URL}/wallet`);
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:54:24
+      92 |     // Actually, `checkout/session` response returns `{url: ...}`.
+      93 |     const depRes = await depReq.response();
+    > 94 |     const depJson = await depRes.json();
+         |                                  ^
+      95 |     // The URL is like `.../wallet?provider=adyen&tx_id=...`
+      96 |     const redirectUrl = depJson.url;
+      97 |     const urlObj = new URL(redirectUrl);
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:94:34
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-345f3-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
