@@ -58,8 +58,9 @@ async def test_payout_real_provider_adyen_flow(client: AsyncClient, admin_token,
         email="payout_real@test.com",
         username="payout_real",
         tenant_id=tenant.id,
-        password_hash="mock_hash", # Added
-        kyc_status="verified"
+        password_hash="mock_hash", 
+        kyc_status="verified",
+        balance_real_held=150.0 # Funds held for the pending withdrawal
     )
     session.add(player)
     await session.commit()
