@@ -4,29 +4,28 @@ from sqlmodel import select
 from typing import Optional, Dict
 import uuid
 import logging
-
+import stripe
 from app.core.database import get_session
-from app.models.sql_models import Transaction, Player
+from app.models.sql_models import Transaction, Player, AuditEvent
 from app.utils.auth_player import get_current_player
 from app.services.audit import audit
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse
+from app.services.metrics import metrics
 from config import settings
 import os
 from pydantic import BaseModel, Field
 
-from app.services.metrics import metrics
 # Initialize router
 router = APIRouter(prefix="/api/v1/payments/stripe", tags=["payments", "stripe"])
 logger = logging.getLogger(__name__)
 
-# Using global init for efficiency, but need to ensure env is loaded.
-STRIPE_API_KEY = settings.stripe_api_key
-webhook_url = "/api/v1/payments/stripe/webhook" # Relative path, will be constructed with host
+# Initialize global stripe api key if available for direct usage
+if settings.stripe_api_key:
+    stripe.api_key = settings.stripe_api_key
 
-# We need to instantiate this per request or lazily if we want to capture host_url correctly
-# or just once if we pass the URLs dynamically.
-# The library example: stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
+STRIPE_API_KEY = settings.stripe_api_key
+webhook_url = "/api/v1/payments/stripe/webhook" 
 
 class StripeDepositRequest(BaseModel):
     amount: float = Field(..., gt=0, description="Amount to deposit")
@@ -46,12 +45,9 @@ async def create_checkout_session(
     if not STRIPE_API_KEY:
         raise HTTPException(status_code=500, detail="Stripe configuration missing")
 
-    # 1. Validation
-    # Enforce limits (reusing logic from player_wallet if possible, but simplified here)
-    if body.amount < 10.0: # Minimum deposit
+    if body.amount < 10.0:
         raise HTTPException(status_code=400, detail="Minimum deposit is $10.00")
     
-    # 2. Create Transaction (Pending)
     tx_id = str(uuid.uuid4())
     tx = Transaction(
         id=tx_id,
@@ -61,33 +57,19 @@ async def create_checkout_session(
         amount=body.amount,
         currency=body.currency,
         status="pending",
-        state="created", # Initial state
+        state="created", 
         provider="stripe",
         method="stripe_checkout",
-        balance_after=0.0, # Will be updated on completion
+        balance_after=0.0, 
         metadata_json=body.metadata or {}
     )
     session.add(tx)
     await session.commit()
     await session.refresh(tx)
 
-    # 3. Initialize Stripe Helper
-    # Construct full URLs
     host_url = str(request.base_url).rstrip("/")
-    # Check if REACT_APP_BACKEND_URL or similar matches request.base_url 
-    # For frontend redirect, we need the FRONTEND URL, not backend.
-    # Usually we get origin from headers or config.
-    # The Playbook says: "Frontend will get the host header via window.location.origin and call the backend... passing the host header"
-    # But here we are simplifying. Let's assume the frontend calls this and we return a URL.
-    # We need to know where to redirect back.
-    # Ideally, frontend sends `success_url` pattern.
-    # For now, let's look at `request.headers.get("origin")`.
     origin = request.headers.get("origin")
     if not origin:
-        # Fallback to a known frontend URL or throw error
-        # In this environment, frontend is on port 3000.
-        # But we don't know the external IP easily if not provided.
-        # Let's trust the origin header if present, else fail.
         raise HTTPException(status_code=400, detail="Origin header required for redirect construction")
 
     success_url = f"{origin}/wallet?session_id={{CHECKOUT_SESSION_ID}}&status=success"
@@ -97,7 +79,6 @@ async def create_checkout_session(
     
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=full_webhook_url)
 
-    # 4. Create Session
     checkout_request = CheckoutSessionRequest(
         amount=body.amount,
         currency=body.currency,
@@ -120,7 +101,6 @@ async def create_checkout_session(
         await session.commit()
         raise HTTPException(status_code=500, detail=str(e))
 
-    # 5. Update Transaction with Provider IDs
     tx.provider_event_id = checkout_session.session_id
     tx.state = "pending_provider"
     session.add(tx)
@@ -141,14 +121,13 @@ async def get_checkout_status(
     if not STRIPE_API_KEY:
         raise HTTPException(status_code=500, detail="Stripe configuration missing")
 
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="") # Webhook url not needed for status check
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="") 
 
     try:
         status_response = await stripe_checkout.get_checkout_status(session_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch status: {e}")
 
-    # Find Transaction
     stmt = select(Transaction).where(
         Transaction.provider_event_id == session_id,
         Transaction.provider == "stripe"
@@ -158,25 +137,19 @@ async def get_checkout_status(
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
-    # Check if already processed
     if tx.status == "completed":
-        # If DB says completed, we override stripe response to ensure frontend sees "paid"
-        # This handles the simulation case where real Stripe is still "unpaid"
         status_response.payment_status = "paid"
         status_response.status = "complete"
         return status_response
 
-    # Update logic
     if status_response.payment_status == "paid":
-        # Apply Balance Update
-        # Using apply_wallet_delta_with_ledger to be safe and consistent
         await apply_wallet_delta_with_ledger(
             session,
             tenant_id=tx.tenant_id,
             player_id=tx.player_id,
             tx_id=tx.id,
             event_type="deposit_succeeded",
-            delta_available=tx.amount, # Credit
+            delta_available=tx.amount, 
             delta_held=0.0,
             currency=tx.currency,
             idempotency_key=f"stripe:{session_id}:capture",
@@ -214,7 +187,6 @@ async def test_trigger_webhook(
     session_id = payload.get("session_id")
 
     if event_type == "checkout.session.completed":
-        # Idempotency check
         stmt = select(Transaction).where(
             Transaction.provider_event_id == session_id,
             Transaction.provider == "stripe"
@@ -250,41 +222,69 @@ async def stripe_webhook(
     session: AsyncSession = Depends(get_session)
 ):
     """
-    Handle Stripe Webhooks
+    Handle Stripe Webhooks with Hardened Security
     """
     if not STRIPE_API_KEY:
         raise HTTPException(status_code=500, detail="Stripe configuration missing")
 
     body_bytes = await request.body()
     sig_header = request.headers.get("stripe-signature")
+    
+    event = None
 
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
-
-    try:
-        # Note: library might need fixed webhook secret if verifying signature properly
-        # The playbook says: handle_webhook(webhook_request_body_bytes, request.headers.get("Stripe-Signature"))
-        # But handle_webhook usually needs the secret to be set in the class or passed?
-        # emergentintegrations 0.1.0 might handle this.
-        webhook_response = await stripe_checkout.handle_webhook(body_bytes, sig_header)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Webhook Error: {e}")
-
-    # Process event
-    event_type = webhook_response.event_type
-    metrics.record_webhook_event("stripe", event_type)
-
-    if event_type == "checkout.session.completed":
-        session_id = webhook_response.session_id
+    # Hardening: Verify Signature
+    if settings.webhook_signature_enforced or settings.stripe_webhook_secret:
+        webhook_secret = settings.stripe_webhook_secret
+        if not webhook_secret and settings.webhook_signature_enforced:
+             logger.error("Stripe webhook secret missing but signature enforced")
+             raise HTTPException(status_code=500, detail="Configuration Error")
         
-        # Idempotency check
+        try:
+            event = stripe.Webhook.construct_event(
+                payload=body_bytes,
+                sig_header=sig_header,
+                secret=webhook_secret,
+                tolerance=300 # 5 minutes
+            )
+        except ValueError as e:
+            # Invalid payload
+            raise HTTPException(status_code=400, detail="Invalid payload")
+        except stripe.error.SignatureVerificationError as e:
+            # Invalid signature
+            raise HTTPException(status_code=400, detail=f"Webhook Error: {str(e)}")
+    else:
+        # Fallback for dev/mock without signature
+        try:
+             event = stripe.Event.construct_from(
+                 await request.json(), stripe.api_key
+             )
+        except Exception:
+             pass
+
+    if not event:
+         raise HTTPException(status_code=400, detail="Could not parse event")
+
+    metrics.record_webhook_event("stripe", event.type)
+
+    if event.type == "checkout.session.completed":
+        session_obj = event.data.object
+        session_id = session_obj.id
+        
+        # Idempotency check / Replay protection
         stmt = select(Transaction).where(
             Transaction.provider_event_id == session_id,
             Transaction.provider == "stripe"
         )
         tx = (await session.execute(stmt)).scalars().first()
+        
+        if tx:
+            if tx.status == "completed":
+                logger.info(f"Stripe Webhook: Replay detected for {session_id}")
+                # Log audit event for replay?
+                return {"status": "success", "replay": True}
 
-        if tx and tx.status != "completed":
-             await apply_wallet_delta_with_ledger(
+            # Process
+            await apply_wallet_delta_with_ledger(
                 session,
                 tenant_id=tx.tenant_id,
                 player_id=tx.player_id,
@@ -298,9 +298,14 @@ async def stripe_webhook(
                 provider_ref=session_id,
                 provider_event_id=session_id
             )
-             tx.status = "completed"
-             tx.state = "completed"
-             session.add(tx)
-             await session.commit()
+            tx.status = "completed"
+            tx.state = "completed"
+            session.add(tx)
+            await session.commit()
+        else:
+            logger.warning(f"Stripe Webhook: Transaction not found for {session_id}")
+            # Maybe return 404 to force retry if race condition? Or 200 to ack?
+            # Usually 200 because we can't do anything if TX doesn't exist yet (unless created by webhook)
+            pass
 
     return {"status": "success"}
