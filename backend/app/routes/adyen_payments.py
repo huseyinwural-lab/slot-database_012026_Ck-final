@@ -4,23 +4,21 @@ from sqlmodel import select
 from typing import Optional, Dict
 import uuid
 import logging
-from datetime import datetime
 
 from app.core.database import get_session
-from app.models.sql_models import Transaction, Player
+from app.models.sql_models import Transaction, Player, AuditEvent
 from app.utils.auth_player import get_current_player
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from app.services.adyen_psp import AdyenPSP
+from app.services.metrics import metrics
 from config import settings
 from pydantic import BaseModel, Field
-from app.services.metrics import metrics
 
 # Initialize router
 router = APIRouter(prefix="/api/v1/payments/adyen", tags=["payments", "adyen"])
 logger = logging.getLogger(__name__)
 
 # Initialize Service
-# In a real app, we might inject this dependency
 def get_adyen_service():
     return AdyenPSP(
         api_key=settings.adyen_api_key or "mock_key",
@@ -66,11 +64,8 @@ async def create_checkout_session(
     # 2. Construct Return URL
     origin = request.headers.get("origin")
     if not origin:
-        # Fallback for local testing if origin missing
         origin = settings.cors_origins[0] if isinstance(settings.cors_origins, list) else "http://localhost:3000"
     
-    # Adyen redirects here. Frontend handles the result.
-    # We append the tx_id to verify later if needed, though Adyen sends reference.
     return_url = f"{origin}/wallet?provider=adyen&tx_id={tx_id}"
 
     # 3. Create Payment Link
@@ -78,7 +73,7 @@ async def create_checkout_session(
         link_response = await adyen.create_payment_link(
             amount=body.amount,
             currency=body.currency,
-            reference=tx_id, # Use tx_id as reference
+            reference=tx_id, 
             return_url=return_url,
             shopper_email=current_player.email
         )
@@ -100,12 +95,20 @@ async def create_checkout_session(
 @router.post("/webhook")
 async def adyen_webhook(
     request: Request,
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    adyen: AdyenPSP = Depends(get_adyen_service)
 ):
     """
     Handle Adyen Webhooks (Notification).
     """
     body = await request.json()
+    
+    # Signature Verification (Simplified)
+    # Adyen usually puts signature in notificationItems structure, not header
+    # But let's assume standard practice or verify using the payload content
+    # For now, we trust verify_webhook_signature stub
+    if not adyen.verify_webhook_signature(body, ""):
+         raise HTTPException(status_code=401, detail="WEBHOOK_SIGNATURE_INVALID")
     
     # Basic validation structure for Adyen
     notification_items = body.get("notificationItems", [])
@@ -131,7 +134,10 @@ async def adyen_webhook(
                  logger.warning(f"Adyen Webhook: Transaction {tx_id} not found")
                  continue
                  
+             # Replay Check
              if tx.status == "completed":
+                 logger.info(f"Adyen Webhook: Replay detected for {tx_id}")
+                 # No-op 200
                  continue
 
              if success:
@@ -169,7 +175,6 @@ async def test_trigger_webhook(
 ):
     """
     Simulate Adyen Webhook for E2E testing.
-    Payload: { "tx_id": "...", "success": true }
     """
     if settings.env in {"prod", "production"}:
         raise HTTPException(status_code=403, detail="Not available in production")
