@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "CasinoLobby" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e9]: CasinoLobby
+      - navigation [ref=e10]:
+        - link "Lobby" [ref=e11] [cursor=pointer]:
+          - /url: /
+        - link "Slots" [ref=e12] [cursor=pointer]:
+          - /url: /slots
+        - link "Wallet" [ref=e13] [cursor=pointer]:
+          - /url: /wallet
+        - link "Promotions" [ref=e14] [cursor=pointer]:
+          - /url: /promotions
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: rcuser1766563130222
+          - generic [ref=e18]: $0.00
+        - button [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+  - main [ref=e23]:
+    - generic [ref=e24]:
+      - generic [ref=e26]:
+        - text: New Arrival
+        - heading "Big Bass Splash" [level=1] [ref=e27]
+        - paragraph [ref=e28]: Catch the biggest wins in the new release from Pragmatic Play. High volatility and huge multipliers await!
+        - button "Play Now" [ref=e29] [cursor=pointer]
+      - generic [ref=e31]:
+        - button "All Games" [ref=e32] [cursor=pointer]
+        - button "Slots" [ref=e33] [cursor=pointer]
+        - button "Live Casino" [ref=e34] [cursor=pointer]
+        - button "Table Games" [ref=e35] [cursor=pointer]
+        - button "Jackpots" [ref=e36] [cursor=pointer]
+        - button "Bonus Buy" [ref=e37] [cursor=pointer]
+      - generic [ref=e38]:
+        - heading "Popular Games" [level=2] [ref=e39]:
+          - img [ref=e40]
+          - text: Popular Games
+        - generic [ref=e42]:
+          - paragraph [ref=e43]: No active games found for this lobby.
+          - paragraph [ref=e44]: Please contact support or check back later.
+  - contentinfo [ref=e45]:
+    - generic [ref=e46]:
+      - paragraph [ref=e47]: © 2025 CasinoLobby. All rights reserved.
+      - paragraph [ref=e48]: Responsible Gaming | 18+
+```
