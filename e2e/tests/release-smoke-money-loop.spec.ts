@@ -144,13 +144,18 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await adminPage.goto(`${ADMIN_APP_URL}/finance/withdrawals`);
     await expect(adminPage).toHaveURL(/\/finance\/withdrawals/, { timeout: 15000 });
     
-    // Find row
-    const row = adminPage.locator('tr').filter({ hasText: `rcuser${uniqueId}` }).first();
+    // Find row by Player ID (not username, as table shows ID)
+    const row = adminPage.locator('tr').filter({ hasText: playerId }).first();
     await expect(row).toBeVisible({ timeout: 15000 });
 
     // 1. Approve (if needed)
     if (await row.locator('button:has-text("Approve")').count() > 0) {
         await row.locator('button:has-text("Approve")').click();
+        
+        // Handle Approval Modal
+        await expect(adminPage.locator('text=Approve Withdrawal')).toBeVisible();
+        await adminPage.fill('textarea', 'Smoke Test Approval');
+        await adminPage.click('button:has-text("Confirm")');
         
         // Poll API for 'approved' status
         await expect.poll(async () => {
@@ -159,11 +164,13 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
         }, { timeout: 15000, message: "Status did not become 'approved'" }).toBe('approved');
     }
 
-    // 2. Retry/Pay
-    await row.locator('button:has-text("Retry")').click();
+    // 2. Start/Retry Payout
+    // Button text depends on state
+    const payoutBtn = row.locator('button:has-text("Start Payout"), button:has-text("Retry Payout")');
+    await expect(payoutBtn).toBeVisible({ timeout: 10000 });
+    await payoutBtn.click();
     
     // Poll API for 'payout_submitted' or similar
-    // We match roughly to be safe against exact string variations
     await expect.poll(async () => {
         const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
         const st = (await res.json()).status;
