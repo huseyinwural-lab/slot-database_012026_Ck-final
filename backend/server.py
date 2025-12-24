@@ -118,6 +118,8 @@ app.include_router(game_import.router)
 app.include_router(game_config_presets.router)
 app.include_router(robot.router)
 app.include_router(revenue.router)
+from app.routes import finance_refunds
+app.include_router(finance_refunds.router)
 app.include_router(finance.router)
 app.include_router(finance_actions.router)
 app.include_router(feature_flags.router)
