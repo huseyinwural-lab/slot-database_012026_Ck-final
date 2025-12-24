@@ -9,9 +9,16 @@ async def test_payout_provider_mock_gated_in_prod(client: AsyncClient, admin_tok
     """
     Ensure mock payouts are gated in production.
     """
+    # 0. Get Tenant ID from Admin Token (or DB)
+    from app.models.sql_models import Tenant
+    stmt = select(Tenant)
+    tenant = (await session.execute(stmt)).scalars().first()
+    assert tenant is not None
+    tenant_id = tenant.id
+
     # 1. Create a withdrawal
     tx = Transaction(
-        tenant_id="default_casino",
+        tenant_id=tenant_id,
         player_id="player1",
         type="withdrawal",
         amount=50.0,
@@ -40,8 +47,15 @@ async def test_payout_provider_mock_allowed_in_dev(client: AsyncClient, admin_to
     """
     Ensure mock payouts work in dev.
     """
+    # 0. Get Tenant ID
+    from app.models.sql_models import Tenant
+    stmt = select(Tenant)
+    tenant = (await session.execute(stmt)).scalars().first()
+    assert tenant is not None
+    tenant_id = tenant.id
+
     tx = Transaction(
-        tenant_id="default_casino",
+        tenant_id=tenant_id,
         player_id="player2",
         type="withdrawal",
         amount=50.0,
