@@ -99,21 +99,31 @@ test.describe('Release Smoke Money Loop', () => {
     
     // Fill Withdrawal Form (Fallback to placeholders/types if labels fail)
     // Amount
-    const amountInput = page.locator('input[placeholder="100.00"]');
+    // Use generic type selector as placeholder might vary or be obscured
+    const amountInput = page.locator('input[type="number"]').first();
     await expect(amountInput).toBeVisible();
     await amountInput.fill('50');
 
-    // Fill Bank Details
-    await page.fill('input[placeholder="John Doe"]', 'Smoke Test User');
-    await page.fill('input[placeholder="123456789"]', '123456789');
-    await page.fill('input[placeholder="021000021"]', '001');
-    await page.fill('input[placeholder="001"]', 'ABC');
+    // Fill Bank Details (generic text inputs)
+    // Account Holder Name
+    await page.locator('input[name="accountHolderName"], input[placeholder="John Doe"]').first().fill('Smoke Test User');
     
-    // Country/Currency often have default values or are strict.
-    // Our form has defaults US/USD. We can skip or fill if needed.
-    // If they are inputs:
-    await page.fill('input[placeholder="US"]', 'US');
-    await page.fill('input[placeholder="USD"]', 'USD');
+    // Account Number
+    await page.locator('input[name="accountNumber"], input[placeholder="123456789"]').first().fill('123456789');
+    
+    // Bank Code
+    await page.locator('input[name="bankCode"], input[placeholder="021000021"]').first().fill('001');
+    
+    // Branch Code
+    await page.locator('input[name="branchCode"], input[placeholder="001"]').first().fill('ABC');
+    
+    // Country/Currency might be inputs or selects.
+    // If they are inputs (as per form code):
+    const countryInput = page.locator('input[name="countryCode"]');
+    if (await countryInput.count() > 0) await countryInput.fill('US');
+    
+    const currencyInput = page.locator('input[name="currencyCode"]');
+    if (await currencyInput.count() > 0) await currencyInput.fill('USD');
 
     await page.click('button:has-text("Request Withdrawal")');
     
