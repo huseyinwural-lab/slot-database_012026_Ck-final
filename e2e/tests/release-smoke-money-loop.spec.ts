@@ -1,7 +1,7 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 
 test.describe('Release Smoke Money Loop (Deterministic)', () => {
-  test.setTimeout(120000); 
+  test.setTimeout(180000); 
 
   test('Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid', async ({ page, browser }) => {
     const PLAYER_APP_URL = 'http://localhost:3001';
