@@ -19,9 +19,16 @@ async def test_payout_real_provider_adyen_flow(client: AsyncClient, admin_token,
     """
     
     # 0. Setup: Player and Pending Withdrawal
-    # Get Tenant
-    stmt = select(Tenant).where(Tenant.id == "default_casino")
-    tenant = (await session.execute(stmt)).scalars().first()
+    # Create Tenant if not exists
+    tenant = Tenant(id="default_casino", name="Default Casino")
+    session.add(tenant)
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        # Fetch if exists
+        stmt = select(Tenant).where(Tenant.id == "default_casino")
+        tenant = (await session.execute(stmt)).scalars().first()
     
     # Create Player
     player = Player(
