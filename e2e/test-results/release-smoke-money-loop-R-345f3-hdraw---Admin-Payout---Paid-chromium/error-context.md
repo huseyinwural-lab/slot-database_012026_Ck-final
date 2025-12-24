@@ -19,7 +19,7 @@
           - /url: /promotions
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: rcuser1766565008570
+          - generic [ref=e17]: rcuser1766565079062
           - generic [ref=e18]: $0.00
         - button [ref=e19] [cursor=pointer]:
           - img [ref=e20]
@@ -59,7 +59,7 @@
           - generic [ref=e67]:
             - generic [ref=e68]:
               - heading "Withdrawal Status" [level=3] [ref=e69]
-              - paragraph [ref=e70]: "ID: 273d10c8-8985-4743-95b7-79a2405dde30"
+              - paragraph [ref=e70]: "ID: b203bea9-462d-4732-b6c8-5f27793665ca"
               - generic [ref=e71]:
                 - img [ref=e72]
                 - generic [ref=e75]: Pending
@@ -86,7 +86,7 @@
                 - columnheader "Date" [ref=e100]
                 - columnheader "ID" [ref=e101]
             - rowgroup [ref=e102]:
-              - row "withdrawal -$50.00 requested 12/24/2025, 8:30:11 AM 273d10c8..." [ref=e103]:
+              - row "withdrawal -$50.00 requested 12/24/2025, 8:31:21 AM b203bea9..." [ref=e103]:
                 - cell "withdrawal" [ref=e104]:
                   - generic [ref=e105]:
                     - img [ref=e106]
@@ -94,12 +94,12 @@
                 - cell "-$50.00" [ref=e110]
                 - cell "requested" [ref=e111]:
                   - generic [ref=e112]: requested
-                - cell "12/24/2025, 8:30:11 AM" [ref=e113]
-                - cell "273d10c8..." [ref=e114]:
-                  - button "273d10c8..." [ref=e115] [cursor=pointer]:
-                    - text: 273d10c8...
+                - cell "12/24/2025, 8:31:21 AM" [ref=e113]
+                - cell "b203bea9..." [ref=e114]:
+                  - button "b203bea9..." [ref=e115] [cursor=pointer]:
+                    - text: b203bea9...
                     - img [ref=e116]
-              - row "withdrawal -$50.00 requested 12/24/2025, 8:30:11 AM e6d16399..." [ref=e119]:
+              - row "withdrawal -$50.00 requested 12/24/2025, 8:31:21 AM 2511bb61..." [ref=e119]:
                 - cell "withdrawal" [ref=e120]:
                   - generic [ref=e121]:
                     - img [ref=e122]
@@ -107,12 +107,12 @@
                 - cell "-$50.00" [ref=e126]
                 - cell "requested" [ref=e127]:
                   - generic [ref=e128]: requested
-                - cell "12/24/2025, 8:30:11 AM" [ref=e129]
-                - cell "e6d16399..." [ref=e130]:
-                  - button "e6d16399..." [ref=e131] [cursor=pointer]:
-                    - text: e6d16399...
+                - cell "12/24/2025, 8:31:21 AM" [ref=e129]
+                - cell "2511bb61..." [ref=e130]:
+                  - button "2511bb61..." [ref=e131] [cursor=pointer]:
+                    - text: 2511bb61...
                     - img [ref=e132]
-              - row "deposit +$100.00 completed 12/24/2025, 8:30:10 AM 624c85a7..." [ref=e135]:
+              - row "deposit +$100.00 completed 12/24/2025, 8:31:21 AM 5930f7af..." [ref=e135]:
                 - cell "deposit" [ref=e136]:
                   - generic [ref=e137]:
                     - img [ref=e138]
@@ -120,10 +120,10 @@
                 - cell "+$100.00" [ref=e142]
                 - cell "completed" [ref=e143]:
                   - generic [ref=e144]: completed
-                - cell "12/24/2025, 8:30:10 AM" [ref=e145]
-                - cell "624c85a7..." [ref=e146]:
-                  - button "624c85a7..." [ref=e147] [cursor=pointer]:
-                    - text: 624c85a7...
+                - cell "12/24/2025, 8:31:21 AM" [ref=e145]
+                - cell "5930f7af..." [ref=e146]:
+                  - button "5930f7af..." [ref=e147] [cursor=pointer]:
+                    - text: 5930f7af...
                     - img [ref=e148]
           - generic [ref=e151]:
             - button "Previous Page" [disabled] [ref=e152]:
