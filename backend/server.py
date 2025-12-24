@@ -81,6 +81,8 @@ from app.routes import player_auth, player_lobby, player_wallet
 app.include_router(player_auth.router)
 app.include_router(player_lobby.router)
 app.include_router(player_wallet.router)
+from app.routes import payouts
+app.include_router(payouts.router)
 
 # 3. Core Business Logic (Partially Refactored)
 from app.routes import core
