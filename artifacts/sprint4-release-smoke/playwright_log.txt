@@ -1,27 +1,37 @@
-TimeoutError: apiRequestContext.post: Timeout 30000ms exceeded.
-Call log:
-  - → POST http://localhost:8001/api/v1/auth/login
-    - user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19
-    - accept: */*
-    - accept-encoding: gzip,deflate,br
-    - content-type: application/json
-    - content-length: 51
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (492ms)
 
 
-   at ../global-setup.ts:16
+  1) [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
 
-  14 |   while (attempt < maxAttempts) {
-  15 |     attempt += 1;
-> 16 |     const res = await ctx.post('/api/v1/auth/login', {
-     |                           ^
-  17 |       data: { email, password },
-  18 |     });
-  19 |
-    at loginWithRetry (/app/e2e/global-setup.ts:16:27)
-    at globalSetup (/app/e2e/global-setup.ts:59:22)
+    TypeError: Cannot read properties of undefined (reading 'id')
 
-npm notice
-npm notice New major version of npm available! 10.8.2 -> 11.7.0
-npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
-npm notice To update run: npm install -g npm@11.7.0
-npm notice
+      20 |     expect(regRes.ok(), "Player registration failed").toBeTruthy();
+      21 |     const playerData = await regRes.json();
+    > 22 |     const playerId = playerData.id || playerData.player.id; // Adjust based on actual response
+         |                                                         ^
+      23 |
+      24 |     // === PART B: DEPOSIT ===
+      25 |     // 2. Login Player
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:22:57
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
