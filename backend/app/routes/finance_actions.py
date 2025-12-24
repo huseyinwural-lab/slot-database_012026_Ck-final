@@ -144,10 +144,11 @@ async def retry_payout(
         try:
             payout_ref = f"payout_{attempt.id}"
             
+            metrics.record_payout_attempt()
+            
             payout_resp = await adyen_service.submit_payout(
                 amount=tx.amount,
                 currency=tx.currency,
-            metrics.record_payout_attempt()
                 reference=payout_ref,
                 shopper_reference=player.id,
                 shopper_email=player.email,
