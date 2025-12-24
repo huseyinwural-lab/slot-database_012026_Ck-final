@@ -1,26 +1,31 @@
 
 Running 1 test using 1 worker
 
-  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (1.5m)
+  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (12.3s)
 
 
   1) [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
 
-    [31mTest timeout of 90000ms exceeded.[39m
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
 
-    Error: locator.fill: Test timeout of 90000ms exceeded.
+    Locator: locator('text=Bank Account Details')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
     Call log:
-    [2m  - waiting for locator('input[name="accountHolderName"], input[placeholder="John Doe"]').first()[22m
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('text=Bank Account Details')[22m
 
 
-      107 |     // Fill Bank Details (generic text inputs)
-      108 |     // Account Holder Name
-    > 109 |     await page.locator('input[name="accountHolderName"], input[placeholder="John Doe"]').first().fill('Smoke Test User');
-          |                                                                                                  ^
-      110 |     
-      111 |     // Account Number
-      112 |     await page.locator('input[name="accountNumber"], input[placeholder="123456789"]').first().fill('123456789');
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:109:98
+      106 |
+      107 |     // Wait for Bank Account section
+    > 108 |     await expect(page.locator('text=Bank Account Details')).toBeVisible();
+          |                                                             ^
+      109 |
+      110 |     // Fill Bank Details (generic text inputs sequence)
+      111 |     // 1. Account Holder
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:108:61
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
