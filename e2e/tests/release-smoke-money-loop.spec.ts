@@ -84,28 +84,26 @@ test.describe('Release Smoke Money Loop', () => {
     // Ensure we are on Wallet page
     await expect(page).toHaveURL(/\/wallet/);
     
-    // Check if there is a "Withdraw" tab or button.
-    // Sometimes it's a tab in a TabsList.
-    const withdrawTab = page.locator('button[role="tab"]:has-text("Withdraw")');
-    if (await withdrawTab.count() > 0) {
-        await withdrawTab.click();
+    // Click "Withdraw" Tab. 
+    // We try to find the tab strictly first.
+    // If "Withdraw" text is inside the content (e.g. "Withdraw your funds"), we might misclick.
+    // Tabs trigger usually has role="tab".
+    const tab = page.locator('button[role="tab"]:has-text("Withdraw")');
+    if (await tab.count() > 0) {
+        await tab.click();
     } else {
-        // Maybe a button?
+        // Fallback: look for a navigation button
         await page.click('button:has-text("Withdraw")');
     }
     
-    // Wait for form header
-    await expect(page.locator('h3:has-text("Request Withdrawal"), div:has-text("Request Withdrawal")').first()).toBeVisible();
+    // Wait for UNIQUE element of Withdrawal Form
+    // "Bank Account Details" is strictly in WithdrawalForm.jsx
+    await expect(page.locator('text=Bank Account Details')).toBeVisible({ timeout: 10000 });
     
-    // Fill Withdrawal Form (Fallback to placeholders/types if labels fail)
+    // Now we are sure we are on the form.
     // Amount
-    // Use generic type selector as placeholder might vary or be obscured
     const amountInput = page.locator('input[type="number"]').first();
-    await expect(amountInput).toBeVisible();
     await amountInput.fill('50');
-
-    // Wait for Bank Account section
-    await expect(page.locator('text=Bank Account Details')).toBeVisible();
 
     // Fill Bank Details (generic text inputs sequence)
     // 1. Account Holder
@@ -127,6 +125,8 @@ test.describe('Release Smoke Money Loop', () => {
     // 6. Currency
     if (await textInputs.count() > 5) await textInputs.nth(5).fill('USD');
 
+    // Submit
+    // "Request Withdrawal" might be the button text.
     await page.click('button:has-text("Request Withdrawal")');
     
     // 7. Verify Toast/Success
