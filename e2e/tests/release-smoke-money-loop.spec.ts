@@ -170,12 +170,12 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await expect(payoutBtn).toBeVisible({ timeout: 10000 });
     await payoutBtn.click();
     
-    // Poll API for 'payout_submitted' or similar
+    // Poll API for 'payout_submitted' or 'paid' (if instant)
     await expect.poll(async () => {
         const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
         const st = (await res.json()).status;
         return st;
-    }, { timeout: 15000, message: "Status did not become 'payout_submitted'" }).toMatch(/payout_(submitted|pending)/);
+    }, { timeout: 15000, message: "Status did not become 'payout_submitted' or 'paid'" }).toMatch(/payout_(submitted|pending)|paid/);
 
     // Webhook - Simulate Adyen calling us back
     await apiContext.post(`/api/v1/payments/adyen/test-trigger-webhook`, {
