@@ -123,3 +123,27 @@ class Settings(BaseSettings):
         extra = "ignore"  # Ignore extra fields in .env
 
 settings = Settings()
+
+    def validate_prod_secrets(self) -> None:
+        """P0-1: Fail-fast validation for Production/Staging secrets."""
+        if self.env in {"prod", "staging"}:
+            missing = []
+            # Critical Secrets List
+            if not self.stripe_api_key or not self.stripe_api_key.startswith("sk_"):
+                missing.append("STRIPE_API_KEY (must start with sk_)")
+            if not self.stripe_webhook_secret or not self.stripe_webhook_secret.startswith("whsec_"):
+                missing.append("STRIPE_WEBHOOK_SECRET (must start with whsec_)")
+            
+            # Adyen
+            if not self.adyen_api_key:
+                missing.append("ADYEN_API_KEY")
+            if not self.adyen_merchant_account:
+                missing.append("ADYEN_MERCHANT_ACCOUNT")
+            if not self.adyen_hmac_key:
+                missing.append("ADYEN_HMAC_KEY")
+            
+            if missing:
+                raise ValueError(
+                    f"CRITICAL: Missing required secrets for {self.env} environment:\n" + 
+                    "\n".join(f"- {m}" for m in missing)
+                )

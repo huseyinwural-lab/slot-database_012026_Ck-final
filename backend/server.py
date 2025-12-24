@@ -31,6 +31,8 @@ if settings.env in {"prod", "staging"}:
 app = FastAPI(
     title="Casino Admin Panel API",
     description="Backend for Casino Admin Dashboard with AI Fraud Detection",
+# P0-1: Run secret validation on startup
+settings.validate_prod_secrets()
     version="13.0.0"
 )
 
