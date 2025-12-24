@@ -1,6 +1,9 @@
 import pytest
 from httpx import AsyncClient
+from unittest.mock import patch, MagicMock
 from app.models.sql_models import Transaction
+from config import settings
+from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 
 @pytest.mark.asyncio
 async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_token):
@@ -15,7 +18,7 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
         username="refund_user",
         email="refund@test.com",
         password_hash="hash",
-        balance_real_available=100.0  # Match deposit amount
+        balance_real_available=100.0 # Match deposit amount
     )
     session.add(player)
     
@@ -30,12 +33,13 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
         state="completed",
         provider="stripe",
         provider_event_id="tx_evt_123", # Needs event id
+        provider_ref="ref_123", # Needs provider ref for ledger
         balance_after=100.0
     )
     session.add(tx)
     await session.commit()
     await session.refresh(tx)
-    
+
     # 2. Refund Call
     resp = await client.post(
         f"/api/v1/finance/deposits/{tx.id}/refund",
@@ -50,8 +54,9 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
     # 3. Verify Ledger / TX State
     await session.refresh(tx)
     assert tx.state == "reversed"
-    # Balance check? We assume wallet ledger service does its job, but we can verify invariants if we mock it or use real DB.
-    # The test client uses real DB logic in memory.
+    
+    await session.refresh(player)
+    assert player.balance_real_available == 0.0 # 100 - 100 = 0
     
     # 4. Verify Replay (Idempotency)
     resp2 = await client.post(
@@ -60,5 +65,4 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
         headers={"Authorization": f"Bearer {admin_token}"}
     )
     # Should be successful/idempotent or 409 depending on logic.
-    # If state is reversed, maybe 400 "Already reversed" or 200 "OK"
     assert resp2.status_code in (200, 400, 409)
