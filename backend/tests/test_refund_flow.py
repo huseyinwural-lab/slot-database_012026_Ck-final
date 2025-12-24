@@ -7,6 +7,17 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
     """
     Test admin refund endpoint.
     """
+    # 0. Create Player
+    from app.models.sql_models import Player
+    player = Player(
+        tenant_id="default_casino",
+        id="player_refund_test",
+        username="refund_user",
+        email="refund@test.com",
+        password_hash="hash"
+    )
+    session.add(player)
+    
     # 1. Create completed deposit
     tx = Transaction(
         tenant_id="default_casino",
@@ -17,6 +28,7 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
         status="completed",
         state="completed",
         provider="stripe",
+        provider_event_id="tx_evt_123", # Needs event id
         balance_after=100.0
     )
     session.add(tx)
