@@ -133,8 +133,9 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await adminPage.goto(`${ADMIN_APP_URL}/login`);
     if (adminPage.url().includes('404')) await adminPage.goto(`${ADMIN_APP_URL}/admin/login`);
     
-    await adminPage.fill('input[name="email"]', 'admin@casino.com');
-    await adminPage.fill('input[name="password"]', 'Admin123!');
+    // Login with robust selectors (id based)
+    await adminPage.fill('#email', 'admin@casino.com');
+    await adminPage.fill('#password', 'Admin123!');
     await adminPage.click('button[type="submit"]');
     await expect(adminPage).toHaveURL(/\/admin\/dashboard/, { timeout: 15000 });
 
