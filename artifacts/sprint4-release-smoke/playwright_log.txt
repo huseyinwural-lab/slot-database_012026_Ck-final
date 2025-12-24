@@ -1,23 +1,26 @@
 
 Running 1 test using 1 worker
 
-  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (2.4s)
+  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (1.5m)
 
 
   1) [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
 
-    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+    [31mTest timeout of 90000ms exceeded.[39m
 
-    Received: [31mnull[39m
+    Error: page.fill: Test timeout of 90000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('input[name="amount"]')[22m
 
-      58 |     const urlObj = new URL(walletUrl);
-      59 |     depositTxId = urlObj.searchParams.get('tx_id');
-    > 60 |     expect(depositTxId).toBeTruthy();
-         |                         ^
-      61 |
-      62 |     // 4. Simulate Deposit Webhook
-      63 |     const depHookRes = await request.post(`${API_URL}/api/v1/payments/adyen/test-trigger-webhook`, {
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:60:25
+
+      68 |     await page.click('button:has-text("Withdraw")'); // Assuming tab/button
+      69 |     // Fill Withdrawal Form
+    > 70 |     await page.fill('input[name="amount"]', '50');
+         |                ^
+      71 |     // Fill Bank Details (assuming form fields from Payout Playbook)
+      72 |     await page.fill('input[name="accountHolderName"]', 'Smoke Test User');
+      73 |     await page.fill('input[name="accountNumber"]', '123456789');
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:70:16
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
