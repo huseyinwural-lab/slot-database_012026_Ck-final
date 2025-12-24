@@ -19,7 +19,7 @@
           - /url: /promotions
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: rcuser1766564489840
+          - generic [ref=e17]: rcuser1766564643904
           - generic [ref=e18]: $0.00
         - button [ref=e19] [cursor=pointer]:
           - img [ref=e20]
@@ -73,14 +73,14 @@
                     - textbox "John Doe" [ref=e81]: Smoke User
                   - generic [ref=e82]:
                     - generic [ref=e83]: Account Number
-                    - textbox "123456789" [ref=e84]: "123456"
+                    - textbox "123456789" [ref=e84]
                   - generic [ref=e85]:
                     - generic [ref=e86]:
                       - generic [ref=e87]: Bank Code
-                      - textbox "021000021" [ref=e88]: "001"
+                      - textbox "021000021" [ref=e88]
                     - generic [ref=e89]:
                       - generic [ref=e90]: Branch Code
-                      - textbox "001" [ref=e91]: ABC
+                      - textbox "001" [ref=e91]
                   - generic [ref=e92]:
                     - generic [ref=e93]:
                       - generic [ref=e94]: Country
@@ -104,7 +104,7 @@
                 - columnheader "Date" [ref=e116]
                 - columnheader "ID" [ref=e117]
             - rowgroup [ref=e118]:
-              - row "deposit +$100.00 completed 12/24/2025, 8:21:31 AM 50862268..." [ref=e119]:
+              - row "deposit +$100.00 completed 12/24/2025, 8:24:05 AM 604d3cdf..." [ref=e119]:
                 - cell "deposit" [ref=e120]:
                   - generic [ref=e121]:
                     - img [ref=e122]
@@ -112,10 +112,10 @@
                 - cell "+$100.00" [ref=e126]
                 - cell "completed" [ref=e127]:
                   - generic [ref=e128]: completed
-                - cell "12/24/2025, 8:21:31 AM" [ref=e129]
-                - cell "50862268..." [ref=e130]:
-                  - button "50862268..." [ref=e131] [cursor=pointer]:
-                    - text: 50862268...
+                - cell "12/24/2025, 8:24:05 AM" [ref=e129]
+                - cell "604d3cdf..." [ref=e130]:
+                  - button "604d3cdf..." [ref=e131] [cursor=pointer]:
+                    - text: 604d3cdf...
                     - img [ref=e132]
           - generic [ref=e135]:
             - button "Previous Page" [disabled] [ref=e136]:

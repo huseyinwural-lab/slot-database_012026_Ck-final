@@ -2,10 +2,10 @@
   "cookies": [
     {
       "name": "ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog",
-      "value": "%7B%22distinct_id%22%3A%22019b4f72-bc4a-7022-8c93-a6018a600647%22%2C%22%24sesid%22%3A%5B1766564481531%2C%22019b4f72-be15-7d7e-8b08-faee6013544b%22%2C1766564478485%5D%7D",
+      "value": "%7B%22distinct_id%22%3A%22019b4f75-166c-7172-a49a-b9885b898b19%22%2C%22%24sesid%22%3A%5B1766564635558%2C%22019b4f75-17bc-7e6b-ae22-0584bb7145f3%22%2C1766564632508%5D%7D",
       "domain": "localhost",
       "path": "/",
-      "expires": 1798100481,
+      "expires": 1798100635,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
@@ -17,7 +17,7 @@
       "localStorage": [
         {
           "name": "ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog",
-          "value": "{\"distinct_id\":\"019b4f72-bc4a-7022-8c93-a6018a600647\",\"$sesid\":[1766564481531,\"019b4f72-be15-7d7e-8b08-faee6013544b\",1766564478485],\"$initialization_time\":\"2025-12-24T08:21:21.392Z\",\"$configured_session_timeout_ms\":1800000,\"$device_id\":\"019b4f72-bc4a-7022-8c93-a6018a600647\",\"$user_state\":\"anonymous\",\"$session_recording_remote_config\":{\"enabled\":true,\"endpoint\":\"/s/\",\"consoleLogRecordingEnabled\":true,\"recorderVersion\":\"v2\",\"sampleRate\":0.01,\"minimumDurationMilliseconds\":30000,\"linkedFlag\":null,\"networkPayloadCapture\":{\"capturePerformance\":{\"network_timing\":false,\"web_vitals\":true,\"web_vitals_allowed_metrics\":null}},\"masking\":null,\"urlTriggers\":[],\"scriptConfig\":{\"script\":\"posthog-recorder\"},\"urlBlocklist\":[],\"eventTriggers\":[],\"triggerMatchType\":null,\"canvasRecording\":{}},\"$autocapture_disabled_server_side\":true,\"$heatmaps_enabled_server_side\":false,\"$product_tours_enabled_server_side\":false,\"$web_vitals_enabled_server_side\":true,\"$web_vitals_allowed_metrics\":null,\"$exception_capture_enabled_server_side\":false,\"$error_tracking_suppression_rules\":[],\"$dead_clicks_enabled_server_side\":false,\"$active_feature_flags\":[],\"$enabled_feature_flags\":{},\"$feature_flag_payloads\":{},\"$feature_flag_details\":{},\"$feature_flag_request_id\":\"63fdabf0-33f5-4865-9fc2-b0a43a058126\",\"$feature_flag_evaluated_at\":1766564481417,\"$client_session_props\":{\"sessionId\":\"019b4f72-be15-7d7e-8b08-faee6013544b\",\"props\":{\"r\":\"$direct\",\"u\":\"http://localhost:3000/login\"}},\"$session_is_sampled\":false}"
+          "value": "{\"distinct_id\":\"019b4f75-166c-7172-a49a-b9885b898b19\",\"$sesid\":[1766564635558,\"019b4f75-17bc-7e6b-ae22-0584bb7145f3\",1766564632508],\"$initialization_time\":\"2025-12-24T08:23:55.428Z\",\"$configured_session_timeout_ms\":1800000,\"$device_id\":\"019b4f75-166c-7172-a49a-b9885b898b19\",\"$user_state\":\"anonymous\",\"$session_recording_remote_config\":{\"enabled\":true,\"endpoint\":\"/s/\",\"consoleLogRecordingEnabled\":true,\"recorderVersion\":\"v2\",\"sampleRate\":0.01,\"minimumDurationMilliseconds\":30000,\"linkedFlag\":null,\"networkPayloadCapture\":{\"capturePerformance\":{\"network_timing\":false,\"web_vitals\":true,\"web_vitals_allowed_metrics\":null}},\"masking\":null,\"urlTriggers\":[],\"scriptConfig\":{\"script\":\"posthog-recorder\"},\"urlBlocklist\":[],\"eventTriggers\":[],\"triggerMatchType\":null,\"canvasRecording\":{}},\"$autocapture_disabled_server_side\":true,\"$heatmaps_enabled_server_side\":false,\"$product_tours_enabled_server_side\":false,\"$web_vitals_enabled_server_side\":true,\"$web_vitals_allowed_metrics\":null,\"$exception_capture_enabled_server_side\":false,\"$error_tracking_suppression_rules\":[],\"$dead_clicks_enabled_server_side\":false,\"$active_feature_flags\":[],\"$enabled_feature_flags\":{},\"$feature_flag_payloads\":{},\"$feature_flag_details\":{},\"$feature_flag_request_id\":\"3d2e27ee-68c9-46e1-8194-8c9c44b0f4a1\",\"$feature_flag_evaluated_at\":1766564635453,\"$client_session_props\":{\"sessionId\":\"019b4f75-17bc-7e6b-ae22-0584bb7145f3\",\"props\":{\"r\":\"$direct\",\"u\":\"http://localhost:3000/login\"}},\"$session_is_sampled\":false}"
         },
         {
           "name": "admin_user",
@@ -25,7 +25,7 @@
         },
         {
           "name": "admin_token",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MDU2OTkxYy04YjU4LTRlYTUtOGJhNC0wOTEyMDdjMDZhMzkiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NjY1MDg4MX0.pGNNZkv5PNOesxPYn94KoQcC1sgw6eaxRjF4SY4oGFE"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MDU2OTkxYy04YjU4LTRlYTUtOGJhNC0wOTEyMDdjMDZhMzkiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NjY1MTAzNX0.UqRqwJxFfLHb-nKIdQPsBGMrjlvaI7LKhxyiAgAo4nc"
         }
       ]
     }
