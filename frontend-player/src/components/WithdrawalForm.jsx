@@ -1,87 +1,55 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-
-const withdrawalSchema = z.object({
-  amount: z.coerce
-    .number()
-    .min(10, 'Minimum withdrawal amount is 10')
-    .max(10000, 'Maximum withdrawal amount is 10,000'),
-  accountHolderName: z.string()
-    .min(3, 'Account holder name is required')
-    .max(50, 'Name must be less than 50 characters'),
-  accountNumber: z.string()
-    .regex(/^\d{8,17}$/, 'Invalid account number'),
-  bankCode: z.string()
-    .min(1, 'Bank code is required'),
-  branchCode: z.string()
-    .min(1, 'Branch/Sort code is required'),
-  countryCode: z.string()
-    .regex(/^[A-Z]{2}$/, 'Invalid country code'),
-  currencyCode: z.string()
-    .regex(/^[A-Z]{3}$/, 'Invalid currency code'),
-});
 
 export function WithdrawalForm({ playerId, playerEmail, onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
-
-  const form = useForm({
-    resolver: zodResolver(withdrawalSchema),
-    defaultValues: {
-      amount: '',
-      accountHolderName: '',
-      accountNumber: '',
-      bankCode: '',
-      branchCode: '',
-      countryCode: 'US',
-      currencyCode: 'USD',
-    },
+  
+  // Local state instead of react-hook-form/zod to reduce deps if they are missing too
+  // But react-hook-form was in package.json in playbook. 
+  // Let's assume standard deps are fine, but UI components are missing.
+  // We'll use simple controlled inputs for safety.
+  const [formData, setFormData] = useState({
+    amount: '',
+    accountHolderName: '',
+    accountNumber: '',
+    bankCode: '',
+    branchCode: '',
+    countryCode: 'US',
+    currencyCode: 'USD',
   });
 
-  async function onSubmit(values) {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  async function onSubmit(e) {
+    e.preventDefault();
     setIsSubmitting(true);
     setResult(null);
 
     try {
-      const amountInMinorUnits = Math.round(values.amount * 100);
+      const amountInMinorUnits = Math.round(parseFloat(formData.amount) * 100);
       const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
 
       const response = await fetch(`${API_BASE}/api/payouts/initiate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add Auth header if needed, usually managed by interceptor or cookie
-          // Assuming cookie or local storage token
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
         },
         body: JSON.stringify({
           player_id: playerId,
           amount: amountInMinorUnits,
-          currency: values.currencyCode,
+          currency: formData.currencyCode,
           player_email: playerEmail,
           bank_account: {
-            account_holder_name: values.accountHolderName,
-            account_number: values.accountNumber,
-            bank_code: values.bankCode,
-            branch_code: values.branchCode,
-            country_code: values.countryCode,
-            currency_code: values.currencyCode,
+            account_holder_name: formData.accountHolderName,
+            account_number: formData.accountNumber,
+            bank_code: formData.bankCode,
+            branch_code: formData.branchCode,
+            country_code: formData.countryCode,
+            currency_code: formData.currencyCode,
           },
           description: `Casino withdrawal for ${playerId}`,
         }),
@@ -97,10 +65,8 @@ export function WithdrawalForm({ playerId, playerEmail, onSuccess }) {
       setResult({
         type: 'success',
         data: data,
-        message: `Withdrawal of ${values.amount} ${values.currencyCode} submitted successfully. Your payout ID is ${data.payout_id}.`,
+        message: `Withdrawal submitted. ID: ${data.payout_id}`,
       });
-
-      form.reset();
 
       if (onSuccess) {
         onSuccess(data);
@@ -108,7 +74,7 @@ export function WithdrawalForm({ playerId, playerEmail, onSuccess }) {
     } catch (error) {
       setResult({
         type: 'error',
-        message: error.message || 'An error occurred during withdrawal submission.',
+        message: error.message || 'Error submitting withdrawal.',
       });
     } finally {
       setIsSubmitting(false);
@@ -116,164 +82,124 @@ export function WithdrawalForm({ playerId, playerEmail, onSuccess }) {
   }
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>Request Withdrawal</CardTitle>
-        <CardDescription>
-          Withdraw your winnings to your bank account. Payouts typically arrive within 1-2 business days.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {result && (
-          <Alert className={`mb-6 ${result.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-            {result.type === 'success' ? (
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-red-600" />
-            )}
-            <AlertDescription className={result.type === 'success' ? 'text-green-800' : 'text-red-800'}>
-              {result.message}
-            </AlertDescription>
-          </Alert>
-        )}
+    <div className="bg-secondary/20 p-6 rounded-xl border border-white/5">
+      <h3 className="text-xl font-semibold mb-4 text-white">Request Withdrawal</h3>
+      
+      {result && (
+        <div className={`mb-4 p-3 rounded-lg text-sm flex items-center gap-2 ${result.type === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+          {result.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          {result.message}
+        </div>
+      )}
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Withdrawal Amount</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center">
-                      <Input
-                        type="number"
-                        placeholder="100.00"
-                        step="0.01"
-                        min="0"
-                        {...field}
-                      />
-                      <span className="ml-3 text-gray-600">USD</span>
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Minimum: $10, Maximum: $10,000
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm text-muted-foreground mb-1">Withdrawal Amount</label>
+          <input
+            type="number"
+            name="amount"
+            value={formData.amount}
+            onChange={handleChange}
+            placeholder="100.00"
+            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:border-primary focus:outline-none"
+            required
+            min="10"
+          />
+        </div>
 
-            <div className="space-y-4 border-t pt-4">
-              <h3 className="font-semibold text-lg">Bank Account Details</h3>
-
-              <FormField
-                control={form.control}
+        <div className="pt-4 border-t border-white/10">
+          <h4 className="font-semibold text-lg mb-3 text-white">Bank Account Details</h4>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">Account Holder Name</label>
+              <input
+                type="text"
                 name="accountHolderName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Account Holder Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                value={formData.accountHolderName}
+                onChange={handleChange}
+                placeholder="John Doe"
+                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white"
+                required
               />
-
-              <FormField
-                control={form.control}
+            </div>
+            
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">Account Number</label>
+              <input
+                type="text"
                 name="accountNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Account Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="123456789" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                value={formData.accountNumber}
+                onChange={handleChange}
+                placeholder="123456789"
+                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white"
+                required
               />
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1">Bank Code</label>
+                <input
+                  type="text"
                   name="bankCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bank Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="021000021" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="branchCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Branch Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="001" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  value={formData.bankCode}
+                  onChange={handleChange}
+                  placeholder="021000021"
+                  className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white"
+                  required
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="countryCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="US" maxLength="2" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="currencyCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency</FormLabel>
-                      <FormControl>
-                        <Input placeholder="USD" maxLength="3" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1">Branch Code</label>
+                <input
+                  type="text"
+                  name="branchCode"
+                  value={formData.branchCode}
+                  onChange={handleChange}
+                  placeholder="001"
+                  className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white"
+                  required
                 />
               </div>
             </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1">Country</label>
+                <input
+                  type="text"
+                  name="countryCode"
+                  value={formData.countryCode}
+                  onChange={handleChange}
+                  className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1">Currency</label>
+                <input
+                  type="text"
+                  name="currencyCode"
+                  value={formData.currencyCode}
+                  onChange={handleChange}
+                  className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full"
-            >
-              {isSubmitting ? (
-                <>
-                  <Clock className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Request Withdrawal'
-              )}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
+        >
+          {isSubmitting && <Clock className="w-4 h-4 animate-spin" />}
+          {isSubmitting ? 'Processing...' : 'Request Withdrawal'}
+        </button>
+      </form>
+    </div>
   );
 }
