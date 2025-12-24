@@ -38,19 +38,21 @@
     - **E2E**: `e2e/tests/adyen-deposit.spec.ts` passed.
     - **Docs**: `docs/payments/adyen-integration.md`.
 
-## 5. Ops & Monitoring (Sprint 2 - PR1)
+## 6. Webhook Hardening & Refund (Sprint 2 - PR2)
 - **Status**: ✅ COMPLETED & VERIFIED
 - **Features**:
-    - **Monitoring**: `app/services/metrics.py` + `metrics_middleware.py`.
-    - **Dashboard**: `GET /api/v1/ops/dashboard` (JSON).
-    - **Alerting**: Logs `[ALERT]` on critical findings.
-    - **Recon Automation**: `app/worker.py` (ARQ Cron Job @ 2AM).
+    - **Webhook Hardening**: Enforced signature verification for Stripe & Adyen. Implemented replay protection.
+    - **Refund Flow**: `POST /api/v1/finance/deposits/{tx_id}/refund` (Admin only). Updates ledger (reverse) and status.
+    - **Payout Gating**: Mock payouts explicitly blocked in PROD (403).
+    - **Rate Limiting**: Added limits for webhook endpoints.
 - **Verification**:
-    - `pytest tests/test_ops_metrics.py`: **PASSED** (Metrics & Dashboard).
-    - `pytest tests/test_worker_recon.py`: **PASSED** (Cron Job logic).
+    - `pytest tests/test_webhook_security_stripe.py`: **PASSED** (Signature & Replay).
+    - `pytest tests/test_webhook_security_adyen.py`: **PASSED** (Signature & Replay).
+    - `pytest tests/test_refund_flow.py`: **PASSED** (Admin refund logic).
+    - `pytest tests/test_payout_provider.py`: **PASSED** (Prod gating).
 
 ## Artifacts
-- `app/backend/app/worker.py`: Worker entrypoint.
-- `app/backend/app/services/metrics.py`: Metrics service.
+- `app/backend/app/routes/finance_refunds.py`: Refund endpoint.
+- `app/backend/app/services/adyen_psp.py`: Updated with signature Stub.
 -   `e2e/tests/stripe-deposit.spec.ts`: New E2E test.
 -   `backend/tests/test_tenant_policy_enforcement.py`: New backend policy test.
