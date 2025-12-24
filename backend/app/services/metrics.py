@@ -51,6 +51,25 @@ class MetricsService:
         if success:
             self.payout_success += 1
         else:
+        # Threshold Evaluation
+        status = "healthy"
+        alerts = []
+        
+        if payout_failure_rate > 0.15:
+            status = "critical"
+            alerts.append("Payout Failure Rate > 15%")
+        elif payout_failure_rate > 0.05:
+            status = "warning"
+            alerts.append("Payout Failure Rate > 5%")
+            
+        if self.reconciliation_critical > 0:
+            status = "critical"
+            alerts.append("Critical Reconciliation Findings")
+            
+        return {
+            "status": status,
+            "alerts": alerts,
+            "http": {
             self.payout_failed += 1
 
     def record_webhook_signature_failure(self, provider: str):
