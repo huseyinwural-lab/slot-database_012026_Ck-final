@@ -21,6 +21,22 @@ test.describe('Release Smoke Money Loop', () => {
     const playerData = await regRes.json();
     const playerId = playerData.player_id || playerData.id; // Updated key
 
+    // 1b. Verify KYC via Admin API (to unblock withdrawal)
+    // Login Admin API
+    const adminLoginRes = await request.post(`${API_URL}/api/v1/auth/login`, {
+      data: { email: 'admin@casino.com', password: 'Admin123!' }
+    });
+    expect(adminLoginRes.ok()).toBeTruthy();
+    const adminData = await adminLoginRes.json();
+    const adminToken = adminData.access_token;
+    
+    // Verify Player
+    const kycRes = await request.post(`${API_URL}/api/v1/kyc/documents/${playerId}/review`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` },
+      data: { status: 'approved' }
+    });
+    expect(kycRes.ok(), "KYC Verification failed").toBeTruthy();
+
     // === PART B: DEPOSIT ===
     // 2. Login Player
     await page.goto(`${PLAYER_APP_URL}/login`);
