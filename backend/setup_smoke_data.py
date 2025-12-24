@@ -1,7 +1,7 @@
 import asyncio
 import os
 from sqlmodel import select
-from app.core.database import async_session_factory
+from app.core.database import async_session
 from app.models.sql_models import AdminUser, Player, Transaction, Tenant
 from app.utils.auth import create_access_token, get_password_hash
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
@@ -9,7 +9,7 @@ from datetime import timedelta
 import uuid
 
 async def setup():
-    async with async_session_factory() as session:
+    async with async_session() as session:
         # 1. Ensure Tenant
         stmt = select(Tenant).where(Tenant.id == "default_casino")
         tenant = (await session.execute(stmt)).scalars().first()
