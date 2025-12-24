@@ -136,8 +136,17 @@ async def initiate_payout(
         logger.error(f"Payout Init Failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-    # Just create TX
-    from app.models.sql_models import Transaction
+    # Create Transaction
+    from app.models.sql_models import Transaction, Player
+    
+    # 1. Fetch Player & Check Balance
+    player = await session.get(Player, request.player_id)
+    if not player:
+        raise HTTPException(404, "Player not found")
+        
+    if player.balance_real_available < amount_major:
+        raise HTTPException(400, "Insufficient funds")
+
     tx_id = str(uuid.uuid4())
     tx = Transaction(
         id=tx_id,
@@ -152,6 +161,21 @@ async def initiate_payout(
         metadata_json={"bank_account": bank_acc_adyen}
     )
     session.add(tx)
+    
+    # 2. Apply Ledger Delta (Available -> Held)
+    from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+    await apply_wallet_delta_with_ledger(
+        session,
+        tenant_id="default_casino",
+        player_id=request.player_id,
+        tx_id=tx_id,
+        event_type="withdraw_requested",
+        delta_available=-float(amount_major),
+        delta_held=+float(amount_major),
+        currency=request.currency,
+        idempotency_key=f"withdraw-{tx_id}"
+    )
+    
     await session.commit()
     
     return {
