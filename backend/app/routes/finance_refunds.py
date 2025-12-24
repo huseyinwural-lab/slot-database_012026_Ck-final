@@ -31,22 +31,56 @@ async def refund_deposit(
     Admin only.
     """
     # 1. Fetch TX
-    tx = await session.get(Transaction, tx_id)
+    # Use with_for_update to prevent race conditions
+    stmt = select(Transaction).where(Transaction.id == tx_id).with_for_update()
+    tx = (await session.execute(stmt)).scalars().first()
+    
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
+    # Audit: Requested
+    await audit.log_event(
+        session=session,
+        request_id=f"req_refund_{tx.id}",
+        actor_user_id=str(current_admin.id),
+        tenant_id=tx.tenant_id,
+        action="FIN_DEPOSIT_REFUND_REQUESTED",
+        resource_type="transaction",
+        resource_id=tx.id,
+        result="pending",
+        details={"reason": body.reason}
+    )
+
     # 2. Validation
     if tx.type != "deposit":
+        await audit.log_event(
+            session=session,
+            request_id=f"req_refund_{tx.id}",
+            actor_user_id=str(current_admin.id),
+            tenant_id=tx.tenant_id,
+            action="FIN_DEPOSIT_REFUND_REJECTED",
+            resource_type="transaction",
+            resource_id=tx.id,
+            result="rejected",
+            details={"reason": "invalid_type", "type": tx.type}
+        )
         raise HTTPException(status_code=400, detail="Only deposits can be refunded")
     
     if tx.status == "reversed" or tx.state == "reversed":
-        # Idempotent response?
-        # Or error? Spec implies state machine transition check.
-        # But for UI safety, returning success if already reversed with same reason is nice.
-        # For now, simplistic approach:
         return {"status": "reversed", "tx_id": tx.id, "message": "Already reversed"}
 
     if tx.status != "completed":
+        await audit.log_event(
+            session=session,
+            request_id=f"req_refund_{tx.id}",
+            actor_user_id=str(current_admin.id),
+            tenant_id=tx.tenant_id,
+            action="FIN_DEPOSIT_REFUND_REJECTED",
+            resource_type="transaction",
+            resource_id=tx.id,
+            result="rejected",
+            details={"reason": "invalid_state", "status": tx.status}
+        )
         raise HTTPException(status_code=400, detail="Transaction is not in completed state")
 
     # 3. Apply Reversal Ledger
