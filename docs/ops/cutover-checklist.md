@@ -9,6 +9,8 @@
 - [ ] `ADYEN_HMAC_KEY` (Live) configured.
 - [ ] `ALLOW_TEST_PAYMENT_METHODS=false` confirmed.
 
+- [ ] `PAYOUTS_ROUTER` active (Endpoint `/api/v1/payouts/initiate` reachable).
+- [ ] Ledger Logic Verified (Withdrawal deducts balance immediately).
 ## 2. Infrastructure
 - [ ] Database backup executed (Restore Drill PASS).
 - [ ] Redis Queue (Reconciliation) running.
