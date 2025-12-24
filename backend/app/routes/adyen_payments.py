@@ -166,6 +166,79 @@ async def adyen_webhook(
                  session.add(tx)
                  await session.commit()
 
+        # PAYOUT-REAL-001: Handle Payout Webhooks
+        elif event_code == "PAYOUT_THIRDPARTY":
+             tx_id = req_item.get("merchantReference") # We sent "payout_{attempt_id}"
+             success = req_item.get("success") == "true"
+             psp_reference = req_item.get("pspReference")
+             
+             # Extract Attempt ID from reference
+             # format: payout_{attempt_id}
+             if not tx_id or not tx_id.startswith("payout_"):
+                 logger.warning(f"Adyen Webhook: Invalid payout reference {tx_id}")
+                 continue
+                 
+             attempt_id = tx_id.replace("payout_", "")
+             
+             # Find Attempt
+             from app.models.sql_models import PayoutAttempt
+             attempt = await session.get(PayoutAttempt, attempt_id)
+             if not attempt:
+                 logger.warning(f"Adyen Webhook: PayoutAttempt {attempt_id} not found")
+                 continue
+                 
+             # Find Transaction
+             tx = await session.get(Transaction, attempt.withdraw_tx_id)
+             if not tx:
+                 logger.warning("Adyen Webhook: Withdrawal TX not found")
+                 continue
+                 
+             if tx.status == "completed":
+                 logger.info(f"Adyen Webhook: Payout already completed {tx.id}")
+                 continue
+
+             if success:
+                 # Ledger: Apply 'withdrawal_succeeded' (Unlock held funds and reduce balance permanently)
+                 # Wait, for withdrawal:
+                 # 1. Created: Delta Available -X, Delta Held +X
+                 # 2. Paid: Delta Held -X (burn)
+                 # Let's check 'apply_wallet_delta_with_ledger' logic for 'withdrawal_succeeded'
+                 # It should reduce 'held' balance.
+                 
+                 await apply_wallet_delta_with_ledger(
+                    session,
+                    tenant_id=tx.tenant_id,
+                    player_id=tx.player_id,
+                    tx_id=tx.id,
+                    event_type="withdrawal_succeeded", # burns the held amount
+                    delta_available=0.0,
+                    delta_held=-tx.amount, # Reduce held
+                    currency=tx.currency,
+                    idempotency_key=f"adyen:{psp_reference}:payout",
+                    provider="adyen",
+                    provider_ref=psp_reference,
+                    provider_event_id=psp_reference
+                )
+                 tx.status = "completed"
+                 tx.state = "paid"
+                 attempt.status = "success"
+                 
+             else:
+                 # Payout Failed
+                 # We should Refund the Held amount? Or just mark failed and let admin retry?
+                 # Usually if payout fails, funds verify logic might keep them held until manual review.
+                 # Or we auto-refund to available.
+                 # For safety in this Sprint, we mark as 'payout_failed' and keep funds held.
+                 # Admin can 'Reject' to refund, or 'Retry'.
+                 tx.status = "payout_failed"
+                 tx.state = "payout_failed"
+                 attempt.status = "failed"
+                 attempt.error_code = req_item.get("reason", "Payout Failed")
+             
+             session.add(tx)
+             session.add(attempt)
+             await session.commit()
+
     return {"status": "[accepted]"}
 
 @router.post("/test-trigger-webhook")

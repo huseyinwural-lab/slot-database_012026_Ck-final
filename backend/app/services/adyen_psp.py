@@ -74,6 +74,80 @@ class AdyenPSP:
             except Exception as e:
                 logger.error(f"Adyen Connection Error: {str(e)}")
                 raise
+    async def submit_payout(
+        self,
+        amount: float,
+        currency: str,
+        reference: str,
+        shopper_reference: Optional[str] = None,
+        shopper_email: Optional[str] = None,
+        bank_account: Optional[Dict] = None,
+        metadata: Optional[Dict] = None
+    ) -> Dict[str, Any]:
+        """
+        Submits a payout via Adyen Payout API (Third Party).
+        """
+        # Mock Mode for Dev/Test
+        if (not self.api_key or "mock" in self.api_key.lower()) and settings.allow_test_payment_methods:
+             logger.info(f"Mocking Adyen Payout for {reference}")
+             return {
+                 "pspReference": f"MOCK_PAYOUT_{reference}",
+                 "resultCode": "[payout-submit-received]",
+                 "merchantReference": reference
+             }
+
+        if not self.api_key:
+             raise ValueError("Adyen API Key missing")
+        
+        url = f"{self.base_url}/pal/servlet/Payment/v68/submitThirdParty"
+        # Note: Adyen Live Payout URL is different, handling via base_url logic or config is best.
+        # Here we assume base_url is set correctly for Payouts or we override it.
+        # Adyen Payouts often use a different endpoint prefix than Checkout.
+        # For MVP we assume standard structure or Update base_url dynamically if needed.
+        # Actually, Payouts API has specific endpoints. Let's use the one from playbook.
+        if "checkout" in self.base_url:
+             # switch to pal-test or pal-live
+             if "test" in self.environment:
+                 url = "https://pal-test.adyen.com/pal/servlet/Payment/v68/submitThirdParty"
+             else:
+                 # TODO: Add live prefix config
+                 url = "https://pal-live.adyenpayments.com/pal/servlet/Payment/v68/submitThirdParty"
+
+        value = int(amount * 100)
+        
+        payload = {
+            "merchantAccount": self.merchant_account,
+            "amount": {"currency": currency, "value": value},
+            "reference": reference,
+            "shopperEmail": shopper_email,
+            "shopperReference": shopper_reference,
+            "selectedRecurringDetailReference": "LATEST", # Use latest saved detail if available
+            "recurring": {"contract": "PAYOUT"},
+        }
+        
+        # If explicit bank account provided (rare for just 'retry', but possible)
+        if bank_account:
+            payload["bankAccount"] = bank_account
+            
+        if metadata:
+            payload["metadata"] = metadata
+
+        headers = {
+            "x-API-key": self.api_key,
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(url, json=payload, headers=headers, timeout=10.0)
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPStatusError as e:
+                logger.error(f"Adyen Payout API Error: {e.response.text}")
+                raise Exception(f"Adyen Payout API Error: {e.response.text}")
+            except Exception as e:
+                logger.error(f"Adyen Payout Connection Error: {str(e)}")
+                raise
 
     def verify_webhook_signature(self, payload: Dict, signature: str) -> bool:
         """
