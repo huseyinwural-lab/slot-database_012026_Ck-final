@@ -122,8 +122,6 @@ class Settings(BaseSettings):
         env_file = ".env"
         extra = "ignore"  # Ignore extra fields in .env
 
-settings = Settings()
-
     def validate_prod_secrets(self) -> None:
         """P0-1: Fail-fast validation for Production/Staging secrets."""
         if self.env in {"prod", "staging"}:
@@ -147,3 +145,5 @@ settings = Settings()
                     f"CRITICAL: Missing required secrets for {self.env} environment:\n" + 
                     "\n".join(f"- {m}" for m in missing)
                 )
+
+settings = Settings()
