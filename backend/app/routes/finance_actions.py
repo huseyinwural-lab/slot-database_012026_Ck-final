@@ -12,6 +12,7 @@ from app.utils.tenant import get_current_tenant_id
 from app.services.audit import audit
 from app.services.psp import get_psp
 
+from config import settings
 router = APIRouter(prefix="/api/v1/finance-actions", tags=["finance_actions"])
 
 @router.post("/withdrawals/{tx_id}/retry")
@@ -104,8 +105,22 @@ async def retry_payout(
     )
     session.add(attempt)
     
-    # 4. Trigger Logic (Stubbed for now, just recording attempt)
+    # 4. Trigger Logic
+    provider = attempt.provider
+    
+    # Gating for Mock Provider in Prod (PAYOUT-PROVIDER-001)
+    if provider == "mock_psp" or "mock" in provider:
+        if settings.env in {"prod", "production"} and not settings.allow_test_payment_methods:
+             raise HTTPException(status_code=403, detail="Mock payouts are disabled in production")
+
     # In real flow, this would call PSP service.
+    # We simulate async processing
+    if provider == "mock_psp":
+        # Simulate success
+        tx.status = "completed" # For simplicity in this sprint
+        attempt.status = "success"
+        session.add(tx)
+        session.add(attempt)
     
     await audit.log_event(
         session=session,

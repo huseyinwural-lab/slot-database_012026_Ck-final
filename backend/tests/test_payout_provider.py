@@ -1,16 +1,63 @@
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+from app.models.sql_models import Transaction, PayoutAttempt
+from config import settings
 
 @pytest.mark.asyncio
 async def test_payout_provider_mock_gated_in_prod(client: AsyncClient, admin_token, session):
     """
     Ensure mock payouts are gated in production.
     """
-    # Assuming the finance_actions router checks settings.allow_test_payment_methods 
-    # OR settings.env for mock provider logic.
-    # The requirement is "prod’da mock payout kapalı (403)".
-    
-    # We haven't implemented the gating change in finance_actions.py yet, let's do TDD.
-    # We need to find the route for payout approval or execution.
-    pass 
+    # 1. Create a withdrawal
+    tx = Transaction(
+        tenant_id="default_casino",
+        player_id="player1",
+        type="withdrawal",
+        amount=50.0,
+        currency="USD",
+        status="pending",
+        state="approved",
+        provider="mock_psp"
+    )
+    session.add(tx)
+    await session.commit()
+    await session.refresh(tx)
+
+    # 2. Attempt Retry in PROD
+    with patch("config.settings.env", "prod"):
+        with patch("config.settings.allow_test_payment_methods", False):
+            resp = await client.post(
+                f"/api/v1/finance-actions/withdrawals/{tx.id}/retry",
+                json={"reason": "Retrying"},
+                headers={"Authorization": f"Bearer {admin_token}"}
+            )
+            assert resp.status_code == 403
+            assert "Mock payouts are disabled" in resp.json()["detail"]
+
+@pytest.mark.asyncio
+async def test_payout_provider_mock_allowed_in_dev(client: AsyncClient, admin_token, session):
+    """
+    Ensure mock payouts work in dev.
+    """
+    tx = Transaction(
+        tenant_id="default_casino",
+        player_id="player2",
+        type="withdrawal",
+        amount=50.0,
+        currency="USD",
+        status="pending",
+        state="approved",
+        provider="mock_psp"
+    )
+    session.add(tx)
+    await session.commit()
+    await session.refresh(tx)
+
+    resp = await client.post(
+        f"/api/v1/finance-actions/withdrawals/{tx.id}/retry",
+        json={"reason": "Retrying"},
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "retry_initiated"
