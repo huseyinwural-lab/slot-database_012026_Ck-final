@@ -20,7 +20,7 @@ export function WithdrawalStatus({ payoutId, onStatusChange }) {
     const fetchPayoutStatus = async () => {
       try {
         const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
-        const response = await fetch(`${API_BASE}/api/payouts/status/${payoutId}`);
+        const response = await fetch(`${API_BASE}/api/v1/payouts/status/${payoutId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch payout status');
         }
