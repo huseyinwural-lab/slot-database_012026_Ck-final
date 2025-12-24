@@ -1,5 +1,20 @@
+/root/.venv/lib/python3.11/site-packages/pydantic/_migration.py:283: UserWarning: `pydantic.generics:GenericModel` has been moved to `pydantic.BaseModel`.
+  warnings.warn(f'`{import_path}` has been moved to `{new_location}`.')
+=== T3: Payout Gating Verification ===
+Testing that Mock Payouts are DISABLED in Production environment.
 Traceback (most recent call last):
-  File "/app/backend/verify_prod_gating.py", line 5, in <module>
-    from app.server import app # Import the app
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^
-ModuleNotFoundError: No module named 'app.server'
+  File "/app/backend/verify_prod_gating.py", line 54, in <module>
+    asyncio.run(run_check())
+  File "/usr/local/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/app/backend/verify_prod_gating.py", line 27, in run_check
+    async with AsyncClient(app=app, base_url="http://test") as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: AsyncClient.__init__() got an unexpected keyword argument 'app'

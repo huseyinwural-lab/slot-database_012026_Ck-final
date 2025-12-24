@@ -13,13 +13,13 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 > 
 } [41 bytes data]
 < HTTP/1.1 200 OK
-< date: Wed, 24 Dec 2025 00:35:02 GMT
+< date: Wed, 24 Dec 2025 00:35:57 GMT
 < server: uvicorn
 < content-length: 68
 < content-type: application/json
-< x-request-id: dcbedc2d-85ed-4521-a1f8-2963e9890620
+< x-request-id: 024664ca-4528-4680-89a4-13611ec899f4
 < 
 { [68 bytes data]
-100   109  100    68  100    41   2869   1730 --:--:-- --:--:-- --:--:--  4739
+100   109  100    68  100    41   3479   2098 --:--:-- --:--:-- --:--:--  5736
 * Connection #0 to host localhost left intact
 {"status":"reversed","tx_id":"e3dac1da-90c9-4b48-b41b-28bac985eedc"}

@@ -13,13 +13,13 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 > 
 } [2 bytes data]
 < HTTP/1.1 400 Bad Request
-< date: Wed, 24 Dec 2025 00:35:02 GMT
+< date: Wed, 24 Dec 2025 00:35:57 GMT
 < server: uvicorn
 < content-length: 34
 < content-type: application/json
-< x-request-id: dfc7b337-fc4b-4f83-afb4-3c9dd8f1540e
+< x-request-id: 2436ae99-7c91-4398-862e-7f84a89f2d2a
 < 
 { [34 bytes data]
-100    36  100    34  100     2   2197    129 --:--:-- --:--:-- --:--:--  2400
+100    36  100    34  100     2   4817    283 --:--:-- --:--:-- --:--:--  5142
 * Connection #0 to host localhost left intact
 {"detail":"Could not parse event"}
