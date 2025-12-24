@@ -14,7 +14,8 @@ async def test_admin_refund_deposit_flow(client: AsyncClient, session, admin_tok
         id="player_refund_test",
         username="refund_user",
         email="refund@test.com",
-        password_hash="hash"
+        password_hash="hash",
+        balance_real_available=100.0  # Match deposit amount
     )
     session.add(player)
     
