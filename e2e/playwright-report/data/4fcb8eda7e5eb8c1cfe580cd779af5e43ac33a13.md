@@ -19,7 +19,7 @@
           - /url: /promotions
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: smokeuser1766540302186
+          - generic [ref=e17]: smokeuser1766540368953
           - generic [ref=e18]: $0.00
         - button [ref=e19] [cursor=pointer]:
           - img [ref=e20]
@@ -55,7 +55,7 @@
         - generic [ref=e62]:
           - generic [ref=e63]:
             - button "Deposit" [ref=e64] [cursor=pointer]
-            - button "Withdraw" [ref=e65] [cursor=pointer]
+            - button "Withdraw" [active] [ref=e65] [cursor=pointer]
           - generic [ref=e67]:
             - heading "Request Withdrawal" [level=3] [ref=e68]:
               - img [ref=e69]
@@ -64,7 +64,7 @@
               - generic [ref=e73]: Amount ($)
               - generic [ref=e74]:
                 - img [ref=e75]
-                - spinbutton [active] [ref=e77]: "50"
+                - spinbutton [ref=e77]
             - generic [ref=e78]:
               - generic [ref=e79]: Wallet Address / IBAN
               - textbox "TR..." [ref=e80]
@@ -84,7 +84,7 @@
                 - columnheader "Date" [ref=e98]
                 - columnheader "ID" [ref=e99]
             - rowgroup [ref=e100]:
-              - row "deposit +$100.00 completed 12/24/2025, 1:38:23 AM f3fb3667..." [ref=e101]:
+              - row "deposit +$100.00 completed 12/24/2025, 1:39:30 AM ed920554..." [ref=e101]:
                 - cell "deposit" [ref=e102]:
                   - generic [ref=e103]:
                     - img [ref=e104]
@@ -92,10 +92,10 @@
                 - cell "+$100.00" [ref=e108]
                 - cell "completed" [ref=e109]:
                   - generic [ref=e110]: completed
-                - cell "12/24/2025, 1:38:23 AM" [ref=e111]
-                - cell "f3fb3667..." [ref=e112]:
-                  - button "f3fb3667..." [ref=e113] [cursor=pointer]:
-                    - text: f3fb3667...
+                - cell "12/24/2025, 1:39:30 AM" [ref=e111]
+                - cell "ed920554..." [ref=e112]:
+                  - button "ed920554..." [ref=e113] [cursor=pointer]:
+                    - text: ed920554...
                     - img [ref=e114]
           - generic [ref=e117]:
             - button "Previous Page" [disabled] [ref=e118]:

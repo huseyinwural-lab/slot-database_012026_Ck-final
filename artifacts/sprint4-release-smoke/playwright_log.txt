@@ -1,7 +1,7 @@
 
 Running 1 test using 1 worker
 
-  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (12.3s)
+  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (12.6s)
 
 
   1) [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
@@ -18,14 +18,14 @@ Running 1 test using 1 worker
     [2m  - waiting for locator('text=Bank Account Details')[22m
 
 
-      106 |
-      107 |     // Wait for Bank Account section
-    > 108 |     await expect(page.locator('text=Bank Account Details')).toBeVisible();
+       99 |     // Wait for UNIQUE element of Withdrawal Form
+      100 |     // "Bank Account Details" is strictly in WithdrawalForm.jsx
+    > 101 |     await expect(page.locator('text=Bank Account Details')).toBeVisible({ timeout: 10000 });
           |                                                             ^
-      109 |
-      110 |     // Fill Bank Details (generic text inputs sequence)
-      111 |     // 1. Account Holder
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:108:61
+      102 |     
+      103 |     // Now we are sure we are on the form.
+      104 |     // Amount
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:101:61
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
