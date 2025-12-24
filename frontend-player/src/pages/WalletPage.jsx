@@ -6,6 +6,8 @@ import {
   Wallet, ArrowUpRight, ArrowDownLeft, History, CreditCard, DollarSign, 
   ChevronLeft, ChevronRight, RefreshCw, Copy, AlertCircle 
 } from 'lucide-react';
+import { WithdrawalForm } from '../components/WithdrawalForm';
+import { WithdrawalStatus } from '../components/WithdrawalStatus';
 
 const WalletPage = () => {
   const [activeTab, setActiveTab] = useState('deposit');
@@ -22,11 +24,11 @@ const WalletPage = () => {
   // Form States
   const [depositAmount, setDepositAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('stripe');
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [withdrawAddress, setWithdrawAddress] = useState('');
+  // Withdrawal State
+  const [lastPayoutId, setLastPayoutId] = useState(null);
+  
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState(null);
-  const [actionStatus, setActionStatus] = useState({});
 
   const PLAYER_SCOPE = 'player';
 
@@ -163,50 +165,15 @@ const WalletPage = () => {
     }
   };
 
-  const handleWithdraw = async (e) => {
-    e.preventDefault();
-    setProcessing(true);
-    setMessage(null);
+  // Get Player ID
+  const storedPlayer = localStorage.getItem('player_user');
+  const player = storedPlayer ? JSON.parse(storedPlayer) : null;
+  const playerId = player?.id;
+  const playerEmail = player?.email || 'user@example.com';
 
-    const storedPlayer = localStorage.getItem('player_user');
-    const player = storedPlayer ? JSON.parse(storedPlayer) : null;
-    const playerId = player?.id || 'self';
-    const scope = PLAYER_SCOPE;
-    const action = 'withdraw';
-
-    const key = `${scope}:${playerId}:${action}`;
-    setActionStatus((prev) => ({ ...prev, [key]: { status: 'in_flight' } }));
-
-    try {
-      await callMoneyAction({
-        scope,
-        id: playerId,
-        action,
-        requestFn: (idemKey) =>
-          api.post('/player/wallet/withdraw', {
-            amount: parseFloat(withdrawAmount),
-            method: 'crypto',
-            address: withdrawAddress,
-          }, {
-            headers: { 'Idempotency-Key': idemKey },
-          }),
-        onStatus: (status) => {
-          setActionStatus((prev) => ({
-            ...prev,
-            [key]: { status: status.status || status, message: status.message },
-          }));
-        },
-      });
-      setMessage({ type: 'success', text: 'Withdrawal requested successfully!' });
-      setWithdrawAmount('');
-      setWithdrawAddress('');
-      fetchWalletData(1);
-    } catch (err) {
-      console.error(err);
-      setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
-    } finally {
-      setProcessing(false);
-    }
+  const handlePayoutSuccess = (data) => {
+      setLastPayoutId(data.payout_id);
+      fetchWalletData(1); // Refresh history
   };
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
@@ -355,42 +322,24 @@ const WalletPage = () => {
                 </p>
               </form>
             ) : (
-              <form onSubmit={handleWithdraw} className="space-y-4">
-                <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <ArrowUpRight className="text-red-500" /> Request Withdrawal
-                </h3>
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1">Amount ($)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                    <input 
-                      type="number" 
-                      min="10" 
-                      max={balance.available_real}
-                      step="0.01"
-                      value={withdrawAmount}
-                      onChange={e => setWithdrawAmount(e.target.value)}
-                      className="w-full bg-black/20 border border-white/10 rounded-lg pl-10 p-3 focus:border-primary focus:outline-none transition-colors"
-                      placeholder={`Max $${(balance.available_real || 0).toFixed(2)}`}
-                      required 
-                    />
-                  </div>
+              // WITHDRAW TAB - INTEGRATED WITHDRAWAL FORM
+              lastPayoutId ? (
+                <div className="space-y-4">
+                  <WithdrawalStatus payoutId={lastPayoutId} />
+                  <button 
+                    onClick={() => setLastPayoutId(null)}
+                    className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-2 rounded-lg transition-colors"
+                  >
+                    Start New Withdrawal
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1">Wallet Address / IBAN</label>
-                  <input 
-                    type="text" 
-                    value={withdrawAddress}
-                    onChange={e => setWithdrawAddress(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:border-primary focus:outline-none transition-colors"
-                    placeholder="TR..."
-                    required 
-                  />
-                </div>
-                <button type="submit" disabled={processing} className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50">
-                  {processing ? 'Submitting...' : 'Request Payout'}
-                </button>
-              </form>
+              ) : (
+                <WithdrawalForm 
+                  playerId={playerId} 
+                  playerEmail={playerEmail} 
+                  onSuccess={handlePayoutSuccess}
+                />
+              )
             )}
           </div>
         </div>
@@ -440,7 +389,7 @@ const WalletPage = () => {
                         <td className="px-4 py-3">
                           <span className={`text-[10px] px-2 py-0.5 rounded-full inline-block uppercase tracking-wide ${
                             tx.state === 'completed' || tx.state === 'paid' ? 'bg-green-500/20 text-green-400' : 
-                            tx.state === 'pending' || tx.state === 'requested' || tx.state === 'created' ? 'bg-yellow-500/20 text-yellow-400' : 
+                            tx.state === 'pending' || tx.state === 'requested' || tx.state === 'created' || tx.state === 'payout_submitted' ? 'bg-yellow-500/20 text-yellow-400' : 
                             'bg-red-500/20 text-red-400'
                           }`}>
                             {tx.state}
