@@ -30,6 +30,29 @@ async def test_payout_real_provider_adyen_flow(client: AsyncClient, admin_token,
         stmt = select(Tenant).where(Tenant.id == "default_casino")
         tenant = (await session.execute(stmt)).scalars().first()
     
+    # Setup Admin & Token for this Tenant
+    from app.models.sql_models import AdminUser
+    from app.utils.auth import create_access_token
+    from datetime import timedelta
+    
+    admin = AdminUser(
+        email="payout_admin@test.com",
+        username="payout_admin",
+        full_name="Payout Admin",
+        role="Admin",
+        tenant_id=tenant.id,
+        password_hash="mock_hash",
+        status="active"
+    )
+    session.add(admin)
+    await session.commit()
+    await session.refresh(admin)
+    
+    admin_token = create_access_token(
+        data={"sub": admin.id, "email": admin.email, "tenant_id": admin.tenant_id, "role": admin.role},
+        expires_delta=timedelta(days=1)
+    )
+
     # Create Player
     player = Player(
         email="payout_real@test.com",
