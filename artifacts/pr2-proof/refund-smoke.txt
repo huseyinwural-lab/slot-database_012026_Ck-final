@@ -12,14 +12,14 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 > Content-Length: 41
 > 
 } [41 bytes data]
-< HTTP/1.1 200 OK
-< date: Wed, 24 Dec 2025 00:35:57 GMT
+< HTTP/1.1 500 Internal Server Error
+< date: Wed, 24 Dec 2025 00:36:24 GMT
 < server: uvicorn
-< content-length: 68
+< content-length: 33
 < content-type: application/json
-< x-request-id: 024664ca-4528-4680-89a4-13611ec899f4
+< x-request-id: c996989c-b6c4-4cdd-91bb-0dc5c8f0ee0d
 < 
-{ [68 bytes data]
-100   109  100    68  100    41   3479   2098 --:--:-- --:--:-- --:--:--  5736
+{ [33 bytes data]
+100    74  100    33  100    41   2691   3343 --:--:-- --:--:-- --:--:--  6166
 * Connection #0 to host localhost left intact
-{"status":"reversed","tx_id":"e3dac1da-90c9-4b48-b41b-28bac985eedc"}
+{"detail":"Ledger update failed"}
