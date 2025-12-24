@@ -1,7 +1,7 @@
 
 Running 1 test using 1 worker
 
-  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (12.3s)
+  ✘  1 [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid (12.5s)
 
 
   1) [chromium] › tests/release-smoke-money-loop.spec.ts:4:7 › Release Smoke Money Loop › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid 
@@ -18,14 +18,14 @@ Running 1 test using 1 worker
     [2m  - waiting for locator('input[placeholder="100.00"]')[22m
 
 
-      85 |     // Amount
-      86 |     const amountInput = page.locator('input[placeholder="100.00"]');
-    > 87 |     await expect(amountInput).toBeVisible();
-         |                               ^
-      88 |     await amountInput.fill('50');
-      89 |
-      90 |     // Fill Bank Details
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:87:31
+      101 |     // Amount
+      102 |     const amountInput = page.locator('input[placeholder="100.00"]');
+    > 103 |     await expect(amountInput).toBeVisible();
+          |                               ^
+      104 |     await amountInput.fill('50');
+      105 |
+      106 |     // Fill Bank Details
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:103:31
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
