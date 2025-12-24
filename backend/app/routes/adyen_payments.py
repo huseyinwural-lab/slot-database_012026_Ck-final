@@ -269,6 +269,59 @@ async def test_trigger_webhook(
     if tx.status == "completed":
         return {"status": "already_completed"}
 
+    # Handle Payout Simulation
+    if payload.get("type") == "payout":
+        psp_reference = payload.get("psp_reference") or f"sim_payout_{uuid.uuid4()}"
+        
+        # Look up the Attempt by withdraw_tx_id = tx_id
+        from app.models.sql_models import PayoutAttempt
+        stmt = select(PayoutAttempt).where(
+            PayoutAttempt.withdraw_tx_id == tx_id
+        ).order_by(PayoutAttempt.created_at.desc())
+        attempt = (await session.execute(stmt)).scalars().first()
+        
+        if not attempt:
+             # If attempt missing (maybe manual curl test?), create one or fail?
+             # For E2E robustness, if we can't find attempt, we might fail.
+             # But let's log warning and try to proceed if possible? 
+             # No, ledger needs idempotency which usually links to attempt.
+             raise HTTPException(status_code=404, detail="Payout Attempt not found for this TX")
+
+        if success:
+             if tx and tx.status != "completed":
+                 await apply_wallet_delta_with_ledger(
+                    session,
+                    tenant_id=tx.tenant_id,
+                    player_id=tx.player_id,
+                    tx_id=tx.id,
+                    event_type="withdrawal_succeeded",
+                    delta_available=0.0,
+                    delta_held=-tx.amount, 
+                    currency=tx.currency,
+                    idempotency_key=f"adyen:{psp_reference}:payout",
+                    provider="adyen",
+                    provider_ref=psp_reference,
+                    provider_event_id=psp_reference
+                )
+                 tx.status = "completed"
+                 tx.state = "paid"
+                 attempt.status = "success"
+                 session.add(tx)
+                 session.add(attempt)
+                 await session.commit()
+                 return {"status": "simulated_payout_success"}
+        else:
+             if tx:
+                 tx.status = "payout_failed"
+                 tx.state = "payout_failed"
+                 attempt.status = "failed"
+                 session.add(tx)
+                 session.add(attempt)
+                 await session.commit()
+                 return {"status": "simulated_payout_failed"}
+        return {"status": "payout_processed"}
+
+    # Handle Deposit Simulation (Default)
     if success:
         # Generate a fake psp reference
         psp_reference = f"sim_{uuid.uuid4()}"
