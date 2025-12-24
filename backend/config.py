@@ -85,6 +85,7 @@ class Settings(BaseSettings):
     webhook_signature_enforced: bool = False
     webhook_secret_mockpsp: str = "changeme-mockpsp-secret"
     stripe_api_key: Optional[str] = None
+    stripe_webhook_secret: Optional[str] = None
     
     # Adyen Config
     adyen_api_key: Optional[str] = None
