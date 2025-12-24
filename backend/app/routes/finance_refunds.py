@@ -65,7 +65,7 @@ async def refund_deposit(
             currency=tx.currency,
             idempotency_key=f"refund:{tx.id}",
             provider=tx.provider,
-            provider_ref=tx.provider_ref,
+            provider_ref=tx.provider_event_id, # Use provider_event_id as ref
             provider_event_id=f"refund_req_{uuid.uuid4()}" # Unique event for the refund action
         )
     except Exception as e:
