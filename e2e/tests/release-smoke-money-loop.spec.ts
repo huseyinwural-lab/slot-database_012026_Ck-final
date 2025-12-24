@@ -68,23 +68,18 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     let depositTxId;
     
     // Trigger Deposit (Adyen)
-    // Setup listener before action
-    const depResponsePromise = page.waitForResponse(resp => 
-        resp.url().includes('/api/v1/payments/adyen/checkout/session') && resp.status() === 200
-    );
-
     await page.click('button:has-text("Adyen (All Methods)")');
     await page.fill('input[placeholder="Min $10.00"]', '100');
     await page.click('button:has-text("Pay with Adyen")');
     
-    const depResponse = await depResponsePromise;
-    const depJson = await depResponse.json();
-    const redirectUrl = depJson.url;
+    // Wait for redirect to happen and capture URL
+    // This avoids "Protocol error" when trying to read response body of a request 
+    // that triggered an immediate navigation.
+    await expect.poll(() => page.url(), { timeout: 15000 }).toContain('tx_id=');
     
-    // Extract ID from URL
-    const urlObj = new URL(redirectUrl);
-    depositTxId = urlObj.searchParams.get('tx_id');
-    expect(depositTxId, "Deposit TX ID not found in API response").toBeTruthy();
+    const currentUrl = new URL(page.url());
+    depositTxId = currentUrl.searchParams.get('tx_id');
+    expect(depositTxId, "Deposit TX ID not found in Page URL").toBeTruthy();
 
     // Simulate Webhook (Backend state change)
     await apiContext.post(`/api/v1/payments/adyen/test-trigger-webhook`, {
