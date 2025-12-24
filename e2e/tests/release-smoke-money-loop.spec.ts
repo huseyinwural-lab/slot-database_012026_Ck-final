@@ -104,26 +104,28 @@ test.describe('Release Smoke Money Loop', () => {
     await expect(amountInput).toBeVisible();
     await amountInput.fill('50');
 
-    // Fill Bank Details (generic text inputs)
-    // Account Holder Name
-    await page.locator('input[name="accountHolderName"], input[placeholder="John Doe"]').first().fill('Smoke Test User');
+    // Wait for Bank Account section
+    await expect(page.locator('text=Bank Account Details')).toBeVisible();
+
+    // Fill Bank Details (generic text inputs sequence)
+    // 1. Account Holder
+    const textInputs = page.locator('input[type="text"]');
+    await textInputs.nth(0).fill('Smoke Test User');
     
-    // Account Number
-    await page.locator('input[name="accountNumber"], input[placeholder="123456789"]').first().fill('123456789');
+    // 2. Account Number
+    await textInputs.nth(1).fill('123456789');
     
-    // Bank Code
-    await page.locator('input[name="bankCode"], input[placeholder="021000021"]').first().fill('001');
+    // 3. Bank Code
+    await textInputs.nth(2).fill('001');
     
-    // Branch Code
-    await page.locator('input[name="branchCode"], input[placeholder="001"]').first().fill('ABC');
+    // 4. Branch Code
+    await textInputs.nth(3).fill('ABC');
     
-    // Country/Currency might be inputs or selects.
-    // If they are inputs (as per form code):
-    const countryInput = page.locator('input[name="countryCode"]');
-    if (await countryInput.count() > 0) await countryInput.fill('US');
+    // 5. Country (might be prefilled or input)
+    if (await textInputs.count() > 4) await textInputs.nth(4).fill('US');
     
-    const currencyInput = page.locator('input[name="currencyCode"]');
-    if (await currencyInput.count() > 0) await currencyInput.fill('USD');
+    // 6. Currency
+    if (await textInputs.count() > 5) await textInputs.nth(5).fill('USD');
 
     await page.click('button:has-text("Request Withdrawal")');
     
