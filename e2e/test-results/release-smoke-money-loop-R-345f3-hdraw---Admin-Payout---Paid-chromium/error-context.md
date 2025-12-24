@@ -19,7 +19,7 @@
           - /url: /promotions
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: rcuser1766564436217
+          - generic [ref=e17]: rcuser1766564489840
           - generic [ref=e18]: $0.00
         - button [ref=e19] [cursor=pointer]:
           - img [ref=e20]
@@ -36,7 +36,7 @@
       - generic [ref=e39]:
         - generic [ref=e40]:
           - generic [ref=e41]: Available Balance
-          - generic [ref=e42]: $0.00
+          - generic [ref=e42]: $100.00
           - generic [ref=e43]:
             - img [ref=e44]
             - text: Ready to play or withdraw
@@ -49,77 +49,84 @@
         - generic [ref=e52]:
           - img [ref=e54]
           - generic [ref=e58]: Total Balance
-          - generic [ref=e59]: $0.00
+          - generic [ref=e59]: $100.00
           - generic [ref=e60]: Net Asset Value
       - generic [ref=e61]:
         - generic [ref=e62]:
           - generic [ref=e63]:
             - button "Deposit" [ref=e64] [cursor=pointer]
             - button "Withdraw" [ref=e65] [cursor=pointer]
-          - generic [ref=e66]:
-            - generic [ref=e67]:
-              - img [ref=e68]
-              - text: Adyen Payment Authorised! Balance will update shortly.
-            - generic [ref=e70]:
-              - heading "Deposit Funds" [level=3] [ref=e71]:
-                - img [ref=e72]
-                - text: Deposit Funds
-              - generic [ref=e75]:
-                - generic [ref=e76]: Payment Method
-                - generic [ref=e77]:
-                  - button "Credit Card (Stripe)" [ref=e78] [cursor=pointer]
-                  - button "Adyen (All Methods)" [ref=e79] [cursor=pointer]
-              - generic [ref=e80]:
-                - generic [ref=e81]: Amount ($)
-                - generic [ref=e82]:
-                  - img [ref=e83]
-                  - spinbutton [ref=e85]
-              - generic [ref=e86]:
-                - button "$50" [ref=e87] [cursor=pointer]
-                - button "$100" [ref=e88] [cursor=pointer]
-                - button "$500" [ref=e89] [cursor=pointer]
-              - button "Pay with Stripe" [ref=e90] [cursor=pointer]
-              - paragraph [ref=e91]:
-                - img [ref=e92]
-                - text: Secure Payment via Stripe
-        - generic [ref=e94]:
-          - generic [ref=e95]:
-            - heading "Transaction History" [level=3] [ref=e96]:
-              - img [ref=e97]
+          - generic [ref=e67]:
+            - heading "Request Withdrawal" [level=3] [ref=e68]
+            - generic [ref=e69]:
+              - img [ref=e70]
+              - text: Not Found
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - generic [ref=e74]: Withdrawal Amount
+                - spinbutton [ref=e75]: "50"
+              - generic [ref=e76]:
+                - heading "Bank Account Details" [level=4] [ref=e77]
+                - generic [ref=e78]:
+                  - generic [ref=e79]:
+                    - generic [ref=e80]: Account Holder Name
+                    - textbox "John Doe" [ref=e81]: Smoke User
+                  - generic [ref=e82]:
+                    - generic [ref=e83]: Account Number
+                    - textbox "123456789" [ref=e84]: "123456"
+                  - generic [ref=e85]:
+                    - generic [ref=e86]:
+                      - generic [ref=e87]: Bank Code
+                      - textbox "021000021" [ref=e88]: "001"
+                    - generic [ref=e89]:
+                      - generic [ref=e90]: Branch Code
+                      - textbox "001" [ref=e91]: ABC
+                  - generic [ref=e92]:
+                    - generic [ref=e93]:
+                      - generic [ref=e94]: Country
+                      - textbox [ref=e95]: US
+                    - generic [ref=e96]:
+                      - generic [ref=e97]: Currency
+                      - textbox [ref=e98]: USD
+              - button "Request Withdrawal" [ref=e99] [cursor=pointer]
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - heading "Transaction History" [level=3] [ref=e102]:
+              - img [ref=e103]
               - text: Transaction History
-            - generic [ref=e101]: Showing 1 records
-          - table [ref=e104]:
-            - rowgroup [ref=e105]:
-              - row "Type Amount State Date ID" [ref=e106]:
-                - columnheader "Type" [ref=e107]
-                - columnheader "Amount" [ref=e108]
-                - columnheader "State" [ref=e109]
-                - columnheader "Date" [ref=e110]
-                - columnheader "ID" [ref=e111]
-            - rowgroup [ref=e112]:
-              - row "deposit +$100.00 pending_provider 12/24/2025, 8:20:38 AM 612f37cd..." [ref=e113]:
-                - cell "deposit" [ref=e114]:
-                  - generic [ref=e115]:
-                    - img [ref=e116]
-                    - generic [ref=e119]: deposit
-                - cell "+$100.00" [ref=e120]
-                - cell "pending_provider" [ref=e121]:
-                  - generic [ref=e122]: pending_provider
-                - cell "12/24/2025, 8:20:38 AM" [ref=e123]
-                - cell "612f37cd..." [ref=e124]:
-                  - button "612f37cd..." [ref=e125] [cursor=pointer]:
-                    - text: 612f37cd...
-                    - img [ref=e126]
-          - generic [ref=e129]:
-            - button "Previous Page" [disabled] [ref=e130]:
-              - img [ref=e131]
+            - generic [ref=e107]: Showing 1 records
+          - table [ref=e110]:
+            - rowgroup [ref=e111]:
+              - row "Type Amount State Date ID" [ref=e112]:
+                - columnheader "Type" [ref=e113]
+                - columnheader "Amount" [ref=e114]
+                - columnheader "State" [ref=e115]
+                - columnheader "Date" [ref=e116]
+                - columnheader "ID" [ref=e117]
+            - rowgroup [ref=e118]:
+              - row "deposit +$100.00 completed 12/24/2025, 8:21:31 AM 50862268..." [ref=e119]:
+                - cell "deposit" [ref=e120]:
+                  - generic [ref=e121]:
+                    - img [ref=e122]
+                    - generic [ref=e125]: deposit
+                - cell "+$100.00" [ref=e126]
+                - cell "completed" [ref=e127]:
+                  - generic [ref=e128]: completed
+                - cell "12/24/2025, 8:21:31 AM" [ref=e129]
+                - cell "50862268..." [ref=e130]:
+                  - button "50862268..." [ref=e131] [cursor=pointer]:
+                    - text: 50862268...
+                    - img [ref=e132]
+          - generic [ref=e135]:
+            - button "Previous Page" [disabled] [ref=e136]:
+              - img [ref=e137]
               - text: Previous
-            - generic [ref=e133]: Page 1 of 1
-            - button "Next Page" [disabled] [ref=e134]:
+            - generic [ref=e139]: Page 1 of 1
+            - button "Next Page" [disabled] [ref=e140]:
               - text: Next
-              - img [ref=e135]
-  - contentinfo [ref=e137]:
-    - generic [ref=e138]:
-      - paragraph [ref=e139]: © 2025 CasinoLobby. All rights reserved.
-      - paragraph [ref=e140]: Responsible Gaming | 18+
+              - img [ref=e141]
+  - contentinfo [ref=e143]:
+    - generic [ref=e144]:
+      - paragraph [ref=e145]: © 2025 CasinoLobby. All rights reserved.
+      - paragraph [ref=e146]: Responsible Gaming | 18+
 ```
