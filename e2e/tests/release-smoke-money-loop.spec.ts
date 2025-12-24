@@ -130,7 +130,7 @@ test.describe('Release Smoke Money Loop', () => {
     await page.click('button:has-text("Request Withdrawal")');
     
     // 7. Verify Toast/Success
-    await expect(page.locator('text=submitted successfully')).toBeVisible();
+    await expect(page.locator('text=Withdrawal submitted')).toBeVisible();
     
     // Get Withdraw TX ID (from response or history)
     // We can query API or check UI.
