@@ -32,9 +32,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             is_dev = False
 
         login_limit = (100, 60.0) if is_dev else (5, 60.0)
+        webhook_limit = (1000, 60.0) # Higher limit for webhooks (e.g. 1000/min)
         
         self._limits = {
             "/api/v1/auth/login": login_limit,
+            "/api/v1/payments/stripe/webhook": webhook_limit,
+            "/api/v1/payments/adyen/webhook": webhook_limit,
         }
 
     def _get_client_ip(self, request: Request) -> str:
