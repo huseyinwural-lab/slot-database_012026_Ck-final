@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 from unittest.mock import patch
 from app.models.sql_models import Transaction, PayoutAttempt
+from sqlmodel import select
 from config import settings
 
 @pytest.mark.asyncio
