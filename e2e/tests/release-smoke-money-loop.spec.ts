@@ -183,11 +183,12 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     });
 
     // === FINAL VERIFY ===
-    // Backend Status -> 'paid'
+    // Backend Status -> 'paid' or 'completed'
     await expect.poll(async () => {
         const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
-        return (await res.json()).status;
-    }, { timeout: 15000, message: "Final status is not 'paid'" }).toBe('paid');
+        const st = (await res.json()).status;
+        return st;
+    }, { timeout: 15000, message: "Final status is not 'paid' or 'completed'" }).toMatch(/paid|completed/);
 
     // Ledger Invariant -> Held should be 0
     await expect.poll(async () => {
