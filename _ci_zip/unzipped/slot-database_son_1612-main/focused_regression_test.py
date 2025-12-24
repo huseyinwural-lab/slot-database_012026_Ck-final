@@ -13,7 +13,7 @@ import subprocess
 import os
 import sys
 
-BASE_URL = "https://pay-processor-2.preview.emergentagent.com"
+BASE_URL = "https://securepay-13.preview.emergentagent.com"
 
 def test_alembic_baseline_migration():
     """Test 1: Validate Alembic baseline migration contains op.create_table(...) calls"""

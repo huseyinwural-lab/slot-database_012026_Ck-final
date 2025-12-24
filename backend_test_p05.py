@@ -21,7 +21,7 @@ import os
 import uuid
 
 # Use the production backend URL from frontend env
-BACKEND_URL = "https://pay-processor-2.preview.emergentagent.com"
+BACKEND_URL = "https://securepay-13.preview.emergentagent.com"
 
 class P05TestSuite:
     def __init__(self):

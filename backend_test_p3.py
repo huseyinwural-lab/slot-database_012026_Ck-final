@@ -18,7 +18,7 @@ import yaml
 from typing import Dict, Any, Optional
 
 # Configuration - Use frontend .env for external URL
-BASE_URL = "https://pay-processor-2.preview.emergentagent.com"  # Default
+BASE_URL = "https://securepay-13.preview.emergentagent.com"  # Default
 try:
     with open("/app/frontend/.env", "r") as f:
         for line in f:
