@@ -66,21 +66,20 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     let balance = await getPlayerBalance(apiContext, playerToken);
     const initialAvailable = balance.available_real || 0;
 
-    // Trigger Deposit (Adyen) with explicit wait for API response
     // We intercept the API call to capture the 'url' from response body directly
     // This avoids relying on UI redirect which might be blocked by headless/browser context or timing
     let depositTxId;
-    const [depResponse] = await Promise.all([
-        page.waitForResponse(resp => 
-            resp.url().includes('/api/v1/payments/adyen/checkout/session') && resp.status() === 200
-        ),
-        (async () => {
-            await page.click('button:has-text("Adyen (All Methods)")');
-            await page.fill('input[placeholder="Min $10.00"]', '100');
-            await page.click('button:has-text("Pay with Adyen")');
-        })()
-    ]);
     
+    // Setup listener before action
+    const depResponsePromise = page.waitForResponse(resp => 
+        resp.url().includes('/api/v1/payments/adyen/checkout/session') && resp.status() === 200
+    );
+
+    await page.click('button:has-text("Adyen (All Methods)")');
+    await page.fill('input[placeholder="Min $10.00"]', '100');
+    await page.click('button:has-text("Pay with Adyen")');
+    
+    const depResponse = await depResponsePromise;
     const depJson = await depResponse.json();
     // depJson = { url: "..." }
     const redirectUrl = depJson.url;
