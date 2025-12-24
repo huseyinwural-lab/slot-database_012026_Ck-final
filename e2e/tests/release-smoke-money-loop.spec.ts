@@ -19,7 +19,7 @@ test.describe('Release Smoke Money Loop', () => {
     });
     expect(regRes.ok(), "Player registration failed").toBeTruthy();
     const playerData = await regRes.json();
-    const playerId = playerData.id || playerData.player.id; // Adjust based on actual response
+    const playerId = playerData.player_id || playerData.id; // Updated key
 
     // === PART B: DEPOSIT ===
     // 2. Login Player
