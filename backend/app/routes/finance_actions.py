@@ -12,6 +12,7 @@ from app.utils.tenant import get_current_tenant_id
 from app.services.audit import audit
 from app.services.psp import get_psp
 
+from app.services.metrics import metrics
 from config import settings
 router = APIRouter(prefix="/api/v1/finance-actions", tags=["finance_actions"])
 import logging
@@ -146,6 +147,7 @@ async def retry_payout(
             payout_resp = await adyen_service.submit_payout(
                 amount=tx.amount,
                 currency=tx.currency,
+            metrics.record_payout_attempt()
                 reference=payout_ref,
                 shopper_reference=player.id,
                 shopper_email=player.email,

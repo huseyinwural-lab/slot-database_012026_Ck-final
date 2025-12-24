@@ -109,6 +109,7 @@ async def adyen_webhook(
     # For now, we trust verify_webhook_signature stub
     if not adyen.verify_webhook_signature(body, ""):
          raise HTTPException(status_code=401, detail="WEBHOOK_SIGNATURE_INVALID")
+         metrics.record_webhook_signature_failure("adyen")
     
     # Basic validation structure for Adyen
     notification_items = body.get("notificationItems", [])
@@ -138,6 +139,7 @@ async def adyen_webhook(
              if tx.status == "completed":
                  logger.info(f"Adyen Webhook: Replay detected for {tx_id}")
                  # No-op 200
+                 metrics.record_webhook_replay()
                  continue
 
              if success:
@@ -196,6 +198,7 @@ async def adyen_webhook(
              if tx.status == "completed":
                  logger.info(f"Adyen Webhook: Payout already completed {tx.id}")
                  continue
+                 metrics.record_webhook_replay()
 
              if success:
                  # Ledger: Apply 'withdrawal_succeeded' (Unlock held funds and reduce balance permanently)
@@ -221,6 +224,7 @@ async def adyen_webhook(
                 )
                  tx.status = "completed"
                  tx.state = "paid"
+                 metrics.record_payout_result(True)
                  attempt.status = "success"
                  
              else:
@@ -232,6 +236,7 @@ async def adyen_webhook(
                  # Admin can 'Reject' to refund, or 'Retry'.
                  tx.status = "payout_failed"
                  tx.state = "payout_failed"
+                 metrics.record_payout_result(False)
                  attempt.status = "failed"
                  attempt.error_code = req_item.get("reason", "Payout Failed")
              
