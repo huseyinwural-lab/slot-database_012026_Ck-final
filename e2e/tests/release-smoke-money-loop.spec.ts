@@ -97,21 +97,23 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     const tab = page.locator('button:has-text("Withdraw")');
     if (await tab.count() > 0) await tab.click();
     
-    await expect(page.locator('text=Bank Account Details')).toBeVisible();
+    await expect(page.locator('text=Bank Account Details')).toBeVisible({ timeout: 10000 });
 
-    // Fill Form
-    await page.locator('input[type="number"]').first().fill('50');
-    // Generic Inputs
-    const inputs = page.locator('input[type="text"]');
-    await inputs.nth(0).fill('Smoke User'); 
-    await inputs.nth(1).fill('123456');
-    await inputs.nth(2).fill('001');
-    await inputs.nth(3).fill('ABC');
-    if (await inputs.count() > 4) await inputs.nth(4).fill('US');
-    if (await inputs.count() > 5) await inputs.nth(5).fill('USD');
+    // Fill Form with Robust Selectors
+    await page.fill('input[name="amount"]', '50');
+    await page.fill('input[name="accountHolderName"]', 'Smoke User');
+    await page.fill('input[name="accountNumber"]', '123456789');
+    await page.fill('input[name="bankCode"]', '021000021');
+    await page.fill('input[name="branchCode"]', '001');
+    await page.fill('input[name="countryCode"]', 'US');
+    await page.fill('input[name="currencyCode"]', 'USD');
 
+    // Click and Wait for Success Message
     await page.click('button:has-text("Request Withdrawal")');
     
+    // This text comes from the component state after successful API call
+    await expect(page.locator('text=Withdrawal submitted')).toBeVisible({ timeout: 10000 });
+
     // Verify Invariant (Held 50) via API Polling
     // This implicitly confirms the withdrawal was created successfully
     await expect.poll(async () => {
