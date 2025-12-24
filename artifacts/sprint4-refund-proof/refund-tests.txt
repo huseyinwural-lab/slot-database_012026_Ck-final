@@ -1,0 +1,9 @@
+ImportError while loading conftest '/app/backend/tests/conftest.py'.
+tests/conftest.py:15: in <module>
+    from server import app
+server.py:98: in <module>
+    from app.routes import fraud_detection, email_notification, simulator, modules, crm, affiliates, support, risk, approvals, rg, cms, reports, logs, version as version_router, audit as audit_router, game_config, game_import, game_config_presets, robot, revenue, finance, finance_actions, feature_flags, simulation_lab, settings as settings_router, dashboard, tables, kill_switch, flags
+E     File "/app/backend/app/routes/finance_actions.py", line 150
+E       metrics.record_payout_attempt()
+E       ^^^^^^^^^^^^^
+E   SyntaxError: invalid syntax. Perhaps you forgot a comma?
