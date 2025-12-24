@@ -34,30 +34,24 @@ test.describe('Release Smoke Money Loop', () => {
     await page.click('button:has-text("Adyen (All Methods)")');
     await page.fill('input[placeholder="Min $10.00"]', '100'); // Deposit $100
     
-    // Capture TX ID from API call or URL
+    // Capture TX ID via request interception (more reliable if UI cleans URL)
     let depositTxId;
-    const depositRequestPromise = page.waitForRequest(req => 
-        req.url().includes('/api/v1/payments/adyen/checkout/session') && req.method() === 'POST'
-    );
+    const urlListener = request => {
+        const url = request.url();
+        if (url.includes('provider=adyen') && url.includes('tx_id')) {
+            const u = new URL(url);
+            depositTxId = u.searchParams.get('tx_id');
+        }
+    };
+    page.on('request', urlListener);
+
     await page.click('button:has-text("Pay with Adyen")');
-    const depositReq = await depositRequestPromise;
-    // The response is CheckoutSessionResponse, might not have TX ID directly in body?
-    // Wait, the redirect URL has it.
     
     // Wait for "Authorised" or redirect
     await expect(page.locator('text=Adyen Payment Authorised!')).toBeVisible({ timeout: 15000 });
     
-    // We need TX ID to simulate webhook. 
-    // In our implementation, `create_checkout_session` returns `{url: ...}`.
-    // The redirect URL contains `tx_id`.
-    // Let's get it from the URL of the page (if it redirected) or we need to spy the response.
-    // Actually `test-trigger-webhook` for deposit needs `tx_id`.
-    // Let's try to query it via backend API if we have admin access?
-    // Or simpler: The page URL often has it: `.../wallet?provider=adyen&tx_id=...`
-    const walletUrl = page.url();
-    const urlObj = new URL(walletUrl);
-    depositTxId = urlObj.searchParams.get('tx_id');
-    expect(depositTxId).toBeTruthy();
+    page.off('request', urlListener);
+    expect(depositTxId, "Failed to capture deposit TX ID").toBeTruthy();
 
     // 4. Simulate Deposit Webhook
     const depHookRes = await request.post(`${API_URL}/api/v1/payments/adyen/test-trigger-webhook`, {
