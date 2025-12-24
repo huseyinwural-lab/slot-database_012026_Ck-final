@@ -64,6 +64,7 @@ async def refund_deposit(
             result="rejected",
             details={"reason": "invalid_type", "type": tx.type}
         )
+        await session.commit()
         raise HTTPException(status_code=400, detail="Only deposits can be refunded")
     
     if tx.status == "reversed" or tx.state == "reversed":
@@ -81,6 +82,7 @@ async def refund_deposit(
             result="rejected",
             details={"reason": "invalid_state", "status": tx.status}
         )
+        await session.commit()
         raise HTTPException(status_code=400, detail="Transaction is not in completed state")
 
     # 3. Apply Reversal Ledger
