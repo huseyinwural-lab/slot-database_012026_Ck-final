@@ -8,19 +8,19 @@ Running 1 test using 1 worker
 
     [31mTest timeout of 90000ms exceeded.[39m
 
-    Error: page.fill: Test timeout of 90000ms exceeded.
+    Error: locator.fill: Test timeout of 90000ms exceeded.
     Call log:
-    [2m  - waiting for locator('input[name="amount"]')[22m
+    [2m  - waiting for getByLabel('Withdrawal Amount')[22m
 
 
       83 |     
-      84 |     // Fill Withdrawal Form
-    > 85 |     await page.fill('input[name="amount"]', '50');
-         |                ^
+      84 |     // Fill Withdrawal Form using Labels (more robust)
+    > 85 |     await page.getByLabel('Withdrawal Amount').fill('50');
+         |                                                ^
       86 |     // Fill Bank Details
-      87 |     await page.fill('input[name="accountHolderName"]', 'Smoke Test User');
-      88 |     await page.fill('input[name="accountNumber"]', '123456789');
-        at /app/e2e/tests/release-smoke-money-loop.spec.ts:85:16
+      87 |     await page.getByLabel('Account Holder Name').fill('Smoke Test User');
+      88 |     await page.getByLabel('Account Number').fill('123456789');
+        at /app/e2e/tests/release-smoke-money-loop.spec.ts:85:48
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/release-smoke-money-loop-R-15f28-hdraw---Admin-Payout---Paid-chromium/test-failed-1.png
