@@ -22,7 +22,7 @@
 2. **"Invite link copied!"** toast mesajını görmelisiniz
 3. Linki bir yere yapıştırın (örnek: notepad)
 
-**Link formatı:** `https://securepay-13.preview.emergentagent.com/accept-invite?token=ey...`
+**Link formatı:** `https://wallet-release.preview.emergentagent.com/accept-invite?token=ey...`
 
 ---
 
