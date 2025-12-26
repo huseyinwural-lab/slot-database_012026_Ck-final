@@ -24,28 +24,30 @@ async def run_smoke_tests():
     # Unique suffix
     run_id = str(uuid.uuid4())[:8]
     player_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc)
     
     async with engine.connect() as conn:
         try:
             # --- Setup Smoke Player ---
-            # Added ALL required fields to avoid IntegrityError
+            # Added ALL required fields including registered_at
             await conn.execute(text("""
                 INSERT INTO player (
                     id, tenant_id, username, email, password_hash, 
                     balance_real_available, balance_real_held, balance_real, balance_bonus, 
                     wagering_requirement, wagering_remaining, risk_score,
-                    status, kyc_status
+                    status, kyc_status, registered_at
                 )
                 VALUES (
                     :id, :tid, :user, :email, 'hash', 
                     0, 0, 0, 0, 
                     0, 0, 'low',
-                    'active', 'pending'
+                    'active', 'pending', :now
                 )
             """), {
                 "id": player_id, "tid": tenant_id, 
                 "user": f"smoke_{run_id}", 
-                "email": f"smoke_{run_id}@test.com"
+                "email": f"smoke_{run_id}@test.com",
+                "now": now
             })
             finance_log.append(f"Created Smoke Player: {player_id}")
             
@@ -53,10 +55,10 @@ async def run_smoke_tests():
             # 1. Deposit
             tx_dep_id = str(uuid.uuid4())
             await conn.execute(text("""
-                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key)
-                VALUES (:id, :tid, :pid, 'deposit', 100.0, 'USD', 'completed', 'completed', 'test_method', :ik)
+                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key, created_at, updated_at)
+                VALUES (:id, :tid, :pid, 'deposit', 100.0, 'USD', 'completed', 'completed', 'test_method', :ik, :now, :now)
             """), {
-                "id": tx_dep_id, "tid": tenant_id, "pid": player_id, "ik": f"smoke_dep_{run_id}"
+                "id": tx_dep_id, "tid": tenant_id, "pid": player_id, "ik": f"smoke_dep_{run_id}", "now": now
             })
             # Update Balance
             await conn.execute(text("UPDATE player SET balance_real_available = balance_real_available + 100 WHERE id = :id"), {"id": player_id})
@@ -65,19 +67,19 @@ async def run_smoke_tests():
             # 2. Withdraw
             tx_wd_id = str(uuid.uuid4())
             await conn.execute(text("""
-                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key)
-                VALUES (:id, :tid, :pid, 'withdrawal', 50.0, 'USD', 'pending', 'requested', 'bank', :ik)
+                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key, created_at, updated_at)
+                VALUES (:id, :tid, :pid, 'withdrawal', 50.0, 'USD', 'pending', 'requested', 'bank', :ik, :now, :now)
             """), {
-                "id": tx_wd_id, "tid": tenant_id, "pid": player_id, "ik": f"smoke_wd_{run_id}"
+                "id": tx_wd_id, "tid": tenant_id, "pid": player_id, "ik": f"smoke_wd_{run_id}", "now": now
             })
             await conn.execute(text("UPDATE player SET balance_real_available = balance_real_available - 50, balance_real_held = balance_real_held + 50 WHERE id = :id"), {"id": player_id})
             finance_log.append("Withdraw Request 50.0 USD: SUCCESS (Balances updated)")
             
             # 3. Ledger Entry (Simulated)
             await conn.execute(text("""
-                INSERT INTO ledgertransaction (id, tenant_id, player_id, type, amount, currency, status)
-                VALUES (:id, :tid, :pid, 'deposit', 100.0, 'USD', 'deposit_succeeded')
-            """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": player_id})
+                INSERT INTO ledgertransaction (id, tenant_id, player_id, type, amount, currency, status, created_at)
+                VALUES (:id, :tid, :pid, 'deposit', 100.0, 'USD', 'deposit_succeeded', :now)
+            """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": player_id, "now": now})
             finance_log.append("Ledger Entry: SUCCESS")
             
             # --- 4.2 Game Loop Smoke ---
@@ -87,23 +89,23 @@ async def run_smoke_tests():
             if not game_id:
                 game_id = str(uuid.uuid4())
                 await conn.execute(text("""
-                    INSERT INTO game (id, tenant_id, external_id, name, provider, category, is_active, provider_id)
-                    VALUES (:id, :tid, 'smoke_game', 'Smoke Slot', 'internal', 'slot', 1, 'int_1')
-                """), {"id": game_id, "tid": tenant_id})
+                    INSERT INTO game (id, tenant_id, external_id, name, provider, category, is_active, provider_id, created_at)
+                    VALUES (:id, :tid, 'smoke_game', 'Smoke Slot', 'internal', 'slot', 1, 'int_1', :now)
+                """), {"id": game_id, "tid": tenant_id, "now": now})
                 
             game_log.append(f"Selected Game: {game_id}")
             
             # 2. Bind Robot (Safe Insert)
             robot_id = str(uuid.uuid4())
             await conn.execute(text("""
-                INSERT INTO robotdefinition (id, name, config, config_hash, is_active)
-                VALUES (:id, :name, '{}', 'hash1', 1)
-            """), {"id": robot_id, "name": f"Smoke Robot {run_id}"})
+                INSERT INTO robotdefinition (id, name, config, config_hash, is_active, created_at, updated_at)
+                VALUES (:id, :name, '{}', 'hash1', 1, :now, :now)
+            """), {"id": robot_id, "name": f"Smoke Robot {run_id}", "now": now})
             
             await conn.execute(text("""
-                INSERT INTO gamerobotbinding (id, tenant_id, game_id, robot_id, is_enabled)
-                VALUES (:id, :tid, :gid, :rid, 1)
-            """), {"id": str(uuid.uuid4()), "tid": tenant_id, "gid": game_id, "rid": robot_id})
+                INSERT INTO gamerobotbinding (id, tenant_id, game_id, robot_id, is_enabled, created_at, effective_from)
+                VALUES (:id, :tid, :gid, :rid, 1, :now, :now)
+            """), {"id": str(uuid.uuid4()), "tid": tenant_id, "gid": game_id, "rid": robot_id, "now": now})
             
             game_log.append(f"Bound Robot {robot_id} to Game {game_id}: SUCCESS")
             
