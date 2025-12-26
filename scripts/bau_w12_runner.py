@@ -8,7 +8,7 @@ import json
 # Env
 BASE_URL = "http://localhost:8001/api/v1"
 ADMIN_EMAIL = "admin@casino.com"
-ADMIN_PASS = "admin123"
+ADMIN_PASS = "Admin123!"
 
 # Colors
 GREEN = "\033[92m"
