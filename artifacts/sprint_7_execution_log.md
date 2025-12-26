@@ -23,6 +23,11 @@
 
 [*] Verifying Critical Secrets (from Loaded Settings)...
     [WARN] STRIPE_API_KEY present but looks like Test Key (does not start with 'sk_live_').
+
+### T-15: Deploy & Smoke
+- **Status:** Started
+- **Action:** Executing `go_live_smoke.sh`
+
            Current Value: sk_test_em...
     [FAIL] STRIPE_WEBHOOK_SECRET is MISSING in Settings.
     [FAIL] ADYEN_API_KEY is MISSING in Settings.
