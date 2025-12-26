@@ -32,7 +32,8 @@ async def export_audit_log(target_date: str, output_dir: str = None, db_url: str
     
     # Parse date
     try:
-        start_dt = datetime.strptime(target_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        # Use naive datetime for query to be safe with SQLite default storage
+        start_dt = datetime.strptime(target_date, "%Y-%m-%d")
         end_dt = start_dt + timedelta(days=1)
     except ValueError:
         print("Invalid date format. Use YYYY-MM-DD.")
@@ -60,12 +61,18 @@ async def export_audit_log(target_date: str, output_dir: str = None, db_url: str
     chain_tail_hash = None
 
     async with engine.connect() as conn:
+        # We try strict comparison. SQLite '2025...' string vs :start param.
+        # If DB has ISO strings, we should pass ISO strings.
         query = text("""
             SELECT * FROM auditevent 
             WHERE timestamp >= :start AND timestamp < :end 
             ORDER BY timestamp ASC, sequence ASC
         """)
-        result = await conn.execute(query, {"start": start_dt, "end": end_dt})
+        # Pass strings explicitly if SQLite
+        if "sqlite" in url:
+             result = await conn.execute(query, {"start": start_dt.isoformat(), "end": end_dt.isoformat()})
+        else:
+             result = await conn.execute(query, {"start": start_dt, "end": end_dt})
         
         # Open Gzip file
         with gzip.open(local_jsonl, 'wt', encoding='utf-8') as f_out:
@@ -124,29 +131,6 @@ async def export_audit_log(target_date: str, output_dir: str = None, db_url: str
     manifest_bytes = json.dumps(manifest, sort_keys=True).encode()
     signature = hmac.new(secret, manifest_bytes, hashlib.sha256).hexdigest()
     
-    # Include signature in manifest? Or separate file? 
-    # Requirement: "...jsonl.gz.sig". 
-    # Usually sig is for the DATA file or the MANIFEST. 
-    # D1 said manifest.sig. D2 says jsonl.gz.sig.
-    # Let's sign the MANIFEST primarily as it contains the hash of data.
-    # But if we want to verify data stream without manifest, we sign data.
-    # Let's stick to signing the manifest content, but name it consistent with D2 spec or manifest.sig.
-    # D2 spec: ...jsonl.gz.sig (signature).
-    # If we sign the .gz file directly, it's safer.
-    # Let's sign the .gz file content for .jsonl.gz.sig.
-    
-    # Re-read gzip to sign it? Or use the sha256 we already computed?
-    # Signing the hash is standard. HMAC(secret, final_sha256).
-    # But let's sign the Manifest as the "Master Record".
-    # D2 Spec: manifest.json (contains signature). 
-    # Wait, Acceptance Criteria 1: "manifest.json içinde: ... signature ... var".
-    # So signature goes INSIDE manifest.
-    
-    manifest['signature'] = signature # Self-referential signature is tricky? 
-    # No, sign the *content* of manifest excluding signature field?
-    # Or simply: signature is HMAC(secret, file_sha256). 
-    # Let's do that. Signature covers the data integrity.
-    
     data_signature = hmac.new(secret, final_sha256.encode(), hashlib.sha256).hexdigest()
     manifest['signature'] = data_signature
     
@@ -171,7 +155,6 @@ async def export_audit_log(target_date: str, output_dir: str = None, db_url: str
             
     print("Upload complete.")
     
-    # Cleanup if using temp dir (unless user specified output dir for local keeping)
     if not output_dir:
         import shutil
         shutil.rmtree(temp_dir)
