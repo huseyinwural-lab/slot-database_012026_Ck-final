@@ -4,38 +4,12 @@ $ playwright test tests/robot-admin-ops.spec.ts --reporter=line
 Running 1 test using 1 worker
 
 [1A[2K[1/1] [chromium] › tests/robot-admin-ops.spec.ts:6:7 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify
-[1A[2K  1) [chromium] › tests/robot-admin-ops.spec.ts:6:7 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify 
+[1A[2K[chromium] › tests/robot-admin-ops.spec.ts:6:7 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify
+Spin Audit Robot ID: fb2f46f4-f629-4645-a80a-46d4482959df
 
-    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+[1A[2KExpected Cloned ID: fb2f46f4-f629-4645-a80a-46d4482959df
 
-    Received: [31mfalse[39m
+[1A[2KRobot Admin Ops PASS
 
-      29 |       data: { name_suffix: " (E2E Test)" }
-      30 |     });
-    > 31 |     expect(cloneRes.ok()).toBeTruthy();
-         |                           ^
-      32 |     const clonedRobot = await cloneRes.json();
-      33 |     
-      34 |     // Enable Cloned Robot
-        at /app/e2e/tests/robot-admin-ops.spec.ts:31:27
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
-    test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/trace.zip
-    Usage:
-
-        yarn playwright show-trace test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/trace.zip
-
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-
-[1A[2K  1 failed
-    [chromium] › tests/robot-admin-ops.spec.ts:6:7 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify 
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+[1A[2K  1 passed (2.2s)
+Done in 2.79s.
