@@ -122,6 +122,10 @@ app.include_router(game_config.router)
 app.include_router(game_import.router)
 app.include_router(game_config_presets.router)
 app.include_router(robot.router)
+app.include_router(robot.router)
+from app.routes import robots, math_assets
+app.include_router(robots.router)
+app.include_router(math_assets.router)
 app.include_router(revenue.router)
 from app.routes import finance_refunds
 app.include_router(finance_refunds.router)
