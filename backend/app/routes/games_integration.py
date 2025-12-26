@@ -14,6 +14,7 @@ async def provider_callback(
     payload: ProviderEvent,
     session: AsyncSession = Depends(get_session)
 ):
+from app.middleware.callback_security import verify_signature
     """
     Unified Callback Endpoint for Game Providers.
     Accepts BET/WIN/REFUND events.
