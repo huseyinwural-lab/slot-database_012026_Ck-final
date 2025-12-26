@@ -354,3 +354,30 @@ class FeatureFlag(SQLModel, table=True):
     description: str
     is_enabled: bool = False
     created_at: str = ""
+
+class LedgerTransaction(SQLModel, table=True):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    tenant_id: str = Field(index=True)
+    player_id: str = Field(index=True)
+    type: str # bet, win, deposit, withdraw
+    amount: float
+    currency: str = "USD"
+    status: str
+    direction: str # debit, credit
+    provider: Optional[str] = None
+    provider_ref: Optional[str] = None
+    balance_after: float = 0.0
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+
+class WalletBalance(SQLModel, table=True):
+    """Snapshot of wallet state for reconciliation/fast-read"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    tenant_id: str = Field(index=True)
+    player_id: str = Field(index=True)
+    currency: str = "USD"
+    balance_real_available: float = 0.0
+    balance_real_held: float = 0.0
+    balance_bonus: float = 0.0
+    balance_real_pending: float = 0.0
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+
