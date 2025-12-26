@@ -23,8 +23,8 @@ Establish the Golden Path for External Provider Integration and define the Table
 - **Audit:** Hand history auditing active.
 
 ## 📊 Artifacts
-- **Security Test:** `/app/artifacts/bau/week6/poker_security_tests.txt`
-- **E2E Flow:** `/app/artifacts/bau/week6/e2e_poker_provider_sandbox.txt`
+- **Security Test:** `/app/artifacts/bau/week4/poker_security_tests.txt`
+- **E2E Flow:** `/app/artifacts/bau/week4/e2e_poker_provider_sandbox.txt`
 - **Spec:** `/app/docs/game_engines/table_games_spec_v1.md`
 
 ## 🚀 Status
@@ -32,4 +32,4 @@ Establish the Golden Path for External Provider Integration and define the Table
 - **Table Strategy:** **APPROVED**.
 - **Security:** **HARDENED**.
 
-Ready for Week 5 execution.
+Ready for Week 5/6 execution.
