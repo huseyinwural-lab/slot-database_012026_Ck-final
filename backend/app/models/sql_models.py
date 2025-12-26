@@ -212,14 +212,8 @@ class AuditEvent(SQLModel, table=True):
 
     timestamp: datetime = Field(default_factory=lambda: datetime.utcnow(), index=True)
 
-class Affiliate(SQLModel, table=True):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(foreign_key="tenant.id", index=True)
-    username: str
-    email: str
-    commission_rate: float = 0.0
-    status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+# Affiliate moved to growth_models.py
+from app.models.growth_models import Affiliate
 
 
 class RiskRule(SQLModel, table=True):
