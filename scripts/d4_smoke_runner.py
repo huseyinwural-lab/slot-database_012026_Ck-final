@@ -113,8 +113,12 @@ async def run_smoke_tests():
             # 2. Bind Robot (Safe Insert)
             robot_id = str(uuid.uuid4())
             await conn.execute(text("""
-                INSERT INTO robotdefinition (id, name, config, config_hash, is_active, created_at, updated_at)
-                VALUES (:id, :name, '{}', 'hash1', 1, :now, :now)
+                INSERT INTO robotdefinition (
+                    id, name, config, config_hash, is_active, created_at, updated_at, schema_version
+                )
+                VALUES (
+                    :id, :name, '{}', 'hash1', 1, :now, :now, '1.0'
+                )
             """), {"id": robot_id, "name": f"Smoke Robot {run_id}", "now": now})
             
             await conn.execute(text("""
