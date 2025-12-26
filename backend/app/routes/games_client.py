@@ -9,7 +9,7 @@ from app.utils.auth_player import get_current_player
 from app.models.sql_models import Player
 import uuid
 
-router = APIRouter(prefix="/api/v1/games", tags=["games"])
+router = APIRouter(prefix="/api/v1/player/client-games", tags=["games"])
 
 @router.get("/", response_model=List[Game])
 async def list_games(

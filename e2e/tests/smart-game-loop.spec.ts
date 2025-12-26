@@ -28,15 +28,16 @@ test.describe('Smart Game Loop', () => {
 
     // 2. Launch Game (Classic 777 - has Robot)
     // First get games to find ID
-    const gamesRes = await apiContext.get('/api/v1/games', {
+    const gamesRes = await apiContext.get('/api/v1/player/client-games', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
-    const gamesData = await gamesRes.json();
-    const games = gamesData.items || gamesData;
-    const game = games.find(g => g.external_id === 'classic777');
+    const games = await gamesRes.json();
+    // games_client returns List[Game] directly (not wrapped in items)
+    const game = Array.isArray(games) ? games.find(g => g.external_id === 'classic777') : games.items?.find(g => g.external_id === 'classic777');
+    
     expect(game).toBeTruthy();
     
-    const launchRes = await apiContext.post('/api/v1/games/launch', {
+    const launchRes = await apiContext.post('/api/v1/player/client-games/launch', {
         data: { game_id: game.id, currency: 'USD' },
         headers: { 'Authorization': `Bearer ${token}` }
     });
