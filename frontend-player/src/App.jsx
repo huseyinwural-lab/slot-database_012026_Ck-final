@@ -17,6 +17,7 @@ function App() {
           <Route path="game/:id" element={<GameRoom />} />
           <Route path="wallet" element={<WalletPage />} />
         </Route>
+          <Route path="settings" element={<SettingsPanel />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<Navigate to="/" />} />
