@@ -85,6 +85,7 @@ async def review_document(
     doc_id: str,
     request: Request,
     payload: Dict = Body(...),
+    _ = Depends(feature_required("can_manage_kyc")),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
