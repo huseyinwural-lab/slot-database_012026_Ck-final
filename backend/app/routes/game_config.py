@@ -12,6 +12,7 @@ from app.utils.tenant import get_current_tenant_id
 from app.core.errors import AppError
 from app.models.robot_models import GameRobotBinding, RobotDefinition
 from app.services.audit import audit
+from app.utils.reason import require_reason
 import uuid
 
 router = APIRouter(prefix="/api/v1/games", tags=["game_config"])
@@ -37,6 +38,7 @@ async def update_game_config(
     game_id: str,
     request: Request,
     config: Dict[str, Any] = Body(...),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
@@ -47,6 +49,8 @@ async def update_game_config(
     game = res.scalars().first()
     if not game:
         raise HTTPException(404, "Game not found")
+
+    old_config = game.configuration
 
     # Versioning
     version_entry = GameConfigVersion(
@@ -62,6 +66,26 @@ async def update_game_config(
     game.configuration = config
     session.add(game)
     
+    # Audit
+    await audit.log_event(
+        session=session,
+        request_id=getattr(request.state, "request_id", str(uuid.uuid4())),
+        actor_user_id=current_admin.id,
+        actor_role=current_admin.role,
+        tenant_id=current_admin.tenant_id,
+        action="GAME_CONFIG_PUBLISH",
+        resource_type="game",
+        resource_id=game.id,
+        result="success",
+        reason=reason,
+        ip_address=getattr(request.state, "ip_address", None),
+        user_agent=getattr(request.state, "user_agent", None),
+        before=old_config,
+        after=config
+    )
+
+    await session.commit()
+    return {"message": "Config updated"}
 
 @router.get("/{game_id}/robot")
 async def get_game_robot(
@@ -90,8 +114,10 @@ async def get_game_robot(
 
 @router.post("/{game_id}/robot")
 async def bind_game_robot(
+    request: Request,
     game_id: str,
     payload: Dict[str, Any] = Body(...), # { robot_id: str }
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
@@ -109,6 +135,8 @@ async def bind_game_robot(
     # Disable old binding
     stmt = select(GameRobotBinding).where(GameRobotBinding.game_id == game_id, GameRobotBinding.is_enabled == True)
     old_binding = (await session.execute(stmt)).scalars().first()
+    old_robot_id = old_binding.robot_id if old_binding else None
+    
     if old_binding:
         old_binding.is_enabled = False
         session.add(old_binding)
@@ -124,17 +152,21 @@ async def bind_game_robot(
     
     await audit.log_event(
         session=session,
-        request_id=str(uuid.uuid4()),
+        request_id=getattr(request.state, "request_id", str(uuid.uuid4())),
         actor_user_id=current_admin.id,
+        actor_role=current_admin.role,
         tenant_id=current_admin.tenant_id,
         action="GAME_ROBOT_BIND",
         resource_type="game",
         resource_id=game_id,
         result="success",
-        details={"robot_id": robot_id}
+        reason=reason,
+        ip_address=getattr(request.state, "ip_address", None),
+        user_agent=getattr(request.state, "user_agent", None),
+        details={"robot_id": robot_id},
+        before={"robot_id": old_robot_id},
+        after={"robot_id": robot_id}
     )
     
     await session.commit()
     return {"message": "Robot bound successfully", "binding_id": new_binding.id}
-    await session.commit()
-    return {"message": "Config updated"}
