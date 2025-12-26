@@ -351,8 +351,4 @@ class FeatureFlag(SQLModel, table=True):
 
 # LedgerTransaction and WalletBalance moved to repositories/ledger_repo.py to avoid duplicates
 from app.repositories.ledger_repo import LedgerTransaction, WalletBalance
-    balance_real_held: float = 0.0
-    balance_bonus: float = 0.0
-    balance_real_pending: float = 0.0
-    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
