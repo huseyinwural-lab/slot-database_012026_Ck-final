@@ -1,7 +1,17 @@
-ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: player.wagering_requirement
+ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: player.registered_at
 [SQL: 
-                INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, status, kyc_status)
-                VALUES (?, ?, ?, ?, 'hash', 0, 0, 0, 'active', 'pending')
+                INSERT INTO player (
+                    id, tenant_id, username, email, password_hash, 
+                    balance_real_available, balance_real_held, balance_real, balance_bonus, 
+                    wagering_requirement, wagering_remaining, risk_score,
+                    status, kyc_status
+                )
+                VALUES (
+                    ?, ?, ?, ?, 'hash', 
+                    0, 0, 0, 0, 
+                    0, 0, 'low',
+                    'active', 'pending'
+                )
             ]
-[parameters: ('76d852b4-85f7-40bd-876a-e22b686d910d', 'default_casino', 'smoke_781261d4', 'smoke_781261d4@test.com')]
+[parameters: ('1d48ce58-832c-4a2d-9e46-ebfbf8c82e71', 'default_casino', 'smoke_9566f5b9', 'smoke_9566f5b9@test.com')]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
