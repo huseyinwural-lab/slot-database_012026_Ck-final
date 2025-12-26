@@ -25,10 +25,13 @@ async def run_bonus_hardening():
         
     engine = create_async_engine(TEST_DB_URL)
     
-    # Init Schema
+    # Init Schema - Import ALL models
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
         from app.models.bonus_models import BonusCampaign, BonusGrant
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
+        from app.models.engine_models import EngineStandardProfile
         await conn.run_sync(SQLModel.metadata.create_all)
         
     log = []
@@ -46,15 +49,15 @@ async def run_bonus_hardening():
         # Player 1: 100 bonus, 50% wagered
         p1 = str(uuid.uuid4())
         await conn.execute(text("""
-            INSERT INTO bonusgrant (id, tenant_id, campaign_id, player_id, amount_granted, wagering_target, wagering_contributed, status, granted_at)
-            VALUES (:id, :tid, :cid, :pid, 100, 3500, 1750, 'active', :now)
+            INSERT INTO bonusgrant (id, tenant_id, campaign_id, player_id, amount_granted, initial_balance, wagering_target, wagering_contributed, status, granted_at)
+            VALUES (:id, :tid, :cid, :pid, 100, 100, 3500, 1750, 'active', :now)
         """), {"id": str(uuid.uuid4()), "tid": tenant_id, "cid": campaign_id, "pid": p1, "now": datetime.now(timezone.utc)})
         
         # Player 2: 50 bonus, 0% wagered
         p2 = str(uuid.uuid4())
         await conn.execute(text("""
-            INSERT INTO bonusgrant (id, tenant_id, campaign_id, player_id, amount_granted, wagering_target, wagering_contributed, status, granted_at)
-            VALUES (:id, :tid, :cid, :pid, 50, 1750, 0, 'active', :now)
+            INSERT INTO bonusgrant (id, tenant_id, campaign_id, player_id, amount_granted, initial_balance, wagering_target, wagering_contributed, status, granted_at)
+            VALUES (:id, :tid, :cid, :pid, 50, 50, 1750, 0, 'active', :now)
         """), {"id": str(uuid.uuid4()), "tid": tenant_id, "cid": campaign_id, "pid": p2, "now": datetime.now(timezone.utc)})
         
         await conn.commit()
