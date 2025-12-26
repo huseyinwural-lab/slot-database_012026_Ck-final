@@ -12,7 +12,6 @@ from app.models.robot_models import MathAsset
 from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
 from app.services.audit import audit
-from app.utils.reason import require_reason
 
 router = APIRouter(prefix="/api/v1/math-assets", tags=["math_assets"])
 
@@ -50,7 +49,6 @@ async def list_assets(
 async def create_asset(
     request: Request,
     asset_data: Dict[str, Any] = Body(...),
-    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
@@ -58,6 +56,13 @@ async def create_asset(
     Upload new math asset.
     Body: { ref_key: str, type: str, content: dict, reason: str }
     """
+    reason = request.headers.get("X-Reason") or asset_data.get("reason")
+    if not reason:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "REASON_REQUIRED", "message": "Audit reason is required for this action."}
+        )
+
     ref_key = asset_data.get("ref_key")
     type_ = asset_data.get("type")
     content = asset_data.get("content")
@@ -107,10 +112,20 @@ async def replace_asset(
     request: Request,
     asset_id: str,
     new_content: Dict = Body(..., embed=True),
-    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    # Try header first, then body check (embedded 'new_content' dict doesn't contain reason usually, 
+    # but the parent body might if not using embed=True. Here we used embed=True for new_content.
+    # So reason must be in Header for replace_asset with this signature, OR we change signature.
+    # Let's rely on X-Reason header primarily for this one, or assume client sends it.
+    reason = request.headers.get("X-Reason")
+    if not reason:
+         raise HTTPException(
+            status_code=400,
+            detail={"code": "REASON_REQUIRED", "message": "Audit reason is required for this action (X-Reason header)."}
+        )
+
     asset = await session.get(MathAsset, asset_id)
     if not asset:
         raise HTTPException(404, "Asset not found")
