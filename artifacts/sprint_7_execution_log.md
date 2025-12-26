@@ -68,3 +68,13 @@ Artifact: /app/backups/backup_sqlite_20251226_155735.db
     [PASS] Admin Login & Token Issue
     [PASS] Payouts Router Reachable (405)
 === Smoke Test Complete: GO ===
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] › tests/release-smoke-money-loop.spec.ts:6:7 › Release Smoke Money Loop (Deterministic) › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid
+[1A[2K[chromium] › tests/release-smoke-money-loop.spec.ts:6:7 › Release Smoke Money Loop (Deterministic) › Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid
+Tracking Withdrawal TX: a1731116-b0aa-4dfd-acb5-c9c355abbb08
+
+[1A[2KRC Smoke Test Passed
+
+[1A[2K  1 passed (21.0s)
