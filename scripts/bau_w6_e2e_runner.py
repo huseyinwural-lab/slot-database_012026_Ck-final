@@ -49,16 +49,16 @@ async def run_poker_e2e_loop():
         # 2. Table Launch
         table_id = str(uuid.uuid4())
         await conn.execute(text("""
-            INSERT INTO pokertable (id, tenant_id, name, small_blind, big_blind, min_buyin, max_buyin, created_at)
-            VALUES (:id, :tid, 'High Stakes 1', 1.0, 2.0, 50.0, 200.0, :now)
+            INSERT INTO pokertable (id, tenant_id, name, small_blind, big_blind, min_buyin, max_buyin, created_at, game_type, limit_type, current_players, max_players, status)
+            VALUES (:id, :tid, 'High Stakes 1', 1.0, 2.0, 50.0, 200.0, :now, 'TEXAS_HOLDEM', 'NO_LIMIT', 0, 6, 'active')
         """), {"id": table_id, "tid": tenant_id, "now": datetime.now(timezone.utc)})
         log.append(f"Table Created: {table_id}")
         
         # 3. Session Join
         session_id = str(uuid.uuid4())
         await conn.execute(text("""
-            INSERT INTO pokersession (id, tenant_id, player_id, table_id, status, started_at)
-            VALUES (:id, :tid, :pid, :tbl, 'active', :now)
+            INSERT INTO pokersession (id, tenant_id, player_id, table_id, status, started_at, buyin_total, cashout_total)
+            VALUES (:id, :tid, :pid, :tbl, 'active', :now, 0, 0)
         """), {"id": session_id, "tid": tenant_id, "pid": p1, "tbl": table_id, "now": datetime.now(timezone.utc)})
         log.append(f"Session Started: {session_id}")
         
