@@ -123,3 +123,43 @@ async def ensure_within_tenant_daily_limits(
             "currency": currency,
         },
     )
+
+async def check_velocity_limit(
+    session,
+    *,
+    player_id: str,
+    action: ActionType,
+):
+    """Enforce global velocity limit (spam protection).
+    
+    Raises HTTPException(429) if too many requests in short window.
+    """
+    from config import settings
+    
+    limit_count = settings.max_tx_velocity_count
+    window_minutes = settings.max_tx_velocity_window_minutes
+    
+    now = datetime.now(timezone.utc)
+    window_start = now - timedelta(minutes=window_minutes)
+    
+    stmt = select(func.count(Transaction.id)).where(
+        Transaction.player_id == player_id,
+        Transaction.created_at >= window_start,
+        # Check specific action type to isolate deposit vs withdraw spam?
+        # For simple protection, we count ALL wallet actions (deposit+withdraw) or specific.
+        # Let's count specific action type for granularity.
+        Transaction.type == ("deposit" if action == "deposit" else "withdrawal")
+    )
+    
+    count = (await session.execute(stmt)).scalar_one() or 0
+    
+    if count >= limit_count:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error_code": "VELOCITY_LIMIT_EXCEEDED",
+                "message": f"Too many {action} requests. Please wait.",
+                "limit": limit_count,
+                "window_minutes": window_minutes
+            }
+        )
