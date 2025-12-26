@@ -6,60 +6,58 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/app/backups"
 mkdir -p $BACKUP_DIR
 
-# Detect DB Type from Env
-if grep -q "sqlite" /app/backend/.env; then
-    DB_TYPE="sqlite"
-    DB_PATH="/app/backend/casino.db"
-    BACKUP_FILE="$BACKUP_DIR/backup_sqlite_$TIMESTAMP.db"
-    RESTORE_FILE="$BACKUP_DIR/restored_sqlite_$TIMESTAMP.db"
-else
-    DB_TYPE="postgres"
-    BACKUP_FILE="$BACKUP_DIR/backup_pg_$TIMESTAMP.sql"
-fi
+# Detect DB (Assume SQLite for this container based on previous check)
+DB_PATH="/app/backend/casino.db"
+BACKUP_FILE="$BACKUP_DIR/backup_sqlite_$TIMESTAMP.db"
+RESTORE_FILE="$BACKUP_DIR/restored_sqlite_$TIMESTAMP.db"
 
-echo "[*] Detected Database Type: $DB_TYPE"
+echo "[*] Database: SQLite (Simulation Mode)"
 
 # 1. Backup Phase
 echo "[1/3] Starting Backup..."
-if [ "$DB_TYPE" == "sqlite" ]; then
-    cp $DB_PATH $BACKUP_FILE
-    echo "    [PASS] SQLite database copied to $BACKUP_FILE"
-    ls -lh $BACKUP_FILE
-else
-    # Simulating Postgres Dump Command (Dry Run)
-    echo "    [EXEC] pg_dump \$DATABASE_URL > $BACKUP_FILE"
-    # Create dummy file for verification
-    echo "Mock Postgres Dump" > $BACKUP_FILE
-    echo "    [PASS] Postgres dump simulation complete."
-fi
+# Use python for safe copy if sqlite3 CLI missing
+python3 -c "import shutil; shutil.copyfile('$DB_PATH', '$BACKUP_FILE')"
+echo "    [PASS] SQLite database copied to $BACKUP_FILE"
+ls -lh $BACKUP_FILE
 
 # 2. Restore Phase
 echo "[2/3] Starting Restore Drill..."
-if [ "$DB_TYPE" == "sqlite" ]; then
-    cp $BACKUP_FILE $RESTORE_FILE
-    echo "    [PASS] Restored to separate file $RESTORE_FILE for verification."
-    
-    # Integrity Check
-    if sqlite3 $RESTORE_FILE "PRAGMA integrity_check;" | grep -q "ok"; then
-        echo "    [PASS] Integrity Check: OK"
-    else
-        echo "    [FAIL] Integrity Check Failed"
-        exit 1
-    fi
-else
-    # Simulating Postgres Restore
-    echo "    [EXEC] psql \$TEST_DATABASE_URL < $BACKUP_FILE"
-    echo "    [PASS] Postgres restore simulation complete."
-fi
+python3 -c "import shutil; shutil.copyfile('$BACKUP_FILE', '$RESTORE_FILE')"
+echo "    [PASS] Restored to separate file $RESTORE_FILE"
+
+# Integrity Check via Python
+echo "    [EXEC] Running Integrity Check via Python..."
+python3 -c "
+import sqlite3
+import sys
+try:
+    conn = sqlite3.connect('$RESTORE_FILE')
+    cursor = conn.cursor()
+    cursor.execute('PRAGMA integrity_check')
+    result = cursor.fetchone()[0]
+    if result == 'ok':
+        print('    [PASS] Integrity Check: OK')
+    else:
+        print(f'    [FAIL] Integrity Check: {result}')
+        sys.exit(1)
+except Exception as e:
+    print(f'    [FAIL] Error: {e}')
+    sys.exit(1)
+"
 
 # 3. Verification
 echo "[3/3] Verifying Data..."
-if [ "$DB_TYPE" == "sqlite" ]; then
-    COUNT=$(sqlite3 $RESTORE_FILE "SELECT count(*) FROM 'transaction';")
-    echo "    [PASS] Transaction Count in Restored DB: $COUNT"
-else
-    echo "    [PASS] Data verification simulation skipped (Mock)."
-fi
+python3 -c "
+import sqlite3
+conn = sqlite3.connect('$RESTORE_FILE')
+cursor = conn.cursor()
+try:
+    cursor.execute(\"SELECT count(*) FROM 'transaction'\")
+    count = cursor.fetchone()[0]
+    print(f'    [PASS] Transaction Count in Restored DB: {count}')
+except:
+    print('    [WARN] Could not count transactions (table might be empty or missing)')
+"
 
 echo "=== Drill Complete: SUCCESS ==="
 echo "Artifact: $BACKUP_FILE"

@@ -8,63 +8,58 @@ sys.path.append("/app/backend")
 def verify_prod_env():
     print("=== Go-Live Cutover: Production Environment Verification ===\n")
     
-    # 1. Simulate Prod Env for Validation
+    # Force Env to Prod for the Dry Run Logic
+    # Note: This affects defaults in Settings
     os.environ["ENV"] = "prod"
-    print(f"[*] ENV set to: {os.environ['ENV']}")
-
-    # 2. Check Database URL
-    db_url = os.environ.get("DATABASE_URL", "")
-    print(f"[*] Checking DATABASE_URL...")
-    if "sqlite" in db_url:
-        print("    [WARN] Using SQLite in PROD simulation. (Expected for this dry-run container)")
-    elif not db_url:
-        print("    [FAIL] DATABASE_URL is missing!")
-    else:
-        print("    [PASS] Database URL configured.")
-
-    # 3. Check Critical Secrets
-    print("\n[*] Verifying Critical Secrets...")
-    secrets = [
-        ("STRIPE_SECRET_KEY", "sk_live_"),
-        ("STRIPE_WEBHOOK_SECRET", "whsec_"),
-        ("ADYEN_API_KEY", None),
-        ("ADYEN_HMAC_KEY", None)
-    ]
     
-    all_secrets_pass = True
-    for key, prefix in secrets:
-        val = os.environ.get(key)
-        if not val:
-            print(f"    [FAIL] {key} is MISSING.")
-            all_secrets_pass = False
-        elif prefix and not val.startswith(prefix):
-            print(f"    [WARN] {key} does not start with '{prefix}' (Current: {val[:4]}...) - Expected for Dry-Run/Mock keys.")
-        else:
-            print(f"    [PASS] {key} present.")
-
-    # 4. Config Class Validation
-    print("\n[*] Running Application Config Validation...")
     try:
-        from config import Settings
-        # Force re-instantiation with env vars
-        settings = Settings()
-        # We manually trigger the custom validator
-        # settings.validate_prod_secrets() 
-        # Note: We skip the actual exception raising here to show full report, 
-        # but in real app startup it would crash.
-        print("    [PASS] Settings class instantiated successfully.")
-    except ValidationError as e:
-        print(f"    [FAIL] Configuration Validation Error:\n{e}")
-    except Exception as e:
-        print(f"    [FAIL] Unexpected Error:\n{e}")
+        from config import settings
+        print(f"[*] ENV (Effective): {settings.env}")
 
-    # 5. Network & Security
-    print("\n[*] Checking Network Security Config...")
-    cors = os.environ.get("CORS_ORIGINS", "")
-    if cors and "*" not in cors:
-        print(f"    [PASS] CORS restricted: {cors}")
-    else:
-        print(f"    [WARN] CORS is permissive or empty: {cors}")
+        # 2. Check Database URL
+        print(f"[*] Checking DATABASE_URL...")
+        db_url = settings.database_url
+        if "sqlite" in db_url:
+            print("    [WARN] Using SQLite in PROD simulation. (Expected for this dry-run container)")
+        elif not db_url:
+            print("    [FAIL] DATABASE_URL is missing!")
+        else:
+            print(f"    [PASS] Database URL configured: {db_url}")
+
+        # 3. Check Critical Secrets
+        print("\n[*] Verifying Critical Secrets (from Loaded Settings)...")
+        # In this container, we are using the .env file which might have dev keys.
+        # The script should check if *any* key is present, and warn if it's a test key in prod mode.
+        
+        checks = [
+            ("stripe_api_key", "sk_live_"),
+            ("stripe_webhook_secret", "whsec_"),
+            ("adyen_api_key", None),
+            ("adyen_hmac_key", None)
+        ]
+        
+        for attr, prefix in checks:
+            val = getattr(settings, attr)
+            if not val:
+                print(f"    [FAIL] {attr.upper()} is MISSING in Settings.")
+            elif prefix and not str(val).startswith(prefix):
+                print(f"    [WARN] {attr.upper()} present but looks like Test Key (does not start with '{prefix}').")
+                print(f"           Current Value: {str(val)[:10]}...")
+            else:
+                print(f"    [PASS] {attr.upper()} configured.")
+
+        # 4. Network
+        print("\n[*] Checking Network Security Config...")
+        origins = settings.get_cors_origins()
+        if not origins:
+             print("    [WARN] CORS Origins empty (Fail-Closed in Prod).")
+        elif "*" in origins:
+             print(f"    [WARN] CORS is Wildcard '*' in Prod Mode: {origins}")
+        else:
+             print(f"    [PASS] CORS Restricted: {origins}")
+
+    except Exception as e:
+        print(f"[FAIL] Config Load Failed: {e}")
 
     print("\n=== Verification Complete ===")
     print(f"Responsible: {os.environ.get('USER', 'admin')}")
