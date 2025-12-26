@@ -22,7 +22,7 @@ async def run():
         # 1. Robots Page
         print("Navigating to Robots Page...")
         await page.goto("http://localhost:3000/robots")
-        await page.wait_for_selector("table", { state: "visible" }) # Wait for table
+        await page.wait_for_selector("table", state="visible") # Wait for table
         await page.screenshot(path="/app/artifacts/screenshots/robot_catalog.png")
         print("Captured robot_catalog.png")
 
