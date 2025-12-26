@@ -9,7 +9,7 @@ test.describe('Robot Admin Ops', () => {
     // 1. Admin Login
     const adminContext = await pwRequest.newContext({ baseURL: API_URL });
     const adminLoginRes = await adminContext.post('/api/v1/auth/login', {
-      data: { email: 'admin@casino.com', password: 'admin' }
+      data: { email: 'admin@casino.com', password: 'Admin123!' }
     });
     const adminToken = (await adminLoginRes.json()).access_token;
     expect(adminToken).toBeTruthy();
