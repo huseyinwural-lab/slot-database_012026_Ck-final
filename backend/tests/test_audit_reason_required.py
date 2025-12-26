@@ -5,7 +5,7 @@ from app.models.robot_models import RobotDefinition
 @pytest.mark.asyncio
 async def test_toggle_robot_missing_reason_fails(client: AsyncClient, admin_token, session):
     # Setup
-    robot = RobotDefinition(name="No Reason Bot", config={}, is_active=False)
+    robot = RobotDefinition(name="No Reason Bot", config={}, config_hash="dummy_hash_fail_1", is_active=False)
     session.add(robot)
     await session.commit()
     
