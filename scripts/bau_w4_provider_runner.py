@@ -59,7 +59,7 @@ async def run_provider_golden_path():
             
             # 2. Launch (Session)
             await conn.execute(text("""
-                INSERT INTO gamesession (id, tenant_id, player_id, game_id, provider_session_id, currency, start_time, status)
+                INSERT INTO gamesession (id, tenant_id, player_id, game_id, provider_session_id, currency, created_at, status)
                 VALUES (:id, :tid, :pid, :gid, :psid, 'USD', :now, 'active')
             """), {"id": session_id, "tid": tenant_id, "pid": player_id, "gid": game_id, "psid": f"sess_{uuid.uuid4()}", "now": now})
             
