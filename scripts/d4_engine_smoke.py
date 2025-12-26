@@ -27,8 +27,8 @@ async def run_engine_smoke():
         try:
             # Create Game
             await conn.execute(text("""
-                INSERT INTO game (id, tenant_id, external_id, name, provider, category, is_active, provider_id, created_at, configuration)
-                VALUES (:id, :tid, 'engine_smoke', 'Engine Smoke Slot', 'internal', 'slot', 1, 'int_1', :now, '{}')
+                INSERT INTO game (id, tenant_id, external_id, name, provider, category, is_active, provider_id, created_at, configuration, type)
+                VALUES (:id, :tid, 'engine_smoke', 'Engine Smoke Slot', 'internal', 'slot', 1, 'int_1', :now, '{}', 'slot')
             """), {"id": game_id, "tid": tenant_id, "now": datetime.now(timezone.utc)})
             
             # --- 1. Standard Apply Smoke ---
