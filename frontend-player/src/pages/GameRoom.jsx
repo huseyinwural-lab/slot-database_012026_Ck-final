@@ -1,105 +1,112 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import api from '../services/api';
-import { Maximize, Minimize, X, Loader2, RefreshCw } from 'lucide-react';
 
 const GameRoom = () => {
-  const { id } = useParams();
+  const { id: sessionId } = useParams();
   const navigate = useNavigate();
-  const [launchUrl, setLaunchUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [fullScreen, setFullScreen] = useState(false);
+  const [session, setSession] = useState(null);
   
-  // Get user for balance display
-  const user = JSON.parse(localStorage.getItem('player_user') || '{}');
+  // Mock Game State
+  const [balance, setBalance] = useState(0);
+  const [lastWin, setLastWin] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [bet, setBet] = useState(1.0);
 
-  useEffect(() => {
-    const launch = async () => {
+  const handleSpin = async () => {
+      setSpinning(true);
+      setLastWin(0);
       try {
-        const res = await api.get(`/player/games/${id}/launch`);
-        setLaunchUrl(res.data.launch_url);
+          // Simulate game client logic
+          // Determine local outcome (RNG) just for fun, but real logic is backend
+          const isWin = Math.random() > 0.7; // 30% win rate
+          const winAmount = isWin ? bet * (Math.floor(Math.random() * 5) + 2) : 0;
+          
+          const res = await api.post('/mock-provider/spin', {
+              session_id: sessionId,
+              amount: bet,
+              is_win: isWin,
+              win_amount: winAmount,
+              currency: "USD"
+          });
+          
+          setBalance(res.data.final_balance);
+          setLastWin(res.data.win);
       } catch (err) {
-        console.error(err);
-        setError("Failed to launch game. Please try again.");
+          alert(err.response?.data?.detail || "Spin failed");
       } finally {
-        setLoading(false);
+          setSpinning(false);
       }
-    };
-    launch();
-  }, [id]);
-
-  const toggleFullScreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setFullScreen(true);
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-        setFullScreen(false);
-      }
-    }
   };
 
+  useEffect(() => {
+      // Initial balance check
+      api.get('/player/wallet/balance').then(res => setBalance(res.data.total_real));
+  }, []);
+
   return (
-    <div className={`fixed inset-0 z-50 bg-black flex flex-col ${fullScreen ? 'p-0' : 'p-4'}`}>
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-black">
       {/* Game Header */}
-      <div className="h-14 bg-secondary/90 backdrop-blur border-b border-white/10 flex items-center justify-between px-6 rounded-t-xl mx-auto w-full max-w-[1400px]">
-        <div className="flex items-center gap-4">
-            <span className="font-bold text-lg">Game Room</span>
-            <div className="h-4 w-px bg-white/20"></div>
-            <span className="text-sm font-mono text-green-400">Bal: ${user.balance_real?.toFixed(2) || '0.00'}</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-            <button 
-                onClick={() => window.location.reload()} 
-                className="p-2 hover:bg-white/10 rounded-full transition-colors" 
-                title="Reload Game"
-            >
-                <RefreshCw className="w-5 h-5" />
-            </button>
-            <button 
-                onClick={toggleFullScreen} 
-                className="p-2 hover:bg-white/10 rounded-full transition-colors" 
-                title="Fullscreen"
-            >
-                {fullScreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-            </button>
-            <button 
-                onClick={() => navigate('/')} 
-                className="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
-            >
-                <X className="w-4 h-4" /> Exit
-            </button>
+      <div className="bg-zinc-900 border-b border-zinc-800 p-2 flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Lobby
+        </Button>
+        <div className="font-mono font-bold text-yellow-500">
+            BAL: ${balance.toFixed(2)}
         </div>
       </div>
 
-      {/* Game Container */}
-      <div className="flex-1 bg-black relative rounded-b-xl overflow-hidden mx-auto w-full max-w-[1400px] border border-t-0 border-white/10">
-        {loading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                <Loader2 className="w-10 h-10 animate-spin mb-4 text-primary" />
-                <p>Connecting to game provider...</p>
-            </div>
-        ) : error ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-red-400">
-                <div className="bg-red-500/10 p-6 rounded-xl border border-red-500/20 text-center">
-                    <p className="font-bold mb-2">Error</p>
-                    <p>{error}</p>
-                    <button onClick={() => navigate('/')} className="mt-4 text-sm underline hover:text-white">Return to Lobby</button>
-                </div>
-            </div>
-        ) : (
-            // In real app, this is the provider's iframe
-            // For MVP, we use a placeholder that LOOKS like a game or a mock URL
-            <iframe 
-                src={launchUrl || "https://example.com"} 
-                className="w-full h-full border-0" 
-                allowFullScreen 
-                title="Game Frame"
-            />
-        )}
+      {/* Game Area (Mock Iframe) */}
+      <div className="flex-1 flex items-center justify-center bg-zinc-950 relative overflow-hidden">
+          {/* Background FX */}
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900 via-black to-black"></div>
+          
+          <div className="w-[800px] h-[600px] bg-zinc-900 rounded-xl border border-zinc-700 shadow-2xl relative flex flex-col">
+              {/* Mock Reel Area */}
+              <div className="flex-1 flex items-center justify-center p-10 space-x-4">
+                  {[1, 2, 3].map(i => (
+                      <div key={i} className="w-1/3 h-full bg-black rounded-lg border border-zinc-800 flex items-center justify-center text-6xl animate-pulse">
+                          {spinning ? "❓" : (lastWin > 0 ? "🍒" : "🍋")}
+                      </div>
+                  ))}
+              </div>
+              
+              {/* Controls */}
+              <div className="h-24 bg-zinc-800 border-t border-zinc-700 p-4 flex items-center justify-between">
+                  <div className="space-x-2">
+                      <span className="text-xs text-muted-foreground uppercase">Bet</span>
+                      <div className="flex gap-1">
+                          {[1, 2, 5, 10].map(amt => (
+                              <button 
+                                key={amt}
+                                onClick={() => setBet(amt)}
+                                className={`w-10 h-10 rounded border text-sm font-bold ${bet === amt ? 'bg-yellow-500 text-black border-yellow-600' : 'bg-zinc-700 hover:bg-zinc-600 border-zinc-600'}`}
+                              >
+                                  ${amt}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+                  
+                  <div className="text-center">
+                      <div className="text-xs text-muted-foreground uppercase">Win</div>
+                      <div className={`text-2xl font-bold ${lastWin > 0 ? 'text-green-400 animate-bounce' : 'text-zinc-500'}`}>
+                          ${lastWin.toFixed(2)}
+                      </div>
+                  </div>
+
+                  <Button 
+                    size="lg" 
+                    className="w-32 h-16 text-xl font-bold bg-green-600 hover:bg-green-500 rounded-full shadow-lg border-b-4 border-green-800 active:border-b-0 active:translate-y-1 transition-all"
+                    onClick={handleSpin}
+                    disabled={spinning}
+                  >
+                    {spinning ? '...' : 'SPIN'}
+                  </Button>
+              </div>
+          </div>
       </div>
     </div>
   );
