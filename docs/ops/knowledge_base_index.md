@@ -36,4 +36,5 @@ All scripts are located in `/app/scripts/`.
 ## 5. Escalation & Severity
 *   **Sev-1 (Immediate):** 5xx Spike, Payout Failure > 5%, Ledger Invariant Breach. -> **Call Incident Commander.**
 *   **Sev-2 (Urgent):** Queue Backlog > SLA, Webhook Failures > 1%. -> **Ticket + Slack Alert.**
+| `process_withdraw_expiry.py` | Auto-expires stuck withdrawals (>24h). | Cron (Hourly) |
 *   **Sev-3 (Warning):** Single stuck job, Latency drift. -> **Next Business Day.**
