@@ -16,6 +16,7 @@ class Affiliate(SQLModel, table=True):
     cpa_amount: float = 0.0
     cpa_threshold: float = 20.0
     revshare_percent: float = 0.0
+    commission_rate: float = 0.0 # Legacy field for DB compatibility
     
     status: str = "active"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
