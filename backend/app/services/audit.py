@@ -1,7 +1,10 @@
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, Union
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select, desc
 from app.models.sql_models import AdminUser, AuditEvent
+import hashlib
+import json
 
 _REDACT_KEYS = {
     "authorization",
@@ -29,42 +32,63 @@ def _mask_sensitive(obj: Any) -> Any:
     return obj
 
 class AuditLogger:
-    """P2 Audit logger (Task 4 Enhanced)."""
+    """P2 Audit logger (Task 4 Enhanced + D1.4 Hash Chaining)."""
 
     @staticmethod
     async def log_event(
         *,
         session: AsyncSession,
-        # Mandatory Context
         request_id: str,
         actor_user_id: str,
         tenant_id: str,
-        # Action Info
         action: str,
         resource_type: str,
         resource_id: Optional[str],
-        result: str, # Kept for compat
+        result: str, 
         
-        # Task 4 New Fields
-        status: str = "SUCCESS", # SUCCESS | FAILED | DENIED
+        status: str = "SUCCESS", 
         reason: Optional[str] = None,
         actor_role: Optional[str] = None,
         user_agent: Optional[str] = None,
         
-        # Data
         details: Optional[Dict[str, Any]] = None,
         before: Optional[Dict[str, Any]] = None,
         after: Optional[Dict[str, Any]] = None,
         diff: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         
-        # Network
         ip_address: Optional[str] = None,
-        
-        # Error
         error_code: Optional[str] = None,
         error_message: Optional[str] = None,
     ) -> None:
+        
+        timestamp = datetime.now(timezone.utc)
+        
+        # 1. Fetch previous hash for this tenant chain
+        # Using sequence for ordering
+        stmt = select(AuditEvent).where(AuditEvent.tenant_id == tenant_id).order_by(desc(AuditEvent.sequence)).limit(1)
+        prev_event = (await session.execute(stmt)).scalars().first()
+        
+        prev_row_hash = prev_event.row_hash if prev_event and prev_event.row_hash else "0" * 64
+        sequence = (prev_event.sequence + 1) if prev_event and prev_event.sequence is not None else 1
+        
+        # 2. Canonical JSON for current event
+        payload = {
+            "tenant_id": tenant_id,
+            "actor_user_id": actor_user_id,
+            "action": action,
+            "resource_type": resource_type,
+            "resource_id": resource_id,
+            "timestamp": timestamp.isoformat(),
+            "reason": reason,
+            "status": status,
+            "details": _mask_sensitive(details or {}),
+            "sequence": sequence
+        }
+        canonical_str = json.dumps(payload, sort_keys=True)
+        
+        # 3. Compute Hash
+        row_hash = hashlib.sha256((prev_row_hash + canonical_str).encode('utf-8')).hexdigest()
         
         evt = AuditEvent(
             request_id=request_id,
@@ -86,7 +110,13 @@ class AuditLogger:
             metadata_json=_mask_sensitive(metadata),
             error_code=error_code,
             error_message=error_message,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=timestamp,
+            
+            # Chain fields
+            chain_id=tenant_id,
+            sequence=sequence,
+            prev_row_hash=prev_row_hash,
+            row_hash=row_hash
         )
         session.add(evt)
 
@@ -103,13 +133,12 @@ class AuditLogger:
         tenant_id: Optional[str] = None,
         resource_type: Optional[str] = None,
         result: str = "success",
-        # New Task 4 Compat args
         reason: Optional[str] = None,
         before: Optional[Dict] = None,
         after: Optional[Dict] = None,
         metadata: Optional[Dict] = None,
     ) -> None:
-        """Backward-compatible wrapper used by existing routes."""
+        """Backward-compatible wrapper."""
 
         if not session:
             return
@@ -117,7 +146,6 @@ class AuditLogger:
         rid = request_id or "unknown"
         tid = tenant_id or getattr(admin, "tenant_id", "unknown")
         
-        # Map result to status
         status = "SUCCESS"
         if result == "failed": status = "FAILED"
         if result == "blocked": status = "DENIED"
