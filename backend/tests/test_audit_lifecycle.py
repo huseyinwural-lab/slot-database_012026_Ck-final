@@ -2,6 +2,7 @@ import pytest
 import os
 import shutil
 from datetime import datetime, timedelta, timezone
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 import sys
 
@@ -14,11 +15,11 @@ from config import settings
 
 @pytest.mark.asyncio
 async def test_audit_lifecycle(session):
-    # 1. Setup Data (Older than retention to trigger purge)
-    # Retention is 90 days. We need data from 91 days ago.
-    target_date = (datetime.now(timezone.utc) - timedelta(days=91)).strftime("%Y-%m-%d")
+    # Debug
+    print(f"Test DB URL: {settings.database_url}")
     
-    # Use datetime object for insert to ensure consistent storage format with what SQLAlchemy/aiosqlite expects
+    # 1. Setup Data (Older than retention to trigger purge)
+    target_date = (datetime.now(timezone.utc) - timedelta(days=91)).strftime("%Y-%m-%d")
     ts_obj = datetime.strptime(target_date, "%Y-%m-%d").replace(tzinfo=timezone.utc, hour=10)
     
     await session.execute(text("""
@@ -31,31 +32,41 @@ async def test_audit_lifecycle(session):
         "prev": "0"*64
     })
     await session.commit()
-    
     await session.close()
     
-    # 2. Export (Archive)
+    # Verify visibility with new engine
+    engine_check = create_async_engine(settings.database_url)
+    async with engine_check.connect() as conn:
+        res = await conn.execute(text("SELECT count(*) FROM auditevent"))
+        print(f"Rows in DB (Fresh Engine): {res.scalar()}")
+    await engine_check.dispose()
+    
+    # 2. Export
     test_archive_path = "/tmp/test_audit_archive_storage"
     if os.path.exists(test_archive_path):
         shutil.rmtree(test_archive_path)
     
-    # Patch settings
     settings.audit_archive_path = test_archive_path
     
-    # Export
-    await export_audit_log(target_date, output_dir="/tmp/audit_export_temp_lifecycle")
+    # Pass explicit DB URL
+    await export_audit_log(target_date, output_dir="/tmp/audit_export_temp_lifecycle", db_url=settings.database_url)
     
-    # Verify File Exists in "Storage"
+    # Verify File Exists
     date_path = datetime.strptime(target_date, "%Y-%m-%d").strftime("%Y/%m/%d")
     manifest_path = f"{test_archive_path}/audit/{date_path}/audit_{target_date}_part01_manifest.json"
+    
+    if not os.path.exists(manifest_path):
+        print(f"Manifest not found at {manifest_path}")
+        # List dir
+        print(f"Contents of {test_archive_path}:")
+        os.system(f"ls -R {test_archive_path}")
+        
     assert os.path.exists(manifest_path)
     
     # 3. Purge
-    # Should delete the record because it is > 90 days and archived
     await purge_audit_logs(keep_days=90, dry_run=False)
     
     # Verify Deletion
-    from sqlalchemy.ext.asyncio import create_async_engine
     engine = create_async_engine(settings.database_url)
     async with engine.connect() as conn:
         res = await conn.execute(text(f"SELECT count(*) FROM auditevent WHERE id='life_1'"))
