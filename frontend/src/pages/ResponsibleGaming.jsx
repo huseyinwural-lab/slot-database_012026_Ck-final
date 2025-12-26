@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shield, Clock, AlertTriangle } from 'lucide-react';
-import api from '../../services/api';
+import api from '../services/api';
 import { toast } from 'sonner';
 
 const ResponsibleGaming = () => {
