@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class Game(SQLModel, table=True):
     __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(index=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
     
     # Modern fields (Sprint B+)
     provider_id: str = Field(index=True) # e.g. "pragmatic", "mock"
@@ -35,7 +35,7 @@ class Game(SQLModel, table=True):
 class GameSession(SQLModel, table=True):
     __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(index=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
     player_id: str = Field(index=True)
     game_id: str = Field(foreign_key="game.id")
     provider_session_id: str = Field(index=True)
@@ -47,7 +47,7 @@ class GameSession(SQLModel, table=True):
 class GameRound(SQLModel, table=True):
     __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(index=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
     player_id: str = Field(index=True)
     session_id: str = Field(foreign_key="gamesession.id")
     game_id: str = Field(foreign_key="game.id")
