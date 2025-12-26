@@ -129,6 +129,8 @@ app.include_router(finance.router)
 from app.routes import finance_chargebacks
 from app.routes import rg_player
 from app.routes import games_integration
+from app.routes import mock_provider
+app.include_router(mock_provider.router)
 app.include_router(games_integration.router)
 app.include_router(rg_player.router)
 app.include_router(finance_chargebacks.router)
