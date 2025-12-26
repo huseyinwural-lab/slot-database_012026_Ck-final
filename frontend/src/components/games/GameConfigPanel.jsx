@@ -602,11 +602,11 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
 
         {/* ROBOT TAB (Math Engine) */}
         {visibleTabs.includes('robot') && (
-        {visibleTabs.includes('robot') && (
           <TabsContent value="engine" className="space-y-4 pt-4">
             <GameEngineTab game={game} onUpdated={onSaved} />
           </TabsContent>
         )}
+        {visibleTabs.includes('robot') && (
           <TabsContent value="robot" className="space-y-4 pt-4">
             <GameRobotTab game={game} />
           </TabsContent>
