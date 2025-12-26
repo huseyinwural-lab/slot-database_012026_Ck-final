@@ -6,6 +6,7 @@ from app.core.database import async_session
 from app.models.robot_models import RobotDefinition, MathAsset, GameRobotBinding
 from app.models.game_models import Game
 from sqlmodel import select
+from app.models.sql_models import Tenant
 
 async def seed_robots():
     print("=== Seeding Robots & Math Assets ===")
