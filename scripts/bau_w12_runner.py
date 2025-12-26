@@ -78,7 +78,7 @@ async def main():
             "type": "deposit_match",
             "config": {"match_percent": 100}
         }
-        resp = await client.post(f"{BASE_URL}/bonuses/campaigns", json=camp_data, headers=headers)
+        resp = await client.post(f"{BASE_URL}/bonuses/campaigns", json={"payload": camp_data}, headers=headers)
         if resp.status_code != 200:
              print(f"{RED}Create Campaign Failed: {resp.text}{RESET}")
              return
