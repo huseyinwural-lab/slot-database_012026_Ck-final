@@ -19,7 +19,7 @@ async def test_toggle_robot_missing_reason_fails(client: AsyncClient, admin_toke
 
 @pytest.mark.asyncio
 async def test_clone_robot_missing_reason_fails(client: AsyncClient, admin_token, session):
-    robot = RobotDefinition(name="No Reason Clone", config={}, is_active=True)
+    robot = RobotDefinition(name="No Reason Clone", config={}, config_hash="dummy_hash_fail_2", is_active=True)
     session.add(robot)
     await session.commit()
     
