@@ -10,6 +10,7 @@ from sqlmodel import select, func
 
 from app.models.sql_models import Tenant, Transaction
 
+from app.models.sql_models import Tenant, Transaction, Player
 
 ActionType = Literal["deposit", "withdraw"]
 
