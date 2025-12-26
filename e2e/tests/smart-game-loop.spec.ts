@@ -21,10 +21,13 @@ test.describe('Smart Game Loop', () => {
     const token = (await loginRes.json()).access_token;
     
     // Deposit 100
-    await apiContext.post('/api/v1/player/wallet/deposit', {
+    const depositRes = await apiContext.post('/api/v1/player/wallet/deposit', {
         headers: { 'Authorization': `Bearer ${token}` },
         data: { amount: 100, method: 'test' }
     });
+    if (!depositRes.ok()) {
+        console.log('Deposit Failed:', depositRes.status(), await depositRes.text());
+    }
     if (!depositRes.ok()) {
         console.log('Deposit Failed:', depositRes.status(), await depositRes.text());
     }
