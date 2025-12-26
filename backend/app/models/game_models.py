@@ -63,5 +63,16 @@ class GameEvent(SQLModel, table=True):
     
     # Wallet Transaction Reference
     tx_id: Optional[str] = Field(index=True)
+class CallbackNonce(SQLModel, table=True):
+    """Replay Protection Store"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    provider_id: str = Field(index=True)
+    nonce: str = Field(index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: datetime
+    
+    # Constraint: Unique (provider, nonce) handled by logic or composite index manually if needed
+    # For now, simplistic check
+
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
