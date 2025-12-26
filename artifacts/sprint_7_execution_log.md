@@ -13,6 +13,11 @@
 === Go-Live Cutover: Production Environment Verification ===
 
 [*] ENV (Effective): prod
+
+### T-30: Backup
+- **Status:** Started
+- **Action:** Executing `db_restore_drill.sh` (Backup Phase)
+
 [*] Checking DATABASE_URL...
     [WARN] Using SQLite in PROD simulation. (Expected for this dry-run container)
 
