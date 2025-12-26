@@ -9,9 +9,22 @@ from config import settings
 
 sys.path.append("/app/backend")
 
+# Use a separate DB for this test to ensure schema freshness
+TEST_DB_URL = "sqlite+aiosqlite:////app/backend/casino_bonus_test.db"
+
 async def run_bonus_smoke():
     print("Starting BAU W2 Bonus Smoke Test...")
-    engine = create_async_engine(settings.database_url)
+    
+    if os.path.exists("/app/backend/casino_bonus_test.db"):
+        os.remove("/app/backend/casino_bonus_test.db")
+        
+    engine = create_async_engine(TEST_DB_URL)
+    
+    # Init Schema
+    async with engine.begin() as conn:
+        from app.models.sql_models import SQLModel
+        from app.models.bonus_models import BonusCampaign # Ensure imported
+        await conn.run_sync(SQLModel.metadata.create_all)
     
     e2e_log = []
     
@@ -26,10 +39,10 @@ async def run_bonus_smoke():
     async with engine.connect() as conn:
         try:
             # 1. Setup Data
-            # Tenant (if not exists)
-            await conn.execute(text("INSERT OR IGNORE INTO tenant (id, name, type, features, created_at, updated_at) VALUES (:id, 'Test Casino', 'owner', '{}', :now, :now)"), {"id": tenant_id, "now": now})
+            # Tenant
+            await conn.execute(text("INSERT INTO tenant (id, name, type, features, created_at, updated_at) VALUES (:id, 'Test Casino', 'owner', '{}', :now, :now)"), {"id": tenant_id, "now": now})
             
-            # Admin
+            # Admin (Schema includes mfa_enabled now)
             await conn.execute(text("""
                 INSERT INTO adminuser (id, tenant_id, username, email, full_name, password_hash, role, tenant_role, is_active, status, mfa_enabled, failed_login_attempts, is_platform_owner, created_at)
                 VALUES (:id, :tid, 'bonus_admin', :email, 'Bonus Admin', 'hash', 'Super Admin', 'admin', 1, 'active', 0, 0, 1, :now)
