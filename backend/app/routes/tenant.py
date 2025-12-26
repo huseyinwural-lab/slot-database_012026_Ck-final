@@ -238,6 +238,9 @@ async def seed_default_tenants(session: AsyncSession):
             "can_manage_affiliates": True,
             "can_use_crm": True,
         }
+            "can_use_game_robot": True,
+            "can_manage_kyc": True,
+            "can_manage_bonus": True,
     )
     
     # Create Demo Renter
