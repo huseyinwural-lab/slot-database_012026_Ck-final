@@ -1,5 +1,14 @@
 # Go-Live Cutover Runbook & RC Sign-off
 
+## Cutover Preconditions
+**Do NOT start cutover unless these are met:**
+*   **Release Pin:** Release SHA/Tag pinned and communicated.
+*   **Access:** Prod access (DB, Registry, Deploy) verified for responsible owners.
+*   **Artifacts:** RC Artifacts (`/app/artifacts/rc-proof/`) present and hashes verified.
+*   **Rollback:** Plan and "Restore Point" (Snapshot) owner assigned.
+*   **Canary:** Canary user/tenant ready with test amounts defined.
+*   **Hypercare:** On-call rotation and alert channels active.
+
 ## 1. RC Sign-off Criteria (Met)
 - **E2E (Money Loop):** PASS (Determinisitc via polling).
 - **Backend Regression:** PASS (8/8 tests, covers ledger invariants).
@@ -34,12 +43,13 @@
 4.  **Health Check:**
     - Verify `/api/health`.
     - Check Admin Login.
+    - Check Dashboard Load.
+    - Open Traffic.
+
 ### Tools & Scripts
 - **Config Verification:** `python3 scripts/verify_prod_env.py`
 - **Backup Drill:** `bash scripts/db_restore_drill.sh`
 - **Smoke Test:** `bash scripts/go_live_smoke.sh`
-    - Check Dashboard Load.
-    - Open Traffic.
 
 ### C) Post-Cutover (T+0 -> T+30)
 1.  **Canary Smoke Test:**
@@ -65,7 +75,6 @@
 3.  Restore DB Snapshot (if data corruption suspect) OR Rollback Migration (if safe).
 4.  Verify Login & Read-Only endpoints.
 5.  Re-open Traffic.
-
 
 ## 4. Sprint 7 — Cutover Command Sheet (One-Pager)
 
@@ -94,6 +103,16 @@
 | :--- | :--- |
 | Payout/Withdraw 404/5xx | **Immediate Rollback** |
 | Migration Failure | **Immediate Rollback** |
+| Ledger Invariant Breach | **Immediate Rollback** |
+| Webhook Misclassification | **Immediate Rollback** |
+| Latency Spike (No Errors) | Monitor (Hypercare) |
+| Queue Backlog (< SLA) | Monitor (Hypercare) |
+
+### Hypercare Routine (72h)
+*   **0-6h:** Every 30m check.
+*   **6-24h:** Hourly check.
+*   **24-72h:** 3x Daily check.
+*   **Focus:** 5xx rates, Queue Backlog, Webhook Failures, Random Ledger Recon.
 
 ## 5. Sprint 7 — Execution Checklist (Sign-off)
 
@@ -137,13 +156,11 @@
 **Canary "GO" Decision Statement (Standard)**
 "Prod deploy smoke checks PASS. Canary Money Loop (deposit->withdraw->approve->paid->ledger settlement) PASS. No rollback triggers observed. GO-LIVE confirmed."
 
-| Ledger Invariant Breach | **Immediate Rollback** |
-| Webhook Misclassification | **Immediate Rollback** |
-| Latency Spike (No Errors) | Monitor (Hypercare) |
-| Queue Backlog (< SLA) | Monitor (Hypercare) |
-
-### Hypercare Routine (72h)
-*   **0-6h:** Every 30m check.
-*   **6-24h:** Hourly check.
-*   **24-72h:** 3x Daily check.
-*   **Focus:** 5xx rates, Queue Backlog, Webhook Failures, Random Ledger Recon.
+## Go-Live Completion Criteria
+**Go-Live is considered "COMPLETE" when:**
+*   Smoke Tests (Health, Auth, Payouts) **PASS**.
+*   Canary Money Loop **PASS** and report filed.
+*   No 5xx spikes in the first 2 hours (baseline normal).
+*   Withdraw/Payout Queue under control (No SLA breach).
+*   No Rollback triggers observed.
+*   24-hour control report published (Summary + Metrics + Actions).
