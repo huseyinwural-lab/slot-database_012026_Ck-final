@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 import uuid
 
 from app.models.sql_models import Player
+from app.services.affiliate_engine import AffiliateEngine
 from app.core.database import get_session
 from app.utils.auth import get_password_hash, verify_password, create_access_token
 from app.schemas.player import PlayerPublic
@@ -40,6 +41,14 @@ async def register_player(payload: dict = Body(...), session: AsyncSession = Dep
     
     session.add(player)
     await session.commit()
+    await session.refresh(player) # Need ID for attribution
+
+    # Affiliate Attribution
+    referral_code = payload.get("referral_code") or payload.get("ref_code")
+    if referral_code:
+        aff_engine = AffiliateEngine()
+        await aff_engine.attribute_player(session, player.id, tenant_id, referral_code)
+        await session.commit()
     
     return {"message": "Registered", "player_id": player.id}
 
