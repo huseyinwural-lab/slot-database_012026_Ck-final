@@ -96,6 +96,41 @@ async def payments_webhook(
                 delta_pending=0.0,
             )
 
+            # --- GROWTH LOOP START ---
+            # Check if First Deposit by counting successful deposits in Ledger
+            stmt = select(func.count(LedgerTransaction.id)).where(
+                LedgerTransaction.tenant_id == event.tenant_id,
+                LedgerTransaction.player_id == event.player_id,
+                LedgerTransaction.type == "deposit",
+                LedgerTransaction.status == "deposit_captured"
+            )
+            dep_count = (await session.execute(stmt)).scalar() or 0
+            
+            # Since we just appended the event above, count should be 1 for the first time
+            if dep_count == 1:
+                # 1. Affiliate Commission
+                aff_engine = AffiliateEngine()
+                await aff_engine.process_commission(
+                    session, 
+                    player_id=event.player_id, 
+                    event_type="FIRST_DEPOSIT", 
+                    amount=event.amount
+                )
+                
+                # 2. CRM Trigger
+                crm_engine = CRMEngine()
+                growth_event = GrowthEvent(
+                    tenant_id=event.tenant_id,
+                    event_type="FIRST_DEPOSIT",
+                    player_id=event.player_id,
+                    payload={"amount": event.amount, "currency": event.currency, "tx_id": event.tx_id}
+                )
+                session.add(growth_event)
+                await session.commit() # Save event ID
+                await session.refresh(growth_event)
+                await crm_engine.process_event(session, growth_event)
+            # --- GROWTH LOOP END ---
+
     elif status == "withdraw_paid":
         # Payout confirmed -> finalize pending (debit)
         from app.repositories.ledger_repo import append_event
