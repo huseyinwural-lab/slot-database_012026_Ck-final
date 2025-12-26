@@ -1,24 +1,52 @@
 
-import asyncio
+import sqlite3
 import os
-from sqlalchemy import create_engine, text
+import json
 
-# Get DB URL from env
-db_url = os.environ.get("DATABASE_URL")
-if not db_url:
-    # Fallback/Construct if not directly in env (common in this project setup to have MONGO_URL but maybe SQL_DATABASE_URL?)
-    # Handoff mentions PostgreSQL/SQLModel.
-    # Let's check backend/.env first usually, but here I'll try to guess or read from a config if this fails.
-    # Actually, let's wait to see if this script works, otherwise I'll read backend/app/core/config.py
-    pass
+DB_PATH = "/app/backend/casino.db"
+OUTPUT_FILE = "/app/artifacts/audit_tail_task3.txt"
 
-async def dump_audit():
-    # We need to find the correct connection string. 
-    # Usually in /app/backend/.env
-    # For now, I'll rely on the shell command to run this with the env vars loaded.
-    pass
+def dump_audit():
+    if not os.path.exists(DB_PATH):
+        print(f"Error: Database not found at {DB_PATH}")
+        return
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Check for table name
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = [r[0] for r in cursor.fetchall()]
+    
+    target_table = None
+    if "audit_events" in tables:
+        target_table = "audit_events"
+    elif "audit_log" in tables:
+        target_table = "audit_log"
+    
+    if not target_table:
+        print(f"Error: Audit table not found. Tables: {tables}")
+        conn.close()
+        return
+
+    print(f"Dumping last 50 rows from {target_table}...")
+    
+    query = f"SELECT * FROM {target_table} ORDER BY created_at DESC LIMIT 50;"
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    
+    # Get column names
+    col_names = [description[0] for description in cursor.description]
+
+    with open(OUTPUT_FILE, "w") as f:
+        f.write(f"--- Audit Log Dump ({target_table}) ---\n")
+        f.write(f"Columns: {', '.join(col_names)}\n\n")
+        for row in rows:
+            row_dict = dict(zip(col_names, row))
+            f.write(json.dumps(row_dict, default=str) + "\n")
+
+    print(f"Successfully dumped {len(rows)} rows to {OUTPUT_FILE}")
+    conn.close()
 
 if __name__ == "__main__":
-    # This is a placeholder. I will implement the actual logic in the tool call 
-    # after checking the environment variables and DB connection details.
-    pass
+    dump_audit()
