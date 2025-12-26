@@ -1,2 +1,41 @@
 yarn run v1.22.22
+$ playwright test tests/robot-admin-ops.spec.ts --reporter=line
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] › tests/robot-admin-ops.spec.ts:6:7 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify
+[1A[2K  1) [chromium] › tests/robot-admin-ops.spec.ts:6:7 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      29 |       data: { name_suffix: " (E2E Test)" }
+      30 |     });
+    > 31 |     expect(cloneRes.ok()).toBeTruthy();
+         |                           ^
+      32 |     const clonedRobot = await cloneRes.json();
+      33 |     
+      34 |     // Enable Cloned Robot
+        at /app/e2e/tests/robot-admin-ops.spec.ts:31:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/trace.zip
+    Usage:
+
+        yarn playwright show-trace test-results/robot-admin-ops-Robot-Admi-c934e---Bind---Player-Spin-Verify-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[1A[2K  1 failed
+    [chromium] › tests/robot-admin-ops.spec.ts:6:7 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify 
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
