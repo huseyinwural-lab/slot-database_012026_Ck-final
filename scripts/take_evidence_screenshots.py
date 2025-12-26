@@ -47,7 +47,10 @@ async def run():
         await page.click('button[role="tab"]:has-text("Math Engine")')
         
         # Wait for tab content
-        await page.wait_for_selector('text=Active Robot Strategy', { timeout: 5000 }).catch(() => console.log("Could not find specific text, taking screenshot anyway."))
+        try:
+            await page.wait_for_selector('text=Active Robot Strategy', timeout=5000)
+        except Exception as e:
+            print("Could not find specific text, taking screenshot anyway.")
         
         # Small delay for animation
         await page.wait_for_timeout(1000)
