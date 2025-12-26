@@ -8,6 +8,7 @@ from app.models.sql_models import Bonus, AdminUser
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 from app.utils.pagination import get_pagination_params
+from app.utils.permissions import feature_required
 from app.models.common import PaginationMeta, PaginationParams
 
 router = APIRouter(prefix="/api/v1/bonuses", tags=["bonuses"])
