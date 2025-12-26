@@ -2,8 +2,6 @@ import pytest
 import os
 import shutil
 from datetime import datetime, timedelta, timezone
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy import text
 import sys
 
 # Ensure scripts in path
@@ -12,41 +10,33 @@ from audit_archive_export import export_audit_log
 from purge_audit_logs import purge_audit_logs
 from restore_audit_logs import restore_audit_logs
 from config import settings
+from app.models.sql_models import AuditEvent
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import text
 
 @pytest.mark.asyncio
 async def test_audit_lifecycle(session):
-    # Debug
-    print(f"Test DB URL: {settings.database_url}")
-    
-    # 1. Setup Data (Older than retention to trigger purge)
+    # 1. Setup Data using ORM
     target_date = (datetime.now(timezone.utc) - timedelta(days=91)).strftime("%Y-%m-%d")
+    ts_obj = datetime.strptime(target_date, "%Y-%m-%d").replace(tzinfo=timezone.utc, hour=10)
     
-    # Use NAIVE ISO string to ensure match with export logic
-    ts_val = f"{target_date}T10:00:00"
-    
-    await session.execute(text("""
-        INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, result, timestamp, row_hash, prev_row_hash, sequence)
-        VALUES 
-        (:id, 'r1', 'u1', 't1', 'LIFECYCLE_TEST', 'res', 'success', :ts, 'hash1', :prev, 1)
-    """), {
-        "id": "life_1",
-        "ts": ts_val,
-        "prev": "0"*64
-    })
+    evt = AuditEvent(
+        id="life_1",
+        request_id="r1",
+        actor_user_id="u1",
+        tenant_id="t1",
+        action="LIFECYCLE_TEST",
+        resource_type="res",
+        result="success",
+        timestamp=ts_obj,
+        row_hash="hash1",
+        prev_row_hash="0"*64,
+        sequence=1,
+        details={}
+    )
+    session.add(evt)
     await session.commit()
     await session.close()
-    
-    # Verify visibility & format
-    engine_check = create_async_engine(settings.database_url)
-    async with engine_check.connect() as conn:
-        res = await conn.execute(text("SELECT count(*) FROM auditevent"))
-        print(f"Rows in DB: {res.scalar()}")
-        
-        res = await conn.execute(text("SELECT timestamp FROM auditevent WHERE id='life_1'"))
-        val = res.scalar()
-        print(f"Stored Timestamp: {val!r} (Type: {type(val)})")
-             
-    await engine_check.dispose()
     
     # 2. Export
     test_archive_path = "/tmp/test_audit_archive_storage"
@@ -58,10 +48,9 @@ async def test_audit_lifecycle(session):
     # Export
     await export_audit_log(target_date, output_dir="/tmp/audit_export_temp_lifecycle", db_url=settings.database_url)
     
-    # Verify
+    # Verify Manifest
     date_path = datetime.strptime(target_date, "%Y-%m-%d").strftime("%Y/%m/%d")
     manifest_path = f"{test_archive_path}/audit/{date_path}/audit_{target_date}_part01_manifest.json"
-    
     assert os.path.exists(manifest_path)
     
     # 3. Purge
