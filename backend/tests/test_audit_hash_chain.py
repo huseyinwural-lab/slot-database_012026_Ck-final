@@ -12,9 +12,6 @@ async def test_audit_hash_chain_integrity(client: AsyncClient, session):
     tenant_id = "chain_test_tenant"
     
     # 2. Insert Event 1
-    # We can use AuditLogger.log_event directly if we can import it, or use an endpoint.
-    # Using an endpoint is better E2E but harder to control timing.
-    # Let's use the service directly.
     from app.services.audit import audit
     
     await audit.log_event(
@@ -76,15 +73,3 @@ async def test_audit_hash_chain_integrity(client: AsyncClient, session):
     expected_hash = hashlib.sha256((e1.row_hash + canonical_str).encode('utf-8')).hexdigest()
     
     assert e2.row_hash == expected_hash
-
-@pytest.mark.asyncio
-async def test_audit_hash_chain_tamper_detection(client: AsyncClient, session):
-    # This test verifies that if we manually modify a row (bypassing triggers if possible, or using SQL before trigger?), 
-    # the chain verification would fail.
-    # Since we have triggers blocking UPDATE, we assume 'tamper' means database file modification or 
-    # deleting the trigger to modify. 
-    # Here we just verify the logic: changing a previous hash breaks the next one.
-    
-    # We won't actually tamper DB because triggers block it and it's hard to simulate file corruption in pytest.
-    # Instead, we verify that re-hashing with different data produces mismatch.
-    pass 
