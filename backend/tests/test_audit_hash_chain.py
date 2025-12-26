@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import select, text
 from app.models.sql_models import AuditEvent
+from datetime import timezone
 import hashlib
 import json
 
@@ -47,24 +48,17 @@ async def test_audit_hash_chain_integrity(client: AsyncClient, session):
         assert len(events) == 2
         e1, e2 = events[0], events[1]
         
-        # Debug Output
-        print(f"E1 Hash: {e1.row_hash}")
-        print(f"E2 Hash: {e2.row_hash}")
-        print(f"E2 Prev: {e2.prev_row_hash}")
-        
         # Verify Chain
         assert e1.prev_row_hash == "0" * 64
         assert e2.prev_row_hash == e1.row_hash
         
         # Re-compute E2 Hash
-        # Use ISO format with 'Z' if aware, or +00:00. Pydantic/SQLModel output might vary.
-        # Let's inspect what e2.timestamp.isoformat() looks like.
-        ts_str = e2.timestamp.isoformat()
-        if not ts_str.endswith("+00:00") and not ts_str.endswith("Z"):
-             # If SQLite stored naive, we might need to adjust.
-             # But audit.py used aware UTC.
-             pass
-             
+        # Ensure timestamp matches audit.py generation (UTC aware)
+        ts = e2.timestamp
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        ts_str = ts.isoformat()
+        
         payload = {
             "tenant_id": tenant_id,
             "actor_user_id": "actor1",
@@ -78,10 +72,8 @@ async def test_audit_hash_chain_integrity(client: AsyncClient, session):
             "sequence": 2
         }
         canonical_str = json.dumps(payload, sort_keys=True)
-        print(f"Test Canonical Str: {canonical_str}")
         
         expected_hash = hashlib.sha256((e1.row_hash + canonical_str).encode('utf-8')).hexdigest()
-        print(f"Test Expected Hash: {expected_hash}")
         
         assert e2.row_hash == expected_hash
     finally:
