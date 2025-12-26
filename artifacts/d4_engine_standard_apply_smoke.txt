@@ -1,7 +1,1 @@
-ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: game.status
-[SQL: 
-                INSERT INTO game (id, tenant_id, external_id, name, provider, category, is_active, provider_id, created_at, configuration, type, rtp)
-                VALUES (?, ?, 'engine_smoke', 'Engine Smoke Slot', 'internal', 'slot', 1, 'int_1', ?, '{}', 'slot', 96.0)
-            ]
-[parameters: ('477a43f5-9b1d-4cd8-98a8-6cae482dad98', 'default_casino', datetime.datetime(2025, 12, 26, 20, 48, 31, 733218, tzinfo=datetime.timezone.utc))]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Applied Standard Profile: SUCCESS
