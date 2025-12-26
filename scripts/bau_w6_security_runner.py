@@ -25,9 +25,13 @@ async def run_security_test():
         
     engine = create_async_engine(os.environ["DATABASE_URL"])
     
-    # Init Schema
+    # Init Schema - Import ALL models
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
+        from app.models.bonus_models import BonusCampaign
+        from app.models.engine_models import EngineStandardProfile
         from app.models.poker_models import RakeProfile, PokerHandAudit
         await conn.run_sync(SQLModel.metadata.create_all)
         
@@ -40,8 +44,8 @@ async def run_security_test():
         p1 = str(uuid.uuid4())
         await conn.execute(text("""
             INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, balance_real_held, wagering_requirement, wagering_remaining, risk_score, status, kyc_status, registered_at)
-            VALUES (:id, :tid, 'p_sec', 'sec@test.com', 'hash', 1000, 1000, 0, 0, 0, 0, 'low', 'active', 'verified', :now)
-        """), {"id": p1, "tid": tenant_id, "now": datetime.now(timezone.utc)})
+            VALUES (:id, :tid, :user, :email, 'hash', 1000, 1000, 0, 0, 0, 0, 'low', 'active', 'verified', :now)
+        """), {"id": p1, "tid": tenant_id, "user": f"p_{p1[:4]}", "email": f"sec_{p1[:4]}@test.com", "now": datetime.now(timezone.utc)})
         await conn.commit()
         log.append("Setup Complete.")
         
@@ -62,9 +66,6 @@ async def run_security_test():
             log.append("Idempotency Check: FAIL")
             
         # 2. Ledger Invariant (Hold/Settle)
-        # Simulate Bet (Debit) -> Win (Credit)
-        # Initial: 1000. Bet 50. Win 100. Final should be 1050.
-        
         # Reset balance for test
         await conn.execute(text("UPDATE player SET balance_real_available = 1000, balance_real = 1000 WHERE id=:pid"), {"pid": p1})
         
