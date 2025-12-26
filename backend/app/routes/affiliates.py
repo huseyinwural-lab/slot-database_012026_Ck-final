@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Body, Request
+from app.models.growth_models import Affiliate, AffiliateLink
+from fastapi import APIRouter, Depends, Body, Request, HTTPException
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.core.database import get_session
-from app.models.sql_models import Affiliate, AdminUser
+from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
 from app.services.feature_access import enforce_module_access
 from app.utils.tenant import get_current_tenant_id
@@ -39,29 +40,16 @@ async def create_affiliate(
     # UI sends: { username, email, company_name, model }
     aff = Affiliate(
         tenant_id=tenant_id,
-        name=affiliate_data.get("username") or affiliate_data.get("name") or "",
+        username=affiliate_data.get("username") or affiliate_data.get("name") or "",
         email=affiliate_data.get("email") or "",
+        commission_type=affiliate_data.get("model", "CPA"),
+        cpa_amount=float(affiliate_data.get("cpa_amount", 50.0)),
         status="active",
     )
     session.add(aff)
     await session.commit()
     await session.refresh(aff)
     return aff
-
-# Stubs returning arrays
-@router.get("/offers")
-async def get_offers(
-    request: Request,
-    session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
-):
-    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
-    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
-    return []
-
-from app.models.growth_models import Affiliate, AffiliateLink
-
-router = APIRouter(prefix="/api/v1/affiliates", tags=["affiliates"])
 
 @router.get("/{affiliate_id}/links")
 async def get_affiliate_links(
@@ -112,6 +100,16 @@ async def create_affiliate_link(
     await session.refresh(link)
     return link
 
+# Stubs returning arrays
+@router.get("/offers")
+async def get_offers(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+    return []
 
 @router.get("/payouts")
 async def get_payouts(
