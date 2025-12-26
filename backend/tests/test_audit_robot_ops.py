@@ -44,7 +44,7 @@ async def test_robot_toggle_audit(client: AsyncClient, admin_token, session):
 @pytest.mark.asyncio
 async def test_robot_clone_audit(client: AsyncClient, admin_token, session):
     # 1. Create Robot
-    original = RobotDefinition(name="Original Robot", config={"rtp": 95}, is_active=True)
+    original = RobotDefinition(name="Original Robot", config={"rtp": 95}, config_hash="dummy_hash_2", is_active=True)
     session.add(original)
     await session.commit()
     
