@@ -26,6 +26,7 @@ import GameSlotAdvancedTab from './GameSlotAdvancedTab';
 import GameClientTab from './GameClientTab';
 import GameRobotTab from './GameRobotTab';
 
+import GameEngineTab from './GameEngineTab';
 const defaultVisibility = {
   countries: [],
   segments: [],
