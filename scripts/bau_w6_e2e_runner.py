@@ -21,9 +21,13 @@ async def run_poker_e2e_loop():
         
     engine = create_async_engine(os.environ["DATABASE_URL"])
     
-    # Init Schema
+    # Init Schema - Import ALL models
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
+        from app.models.bonus_models import BonusCampaign
+        from app.models.engine_models import EngineStandardProfile
         from app.models.poker_models import RakeProfile, PokerHandAudit
         from app.models.poker_table_models import PokerTable, PokerSession
         await conn.run_sync(SQLModel.metadata.create_all)
