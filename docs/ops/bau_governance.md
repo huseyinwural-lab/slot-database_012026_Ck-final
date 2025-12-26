@@ -53,6 +53,11 @@ Escalation is **mandatory** under the following conditions:
 *   [ ] All `HIGH` risk waivers are closed or formally re-planned.
 *   [ ] SLOs are actively measured, and a trend report is available.
 
+## 8. Monthly Docs Maintenance (Drift Control)
+*   **Run Check:** `python3 scripts/docs_drift_check.py`
+*   **Review:** Verify `glossary.md` against new release features.
+*   **Output:** `/app/artifacts/bau_docs_review_YYYY-MM-DD.md`
+
 ## 7. Initiation Instruction
 Upon approval of this order:
 1.  Generate the **W1 Ops Review** report.
