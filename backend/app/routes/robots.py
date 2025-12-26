@@ -1,40 +1,59 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Request
-from sqlmodel import select
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
-import uuid
-import json
+from sqlmodel import select, func
+from typing import List, Optional, Dict
 import hashlib
+import json
+import uuid
+from datetime import datetime
 
 from app.core.database import get_session
-from app.models.robot_models import RobotDefinition, MathAsset, GameRobotBinding
+from app.models.robot_models import RobotDefinition
 from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
 from app.services.audit import audit
-from app.utils.permissions import feature_required
 
 router = APIRouter(prefix="/api/v1/robots", tags=["robots"])
 
-# --- ROBOTS ---
-
-@router.get("/", response_model=List[RobotDefinition])
+@router.get("/", response_model=Dict)
 async def list_robots(
-    active_only: bool = False,
+    page: int = 1,
+    limit: int = 20,
+    search: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    motor_type: Optional[str] = None,
     session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_use_game_robot")), # Feature Gate
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    stmt = select(RobotDefinition)
-    if active_only:
-        stmt = stmt.where(RobotDefinition.is_active == True)
-    stmt = stmt.order_by(RobotDefinition.created_at.desc())
-    return (await session.execute(stmt)).scalars().all()
+    query = select(RobotDefinition)
+    
+    if search:
+        query = query.where(RobotDefinition.name.ilike(f"%{search}%"))
+    
+    if is_active is not None:
+        query = query.where(RobotDefinition.is_active == is_active)
+        
+    # motor_type filtering would require JSON query on config, unlikely for MVP sqlite/simple
+    # Skipping deep JSON filter for now unless explicitly needed
+    
+    query = query.order_by(RobotDefinition.created_at.desc())
+    
+    # Count
+    count_query = select(func.count()).select_from(query.subquery())
+    total = (await session.execute(count_query)).scalar() or 0
+    
+    query = query.offset((page - 1) * limit).limit(limit)
+    robots = (await session.execute(query)).scalars().all()
+    
+    return {
+        "items": robots,
+        "meta": {"total": total, "page": page, "page_size": limit}
+    }
 
 @router.get("/{robot_id}", response_model=RobotDefinition)
 async def get_robot(
     robot_id: str,
     session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_use_game_robot")),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
     robot = await session.get(RobotDefinition, robot_id)
@@ -45,153 +64,68 @@ async def get_robot(
 @router.post("/{robot_id}/toggle")
 async def toggle_robot(
     robot_id: str,
-    request: Request,
     session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_use_game_robot")),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
     robot = await session.get(RobotDefinition, robot_id)
     if not robot:
         raise HTTPException(404, "Robot not found")
-        
-    prev = robot.is_active
+    
+    old_state = robot.is_active
     robot.is_active = not robot.is_active
+    robot.updated_at = datetime.utcnow()
+    
     session.add(robot)
     
+    # Audit
     await audit.log_event(
         session=session,
-        request_id=getattr(request.state, "request_id", "unknown"),
+        request_id=str(uuid.uuid4()),
         actor_user_id=current_admin.id,
         tenant_id=current_admin.tenant_id,
         action="ROBOT_TOGGLE",
         resource_type="robot",
         resource_id=robot.id,
         result="success",
-        details={"before": prev, "after": robot.is_active}
+        details={"old_state": old_state, "new_state": robot.is_active}
     )
     
     await session.commit()
-    return {"status": "success", "is_active": robot.is_active}
+    return robot
 
 @router.post("/{robot_id}/clone")
 async def clone_robot(
     robot_id: str,
-    request: Request,
-    payload: dict = Body(...),
+    name_suffix: str = Body(" (Cloned)", embed=True),
     session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_use_game_robot")),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    source = await session.get(RobotDefinition, robot_id)
-    if not source:
-        raise HTTPException(404, "Source robot not found")
+    original = await session.get(RobotDefinition, robot_id)
+    if not original:
+        raise HTTPException(404, "Robot not found")
         
-    new_name = payload.get("name", f"{source.name} (Copy)")
-    
     new_robot = RobotDefinition(
-        name=new_name,
-        schema_version=source.schema_version,
-        config=source.config, # Deep copy recommended if mutable
-        config_hash=source.config_hash,
-        is_active=False
+        name=f"{original.name}{name_suffix}",
+        config=original.config,
+        config_hash=original.config_hash,
+        is_active=False # Default to inactive
     )
+    
     session.add(new_robot)
     await session.flush()
     
+    # Audit
     await audit.log_event(
         session=session,
-        request_id=getattr(request.state, "request_id", "unknown"),
+        request_id=str(uuid.uuid4()),
         actor_user_id=current_admin.id,
         tenant_id=current_admin.tenant_id,
         action="ROBOT_CLONE",
         resource_type="robot",
         resource_id=new_robot.id,
         result="success",
-        details={"source_id": source.id}
+        details={"original_id": original.id}
     )
     
     await session.commit()
-    await session.refresh(new_robot)
     return new_robot
-
-# --- MATH ASSETS ---
-
-@router.get("/assets", response_model=List[MathAsset])
-async def list_assets(
-    type: Optional[str] = None,
-    session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_use_game_robot")),
-    current_admin: AdminUser = Depends(get_current_admin)
-):
-    stmt = select(MathAsset)
-    if type:
-        stmt = stmt.where(MathAsset.type == type)
-    stmt = stmt.order_by(MathAsset.created_at.desc())
-    return (await session.execute(stmt)).scalars().all()
-
-# --- BINDING ---
-
-@router.get("/binding/{game_id}")
-async def get_game_binding(
-    game_id: str,
-    session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_use_game_robot")),
-    current_admin: AdminUser = Depends(get_current_admin)
-):
-    stmt = select(GameRobotBinding).where(GameRobotBinding.game_id == game_id).order_by(GameRobotBinding.created_at.desc())
-    binding = (await session.execute(stmt)).scalars().first()
-    
-    if not binding:
-        return {"robot_id": None}
-        
-    # Get robot details
-    robot = await session.get(RobotDefinition, binding.robot_id)
-    
-    return {
-        "binding_id": binding.id,
-        "robot_id": binding.robot_id,
-        "is_enabled": binding.is_enabled,
-        "robot_name": robot.name if robot else "Unknown",
-        "robot_active": robot.is_active if robot else False
-    }
-
-@router.post("/binding/{game_id}")
-async def set_game_binding(
-    game_id: str,
-    request: Request,
-    payload: dict = Body(...),
-    session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_use_game_robot")),
-    current_admin: AdminUser = Depends(get_current_admin)
-):
-    robot_id = payload.get("robot_id")
-    is_enabled = payload.get("is_enabled", True)
-    
-    # Verify Robot
-    robot = await session.get(RobotDefinition, robot_id)
-    if not robot:
-        raise HTTPException(404, "Robot not found")
-        
-    # Create new binding record (History preserved by creating new rows)
-    binding = GameRobotBinding(
-        tenant_id=current_admin.tenant_id,
-        game_id=game_id,
-        robot_id=robot_id,
-        is_enabled=is_enabled
-    )
-    session.add(binding)
-    
-    await audit.log_event(
-        session=session,
-        request_id=getattr(request.state, "request_id", "unknown"),
-        actor_user_id=current_admin.id,
-        tenant_id=current_admin.tenant_id,
-        action="GAME_ROBOT_BIND",
-        resource_type="game_robot_binding",
-        resource_id=binding.id,
-        result="success",
-        details={"game_id": game_id, "robot_id": robot_id}
-    )
-    
-    await session.commit()
-    return binding
