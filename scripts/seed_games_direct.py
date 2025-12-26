@@ -1,6 +1,6 @@
 import asyncio
 import os
-from app.backend.config import settings
+from config import settings
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.core.database import SQLModel, get_session
 from app.models.game_models import Game
