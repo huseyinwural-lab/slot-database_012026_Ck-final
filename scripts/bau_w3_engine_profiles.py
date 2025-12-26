@@ -25,9 +25,12 @@ async def run_profiles_test():
         
     engine = create_async_engine(TEST_DB_URL)
     
-    # Init Schema
+    # Init Schema - Import ALL models
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
+        from app.models.bonus_models import BonusCampaign
         from app.models.engine_models import EngineStandardProfile
         await conn.run_sync(SQLModel.metadata.create_all)
         
