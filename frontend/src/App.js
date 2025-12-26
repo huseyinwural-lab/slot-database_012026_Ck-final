@@ -100,7 +100,6 @@ function App() {
                   <RequireFeature feature="can_use_game_robot"><MathAssetsPage /></RequireFeature>
                 </RequireAuth>
               } />
-              } />
               
               <Route path="/kyc" element={
                 <RequireAuth>
