@@ -18,9 +18,11 @@ async def test_audit_lifecycle(session):
     # Debug
     print(f"Test DB URL: {settings.database_url}")
     
-    # 1. Setup Data
+    # 1. Setup Data (Older than retention to trigger purge)
     target_date = (datetime.now(timezone.utc) - timedelta(days=91)).strftime("%Y-%m-%d")
-    ts_obj = datetime.strptime(target_date, "%Y-%m-%d").replace(tzinfo=timezone.utc, hour=10)
+    
+    # Use NAIVE ISO string to ensure match with export logic
+    ts_val = f"{target_date}T10:00:00"
     
     await session.execute(text("""
         INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, result, timestamp, row_hash, prev_row_hash, sequence)
@@ -28,7 +30,7 @@ async def test_audit_lifecycle(session):
         (:id, 'r1', 'u1', 't1', 'LIFECYCLE_TEST', 'res', 'success', :ts, 'hash1', :prev, 1)
     """), {
         "id": "life_1",
-        "ts": ts_obj,
+        "ts": ts_val,
         "prev": "0"*64
     })
     await session.commit()
@@ -43,8 +45,6 @@ async def test_audit_lifecycle(session):
         res = await conn.execute(text("SELECT timestamp FROM auditevent WHERE id='life_1'"))
         val = res.scalar()
         print(f"Stored Timestamp: {val!r} (Type: {type(val)})")
-        if isinstance(val, datetime):
-             print(f"Stored TZ: {val.tzinfo}")
              
     await engine_check.dispose()
     
