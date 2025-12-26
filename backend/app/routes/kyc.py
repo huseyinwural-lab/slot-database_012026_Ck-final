@@ -9,6 +9,7 @@ from app.models.sql_models import Player, AdminUser
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 
+from app.utils.permissions import feature_required
 router = APIRouter(prefix="/api/v1/kyc", tags=["kyc"])
 
 @router.get("/dashboard")
