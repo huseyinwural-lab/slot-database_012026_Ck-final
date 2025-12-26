@@ -1,7 +1,8 @@
-ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: player.wagering_requirement
+Setup Complete: Tenant, Player (100.0), Game.
+ERROR: (sqlite3.OperationalError) table gamesession has no column named start_time
 [SQL: 
-                INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, status, kyc_status, registered_at)
-                VALUES (?, ?, ?, ?, 'hash', 100, 100, 0, 'active', 'verified', ?)
+                INSERT INTO gamesession (id, tenant_id, player_id, game_id, provider_session_id, currency, start_time, status)
+                VALUES (?, ?, ?, ?, ?, 'USD', ?, 'active')
             ]
-[parameters: ('265aeaa0-0662-4689-b346-6cb5b8243457', 'default_casino', 'prov_e977c356', 'prov@test.com', datetime.datetime(2025, 12, 26, 22, 3, 33, 130610, tzinfo=datetime.timezone.utc))]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
+[parameters: ('5faf36e6-22bd-473c-82ab-4b5b3c2a6774', 'default_casino', '5ad7808b-d6d4-407b-a7c7-2ca1c8cf4cd6', '1e55293a-c60c-408b-8a85-1428730e3daf', 'sess_e7190c4f-ba25-4b91-befd-05ce0eb1c807', datetime.datetime(2025, 12, 26, 22, 4, 29, 537540, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
