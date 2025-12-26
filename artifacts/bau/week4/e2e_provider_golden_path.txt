@@ -1,8 +1,8 @@
 Setup Complete: Tenant, Player (100.0), Game.
-ERROR: (sqlite3.OperationalError) table gamesession has no column named start_time
+ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: gamesession.last_activity_at
 [SQL: 
-                INSERT INTO gamesession (id, tenant_id, player_id, game_id, provider_session_id, currency, start_time, status)
+                INSERT INTO gamesession (id, tenant_id, player_id, game_id, provider_session_id, currency, created_at, status)
                 VALUES (?, ?, ?, ?, ?, 'USD', ?, 'active')
             ]
-[parameters: ('5faf36e6-22bd-473c-82ab-4b5b3c2a6774', 'default_casino', '5ad7808b-d6d4-407b-a7c7-2ca1c8cf4cd6', '1e55293a-c60c-408b-8a85-1428730e3daf', 'sess_e7190c4f-ba25-4b91-befd-05ce0eb1c807', datetime.datetime(2025, 12, 26, 22, 4, 29, 537540, tzinfo=datetime.timezone.utc))]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[parameters: ('d93ad54f-b55f-4585-b042-ed155cc0c544', 'default_casino', 'b09f3f65-78cb-40c8-90c9-b8eb19d97739', '1b89ab7c-4cbd-4911-b64a-6601c23e7870', 'sess_6001bd3e-c2dd-4a7e-85e9-7ea866463d1c', datetime.datetime(2025, 12, 26, 22, 5, 31, 196286, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
