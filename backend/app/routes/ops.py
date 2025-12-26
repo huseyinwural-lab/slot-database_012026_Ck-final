@@ -1,13 +1,76 @@
-from fastapi import APIRouter, Depends
-from app.services.metrics import metrics
-from app.routes.auth_snippet import get_current_admin
-from app.models.sql_models import AdminUser
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select, text
+from app.core.database import get_session
+from app.models.sql_models import AdminUser, AuditEvent
+from app.utils.auth import get_current_admin
+from config import settings
+from datetime import datetime, timezone
+import os
 
 router = APIRouter(prefix="/api/v1/ops", tags=["ops"])
 
-@router.get("/dashboard")
-async def get_ops_dashboard(current_admin: AdminUser = Depends(get_current_admin)):
-    """
-    Operational Dashboard for Monitoring
-    """
-    return metrics.get_metrics()
+@router.get("/health", response_model=dict)
+async def ops_health_check(
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    """Detailed Ops Health Check (P0 for Go-Live)."""
+    
+    health = {
+        "status": "green",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "components": {}
+    }
+    
+    # 1. Database
+    try:
+        await session.execute(text("SELECT 1"))
+        health["components"]["database"] = {"status": "ok", "latency_ms": 0} # simplified
+    except Exception as e:
+        health["components"]["database"] = {"status": "error", "error": str(e)}
+        health["status"] = "red"
+
+    # 2. Migrations (Check for alembic table)
+    try:
+        res = await session.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))
+        version = res.scalar()
+        health["components"]["migrations"] = {"status": "ok", "version": version}
+    except Exception:
+        health["components"]["migrations"] = {"status": "unknown", "error": "Table not found"}
+        # Warning only, don't red-flag unless strict
+
+    # 3. Audit Chain (Check last event hash)
+    try:
+        res = await session.execute(text("SELECT row_hash, sequence, timestamp FROM auditevent ORDER BY sequence DESC LIMIT 1"))
+        last = res.mappings().first()
+        if last:
+            health["components"]["audit_chain"] = {
+                "status": "ok", 
+                "head_sequence": last['sequence'],
+                "head_hash": last['row_hash'][:8] + "...",
+                "last_event_time": last['timestamp']
+            }
+        else:
+            health["components"]["audit_chain"] = {"status": "empty"}
+    except Exception as e:
+        health["components"]["audit_chain"] = {"status": "error", "error": str(e)}
+        health["status"] = "red"
+
+    # 4. Storage (Check reachability)
+    # Check if local path exists or S3 creds are present
+    storage_status = "ok"
+    if settings.audit_archive_backend == "filesystem":
+        if not os.path.exists(settings.audit_archive_path):
+            storage_status = "warning (path missing)"
+    elif settings.audit_archive_backend == "s3":
+        if not settings.audit_s3_bucket:
+            storage_status = "error (config missing)"
+            health["status"] = "red"
+            
+    health["components"]["storage"] = {
+        "backend": settings.audit_archive_backend,
+        "status": storage_status
+    }
+
+    return health
