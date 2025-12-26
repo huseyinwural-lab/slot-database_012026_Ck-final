@@ -1,11 +1,11 @@
-ERROR: (sqlite3.OperationalError) table ledgertransaction has no column named balance_after
+ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: ledgertransaction.direction
 [SQL: 
                 INSERT INTO ledgertransaction (
-                    id, tenant_id, player_id, type, amount, currency, status, created_at, balance_after
+                    id, tenant_id, player_id, type, amount, currency, status, created_at
                 )
                 VALUES (
-                    ?, ?, ?, 'deposit', 100.0, 'USD', 'deposit_succeeded', ?, 100.0
+                    ?, ?, ?, 'deposit', 100.0, 'USD', 'deposit_succeeded', ?
                 )
             ]
-[parameters: ('f90c3d22-6d42-40b2-b653-3e7aeeaba7c6', 'default_casino', 'f8dabe37-9c0c-422f-bde6-2d1952ee75af', datetime.datetime(2025, 12, 26, 20, 35, 33, 457394, tzinfo=datetime.timezone.utc))]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[parameters: ('6ecb67c5-b736-4ec6-95a3-ba4abd7bd220', 'default_casino', '40a84bdf-d99a-418c-b9fd-6838564808b9', datetime.datetime(2025, 12, 26, 20, 36, 15, 791357, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
