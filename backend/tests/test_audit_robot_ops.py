@@ -12,6 +12,7 @@ async def test_robot_toggle_audit(client: AsyncClient, admin_token, session):
     robot = RobotDefinition(
         name="Audit Test Robot",
         config={"rtp": 96.5},
+        config_hash="dummy_hash_1",
         is_active=False
     )
     session.add(robot)
