@@ -5,12 +5,10 @@ from arq.connections import RedisSettings
 
 class Settings(BaseSettings):
     # Environment
-    # Canonical values: dev | local | staging | prod
-    env: str = "dev"  # ENV
+    env: str = "dev"
 
     # Database
-    database_url: str = "sqlite+aiosqlite:////app/backend/casino.db"  # Absolute path to prevent CWD mismatch
-    # Connection pool tuning (Postgres/asyncpg)
+    database_url: str = "sqlite+aiosqlite:////app/backend/casino.db"
     db_pool_size: int = 5
     db_max_overflow: int = 10
 
@@ -21,137 +19,112 @@ class Settings(BaseSettings):
 
     # App
     debug: bool = True
-    # Supports both formats:
-    # 1) JSON list: ["http://localhost:3000", "http://localhost:3001"]
-    # 2) CSV: http://localhost:3000,http://localhost:3001
     cors_origins: str = '["http://localhost:3000", "http://localhost:3001"]'
 
     # Logging
-    log_level: str = "INFO"  # LOG_LEVEL
-    # Default: auto => dev/local plain, prod/staging json
-    log_format: str = "auto"  # LOG_FORMAT (auto|plain|json)
+    log_level: str = "INFO"
+    log_format: str = "auto"
 
     def get_log_format(self) -> str:
         fmt = (self.log_format or "").strip().lower()
         if fmt in {"plain", "json"}:
             return fmt
-        # auto/empty/unknown -> env-based default
         if (self.env or "").lower() in {"prod", "staging"}:
             return "json"
         return "plain"
 
-    # Reverse proxy / client IP trust
-    # Comma-separated list of trusted proxy IPs (the immediate peer IP that forwards requests).
-    # Only when ENV is prod/staging and the request comes from a trusted proxy IP
-    # will we trust X-Forwarded-For for rate limiting.
-    trusted_proxy_ips: str = ""  # TRUSTED_PROXY_IPS
-
-    # Kill switch
-    # Global emergency switch to disable all non-core modules
-    kill_switch_all: str = "false"  # KILL_SWITCH_ALL
-
-    # Seeding guard (P0)
-    # Fail-closed: seed runs only in (dev|local) AND when explicitly enabled.
-    seed_on_startup: bool = False  # SEED_ON_STARTUP
+    trusted_proxy_ips: str = ""
+    kill_switch_all: str = "false"
+    seed_on_startup: bool = False
 
     openai_model: str = "gpt-4-1106-preview"
-    # Integrations
     openai_api_key: Optional[str] = None
-    
     sendgrid_api_key: Optional[str] = None
     sendgrid_from_email: str = "admin@casino.com"
     emergent_llm_key: Optional[str] = None
 
-    # KYC / wallet
     kyc_unverified_daily_deposit_cap: float = 100.0
-
-    # Velocity limit settings
     max_tx_velocity_count: int = 5
     max_tx_velocity_window_minutes: int = 1
 
-    # Reconciliation runner / queue
-    redis_url: str = "redis://redis:6379/0"  # REDIS_URL
-    recon_runner: str = "background"  # RECON_RUNNER: "queue" or "background"
+    redis_url: str = "redis://redis:6379/0"
+    recon_runner: str = "background"
 
     @property
     def arq_redis_settings(self) -> RedisSettings:
         return RedisSettings.from_dsn(self.redis_url)
 
-    # Test-only payment methods gate
-    allow_test_payment_methods: bool = True  # ALLOW_TEST_PAYMENT_METHODS
-
-    # Ledger feature flags
+    allow_test_payment_methods: bool = True
     ledger_shadow_write: bool = True
     ledger_enforce_balance: bool = False
     ledger_balance_mismatch_log: bool = True
 
-    # Webhook / PSP security
     webhook_signature_enforced: bool = False
     webhook_secret_mockpsp: str = "changeme-mockpsp-secret"
     stripe_api_key: Optional[str] = None
     stripe_webhook_secret: Optional[str] = None
     
-    # Adyen Config
     adyen_api_key: Optional[str] = None
     adyen_merchant_account: Optional[str] = None
     adyen_client_key: Optional[str] = None
     adyen_hmac_key: Optional[str] = None
 
-    # Audit Retention (Task D1.2)
-    audit_retention_days: int = 730 # 2 years default
-    audit_archive_path: str = "/app/archive/audit" # Local path for archive store (or mount point)
+    # Audit Retention & Archival (Task D1/D2)
+    audit_retention_days: int = 90
     audit_export_secret: str = "change_this_to_strong_secret_for_hmac"
+    
+    # Task D2: Remote Storage
+    audit_archive_backend: str = "filesystem" # 'filesystem' or 's3'
+    audit_s3_endpoint: Optional[str] = None
+    audit_s3_region: str = "us-east-1"
+    audit_s3_bucket: str = "casino-audit-archive"
+    audit_s3_access_key: Optional[str] = None
+    audit_s3_secret_key: Optional[str] = None
+    audit_archive_prefix: str = "audit/"
+    # Local path fallback (for 'filesystem' backend)
+    audit_archive_path: str = "/app/archive/audit" 
 
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
         if not raw:
-            # In prod/staging we fail-closed (no wildcard). In dev/local we keep permissive behavior.
             if (self.env or "").lower() in {"prod", "staging"}:
                 return []
             return ["*"]
-
-        # JSON list support (legacy)
         try:
             parsed = json.loads(raw)
             if isinstance(parsed, list):
                 return [str(o).strip() for o in parsed if str(o).strip()]
         except json.JSONDecodeError:
             pass
-
-        # CSV support (canonical for prod)
         origins = [o.strip() for o in raw.split(",") if o.strip()]
         if origins:
             return origins
-
         if (self.env or "").lower() in {"prod", "staging"}:
             return []
         return ["*"]
 
     class Config:
         env_file = ".env"
-        extra = "ignore"  # Ignore extra fields in .env
+        extra = "ignore"
 
     def validate_prod_secrets(self) -> None:
-        """P0-1: Fail-fast validation for Production/Staging secrets."""
         if self.env in {"prod", "staging"}:
             missing = []
-            # Critical Secrets List
             if not self.stripe_api_key or not self.stripe_api_key.startswith("sk_"):
                 missing.append("STRIPE_API_KEY (must start with sk_)")
             if not self.stripe_webhook_secret or not self.stripe_webhook_secret.startswith("whsec_"):
                 missing.append("STRIPE_WEBHOOK_SECRET (must start with whsec_)")
             
-            # Adyen
             if not self.adyen_api_key:
                 missing.append("ADYEN_API_KEY")
-            if not self.adyen_merchant_account:
-                missing.append("ADYEN_MERCHANT_ACCOUNT")
-            if not self.adyen_hmac_key:
-                missing.append("ADYEN_HMAC_KEY")
             
-            # Audit Secret
             if self.audit_export_secret == "change_this_to_strong_secret_for_hmac":
                 missing.append("AUDIT_EXPORT_SECRET (must be changed)")
+                
+            if self.audit_archive_backend == "s3":
+                if not self.audit_s3_access_key: missing.append("AUDIT_S3_ACCESS_KEY")
+                if not self.audit_s3_secret_key: missing.append("AUDIT_S3_SECRET_KEY")
+                if not self.audit_s3_bucket: missing.append("AUDIT_S3_BUCKET")
 
             if missing:
                 raise ValueError(
