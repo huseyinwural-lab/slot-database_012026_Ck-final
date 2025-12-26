@@ -22,7 +22,10 @@ test.describe('Smart Game Loop', () => {
     
     // Deposit 100
     const depositRes = await apiContext.post('/api/v1/player/wallet/deposit', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 
+            'Authorization': `Bearer ${token}`,
+            'X-Idempotency-Key': `dep-${Date.now()}`
+        },
         data: { amount: 100, method: 'test' }
     });
     if (!depositRes.ok()) {
