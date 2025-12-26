@@ -65,6 +65,20 @@ async def create_deposit(
 
     # Tenant daily deposit limit enforcement (TENANT-POLICY-001)
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
+    # Velocity Check (Global Spam Protection)
+    await ensure_within_tenant_daily_limits(
+        session,
+        tenant_id=tenant_id,
+        player_id=current_player.id,
+        action="deposit",
+        amount=amount,
+        currency="USD",
+    )
+    
+    # New: Velocity Check (1 min window)
+    from app.services.tenant_policy_enforcement import check_velocity_limit
+    await check_velocity_limit(session, player_id=current_player.id, action="deposit")
+
 
     tenant_id = current_player.tenant_id
     try:
