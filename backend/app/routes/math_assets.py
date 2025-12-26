@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func
 from typing import List, Optional, Dict, Any
@@ -12,6 +12,7 @@ from app.models.robot_models import MathAsset
 from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
 from app.services.audit import audit
+from app.utils.reason import require_reason
 
 router = APIRouter(prefix="/api/v1/math-assets", tags=["math_assets"])
 
@@ -47,13 +48,15 @@ async def list_assets(
 
 @router.post("/")
 async def create_asset(
+    request: Request,
     asset_data: Dict[str, Any] = Body(...),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
     """
     Upload new math asset.
-    Body: { ref_key: str, type: str, content: dict }
+    Body: { ref_key: str, type: str, content: dict, reason: str }
     """
     ref_key = asset_data.get("ref_key")
     type_ = asset_data.get("type")
@@ -81,14 +84,19 @@ async def create_asset(
     
     await audit.log_event(
         session=session,
-        request_id=str(uuid.uuid4()),
+        request_id=getattr(request.state, "request_id", str(uuid.uuid4())),
         actor_user_id=current_admin.id,
+        actor_role=current_admin.role,
         tenant_id=current_admin.tenant_id,
         action="MATH_ASSET_UPLOAD",
         resource_type="math_asset",
         resource_id=asset.id,
         result="success",
-        details={"ref_key": ref_key, "hash": content_hash}
+        reason=reason,
+        ip_address=getattr(request.state, "ip_address", None),
+        user_agent=getattr(request.state, "user_agent", None),
+        metadata={"ref_key": ref_key, "hash": content_hash},
+        after={"ref_key": ref_key, "type": type_, "hash": content_hash}
     )
     
     await session.commit()
@@ -96,8 +104,10 @@ async def create_asset(
 
 @router.post("/{asset_id}/replace")
 async def replace_asset(
+    request: Request,
     asset_id: str,
     new_content: Dict = Body(..., embed=True),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
@@ -110,21 +120,26 @@ async def replace_asset(
     
     asset.content = new_content
     asset.content_hash = new_hash
-    # Update version logic could go here (e.g. increment or suffix)
-    # For now, just replace content
     
     session.add(asset)
     
     await audit.log_event(
         session=session,
-        request_id=str(uuid.uuid4()),
+        request_id=getattr(request.state, "request_id", str(uuid.uuid4())),
         actor_user_id=current_admin.id,
+        actor_role=current_admin.role,
         tenant_id=current_admin.tenant_id,
         action="MATH_ASSET_REPLACE",
         resource_type="math_asset",
         resource_id=asset.id,
         result="success",
-        details={"old_hash": old_hash, "new_hash": new_hash}
+        reason=reason,
+        ip_address=getattr(request.state, "ip_address", None),
+        user_agent=getattr(request.state, "user_agent", None),
+        metadata={"old_hash": old_hash, "new_hash": new_hash},
+        before={"hash": old_hash},
+        after={"hash": new_hash},
+        diff={"hash": {"from": old_hash, "to": new_hash}}
     )
     
     await session.commit()
