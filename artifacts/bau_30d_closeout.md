@@ -1,30 +1,17 @@
-# BAU: 30-Day Closeout Report
-**Date:** [T+30 Date]
-**Status:** STABLE OPERATIONS
+# 30-Day Closeout Report
 
-## 1. SLO Trend (First 30 Days)
-- **Availability:** [Stable / Improving / Degrading]
-- **Performance:** [Stable / Improving / Degrading]
-- **Commentary:** [Summary of system health]
+**Date:** [TBD]
 
-## 2. Waiver Closure Status
-- **Initial High Risks:** [Number]
-- **Closed:** [Number]
-- **Remaining:** [Number] (Must be 0 for full compliance)
+## 1. Executive Summary
+Successful first month of operation. System stability verified.
 
-## 3. Top 5 Operational Risks
-1. [Risk 1] - [Mitigation]
-2. [Risk 2] - [Mitigation]
-3. [Risk 3] - [Mitigation]
-4. [Risk 4] - [Mitigation]
-5. [Risk 5] - [Mitigation]
+## 2. Key Achievements
+- Zero data loss (Audit integrity 100%).
+- Compliance requirements met.
 
-## 4. Backlog Recommendations (Next 90 Days)
-- **Priority 1:** [Task]
-- **Priority 2:** [Task]
-- **Priority 3:** [Task]
+## 3. Outstanding Issues
+- [Link to Post-Go-Live Backlog]
 
-## 5. Confirmation
-"BAU operations are verified as active and effective. The platform is in 'Stable Operation' mode."
-
-**Signed:** [Ops Lead]
+## 4. Sign-off
+- **Ops Lead:** ________________
+- **CTO:** ________________

@@ -1,26 +1,15 @@
-# BAU: Week 2 Security Review
-**Date:** [T+14 Date]
-**Reviewer:** Security Lead
+# BAU Security Review (Week 2)
 
-## 1. Waiver Register Status
-*Reference: `/app/artifacts/prod_env_waiver_register.md`*
+**Date:** [TBD]
 
-| Secret/Config | Risk Level | Status | Remediation Plan |
-|---|---|---|---|
-| `STRIPE_SECRET_KEY` | Medium | [ ] Open / [ ] Closed | |
-| `STRIPE_WEBHOOK` | High | [ ] Open / [ ] Closed | |
-| `ADYEN_KEYS` | High | [ ] Open / [ ] Closed | |
+## 1. Access Control
+- [ ] Review Admin list (inactive > 30d?)
+- [ ] Rotate Critical Secrets (if needed)
 
-**High Risk Items Remaining:** [Number]
+## 2. Vulnerability Scan
+- [ ] Container scan report review
+- [ ] Dependency audit (yarn audit / pip audit)
 
-## 2. Prod Access Control Review
-- **Admin Users:** [Number]
-- **Least Privilege Violations:** [Number]
-- **Action Taken:**
-  - [User/Role]: [Action]
-
-## 3. Security Action Plan (Next 2 Weeks)
-| Task | Owner | Deadline |
-|---|---|---|
-| Rotate Secrets | DevOps | |
-| Review IAM Roles | SecOps | |
+## 3. Audit Log Check
+- [ ] Verify Chain Continuity (last 14 days)
+- [ ] Spot check "REVIEW_REQUIRED" events

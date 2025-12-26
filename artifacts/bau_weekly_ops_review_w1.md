@@ -1,28 +1,20 @@
-# BAU: Week 1 Ops Health Review
-**Date:** [T+7 Date]
-**Reviewer:** Ops Lead
+# BAU Weekly Ops Review (Week 1)
 
-## 1. SLO/SLI Metrics
-| Metric | Target | Actual (W1) | Status |
-|---|---|---|---|
-| **API Availability** | 99.9% | _% | [ ] PASS / [ ] FAIL |
-| **Latency (p95)** | < 500ms | _ms | [ ] PASS / [ ] FAIL |
-| **Webhook Success** | > 99.5% | _% | [ ] PASS / [ ] FAIL |
-| **Payout SLA (<24h)** | 95% | _% | [ ] PASS / [ ] FAIL |
+**Date:** [TBD]
+**Attendees:** Ops Team, Dev Lead
 
-## 2. Incident Summary
-- **Total Incidents:** [Number]
-- **Severity 1:** [Number]
-- **Key Issues:**
-  - [Issue 1]: [Brief description] -> [Action/Link]
+## 1. Metrics Review
+- **Uptime:** [99.xx]%
+- **Error Rate (5xx):** [0.xx]%
+- **Avg Latency (p95):** [xxx]ms
 
-## 3. Reconciliation & Stuck Jobs
-- **Stuck Jobs Detected:** [Number]
-- **Auto-Resolved:** [Number]
-- **Manual Intervention:** [Number]
-- **Ledger Mismatches:** [Number]
+## 2. Incidents
+- [List major incidents or "None"]
 
-## 4. Actions & Owners
-| Action Item | Owner | Deadline |
-|---|---|---|
-| | | |
+## 3. Capacity
+- **DB CPU:** [xx]%
+- **Storage:** [xx]% (Archive growth rate)
+
+## 4. Actions
+- [ ] Action 1
+- [ ] Action 2
