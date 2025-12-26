@@ -34,6 +34,10 @@
 4.  **Health Check:**
     - Verify `/api/health`.
     - Check Admin Login.
+### Tools & Scripts
+- **Config Verification:** `python3 scripts/verify_prod_env.py`
+- **Backup Drill:** `bash scripts/db_restore_drill.sh`
+- **Smoke Test:** `bash scripts/go_live_smoke.sh`
     - Check Dashboard Load.
     - Open Traffic.
 
