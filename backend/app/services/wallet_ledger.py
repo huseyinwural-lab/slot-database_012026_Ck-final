@@ -39,6 +39,7 @@ async def apply_wallet_delta_with_ledger(
     provider_ref: Optional[str] = None,
     provider_event_id: Optional[str] = None,
 ) -> bool:
+    allow_negative: bool = False,
     """Apply a wallet delta in a single transaction, bound to the ledger.
 
     This is the *only* supported way to change wallet balances.
