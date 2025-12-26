@@ -26,9 +26,17 @@ async def run_psp_failover_e2e():
         
     engine = create_async_engine(os.environ["DATABASE_URL"])
     
-    # Init Schema
+    # Init Schema - Import ALL models
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
+        from app.models.bonus_models import BonusCampaign
+        from app.models.engine_models import EngineStandardProfile
+        from app.models.poker_models import RakeProfile
+        from app.models.poker_table_models import PokerTable
+        from app.models.poker_mtt_models import PokerTournament
+        from app.models.rg_models import PlayerRGProfile
         from app.models.payment_models import PaymentIntent, Dispute
         await conn.run_sync(SQLModel.metadata.create_all)
         
@@ -105,7 +113,9 @@ async def run_psp_failover_e2e():
         log.append(f"Final Status: {row['status']}")
         log.append(f"Attempts: {row['attempts']}")
         
-        if row['status'] == 'COMPLETED' and 'stripe_mock' in row['attempts'] and 'adyen_mock' in row['attempts']:
+        # Verify both attempts exist
+        att_str = row['attempts']
+        if row['status'] == 'COMPLETED' and 'stripe_mock' in att_str and 'adyen_mock' in att_str:
             log.append("E2E Failover Test: PASS")
         else:
             log.append("E2E Failover Test: FAIL")
