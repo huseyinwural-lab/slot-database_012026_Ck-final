@@ -31,7 +31,8 @@ test.describe('Smart Game Loop', () => {
     const gamesRes = await apiContext.get('/api/v1/games', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
-    const games = await gamesRes.json();
+    const gamesData = await gamesRes.json();
+    const games = gamesData.items || gamesData;
     const game = games.find(g => g.external_id === 'classic777');
     expect(game).toBeTruthy();
     
