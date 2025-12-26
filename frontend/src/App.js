@@ -30,6 +30,7 @@ import { SystemLogs } from './pages/SystemLogs';
 import { AdminManagement } from './pages/AdminManagement';
 import AuditLog from './pages/AuditLog';
 import SettingsPanel from './pages/SettingsPanel';
+import OpsStatus from './pages/OpsStatus';
 import TenantsPage from './pages/TenantsPage';
 import KillSwitchPage from './pages/KillSwitchPage';
 import Login from './pages/Login';
