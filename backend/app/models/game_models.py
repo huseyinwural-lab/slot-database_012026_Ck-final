@@ -4,7 +4,8 @@ from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON
 import uuid
 
-class Game(SQLModel, table=True, extend_existing=True):
+class Game(SQLModel, table=True):
+    __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
     provider_id: str = Field(index=True) # e.g. "pragmatic", "mock"
@@ -16,7 +17,8 @@ class Game(SQLModel, table=True, extend_existing=True):
     configuration: Dict = Field(default={}, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-class GameSession(SQLModel, table=True, extend_existing=True):
+class GameSession(SQLModel, table=True):
+    __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
     player_id: str = Field(index=True)
@@ -27,7 +29,8 @@ class GameSession(SQLModel, table=True, extend_existing=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_activity_at: datetime = Field(default_factory=datetime.utcnow)
 
-class GameRound(SQLModel, table=True, extend_existing=True):
+class GameRound(SQLModel, table=True):
+    __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
     player_id: str = Field(index=True)
@@ -45,8 +48,9 @@ class GameRound(SQLModel, table=True, extend_existing=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-class GameEvent(SQLModel, table=True, extend_existing=True):
+class GameEvent(SQLModel, table=True):
     """Immutable audit log of every spin/event"""
+    __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     round_id: str = Field(foreign_key="gameround.id", index=True)
     
