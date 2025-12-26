@@ -43,6 +43,7 @@ class AdminUser(SQLModel, table=True):
     is_platform_owner: bool = False
     status: str = "active"
     is_active: bool = True
+    mfa_enabled: bool = False # P0-CUTOVER-02
     failed_login_attempts: int = 0
     invite_token: Optional[str] = None
     password_reset_token: Optional[str] = None
