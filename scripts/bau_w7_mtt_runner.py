@@ -61,8 +61,8 @@ async def run_mtt_e2e():
         buy_in = 10.0
         fee = 1.0
         await conn.execute(text("""
-            INSERT INTO pokertournament (id, tenant_id, name, buy_in, fee, min_players, max_players, start_at, status, created_at, updated_at, entrants_count, prize_pool_total, payout_report)
-            VALUES (:id, :tid, 'Sunday Special', :bi, :fee, 2, 100, :start, 'REG_OPEN', :now, :now, 0, 0, '{}')
+            INSERT INTO pokertournament (id, tenant_id, name, buy_in, fee, min_players, max_players, start_at, status, created_at, updated_at, entrants_count, prize_pool_total, payout_report, game_type, limit_type, currency, starting_chips)
+            VALUES (:id, :tid, 'Sunday Special', :bi, :fee, 2, 100, :start, 'REG_OPEN', :now, :now, 0, 0, '{}', 'TEXAS_HOLDEM', 'NO_LIMIT', 'USD', 1500)
         """), {"id": trn_id, "tid": tenant_id, "bi": buy_in, "fee": fee, "start": datetime.now(timezone.utc), "now": datetime.now(timezone.utc)})
         
         log.append(f"Tournament {trn_id} Created (REG_OPEN).")
