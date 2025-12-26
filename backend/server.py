@@ -127,6 +127,8 @@ from app.routes import finance_refunds
 app.include_router(finance_refunds.router)
 app.include_router(finance.router)
 from app.routes import finance_chargebacks
+from app.routes import rg_player
+app.include_router(rg_player.router)
 app.include_router(finance_chargebacks.router)
 app.include_router(finance_actions.router)
 app.include_router(feature_flags.router)
