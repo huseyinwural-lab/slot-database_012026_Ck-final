@@ -51,8 +51,8 @@ async def run_rg_kyc_smoke():
             
             # 1. RG Limit Set
             await conn.execute(text("""
-                INSERT INTO playerrgprofile (id, tenant_id, player_id, deposit_limit_daily, updated_at)
-                VALUES (:id, :tid, :pid, 50.0, :now)
+                INSERT INTO playerrgprofile (id, tenant_id, player_id, deposit_limit_daily, self_excluded_permanent, updated_at)
+                VALUES (:id, :tid, :pid, 50.0, 0, :now)
             """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": p1, "now": datetime.now(timezone.utc)})
             log.append("RG: Daily Deposit Limit set to 50.0.")
             
@@ -93,8 +93,8 @@ async def run_rg_kyc_smoke():
             # 5. Admin Verify
             await conn.execute(text("UPDATE player SET kyc_status = 'verified' WHERE id = :pid"), {"pid": p1})
             await conn.execute(text("""
-                INSERT INTO playerkyc (id, tenant_id, player_id, status, verified_at, updated_at)
-                VALUES (:id, :tid, :pid, 'VERIFIED', :now, :now)
+                INSERT INTO playerkyc (id, tenant_id, player_id, status, verified_at, updated_at, required_level)
+                VALUES (:id, :tid, :pid, 'VERIFIED', :now, :now, 'L1')
             """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": p1, "now": datetime.now(timezone.utc)})
             log.append("Admin KYC Verify: SUCCESS")
             
