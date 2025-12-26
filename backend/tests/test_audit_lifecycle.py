@@ -18,7 +18,7 @@ async def test_audit_lifecycle(session):
     # Debug
     print(f"Test DB URL: {settings.database_url}")
     
-    # 1. Setup Data (Older than retention to trigger purge)
+    # 1. Setup Data
     target_date = (datetime.now(timezone.utc) - timedelta(days=91)).strftime("%Y-%m-%d")
     ts_obj = datetime.strptime(target_date, "%Y-%m-%d").replace(tzinfo=timezone.utc, hour=10)
     
@@ -34,11 +34,18 @@ async def test_audit_lifecycle(session):
     await session.commit()
     await session.close()
     
-    # Verify visibility with new engine
+    # Verify visibility & format
     engine_check = create_async_engine(settings.database_url)
     async with engine_check.connect() as conn:
         res = await conn.execute(text("SELECT count(*) FROM auditevent"))
-        print(f"Rows in DB (Fresh Engine): {res.scalar()}")
+        print(f"Rows in DB: {res.scalar()}")
+        
+        res = await conn.execute(text("SELECT timestamp FROM auditevent WHERE id='life_1'"))
+        val = res.scalar()
+        print(f"Stored Timestamp: {val!r} (Type: {type(val)})")
+        if isinstance(val, datetime):
+             print(f"Stored TZ: {val.tzinfo}")
+             
     await engine_check.dispose()
     
     # 2. Export
@@ -48,19 +55,13 @@ async def test_audit_lifecycle(session):
     
     settings.audit_archive_path = test_archive_path
     
-    # Pass explicit DB URL
+    # Export
     await export_audit_log(target_date, output_dir="/tmp/audit_export_temp_lifecycle", db_url=settings.database_url)
     
-    # Verify File Exists
+    # Verify
     date_path = datetime.strptime(target_date, "%Y-%m-%d").strftime("%Y/%m/%d")
     manifest_path = f"{test_archive_path}/audit/{date_path}/audit_{target_date}_part01_manifest.json"
     
-    if not os.path.exists(manifest_path):
-        print(f"Manifest not found at {manifest_path}")
-        # List dir
-        print(f"Contents of {test_archive_path}:")
-        os.system(f"ls -R {test_archive_path}")
-        
     assert os.path.exists(manifest_path)
     
     # 3. Purge
