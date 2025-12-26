@@ -29,7 +29,6 @@ async def run_smoke_tests():
     async with engine.connect() as conn:
         try:
             # --- Setup Smoke Player ---
-            # Added ALL required fields including registered_at
             await conn.execute(text("""
                 INSERT INTO player (
                     id, tenant_id, username, email, password_hash, 
@@ -55,8 +54,14 @@ async def run_smoke_tests():
             # 1. Deposit
             tx_dep_id = str(uuid.uuid4())
             await conn.execute(text("""
-                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key, created_at, updated_at)
-                VALUES (:id, :tid, :pid, 'deposit', 100.0, 'USD', 'completed', 'completed', 'test_method', :ik, :now, :now)
+                INSERT INTO "transaction" (
+                    id, tenant_id, player_id, type, amount, currency, 
+                    status, state, method, idempotency_key, created_at, updated_at, balance_after
+                )
+                VALUES (
+                    :id, :tid, :pid, 'deposit', 100.0, 'USD', 
+                    'completed', 'completed', 'test_method', :ik, :now, :now, 100.0
+                )
             """), {
                 "id": tx_dep_id, "tid": tenant_id, "pid": player_id, "ik": f"smoke_dep_{run_id}", "now": now
             })
@@ -67,8 +72,14 @@ async def run_smoke_tests():
             # 2. Withdraw
             tx_wd_id = str(uuid.uuid4())
             await conn.execute(text("""
-                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key, created_at, updated_at)
-                VALUES (:id, :tid, :pid, 'withdrawal', 50.0, 'USD', 'pending', 'requested', 'bank', :ik, :now, :now)
+                INSERT INTO "transaction" (
+                    id, tenant_id, player_id, type, amount, currency, 
+                    status, state, method, idempotency_key, created_at, updated_at, balance_after
+                )
+                VALUES (
+                    :id, :tid, :pid, 'withdrawal', 50.0, 'USD', 
+                    'pending', 'requested', 'bank', :ik, :now, :now, 50.0
+                )
             """), {
                 "id": tx_wd_id, "tid": tenant_id, "pid": player_id, "ik": f"smoke_wd_{run_id}", "now": now
             })
@@ -77,8 +88,12 @@ async def run_smoke_tests():
             
             # 3. Ledger Entry (Simulated)
             await conn.execute(text("""
-                INSERT INTO ledgertransaction (id, tenant_id, player_id, type, amount, currency, status, created_at)
-                VALUES (:id, :tid, :pid, 'deposit', 100.0, 'USD', 'deposit_succeeded', :now)
+                INSERT INTO ledgertransaction (
+                    id, tenant_id, player_id, type, amount, currency, status, created_at, balance_after
+                )
+                VALUES (
+                    :id, :tid, :pid, 'deposit', 100.0, 'USD', 'deposit_succeeded', :now, 100.0
+                )
             """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": player_id, "now": now})
             finance_log.append("Ledger Entry: SUCCESS")
             
