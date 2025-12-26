@@ -84,12 +84,12 @@ async def run_cutover():
                 INSERT INTO adminuser (
                     id, tenant_id, username, email, full_name, password_hash, 
                     role, tenant_role, is_active, status, mfa_enabled, failed_login_attempts, 
-                    created_at
+                    is_platform_owner, created_at
                 )
                 VALUES (
                     :id, 'system', 'admin_prod', 'admin@casino.com', 'Prod Admin', 'hash', 
                     'Super Admin', 'admin', 1, 'active', 1, 0, 
-                    :now
+                    1, :now
                 )
             """), {"id": admin_id, "now": now})
             
