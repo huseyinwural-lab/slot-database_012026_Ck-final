@@ -26,7 +26,7 @@ async def main():
             print(f"{RED}Login Failed: {resp.text}{RESET}")
             return
         token = resp.json()["access_token"]
-        headers = {"Authorization": f"Bearer {token}"}
+        headers = {"Authorization": f"Bearer {token}", "X-Reason": "BAU_W12_TEST"}
         
         # 2. Setup Affiliate
         print(f"-> Creating Affiliate...")
@@ -73,15 +73,24 @@ async def main():
         # 5. First Deposit (Trigger CPA & CRM)
         print(f"-> Simulating First Deposit ($50)...")
         # Ensure 'deposit_match' bonus campaign exists for CRM trigger test
-        # We assume one exists or we create one (Skipping creation for brevity, assuming seeded data or CRM engine handles it gracefully if missing)
-        # Actually, let's create a Bonus Campaign just in case CRM needs it to grant bonus
         camp_data = {
             "name": "Welcome Bonus",
             "type": "deposit_match",
-            "status": "active",
             "config": {"match_percent": 100}
         }
-        await client.post(f"{BASE_URL}/bonuses/campaigns", json=camp_data, headers=headers)
+        resp = await client.post(f"{BASE_URL}/bonuses/campaigns", json=camp_data, headers=headers)
+        if resp.status_code != 200:
+             print(f"{RED}Create Campaign Failed: {resp.text}{RESET}")
+             return
+        camp_id = resp.json()["id"]
+        
+        # Activate Campaign (Reason required)
+        status_data = {"status": "active"}
+        resp = await client.post(f"{BASE_URL}/bonuses/campaigns/{camp_id}/status", json=status_data, headers=headers)
+        if resp.status_code != 200:
+             print(f"{RED}Activate Campaign Failed: {resp.text}{RESET}")
+             return
+        print(f"{GREEN}   Campaign Activated: {camp_id}{RESET}")
 
         # Deposit via Webhook (MockPSP)
         webhook_payload = {
