@@ -28,10 +28,20 @@ async def run_smoke_tests():
     async with engine.connect() as conn:
         try:
             # --- Setup Smoke Player ---
-            # Added legacy balance fields
+            # Added ALL required fields to avoid IntegrityError
             await conn.execute(text("""
-                INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, status, kyc_status)
-                VALUES (:id, :tid, :user, :email, 'hash', 0, 0, 0, 'active', 'pending')
+                INSERT INTO player (
+                    id, tenant_id, username, email, password_hash, 
+                    balance_real_available, balance_real_held, balance_real, balance_bonus, 
+                    wagering_requirement, wagering_remaining, risk_score,
+                    status, kyc_status
+                )
+                VALUES (
+                    :id, :tid, :user, :email, 'hash', 
+                    0, 0, 0, 0, 
+                    0, 0, 'low',
+                    'active', 'pending'
+                )
             """), {
                 "id": player_id, "tid": tenant_id, 
                 "user": f"smoke_{run_id}", 
