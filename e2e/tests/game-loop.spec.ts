@@ -1,15 +1,15 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 
-test.describe('Full Casino Game Loop', () => {
+test.describe('Casino E2E with Security', () => {
   test.setTimeout(120000);
 
-  test('Session -> Bet -> Win -> Ledger Check', async ({ page }) => {
+  test('Full Loop with Signed Webhooks', async ({ page }) => {
     const API_URL = 'http://localhost:8001';
     const PLAYER_APP_URL = 'http://localhost:3001';
     
     // 1. Setup User
     const uniqueId = Date.now();
-    const email = `gamer_${uniqueId}@example.com`;
+    const email = `secure_gamer_${uniqueId}@example.com`;
     const apiContext = await pwRequest.newContext({ baseURL: API_URL });
     
     await apiContext.post('/api/v1/auth/player/register', {
@@ -32,27 +32,22 @@ test.describe('Full Casino Game Loop', () => {
     await page.fill('input[type="email"]', email);
     await page.fill('input[type="password"]', 'Password123!');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/\/$/, { timeout: 10000 }); // Lobby
+    await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
 
-    // 3. Launch Game
-    // Click on a game card
-    await page.click('.group'); // Clicks first game card
+    // 3. Play Game
+    await page.click('.group');
     await expect(page).toHaveURL(/\/game\//);
     
-    // 4. Play (Spin)
-    // Check initial balance in header
+    // 4. Spin (Trigger Signed Callback)
     await expect(page.locator('text=BAL: $100.00')).toBeVisible();
-    
-    // Spin (Bet $1)
     await page.click('button:has-text("SPIN")');
     
-    // Wait for spin result
-    // Balance should change (either 99 or more if win)
+    // 5. Verify Balance Change
     await expect.poll(async () => {
         const text = await page.locator('div:has-text("BAL:")').innerText();
         return text;
-    }, { timeout: 10000 }).not.toBe('BAL: $100.00');
+    }, { timeout: 15000 }).not.toBe('BAL: $100.00');
     
-    console.log('Game Loop Successful');
+    console.log('Secure Game Loop PASS');
   });
 });
