@@ -25,7 +25,7 @@ test.describe('Robot Admin Ops', () => {
     
     // Clone
     const cloneRes = await adminContext.post(`/api/v1/robots/${originalRobot.id}/clone`, {
-      headers: { 'Authorization': `Bearer ${adminToken}` },
+      headers: { 'Authorization': `Bearer ${adminToken}`, 'X-Reason': 'E2E Test Clone' },
       data: { name_suffix: " (E2E Test)" }
     });
     expect(cloneRes.ok()).toBeTruthy();
@@ -33,7 +33,7 @@ test.describe('Robot Admin Ops', () => {
     
     // Enable Cloned Robot
     await adminContext.post(`/api/v1/robots/${clonedRobot.id}/toggle`, {
-      headers: { 'Authorization': `Bearer ${adminToken}` }
+      headers: { 'Authorization': `Bearer ${adminToken}`, 'X-Reason': 'E2E Test Toggle' }
     });
     
     // 3. Bind to Game
@@ -46,7 +46,7 @@ test.describe('Robot Admin Ops', () => {
     expect(game).toBeTruthy();
     
     const bindRes = await adminContext.post(`/api/v1/games/${game.id}/robot`, {
-        headers: { 'Authorization': `Bearer ${adminToken}` },
+        headers: { 'Authorization': `Bearer ${adminToken}`, 'X-Reason': 'E2E Test Bind' },
         data: { robot_id: clonedRobot.id }
     });
     expect(bindRes.ok()).toBeTruthy();
