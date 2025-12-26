@@ -151,6 +151,11 @@
 | Latency Spike (No Errors) | Monitor (Hypercare) |
 | Queue Backlog (< SLA) | Monitor (Hypercare) |
 
+### 6) Hypercare Tools & Scripts
+- **Stuck Job Detector:** `python3 scripts/detect_stuck_finance_jobs.py` (Run every 30m)
+- **Daily Recon Report:** `python3 scripts/daily_reconciliation_report.py` (Run daily)
+- **Waiver Tracking:** `artifacts/prod_env_waiver_register.md`
+
 ### Hypercare Routine (72h)
 *   **0-6h:** Every 30m check.
 *   **6-24h:** Hourly check.
