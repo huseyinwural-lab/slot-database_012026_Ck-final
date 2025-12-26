@@ -126,6 +126,8 @@ app.include_router(game_import.router)
 app.include_router(game_config_presets.router)
 app.include_router(robot.router)
 from app.routes import robots, math_assets
+from app.routes import admin_payments
+app.include_router(admin_payments.router)
 from app.routes import rg
 app.include_router(rg.router)
 from app.routes import poker_mtt
