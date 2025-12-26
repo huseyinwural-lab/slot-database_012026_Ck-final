@@ -58,6 +58,9 @@ class Player(SQLModel, table=True):
     balance_real: float = 0.0
     balance_bonus: float = 0.0
     # New split balances for prod-grade wallet
+    # Bonus Wagering (Sprint B)
+    wagering_requirement: float = 0.0
+    wagering_remaining: float = 0.0
     balance_real_available: float = 0.0
     balance_real_held: float = 0.0
     status: str = "active"
