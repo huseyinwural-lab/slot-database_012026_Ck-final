@@ -57,6 +57,18 @@ async def ops_health_check(
         health["components"]["audit_chain"] = {"status": "error", "error": str(e)}
         health["status"] = "red"
 
+    # 4. Engine Standards (Task D4 Extension)
+    try:
+        from app.models.engine_models import EngineStandardProfile
+        res = await session.execute(select(EngineStandardProfile))
+        profiles = res.scalars().all()
+        health["components"]["engine_standards"] = {
+            "status": "ok" if len(profiles) >= 3 else "warning",
+            "loaded_count": len(profiles)
+        }
+    except Exception as e:
+        health["components"]["engine_standards"] = {"status": "error", "error": str(e)}
+
     # 4. Storage (Check reachability)
     # Check if local path exists or S3 creds are present
     storage_status = "ok"
