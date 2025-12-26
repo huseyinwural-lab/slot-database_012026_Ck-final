@@ -65,3 +65,42 @@
 3.  Restore DB Snapshot (if data corruption suspect) OR Rollback Migration (if safe).
 4.  Verify Login & Read-Only endpoints.
 5.  Re-open Traffic.
+
+
+## 4. Sprint 7 — Cutover Command Sheet (One-Pager)
+
+### T-60 — Pre-flight
+1.  **Release Pin:** Define `RELEASE_SHA` / Tag.
+2.  **Prod Env Check:** `python3 scripts/verify_prod_env.py`
+    *   *Acceptance:* Prod mode, CORS restricted, no test secrets (or waived via ticket).
+
+### T-30 — Backup
+1.  **DB Snapshot:** Execute via Cloud Provider or `pg_dump` (do NOT run restore drill in Prod).
+2.  **Record:** Snapshot ID/Path + Timestamp + Checksum.
+
+### T-15 — Deploy + Migration + Smoke
+1.  **Deploy & Migrate:** `bash scripts/go_live_smoke.sh`
+    *   *Acceptance:* Migrations OK, API Health 200, Login OK, Payouts Router reachable.
+
+### T-0 — Canary Money Loop (GO Decision)
+1.  **Execute:** `docs/ops/canary_report_template.md` steps.
+    *   Deposit -> Withdraw Request -> Admin Approve -> Mark Paid -> Ledger Settlement.
+2.  **Decision:**
+    *   ✅ **GO:** Canary PASS + Artifacts Secured.
+    *   ❌ **NO-GO (Rollback):** Canary FAIL.
+
+### Rollback Decision Matrix
+| Trigger | Action |
+| :--- | :--- |
+| Payout/Withdraw 404/5xx | **Immediate Rollback** |
+| Migration Failure | **Immediate Rollback** |
+| Ledger Invariant Breach | **Immediate Rollback** |
+| Webhook Misclassification | **Immediate Rollback** |
+| Latency Spike (No Errors) | Monitor (Hypercare) |
+| Queue Backlog (< SLA) | Monitor (Hypercare) |
+
+### Hypercare Routine (72h)
+*   **0-6h:** Every 30m check.
+*   **6-24h:** Hourly check.
+*   **24-72h:** 3x Daily check.
+*   **Focus:** 5xx rates, Queue Backlog, Webhook Failures, Random Ledger Recon.
