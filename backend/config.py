@@ -97,6 +97,11 @@ class Settings(BaseSettings):
     adyen_client_key: Optional[str] = None
     adyen_hmac_key: Optional[str] = None
 
+    # Audit Retention (Task D1.2)
+    audit_retention_days: int = 730 # 2 years default
+    audit_archive_path: str = "/app/archive/audit" # Local path for archive store (or mount point)
+    audit_export_secret: str = "change_this_to_strong_secret_for_hmac"
+
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
         if not raw:
@@ -144,6 +149,10 @@ class Settings(BaseSettings):
             if not self.adyen_hmac_key:
                 missing.append("ADYEN_HMAC_KEY")
             
+            # Audit Secret
+            if self.audit_export_secret == "change_this_to_strong_secret_for_hmac":
+                missing.append("AUDIT_EXPORT_SECRET (must be changed)")
+
             if missing:
                 raise ValueError(
                     f"CRITICAL: Missing required secrets for {self.env} environment:\n" + 
