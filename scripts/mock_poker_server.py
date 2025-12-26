@@ -21,9 +21,13 @@ async def run_poker_mock():
         
     engine = create_async_engine(os.environ["DATABASE_URL"])
     
-    # Init Schema
+    # Init Schema - Import ALL models
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
+        from app.models.bonus_models import BonusCampaign
+        from app.models.engine_models import EngineStandardProfile
         from app.models.poker_models import RakeProfile, PokerHandAudit
         await conn.run_sync(SQLModel.metadata.create_all)
         
@@ -40,8 +44,8 @@ async def run_poker_mock():
         
         for p in [p1, p2]:
             await conn.execute(text("""
-                INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, status, kyc_status, registered_at)
-                VALUES (:id, :tid, :user, :email, 'hash', 1000, 1000, 0, 'active', 'verified', :now)
+                INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, balance_real_held, wagering_requirement, wagering_remaining, risk_score, status, kyc_status, registered_at)
+                VALUES (:id, :tid, :user, :email, 'hash', 1000, 1000, 0, 0, 0, 0, 'low', 'active', 'verified', :now)
             """), {"id": p, "tid": tenant_id, "user": f"p_{p[:4]}", "email": f"p_{p[:4]}@test.com", "now": datetime.now(timezone.utc)})
             
         await conn.commit()
@@ -56,12 +60,6 @@ async def run_poker_mock():
         hand_id = "hand_101"
         
         # 1. DEBIT P1
-        # Call API logic (simulated by direct insert for simplicity in single script, 
-        # or we could use httpx if backend running. Let's use direct DB inserts mirroring API logic 
-        # to ensure environment consistency without needing running server).
-        
-        # Simulating API Logic via DB:
-        
         # P1 Bet 50
         await conn.execute(text("UPDATE player SET balance_real_available = balance_real_available - 50, balance_real = balance_real - 50 WHERE id=:pid"), {"pid": p1})
         await conn.execute(text("""
@@ -84,6 +82,7 @@ async def run_poker_mock():
         log.append(f"P1 Wins {win_amt}: OK")
         
         # Ledger Rake
+        # NOTE: ledgertransaction needs `direction`. 'credit' for revenue? Yes.
         await conn.execute(text("""
             INSERT INTO ledgertransaction (id, tenant_id, player_id, type, amount, currency, status, created_at, direction, provider, provider_ref)
             VALUES (:id, :tid, 'system', 'poker_rake', :amt, 'USD', 'revenue', :now, 'credit', 'poker', :ref)
