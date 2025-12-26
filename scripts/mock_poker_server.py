@@ -82,10 +82,10 @@ async def run_poker_mock():
         log.append(f"P1 Wins {win_amt}: OK")
         
         # Ledger Rake
-        # NOTE: ledgertransaction needs `direction`. 'credit' for revenue? Yes.
+        # Added balance_after=0.0
         await conn.execute(text("""
-            INSERT INTO ledgertransaction (id, tenant_id, player_id, type, amount, currency, status, created_at, direction, provider, provider_ref)
-            VALUES (:id, :tid, 'system', 'poker_rake', :amt, 'USD', 'revenue', :now, 'credit', 'poker', :ref)
+            INSERT INTO ledgertransaction (id, tenant_id, player_id, type, amount, currency, status, created_at, direction, provider, provider_ref, balance_after)
+            VALUES (:id, :tid, 'system', 'poker_rake', :amt, 'USD', 'revenue', :now, 'credit', 'poker', :ref, 0.0)
         """), {"id": str(uuid.uuid4()), "tid": tenant_id, "amt": rake, "now": datetime.now(timezone.utc), "ref": hand_id})
         log.append(f"Rake {rake} Recorded: OK")
         
