@@ -8,6 +8,11 @@ import hmac
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
+import sys
+
+# Ensure backend directory is in path so we can import config
+sys.path.append(os.path.join(os.path.dirname(__file__), "../backend"))
+
 from config import settings
 
 # Setup DB
@@ -42,9 +47,6 @@ async def export_audit_log(target_date: str, output_dir: str):
 
     async with engine.connect() as conn:
         # Fetch rows
-        # In a real heavy DB, we'd use server-side cursors (stream). 
-        # For now, fetching in chunks or all (if memory permits) is standard.
-        # We'll use a simple fetch for MVP P0.
         query = text("""
             SELECT * FROM auditevent 
             WHERE timestamp >= :start AND timestamp < :end 
