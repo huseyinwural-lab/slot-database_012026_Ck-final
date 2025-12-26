@@ -20,10 +20,12 @@ async def run_bonus_smoke():
         
     engine = create_async_engine(TEST_DB_URL)
     
-    # Init Schema
+    # Init Schema - Import ALL models
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
-        from app.models.bonus_models import BonusCampaign # Ensure imported
+        from app.models.bonus_models import BonusCampaign, BonusGrant
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
         await conn.run_sync(SQLModel.metadata.create_all)
     
     e2e_log = []
@@ -42,7 +44,7 @@ async def run_bonus_smoke():
             # Tenant
             await conn.execute(text("INSERT INTO tenant (id, name, type, features, created_at, updated_at) VALUES (:id, 'Test Casino', 'owner', '{}', :now, :now)"), {"id": tenant_id, "now": now})
             
-            # Admin (Schema includes mfa_enabled now)
+            # Admin (Schema includes mfa_enabled, is_platform_owner)
             await conn.execute(text("""
                 INSERT INTO adminuser (id, tenant_id, username, email, full_name, password_hash, role, tenant_role, is_active, status, mfa_enabled, failed_login_attempts, is_platform_owner, created_at)
                 VALUES (:id, :tid, 'bonus_admin', :email, 'Bonus Admin', 'hash', 'Super Admin', 'admin', 1, 'active', 0, 0, 1, :now)
