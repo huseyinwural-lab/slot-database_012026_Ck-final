@@ -10,6 +10,9 @@ from app.models.sql_models import GameConfigVersion, AdminUser
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 from app.core.errors import AppError
+from app.models.robot_models import GameRobotBinding, RobotDefinition
+from app.services.audit import audit
+import uuid
 
 router = APIRouter(prefix="/api/v1/games", tags=["game_config"])
 
@@ -59,5 +62,79 @@ async def update_game_config(
     game.configuration = config
     session.add(game)
     
+
+@router.get("/{game_id}/robot")
+async def get_game_robot(
+    game_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    stmt = select(GameRobotBinding, RobotDefinition).join(RobotDefinition).where(GameRobotBinding.game_id == game_id)
+    # We want the ACTIVE binding
+    stmt = stmt.where(GameRobotBinding.is_enabled == True)
+    res = await session.execute(stmt)
+    row = res.first()
+    
+    if not row:
+        return {} # Empty object if no binding
+        
+    binding, robot = row
+    return {
+        "binding_id": binding.id,
+        "robot_id": robot.id,
+        "robot_name": robot.name,
+        "config_hash": robot.config_hash,
+        "is_active": robot.is_active,
+        "effective_from": binding.effective_from
+    }
+
+@router.post("/{game_id}/robot")
+async def bind_game_robot(
+    game_id: str,
+    payload: Dict[str, Any] = Body(...), # { robot_id: str }
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    robot_id = payload.get("robot_id")
+    if not robot_id:
+        raise HTTPException(400, "robot_id required")
+        
+    # Check robot exists
+    robot = await session.get(RobotDefinition, robot_id)
+    if not robot:
+        raise HTTPException(404, "Robot not found")
+    if not robot.is_active:
+        raise HTTPException(409, "Robot is not active")
+        
+    # Disable old binding
+    stmt = select(GameRobotBinding).where(GameRobotBinding.game_id == game_id, GameRobotBinding.is_enabled == True)
+    old_binding = (await session.execute(stmt)).scalars().first()
+    if old_binding:
+        old_binding.is_enabled = False
+        session.add(old_binding)
+        
+    # Create new binding
+    new_binding = GameRobotBinding(
+        tenant_id=current_admin.tenant_id,
+        game_id=game_id,
+        robot_id=robot_id,
+        is_enabled=True
+    )
+    session.add(new_binding)
+    
+    await audit.log_event(
+        session=session,
+        request_id=str(uuid.uuid4()),
+        actor_user_id=current_admin.id,
+        tenant_id=current_admin.tenant_id,
+        action="GAME_ROBOT_BIND",
+        resource_type="game",
+        resource_id=game_id,
+        result="success",
+        details={"robot_id": robot_id}
+    )
+    
+    await session.commit()
+    return {"message": "Robot bound successfully", "binding_id": new_binding.id}
     await session.commit()
     return {"message": "Config updated"}
