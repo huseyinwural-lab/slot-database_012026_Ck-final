@@ -24,6 +24,13 @@ async def run_rg_kyc_smoke():
     # Init Schema
     async with engine.begin() as conn:
         from app.models.sql_models import SQLModel
+        from app.models.game_models import Game
+        from app.models.robot_models import RobotDefinition
+        from app.models.bonus_models import BonusCampaign
+        from app.models.engine_models import EngineStandardProfile
+        from app.models.poker_models import RakeProfile
+        from app.models.poker_table_models import PokerTable
+        from app.models.poker_mtt_models import PokerTournament
         from app.models.rg_models import PlayerRGProfile, PlayerKYC
         await conn.run_sync(SQLModel.metadata.create_all)
     
