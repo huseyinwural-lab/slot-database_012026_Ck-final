@@ -4,6 +4,29 @@ from sqlalchemy import text
 from app.models.sql_models import AuditEvent
 from sqlalchemy.exc import DBAPIError, OperationalError, IntegrityError
 
+# Fixture to apply triggers for test session (if using in-memory or fresh DB)
+@pytest.fixture(autouse=True)
+async def apply_audit_triggers(session):
+    triggers = [
+        """
+        CREATE TRIGGER IF NOT EXISTS prevent_audit_update 
+        BEFORE UPDATE ON auditevent 
+        BEGIN 
+            SELECT RAISE(ABORT, 'Audit events are immutable: UPDATE blocked'); 
+        END;
+        """,
+        """
+        CREATE TRIGGER IF NOT EXISTS prevent_audit_delete 
+        BEFORE DELETE ON auditevent 
+        BEGIN 
+            SELECT RAISE(ABORT, 'Audit events are immutable: DELETE blocked'); 
+        END;
+        """
+    ]
+    for t in triggers:
+        await session.execute(text(t))
+    await session.commit()
+
 @pytest.mark.asyncio
 async def test_audit_immutable_update_fails(session):
     # 1. Insert Event
