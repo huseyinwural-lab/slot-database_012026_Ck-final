@@ -1,23 +1,19 @@
-from __future__ import annotations
-
-from datetime import datetime, timedelta, timezone
-from typing import Optional
-import csv
-import io
-
-from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
+from datetime import datetime, timezone, timedelta
+import csv
+import io
+import uuid
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser, AuditEvent
 from app.schemas.audit_event import AuditEventListResponse, AuditEventPublic
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
-
+from app.services.audit import audit # Import service to log export itself
 
 router = APIRouter(prefix="/api/v1/audit", tags=["audit"])
-
 
 @router.get("/events", response_model=AuditEventListResponse)
 async def list_audit_events(
@@ -108,10 +104,35 @@ async def export_audit_events(
     current_admin: AdminUser = Depends(get_current_admin),
     since_hours: int = Query(default=24, ge=1, le=24 * 90),
 ):
-    """Export audit events as CSV."""
+    """
+    Export audit events as CSV.
+    Security: Tenant-scoped. Rate-limiting suggested (omitted for MVP, handled by generic rate-limiter).
+    Audit: This action itself is audited as 'AUDIT_EXPORT'.
+    """
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=since_hours)
     
+    # 1. Self-Audit First
+    await audit.log_event(
+        session=session,
+        request_id=getattr(request.state, "request_id", str(uuid.uuid4())),
+        actor_user_id=current_admin.id,
+        actor_role=current_admin.role,
+        tenant_id=tenant_id,
+        action="AUDIT_EXPORT",
+        resource_type="audit_log",
+        resource_id=None,
+        result="success",
+        status="SUCCESS",
+        reason="Manual CSV Export",
+        ip_address=getattr(request.state, "ip_address", None),
+        user_agent=getattr(request.state, "user_agent", None),
+        details={"since_hours": since_hours, "format": "csv"}
+    )
+    # Commit audit log before streaming response to ensure it's recorded even if export fails mid-stream
+    await session.commit()
+    
+    # 2. Query
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=since_hours)
     q = select(AuditEvent).where(AuditEvent.timestamp >= cutoff)
     
     if not getattr(current_admin, "is_platform_owner", False):
