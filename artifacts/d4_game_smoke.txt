@@ -1,17 +1,7 @@
-ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: player.registered_at
+ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: transaction.balance_after
 [SQL: 
-                INSERT INTO player (
-                    id, tenant_id, username, email, password_hash, 
-                    balance_real_available, balance_real_held, balance_real, balance_bonus, 
-                    wagering_requirement, wagering_remaining, risk_score,
-                    status, kyc_status
-                )
-                VALUES (
-                    ?, ?, ?, ?, 'hash', 
-                    0, 0, 0, 0, 
-                    0, 0, 'low',
-                    'active', 'pending'
-                )
+                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key, created_at, updated_at)
+                VALUES (?, ?, ?, 'deposit', 100.0, 'USD', 'completed', 'completed', 'test_method', ?, ?, ?)
             ]
-[parameters: ('1d48ce58-832c-4a2d-9e46-ebfbf8c82e71', 'default_casino', 'smoke_9566f5b9', 'smoke_9566f5b9@test.com')]
+[parameters: ('c3a1ee5a-c89a-4bee-90e8-b5b941f76846', 'default_casino', '94d057e2-20f9-4152-b3ae-9c07566ac43b', 'smoke_dep_d95a6d73', datetime.datetime(2025, 12, 26, 20, 34, 15, 331348, tzinfo=datetime.timezone.utc), datetime.datetime(2025, 12, 26, 20, 34, 15, 331348, tzinfo=datetime.timezone.utc))]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
