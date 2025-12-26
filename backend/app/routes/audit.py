@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 import csv
 import io
 import uuid
+from typing import Optional
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser, AuditEvent
