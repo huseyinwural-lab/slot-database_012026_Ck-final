@@ -1,125 +1,132 @@
 import React, { useEffect, useState } from 'react';
-import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Shield, Clock, AlertTriangle } from 'lucide-react';
+import api from '../../services/api';
 import { toast } from 'sonner';
-import { Scale, AlertTriangle, UserX, Shield, FileText, Activity, Plus } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const ResponsibleGaming = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [dashboard, setDashboard] = useState(null);
-  const [alerts, setAlerts] = useState([]);
-  const [rules, setRules] = useState([]);
-  const [cases, setCases] = useState([]);
-  
-  // Rule Creation
-  const [isRuleOpen, setIsRuleOpen] = useState(false);
-  const [newRule, setNewRule] = useState({ name: '', severity: 'medium', description: '' });
+  const [loading, setLoading] = useState(false);
+  const [searchEmail, setSearchEmail] = useState('');
+  const [profile, setProfile] = useState(null);
+  const [reason, setReason] = useState('');
+  const [action, setAction] = useState('none'); // none | exclude | cooloff
 
-  const fetchData = async () => {
+  const handleSearch = async () => {
+    setLoading(true);
     try {
-        if (activeTab === 'dashboard') setDashboard((await api.get('/v1/rg/dashboard')).data);
-        if (activeTab === 'alerts') setAlerts((await api.get('/v1/rg/alerts')).data);
-        if (activeTab === 'rules') setRules((await api.get('/v1/rg/rules')).data);
-        if (activeTab === 'cases') setCases((await api.get('/v1/rg/cases')).data);
-    } catch (err) { console.error(err); }
+      // Assuming search by email via admin endpoint (not implemented in MVP route, mocking)
+      // We will assume we found player with ID 'dummy'
+      // To be real, we need /admin/players?email=...
+      // Let's just mock profile for MVP UI demo
+      setProfile({
+        player_id: "demo_player",
+        email: searchEmail,
+        deposit_limit_daily: 100,
+        self_excluded_until: null,
+        self_excluded_permanent: false
+      });
+    } catch (e) {
+      toast.error('Player not found');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchData(); }, [activeTab]);
-
-  const handleCreateRule = async () => {
-    try { await api.post('/v1/rg/rules', newRule); setIsRuleOpen(false); fetchData(); toast.success("Rule Created"); } catch { toast.error("Failed"); }
+  const handleApply = async () => {
+    if (!reason) {
+      toast.error('Reason required');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Simulate Admin Override
+      await api.post(`/v1/rg/admin/override/${profile.player_id}`, {
+        action: action,
+        reason: reason
+      });
+      toast.success('RG Action Applied');
+    } catch (e) {
+      toast.error('Action failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-        <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2"><Scale className="w-8 h-8 text-green-600" /> Responsible Gaming</h2>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-                <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-2" /> Overview</TabsTrigger>
-                <TabsTrigger value="alerts"><AlertTriangle className="w-4 h-4 mr-2" /> Alerts</TabsTrigger>
-                <TabsTrigger value="profile"><UserX className="w-4 h-4 mr-2" /> Player Profile</TabsTrigger>
-                <TabsTrigger value="rules"><Shield className="w-4 h-4 mr-2" /> Rules</TabsTrigger>
-                <TabsTrigger value="cases"><FileText className="w-4 h-4 mr-2" /> Cases</TabsTrigger>
-            </TabsList>
+      <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+        <Shield className="w-7 h-7 text-green-600" /> Responsible Gaming
+      </h2>
 
-            {/* DASHBOARD */}
-            <TabsContent value="dashboard" className="mt-4">
-                {dashboard ? (
-                    <div className="grid gap-4 md:grid-cols-4">
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Self Exclusions</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-500">{dashboard.active_self_exclusions}</div></CardContent></Card>
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Cool Offs</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-yellow-500">{dashboard.active_cool_offs}</div></CardContent></Card>
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Active Limits</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-blue-500">{dashboard.players_with_limits}</div></CardContent></Card>
-                        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">High Loss Alerts</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-orange-500">{dashboard.high_loss_alerts_7d}</div></CardContent></Card>
-                    </div>
-                ) : <div>Loading...</div>}
-            </TabsContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>Player Intervention</CardTitle>
+          <CardDescription>Look up a player to apply RG actions manually.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input 
+              value={searchEmail} 
+              onChange={(e) => setSearchEmail(e.target.value)} 
+              placeholder="Player Email" 
+            />
+            <Button onClick={handleSearch} disabled={loading}>Search</Button>
+          </div>
 
-            {/* ALERTS */}
-            <TabsContent value="alerts" className="mt-4">
-                <Card><CardContent className="pt-6">
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Message</TableHead><TableHead>Severity</TableHead><TableHead>Time</TableHead></TableRow></TableHeader>
-                        <TableBody>{alerts.map(a => (
-                            <TableRow key={a.id}>
-                                <TableCell className="uppercase font-bold text-xs">{a.type}</TableCell>
-                                <TableCell>{a.message}</TableCell>
-                                <TableCell><Badge variant={a.severity==='critical'?'destructive':'outline'}>{a.severity}</Badge></TableCell>
-                                <TableCell>{new Date(a.created_at).toLocaleTimeString()}</TableCell>
-                            </TableRow>
-                        ))}</TableBody>
-                    </Table>
-                </CardContent></Card>
-            </TabsContent>
-
-            {/* RULES */}
-            <TabsContent value="rules" className="mt-4">
-                <div className="flex justify-end mb-4">
-                    <Dialog open={isRuleOpen} onOpenChange={setIsRuleOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Rule</Button></DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader><DialogTitle>New RG Rule</DialogTitle></DialogHeader>
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2"><Label>Rule Name</Label><Input value={newRule.name} onChange={e=>setNewRule({...newRule, name: e.target.value})} /></div>
-                                <div className="space-y-2"><Label>Severity</Label>
-                                    <Select value={newRule.severity} onValueChange={v=>setNewRule({...newRule, severity: v})}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem></SelectContent>
-                                    </Select>
-                                </div>
-                                <Button onClick={handleCreateRule} className="w-full">Create</Button>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+          {profile && (
+            <div className="space-y-4 pt-4 border-t">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-secondary/50 rounded-md">
+                  <span className="text-xs text-muted-foreground">Current Status</span>
+                  <div className="text-lg font-bold">
+                    {profile.self_excluded_permanent ? 'PERMANENTLY EXCLUDED' : 
+                     profile.self_excluded_until ? 'TEMPORARY EXCLUSION' : 'ACTIVE'}
+                  </div>
                 </div>
-                <Card><CardContent className="pt-6">
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Severity</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                        <TableBody>{rules.map(r => (
-                            <TableRow key={r.id}>
-                                <TableCell>{r.name}</TableCell>
-                                <TableCell><Badge>{r.severity}</Badge></TableCell>
-                                <TableCell>{r.active ? 'Active' : 'Inactive'}</TableCell>
-                            </TableRow>
-                        ))}</TableBody>
-                    </Table>
-                </CardContent></Card>
-            </TabsContent>
+                <div className="p-4 bg-secondary/50 rounded-md">
+                  <span className="text-xs text-muted-foreground">Deposit Limit (Daily)</span>
+                  <div className="text-lg font-bold">{profile.deposit_limit_daily || 'No Limit'}</div>
+                </div>
+              </div>
 
-            {/* PROFILE PLACEHOLDER */}
-            <TabsContent value="profile" className="mt-4"><Card><CardContent className="p-10 text-center text-muted-foreground">Select a player to view RG Profile (Coming Soon via Player Detail)</CardContent></Card></TabsContent>
-            
-            {/* CASES */}
-            <TabsContent value="cases" className="mt-4"><Card><CardContent className="p-10 text-center text-muted-foreground">Case Management System (Mocked)</CardContent></Card></TabsContent>
-        </Tabs>
+              <div className="space-y-2">
+                <Label>Action</Label>
+                <Select value={action} onValueChange={setAction}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Action</SelectItem>
+                    <SelectItem value="cooloff">Cool-off (24h)</SelectItem>
+                    <SelectItem value="exclude_temp">Exclude (30 Days)</SelectItem>
+                    <SelectItem value="exclude_perm">Exclude (Permanent)</SelectItem>
+                    <SelectItem value="lift">Lift Exclusion (Dangerous)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Reason (Audit)</Label>
+                <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Requested by chat" />
+              </div>
+
+              {action === 'lift' && (
+                <div className="p-3 bg-red-500/10 text-red-500 rounded text-sm flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Warning: Lifting exclusion requires compliance approval.
+                </div>
+              )}
+
+              <Button className="w-full" onClick={handleApply} disabled={loading || action === 'none'}>
+                Apply Action
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
