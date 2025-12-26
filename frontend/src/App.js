@@ -16,6 +16,8 @@ import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
 import { FeatureFlags } from './pages/FeatureFlags';
 import SimulationLab from './pages/SimulationLab';
+import RobotsPage from './pages/RobotsPage';
+import MathAssetsPage from './pages/MathAssetsPage';
 import VipGames from './pages/VipGames';
 import KYCManagement from './pages/KYCManagement';
 import { CRM } from './pages/CRM';
@@ -85,6 +87,18 @@ function App() {
                 <RequireAuth>
                   <RequireFeature feature="can_use_game_robot" requireOwner={true}><SimulationLab /></RequireFeature>
                 </RequireAuth>
+              
+              <Route path="/robots" element={
+                <RequireAuth>
+                  <RequireFeature feature="can_use_game_robot"><RobotsPage /></RequireFeature>
+                </RequireAuth>
+              } />
+              
+              <Route path="/math-assets" element={
+                <RequireAuth>
+                  <RequireFeature feature="can_use_game_robot"><MathAssetsPage /></RequireFeature>
+                </RequireAuth>
+              } />
               } />
               
               <Route path="/kyc" element={
