@@ -92,7 +92,7 @@ async def test_math_asset_upload_audit(client: AsyncClient, admin_token, session
 @pytest.mark.asyncio
 async def test_game_robot_bind_audit(client: AsyncClient, admin_token, session):
     # Setup
-    robot = RobotDefinition(name="Binder Bot", config={}, is_active=True)
+    robot = RobotDefinition(name="Binder Bot", config={}, config_hash="dummy_hash_3", is_active=True)
     game = Game(
         name="Bind Game", 
         external_id="bind_game_1", 
