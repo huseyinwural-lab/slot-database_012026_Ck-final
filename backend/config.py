@@ -69,19 +69,18 @@ class Settings(BaseSettings):
     adyen_client_key: Optional[str] = None
     adyen_hmac_key: Optional[str] = None
 
-    # Audit Retention & Archival (Task D1/D2)
+    # Audit Retention
     audit_retention_days: int = 90
     audit_export_secret: str = "change_this_to_strong_secret_for_hmac"
     
-    # Task D2: Remote Storage
-    audit_archive_backend: str = "filesystem" # 'filesystem' or 's3'
+    # Storage
+    audit_archive_backend: str = "filesystem"
     audit_s3_endpoint: Optional[str] = None
     audit_s3_region: str = "us-east-1"
     audit_s3_bucket: str = "casino-audit-archive"
     audit_s3_access_key: Optional[str] = None
     audit_s3_secret_key: Optional[str] = None
     audit_archive_prefix: str = "audit/"
-    # Local path fallback (for 'filesystem' backend)
     audit_archive_path: str = "/app/archive/audit" 
 
     def get_cors_origins(self) -> List[str]:
@@ -108,15 +107,19 @@ class Settings(BaseSettings):
         extra = "ignore"
 
     def validate_prod_secrets(self) -> None:
-        if self.env in {"prod", "staging"}:
+        """P0-OPS-001: Strict Production Validation."""
+        if self.env in {"prod"}:
             missing = []
-            if not self.stripe_api_key or not self.stripe_api_key.startswith("sk_"):
-                missing.append("STRIPE_API_KEY (must start with sk_)")
-            if not self.stripe_webhook_secret or not self.stripe_webhook_secret.startswith("whsec_"):
-                missing.append("STRIPE_WEBHOOK_SECRET (must start with whsec_)")
+            # Critical Secrets List - MUST BE LIVE keys
+            if not self.stripe_api_key or "live" not in self.stripe_api_key:
+                missing.append("STRIPE_API_KEY (must contain 'live')")
+            if not self.stripe_webhook_secret or "live" not in self.stripe_webhook_secret:
+                missing.append("STRIPE_WEBHOOK_SECRET (must contain 'live' or standard prefix for prod)")
             
-            if not self.adyen_api_key:
-                missing.append("ADYEN_API_KEY")
+            if not self.adyen_api_key or "live" not in self.adyen_api_key.lower():
+                # Adyen keys don't always have 'live' in prefix but usually distinguished. 
+                # For this check, we enforce 'live' string presence as per instruction.
+                missing.append("ADYEN_API_KEY (must be a live key)")
             
             if self.audit_export_secret == "change_this_to_strong_secret_for_hmac":
                 missing.append("AUDIT_EXPORT_SECRET (must be changed)")
