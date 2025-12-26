@@ -126,6 +126,8 @@ app.include_router(revenue.router)
 from app.routes import finance_refunds
 app.include_router(finance_refunds.router)
 app.include_router(finance.router)
+from app.routes import finance_chargebacks
+app.include_router(finance_chargebacks.router)
 app.include_router(finance_actions.router)
 app.include_router(feature_flags.router)
 app.include_router(simulation_lab.router)
