@@ -65,6 +65,10 @@ class Settings(BaseSettings):
     # KYC / wallet
     kyc_unverified_daily_deposit_cap: float = 100.0
 
+    # Velocity limit settings
+    max_tx_velocity_count: int = 5
+    max_tx_velocity_window_minutes: int = 1
+
     # Reconciliation runner / queue
     redis_url: str = "redis://redis:6379/0"  # REDIS_URL
     recon_runner: str = "background"  # RECON_RUNNER: "queue" or "background"
