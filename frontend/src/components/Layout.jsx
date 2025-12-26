@@ -6,7 +6,8 @@ import {
   ListChecks, ToggleRight, Search, FlaskConical,
   FileText, Megaphone, BarChart3, Globe, Handshake,
   AlertOctagon, UserCog, ScrollText, Scale, Crown,
-  KeyRound, Building, TrendingUp, Power, DollarSign
+  KeyRound, Building, TrendingUp, Power, DollarSign,
+  Bot, FileCode
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -186,6 +187,12 @@ const Layout = ({ children }) => {
               {isOwner && <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" activeClassName={theme.activeItem} />}
               {isOwner && <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" activeClassName={theme.activeItem} />}
+          </div>
+
+          <div className="space-y-1 mb-6">
+              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Game Engine</div>
+              {hasFeature('can_use_game_robot') && <SidebarItem to="/robots" icon={Bot} label="Robots" activeClassName={theme.activeItem} />}
+              {hasFeature('can_use_game_robot') && <SidebarItem to="/math-assets" icon={FileCode} label="Math Assets" activeClassName={theme.activeItem} />}
           </div>
 
           <div className="space-y-1 mb-6">
