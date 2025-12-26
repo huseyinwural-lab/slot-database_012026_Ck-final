@@ -16,7 +16,6 @@ router = APIRouter(prefix="/api/v1/kyc", tags=["kyc"])
 async def get_kyc_dashboard(
     request: Request,
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin)
     current_admin: AdminUser = Depends(get_current_admin),
     _ = Depends(feature_required("can_manage_kyc")),
 ):
