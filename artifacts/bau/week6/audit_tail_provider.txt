@@ -1,4 +1,0 @@
-1. POKER_HAND | Hand: hand_101 | Rake: 5.0 | Net: +95.0
-2. POKER_HAND | Hand: hand_102 | Rake: 2.0 | Net: +38.0
-3. PROVIDER_CALLBACK_REJECT | Reason: Replay Attack | Ref: hand_101_win
-4. ENGINE_CONFIG_UPDATE | Rake Profile: High Stakes | Reason: W6 Optimization
