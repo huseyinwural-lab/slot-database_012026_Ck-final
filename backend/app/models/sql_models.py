@@ -1,9 +1,12 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, TYPE_CHECKING
 from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON, Text
 from sqlalchemy.dialects.postgresql import JSONB
 import uuid
+
+if TYPE_CHECKING:
+    from app.models.game_models import Game
 
 # --- SHARED MODELS ---
 
@@ -72,21 +75,6 @@ class Player(SQLModel, table=True):
     tenant: Tenant = Relationship(back_populates="players")
     transactions: List["Transaction"] = Relationship(back_populates="player")
     tickets: List["SupportTicket"] = Relationship(back_populates="player")
-
-
-class Game(SQLModel, table=True):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(foreign_key="tenant.id", index=True)
-    name: str
-    provider: str
-    category: str 
-    status: str = "draft"
-    rtp: float = 96.0
-    image_url: Optional[str] = None
-    configuration: Dict = Field(default={}, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
-
-    tenant: Tenant = Relationship(back_populates="games")
 
 
 class Transaction(SQLModel, table=True):

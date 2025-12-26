@@ -1,21 +1,36 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, TYPE_CHECKING
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON
 import uuid
 
+if TYPE_CHECKING:
+    from app.models.sql_models import Tenant
+
 class Game(SQLModel, table=True):
     __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
+    
+    # Modern fields (Sprint B+)
     provider_id: str = Field(index=True) # e.g. "pragmatic", "mock"
     external_id: str = Field(index=True) # Provider's game ID
-    title: str
     type: str = "slot" # slot, live, table
     rtp: float = 96.5
     is_active: bool = True
+    
+    # Legacy fields (from sql_models.py) - Kept for compatibility
+    name: str = ""
+    provider: str = "unknown" # Legacy field
+    category: str = "slot"    # Legacy field
+    status: str = "draft"
+    image_url: Optional[str] = None
+    
     configuration: Dict = Field(default={}, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    # Relationships
+    tenant: "Tenant" = Relationship(back_populates="games")
 
 class GameSession(SQLModel, table=True):
     __table_args__ = {'extend_existing': True}
@@ -63,6 +78,7 @@ class GameEvent(SQLModel, table=True):
     
     # Wallet Transaction Reference
     tx_id: Optional[str] = Field(index=True)
+
 class CallbackNonce(SQLModel, table=True):
     """Replay Protection Store"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
@@ -73,6 +89,3 @@ class CallbackNonce(SQLModel, table=True):
     
     # Constraint: Unique (provider, nonce) handled by logic or composite index manually if needed
     # For now, simplistic check
-
-    
-    created_at: datetime = Field(default_factory=datetime.utcnow)
