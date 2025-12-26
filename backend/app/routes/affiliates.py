@@ -59,15 +59,58 @@ async def get_offers(
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
     return []
 
-@router.get("/links")
-async def get_links(
+from app.models.growth_models import Affiliate, AffiliateLink
+
+router = APIRouter(prefix="/api/v1/affiliates", tags=["affiliates"])
+
+@router.get("/{affiliate_id}/links")
+async def get_affiliate_links(
+    affiliate_id: str,
     request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
-    return []
+    
+    stmt = select(AffiliateLink).where(AffiliateLink.affiliate_id == affiliate_id, AffiliateLink.tenant_id == tenant_id)
+    return (await session.execute(stmt)).scalars().all()
+
+@router.post("/{affiliate_id}/links")
+async def create_affiliate_link(
+    affiliate_id: str,
+    request: Request,
+    payload: dict = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+    
+    # Check affiliate
+    aff = await session.get(Affiliate, affiliate_id)
+    if not aff or aff.tenant_id != tenant_id:
+        raise HTTPException(404, "Affiliate not found")
+
+    code = payload.get("code")
+    if not code:
+        raise HTTPException(400, "Code required")
+        
+    # Check duplicate code
+    stmt = select(AffiliateLink).where(AffiliateLink.code == code, AffiliateLink.tenant_id == tenant_id)
+    if (await session.execute(stmt)).scalars().first():
+        raise HTTPException(400, "Code already in use")
+
+    link = AffiliateLink(
+        tenant_id=tenant_id,
+        affiliate_id=affiliate_id,
+        code=code,
+        campaign=payload.get("campaign", "default")
+    )
+    session.add(link)
+    await session.commit()
+    await session.refresh(link)
+    return link
 
 
 @router.get("/payouts")
