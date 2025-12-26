@@ -150,12 +150,13 @@ function App() {
                 </RequireAuth>
               } />
               
-              <Route path="/rg" element={
               <Route path="/ops" element={
                 <RequireAuth>
                   <RequireFeature requireOwner={true}><OpsStatus /></RequireFeature>
                 </RequireAuth>
               } />
+
+              <Route path="/rg" element={
                 <RequireAuth>
                   <RequireFeature requireOwner={true}><ResponsibleGaming /></RequireFeature>
                 </RequireAuth>
