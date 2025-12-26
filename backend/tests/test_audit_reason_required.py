@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from app.models.sql_models import RobotDefinition
+from app.models.robot_models import RobotDefinition
 
 @pytest.mark.asyncio
 async def test_toggle_robot_missing_reason_fails(client: AsyncClient, admin_token, session):
