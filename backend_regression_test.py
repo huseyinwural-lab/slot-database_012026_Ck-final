@@ -15,7 +15,7 @@ import time
 from typing import Dict, Any, Optional
 
 # Configuration - Use environment variable from frontend/.env
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://smart-robot-ui.preview.emergentagent.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://smartgame-engine.preview.emergentagent.com")
 API_BASE = f"{BASE_URL}/api"
 
 class TestResult:
