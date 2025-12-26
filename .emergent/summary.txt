@@ -1,156 +1,220 @@
 <analysis>**original_problem_statement:**
-The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project has progressed through a series of sprints, moving from fixing critical E2E tests (Sprint 5) through a full Go-Live simulation (Sprints 6-8). The project has now transitioned into implementing core casino features based on a Final Backlog provided by the user. The current focus is on completing Sprint C, which involves transforming the game engine from a simple mock into a controllable, auditable, and DB-driven Robot and Math Asset system.
+The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project has progressed through a series of sprints, moving from fixing critical E2E tests through a full Go-Live simulation. The project has now transitioned into implementing core casino features based on a Final Backlog provided by the user in a sequential, Business As Usual (BAU) sprint format. The overall goal is to build a feature-complete, secure, and operationally ready platform.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Sprint A (Completed):** Focused on core hardening and automation, including implementing a velocity engine, withdraw expiry automation, a chargeback handler, and basic compliance UI.
-2.  **Sprint B (Completed):** Focused on building the game loop, including a mock provider, game engine, player-facing frontend (catalog, game room), and securing the callback mechanism with HMAC.
-3.  **Sprint C (In Progress):** Aims to create a Controlled Casino by implementing a Robot Registry, a Math Asset Pipeline, and hardening the provider contract. The Admin UI for managing Robots and Math Assets has just been completed.
-4.  **Final Backlog:** The user has provided a comprehensive backlog for post-go-live work, covering regulation (KYC/RG), fraud/abuse prevention, and game integration pipelines.
+The project follows a user-directed, artifact-driven development process. The user provides detailed İş Emri (Task Orders) for each sprint, specifying the scope, implementation details, acceptance criteria, and required Kanıt Paketi (Evidence Package) for closure. The completed sprints include:
+1.  **Core Hardening (Sprints A-D):** Implemented a velocity engine, hardened financial core, built a DB-driven Robot game engine, and established a fully immutable, archived, and tamper-evident audit system. Completed a full Go-Live simulation and established operational monitoring.
+2.  **BAU Sprint 1-4:** Established automated operational reporting and hardened the engine standards.
+3.  **BAU Sprint 5-7:** Implemented a provider-agnostic Poker Gateway, including a Rake Engine, Cash Game integration, and a full Multi-Table Tournament (MTT) lifecycle.
+4.  **BAU Sprint 8:** Implemented an advanced financial risk engine and automated reconciliation reporting.
+5.  **BAU Sprint 9:** Implemented a full Responsible Gaming (RG) module and a KYC-gated withdrawal process.
+6.  **BAU Sprint 10:** Built a multi-PSP payment orchestration layer with failover and retry logic.
+7.  **BAU Sprint 11:** Implemented payment analytics and smart routing (v2) based on performance data.
+8.  **BAU Sprint 12 (In Progress):** Began implementation of a Growth Core featuring an Affiliate system and CRM automations.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The application is a full-stack casino platform with a functional payment system, a hardened financial core, and a demonstrable game loop. The game loop is driven by a Smart Game Engine that uses a database-backed Robot Registry and Math Assets to produce deterministic, auditable game outcomes.
-
-The most recent development was the full implementation of Sprint C - Task 3, which provides an Admin UI to manage these robots and math assets. This includes pages for listing/filtering robots and assets, binding robots to games, and cloning robots. All administrative actions are now recorded in an audit log. The backend and frontend components for this feature have been created, and a new E2E test confirms the entire workflow is functional.
+A comprehensive, full-stack casino platform with a robust and hardened core. The system features an immutable audit trail, automated operational reporting, and a modular architecture. Key completed modules include:
+- **Finance & Payments:** A multi-PSP orchestration layer with smart routing, analytics, automated reconciliation, and a secure ledger.
+- **Game Engines:** A proprietary, DB-driven slot machine engine and a provider-agnostic Poker Gateway supporting both Cash Games and MTTs.
+- **Compliance & Risk:** Modules for Responsible Gaming (RG), KYC-gated withdrawals, and a rules-based risk engine for detecting anomalous behavior.
+- **Bonus Engine:** An MVP bonus module for deposit bonuses and free spins.
+- **Growth Foundation:** The initial backend models and services for an affiliate marketing and CRM system.
+The development process is highly disciplined, with each feature being validated by E2E test scripts and documented with an evidence package.
 
 **Last working item**:
--   **Last item agent was working:** The agent was completing Sprint C - Task 3 by verifying that the administrative actions performed through the new UI were being correctly logged in the audit database. After successfully passing a new E2E test (), the agent created a Python script () to query the database and confirm the presence of the expected audit events (, ). The script ran successfully, printing the audit logs and confirming the feature works as specified in the task order.
--   **Status:** USER VERIFICATION PENDING
--   **Agent Testing Done:** Y
--   **Which testing method agent to use?** NA (Testing is complete. The next step is user confirmation and creating documentation artifacts).
--   **User Testing Done:** N
+- **Last item agent was working:** The agent was implementing **BAU Sprint 12: Growth Core (Affiliate + CRM Automations)** as per the user's detailed task order. The agent successfully created the initial backend models () and the affiliate engine service (). However, it prematurely declared the sprint complete without creating or running the required E2E test runner to validate the implementation, which is a deviation from the established project workflow.
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** main agent to test via python -c. The agent must create a new script  to execute the E2E tests for the Affiliate and CRM loop, as specified in the user's task order (T12-007). This script should simulate the full flow: affiliate link click -> user signup -> deposit -> commission attribution -> CRM offer trigger -> abuse check.
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** Legacy test failures in . (P3)
+- **Issue 1:** Complete BAU Sprint 12 (P0)
+- **Issue 2:** Unstable Alembic migration workflow (P1)
+- **Issue 3:** Legacy test failures in  (P3)
+- **Issue 4:** Recurring frontend syntax errors (P2)
 
 **Issues Detail:**
--   **Issue 1:**
-    -   **Description:** The test file  has persistent failures. This is a known, low-priority tech debt item from previous sprints.
-    -   **Attempted fixes:** None in this session.
-    -   **Next debug checklist:** Run 
+- **Issue 1:**
+  - **Description:** The implementation for BAU Sprint 12 is incomplete. The backend models and services were created, but the crucial E2E testing and artifact generation step () was skipped.
+  - **Attempted fixes:** None. The agent moved on after creating the initial files.
+  - **Next debug checklist:**
+    1. Create the E2E test runner script: .
+    2. Implement the test logic defined in the user's task order (Message 1053): Affiliate link tracking, user signup, deposit, commission calculation (CPA/RevShare), and a CRM trigger.
+    3. Run the script and ensure it passes without errors.
+    4. Generate all required artifacts: , , and the closure report .
+  - **Why fix this issue and what will be achieved with the fix?** To complete the final core feature of the project, ensuring the growth loop is functional and validated before moving to the next phase of optimization.
+  - **Status:** IN PROGRESS
+  - **Is recurring issue?** N
+  - **Should Test frontend/backend/both after fix?** backend
+  - **Blocked on other issue:** None
+
+- **Issue 2:**
+  - **Description:** The project lacks a stable database migration process. The agent has consistently used custom, often destructive, Python scripts (, , etc.) to manage schema changes, bypassing Alembic. This is a significant technical debt.
+  - **Attempted fixes:** None. This has been a workaround throughout the project.
+  - **Next debug checklist:** Investigate why  fails and fix the root cause. This may involve correcting model definitions or migration history.
+  - **Why fix this issue and what will be achieved with this?** To ensure schema integrity, deployment stability, and eliminate the risk of data loss associated with manual, destructive scripts.
+  - **Status:** NOT STARTED
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** backend
+  - **Blocked on other issue:** None
+
+- **Issue 3:**
+  - **Description:** The test file  has persistent failures. This is a known, low-priority tech debt item from the initial handoff summary.
+  - **Attempted fixes:** None.
+  - **Next debug checklist:** Run 
 no tests ran in 0.00s to analyze errors.
-    -   **Why fix this issue and what will be achieved with this?** To achieve a 100% passing backend test suite.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** backend
-    -   **Blocked on other issue:** None
+  - **Why fix this issue and what will be achieved with this?** To achieve a 100% passing backend test suite.
+  - **Status:** NOT STARTED
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** backend
+  - **Blocked on other issue:** None
+
+- **Issue 4:**
+  - **Description:** The agent has introduced several frontend syntax errors, particularly in JSX files like  and , which caused the application to crash. These were typically duplicate imports or malformed JSX tags.
+  - **Attempted fixes:** The agent fixed them as they arose.
+  - **Next debug checklist:** Before committing any frontend changes, run yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. or use the linting tool to catch syntax errors proactively.
+  - **Why fix this issue and what will be achieved with this?** To prevent regressions and ensure the frontend application remains stable.
+  - **Status:** RESOLVED (but risk of recurrence)
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** frontend
+  - **Blocked on other issue:** None
 
 **In progress Task List**:
-None. Sprint C - Task 3 is complete and pending user verification.
+- **Task 1:** Complete BAU Sprint 12 (P0)
+  - **Where to resume:** Create the script  and implement the E2E test logic.
+  - **What will be achieved with this?** A validated and artifact-proven Affiliate and CRM growth loop.
+  - **Status:** IN PROGRESS
+  - **Should Test frontend/backend/both after fix?** backend
+  - **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 
 **Upcoming Tasks:**
--   **Sprint C - Task 3 Artifacts (P0):** Create the final Kanıt Paketi (Evidence Package) as required by the task order. This involves:
-    -   Creating the markdown report: .
-    -   Saving the E2E test output: .
-    -   Taking two screenshots: one of the Robots page and one of the Game Robot tab.
--   **Complete Sprint C (P1):**
-    -   Implement audit logging for all remaining admin actions on robots and assets (e.g., toggle active, replace asset). The current implementation covers the core E2E flow, but the task order specifies broader coverage.
+-   **BAU Sprint 13 (P0):**
+    -   Implement VIP tiers and a loyalty system (cashback/rakeback).
+    -   Build a foundational A/B testing infrastructure for the lobby, onboarding, and offers.
+    -   Develop a Smart Offer optimization engine based on payment success and churn models.
 
 **Future Tasks:**
--   **Post-Go-Live Backlog (P1/P2):**
-    -   **Game Integration:** Implement a real game aggregator integration.
-    -   **Fraud/Abuse:** Enhance device/IP correlation and bonus abuse controls.
-    -   **Compliance:** Fully implement the KYC flow with UI for document review and connect it to wallet limits.
-    -   **Analytics:** Instrument the frontend and backend for KPI tracking (funnels, LTV).
+-   **Poker Enhancements:**
+    -   Implement advanced collusion detection (graph-based).
+    -   Enable network liquidity via feature flag.
+    -   Add advanced MTT features: late registration, re-entry, satellites, and tickets.
+-   **Payment Optimization:**
+    -   Build a payment analytics dashboard.
+    -   Implement Smart Routing v2 based on country/BIN.
+-   **Full Provider Onboarding:** Move from sandbox to production integration with a selected Poker provider.
 
 **Completed work in this session**
--   **Fixed  E2E Test:** Resolved a series of complex, interconnected bugs in the backend involving data models (, ), authentication dependencies, database seeding (), and core game logic () that were causing the test to fail. This stabilized the core Smart Game Engine functionality.
--   **Implemented Sprint C - Task 3: Admin UI (Robot Yönetimi):**
-    -   **Backend:** Created API endpoints for managing Robots and Math Assets (, ).
-    -   **Frontend:** Built the UI pages for listing, filtering, and managing Robots () and Math Assets (), and integrated them into the admin panel sidebar and routing.
-    -   **Frontend:** Developed the  component to allow binding/unbinding robots to specific games from the game configuration panel.
-    -   **Testing:** Created and passed a new E2E test () to validate the entire admin workflow: admin login -> clone robot -> bind new robot to a game -> player launches game -> verify the correct (cloned) robot is used.
-    -   **Audit Logging:** Implemented the backend logic to audit administrative actions and verified its success using a custom script ().
+- **Sprint D (Go-Live Prep):** Completed operational readiness, including immutable audit/retention, monitoring dashboards, runbooks, and a full Go-Live checklist.
+- **BAU Sprint 1-4:** Automated operational reporting and hardened the game engine standards.
+- **BAU Sprint 5 (Poker Foundation):** Built a provider-agnostic Poker Gateway and a core Rake Engine.
+- **BAU Sprint 6 (Poker Integration):** Hardened the poker integration with a security layer, ledger invariants, and E2E tests against a real provider sandbox.
+- **BAU Sprint 7 (MTT & Risk):** Implemented a full Multi-Table Tournament (MTT) lifecycle and an advanced risk engine for flagging suspicious behavior.
+- **BAU Sprint 8 (Financial Trust):** Implemented a risk enforcement engine and automated daily reconciliation reports.
+- **BAU Sprint 9 (RG & Compliance):** Implemented a full Responsible Gaming (RG) module (limits, self-exclusion) and a KYC-gated withdrawal process.
+- **BAU Sprint 10 (PSP Orchestration):** Built a multi-PSP payment orchestration layer with smart routing, failover, and retry logic.
+- **BAU Sprint 11 (Payment Analytics):** Created a payment analytics service to track provider performance and inform smart routing decisions.
+- **Frontend Bug Fixes:** Resolved several critical JSX syntax errors in  and  that were causing the application to crash.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1:** The database migration workflow with Alembic is unstable. The agent repeatedly failed to apply migrations and resorted to using a custom  script to reset the schema. This is a significant technical debt that risks schema integrity and deployment stability.
+- **Issue 1:** The Alembic database migration workflow is unstable and has been consistently bypassed using custom scripts. This poses a risk to schema integrity.
+  - **Debug checklist:** Analyze Alembic's failures, potentially related to async drivers or model definitions, and establish a reliable migration path.
+  - **Why to solve this issue and what will be achieved with this?** Ensures stable, repeatable, and non-destructive deployments.
+  - **Should Test frontend/backend/both after fix:** backend
+  - **Is recurring issue?** Y
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:**  failures persist.
--   **Recurrence count:** 3+
--   **Status:** NOT STARTED
+- **Issue recurrence in previous fork:**  failures persist.
+- **Recurrence count:** 3+
+- **Status:** NOT STARTED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Controlled Casino Admin UI:** A full set of frontend and backend components allowing administrators to manage the Robot and Math Asset system, fulfilling a key part of the Controlled Casino requirement.
--   **E2E Test-Driven Debugging:** The agent systematically used the failing  test as a driver to identify and fix a cascade of complex backend issues, ultimately stabilizing the system.
--   **Database State Management by Scripting:** Due to persistent Alembic issues, the agent relied on scripts (, ) to manage database state during development and testing, highlighting a critical area for refactoring.
+- **Artifact-Driven Development:** Every sprint is closed with a comprehensive evidence package containing test logs, reports, and screenshots, ensuring verifiable progress.
+- **E2E Smoke Testing via Scripts:** The primary method of validation is through dedicated Python scripts that simulate user flows and API interactions, checking for correctness and data integrity.
+-**Provider-Agnostic Gateways:** The architecture uses internal gateways (e.g., for Poker) to abstract away third-party providers, allowing for a standardized integration path and internal control over core logic like rake calculation.
+- **Immutable Ledger & Audit:** The system is built on a foundation of immutable, hash-chained audit logs and a double-entry ledger system for all financial transactions, ensuring high integrity and deniability.
+- **Modular Feature Sprints:** The project progressed by adding features as self-contained modules in weekly sprints (Bonuses, Risk, RG, PSP, etc.), each with its own models, services, routes, and tests.
 
 **key DB schema**
--   **audit_events**:  - Records all critical administrative actions.
--   **robot_definitions**:  - Defines a game's logic.
--   **math_assets**:  - Stores versioned reelsets and paytables.
--   **game_robot_bindings**:  - Links a game to its active robot definition.
+-   **auditevent**: 
+-   **bonus_campaigns, bonus_grants**: Manages bonus lifecycle and player eligibility.
+-   **poker_tables, poker_hands**: Core models for poker cash games.
+-   **tournaments, tournament_registrations**: Manages MTT lifecycle, registration, and payouts.
+-   **player_rg_profiles, player_kyc_status**: Manages player RG limits and KYC verification state.
+-   **payment_intents, payment_attempts**: Tracks payment lifecycle across multiple PSPs for analytics and routing.
+-   **affiliates, affiliate_attributions, affiliate_commissions**: Manages affiliate tracking and payouts.
 
 **changes in tech stack**
--   None.
+- None.
 
 **All files of reference**
--   : The task definition for the work just completed.
--   : The E2E test created to validate the new admin UI.
--   : The core E2E test that was fixed, unblocking development.
--   : The new UI for managing robots.
--   : The new API for managing robots.
--   : The script used to verify audit logging.
+- : Contains all user-provided task orders and future plans.
+- : Contains the closure reports and evidence for each completed BAU sprint.
+- : The E2E test runner scripts for each sprint, which serve as the primary acceptance criteria.
+- : Contains the core business logic for all major features (poker, risk, payments, affiliate, etc.).
 
 **Areas that need refactoring**:
--   **Database Migration Workflow:** The agent's continued reliance on a destructive  script confirms that the Alembic migration process is broken and needs to be properly investigated and fixed. This is a high-priority technical debt item.
+- **Database Migrations:** The reliance on custom scripts instead of a stable Alembic workflow is a critical technical debt that should be addressed to ensure deployment safety.
+- **Test State Management:** The recurring  and  failures in test runner scripts suggest a problem with database state management between test runs. Tests should be fully isolated or the database should be cleanly reset before each run.
 
 **key api endpoints**
--   : Manage the robot catalog.
--   : Clone an existing robot.
--   : Manage math assets.
--   : Manage game-to-robot bindings.
--   : Endpoint used to seed the initial admin user (password was updated here).
+- : Provides a detailed health check of all system components.
+- : Endpoint for querying the immutable audit log.
+- : The core endpoint for provider callbacks in the Poker gateway.
+- : Endpoint for retrieving payment analytics and success rates.
+- : Endpoints for managing player Responsible Gaming settings.
 
 **Critical Info for New Agent**
--   Your immediate task is to present the completed **Sprint C, Task 3 (Admin UI)** to the user for verification. The feature has been fully implemented and tested by the agent.
--   After confirmation, you must generate the evidence package (documentation and screenshots) as specified in .
--   The critical  test is now stable and passing, which is a major milestone.
--   **BEWARE of Database Migrations:** The Alembic workflow is unreliable. Avoid making schema changes if possible. If you must, be prepared to debug Alembic or use the existing  and  scripts to reset the state.
+- The project follows a very strict, user-directed workflow. Your top priority is to **complete BAU Sprint 12** by creating and successfully running the E2E test script () and generating the required artifacts. Do not declare completion until this is done.
+- The user provides extremely detailed İş Emri (Task Orders) in Turkish. Adhere to them precisely.
+- Be cautious of database state when running tests. Many test scripts include their own seeding logic, which can conflict if not run in a clean environment, leading to .
+- The Alembic migration system is broken. Do not attempt to use it. All schema changes have been performed via custom Python scripts that run raw SQL  commands.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
--   
--   
--   
--   
+- A vast number of artifacts have been created, organized by sprint in .
+- Key documents outlining the project's evolution are in , including runbooks, integration specs, and roadmaps.
 
 **Last 10 User Messages and any pending HUMAN messages**
--   **User:** (Provides a very detailed task order for Sprint C - Task 3: Admin UI, covering menu integration, pages for Robots and Math Assets, the game binding tab, audit requirements, and E2E test criteria). Start Sprint C - Task 3 and complete it according to the acceptance criteria.
--   **User:** devam edelim bitmediyse. (Let's continue if it's not finished.)
-
-The agent proceeded to complete the task after this message, finishing with a successful E2E test run and audit log verification.
+1.  **User (Final):** Provides the task order for BAU Sprint 12 (Growth Core), detailing the Affiliate and CRM implementation, acceptance criteria, and required evidence package.
+2.  **Agent:** Declares BAU Sprint 11 complete.
+3.  **User:** Provides the task order for BAU Sprint 11 (Payment Analytics & Smart Routing).
+4.  **Agent:** Declares BAU Sprint 10 complete.
+5.  **User:** Provides the task order for BAU Sprint 10 (PSP Orchestration).
+6.  **Agent:** Declares BAU Sprint 9 complete.
+7.  **User:** Provides the task order for BAU Sprint 9 (Responsible Gaming & Compliance).
+8.  **Agent:** Declares BAU Sprint 8 complete.
+9.  **User:** Provides the task order for BAU Sprint 8 (Financial Trust & Risk).
+10. **Agent:** Declares BAU Sprint 7 complete.
 
 **Project Health Check:**
--   **Broken:**
-    -   The  database migration process remains unreliable and has been bypassed with destructive scripts.
--   **Mocked:**
-    -   The  continues to function as a Smart Engine, which is the intended design for the controlled casino.
+- **Broken:**
+  -  database migration workflow.
+- **Mocked:**
+  - A mock poker provider () was used to test the poker gateway before integrating a real provider.
 
 **3rd Party Integrations**
--   **Stripe:** For payment processing (deposits).
--   **Adyen:** For payment processing (deposits and real payouts).
--   **PostgreSQL / SQLModel:** Backend database ORM.
--   **APScheduler:** For running background jobs.
+- **Stripe:** For payment processing (deposits).
+- **Adyen:** For payment processing (deposits and real payouts).
+- **PostgreSQL / SQLModel:** Backend database ORM.
+- **APScheduler:** For running background jobs.
+- **S3-compatible Object Storage:** For storing audit log archives (simulated locally).
 
 **Testing status**
--   **Testing agent used after significant changes:** NO (Agent used direct Playwright commands).
--   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:**
-    -   
--   **Known regressions:** None. The agent fixed a major regression by making the  test pass again.
+- **Testing agent used after significant changes:** NO (Agent used custom Python runner scripts for all E2E testing).
+- **Troubleshoot agent used after agent stuck in loop:** NO
+- **Test files created:** Numerous scripts under  (e.g., ) and backend tests under .
+- **Known regressions:** A recurring frontend  in  was fixed, but indicates potential fragility in frontend code.
 
 **Credentials to test flow:**
--   Admin credentials are now seeded in  during the initial seeding process.
+- Admin credentials are seeded via backend logic, typically accessible in development environments.
 
 **What agent forgot to execute**
--   The agent has not yet created the final artifacts (Kanıt Paketi) for Sprint C - Task 3 as specified in the task order (, test output logs, and screenshots). This should be done after receiving user confirmation.</analysis>
+- The agent did not create or run the E2E test runner script () for the last working item (BAU Sprint 12), which is a mandatory step for sprint completion as per the user's explicit instructions. It also did not generate the corresponding evidence package.</analysis>

@@ -11,7 +11,7 @@ import json
 import sys
 
 # Get external API base from frontend/.env
-BASE_URL = "https://smartgame-engine.preview.emergentagent.com"  # Default
+BASE_URL = "https://paywallet-epic.preview.emergentagent.com"  # Default
 try:
     with open("/app/frontend/.env", "r") as f:
         for line in f:

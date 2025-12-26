@@ -12,7 +12,7 @@ import subprocess
 from datetime import datetime
 
 class TenantIsolationTester:
-    def __init__(self, base_url="https://smartgame-engine.preview.emergentagent.com"):
+    def __init__(self, base_url="https://paywallet-epic.preview.emergentagent.com"):
         self.base_url = base_url
         self.owner_token = None
         self.tenant_token = None
