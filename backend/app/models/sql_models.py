@@ -169,6 +169,7 @@ class AuditEvent(SQLModel, table=True):
 
     # Actor
     actor_user_id: str = Field(index=True)
+    actor_role: Optional[str] = None # Added Task 4
 
     # Tenant scope
     tenant_id: str = Field(index=True)
@@ -177,11 +178,30 @@ class AuditEvent(SQLModel, table=True):
     action: str = Field(index=True)
     resource_type: str = Field(index=True)
     resource_id: Optional[str] = Field(default=None, index=True)
-    result: str = Field(index=True)  # success | failure | blocked
+    
+    # Status/Result
+    result: str = Field(index=True)  # success | failure | blocked (Legacy, kept for compat)
+    status: Optional[str] = Field(default=None, index=True) # SUCCESS | DENIED | FAILED (Task 4 Standard)
+    
+    # Reason
+    reason: Optional[str] = None # Task 4: Mandatory for mutations
 
     # Context
     ip_address: Optional[str] = None
-    details: Dict = Field(default={}, sa_column=Column(JSON))
+    user_agent: Optional[str] = None # Task 4
+
+    # Data Snapshots
+    details: Dict = Field(default={}, sa_column=Column(JSON)) # Legacy bucket
+    
+    # Structured Data (Task 4)
+    before_json: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
+    after_json: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
+    diff_json: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
+    metadata_json: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
+
+    # Error Tracking
+    error_code: Optional[str] = None
+    error_message: Optional[str] = None
 
     timestamp: datetime = Field(default_factory=lambda: datetime.utcnow(), index=True)
 
