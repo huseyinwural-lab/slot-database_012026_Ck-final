@@ -87,12 +87,13 @@ async def run_smoke_tests():
             finance_log.append("Withdraw Request 50.0 USD: SUCCESS (Balances updated)")
             
             # 3. Ledger Entry (Simulated)
+            # Removed balance_after
             await conn.execute(text("""
                 INSERT INTO ledgertransaction (
-                    id, tenant_id, player_id, type, amount, currency, status, created_at, balance_after
+                    id, tenant_id, player_id, type, amount, currency, status, created_at
                 )
                 VALUES (
-                    :id, :tid, :pid, 'deposit', 100.0, 'USD', 'deposit_succeeded', :now, 100.0
+                    :id, :tid, :pid, 'deposit', 100.0, 'USD', 'deposit_succeeded', :now
                 )
             """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": player_id, "now": now})
             finance_log.append("Ledger Entry: SUCCESS")
