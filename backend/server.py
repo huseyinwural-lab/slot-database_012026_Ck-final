@@ -57,6 +57,9 @@ app.add_middleware(RateLimitMiddleware)
 
 # Request logging & correlation ID (outermost middleware; runs before rate limiting)
 app.add_middleware(RequestLoggingMiddleware)
+# Request Context (Task 4)
+from app.middleware.request_context import RequestContextMiddleware
+app.add_middleware(RequestContextMiddleware)
 # Metrics Middleware
 from app.middleware.metrics_middleware import MetricsMiddleware
 app.add_middleware(MetricsMiddleware)
