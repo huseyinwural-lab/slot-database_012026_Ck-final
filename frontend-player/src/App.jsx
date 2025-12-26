@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import WalletPage from './pages/WalletPage';
 import GameRoom from './pages/GameRoom';
+import SettingsPanel from './pages/SettingsPanel';
 import Layout from './components/Layout';
 
 function App() {
