@@ -89,23 +89,44 @@ async def seed_robots():
         stmt_game = select(Game).where(Game.external_id == "classic777")
         game = (await session.execute(stmt_game)).scalars().first()
         
-        if game:
-            stmt_bind = select(GameRobotBinding).where(GameRobotBinding.game_id == game.id)
-            existing_bind = (await session.execute(stmt_bind)).scalars().first()
+        if not game:
+            print("[+] Creating Game 'Classic 777'...")
+            # Fetch Tenant
+            tenant = (await session.execute(select(Tenant))).scalars().first()
+            if not tenant:
+                print("[+] Creating Default Tenant...")
+                tenant = Tenant(name="default_casino", type="owner")
+                session.add(tenant)
+                await session.flush()
+                
+            game = Game(
+                tenant_id=tenant.id,
+                provider_id="mock-smart",
+                external_id="classic777",
+                type="slot",
+                name="Classic 777",
+                status="active",
+                is_active=True
+            )
+            session.add(game)
+            await session.flush()
+            print(f"[+] Created Game: {game.name}")
             
-            if not existing_bind:
-                binding = GameRobotBinding(
-                    tenant_id=game.tenant_id,
-                    game_id=game.id,
-                    robot_id=robot_id,
-                    is_enabled=True
-                )
-                session.add(binding)
-                print(f"[+] Bound Robot to Game: {game.title}")
-            else:
-                print(f"[.] Binding exists for: {game.title}")
+        # Proceed with binding
+        stmt_bind = select(GameRobotBinding).where(GameRobotBinding.game_id == game.id)
+        existing_bind = (await session.execute(stmt_bind)).scalars().first()
+        
+        if not existing_bind:
+            binding = GameRobotBinding(
+                tenant_id=game.tenant_id,
+                game_id=game.id,
+                robot_id=robot_id,
+                is_enabled=True
+            )
+            session.add(binding)
+            print(f"[+] Bound Robot to Game: {game.name}")
         else:
-            print("[WARN] Game 'Classic 777' not found. Skipping binding.")
+            print(f"[.] Binding exists for: {game.name}")
             
         await session.commit()
 
