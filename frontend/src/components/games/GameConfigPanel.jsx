@@ -24,6 +24,7 @@ import GameBlackjackRulesTab from './GameBlackjackRulesTab';
 
 import GameSlotAdvancedTab from './GameSlotAdvancedTab';
 import GameClientTab from './GameClientTab';
+import GameRobotTab from './GameRobotTab';
 
 const defaultVisibility = {
   countries: [],
@@ -32,13 +33,11 @@ const defaultVisibility = {
 };
 
 // core_type bazlı görünür tab şeması
-// Burada ana türler için SLOT / TABLE_POKER / CRASH / DICE / TABLE_BLACKJACK kullanıyoruz.
-// REEL_LINES / WAYS / MEGAWAYS vb. engine tipleri SLOT ile aynı şemayı kullanacak.
 const TAB_SCHEMA = {
-  SLOT: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs', 'slot_advanced'],
-  REEL_LINES: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
-  WAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
-  MEGAWAYS: ['general', 'rtp', 'bets', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
+  SLOT: ['general', 'rtp', 'bets', 'robot', 'features', 'paytable', 'reels', 'assets', 'client', 'logs', 'slot_advanced'],
+  REEL_LINES: ['general', 'rtp', 'bets', 'robot', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
+  WAYS: ['general', 'rtp', 'bets', 'robot', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
+  MEGAWAYS: ['general', 'rtp', 'bets', 'robot', 'features', 'paytable', 'reels', 'assets', 'client', 'logs'],
   TABLE_POKER: ['general', 'poker_rules', 'assets', 'client', 'logs'],
   CRASH: ['general', 'crash_math', 'bets', 'assets', 'client', 'logs'],
   DICE: ['general', 'dice_math', 'bets', 'assets', 'client', 'logs'],
@@ -75,7 +74,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
   const [logs, setLogs] = useState([]);
   const [paytable, setPaytable] = useState({ current: null, history: [] });
 
-  // core_type bazı eski oyunlarda boş olabiliyor; category'den türeterek normalize ediyoruz.
   const resolvedCoreType = React.useMemo(() => {
     if (!game) return undefined;
     if (game.core_type) return game.core_type;
@@ -102,11 +100,9 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
 
     const loadAll = async () => {
       try {
-        // General
         const generalRes = await api.get(`/v1/games/${game.id}/config/general`);
         setGeneral(generalRes.data);
 
-        // RTP + RTP presets (slot türü için)
         if (visibleTabs.includes('rtp')) {
           const [rtpRes, presetRes] = await Promise.all([
             api.get(`/v1/games/${game.id}/config/rtp`),
@@ -118,7 +114,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           setRtpPresets(presetRes.data?.presets || []);
         }
 
-        // Bets + Bets presets (slot/crash/dice türleri için)
         if (visibleTabs.includes('bets')) {
           const [betRes, betPresetRes] = await Promise.all([
             api.get(`/v1/games/${game.id}/config/bets`),
@@ -130,19 +125,16 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           setBetsPresets(betPresetRes.data?.presets || []);
         }
 
-        // Features
         if (visibleTabs.includes('features')) {
           const featRes = await api.get(`/v1/games/${game.id}/config/features`);
           setFeatures(featRes.data.features || {});
         }
 
-        // Paytable
         if (visibleTabs.includes('paytable')) {
           const payRes = await api.get(`/v1/games/${game.id}/config/paytable`);
           setPaytable(payRes.data);
         }
 
-        // Logs
         if (visibleTabs.includes('logs')) {
           const logsRes = await api.get(`/v1/games/${game.id}/config/logs?limit=50`);
           setLogs(logsRes.data.items || []);
@@ -307,6 +299,9 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           {visibleTabs.includes('rtp') && (
             <TabsTrigger value="rtp">Math &amp; RTP</TabsTrigger>
           )}
+          {visibleTabs.includes('robot') && (
+            <TabsTrigger value="robot">Math Engine</TabsTrigger>
+          )}
           {visibleTabs.includes('bets') && (
             <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
           )}
@@ -345,7 +340,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           )}
         </TabsList>
 
-        {/* GENERAL TAB */}
         {visibleTabs.includes('general') && (
           <TabsContent value="general" className="space-y-4 pt-4">
             <div className="grid grid-cols-2 gap-4">
@@ -476,10 +470,8 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* RTP TAB */}
         {visibleTabs.includes('rtp') && (
           <TabsContent value="rtp" className="space-y-4 pt-4">
-            {/* Preset bar */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Preset</CardTitle>
@@ -604,10 +596,15 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* BETS TAB */}
+        {/* ROBOT TAB (Math Engine) */}
+        {visibleTabs.includes('robot') && (
+          <TabsContent value="robot" className="space-y-4 pt-4">
+            <GameRobotTab game={game} />
+          </TabsContent>
+        )}
+
         {visibleTabs.includes('bets') && (
           <TabsContent value="bets" className="space-y-4 pt-4">
-            {/* Preset bar */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Preset</CardTitle>
@@ -694,7 +691,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* FEATURES TAB */}
         {visibleTabs.includes('features') && (
           <TabsContent value="features" className="space-y-4 pt-4">
             <div className="space-y-3">
@@ -741,7 +737,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* POKER RULES TAB */}
         {visibleTabs.includes('poker_rules') && (
           <TabsContent value="poker_rules" className="space-y-4 pt-4">
             {game?.core_type === 'TABLE_POKER' ? (
@@ -758,7 +753,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* CRASH MATH TAB */}
         {visibleTabs.includes('crash_math') && (
           <TabsContent value="crash_math" className="space-y-4 pt-4">
             {resolvedCoreType === 'CRASH' ? (
@@ -775,7 +769,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* DICE MATH TAB */}
         {visibleTabs.includes('dice_math') && (
           <TabsContent value="dice_math" className="space-y-4 pt-4">
             {resolvedCoreType === 'DICE' ? (
@@ -792,7 +785,6 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* BLACKJACK RULES TAB */}
         {visibleTabs.includes('blackjack_rules') && (
           <TabsContent value="blackjack_rules" className="space-y-4 pt-4">
             {resolvedCoreType === 'TABLE_BLACKJACK' ? (
@@ -809,21 +801,18 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* REEL STRIPS TAB */}
         {visibleTabs.includes('reels') && (
           <TabsContent value="reels" className="space-y-4 pt-4">
             <GameReelStripsTab game={game} />
           </TabsContent>
         )}
 
-        {/* PAYTABLE TAB */}
         {visibleTabs.includes('paytable') && (
           <TabsContent value="paytable" className="space-y-4 pt-4">
             <GamePaytableTab game={game} paytable={paytable} onReload={reloadPaytable} />
           </TabsContent>
         )}
 
-        {/* SLOT ADVANCED TAB */}
         {visibleTabs.includes('slot_advanced') && (
           <TabsContent value="slot_advanced" className="space-y-4 pt-4">
             {['SLOT', 'REEL_LINES', 'WAYS', 'MEGAWAYS'].includes(resolvedCoreType) ? (
@@ -840,21 +829,18 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
           </TabsContent>
         )}
 
-        {/* ASSETS TAB */}
         {visibleTabs.includes('assets') && (
           <TabsContent value="assets" className="space-y-4 pt-4">
             <GameAssetsTab game={game} />
           </TabsContent>
         )}
 
-        {/* CLIENT TAB */}
         {visibleTabs.includes('client') && (
           <TabsContent value="client" className="space-y-4 pt-4">
             <GameClientTab game={game} onUpdated={onSaved} />
           </TabsContent>
         )}
 
-        {/* LOGS TAB */}
         {visibleTabs.includes('logs') && (
           <TabsContent value="logs" className="space-y-4 pt-4">
             <Card>
