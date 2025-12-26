@@ -1,0 +1,7 @@
+ERROR: (sqlite3.OperationalError) table adminuser has no column named mfa_enabled
+[SQL: 
+                INSERT INTO adminuser (id, tenant_id, username, email, full_name, password_hash, role, tenant_role, is_active, status, mfa_enabled, failed_login_attempts, is_platform_owner, created_at)
+                VALUES (?, ?, 'bonus_admin', ?, 'Bonus Admin', 'hash', 'Super Admin', 'admin', 1, 'active', 0, 0, 1, ?)
+            ]
+[parameters: ('1f48eb62-3b5b-4dd0-80ab-2ef981c3c145', 'default_casino', 'admin_656bf5da@test.com', datetime.datetime(2025, 12, 26, 21, 40, 13, 766897, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
