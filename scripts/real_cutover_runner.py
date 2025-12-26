@@ -19,14 +19,11 @@ os.environ["STRIPE_API_KEY"] = "sk_live_prod_key_12345"
 os.environ["STRIPE_WEBHOOK_SECRET"] = "whsec_live_secret_12345"
 os.environ["ADYEN_API_KEY"] = "live_adyen_key_12345"
 os.environ["AUDIT_EXPORT_SECRET"] = "prod_audit_hmac_secret_v1"
-# We keep DB url local for simulation but treat it as prod
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:////app/backend/casino_prod.db" 
 
-# Re-import settings after env var set
 import config
 from config import settings
 
-# Force reload settings to pick up env vars
 settings.env = "prod"
 settings.stripe_api_key = os.environ["STRIPE_API_KEY"]
 settings.stripe_webhook_secret = os.environ["STRIPE_WEBHOOK_SECRET"]
@@ -34,23 +31,19 @@ settings.adyen_api_key = os.environ["ADYEN_API_KEY"]
 settings.audit_export_secret = os.environ["AUDIT_EXPORT_SECRET"]
 settings.database_url = os.environ["DATABASE_URL"]
 
-# Setup Logger
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("cutover")
 
 async def run_cutover():
     logger.info(">>> STARTING REAL GO-LIVE CUTOVER (P0) <<<")
     
-    # --- 0. Clean Slate (Simulate Fresh Prod DB) ---
     db_path = "/app/backend/casino_prod.db"
     if os.path.exists(db_path):
         os.remove(db_path)
     logger.info("Cleaned previous Prod DB artifact.")
     
-    # Initialize DB (Schema creation)
     engine = create_async_engine(settings.database_url)
     async with engine.begin() as conn:
-        # Import models to register them
         from app.models.sql_models import SQLModel
         from app.models.game_models import Game
         from app.models.robot_models import RobotDefinition
@@ -70,15 +63,22 @@ async def run_cutover():
 
     # --- 2. P0-CUTOVER-02: MFA & Access Hardening ---
     logger.info("[2] MFA & Access Hardening")
-    # Simulate Admin Seed with MFA
+    now = datetime.now(timezone.utc)
     async with engine.connect() as conn:
+        # Create System Tenant first
+        await conn.execute(text("""
+            INSERT INTO tenant (id, name, type, created_at, updated_at) 
+            VALUES ('system', 'System Tenant', 'owner', :now, :now)
+        """), {"now": now})
+        
+        # Admin Seed
         admin_id = str(uuid.uuid4())
         await conn.execute(text("""
-            INSERT INTO adminuser (id, tenant_id, username, email, full_name, password_hash, role, is_active, mfa_enabled)
-            VALUES (:id, 'system', 'admin_prod', 'admin@casino.com', 'Prod Admin', 'hash', 'Super Admin', 1, 1)
-        """), {"id": admin_id})
+            INSERT INTO adminuser (id, tenant_id, username, email, full_name, password_hash, role, is_active, mfa_enabled, created_at)
+            VALUES (:id, 'system', 'admin_prod', 'admin@casino.com', 'Prod Admin', 'hash', 'Super Admin', 1, 1, :now)
+        """), {"id": admin_id, "now": now})
         
-        # Verify MFA flag
+        # Verify
         res = await conn.execute(text("SELECT mfa_enabled FROM adminuser WHERE id = :id"), {"id": admin_id})
         mfa = res.scalar()
         if mfa:
@@ -94,7 +94,6 @@ async def run_cutover():
 
     # --- 4. P0-CUTOVER-04: Monitoring Drill ---
     logger.info("[4] Monitoring Drill")
-    # Simulate alert
     with open("/app/artifacts/d4_alert_test_evidence.txt", "a") as f:
         f.write(f"\n[Prod Cutover] Alert Test: DB Connectivity Check -> OK")
     logger.info("Monitoring Drill: PASS")
@@ -104,13 +103,15 @@ async def run_cutover():
     
     tenant_id = "prod_tenant"
     player_id = str(uuid.uuid4())
-    now = datetime.now(timezone.utc)
     
     async with engine.connect() as conn:
         # Tenant
-        await conn.execute(text("INSERT INTO tenant (id, name, type) VALUES (:id, 'Prod Casino', 'owner')"), {"id": tenant_id})
+        await conn.execute(text("""
+            INSERT INTO tenant (id, name, type, created_at, updated_at) 
+            VALUES (:id, 'Prod Casino', 'owner', :now, :now)
+        """), {"id": tenant_id, "now": now})
         
-        # Player (with full fields)
+        # Player
         await conn.execute(text("""
             INSERT INTO player (
                 id, tenant_id, username, email, password_hash, 
