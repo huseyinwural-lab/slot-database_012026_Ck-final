@@ -46,6 +46,7 @@ async def create_bonus(
     request: Request,
     bonus_data: Bonus,
     current_admin: AdminUser = Depends(get_current_admin),
+    _ = Depends(feature_required("can_manage_bonus")),
     session: AsyncSession = Depends(get_session)
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
