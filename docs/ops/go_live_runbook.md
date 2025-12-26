@@ -45,6 +45,7 @@
 1.  **Canary Smoke Test:**
     - Real-money Deposit ($10).
     - Real-money Withdraw ($10).
+    - **Report Template:** Use `docs/ops/canary_report_template.md` for structured sign-off.
 2.  **Ledger Check:**
     - Verify `held` -> `0` and `available` reduced correctly.
 3.  **Webhook Watch:**
