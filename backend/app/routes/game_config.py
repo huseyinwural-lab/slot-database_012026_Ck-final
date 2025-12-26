@@ -12,7 +12,6 @@ from app.utils.tenant import get_current_tenant_id
 from app.core.errors import AppError
 from app.models.robot_models import GameRobotBinding, RobotDefinition
 from app.services.audit import audit
-from app.utils.reason import require_reason
 import uuid
 
 router = APIRouter(prefix="/api/v1/games", tags=["game_config"])
@@ -38,10 +37,16 @@ async def update_game_config(
     game_id: str,
     request: Request,
     config: Dict[str, Any] = Body(...),
-    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    reason = request.headers.get("X-Reason") or config.get("reason")
+    if not reason:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "REASON_REQUIRED", "message": "Audit reason is required for this action."}
+        )
+
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
 
     stmt = select(Game).where(Game.id == game_id, Game.tenant_id == tenant_id)
@@ -117,10 +122,16 @@ async def bind_game_robot(
     request: Request,
     game_id: str,
     payload: Dict[str, Any] = Body(...), # { robot_id: str }
-    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    reason = request.headers.get("X-Reason") or payload.get("reason")
+    if not reason:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "REASON_REQUIRED", "message": "Audit reason is required for this action."}
+        )
+
     robot_id = payload.get("robot_id")
     if not robot_id:
         raise HTTPException(400, "robot_id required")
