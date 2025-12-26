@@ -1,6 +1,6 @@
 import asyncio
 import os
-from app.backend.config import settings
+from config import settings
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.core.database import SQLModel
 from app.models.sql_models import * 
