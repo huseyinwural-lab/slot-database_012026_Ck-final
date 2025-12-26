@@ -17,14 +17,19 @@ async def test_audit_lifecycle(session):
     # 1. Setup Data (Older than retention to trigger purge)
     # Retention is 90 days. We need data from 91 days ago.
     target_date = (datetime.now(timezone.utc) - timedelta(days=91)).strftime("%Y-%m-%d")
-    # Use explicit aware timestamp format
-    ts_val = f"{target_date}T10:00:00+00:00"
     
-    await session.execute(text(f"""
+    # Use datetime object for insert to ensure consistent storage format with what SQLAlchemy/aiosqlite expects
+    ts_obj = datetime.strptime(target_date, "%Y-%m-%d").replace(tzinfo=timezone.utc, hour=10)
+    
+    await session.execute(text("""
         INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, result, timestamp, row_hash, prev_row_hash, sequence)
         VALUES 
-        ('life_1', 'r1', 'u1', 't1', 'LIFECYCLE_TEST', 'res', 'success', '{ts_val}', 'hash1', '0'*64, 1)
-    """))
+        (:id, 'r1', 'u1', 't1', 'LIFECYCLE_TEST', 'res', 'success', :ts, 'hash1', :prev, 1)
+    """), {
+        "id": "life_1",
+        "ts": ts_obj,
+        "prev": "0"*64
+    })
     await session.commit()
     
     await session.close()
