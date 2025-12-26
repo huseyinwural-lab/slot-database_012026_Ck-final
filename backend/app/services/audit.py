@@ -62,10 +62,10 @@ class AuditLogger:
         error_message: Optional[str] = None,
     ) -> None:
         
-        timestamp = datetime.now(timezone.utc)
+        # Ensure timestamp is consistent (strip microseconds to avoid DB roundtrip issues)
+        timestamp = datetime.now(timezone.utc).replace(microsecond=0)
         
         # 1. Fetch previous hash for this tenant chain
-        # Using sequence for ordering
         stmt = select(AuditEvent).where(AuditEvent.tenant_id == tenant_id).order_by(desc(AuditEvent.sequence)).limit(1)
         prev_event = (await session.execute(stmt)).scalars().first()
         
