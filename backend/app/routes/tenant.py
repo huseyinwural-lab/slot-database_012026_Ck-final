@@ -237,10 +237,10 @@ async def seed_default_tenants(session: AsyncSession):
             "can_use_kill_switch": True,
             "can_manage_affiliates": True,
             "can_use_crm": True,
-        }
             "can_use_game_robot": True,
             "can_manage_kyc": True,
             "can_manage_bonus": True,
+        }
     )
     
     # Create Demo Renter
@@ -253,11 +253,11 @@ async def seed_default_tenants(session: AsyncSession):
             "can_view_reports": True,
             "can_manage_affiliates": False,
             "can_use_crm": False,
+            "can_manage_experiments": False,
+            "can_use_kill_switch": False,
             "can_use_game_robot": True,
             "can_manage_kyc": True,
             "can_manage_bonus": True,
-            "can_manage_experiments": False,
-            "can_use_kill_switch": False,
         }
     )
     
