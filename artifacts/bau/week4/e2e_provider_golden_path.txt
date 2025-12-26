@@ -1,0 +1,7 @@
+ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: player.wagering_requirement
+[SQL: 
+                INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, status, kyc_status, registered_at)
+                VALUES (?, ?, ?, ?, 'hash', 100, 100, 0, 'active', 'verified', ?)
+            ]
+[parameters: ('265aeaa0-0662-4689-b346-6cb5b8243457', 'default_casino', 'prov_e977c356', 'prov@test.com', datetime.datetime(2025, 12, 26, 22, 3, 33, 130610, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
