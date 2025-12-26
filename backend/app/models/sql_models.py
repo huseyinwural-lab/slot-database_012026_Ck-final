@@ -203,6 +203,12 @@ class AuditEvent(SQLModel, table=True):
     error_code: Optional[str] = None
     error_message: Optional[str] = None
 
+    # Hash Chain
+    row_hash: Optional[str] = Field(default=None, index=True)
+    prev_row_hash: Optional[str] = Field(default=None, index=True)
+    chain_id: Optional[str] = Field(default=None, index=True)
+    sequence: Optional[int] = Field(default=None, index=True)
+
     timestamp: datetime = Field(default_factory=lambda: datetime.utcnow(), index=True)
 
 class Affiliate(SQLModel, table=True):
