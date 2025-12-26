@@ -8,6 +8,9 @@ from datetime import datetime, timezone, timedelta
 sys.path.append("/app/scripts")
 sys.path.append("/app/backend")
 
+# Import all models to ensure registry is populated
+from app.models import sql_models, game_models, robot_models
+
 from audit_archive_export import export_audit_log
 from purge_audit_logs import purge_audit_logs
 from config import settings
@@ -33,9 +36,9 @@ async def run_cron_simulation():
     target_date = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
     print(f"Running Archive for {target_date}...")
     
+    status = "SUCCESS"
     try:
         await export_audit_log(target_date)
-        status = "SUCCESS"
     except Exception as e:
         status = "FAILED"
         print(f"Archive failed: {e}")
@@ -61,10 +64,10 @@ async def run_cron_simulation():
 
     # 2. Purge Job
     print("Running Purge...")
+    status = "SUCCESS"
     try:
         # Keep 90 days
         await purge_audit_logs(keep_days=90, dry_run=True) # Dry run for safety in simulation
-        status = "SUCCESS"
     except Exception as e:
         status = "FAILED"
         print(f"Purge failed: {e}")
