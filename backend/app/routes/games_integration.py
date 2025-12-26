@@ -19,6 +19,7 @@ from app.middleware.callback_security import verify_signature
     Unified Callback Endpoint for Game Providers.
     Accepts BET/WIN/REFUND events.
     """
+    security_check: bool = Depends(verify_signature)
     try:
         # TODO: Verify Signature here using payload.signature and provider secret
         # For mock, we skip validation or assume it's valid
