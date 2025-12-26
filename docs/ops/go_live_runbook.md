@@ -94,6 +94,49 @@
 | :--- | :--- |
 | Payout/Withdraw 404/5xx | **Immediate Rollback** |
 | Migration Failure | **Immediate Rollback** |
+
+## 5. Sprint 7 — Execution Checklist (Sign-off)
+
+### 1) Pre-flight (T-60)
+- [ ] Release SHA/Tag fixed: __________________
+- [ ] Responsibles assigned (Deploy / DB / On-call): __________________
+- [ ] `verify_prod_env.py` executed -> Result: PASS / FAIL
+    - Log ref: __________________
+
+### 2) Backup (T-30)
+- [ ] Prod DB snapshot taken -> Snapshot ID/Path: __________________
+- [ ] Snapshot accessibility verified -> PASS / FAIL
+- [ ] Rollback restore procedure accessible -> PASS / FAIL
+
+### 3) Deploy + Migration + Smoke (T-15)
+- [ ] Deploy completed -> PASS / FAIL
+- [ ] `go_live_smoke.sh` executed -> PASS / FAIL
+    - [ ] API health 200 -> PASS / FAIL
+    - [ ] Admin login -> PASS / FAIL
+    - [ ] Payouts router reachable -> PASS / FAIL
+    - Log ref: __________________
+
+### 4) Canary Money Loop (T-0) — GO/NO-GO
+- [ ] Deposit -> PASS / FAIL (Tx ID: __________________)
+- [ ] Withdraw request -> PASS / FAIL (ID: __________________)
+- [ ] Admin approve -> PASS / FAIL (Timestamp: __________________)
+- [ ] Admin mark paid -> PASS / FAIL (Timestamp: __________________)
+- [ ] Ledger settlement / invariant -> PASS / FAIL (Refs: __________________)
+- [ ] Canary report completed (`docs/ops/canary_report_template.md`) -> PASS / FAIL
+
+**GO/NO-GO Decision:** GO / NO-GO
+**Decider:** __________________ **Date/Time:** __________________
+
+### 5) Hypercare (T+0 -> T+72h)
+- [ ] Alerting active (5xx/latency/DB/webhook) -> PASS / FAIL
+- [ ] First 6 hours monitoring period applied -> PASS / FAIL
+- [ ] 24 hours control report -> PASS / FAIL
+- [ ] 72 hours stable -> PASS / FAIL
+
+---
+**Canary "GO" Decision Statement (Standard)**
+"Prod deploy smoke checks PASS. Canary Money Loop (deposit->withdraw->approve->paid->ledger settlement) PASS. No rollback triggers observed. GO-LIVE confirmed."
+
 | Ledger Invariant Breach | **Immediate Rollback** |
 | Webhook Misclassification | **Immediate Rollback** |
 | Latency Spike (No Errors) | Monitor (Hypercare) |
