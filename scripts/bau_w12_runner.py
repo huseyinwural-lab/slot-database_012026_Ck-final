@@ -149,6 +149,17 @@ async def main():
         else:
             print(f"{RED}   [FAIL] Link Signups NOT Incremented{RESET}")
             
+        # 7. Generate Snapshot
+        snapshot = {
+            "affiliate": affiliate,
+            "link": target_link,
+            "crm_events_found": found_crm,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        with open("growth_metrics_snapshot.json", "w") as f:
+            json.dump(snapshot, f, indent=2)
+        print(f"{GREEN}   Snapshot saved to growth_metrics_snapshot.json{RESET}")
+
     print(f"{GREEN}=== RUN COMPLETE ==={RESET}")
 
 if __name__ == "__main__":
