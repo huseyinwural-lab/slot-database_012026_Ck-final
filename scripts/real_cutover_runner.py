@@ -65,17 +65,25 @@ async def run_cutover():
     logger.info("[2] MFA & Access Hardening")
     now = datetime.now(timezone.utc)
     async with engine.connect() as conn:
-        # Create System Tenant first
+        # Create System Tenant
         await conn.execute(text("""
-            INSERT INTO tenant (id, name, type, created_at, updated_at) 
-            VALUES ('system', 'System Tenant', 'owner', :now, :now)
+            INSERT INTO tenant (id, name, type, features, created_at, updated_at) 
+            VALUES ('system', 'System Tenant', 'owner', '{}', :now, :now)
         """), {"now": now})
         
         # Admin Seed
         admin_id = str(uuid.uuid4())
         await conn.execute(text("""
-            INSERT INTO adminuser (id, tenant_id, username, email, full_name, password_hash, role, is_active, mfa_enabled, created_at)
-            VALUES (:id, 'system', 'admin_prod', 'admin@casino.com', 'Prod Admin', 'hash', 'Super Admin', 1, 1, :now)
+            INSERT INTO adminuser (
+                id, tenant_id, username, email, full_name, password_hash, 
+                role, tenant_role, is_active, status, mfa_enabled, failed_login_attempts, 
+                created_at
+            )
+            VALUES (
+                :id, 'system', 'admin_prod', 'admin@casino.com', 'Prod Admin', 'hash', 
+                'Super Admin', 'admin', 1, 'active', 1, 0, 
+                :now
+            )
         """), {"id": admin_id, "now": now})
         
         # Verify
@@ -107,8 +115,8 @@ async def run_cutover():
     async with engine.connect() as conn:
         # Tenant
         await conn.execute(text("""
-            INSERT INTO tenant (id, name, type, created_at, updated_at) 
-            VALUES (:id, 'Prod Casino', 'owner', :now, :now)
+            INSERT INTO tenant (id, name, type, features, created_at, updated_at) 
+            VALUES (:id, 'Prod Casino', 'owner', '{}', :now, :now)
         """), {"id": tenant_id, "now": now})
         
         # Player
@@ -139,8 +147,8 @@ async def run_cutover():
         
         # Audit
         await conn.execute(text("""
-            INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, resource_id, result, status, reason, timestamp, row_hash, prev_row_hash, sequence, chain_id)
-            VALUES (:id, 'req_prod', 'system', :tid, 'GAME_LAUNCH', 'game', :gid, 'success', 'SUCCESS', 'Player Launch', :now, 'hash', '000', 1, :tid)
+            INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, resource_id, result, status, reason, timestamp, row_hash, prev_row_hash, sequence, chain_id, details)
+            VALUES (:id, 'req_prod', 'system', :tid, 'GAME_LAUNCH', 'game', :gid, 'success', 'SUCCESS', 'Player Launch', :now, 'hash', '000', 1, :tid, '{}')
         """), {"id": str(uuid.uuid4()), "tid": tenant_id, "gid": game_id, "now": now})
         
         logger.info("Game Smoke: Spin & Audit SUCCESS")
