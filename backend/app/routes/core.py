@@ -9,8 +9,9 @@ from app.models.core import (
     DashboardStats, KPIMetric
 )
 from app.models.sql_models import (
-    Player, Transaction, Game, AdminUser
+    Player, Transaction, AdminUser
 )
+from app.models.game_models import Game
 from app.schemas.player import PlayerPublic
 from app.utils.tenant import get_current_tenant_id
 from app.utils.auth import get_current_admin
