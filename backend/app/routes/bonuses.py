@@ -64,6 +64,7 @@ async def update_bonus(
     bonus_id: str,
     request: Request,
     payload: dict = Body(...),
+    _ = Depends(feature_required("can_manage_bonus")),
     current_admin: AdminUser = Depends(get_current_admin),
     session: AsyncSession = Depends(get_session)
 ):
