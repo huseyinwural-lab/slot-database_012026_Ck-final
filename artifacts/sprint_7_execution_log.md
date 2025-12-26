@@ -33,6 +33,11 @@
     [FAIL] ADYEN_API_KEY is MISSING in Settings.
     [FAIL] ADYEN_HMAC_KEY is MISSING in Settings.
 
+
+### T-0: Canary Money Loop
+- **Status:** Started
+- **Action:** Executing E2E Test as Canary User
+
 [*] Checking Network Security Config...
     [PASS] CORS Restricted: ['http://localhost:3000', 'http://localhost:3001']
 
