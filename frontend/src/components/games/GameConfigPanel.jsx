@@ -304,6 +304,9 @@ const GameConfigPanel = ({ game, onClose, onSaved }) => {
             <TabsTrigger value="robot">Math Engine</TabsTrigger>
           )}
           {visibleTabs.includes('bets') && (
+          {visibleTabs.includes('robot') && (
+            <TabsTrigger value="engine">Engine Standards</TabsTrigger>
+          )}
             <TabsTrigger value="bets">Bets &amp; Limits</TabsTrigger>
           )}
           {visibleTabs.includes('features') && (
