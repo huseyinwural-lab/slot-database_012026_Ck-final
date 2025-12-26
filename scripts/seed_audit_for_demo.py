@@ -3,9 +3,14 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
-from config import settings
 import json
 import hashlib
+import sys
+import os
+
+# Fix path
+sys.path.append(os.path.join(os.path.dirname(__file__), "../backend"))
+from config import settings
 
 DATABASE_URL = settings.database_url
 
@@ -22,17 +27,13 @@ async def seed_audit():
     sequence = 1
     tenant_id = "default_casino"
     
-    # Get last sequence if exists? No, we just append for demo. 
-    # Actually, if we want verify to pass, we must respect the chain if data exists.
-    # But let's assume empty or valid.
-    
     async with engine.connect() as conn:
         # Get last
         res = await conn.execute(text("SELECT row_hash, sequence FROM auditevent WHERE tenant_id = :t ORDER BY sequence DESC LIMIT 1"), {"t": tenant_id})
         last = res.mappings().first()
         if last:
-            prev_hash = last['row_hash']
-            sequence = last['sequence'] + 1
+            if last['row_hash']: prev_hash = last['row_hash']
+            if last['sequence']: sequence = last['sequence'] + 1
             
         for i in range(5):
             ts = base_time + timedelta(minutes=i)
