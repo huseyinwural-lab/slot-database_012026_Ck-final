@@ -4,9 +4,7 @@ from sqlalchemy import text
 from app.models.sql_models import AuditEvent
 from sqlalchemy.exc import DBAPIError, OperationalError, IntegrityError
 
-# Fixture to apply triggers for test session (if using in-memory or fresh DB)
-@pytest.fixture(autouse=True)
-async def apply_audit_triggers(session):
+async def apply_triggers(session):
     triggers = [
         """
         CREATE TRIGGER IF NOT EXISTS prevent_audit_update 
@@ -29,6 +27,8 @@ async def apply_audit_triggers(session):
 
 @pytest.mark.asyncio
 async def test_audit_immutable_update_fails(session):
+    await apply_triggers(session)
+    
     # 1. Insert Event
     await session.execute(text("""
         INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, result, timestamp)
@@ -45,6 +45,8 @@ async def test_audit_immutable_update_fails(session):
 
 @pytest.mark.asyncio
 async def test_audit_immutable_delete_fails(session):
+    await apply_triggers(session)
+    
     # 1. Insert
     await session.execute(text("""
         INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, result, timestamp)
