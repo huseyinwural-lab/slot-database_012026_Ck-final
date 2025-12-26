@@ -70,6 +70,14 @@ class GameEngine:
             delta_avail = -abs(payload.amount)
             game_round.total_bet += abs(payload.amount)
         elif payload.event_type == "WIN":
+            # Bonus: Update Wagering Progress
+            if player.wagering_remaining > 0:
+                # Contribute 100% of bet to wagering
+                player.wagering_remaining = max(0.0, player.wagering_remaining - abs(payload.amount))
+                if player.wagering_remaining == 0:
+                    # Bonus Unlocked Logic (MVP: Just clear the tracker)
+                    pass
+                session.add(player) # Stage update
             delta_avail = +abs(payload.amount)
             game_round.total_win += abs(payload.amount)
         elif payload.event_type == "REFUND":
