@@ -87,7 +87,7 @@ function App() {
                 <RequireAuth>
                   <RequireFeature feature="can_use_game_robot" requireOwner={true}><SimulationLab /></RequireFeature>
                 </RequireAuth>
-              
+              } />
               <Route path="/robots" element={
                 <RequireAuth>
                   <RequireFeature feature="can_use_game_robot"><RobotsPage /></RequireFeature>
