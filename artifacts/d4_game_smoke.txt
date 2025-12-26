@@ -1,8 +1,4 @@
 Selected Game: 5a0b83b1-5771-43ef-8dfb-b2d71c3582df
-ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: robotdefinition.schema_version
-[SQL: 
-                INSERT INTO robotdefinition (id, name, config, config_hash, is_active, created_at, updated_at)
-                VALUES (?, ?, '{}', 'hash1', 1, ?, ?)
-            ]
-[parameters: ('75394ee3-b4e8-467e-8408-9e02284c3653', 'Smoke Robot 4d6d3a08', datetime.datetime(2025, 12, 26, 20, 37, 23, 554104, tzinfo=datetime.timezone.utc), datetime.datetime(2025, 12, 26, 20, 37, 23, 554104, tzinfo=datetime.timezone.utc))]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Bound Robot 7e15dfae-95e6-430f-b943-8fbd9a729a2c to Game 5a0b83b1-5771-43ef-8dfb-b2d71c3582df: SUCCESS
+Simulated Spin Round 9274dd6c-9ee3-4703-a148-a93a80e32961: SUCCESS (Callback Signed)
+Robot Change Audit Logged: SUCCESS
