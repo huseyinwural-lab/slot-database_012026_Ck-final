@@ -1,8 +1,5 @@
 Setup Complete: Tenant, Player (100.0), Game.
-ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: gamesession.last_activity_at
-[SQL: 
-                INSERT INTO gamesession (id, tenant_id, player_id, game_id, provider_session_id, currency, created_at, status)
-                VALUES (?, ?, ?, ?, ?, 'USD', ?, 'active')
-            ]
-[parameters: ('d93ad54f-b55f-4585-b042-ed155cc0c544', 'default_casino', 'b09f3f65-78cb-40c8-90c9-b8eb19d97739', '1b89ab7c-4cbd-4911-b64a-6601c23e7870', 'sess_6001bd3e-c2dd-4a7e-85e9-7ea866463d1c', datetime.datetime(2025, 12, 26, 22, 5, 31, 196286, tzinfo=datetime.timezone.utc))]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Game Launched. Session: f849d787-fd76-4b24-b9b8-8f171f1a54f1
+Callback BET Processed. Balance: 90.0
+Callback WIN Processed. Balance: 140.0
+Replay Attack (Win) Blocked: Idempotency Key found.
