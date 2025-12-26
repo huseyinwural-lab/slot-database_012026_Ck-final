@@ -85,10 +85,10 @@ async def update_bonus(
 @router.delete("/{bonus_id}")
 async def delete_bonus(
     bonus_id: str,
-    _ = Depends(feature_required("can_manage_bonus")),
     request: Request,
     current_admin: AdminUser = Depends(get_current_admin),
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    _ = Depends(feature_required("can_manage_bonus"))
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     
