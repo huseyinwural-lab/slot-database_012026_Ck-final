@@ -21,7 +21,7 @@ async def main():
     async with httpx.AsyncClient(timeout=30.0) as client:
         # 1. Login Admin
         print(f"-> Logging in Admin...")
-        resp = await client.post(f"{BASE_URL}/auth/token", data={"username": ADMIN_EMAIL, "password": ADMIN_PASS})
+        resp = await client.post(f"{BASE_URL}/auth/login", json={"email": ADMIN_EMAIL, "password": ADMIN_PASS})
         if resp.status_code != 200:
             print(f"{RED}Login Failed: {resp.text}{RESET}")
             return
