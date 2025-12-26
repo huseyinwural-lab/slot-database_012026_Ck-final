@@ -50,6 +50,12 @@ async def run_cutover():
         await conn.run_sync(SQLModel.metadata.create_all)
     logger.info("Prod DB Initialized with Schema (inc. MFA).")
 
+    # Debug: Check AdminUser Columns
+    async with engine.connect() as conn:
+        res = await conn.execute(text("PRAGMA table_info(adminuser)"))
+        cols = [r[1] for r in res.fetchall()]
+        logger.info(f"AdminUser Columns: {cols}")
+
     # --- 1. P0-CUTOVER-01: Secrets Injection Check ---
     logger.info("[1] Secrets Injection & Validation")
     try:
@@ -65,34 +71,39 @@ async def run_cutover():
     logger.info("[2] MFA & Access Hardening")
     now = datetime.now(timezone.utc)
     async with engine.connect() as conn:
-        # Create System Tenant
-        await conn.execute(text("""
-            INSERT INTO tenant (id, name, type, features, created_at, updated_at) 
-            VALUES ('system', 'System Tenant', 'owner', '{}', :now, :now)
-        """), {"now": now})
-        
-        # Admin Seed
-        admin_id = str(uuid.uuid4())
-        await conn.execute(text("""
-            INSERT INTO adminuser (
-                id, tenant_id, username, email, full_name, password_hash, 
-                role, tenant_role, is_active, status, mfa_enabled, failed_login_attempts, 
-                created_at
-            )
-            VALUES (
-                :id, 'system', 'admin_prod', 'admin@casino.com', 'Prod Admin', 'hash', 
-                'Super Admin', 'admin', 1, 'active', 1, 0, 
-                :now
-            )
-        """), {"id": admin_id, "now": now})
-        
-        # Verify
-        res = await conn.execute(text("SELECT mfa_enabled FROM adminuser WHERE id = :id"), {"id": admin_id})
-        mfa = res.scalar()
-        if mfa:
-            logger.info("Admin MFA Enforcement: VERIFIED")
-        else:
-            logger.error("Admin MFA Enforcement: FAILED")
+        try:
+            # Create System Tenant
+            await conn.execute(text("""
+                INSERT INTO tenant (id, name, type, features, created_at, updated_at) 
+                VALUES ('system', 'System Tenant', 'owner', '{}', :now, :now)
+            """), {"now": now})
+            
+            # Admin Seed
+            admin_id = str(uuid.uuid4())
+            await conn.execute(text("""
+                INSERT INTO adminuser (
+                    id, tenant_id, username, email, full_name, password_hash, 
+                    role, tenant_role, is_active, status, mfa_enabled, failed_login_attempts, 
+                    created_at
+                )
+                VALUES (
+                    :id, 'system', 'admin_prod', 'admin@casino.com', 'Prod Admin', 'hash', 
+                    'Super Admin', 'admin', 1, 'active', 1, 0, 
+                    :now
+                )
+            """), {"id": admin_id, "now": now})
+            
+            # Verify
+            res = await conn.execute(text("SELECT mfa_enabled FROM adminuser WHERE id = :id"), {"id": admin_id})
+            mfa = res.scalar()
+            if mfa:
+                logger.info("Admin MFA Enforcement: VERIFIED")
+            else:
+                logger.error("Admin MFA Enforcement: FAILED")
+            await conn.commit()
+        except Exception as e:
+            logger.error(f"MFA/Access Setup FAILED: {e}")
+            raise e
             
     # --- 3. P0-CUTOVER-03: Restore Drill (Prod Config) ---
     logger.info("[3] Restore Drill")
@@ -113,46 +124,51 @@ async def run_cutover():
     player_id = str(uuid.uuid4())
     
     async with engine.connect() as conn:
-        # Tenant
-        await conn.execute(text("""
-            INSERT INTO tenant (id, name, type, features, created_at, updated_at) 
-            VALUES (:id, 'Prod Casino', 'owner', '{}', :now, :now)
-        """), {"id": tenant_id, "now": now})
-        
-        # Player
-        await conn.execute(text("""
-            INSERT INTO player (
-                id, tenant_id, username, email, password_hash, 
-                balance_real_available, balance_real_held, balance_real, balance_bonus, 
-                wagering_requirement, wagering_remaining, risk_score,
-                status, kyc_status, registered_at
-            )
-            VALUES (:id, :tid, 'prod_player', 'player@prod.com', 'hash', 0,0,0,0,0,0,'low', 'active', 'verified', :now)
-        """), {"id": player_id, "tid": tenant_id, "now": now})
-        
-        # Deposit
-        await conn.execute(text("""
-            INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key, created_at, updated_at, balance_after)
-            VALUES (:id, :tid, :pid, 'deposit', 50.0, 'USD', 'completed', 'completed', 'credit_card', :ik, :now, :now, 50.0)
-        """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": player_id, "ik": "prod_dep_1", "now": now})
-        
-        logger.info("Finance Smoke: Deposit SUCCESS")
-        
-        # Game Spin
-        game_id = str(uuid.uuid4())
-        await conn.execute(text("""
-            INSERT INTO game (id, tenant_id, external_id, name, provider, category, is_active, provider_id, created_at, configuration, type, rtp, status)
-            VALUES (:id, :tid, 'prod_slot', 'Mega Prod Slot', 'internal', 'slot', 1, 'int_1', :now, '{}', 'slot', 96.0, 'live')
-        """), {"id": game_id, "tid": tenant_id, "now": now})
-        
-        # Audit
-        await conn.execute(text("""
-            INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, resource_id, result, status, reason, timestamp, row_hash, prev_row_hash, sequence, chain_id, details)
-            VALUES (:id, 'req_prod', 'system', :tid, 'GAME_LAUNCH', 'game', :gid, 'success', 'SUCCESS', 'Player Launch', :now, 'hash', '000', 1, :tid, '{}')
-        """), {"id": str(uuid.uuid4()), "tid": tenant_id, "gid": game_id, "now": now})
-        
-        logger.info("Game Smoke: Spin & Audit SUCCESS")
-        await conn.commit()
+        try:
+            # Tenant
+            await conn.execute(text("""
+                INSERT INTO tenant (id, name, type, features, created_at, updated_at) 
+                VALUES (:id, 'Prod Casino', 'owner', '{}', :now, :now)
+            """), {"id": tenant_id, "now": now})
+            
+            # Player
+            await conn.execute(text("""
+                INSERT INTO player (
+                    id, tenant_id, username, email, password_hash, 
+                    balance_real_available, balance_real_held, balance_real, balance_bonus, 
+                    wagering_requirement, wagering_remaining, risk_score,
+                    status, kyc_status, registered_at
+                )
+                VALUES (:id, :tid, 'prod_player', 'player@prod.com', 'hash', 0,0,0,0,0,0,'low', 'active', 'verified', :now)
+            """), {"id": player_id, "tid": tenant_id, "now": now})
+            
+            # Deposit
+            await conn.execute(text("""
+                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, idempotency_key, created_at, updated_at, balance_after)
+                VALUES (:id, :tid, :pid, 'deposit', 50.0, 'USD', 'completed', 'completed', 'credit_card', :ik, :now, :now, 50.0)
+            """), {"id": str(uuid.uuid4()), "tid": tenant_id, "pid": player_id, "ik": "prod_dep_1", "now": now})
+            
+            logger.info("Finance Smoke: Deposit SUCCESS")
+            
+            # Game Spin
+            game_id = str(uuid.uuid4())
+            await conn.execute(text("""
+                INSERT INTO game (id, tenant_id, external_id, name, provider, category, is_active, provider_id, created_at, configuration, type, rtp, status)
+                VALUES (:id, :tid, 'prod_slot', 'Mega Prod Slot', 'internal', 'slot', 1, 'int_1', :now, '{}', 'slot', 96.0, 'live')
+            """), {"id": game_id, "tid": tenant_id, "now": now})
+            
+            # Audit
+            # Note: details='{}' needs to be passed explicitly as string
+            await conn.execute(text("""
+                INSERT INTO auditevent (id, request_id, actor_user_id, tenant_id, action, resource_type, resource_id, result, status, reason, timestamp, row_hash, prev_row_hash, sequence, chain_id, details)
+                VALUES (:id, 'req_prod', 'system', :tid, 'GAME_LAUNCH', 'game', :gid, 'success', 'SUCCESS', 'Player Launch', :now, 'hash', '000', 1, :tid, '{}')
+            """), {"id": str(uuid.uuid4()), "tid": tenant_id, "gid": game_id, "now": now})
+            
+            logger.info("Game Smoke: Spin & Audit SUCCESS")
+            await conn.commit()
+        except Exception as e:
+            logger.error(f"Smoke Test FAILED: {e}")
+            raise e
 
     with open("/app/artifacts/prod_smoke_20251226.txt", "w") as f:
         f.write("PROD SMOKE SUITE: ALL PASS\nFinance: OK\nGame: OK\nAudit: OK")
