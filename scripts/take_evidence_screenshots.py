@@ -39,7 +39,7 @@ async def run():
         await page.click('button:has-text("Config") >> nth=0') # Click the first one
 
         # Wait for Dialog
-        await page.wait_for_selector('div[role="dialog"]', { state: "visible" })
+        await page.wait_for_selector('div[role="dialog"]', state="visible")
         
         # Click "Math Engine" tab
         # Based on GameConfigPanel.jsx: <TabsTrigger value="robot">Math Engine</TabsTrigger>
