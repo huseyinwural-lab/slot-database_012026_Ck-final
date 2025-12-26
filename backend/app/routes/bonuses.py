@@ -18,7 +18,6 @@ async def get_bonuses(
     request: Request,
     pagination: PaginationParams = Depends(get_pagination_params),
     current_admin: AdminUser = Depends(get_current_admin),
-    session: AsyncSession = Depends(get_session)
     session: AsyncSession = Depends(get_session),
     _ = Depends(feature_required("can_manage_bonus")),
 ):
