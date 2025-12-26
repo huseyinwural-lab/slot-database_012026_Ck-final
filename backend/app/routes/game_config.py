@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Dict, Any
 
 from app.core.database import get_session
-from app.models.sql_models import Game, GameConfigVersion, AdminUser
+from app.models.game_models import Game
+from app.models.sql_models import GameConfigVersion, AdminUser
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 from app.core.errors import AppError

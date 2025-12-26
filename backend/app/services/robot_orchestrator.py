@@ -9,7 +9,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from app.models.sql_models import Game
+from app.models.game_models import Game
 
 SUPPORTED_GAME_TYPES = {"slot", "crash", "dice"}
 MAX_ROUNDS_PER_TYPE = 1000

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from app.models.sql_models import Game
+from app.models.game_models import Game
 from app.core.database import get_session
 
 router = APIRouter(prefix="/api/v1/player", tags=["player_lobby"])
