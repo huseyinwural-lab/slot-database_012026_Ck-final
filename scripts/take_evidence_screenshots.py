@@ -33,7 +33,7 @@ async def run():
         # Find the first "Config" button. 
         # Based on GameManagement.jsx: Button variant="outline" with Settings2 icon and text "Config"
         # We can use text="Config"
-        await page.wait_for_selector('button:has-text("Config")', { state: "visible" })
+        await page.wait_for_selector('button:has-text("Config")', state="visible")
         
         print("Opening Game Config...")
         await page.click('button:has-text("Config") >> nth=0') # Click the first one
