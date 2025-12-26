@@ -3,7 +3,10 @@ from pydantic import BaseModel
 import httpx
 import uuid
 import hashlib
-from typing import Literal
+import hmac
+import time
+import json
+from config import settings
 
 router = APIRouter(prefix="/api/v1/mock-provider", tags=["mock_provider"])
 
@@ -17,30 +20,48 @@ class MockSpinRequest(BaseModel):
 @router.post("/spin")
 async def mock_spin(request: MockSpinRequest):
     """
-    Simulate a Game Spin.
-    1. Sends BET webhook to Backend.
-    2. If is_win, sends WIN webhook to Backend.
+    Simulate a Game Spin with Security Headers.
     """
     
-    CALLBACK_URL = "http://localhost:8001/api/v1/integrations/callback" # Internal ref
+    CALLBACK_URL = "http://localhost:8001/api/v1/integrations/callback" 
+    SECRET = settings.adyen_hmac_key or "mock-secret"
     
     round_id = f"rnd-{uuid.uuid4().hex[:8]}"
     
-    # 1. BET
-    bet_payload = {
-        "provider_id": "mock-provider",
-        "event_type": "BET",
-        "session_id": request.session_id,
-        "provider_round_id": round_id,
-        "provider_event_id": f"evt-{uuid.uuid4().hex}",
-        "amount": request.amount,
-        "currency": request.currency,
-        "signature": "mock-sig"
-    }
-    
     async with httpx.AsyncClient() as client:
-        # Call Backend
-        resp = await client.post(CALLBACK_URL, json=bet_payload, timeout=5.0)
+        
+        # Helper to send signed request
+        async def send_signed(payload):
+            timestamp = str(int(time.time()))
+            nonce = uuid.uuid4().hex
+            
+            body_bytes = json.dumps(payload).encode("utf-8")
+            
+            # Sign: timestamp.nonce.body
+            msg = f"{timestamp}.{nonce}.".encode("utf-8") + body_bytes
+            sig = hmac.new(SECRET.encode("utf-8"), msg, hashlib.sha256).hexdigest()
+            
+            headers = {
+                "X-Signature": sig,
+                "X-Timestamp": timestamp,
+                "X-Nonce": nonce,
+                "X-Provider": "mock-provider"
+            }
+            
+            return await client.post(CALLBACK_URL, content=body_bytes, headers=headers)
+
+        # 1. BET
+        bet_payload = {
+            "provider_id": "mock-provider",
+            "event_type": "BET",
+            "session_id": request.session_id,
+            "provider_round_id": round_id,
+            "provider_event_id": f"evt-{uuid.uuid4().hex}",
+            "amount": request.amount,
+            "currency": request.currency
+        }
+        
+        resp = await send_signed(bet_payload)
         
         if resp.status_code != 200:
             raise HTTPException(status_code=resp.status_code, detail=f"Bet Failed: {resp.text}")
@@ -56,11 +77,10 @@ async def mock_spin(request: MockSpinRequest):
                 "provider_round_id": round_id,
                 "provider_event_id": f"evt-{uuid.uuid4().hex}",
                 "amount": request.win_amount,
-                "currency": request.currency,
-                "signature": "mock-sig"
+                "currency": request.currency
             }
             
-            resp_win = await client.post(CALLBACK_URL, json=win_payload, timeout=5.0)
+            resp_win = await send_signed(win_payload)
             if resp_win.status_code != 200:
                  raise HTTPException(status_code=resp_win.status_code, detail=f"Win Failed: {resp_win.text}")
             
