@@ -73,10 +73,10 @@ async def test_math_asset_upload_audit(client: AsyncClient, admin_token, session
     payload = {
         "ref_key": f"asset_audit_{uuid.uuid4().hex}",
         "type": "paytable",
-        "content": {"payouts": [1, 2, 3]},
-        "reason": "New math version"
+        "content": {"payouts": [1, 2, 3]}
     }
-    headers = {"Authorization": f"Bearer {admin_token}"}
+    # Send reason in header to avoid body parsing conflicts with Dict Body
+    headers = {"Authorization": f"Bearer {admin_token}", "X-Reason": "New math version"}
     resp = await client.post("/api/v1/math-assets/", json=payload, headers=headers)
     assert resp.status_code == 200
     asset_id = resp.json()["id"]
@@ -96,9 +96,10 @@ async def test_game_robot_bind_audit(client: AsyncClient, admin_token, session):
     game = Game(
         name="Bind Game", 
         external_id="bind_game_1", 
-        provider="internal", 
+        provider="internal",
+        provider_id="internal_1", # Fixed: Missing field
         tenant_id="default_casino",
-        client_type="html5", # Add required field
+        client_type="html5", 
         provider_game_id="bind_game_1",
         category="slot"
     )
