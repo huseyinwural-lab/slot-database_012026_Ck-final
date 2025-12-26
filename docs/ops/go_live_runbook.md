@@ -9,6 +9,49 @@
 *   **Canary:** Canary user/tenant ready with test amounts defined.
 *   **Hypercare:** On-call rotation and alert channels active.
 
+## War Room Protocol (Sprint 7 Cutover)
+**Goal:** Single source of truth for GO/NO-GO decisions.
+
+### Roles
+*   **Incident Commander (IC):** Sole decision maker (GO/NO-GO/ROLLBACK).
+*   **Deployer:** Executes deploy and smoke scripts.
+*   **DB Owner:** Manages snapshots and migration monitoring.
+*   **Payments Owner:** Validates Canary Money Loop & Ledger Invariants.
+*   **Scribe:** Logs timeline, references, and decisions.
+
+### Rules
+1.  All steps follow the checklist. No skipping.
+2.  **Canary FAIL = NO-GO** (No exceptions).
+3.  If Rollback trigger observed, IC decides within 5 minutes.
+4.  Log every step: PASS/FAIL + Timestamp.
+
+### Timeline (Scribe Format)
+*   **T-60:** Pre-flight Start/End.
+*   **T-30:** Snapshot ID recorded.
+*   **T-15:** Deploy Start/End.
+*   **T-10:** Smoke PASS/FAIL.
+*   **T-0:** Canary PASS/FAIL.
+*   **T+15:** GO/NO-GO Decision.
+*   **T+60:** First Hypercare Report.
+
+## Communication Plan (Cutover Broadcast)
+### Channels & Messages
+1.  **Cutover Start:** "Cutover initiated. Maintenance window active. Updates every 15m."
+2.  **Checkpoint Updates:**
+    *   "Pre-flight PASS"
+    *   "Backup PASS"
+    *   "Deploy+Smoke PASS/FAIL"
+    *   "Canary PASS/FAIL"
+3.  **GO-LIVE Announcement:** "GO decision made. System live. Hypercare started."
+4.  **Rollback (If needed):** "Rollback triggered. Reason: [X]. Restoration in progress."
+
+### Update Cadence
+*   **During Cutover:** Every 15m or at checkpoints.
+*   **First 2 Hours:** Every 30m.
+*   **2-24 Hours:** Hourly summary.
+
+---
+
 ## 1. RC Sign-off Criteria (Met)
 - **E2E (Money Loop):** PASS (Determinisitc via polling).
 - **Backend Regression:** PASS (8/8 tests, covers ledger invariants).
