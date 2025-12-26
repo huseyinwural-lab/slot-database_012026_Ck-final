@@ -1,0 +1,8 @@
+Setup: Player Created.
+ERROR: (sqlite3.IntegrityError) NOT NULL constraint failed: playerrgprofile.self_excluded_permanent
+[SQL: 
+                INSERT INTO playerrgprofile (id, tenant_id, player_id, deposit_limit_daily, updated_at)
+                VALUES (?, ?, ?, 50.0, ?)
+            ]
+[parameters: ('a5e9a8dc-b5bc-464c-88ed-aee5c643aee4', 'default_casino', '93f44791-4050-4c98-a0bc-6f50cb7d3889', datetime.datetime(2025, 12, 26, 23, 19, 54, 47457, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
