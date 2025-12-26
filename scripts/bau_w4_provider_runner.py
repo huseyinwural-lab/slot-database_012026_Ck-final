@@ -12,15 +12,8 @@ from config import settings
 sys.path.append("/app/backend")
 
 # --- MOCK PROVIDER SIMULATION ---
-# This script simulates an external provider sending callbacks to our system
-# and verifies the ledger/audit trail.
-
 async def run_provider_golden_path():
     print("Starting Provider Integration Golden Path Test...")
-    
-    # We will simulate the behavior via direct DB interaction + Logic simulation 
-    # to prove the data model and flow works, as setting up a real HTTP server/client 
-    # interaction in this script is complex. We focus on the "Service Logic".
     
     engine = create_async_engine(settings.database_url)
     
@@ -42,8 +35,18 @@ async def run_provider_golden_path():
             
             # Player (Balance 100)
             await conn.execute(text("""
-                INSERT INTO player (id, tenant_id, username, email, password_hash, balance_real_available, balance_real, balance_bonus, status, kyc_status, registered_at)
-                VALUES (:id, :tid, :user, :email, 'hash', 100, 100, 0, 'active', 'verified', :now)
+                INSERT INTO player (
+                    id, tenant_id, username, email, password_hash, 
+                    balance_real_available, balance_real, balance_bonus, balance_real_held,
+                    wagering_requirement, wagering_remaining, risk_score,
+                    status, kyc_status, registered_at
+                )
+                VALUES (
+                    :id, :tid, :user, :email, 'hash', 
+                    100, 100, 0, 0,
+                    0, 0, 'low',
+                    'active', 'verified', :now
+                )
             """), {"id": player_id, "tid": tenant_id, "user": f"prov_{uuid.uuid4().hex[:8]}", "email": "prov@test.com", "now": now})
             
             # Game (Provider)
@@ -73,8 +76,8 @@ async def run_provider_golden_path():
             
             # Transaction
             await conn.execute(text("""
-                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, provider, provider_event_id, idempotency_key, created_at, updated_at, balance_after)
-                VALUES (:id, :tid, :pid, 'bet', :amt, 'USD', 'completed', 'completed', :prov, :peid, :ikey, :now, :now, 90.0)
+                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, provider, provider_event_id, idempotency_key, created_at, updated_at, balance_after)
+                VALUES (:id, :tid, :pid, 'bet', :amt, 'USD', 'completed', 'completed', 'wallet', :prov, :peid, :ikey, :now, :now, 90.0)
             """), {"id": tx_id_bet, "tid": tenant_id, "pid": player_id, "amt": bet_amt, "prov": provider_id, "peid": f"{round_id}_bet", "ikey": f"{round_id}_bet", "now": now})
             
             # Ledger
@@ -97,8 +100,8 @@ async def run_provider_golden_path():
             
             # Transaction
             await conn.execute(text("""
-                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, provider, provider_event_id, idempotency_key, created_at, updated_at, balance_after)
-                VALUES (:id, :tid, :pid, 'win', :amt, 'USD', 'completed', 'completed', :prov, :peid, :ikey, :now, :now, 140.0)
+                INSERT INTO "transaction" (id, tenant_id, player_id, type, amount, currency, status, state, method, provider, provider_event_id, idempotency_key, created_at, updated_at, balance_after)
+                VALUES (:id, :tid, :pid, 'win', :amt, 'USD', 'completed', 'completed', 'wallet', :prov, :peid, :ikey, :now, :now, 140.0)
             """), {"id": tx_id_win, "tid": tenant_id, "pid": player_id, "amt": win_amt, "prov": provider_id, "peid": f"{round_id}_win", "ikey": f"{round_id}_win", "now": now})
             
             # Ledger
