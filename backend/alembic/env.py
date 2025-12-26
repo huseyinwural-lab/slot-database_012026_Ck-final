@@ -10,6 +10,7 @@ from sqlalchemy.engine.url import make_url
 # P1-001: Correct import path for settings
 from app.core.database import SQLModel # Use absolute path
 from app.models import sql_models, game_models # Import all models to register with metadata
+from app.models import sql_models, game_models, robot_models # Register Robot Models
 from config import settings
 
 # this is the Alembic Config object, which provides
