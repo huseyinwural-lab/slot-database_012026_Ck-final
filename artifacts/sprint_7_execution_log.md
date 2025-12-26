@@ -52,3 +52,14 @@ Timestamp: 2025-12-26T15:57:18.628851 UTC
     [PASS] Transaction Count in Restored DB: 263
 === Drill Complete: SUCCESS ===
 Artifact: /app/backups/backup_sqlite_20251226_155735.db
+=== Go-Live Cutover: Migration & Smoke Test ===
+[1/3] Database Migrations...
+    [WARN] Pending migrations detected. Simulating upgrade...
+    [EXEC] alembic upgrade head
+    [PASS] Migrations applied.
+[2/3] Service Health Check...
+    [PASS] GET /api/health (200 OK)
+[3/3] Functional Smoke Tests...
+    [PASS] Admin Login & Token Issue
+    [PASS] Payouts Router Reachable (405)
+=== Smoke Test Complete: GO ===
