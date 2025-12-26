@@ -164,3 +164,24 @@ async def check_velocity_limit(
                 "window_minutes": window_minutes
             }
         )
+async def check_wagering_requirement(
+    session,
+    *,
+    player_id: str,
+):
+    """Ensure player has met wagering requirements before withdrawal."""
+    player = await session.get(Player, player_id)
+    if not player:
+        return
+
+    # Check if wagering remaining > 0
+    if player.wagering_remaining > 0:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error_code": "WAGERING_REQUIREMENT_NOT_MET",
+                "remaining": float(player.wagering_remaining),
+                "message": "You must complete wagering requirements before withdrawing."
+            }
+        )
+
