@@ -1,0 +1,161 @@
+<analysis>**original_problem_statement:**
+The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project has progressed through a series of sprints, moving from fixing critical E2E tests (Sprint 5) through a full Go-Live simulation (Sprints 6-8). The project has now transitioned into implementing core casino features based on a Final Backlog provided by the user. The current focus is on completing Sprint C, which involves transforming the game engine from a simple mock into a controllable, auditable, and DB-driven Robot and Math Asset system.
+
+**PRODUCT REQUIREMENTS:**
+1.  **Sprint A (Completed):** Focused on core hardening and automation, including implementing a velocity engine, withdraw expiry automation, a chargeback handler, and basic compliance UI.
+2.  **Sprint B (Completed):** Focused on building the game loop, including a mock provider, game engine, player-facing frontend (catalog, game room), and securing the callback mechanism with HMAC.
+3.  **Sprint C (In Progress):** Aims to create a Controlled Casino by implementing a Robot Registry, a Math Asset Pipeline, and hardening the provider contract.
+4.  **Final Backlog:** The user has provided a comprehensive backlog for post-go-live work, covering regulation (KYC/RG), fraud/abuse prevention, and game integration pipelines.
+
+**User's preferred language**: Turkish
+
+**what currently exists?**
+The application is a full-stack casino platform with a functional payment and wallet system (Stripe/Adyen) and a complete set of operational documents and Go-Live simulation artifacts. Sprints A and B are complete, meaning the platform has a hardened financial core and a demonstrable game loop. This loop uses a smart mock provider that serves game outcomes based on a newly created database schema for a Robot Registry and Math Assets (reels, paytables). A series of backend syntax errors that were preventing the server from starting have just been fixed, and the admin panel is now accessible.
+
+**Last working item**:
+-   **Last item agent was working:** The agent was resolving a critical issue where the admin panel was inaccessible due to the backend server failing to start. The agent identified and fixed a series of syntax errors (missing commas, incorrect arguments, wrong indentation) across multiple backend route files (, , , ). After several attempts, all errors were resolved, and the backend service was successfully restarted and confirmed to be healthy. The user confirmed the fix and instructed the agent to proceed with the next task.
+-   **Status:** NOT STARTED (The next task, Sprint C - Task 3, has not begun).
+-   **Agent Testing Done:** Y (for the server fix, via health check).
+-   **Which testing method agent to use?** Frontend testing agent. The upcoming task involves significant new UI development in the admin panel and is best validated with an E2E test.
+-   **User Testing Done:** Y (User confirmed admin login is now working).
+
+**All Pending/In progress Issue list**:
+-   **Issue 1:** Legacy test failures in . (P3)
+
+**Issues Detail:**
+-   **Issue 1:**
+    -   **Description:** The test file  has persistent failures. This is a known, low-priority tech debt item from previous sprints.
+    -   **Attempted fixes:** None in this session.
+    -   **Next debug checklist:** Run 
+no tests ran in 0.00s to analyze errors.
+    -   **Why fix this issue and what will be achieved with this?** To achieve a 100% passing backend test suite.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** backend
+    -   **Blocked on other issue:** None
+
+**In progress Task List**:
+-   **Task 1:** Complete Sprint C: Controlled Casino (P0)
+    -   **Where to resume:** Begin implementation of **Task 3: Admin UI (Robot Yönetimi)** as per the detailed task order in . The first step is to add the new pages (Robots, Math Assets) to the admin panel sidebar and create the corresponding routes and components.
+    -   **What will be achieved with this?** This will provide a UI for the operations team to manage the robot catalog, math assets, and the binding between games and robots, making the controlled casino engine operationally manageable.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** frontend
+    -   **Blocked on something:** None.
+
+**Upcoming and Future Tasks**
+
+**Upcoming Tasks:**
+-   **E2E Test for Smart Game Loop (P0):** Re-run the  test, which previously failed due to server instability. This is crucial to validate that the Smart Game Engine from Sprint C-Task 2 works as expected.
+-   **Complete Sprint C (P0):**
+    -   Implement the Math Assets management page.
+    -   Implement audit logging for all admin actions on robots and assets.
+    -   Create and pass a new E2E test for the admin robot management flow ().
+
+**Future Tasks:**
+-   **Post-Go-Live Backlog (P1/P2):**
+    -   **Game Integration:** Implement a real game aggregator integration.
+    -   **Fraud/Abuse:** Enhance device/IP correlation and bonus abuse controls.
+    -   **Compliance:** Fully implement the KYC flow with UI for document review and connect it to wallet limits.
+    -   **Analytics:** Instrument the frontend and backend for KPI tracking (funnels, LTV).
+
+**Completed work in this session**
+-   **Sprint A (Core Hardening):** Implemented a velocity engine, withdraw expiry automation, a chargeback handler, and compliance-related UI stubs.
+-   **Sprint B (Game Loop):** Established the game core, including models, a smart mock provider, player-facing UI (catalog, game room), and a secure callback middleware (HMAC).
+-   **Feature Flag Hardening:** Fixed visibility of hidden admin panel features and added robust backend enforcement for these flags to prevent unauthorized API access.
+-   **Sprint C - Task 1 (Robot Registry):** Created the database schema (models, migrations) and seeding scripts for the Robot Registry and Math Assets.
+-   **Sprint C - Task 2 (Smart Game Engine):** Upgraded the mock game provider to use the DB-driven Robot and Math Assets, making game outcomes deterministic and auditable.
+-   **Critical Bug Fix (Admin Login):** Resolved a series of backend syntax errors that were preventing the server from starting, thereby restoring access to the admin panel.
+
+**Earlier issues found/mentioned but not fixed**
+-   **Issue 1:** The database migration workflow with Alembic is unstable. The agent repeatedly failed to apply migrations and resorted to using  scripts. This is a significant technical debt that risks schema integrity.
+
+**Known issue recurrence from previous fork**
+-   **Issue recurrence in previous fork:**  failures persist.
+-   **Recurrence count:** 2+
+-   **Status:** NOT STARTED
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+-   **Server-Authoritative Game Engine:** The architecture has shifted from a simple mock to a DB-driven system where game logic (Robots) and mathematics (Math Assets) are versioned, stored, and managed centrally. Game outcomes are now deterministic and auditable.
+-   **Feature Flag Hardening:** Security is enforced at both the UI layer (hiding menu items) and, crucially, at the API layer using a  dependency to prevent unauthorized endpoint access.
+-   **Callback Security:** Provider callbacks are secured using a middleware that validates HMAC signatures, timestamps, and a nonce to prevent replay attacks.
+
+**key DB schema**
+-   **robot_definitions**:  - Defines a game's logic.
+-   **math_assets**:  - Stores versioned reelsets and paytables.
+-   **game_robot_bindings**:  - Links a game to its active robot definition.
+-   **callback_nonces**:  - Used for replay protection in callbacks.
+-   **bonus_campaigns**, **player_bonuses**:  - Schema for the bonus engine.
+
+**changes in tech stack**
+-   None.
+
+**All files of reference**
+-   : The currently active task order.
+-   : Contains the Smart Engine logic that connects the robot, math, and ledger.
+-   : Defines the core schema for the controllable casino engine.
+-   : Contains the  dependency used for security.
+
+**Areas that need refactoring**:
+-   **Database Migration Workflow:** The agent's repeated struggles with Alembic indicate a fundamental problem. The process of generating and applying migrations is unreliable, forcing the use of destructive  scripts. This workflow needs to be investigated and fixed to ensure stable schema evolution without data loss.
+
+**key api endpoints**
+-   : The core endpoint that simulates a game round using the Smart Engine.
+-   : The secured endpoint for receiving game events from providers.
+-   : Player-facing endpoint to start a game session.
+-   , , : (To be created) APIs for the new admin UI.
+
+**Critical Info for New Agent**
+-   Your immediate priority is **Sprint C, Task 3: Admin UI (Robot Yönetimi)**. You need to build the frontend pages for managing the new Robot and Math Asset system.
+-   The previous agent just fixed a series of critical backend syntax errors that were preventing server startup. The backend is now stable and accessible.
+-   **Alembic migrations are a known weak point.** The previous agent struggled significantly, resorting to force-creating the database. Be extremely cautious if you need to make schema changes. Prioritize understanding and fixing the migration process over using workarounds.
+-   Before starting the new UI task, it is highly recommended to run the  test to confirm the Smart Engine is fully functional now that the server is stable.
+
+**documents and test reports created in this job**
+-   
+-   
+-    (Current Task)
+-   
+-   
+-   
+
+**Last 10 User Messages and any pending HUMAN messages**
+10. **User:** Start Sprint C. (summarized)
+9.  **Agent:** Completes Sprint C-Task 1 (DB/Models), asks to continue.
+8.  **User:** Yes, continue. (to Task 2)
+7.  **Agent:** Provides a detailed plan for Sprint C-Task 2 (Smart Engine).
+6.  **Agent:** Completes Sprint C-Task 2 (Smart Engine), asks to continue.
+5.  **User:** I can't log in to the admin panel, can you check, then we'll continue.
+4.  **Agent:** (Multiple steps) Debugs and fixes syntax errors in backend files, restarts the server.
+3.  **Agent:** Reports that the admin login issue is fixed and all features should be visible. Asks for confirmation to proceed with Sprint C-Task 3.
+2.  **User:** Yes, continue. (to Task 3) Provides a detailed work order for the Admin UI.
+1.  **Agent:** Creates the task order file for Sprint C-Task 3.
+
+**Project Health Check:**
+-   **Broken:**
+    -   The  database migration process is unreliable and has been repeatedly bypassed with destructive scripts. This poses a high risk to data integrity and deployment stability.
+-   **Mocked:**
+    -   The  has been intentionally evolved into a Smart Engine that uses a database-backed robot and math assets to simulate a real, deterministic game provider.
+
+**3rd Party Integrations**
+-   **Stripe:** For payment processing (deposits).
+-   **Adyen:** For payment processing (deposits and real payouts).
+-   **PostgreSQL / SQLModel:** Backend database ORM.
+-   **APScheduler:** For running background jobs.
+
+**Testing status**
+-   **Testing agent used after significant changes:** NO
+-   **Troubleshoot agent used after agent stuck in loop:** NO (but should have been considered during the backend syntax error loop).
+-   **Test files created:**
+    -   
+    -   
+    -   
+-   **Known regressions:** None.
+
+**Credentials to test flow:**
+-   All necessary credentials for Stripe and Adyen test environments are available in .
+
+**What agent forgot to execute**
+-   After fixing the backend server stability issues, the agent did not re-run the  test. The last run of this test failed due to server connection problems, and its success is critical to confirm that the Smart Game Engine (Sprint C - Task 2) is fully functional before building a UI on top of it.</analysis>

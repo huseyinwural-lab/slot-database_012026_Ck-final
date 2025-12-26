@@ -3,7 +3,7 @@ import sys
 import json
 
 class JWTAuthTester:
-    def __init__(self, base_url="https://wallet-release.preview.emergentagent.com"):
+    def __init__(self, base_url="https://smart-robot-ui.preview.emergentagent.com"):
         self.base_url = base_url
         self.access_token = None
         self.tests_run = 0
