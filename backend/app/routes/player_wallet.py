@@ -398,6 +398,10 @@ async def create_withdrawal(
     from app.services.tenant_policy_enforcement import check_velocity_limit
     await check_velocity_limit(session, player_id=current_player.id, action="withdraw")
 
+    # Bonus Wagering Check
+    from app.services.tenant_policy_enforcement import check_wagering_requirement
+    await check_wagering_requirement(session, player_id=current_player.id)
+
     if not idempotency_key:
         raise HTTPException(status_code=400, detail={"error_code": "IDEMPOTENCY_KEY_REQUIRED"})
 
