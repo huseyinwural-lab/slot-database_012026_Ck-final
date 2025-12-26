@@ -14,6 +14,7 @@ if os.path.exists(db_path):
         # But for schema sync, dropping game is enough if we recreate it.
         
         # We should also drop dependent tables to be clean
+        conn.execute('DROP TABLE IF EXISTS gameevent')
         conn.execute('DROP TABLE IF EXISTS gamesession')
         conn.execute('DROP TABLE IF EXISTS gameround')
         conn.execute('DROP TABLE IF EXISTS gamerobotbinding')
