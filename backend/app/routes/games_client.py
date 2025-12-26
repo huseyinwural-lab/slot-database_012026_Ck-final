@@ -14,11 +14,16 @@ router = APIRouter(prefix="/api/v1/games", tags=["games"])
 @router.get("/", response_model=List[Game])
 async def list_games(
     tenant_id: Optional[str] = None,
+    current_player: Player = Depends(get_current_player),
     session: AsyncSession = Depends(get_session)
 ):
+    # Tenant filtering logic based on player's tenant
     stmt = select(Game).where(Game.is_active == True)
-    if tenant_id:
-        stmt = stmt.where(Game.tenant_id == tenant_id)
+    
+    # In multi-tenant, player only sees games assigned to their tenant
+    # Assuming all games are global for MVP unless filtered
+    stmt = stmt.where(Game.tenant_id == current_player.tenant_id)
+    
     return (await session.execute(stmt)).scalars().all()
 
 @router.post("/launch", response_model=GameLaunchResponse)
@@ -31,6 +36,10 @@ async def launch_game(
     if not game:
         raise HTTPException(404, "Game not found")
         
+    # Tenant check
+    if game.tenant_id != current_player.tenant_id:
+        raise HTTPException(403, "Game not available")
+
     # Create Session
     session_id = str(uuid.uuid4())
     # Provider Session ID might be different, but for mock we use same
@@ -48,8 +57,7 @@ async def launch_game(
     await session.commit()
     
     # URL construction
-    # For real provider, we would call their API to get a URL.
-    # For mock, we direct to our own GameRoom with session_id
+    # For mock, direct to our Frontend Route
     launch_url = f"/game/{session_id}"
     
     return {"url": launch_url, "session_id": session_id}
