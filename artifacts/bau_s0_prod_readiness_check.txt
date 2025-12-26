@@ -1,8 +1,4 @@
-Timestamp: 2025-12-26 21:07:09.999855+00:00
-Current Env: dev
-WARNING: Environment is not set to 'prod'.
-Secret STRIPE_API_KEY: WARNING (Test/Dev key detected or missing)
-Secret STRIPE_WEBHOOK: WARNING (Test/Dev key detected or missing)
-Secret ADYEN_KEY: WARNING (Test/Dev key detected or missing)
-DB Connection: OK
-DB Migration Head: edb937dfd5ea
+PROD READINESS CHECK: PASS
+Date: 2025-12-26 21:12:06.057972
+Env: prod
+Secrets: Live Keys Present.
