@@ -25,6 +25,9 @@ test.describe('Smart Game Loop', () => {
         headers: { 'Authorization': `Bearer ${token}` },
         data: { amount: 100, method: 'test' }
     });
+    if (!depositRes.ok()) {
+        console.log('Deposit Failed:', depositRes.status(), await depositRes.text());
+    }
 
     // 2. Launch Game (Classic 777 - has Robot)
     // First get games to find ID
