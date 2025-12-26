@@ -19,6 +19,7 @@ async def get_bonuses(
     pagination: PaginationParams = Depends(get_pagination_params),
     current_admin: AdminUser = Depends(get_current_admin),
     session: AsyncSession = Depends(get_session)
+    _ = Depends(feature_required("can_manage_bonus")),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     
