@@ -18,12 +18,13 @@ from config import settings
 # Setup DB
 DATABASE_URL = settings.database_url
 
-async def export_audit_log(target_date: str, output_dir: str):
+async def export_audit_log(target_date: str, output_dir: str, db_url: str = None):
     """
     Export audit logs for a specific date (YYYY-MM-DD) to a signed, compressed JSONL file.
     """
-    print(f"Connecting to {DATABASE_URL}...")
-    engine = create_async_engine(DATABASE_URL)
+    url = db_url or DATABASE_URL
+    print(f"Connecting to {url}...")
+    engine = create_async_engine(url)
     
     # Parse date
     try:
@@ -106,7 +107,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Daily Audit Log Archiver")
     parser.add_argument("--date", type=str, help="Date to export (YYYY-MM-DD)", default=(datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d"))
     parser.add_argument("--output", type=str, help="Output directory", default=settings.audit_archive_path)
+    parser.add_argument("--db-url", type=str, help="Database URL override", default=None)
     
     args = parser.parse_args()
     
-    asyncio.run(export_audit_log(args.date, args.output))
+    asyncio.run(export_audit_log(args.date, args.output, args.db_url))
