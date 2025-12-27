@@ -7,7 +7,7 @@ import uuid
 class Affiliate(SQLModel, table=True):
     """Affiliate Partner."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(index=True)
+    tenant_id: str = Field(foreign_key="tenant.id", index=True)
     username: str
     email: str
     
