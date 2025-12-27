@@ -329,22 +329,53 @@ const TenantsPage = () => {
 
       {/* Edit Features Modal */}
       {editingTenant && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col">
             <CardHeader>
               <CardTitle>Edit Features - {editingTenant.name}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {featureKeys.map((key) => (
-                  <div key={key} className="flex items-center justify-between text-sm">
-                    <span className="text-slate-300">{key}</span>
-                    <Switch
-                      checked={!!editFeatures[key]}
-                      onCheckedChange={() => handleToggleEditFeature(key)}
-                    />
-                  </div>
-                ))}
+            <CardContent className="overflow-y-auto flex-1">
+              <div className="space-y-6">
+                
+                {/* Global Features */}
+                <div>
+                    <h3 className="text-sm font-semibold mb-2">Platform Capabilities</h3>
+                    <div className="space-y-3 border p-3 rounded-md">
+                        {featureKeys.map((key) => (
+                        <div key={key} className="flex items-center justify-between text-sm">
+                            <span className="text-slate-300">{key}</span>
+                            <Switch
+                            checked={!!editFeatures[key]}
+                            onCheckedChange={() => handleToggleEditFeature(key)}
+                            />
+                        </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Menu Visibility */}
+                <div>
+                    <h3 className="text-sm font-semibold mb-2">Menu Visibility (Overrides)</h3>
+                    <div className="space-y-4 border p-3 rounded-md">
+                        {Object.entries(groupedMenu).map(([section, items]) => (
+                            <div key={section}>
+                                <h4 className="text-xs text-muted-foreground uppercase font-bold mb-2">{section}</h4>
+                                <div className="space-y-2 pl-2">
+                                    {items.map(item => (
+                                        <div key={item.key} className="flex items-center justify-between text-sm">
+                                            <span className="text-slate-300">{item.label}</span>
+                                            <Switch
+                                                checked={editFeatures.menu_flags?.[item.key] !== false}
+                                                onCheckedChange={() => handleToggleMenuFlag(item.key)}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
               </div>
               <div className="flex gap-2 mt-6">
                 <Button
