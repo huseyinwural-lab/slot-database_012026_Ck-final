@@ -1,0 +1,27 @@
+{
+  "affiliate": {
+    "id": "acbdfd59-7bbd-4c77-8939-d449eb8d3553",
+    "email": "partner_eafa67@example.com",
+    "cpa_amount": 100.0,
+    "revshare_percent": 0.0,
+    "status": "active",
+    "tenant_id": "default_casino",
+    "commission_type": "CPA",
+    "username": "Partner_e15743",
+    "cpa_threshold": 20.0,
+    "commission_rate": 0.0,
+    "created_at": "2025-12-27T00:47:32.088843"
+  },
+  "link": {
+    "tenant_id": "default_casino",
+    "campaign": "Summer25",
+    "id": "bad187b5-0c33-428a-93a1-5d5961cb5f65",
+    "code": "WINA24C",
+    "signups": 1,
+    "affiliate_id": "acbdfd59-7bbd-4c77-8939-d449eb8d3553",
+    "clicks": 0,
+    "created_at": "2025-12-27T00:47:32.144012"
+  },
+  "crm_events_found": true,
+  "timestamp": "2025-12-27T00:47:34.735497"
+}
