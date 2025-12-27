@@ -48,7 +48,7 @@ def do_run_migrations(connection: Connection) -> None:
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
-        compare_type=True,
+        compare_type=False, # P1: Disable type comparison to avoid SQLite TEXT/VARCHAR drift noise
     )
 
     with context.begin_transaction():
