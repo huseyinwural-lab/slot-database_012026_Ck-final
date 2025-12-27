@@ -9,6 +9,13 @@ import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func, text
 from app.core.database import engine
+# Import ALL models to ensure registry is populated correctly
+from app.models import (
+    sql_models, game_models, robot_models, growth_models, bonus_models, reconciliation,
+    engine_models, payment_models, poker_models, poker_mtt_models, poker_table_models,
+    rg_models, payment_analytics_models, reconciliation_run, sql_models_extended, vip_models,
+    offer_models, dispute_models
+)
 from app.models.sql_models import Player
 from app.repositories.ledger_repo import WalletBalance, LedgerTransaction
 
