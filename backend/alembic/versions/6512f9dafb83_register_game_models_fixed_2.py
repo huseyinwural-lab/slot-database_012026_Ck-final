@@ -213,10 +213,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_gameconfigversion_game_id'), 'gameconfigversion', ['game_id'], unique=False)
     op.create_index(op.f('ix_gameconfigversion_tenant_id'), 'gameconfigversion', ['tenant_id'], unique=False)
-    
-    # REMOVED gamerobotbinding, robotdefinition, mathasset from here
-    # REMOVED callbacknonce from here
-    
     op.create_table('player',
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -359,7 +355,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_payoutattempt_tenant_id'), 'payoutattempt', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_payoutattempt_withdraw_tx_id'), 'payoutattempt', ['withdraw_tx_id'], unique=False)
     
-    op.drop_column('gameevent', 'created_at')
+    # Removed drop_column
     # ### end Alembic commands ###
 
 
