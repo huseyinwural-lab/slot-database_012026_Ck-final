@@ -26,7 +26,7 @@ jobs:
 
     env:
       ENV: test
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:54320/app_test
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:54320/app_test
 
     steps:
       - name: Checkout
