@@ -28,6 +28,10 @@ class PokerTournament(SQLModel, table=True):
     start_at: datetime
     late_reg_until: Optional[datetime] = None
     
+    # Re-entry / Late Reg
+    reentry_max: int = 0 # 0 = Freezeout
+    reentry_price: Optional[float] = None # If None, equals buy_in
+    
     # State Machine: DRAFT -> REG_OPEN -> RUNNING -> FINISHED | CANCELLED
     status: str = Field(default="DRAFT", index=True)
     
