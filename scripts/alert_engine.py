@@ -3,13 +3,23 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../backend')))
 
 import asyncio
-import os
 import json
 from datetime import datetime, timedelta, timezone
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlmodel import select, func, text
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select, func
+
 from app.core.database import engine
-from app.models.sql_models import Transaction, AuditEvent
+
+# Import all models
+from app.models import (
+    sql_models, game_models, robot_models, growth_models, bonus_models, reconciliation,
+    engine_models, payment_models, poker_models, poker_mtt_models, poker_table_models,
+    rg_models, payment_analytics_models, reconciliation_run, sql_models_extended, vip_models,
+    offer_models, dispute_models
+)
+from app.repositories import ledger_repo
+
+from app.models.sql_models import Transaction
 from app.models.poker_mtt_models import RiskSignal
 from app.models.reconciliation import ReconciliationFinding
 
