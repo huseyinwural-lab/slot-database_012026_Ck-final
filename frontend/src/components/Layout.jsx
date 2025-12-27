@@ -1,39 +1,23 @@
-import React, { useState } from 'react';
-import { useNavigate, NavLink, Link } from 'react-router-dom';
-import { 
-  LayoutDashboard, Users, CreditCard, ShieldAlert, 
-  Gamepad2, Gift, MessageSquare, Settings, LogOut,
-  ListChecks, ToggleRight, Search, FlaskConical,
-  FileText, Megaphone, BarChart3, Globe, Handshake,
-  AlertOctagon, UserCog, ScrollText, Scale, Crown,
-  KeyRound, Building, TrendingUp, Power, DollarSign,
-  Bot, FileCode
-} from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { Search, LogOut, CreditCard, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '../services/api';
 import { useCapabilities } from '../context/CapabilitiesContext';
+import { MENU_ITEMS } from '../config/menu';
 
 import TenantSwitcher from './TenantSwitcher';
 
-const linkClass = (path) => {
-  return ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-      isActive
-        ? 'bg-primary text-primary-foreground'
-        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-    }`;
-};
-
-const SidebarItem = ({ to, icon: Icon, label, activeClassName }) => (
+const SidebarItem = ({ to, icon: Icon, label, activeClassName, className }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
       `grid grid-cols-[20px_1fr] items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors min-h-[40px] ${
-        isActive
+        className || (isActive
           ? activeClassName || 'bg-primary text-primary-foreground'
-          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+          : 'text-muted-foreground hover:bg-secondary hover:text-foreground')
       }`
     }
   >
@@ -47,7 +31,9 @@ const Layout = ({ children }) => {
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
-  const { isOwner, tenantName, hasFeature, loading: capabilitiesLoading } = useCapabilities();
+  const { isOwner, tenantName, hasFeature, capabilities } = useCapabilities();
+  
+  const menuFlags = capabilities?.menu_flags || {};
 
   // Theme Config based on Role
   const theme = isOwner ? {
@@ -73,6 +59,34 @@ const Layout = ({ children }) => {
     }
   };
 
+  const groupedMenu = useMemo(() => {
+    const visibleItems = MENU_ITEMS.filter(item => {
+        // 1. Owner check
+        if (item.ownerOnly && !isOwner) return false;
+        if (item.tenantOnly && isOwner) return false;
+
+        // 2. Feature check (Legacy)
+        if (item.feature && !hasFeature(item.feature)) return false;
+
+        // 3. Menu Flag check (New)
+        // If flag is explicitly false, hide it. Otherwise show.
+        if (menuFlags[item.key] === false) return false;
+
+        return true;
+    });
+
+    // Group by section
+    const groups = {};
+    visibleItems.forEach(item => {
+        if (!groups[item.section]) groups[item.section] = [];
+        groups[item.section].push(item);
+    });
+    
+    // Order sections based on MENU_ITEMS order logic (preserved via insertion order usually, but let's be safe if needed)
+    // Actually dict keys iteration order is insertion order in modern JS.
+    return groups;
+  }, [isOwner, hasFeature, menuFlags]);
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
@@ -85,86 +99,26 @@ const Layout = ({ children }) => {
         </div>
         
         <ScrollArea className="flex-1 px-4">
-          <div className="space-y-1 mb-6">
-              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Core</div>
-              <ul className="space-y-1">
-                <li>
-                  <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" activeClassName={theme.activeItem} />
-                </li>
-                <li>
-                  <SidebarItem to="/players" icon={Users} label="Players" activeClassName={theme.activeItem} />
-                </li>
-                {isOwner && (
-                  <li>
-                    <SidebarItem to="/finance" icon={DollarSign} label="Finance" activeClassName={theme.activeItem} />
-                  </li>
-                )}
-                {isOwner && (
-                  <li>
-                    <SidebarItem to="/finance/withdrawals" icon={DollarSign} label="Withdrawals" activeClassName={theme.activeItem} />
-                  </li>
-                )}
-                {isOwner && (
-                  <li>
-                    <SidebarItem to="/revenue/all-tenants" icon={TrendingUp} label="All Revenue" activeClassName={theme.activeItem} />
-                  </li>
-                )}
-                {!isOwner && (
-                  <li>
-                    <SidebarItem to="/revenue/my-tenant" icon={TrendingUp} label="My Revenue" activeClassName={theme.activeItem} />
-                  </li>
-                )}
-                <li>
-                  <SidebarItem to="/games" icon={Gamepad2} label="Games" activeClassName={theme.activeItem} />
-                </li>
-                <li>
-                  <SidebarItem 
-                    to="/vip-games" 
-                    icon={Crown} 
-                    label="VIP Games" 
-                    activeClassName="bg-yellow-500/20 text-yellow-500 border border-yellow-500/50" 
-                  />
-                </li>
-              </ul>
-          </div>
-
-          <div className="space-y-1 mb-6">
-              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Operations</div>
-              {hasFeature('can_manage_kyc') && <SidebarItem to="/kyc" icon={FileText} label="KYC Verification" activeClassName={theme.activeItem} />}
-              {hasFeature('can_use_crm') && <SidebarItem to="/crm" icon={Megaphone} label="CRM & Comms" activeClassName={theme.activeItem} />}
-              {hasFeature('can_manage_bonus') && <SidebarItem to="/bonuses" icon={Gift} label="Bonuses" activeClassName={theme.activeItem} />}
-              {hasFeature('can_manage_affiliates') && <SidebarItem to="/affiliates" icon={Handshake} label="Affiliates" activeClassName={theme.activeItem} />}
-              {isOwner && hasFeature('can_use_kill_switch') && <SidebarItem to="/kill-switch" icon={Power} label="Kill Switch" activeClassName={theme.activeItem} />}
-              <SidebarItem to="/support" icon={MessageSquare} label="Support" activeClassName={theme.activeItem} />
-          </div>
-
-           <div className="space-y-1 mb-6">
-              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Risk & Compliance</div>
-              {isOwner && <SidebarItem to="/risk" icon={AlertOctagon} label="Risk Rules" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/fraud" icon={ShieldAlert} label="Fraud Check" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/approvals" icon={ListChecks} label="Approval Queue" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/rg" icon={Scale} label="Responsible Gaming" activeClassName={theme.activeItem} />}
-          </div>
-
-          <div className="space-y-1 mb-6">
-              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">Game Engine</div>
-              {hasFeature('can_use_game_robot') && <SidebarItem to="/robots" icon={Bot} label="Robots" activeClassName={theme.activeItem} />}
-              {hasFeature('can_use_game_robot') && <SidebarItem to="/math-assets" icon={FileCode} label="Math Assets" activeClassName={theme.activeItem} />}
-          </div>
-
-          <div className="space-y-1 mb-6">
-              <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">System</div>
-              {isOwner && <SidebarItem to="/cms" icon={Globe} label="CMS" activeClassName={theme.activeItem} />}
-              {hasFeature('can_view_reports') && <SidebarItem to="/reports" icon={BarChart3} label="Reports" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/logs" icon={ScrollText} label="Logs" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/audit" icon={ScrollText} label="Audit Log" activeClassName={theme.activeItem} />}
-              {hasFeature('can_manage_admins') && <SidebarItem to="/admins" icon={UserCog} label="Admin Users" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/tenants" icon={Building} label="Tenants" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/keys" icon={KeyRound} label="API Keys" activeClassName={theme.activeItem} />}
-              {isOwner && hasFeature('can_manage_experiments') && <SidebarItem to="/features" icon={ToggleRight} label="Feature Flags" activeClassName={theme.activeItem} />}
-              {hasFeature('can_use_game_robot') && <SidebarItem to="/simulator" icon={FlaskConical} label="Simulator" activeClassName={theme.activeItem} />}
-              {isOwner && <SidebarItem to="/settings" icon={Settings} label="Settings" activeClassName={theme.activeItem} />}
-          </div>
+            {Object.entries(groupedMenu).map(([section, items]) => (
+                <div key={section} className="space-y-1 mb-6">
+                    <div className="px-4 text-xs font-semibold text-muted-foreground mb-2 mt-4 uppercase tracking-wider">
+                        {section}
+                    </div>
+                    <ul className="space-y-1">
+                        {items.map(item => (
+                            <li key={item.key}>
+                                <SidebarItem 
+                                    to={item.path} 
+                                    icon={item.icon} 
+                                    label={item.label} 
+                                    activeClassName={theme.activeItem}
+                                    className={item.className}
+                                />
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ))}
         </ScrollArea>
 
         <div className="p-4 border-t border-border mt-auto bg-card">
