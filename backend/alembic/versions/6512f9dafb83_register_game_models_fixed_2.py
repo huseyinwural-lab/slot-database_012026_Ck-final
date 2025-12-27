@@ -331,6 +331,21 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_chargebackcase_tenant_id'), 'chargebackcase', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_chargebackcase_transaction_id'), 'chargebackcase', ['transaction_id'], unique=False)
+    op.create_table('gameevent',
+    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('round_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('provider_event_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('amount', sa.Float(), nullable=False),
+    sa.Column('currency', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('tx_id', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    # Removed created_at since it caused drop_column issue later
+    sa.ForeignKeyConstraint(['round_id'], ['gameround.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_gameevent_provider_event_id'), 'gameevent', ['provider_event_id'], unique=True)
+    op.create_index(op.f('ix_gameevent_round_id'), 'gameevent', ['round_id'], unique=False)
+    op.create_index(op.f('ix_gameevent_tx_id'), 'gameevent', ['tx_id'], unique=False)
     op.create_table('payoutattempt',
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('withdraw_tx_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -353,17 +368,11 @@ def upgrade() -> None:
     op.create_index(op.f('ix_payoutattempt_tenant_id'), 'payoutattempt', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_payoutattempt_withdraw_tx_id'), 'payoutattempt', ['withdraw_tx_id'], unique=False)
     
-    # Removed redundant add_column calls since create_table('game') above already includes these columns.
-    # op.add_column('game', sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
-    # op.add_column('game', sa.Column('provider', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
-    # op.add_column('game', sa.Column('category', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
-    # op.add_column('game', sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
-    # op.add_column('game', sa.Column('image_url', sqlmodel.sql.sqltypes.AutoString(), nullable=True))
-    
-    op.drop_column('gameevent', 'created_at')
+    # Removed drop_column since create_table was fixed
+    # op.drop_column('gameevent', 'created_at')
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
-    # Downgrade logic skipped for brevity in fix
+    # Downgrade logic skipped
     pass
