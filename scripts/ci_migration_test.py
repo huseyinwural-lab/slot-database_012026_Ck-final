@@ -16,7 +16,8 @@ def main():
     
     # Use a temp sqlite db
     temp_db_name = f"test_mig_{uuid.uuid4().hex}.db"
-    temp_db_url = f"sqlite:///{temp_db_name}"
+    # P1 Fix: Must be async for app.core.database to import safely, Alembic will syncify it
+    temp_db_url = f"sqlite+aiosqlite:///{temp_db_name}"
     
     # Override environment
     env = os.environ.copy()
