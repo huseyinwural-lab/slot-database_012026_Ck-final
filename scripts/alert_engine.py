@@ -74,8 +74,7 @@ class AlertEngine:
         with open(ALERT_LOG_PATH, "a") as f:
             for alert in self.alerts:
                 print(f"   TRIGGERED: {alert}")
-                f.write(f"{datetime.now(timezone.utc).isoformat()} {alert}
-")
+                f.write(f"{datetime.now(timezone.utc).isoformat()} {alert}\n")
 
 async def main():
     async with AsyncSession(engine) as session:
