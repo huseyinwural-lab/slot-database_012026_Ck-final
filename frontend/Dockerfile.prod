@@ -4,9 +4,10 @@ RUN node -v
 
 WORKDIR /app
 
+# Install dependencies without frozen lockfile to allow updates if needed in this repair context
 COPY package.json yarn.lock ./
 RUN test -f yarn.lock
-RUN yarn install --frozen-lockfile --non-interactive
+RUN yarn install --non-interactive
 
 COPY . .
 
