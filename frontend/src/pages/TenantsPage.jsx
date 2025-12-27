@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
+import { MENU_ITEMS } from '../config/menu';
+
 const featureKeys = [
   'can_use_game_robot',
   'can_edit_configs',
