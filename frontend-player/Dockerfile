@@ -1,11 +1,12 @@
-# Node 18 Alpine
-FROM node:18-alpine
+# Node 20 (Alpine not recommended for some native deps, using slim)
+FROM node:20-slim as build
 
 WORKDIR /app
 
 # Install dependencies
-COPY package.json .
-RUN yarn install
+COPY package.json yarn.lock ./
+# Remove frozen-lockfile constraint to auto-fix lockfile issues during build if needed
+RUN yarn install --non-interactive
 
 # Copy Code
 COPY . .
