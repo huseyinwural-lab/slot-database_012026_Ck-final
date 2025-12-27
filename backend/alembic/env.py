@@ -14,7 +14,7 @@ from app.models import (
     sql_models, game_models, robot_models, growth_models, bonus_models, reconciliation,
     engine_models, payment_models, poker_models, poker_mtt_models, poker_table_models,
     rg_models, payment_analytics_models, reconciliation_run, sql_models_extended, vip_models,
-    offer_models
+    offer_models, dispute_models
 )
 from app.repositories import ledger_repo
 from config import settings
