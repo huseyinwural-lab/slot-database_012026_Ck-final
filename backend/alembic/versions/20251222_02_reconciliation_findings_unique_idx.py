@@ -18,16 +18,16 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.create_unique_constraint(
-        "uq_recon_provider_event_type",
-        "reconciliation_findings",
-        ["provider", "provider_event_id", "finding_type"],
-    )
+    with op.batch_alter_table("reconciliation_findings") as batch_op:
+        batch_op.create_unique_constraint(
+            "uq_recon_provider_event_type",
+            ["provider", "provider_event_id", "finding_type"],
+        )
 
 
 def downgrade() -> None:
-    op.drop_constraint(
-        "uq_recon_provider_event_type",
-        "reconciliation_findings",
-        type_="unique",
-    )
+    with op.batch_alter_table("reconciliation_findings") as batch_op:
+        batch_op.drop_constraint(
+            "uq_recon_provider_event_type",
+            type_="unique",
+        )
