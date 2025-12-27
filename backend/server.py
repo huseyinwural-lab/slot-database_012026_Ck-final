@@ -170,6 +170,8 @@ from app.routes import risk_admin
 app.include_router(risk_admin.router)
 from app.routes import offer_admin
 app.include_router(offer_admin.router)
+from app.routes import dispute_admin
+app.include_router(dispute_admin.router)
 from app.routes import poker_mtt_player
 app.include_router(poker_mtt_player.router)
 from app.routes import reconciliation as reconciliation_router
