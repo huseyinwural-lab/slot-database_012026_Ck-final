@@ -213,19 +213,10 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_gameconfigversion_game_id'), 'gameconfigversion', ['game_id'], unique=False)
     op.create_index(op.f('ix_gameconfigversion_tenant_id'), 'gameconfigversion', ['tenant_id'], unique=False)
-    op.create_table('gamerobotbinding',
-    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('game_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('robot_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('is_enabled', sa.Boolean(), nullable=False),
-    sa.Column('effective_from', sa.DateTime(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['robot_id'], ['robotdefinition.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_gamerobotbinding_game_id'), 'gamerobotbinding', ['game_id'], unique=False)
-    op.create_index(op.f('ix_gamerobotbinding_tenant_id'), 'gamerobotbinding', ['tenant_id'], unique=False)
+    
+    # REMOVED gamerobotbinding, robotdefinition, mathasset from here
+    # REMOVED callbacknonce from here
+    
     op.create_table('player',
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -368,8 +359,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_payoutattempt_tenant_id'), 'payoutattempt', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_payoutattempt_withdraw_tx_id'), 'payoutattempt', ['withdraw_tx_id'], unique=False)
     
-    # Removed drop_column since create_table was fixed
-    # op.drop_column('gameevent', 'created_at')
+    op.drop_column('gameevent', 'created_at')
     # ### end Alembic commands ###
 
 
