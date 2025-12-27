@@ -41,7 +41,7 @@ jobs:
         run: |
           cd backend
           python -m pip install -U pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
 
       - name: Alembic upgrade head (Postgres)
         run: |
