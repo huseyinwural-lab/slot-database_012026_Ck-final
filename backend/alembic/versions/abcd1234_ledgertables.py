@@ -24,20 +24,24 @@ def upgrade() -> None:
         op.create_table(
             "ledgertransaction",
             sa.Column("id", sa.String(), primary_key=True),
-        sa.Column("tx_id", sa.String(), nullable=True),
-        sa.Column("tenant_id", sa.String(), nullable=False),
-        sa.Column("player_id", sa.String(), nullable=False),
-        sa.Column("type", sa.String(), nullable=False),
-        sa.Column("direction", sa.String(), nullable=False),
-        sa.Column("amount", sa.Float(), nullable=False),
-        sa.Column("currency", sa.String(length=3), nullable=False, server_default="USD"),
-        sa.Column("status", sa.String(), nullable=False),
-        sa.Column("idempotency_key", sa.String(), nullable=True),
-        sa.Column("provider", sa.String(), nullable=True),
-        sa.Column("provider_ref", sa.String(), nullable=True),
-        sa.Column("provider_event_id", sa.String(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()),
-    )
+            sa.Column("tx_id", sa.String(), nullable=True),
+            sa.Column("tenant_id", sa.String(), nullable=False),
+            sa.Column("player_id", sa.String(), nullable=False),
+            sa.Column("type", sa.String(), nullable=False),
+            sa.Column("direction", sa.String(), nullable=False),
+            sa.Column("amount", sa.Float(), nullable=False),
+            sa.Column("currency", sa.String(length=3), nullable=False, server_default="USD"),
+            sa.Column("status", sa.String(), nullable=False),
+            sa.Column("idempotency_key", sa.String(), nullable=True),
+            sa.Column("provider", sa.String(), nullable=True),
+            sa.Column("provider_ref", sa.String(), nullable=True),
+            sa.Column("provider_event_id", sa.String(), nullable=True),
+            sa.Column("created_at", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()),
+            
+            # Inline Constraints for SQLite compatibility during creation
+            sa.UniqueConstraint("tenant_id", "player_id", "type", "idempotency_key", name="uq_ledger_tx_idempotency"),
+            sa.UniqueConstraint("provider", "provider_event_id", name="uq_ledger_tx_provider_event")
+        )
 
         # Idempotency / lookup indices
         op.create_index(
@@ -48,36 +52,19 @@ def upgrade() -> None:
         op.create_index("ix_ledger_tx_tx_id", "ledgertransaction", ["tx_id"])
         op.create_index("ix_ledger_tx_provider_ref", "ledgertransaction", ["provider_ref"])
 
-        # Unique on (tenant_id, player_id, type, idempotency_key)
-        op.create_unique_constraint(
-            "uq_ledger_tx_idempotency",
-            "ledgertransaction",
-            ["tenant_id", "player_id", "type", "idempotency_key"],
+    if "walletbalance" not in inspector.get_table_names():
+        op.create_table(
+            "walletbalance",
+            sa.Column("tenant_id", sa.String(), primary_key=True),
+            sa.Column("player_id", sa.String(), primary_key=True),
+            sa.Column("currency", sa.String(length=3), primary_key=True, server_default="USD"),
+            sa.Column("balance_real_available", sa.Float(), nullable=False, server_default="0"),
+            sa.Column("balance_real_pending", sa.Float(), nullable=False, server_default="0"),
+            sa.Column("updated_at", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()),
         )
-
-        # Unique on (provider, provider_event_id)
-        op.create_unique_constraint(
-            "uq_ledger_tx_provider_event",
-            "ledgertransaction",
-            ["provider", "provider_event_id"],
-        )
-
-    op.create_table(
-        "walletbalance",
-        sa.Column("tenant_id", sa.String(), primary_key=True),
-        sa.Column("player_id", sa.String(), primary_key=True),
-        sa.Column("currency", sa.String(length=3), primary_key=True, server_default="USD"),
-        sa.Column("balance_real_available", sa.Float(), nullable=False, server_default="0"),
-        sa.Column("balance_real_pending", sa.Float(), nullable=False, server_default="0"),
-        sa.Column("updated_at", sa.DateTime(timezone=False), nullable=False, server_default=sa.func.now()),
-    )
 
 
 def downgrade() -> None:
     op.drop_table("walletbalance")
-    op.drop_constraint("uq_ledger_tx_provider_event", "ledgertransaction", type_="unique")
-    op.drop_constraint("uq_ledger_tx_idempotency", "ledgertransaction", type_="unique")
-    op.drop_index("ix_ledger_tx_provider_ref", table_name="ledgertransaction")
-    op.drop_index("ix_ledger_tx_tx_id", table_name="ledgertransaction")
-    op.drop_index("ix_ledger_tx_player_created_at", table_name="ledgertransaction")
+    # No need to drop constraints explicitly if table is dropped
     op.drop_table("ledgertransaction")
