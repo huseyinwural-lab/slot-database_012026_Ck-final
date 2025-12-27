@@ -30,7 +30,7 @@ const SidebarItem = ({ to, icon: Icon, label, activeClassName }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
-      `flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+      `grid grid-cols-[20px_1fr] items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors min-h-[40px] ${
         isActive
           ? activeClassName || 'bg-primary text-primary-foreground'
           : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -38,7 +38,7 @@ const SidebarItem = ({ to, icon: Icon, label, activeClassName }) => (
     }
   >
     <Icon className="w-5 h-5" />
-    {label}
+    <span className="leading-none">{label}</span>
   </NavLink>
 );
 
