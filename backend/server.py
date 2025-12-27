@@ -136,6 +136,8 @@ from app.routes.integrations import poker
 app.include_router(poker.router)
 from app.routes import bonuses
 app.include_router(bonuses.router)
+from app.routes import vip
+app.include_router(vip.router)
 from app.routes import engine
 app.include_router(engine.router)
 app.include_router(robots.router)
