@@ -215,6 +215,65 @@ async def update_tenant_features(
 
     return {"message": "UPDATED", "tenant": tenant}
 
+@router.get("/{tenant_id}/menu-flags")
+async def get_menu_flags(
+    tenant_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    require_owner(current_admin)
+    tenant = await session.get(Tenant, tenant_id)
+    if not tenant:
+        raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
+        
+    features = tenant.features or {}
+    return features.get("menu_flags", {})
+
+@router.patch("/{tenant_id}/menu-flags")
+async def update_menu_flags(
+    tenant_id: str,
+    payload: dict,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin)
+):
+    require_owner(current_admin)
+    tenant = await session.get(Tenant, tenant_id)
+    if not tenant:
+        raise AppError(error_code="TENANT_NOT_FOUND", message="Tenant not found", status_code=404)
+        
+    # Deep merge logic for menu_flags
+    current_features = dict(tenant.features or {})
+    current_flags = current_features.get("menu_flags", {})
+    
+    # Payload is expected to be { key: bool, ... }
+    # Merge new flags into existing flags
+    updated_flags = {**current_flags, **payload}
+    
+    # Update features
+    current_features["menu_flags"] = updated_flags
+    tenant.features = current_features # SQLModel detects change on assignment
+    
+    session.add(tenant)
+    
+    # Audit
+    from app.services.audit import audit
+    await audit.log(
+        admin=current_admin,
+        action="tenant.menu_flags_updated",
+        module="tenants",
+        target_id=str(tenant.id),
+        details={"updated_flags": payload},
+        session=session,
+        request_id=getattr(request.state, "request_id", None),
+        tenant_id=str(tenant.id),
+        resource_type="tenant",
+        result="success",
+    )
+    
+    await session.commit()
+    return {"message": "Menu flags updated", "menu_flags": updated_flags}
+
 # Seeding function adapted for SQL
 async def seed_default_tenants(session: AsyncSession):
     # Check if default exists
