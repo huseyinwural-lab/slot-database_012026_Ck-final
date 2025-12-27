@@ -98,6 +98,35 @@ const TenantsPage = () => {
     }));
   };
 
+  const handleToggleMenuFlag = (key) => {
+    setEditFeatures((prev) => {
+        const currentFlags = prev.menu_flags || {};
+        // If undefined, it means Enabled (default). So toggling means setting to false.
+        // If false, toggling means setting to true (or undefined).
+        // Let's be explicit: true/false.
+        // But Layout logic is: if (flags[key] === false) hide.
+        // So we default to true.
+        
+        const currentVal = currentFlags[key] !== false; // Default true
+        return {
+            ...prev,
+            menu_flags: {
+                ...currentFlags,
+                [key]: !currentVal
+            }
+        };
+    });
+  };
+
+  const groupedMenu = React.useMemo(() => {
+    const groups = {};
+    MENU_ITEMS.forEach(item => {
+        if (!groups[item.section]) groups[item.section] = [];
+        groups[item.section].push(item);
+    });
+    return groups;
+  }, []);
+
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) {
