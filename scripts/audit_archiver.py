@@ -40,8 +40,7 @@ async def archive_audit_logs():
             for log in logs:
                 # Manual dict conversion for SQLModel
                 data = log.model_dump(mode='json')
-                f.write(json.dumps(data) + "
-")
+                f.write(json.dumps(data) + "\n")
         
         print(f"   Archived to: {filename}")
         
