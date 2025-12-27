@@ -1,27 +1,27 @@
 {
   "affiliate": {
-    "id": "acbdfd59-7bbd-4c77-8939-d449eb8d3553",
-    "email": "partner_eafa67@example.com",
+    "id": "8bde8e26-6c95-4bda-8092-192c6d7beffd",
+    "email": "partner_6e37f7@example.com",
     "cpa_amount": 100.0,
     "revshare_percent": 0.0,
     "status": "active",
     "tenant_id": "default_casino",
     "commission_type": "CPA",
-    "username": "Partner_e15743",
+    "username": "Partner_2b14cb",
     "cpa_threshold": 20.0,
     "commission_rate": 0.0,
-    "created_at": "2025-12-27T00:47:32.088843"
+    "created_at": "2025-12-27T00:55:20.627973"
   },
   "link": {
     "tenant_id": "default_casino",
     "campaign": "Summer25",
-    "id": "bad187b5-0c33-428a-93a1-5d5961cb5f65",
-    "code": "WINA24C",
+    "id": "55eb9dfd-d5d2-46a1-94b7-1ab5c99fef3d",
+    "code": "WINF4BB",
     "signups": 1,
-    "affiliate_id": "acbdfd59-7bbd-4c77-8939-d449eb8d3553",
+    "affiliate_id": "8bde8e26-6c95-4bda-8092-192c6d7beffd",
     "clicks": 0,
-    "created_at": "2025-12-27T00:47:32.144012"
+    "created_at": "2025-12-27T00:55:20.683890"
   },
   "crm_events_found": true,
-  "timestamp": "2025-12-27T00:47:34.735497"
+  "timestamp": "2025-12-27T00:55:23.282572"
 }
