@@ -37,7 +37,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        compare_type=True,
+        compare_type=False, # P1: Disable type comparison to avoid SQLite TEXT/VARCHAR drift noise
     )
 
     with context.begin_transaction():
