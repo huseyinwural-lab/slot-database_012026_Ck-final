@@ -168,6 +168,8 @@ app.include_router(ops.router)
 app.include_router(flags.router)
 from app.routes import risk_admin
 app.include_router(risk_admin.router)
+from app.routes import offer_admin
+app.include_router(offer_admin.router)
 from app.routes import poker_mtt_player
 app.include_router(poker_mtt_player.router)
 from app.routes import reconciliation as reconciliation_router
