@@ -25,17 +25,5 @@ class PaymentIntent(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class Dispute(SQLModel, table=True):
-    """Chargeback/Dispute Tracking."""
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    tenant_id: str = Field(index=True)
-    payment_intent_id: str = Field(foreign_key="paymentintent.id", index=True)
-    
-    status: str = "OPEN" # OPEN, UNDER_REVIEW, WON, LOST
-    reason_code: Optional[str] = None
-    amount_disputed: float
-    
-    evidence: Dict = Field(default={}, sa_column=Column(JSON))
-    
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    resolved_at: Optional[datetime] = None
+# Dispute moved to dispute_models.py
+from app.models.dispute_models import Dispute
