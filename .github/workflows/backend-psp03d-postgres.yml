@@ -26,6 +26,7 @@ jobs:
 
     env:
       ENV: test
+      # Explicitly matching the service credentials below (postgres:postgres)
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:54320/app_test
 
     steps:
