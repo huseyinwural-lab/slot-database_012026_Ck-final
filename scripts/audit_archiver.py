@@ -53,11 +53,17 @@ async def archive_audit_logs():
         print(f"   Archived to: {filename}")
         
         # 3. Delete from DB (Batch)
-        ids = [log.id for log in logs]
-        del_stmt = delete(AuditEvent).where(AuditEvent.id.in_(ids))
-        await session.execute(del_stmt)
-        await session.commit()
-        print("   Deleted from DB.")
+        try:
+            ids = [log.id for log in logs]
+            del_stmt = delete(AuditEvent).where(AuditEvent.id.in_(ids))
+            await session.execute(del_stmt)
+            await session.commit()
+            print("   Deleted from DB.")
+        except Exception as e:
+            if "immutable" in str(e).lower() or "blocked" in str(e).lower():
+                print(f"   [INFO] Deletion blocked by Immutable Policy (Expected): {e}")
+            else:
+                print(f"   [WARN] Deletion failed: {e}")
 
 if __name__ == "__main__":
     asyncio.run(archive_audit_logs())
