@@ -166,6 +166,10 @@ app.include_router(kill_switch.router)
 from app.routes import ops
 app.include_router(ops.router)
 app.include_router(flags.router)
+from app.routes import risk_admin
+app.include_router(risk_admin.router)
+from app.routes import poker_mtt_player
+app.include_router(poker_mtt_player.router)
 from app.routes import reconciliation as reconciliation_router
 app.include_router(reconciliation_router.router)
 
