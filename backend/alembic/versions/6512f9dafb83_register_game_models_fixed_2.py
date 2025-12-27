@@ -10,6 +10,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+import sqlmodel # Added missing import
 
 # revision identifiers, used by Alembic.
 revision: str = '6512f9dafb83'
@@ -212,22 +213,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_gameconfigversion_game_id'), 'gameconfigversion', ['game_id'], unique=False)
     op.create_index(op.f('ix_gameconfigversion_tenant_id'), 'gameconfigversion', ['tenant_id'], unique=False)
-    op.create_table('gamesession',
-    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('player_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('game_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('provider_session_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('currency', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('last_activity_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['game_id'], ['game.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_gamesession_player_id'), 'gamesession', ['player_id'], unique=False)
-    op.create_index(op.f('ix_gamesession_provider_session_id'), 'gamesession', ['provider_session_id'], unique=False)
-    op.create_index(op.f('ix_gamesession_tenant_id'), 'gamesession', ['tenant_id'], unique=False)
     op.create_table('player',
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -277,25 +262,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_riskrule_tenant_id'), 'riskrule', ['tenant_id'], unique=False)
-    op.create_table('gameround',
-    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('player_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('session_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('game_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('provider_round_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('total_bet', sa.Float(), nullable=False),
-    sa.Column('total_win', sa.Float(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['game_id'], ['game.id'], ),
-    sa.ForeignKeyConstraint(['session_id'], ['gamesession.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_gameround_player_id'), 'gameround', ['player_id'], unique=False)
-    op.create_index(op.f('ix_gameround_provider_round_id'), 'gameround', ['provider_round_id'], unique=False)
-    op.create_index(op.f('ix_gameround_tenant_id'), 'gameround', ['tenant_id'], unique=False)
     op.create_table('supportticket',
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -328,7 +294,7 @@ def upgrade() -> None:
     sa.Column('review_reason', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('reviewed_by', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('reviewed_at', sa.DateTime(), nullable=True),
-    sa.Column('metadata', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=True),
+    sa.Column('metadata', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=True),
     sa.Column('balance_after', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -352,21 +318,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_chargebackcase_tenant_id'), 'chargebackcase', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_chargebackcase_transaction_id'), 'chargebackcase', ['transaction_id'], unique=False)
-    op.create_table('gameevent',
-    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('round_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('provider_event_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('amount', sa.Float(), nullable=False),
-    sa.Column('currency', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('tx_id', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['round_id'], ['gameround.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_gameevent_provider_event_id'), 'gameevent', ['provider_event_id'], unique=True)
-    op.create_index(op.f('ix_gameevent_round_id'), 'gameevent', ['round_id'], unique=False)
-    op.create_index(op.f('ix_gameevent_tx_id'), 'gameevent', ['tx_id'], unique=False)
     op.create_table('payoutattempt',
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('withdraw_tx_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -388,11 +339,23 @@ def upgrade() -> None:
     op.create_index(op.f('ix_payoutattempt_status'), 'payoutattempt', ['status'], unique=False)
     op.create_index(op.f('ix_payoutattempt_tenant_id'), 'payoutattempt', ['tenant_id'], unique=False)
     op.create_index(op.f('ix_payoutattempt_withdraw_tx_id'), 'payoutattempt', ['withdraw_tx_id'], unique=False)
+    op.add_column('game', sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
+    op.add_column('game', sa.Column('provider', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
+    op.add_column('game', sa.Column('category', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
+    op.add_column('game', sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False))
+    op.add_column('game', sa.Column('image_url', sqlmodel.sql.sqltypes.AutoString(), nullable=True))
+    op.drop_column('gameevent', 'created_at')
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
+    op.add_column('gameevent', sa.Column('created_at', sa.DATETIME(), nullable=False))
+    op.drop_column('game', 'image_url')
+    op.drop_column('game', 'status')
+    op.drop_column('game', 'category')
+    op.drop_column('game', 'provider')
+    op.drop_column('game', 'name')
     op.drop_index(op.f('ix_payoutattempt_withdraw_tx_id'), table_name='payoutattempt')
     op.drop_index(op.f('ix_payoutattempt_tenant_id'), table_name='payoutattempt')
     op.drop_index(op.f('ix_payoutattempt_status'), table_name='payoutattempt')
@@ -400,10 +363,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_payoutattempt_provider'), table_name='payoutattempt')
     op.drop_index(op.f('ix_payoutattempt_idempotency_key'), table_name='payoutattempt')
     op.drop_table('payoutattempt')
-    op.drop_index(op.f('ix_gameevent_tx_id'), table_name='gameevent')
-    op.drop_index(op.f('ix_gameevent_round_id'), table_name='gameevent')
-    op.drop_index(op.f('ix_gameevent_provider_event_id'), table_name='gameevent')
-    op.drop_table('gameevent')
     op.drop_index(op.f('ix_chargebackcase_transaction_id'), table_name='chargebackcase')
     op.drop_index(op.f('ix_chargebackcase_tenant_id'), table_name='chargebackcase')
     op.drop_table('chargebackcase')
@@ -413,10 +372,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_supportticket_tenant_id'), table_name='supportticket')
     op.drop_index(op.f('ix_supportticket_player_id'), table_name='supportticket')
     op.drop_table('supportticket')
-    op.drop_index(op.f('ix_gameround_tenant_id'), table_name='gameround')
-    op.drop_index(op.f('ix_gameround_provider_round_id'), table_name='gameround')
-    op.drop_index(op.f('ix_gameround_player_id'), table_name='gameround')
-    op.drop_table('gameround')
     op.drop_index(op.f('ix_riskrule_tenant_id'), table_name='riskrule')
     op.drop_table('riskrule')
     op.drop_index(op.f('ix_reconciliationreport_tenant_id'), table_name='reconciliationreport')
@@ -425,10 +380,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_player_tenant_id'), table_name='player')
     op.drop_index(op.f('ix_player_email'), table_name='player')
     op.drop_table('player')
-    op.drop_index(op.f('ix_gamesession_tenant_id'), table_name='gamesession')
-    op.drop_index(op.f('ix_gamesession_provider_session_id'), table_name='gamesession')
-    op.drop_index(op.f('ix_gamesession_player_id'), table_name='gamesession')
-    op.drop_table('gamesession')
     op.drop_index(op.f('ix_gameconfigversion_tenant_id'), table_name='gameconfigversion')
     op.drop_index(op.f('ix_gameconfigversion_game_id'), table_name='gameconfigversion')
     op.drop_table('gameconfigversion')
@@ -449,9 +400,6 @@ def downgrade() -> None:
     op.drop_table('adminuser')
     op.drop_index(op.f('ix_tenant_name'), table_name='tenant')
     op.drop_table('tenant')
-    op.drop_index(op.f('ix_game_tenant_id'), table_name='game')
-    op.drop_index(op.f('ix_game_provider_id'), table_name='game')
-    op.drop_index(op.f('ix_game_external_id'), table_name='game')
     op.drop_table('game')
     op.drop_table('featureflag')
     op.drop_table('auditlog')
