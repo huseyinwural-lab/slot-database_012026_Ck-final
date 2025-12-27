@@ -3,12 +3,22 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../backend')))
 
 import asyncio
-import os
 import json
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, delete
 from app.core.database import engine
+
+# Import all models to ensure SQLModel registry is populated correctly
+from app.models import (
+    sql_models, game_models, robot_models, growth_models, bonus_models, reconciliation,
+    engine_models, payment_models, poker_models, poker_mtt_models, poker_table_models,
+    rg_models, payment_analytics_models, reconciliation_run, sql_models_extended, vip_models,
+    offer_models, dispute_models
+)
+from app.repositories import ledger_repo
+
+# AuditEvent is likely in sql_models
 from app.models.sql_models import AuditEvent
 
 ARCHIVE_DIR = "/app/artifacts/bau/week18/audit_archive"
@@ -19,8 +29,6 @@ async def archive_audit_logs():
     os.makedirs(ARCHIVE_DIR, exist_ok=True)
     
     # Threshold (Simulated as 1 day for testing, usually 90)
-    # Since we don't have 90 day old data, we'll try to archive everything older than 1 minute for the test run
-    # In PROD, use RETENTION_DAYS
     cutoff = datetime.now(timezone.utc) - timedelta(minutes=1) 
     
     async with AsyncSession(engine) as session:
@@ -45,8 +53,6 @@ async def archive_audit_logs():
         print(f"   Archived to: {filename}")
         
         # 3. Delete from DB (Batch)
-        # Note: In real prod, deletion is heavy. Use partitions or careful batching.
-        # Here we just delete by ID for the exported ones.
         ids = [log.id for log in logs]
         del_stmt = delete(AuditEvent).where(AuditEvent.id.in_(ids))
         await session.execute(del_stmt)
