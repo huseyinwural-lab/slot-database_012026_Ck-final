@@ -29,6 +29,10 @@ It includes a financial ledger, risk management, multiplayer poker engine, bonus
 
 ### Setup Steps
 
+> **Note (Prod/Staging / CI_STRICT):**
+> - When `ENV=prod|staging` or `CI_STRICT=1`, `DATABASE_URL` is **required** and **sqlite URLs are forbidden**.
+> - `SYNC_DATABASE_URL` is the canonical name. Legacy `DATABASE_URL_SYNC` is kept only for backward compatibility.
+
 1.  **Backend Setup:**
     ```bash
     cd backend

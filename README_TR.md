@@ -29,6 +29,10 @@ Proje; finansal defter (ledger), risk yönetimi, çok oyunculu poker, bonus moto
 
 ### Kurulum Adımları
 
+> **Not (Prod/Staging / CI_STRICT):**
+> - `ENV=prod|staging` veya `CI_STRICT=1` iken `DATABASE_URL` **zorunludur** ve **sqlite URL** kabul edilmez.
+> - `SYNC_DATABASE_URL` resmi isimdir. Eski `DATABASE_URL_SYNC` yalnızca backward-compat içindir.
+
 1.  **Backend Kurulumu:**
     ```bash
     cd backend
