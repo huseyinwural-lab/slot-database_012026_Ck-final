@@ -1,179 +1,1235 @@
 <analysis>**original_problem_statement:**
-The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project has progressed through a series of sprints, moving from fixing critical E2E tests through a full Go-Live simulation. The project has now transitioned into implementing core casino features based on a Final Backlog provided by the user in a sequential, Business As Usual (BAU) sprint format. The overall goal is to build a feature-complete, secure, and operationally ready platform.
+The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project is in its final phase, focusing on resolving deployment blockers and hardening the application.
 
-After completing the final backlog, the user requested additional features (UI bug fixes, tenant-based menu flags) and a cleanup. A subsequent request to check for deployment readiness revealed critical architectural incompatibilities with the target platform and a fragile CI/CD pipeline. The final phase of the project focused on resolving all CI/CD issues and hardening the entire release and testing process.
+Initially, the main task was to address a critical deployment incompatibility: the application uses PostgreSQL and Redis, but the target Emergent platform only provides MongoDB. The agent and user collaborated extensively to refactor the application's configuration to be driven entirely by environment variables, allowing it to connect to external databases.
+
+They designed a detailed, two-part self-serve verification process (P1-B and P1-B-S) for the user's Ops/Dev team to run on an external environment to confirm the fixes. This involves checking migrations, service readiness, and a money-loop smoke test to ensure financial invariants. The agent created documentation and the necessary API endpoints to support this.
+
+However, just as this verification plan was finalized, the user identified a new, more urgent list of P0 release blockers and repository hygiene issues that must be fixed before proceeding with any verification. The current focus has pivoted to resolving this new list of critical items.
 
 **PRODUCT REQUIREMENTS:**
-The project follows a user-directed, artifact-driven development process. The user provides detailed İş Emri (Task Orders) for each sprint, specifying the scope, implementation details, and acceptance criteria. The final phase required a fully automated, hardened CI/CD pipeline with release smoke tests, artifact generation, and security checks as a gate for production readiness.
+1.  **Deployment Readiness:** The application must be configurable via environment variables (, ) to connect to external PostgreSQL and Redis services. The configuration must be robust, with fail-fast mechanisms for production environments.
+2.  **Production Hardening (P0 Blockers):**
+    -   Webhook signature verification (generic and Adyen-specific) must be fully implemented and not be placeholders.
+    -   Mock KYC endpoints must be disabled in production environments.
+3.  **Repository Hygiene:** The repository must be cleaned of build artifacts, temporary files, and insecure example credentials. A  file must be added to prevent future bloat.
+4.  **Verification:** The fixes must be verifiable through a self-serve evidence pack that the user's Ops/Dev team can run.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-A feature-complete, full-stack casino platform (React/FastAPI/PostgreSQL) that has been built and hardened over 20+ sprints. All core features, including a financial ledger, poker engine, affiliate system, VIP/loyalty program, offer optimizer, and dispute management, are implemented and validated by E2E test runners.
+A full-stack casino platform (React/FastAPI/PostgreSQL). The backend has undergone significant refactoring to move all database and service connection configurations from hardcoded values in  to environment variables managed in . This includes adding fail-fast mechanisms for production-like environments ( or ) to prevent accidental startup with incorrect settings (e.g., missing URLs, using SQLite).
 
-Most recently, the project underwent a significant stabilization and hardening phase. The CI/CD pipeline, which was previously failing, has been fixed and fortified. A robust, centralized E2E smoke test suite ( using ) now acts as a release gate, complete with strict environment checks, secure logging, and automated artifact generation. The project is considered code complete and has passed all its internal quality gates.
+To facilitate the verification of these changes, the agent has:
+-   Added new runtime tests to ============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: anyio-4.11.0, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 56 items / 34 errors
+
+==================================== ERRORS ====================================
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+________________________ ERROR collecting backend/tests ________________________
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1140: in _find_and_load_unlocked
+    ???
+E   ModuleNotFoundError: No module named 'tests.conftest'
+_______________________ ERROR collecting backend_test.py _______________________
+import file mismatch:
+imported module 'backend_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py
+which is not the same as the test file we want to collect:
+  /app/backend_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting feature_flags_test.py ____________________
+import file mismatch:
+imported module 'feature_flags_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/feature_flags_test.py
+which is not the same as the test file we want to collect:
+  /app/feature_flags_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting focused_regression_test.py __________________
+import file mismatch:
+imported module 'focused_regression_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/focused_regression_test.py
+which is not the same as the test file we want to collect:
+  /app/focused_regression_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting jwt_auth_test.py _______________________
+import file mismatch:
+imported module 'jwt_auth_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/jwt_auth_test.py
+which is not the same as the test file we want to collect:
+  /app/jwt_auth_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting p0_patch1_test.py ______________________
+import file mismatch:
+imported module 'p0_patch1_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/p0_patch1_test.py
+which is not the same as the test file we want to collect:
+  /app/p0_patch1_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting patch1_smoke_test.py _____________________
+import file mismatch:
+imported module 'patch1_smoke_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch1_smoke_test.py
+which is not the same as the test file we want to collect:
+  /app/patch1_smoke_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting patch2_test.py ________________________
+import file mismatch:
+imported module 'patch2_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch2_test.py
+which is not the same as the test file we want to collect:
+  /app/patch2_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting player_management_test.py __________________
+import file mismatch:
+imported module 'player_management_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/player_management_test.py
+which is not the same as the test file we want to collect:
+  /app/player_management_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting reports_test.py _______________________
+import file mismatch:
+imported module 'reports_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/reports_test.py
+which is not the same as the test file we want to collect:
+  /app/reports_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting scripts/test_velocity_stub.py ________________
+ImportError while importing test module '/app/scripts/test_velocity_stub.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/test_velocity_stub.py:8: in <module>
+    from app.backend.app.services.tenant_policy_enforcement import check_velocity_limit
+E   ModuleNotFoundError: No module named 'app.backend'
+__________________ ERROR collecting tenant_isolation_test.py ___________________
+import file mismatch:
+imported module 'tenant_isolation_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_isolation_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_isolation_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tenant_kill_switch_test.py __________________
+import file mismatch:
+imported module 'tenant_kill_switch_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_kill_switch_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_kill_switch_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting tenant_test.py ________________________
+import file mismatch:
+imported module 'tenant_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_api_key_robot.py ____________________
+import file mismatch:
+imported module 'test_api_key_robot' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_api_key_robot.py
+which is not the same as the test file we want to collect:
+  /app/test_api_key_robot.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_bonus_config.py _____________________
+import file mismatch:
+imported module 'test_bonus_config' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_config.py
+which is not the same as the test file we want to collect:
+  /app/test_bonus_config.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_bonus_trigger.py ____________________
+import file mismatch:
+imported module 'test_bonus_trigger' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_trigger.py
+which is not the same as the test file we want to collect:
+  /app/test_bonus_trigger.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_client_upload.py ____________________
+ImportError while importing test module '/app/test_client_upload.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_client_upload.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_________________ ERROR collecting test_client_upload_clean.py _________________
+import file mismatch:
+imported module 'test_client_upload_clean' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload_clean.py
+which is not the same as the test file we want to collect:
+  /app/test_client_upload_clean.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________________ ERROR collecting test_dice_fixed.py ______________________
+ImportError while importing test module '/app/test_dice_fixed.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_dice_fixed.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+______________________ ERROR collecting test_dice_only.py ______________________
+ImportError while importing test module '/app/test_dice_only.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_dice_only.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+___________________ ERROR collecting test_ff_enforcement.py ____________________
+import file mismatch:
+imported module 'test_ff_enforcement' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_ff_enforcement.py
+which is not the same as the test file we want to collect:
+  /app/test_ff_enforcement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_finance_endpoints.py __________________
+import file mismatch:
+imported module 'test_finance_endpoints' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_finance_endpoints.py
+which is not the same as the test file we want to collect:
+  /app/test_finance_endpoints.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_game_assets_only.py ___________________
+import file mismatch:
+imported module 'test_game_assets_only' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_game_assets_only.py
+which is not the same as the test file we want to collect:
+  /app/test_game_assets_only.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting test_reconciliation_only.py _________________
+import file mismatch:
+imported module 'test_reconciliation_only' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_reconciliation_only.py
+which is not the same as the test file we want to collect:
+  /app/test_reconciliation_only.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_redaction_direct.py ___________________
+ImportError while importing test module '/app/test_redaction_direct.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_redaction_direct.py:11: in <module>
+    from app.services.audit import AuditLogger
+backend/app/services/audit.py:5: in <module>
+    from app.models.sql_models import AdminUser, AuditEvent
+E   ImportError: cannot import name 'AuditEvent' from 'app.models.sql_models' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend/app/models/sql_models.py)
+___________________ ERROR collecting test_review_specific.py ___________________
+import file mismatch:
+imported module 'test_review_specific' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_review_specific.py
+which is not the same as the test file we want to collect:
+  /app/test_review_specific.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting test_robot_orchestrator.py __________________
+import file mismatch:
+imported module 'test_robot_orchestrator' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_robot_orchestrator.py
+which is not the same as the test file we want to collect:
+  /app/test_robot_orchestrator.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_runner_utils.py __________________
+ImportError while importing test module '/app/tests/test_runner_utils.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_runner_utils'
+__________ ERROR collecting tests/test_withdraw_admin_idempotency.py ___________
+ImportError while importing test module '/app/tests/test_withdraw_admin_idempotency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_withdraw_admin_idempotency'
+_____________ ERROR collecting tests/test_withdraw_idempotency.py ______________
+ImportError while importing test module '/app/tests/test_withdraw_idempotency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_withdraw_idempotency'
+=============================== warnings summary ===============================
+_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: _ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+    class TestResult:
+
+backend_regression_test.py:21
+  /app/backend_regression_test.py:21: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: backend_regression_test.py)
+    class TestResult:
+
+p2_observability_final_test.py:30
+  /app/p2_observability_final_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_final_test.py)
+    class TestResult:
+
+p2_observability_test.py:30
+  /app/p2_observability_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_test.py)
+    class TestResult:
+
+../root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295
+  /root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+test_audit_comprehensive.py:27
+  /app/test_audit_comprehensive.py:27: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: test_audit_comprehensive.py)
+    class TestResult:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py
+ERROR backend/tests - ModuleNotFoundError: No module named 'tests.conftest'
+ERROR backend_test.py
+ERROR feature_flags_test.py
+ERROR focused_regression_test.py
+ERROR jwt_auth_test.py
+ERROR p0_patch1_test.py
+ERROR patch1_smoke_test.py
+ERROR patch2_test.py
+ERROR player_management_test.py
+ERROR reports_test.py
+ERROR scripts/test_velocity_stub.py
+ERROR tenant_isolation_test.py
+ERROR tenant_kill_switch_test.py
+ERROR tenant_test.py
+ERROR test_api_key_robot.py
+ERROR test_bonus_config.py
+ERROR test_bonus_trigger.py
+ERROR test_client_upload.py
+ERROR test_client_upload_clean.py
+ERROR test_dice_fixed.py
+ERROR test_dice_only.py
+ERROR test_ff_enforcement.py
+ERROR test_finance_endpoints.py
+ERROR test_game_assets_only.py
+ERROR test_reconciliation_only.py
+ERROR test_redaction_direct.py
+ERROR test_review_specific.py
+ERROR test_robot_orchestrator.py
+ERROR tests/test_runner_utils.py
+ERROR tests/test_withdraw_admin_idempotency.py
+ERROR tests/test_withdraw_idempotency.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 34 errors during collection !!!!!!!!!!!!!!!!!!!
+======================== 6 warnings, 34 errors in 1.28s ======================== to confirm the fail-fast and configuration logic.
+-   Created new admin endpoints (, ) to enable PSP-free money-loop smoke tests.
+-   Created detailed markdown documents (, ) outlining the self-serve verification steps for the user's Ops/Dev team.
+
+The project is currently blocked on two fronts: 1) Fixing a newly discovered list of P0 release blockers. 2) Waiting for the user's team to execute the self-serve verification for the configuration changes.
 
 **Last working item**:
--   **Last item agent was working:** Finalizing and validating the Hardened Release Process as per the user's detailed final review checklists. The agent successfully refactored all test runner scripts to use a central, robust utility () which includes features like strict CI mode, configurable retries, and secure log sanitization. This was integrated into the main GitHub Actions workflow () with automated artifact uploading and secret leakage checks. The agent performed a final self-verification to confirm all new checks (strict mode, config failure, leak detection) work as expected.
--   **Status:** USER VERIFICATION PENDING
--   **Agent Testing Done:** Y
--   **Which testing method agent to use?** NA. The user needs to give the final sign-off on the hardened CI process. The process itself has been tested.
+-   **Last item agent was working:** The agent began addressing a new, high-priority list of P0 Release Blockers and Hygiene Issues provided by the user (Message #895). The agent's last actions involved exploring the codebase to locate the relevant files for these tasks, including , , , , , and .
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** backend testing agent
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** Confirm Final Release Process Hardening (P0)
--   **Issue 2:** Critical Deployment Incompatibility (P0)
--   **Issue 3:** Legacy Test Failures (P3)
+-   **Issue 1:** Fix P0 Release Blockers & Hygiene Issues (P0)
+-   **Issue 2:** Critical Deployment Incompatibility & Verification (P0)
+-   **Issue 3:** Confirm Final Release Process Hardening (P1)
 
 **Issues Detail:**
--   **Issue 1:** Confirm Final Release Process Hardening
-    -   **Description:** The agent has completed the final set of tasks to harden the CI/CD and testing process. The user provided a series of checklists (Messages #1069, #1082), and the agent implemented them. The work is now pending the user's final review and acceptance.
-    -   **Attempted fixes:** A comprehensive refactor of test runners and CI workflow files.
-    -   **Next debug checklist:** User to review the final implementation and the generated artifacts/documentation to provide a final go-ahead.
-    -   **Why fix this issue and what will be achieved with the fix?** To formally close the project and confirm that the release process meets production-grade standards.
+-   **Issue 1:** Fix P0 Release Blockers & Hygiene Issues
+    -   **Description:** The user has identified a list of critical issues that block production release. This has become the new highest priority task.
+        -   **P0:** Webhook signature verification is a stub in .
+        -   **P0:** Adyen HMAC verification is a placeholder in .
+        -   **P0:** KYC document links are mock URLs in .
+        -   **Hygiene:** Repo contains CI artifacts (), logs, and no  file.
+        -   **Hygiene:**  is present in the repo root.
+        -   **Hygiene:** Live-like secret keys () are present in .
+        -   **Hygiene:** No  files exist.
+    -   **Attempted fixes:** None yet. The agent has only located the files.
+    -   **Next debug checklist:**
+        1.  Get playbook for Adyen integration.
+        2.  Implement real HMAC signature verification in .
+        3.  Implement real Adyen webhook verification in  based on playbook.
+        4.  Disable KYC endpoints with a feature flag in production environments.
+        5.  Create a  file.
+        6.  Delete artifact directories (, etc.) and  from the repo. Add them to .
+        7.  Redact  keys in .
+        8.  Create  files for  and .
+    -   **Why fix this issue and what will be achieved with the fix?** Resolving these issues is mandatory for a secure and clean production release. It fixes critical security vulnerabilities and cleans up the repository.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** backend
+    -   **Blocked on other issue:** None.
+
+-   **Issue 2:** Critical Deployment Incompatibility & Verification
+    -   **Description:** The application's use of PostgreSQL/Redis is incompatible with the target platform's managed MongoDB. The agent has refactored the app to use external DBs via environment variables, but this fix is pending verification by the user's Ops/Dev team. The entire self-serve verification process (P1-B, P1-B-S) is part of resolving this issue.
+    -   **Attempted fixes:** The agent has completed the necessary code refactoring and created comprehensive documentation (, ) for the verification process.
+    -   **Next debug checklist:** This task is currently BLOCKED, waiting for the user's Ops/Dev team to run the self-serve scripts on an external environment and provide the output.
+    -   **Why fix this issue and what will be achieved with the fix?** This is the fundamental blocker for deploying the application.
+    -   **Status:** BLOCKED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** both
+    -   **Blocked on other issue:** Blocked on **Issue 1** (as per user's priority) and external action from the user's team.
+
+-   **Issue 3:** Confirm Final Release Process Hardening
+    -   **Description:** The agent previously completed a major overhaul of the CI/CD and testing process. This work is pending the user's final review and acceptance.
+    -   **Attempted fixes:** A comprehensive refactor of test runners and CI workflow files was completed in a previous session.
+    -   **Next debug checklist:** User needs to give final sign-off.
+    -   **Why fix this issue and what will be achieved with the fix?** To formally close the project's CI hardening phase.
     -   **Status:** USER VERIFICATION PENDING
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** NA
-    -   **Blocked on other issue:** None
-
--   **Issue 2:** Critical Deployment Incompatibility
-    -   **Description:** The **Deployment Agent** (Message #704) reported that the application is **NOT DEPLOYABLE** to the Emergent platform. The backend uses **PostgreSQL** and **Redis**, but the platform only provides a managed **MongoDB** instance. This is a fundamental architectural mismatch.
-    -   **Attempted fixes:** None. The agent fixed the CI build failures but never addressed the underlying database/service incompatibility with the user.
-    -   **Next debug checklist:**
-        1.  Present the findings from the Deployment Agent to the user again.
-        2.  Discuss the two possible solutions: a) Refactor the entire backend to use MongoDB, or b) Configure the application to use externally-hosted PostgreSQL and Redis services, requiring the user to provide connection strings.
-        3.  Implement the chosen solution.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a hard blocker for deploying the application on the intended platform. Fixing it will make the application deployable.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** None
-
--   **Issue 3:** Legacy Test Failures
-    -   **Description:** The test file  has persistent failures, as noted in the initial project handoff. This was never prioritized.
-    -   **Attempted fixes:** None.
-    -   **Next debug checklist:** Run 
-no tests ran in 0.00s to analyze errors.
-    -   **Why fix this issue and what will be achieved with this?** To achieve a 100% passing backend test suite.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** backend
-    -   **Blocked on other issue:** None
+    -   **Blocked on other issue:** None, but logically follows after deployment is proven possible.
 
 **In progress Task List**:
--   None.
+-   **Task 1:** Implement P0 Release Blockers & Hygiene Fixes (P0)
+    -   **Where to resume:** The agent has located the relevant files. The next step is to get the Adyen integration playbook and then begin implementing the fixes for each item on the P0/Hygiene list from message #898.
+    -   **What will be achieved with this?** A more secure and production-ready application, with critical vulnerabilities patched and the repository cleaned.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** backend
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 
 **Upcoming Tasks:**
--   **P0 - Address Deployment Blockers:** Resolve the PostgreSQL/Redis incompatibility issue. This is the highest priority before any new feature work.
+-   **P0 - External Verification (P1-B, P1-B-S):** Once the current P0 blockers are fixed, the next step is to guide the user's team to execute the self-serve verification packs (, ) and provide the output to confirm the deployment configuration works.
 
 **Future Tasks:**
-(As per user's strategic backlog, to be considered after deployment is resolved)
 -   **P1 - Growth & Monetization Track:** Evolve the bonus engine, set promo risk limits, and scale the affiliate system.
 -   **P1 - Collusion v2:** Implement graph-based collusion detection.
 -   **P2 - Post-Go-Live Hardening:** Technical debt cleanup and further optimizations.
 -   **P2 - Day-0 / Day-7 / Day-30 Ops Plan:** Define post-launch monitoring metrics and operational playbooks.
 
 **Completed work in this session**
--   **Sprints 12-19:** Successfully completed all remaining BAU sprints, including Affiliate/CRM, VIP/Loyalty, Poker Risk, Offer Optimizer, Dispute/Clawback, Observability, and Performance.
--   **Project Finalization:** Created a Production Readiness Pack and passed all Final Gates.
--   **Post-Finalization UI/Feature Work:** Fixed a sidebar UI alignment bug and implemented a full-stack tenant-based menu management feature.
--   **Documentation:** Created  and  user manuals.
--   **CI/CD and Testing Overhaul:**
-    -   Fixed a large number of cascading build failures in the GitHub Actions CI pipeline related to , Docker configurations, and DB connection issues.
-    -   Stabilized the Alembic migration chain by fixing multiple broken migration files (SQL syntax, long revision IDs, foreign key violations).
-    -   Refactored all E2E test runner scripts (, , etc.) to use a centralized, robust utility: .
-    -   Hardened the new test framework with features like strict CI mode, configurable retries, and secure log sanitization to prevent credential leaks.
-    -   Integrated the hardened test suite into the CI pipeline () as a mandatory release gate, including automated artifact uploads and secret leakage checks.
+-   **Configuration Refactor:** Refactored , , and  to remove hardcoded DB/Redis hostnames and rely solely on environment variables.
+-   **Fail-Fast Implementation:** Added strict validation in  to make the application exit on startup if critical environment variables are missing or misconfigured in production-like environments.
+-   **Runtime Testing:** Added a suite of new runtime tests to  to verify fail-fast behavior for DB and Redis URLs () and local fallback functionality.
+-   **Tenant Isolation Fixes:** Fixed all failures in  and added new tests to enforce stricter tenant boundary rules (e.g., cross-tenant list endpoints return 200+empty, role checks return 403).
+-   **Soft Delete for Players:** Implemented a soft-delete mechanism for players () and added filtering logic () to the player list endpoint ().
+-   **Self-Serve Verification Prep:**
+    -   Created admin endpoints for PSP-free testing:  and .
+    -   Created documentation for the verification process:  and .
+-   **Test Result Tracking:** Initiated and updated a  file to track progress and test outcomes for the new verification tasks.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1:** Deployment Incompatibility with Emergent Platform.
-    -   **Debug checklist:** See Pending/In progress Issue list for details.
-    -   **Why to solve this issue and what will be achieved with this?** The application cannot be deployed to the target platform without this fix.
-    -   **Should Test frontend/backend/both after fix:** both
-    -   **Is recurring issue?** N
+-   None. The current P0/Hygiene list is being actively worked on.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:**  failures persist.
+-   **Issue recurrence in previous fork:**  failures.
 -   **Recurrence count:** 3+
--   **Status:** NOT STARTED
+-   **Status:** RESOLVED (All tests in this file now pass).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Artifact-Driven Development:** Every sprint is closed with a comprehensive evidence package.
--   **Hardened E2E Release Gates:** A standardized E2E test suite () runs in CI, acting as a mandatory gate for releases. It features strict config checks, secure logging, and standardized artifact generation.
--   **Provider-Agnostic Gateways:** Architecture uses internal gateways (e.g., for Poker) to abstract away third-party providers.
--   **Immutable Ledger & Audit:** The system is built on a foundation of immutable, hash-chained audit logs.
+-   **Environment-Driven Configuration:** All infrastructure dependencies (DB, Redis) are now configured via environment variables, not hardcoded.
+-   **Fail-Fast on Startup:** In , , or  modes, the application will refuse to start if essential configs like  or  are missing.
+-   **Self-Serve Verification Gates:** The project uses markdown documents () as formal checklists for the user's Ops/Dev team to execute and provide evidence, acting as Go/No-Go gates for deployment.
+-   **Idempotent Admin Actions:** Key financial operations, like manual ledger adjustments, are designed to be idempotent using an  header.
+-   **Tenant Isolation:** Enforced at the query level, with tests ensuring cross-tenant data access returns 404 (for details) or empty lists (for enumerations).
 
 **key DB schema**
--   **auditevent**: 
--   **affiliates, affiliate_commissions**: Manages affiliate tracking and payouts.
--   **viptier, playervipstatus, loyaltytransaction**: Manages VIP tiers and loyalty points.
--   **offer, experiment, offerdecisionrecord**: Manages the offer/AB testing engine.
--   **dispute**: Manages payment disputes and chargebacks.
--   **tenantmenuflag**: Manages per-tenant feature/menu visibility.
+-   No significant schema changes in this session. The focus was on configuration and testing.
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   : The new, centralized, hardened utility for all E2E test runners.
--   : The main entrypoint for the CI release smoke test suite.
--   : The main CI workflow, now with smoke tests, artifact uploads, and security checks.
--   : Updated to handle sync/async database URLs reliably.
--    / : New user manuals.
--   : New developer documentation for the test runner framework.
+-   : Core of the new environment-driven configuration and fail-fast logic.
+-   : Implements the enhanced  check, now including Redis.
+-   : Contains all new unit and runtime tests for config, fail-fast, and tenant isolation.
+-   : New endpoint for PSP-free smoke testing.
+-   : Updated with the new  endpoint.
+-   : Go/No-Go checklist for migration and service readiness.
+-   : Go/No-Go checklist for financial invariants and idempotency.
 
 **Areas that need refactoring**:
--   The Alembic migration  was made into a no-op () to fix a  error. This unblocks the pipeline but means the migration's intended schema changes are not applied, which could be a hidden source of tech debt.
+-   The Alembic migration  is still a no-op (), representing hidden technical debt.
+-   Financial logic placeholders (dispute clawback, multi-currency) need to be implemented.
 
 **key api endpoints**
--    (PATCH): Toggles menu item visibility for a tenant.
--   Other new endpoints for VIP, Offers, and Disputes under .
+-   : (NEW) Creates a player, used for smoke testing.
+-   : (NEW) Performs a manual, idempotent credit/debit on a player's account.
+-   : (Updated) Now checks for both Database and Redis connectivity before returning 200.
 
 **Critical Info for New Agent**
--   **Deployment is BLOCKED.** The biggest priority is to address the **PostgreSQL/Redis vs. MongoDB** incompatibility reported by the Deployment Agent. The application CANNOT be deployed to the Emergent platform in its current state. You must discuss this with the user and decide on a path forward (refactor to Mongo or use external DBs).
--   The project's testing methodology has been significantly matured. All E2E tests are now run through a single, hardened script (). Any new development must be accompanied by tests that integrate with this framework.
--   The CI/CD pipeline is now very strict. Refer to  for the required checks.
+-   **Priority Shift:** The primary goal was to prepare for and execute a self-serve verification (P1-B/P1-B-S) of the deployment configuration fixes. However, the user has identified a new, more urgent list of P0 release blockers and hygiene tasks (Message #895). **You must address this new P0 list first.**
+-   **Blocked Verification:** The self-serve verification process is **BLOCKED** and awaiting action from the user's Ops/Dev team. Do not attempt to proceed with it until the new P0 tasks are complete and the user provides the evidence package.
+-   **Use New Tests:** The agent has added a robust suite of ============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: anyio-4.11.0, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 56 items / 34 errors
+
+==================================== ERRORS ====================================
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+________________________ ERROR collecting backend/tests ________________________
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1140: in _find_and_load_unlocked
+    ???
+E   ModuleNotFoundError: No module named 'tests.conftest'
+_______________________ ERROR collecting backend_test.py _______________________
+import file mismatch:
+imported module 'backend_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py
+which is not the same as the test file we want to collect:
+  /app/backend_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting feature_flags_test.py ____________________
+import file mismatch:
+imported module 'feature_flags_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/feature_flags_test.py
+which is not the same as the test file we want to collect:
+  /app/feature_flags_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting focused_regression_test.py __________________
+import file mismatch:
+imported module 'focused_regression_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/focused_regression_test.py
+which is not the same as the test file we want to collect:
+  /app/focused_regression_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting jwt_auth_test.py _______________________
+import file mismatch:
+imported module 'jwt_auth_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/jwt_auth_test.py
+which is not the same as the test file we want to collect:
+  /app/jwt_auth_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting p0_patch1_test.py ______________________
+import file mismatch:
+imported module 'p0_patch1_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/p0_patch1_test.py
+which is not the same as the test file we want to collect:
+  /app/p0_patch1_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting patch1_smoke_test.py _____________________
+import file mismatch:
+imported module 'patch1_smoke_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch1_smoke_test.py
+which is not the same as the test file we want to collect:
+  /app/patch1_smoke_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting patch2_test.py ________________________
+import file mismatch:
+imported module 'patch2_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch2_test.py
+which is not the same as the test file we want to collect:
+  /app/patch2_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting player_management_test.py __________________
+import file mismatch:
+imported module 'player_management_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/player_management_test.py
+which is not the same as the test file we want to collect:
+  /app/player_management_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting reports_test.py _______________________
+import file mismatch:
+imported module 'reports_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/reports_test.py
+which is not the same as the test file we want to collect:
+  /app/reports_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting scripts/test_velocity_stub.py ________________
+ImportError while importing test module '/app/scripts/test_velocity_stub.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/test_velocity_stub.py:8: in <module>
+    from app.backend.app.services.tenant_policy_enforcement import check_velocity_limit
+E   ModuleNotFoundError: No module named 'app.backend'
+__________________ ERROR collecting tenant_isolation_test.py ___________________
+import file mismatch:
+imported module 'tenant_isolation_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_isolation_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_isolation_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tenant_kill_switch_test.py __________________
+import file mismatch:
+imported module 'tenant_kill_switch_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_kill_switch_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_kill_switch_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting tenant_test.py ________________________
+import file mismatch:
+imported module 'tenant_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_api_key_robot.py ____________________
+import file mismatch:
+imported module 'test_api_key_robot' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_api_key_robot.py
+which is not the same as the test file we want to collect:
+  /app/test_api_key_robot.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_bonus_config.py _____________________
+import file mismatch:
+imported module 'test_bonus_config' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_config.py
+which is not the same as the test file we want to collect:
+  /app/test_bonus_config.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_bonus_trigger.py ____________________
+import file mismatch:
+imported module 'test_bonus_trigger' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_trigger.py
+which is not the same as the test file we want to collect:
+  /app/test_bonus_trigger.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_client_upload.py ____________________
+ImportError while importing test module '/app/test_client_upload.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_client_upload.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_________________ ERROR collecting test_client_upload_clean.py _________________
+import file mismatch:
+imported module 'test_client_upload_clean' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload_clean.py
+which is not the same as the test file we want to collect:
+  /app/test_client_upload_clean.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________________ ERROR collecting test_dice_fixed.py ______________________
+ImportError while importing test module '/app/test_dice_fixed.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_dice_fixed.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+______________________ ERROR collecting test_dice_only.py ______________________
+ImportError while importing test module '/app/test_dice_only.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_dice_only.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+___________________ ERROR collecting test_ff_enforcement.py ____________________
+import file mismatch:
+imported module 'test_ff_enforcement' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_ff_enforcement.py
+which is not the same as the test file we want to collect:
+  /app/test_ff_enforcement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_finance_endpoints.py __________________
+import file mismatch:
+imported module 'test_finance_endpoints' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_finance_endpoints.py
+which is not the same as the test file we want to collect:
+  /app/test_finance_endpoints.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_game_assets_only.py ___________________
+import file mismatch:
+imported module 'test_game_assets_only' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_game_assets_only.py
+which is not the same as the test file we want to collect:
+  /app/test_game_assets_only.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting test_reconciliation_only.py _________________
+import file mismatch:
+imported module 'test_reconciliation_only' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_reconciliation_only.py
+which is not the same as the test file we want to collect:
+  /app/test_reconciliation_only.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_redaction_direct.py ___________________
+ImportError while importing test module '/app/test_redaction_direct.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_redaction_direct.py:11: in <module>
+    from app.services.audit import AuditLogger
+backend/app/services/audit.py:5: in <module>
+    from app.models.sql_models import AdminUser, AuditEvent
+E   ImportError: cannot import name 'AuditEvent' from 'app.models.sql_models' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend/app/models/sql_models.py)
+___________________ ERROR collecting test_review_specific.py ___________________
+import file mismatch:
+imported module 'test_review_specific' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_review_specific.py
+which is not the same as the test file we want to collect:
+  /app/test_review_specific.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting test_robot_orchestrator.py __________________
+import file mismatch:
+imported module 'test_robot_orchestrator' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_robot_orchestrator.py
+which is not the same as the test file we want to collect:
+  /app/test_robot_orchestrator.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_runner_utils.py __________________
+ImportError while importing test module '/app/tests/test_runner_utils.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_runner_utils'
+__________ ERROR collecting tests/test_withdraw_admin_idempotency.py ___________
+ImportError while importing test module '/app/tests/test_withdraw_admin_idempotency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_withdraw_admin_idempotency'
+_____________ ERROR collecting tests/test_withdraw_idempotency.py ______________
+ImportError while importing test module '/app/tests/test_withdraw_idempotency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_withdraw_idempotency'
+=============================== warnings summary ===============================
+_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: _ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+    class TestResult:
+
+backend_regression_test.py:21
+  /app/backend_regression_test.py:21: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: backend_regression_test.py)
+    class TestResult:
+
+p2_observability_final_test.py:30
+  /app/p2_observability_final_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_final_test.py)
+    class TestResult:
+
+p2_observability_test.py:30
+  /app/p2_observability_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_test.py)
+    class TestResult:
+
+../root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295
+  /root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+test_audit_comprehensive.py:27
+  /app/test_audit_comprehensive.py:27: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: test_audit_comprehensive.py)
+    class TestResult:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py
+ERROR backend/tests - ModuleNotFoundError: No module named 'tests.conftest'
+ERROR backend_test.py
+ERROR feature_flags_test.py
+ERROR focused_regression_test.py
+ERROR jwt_auth_test.py
+ERROR p0_patch1_test.py
+ERROR patch1_smoke_test.py
+ERROR patch2_test.py
+ERROR player_management_test.py
+ERROR reports_test.py
+ERROR scripts/test_velocity_stub.py
+ERROR tenant_isolation_test.py
+ERROR tenant_kill_switch_test.py
+ERROR tenant_test.py
+ERROR test_api_key_robot.py
+ERROR test_bonus_config.py
+ERROR test_bonus_trigger.py
+ERROR test_client_upload.py
+ERROR test_client_upload_clean.py
+ERROR test_dice_fixed.py
+ERROR test_dice_only.py
+ERROR test_ff_enforcement.py
+ERROR test_finance_endpoints.py
+ERROR test_game_assets_only.py
+ERROR test_reconciliation_only.py
+ERROR test_redaction_direct.py
+ERROR test_review_specific.py
+ERROR test_robot_orchestrator.py
+ERROR tests/test_runner_utils.py
+ERROR tests/test_withdraw_admin_idempotency.py
+ERROR tests/test_withdraw_idempotency.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 34 errors during collection !!!!!!!!!!!!!!!!!!!
+======================== 6 warnings, 34 errors in 0.70s ======================== runtime tests. Use these to validate changes and prevent regressions in configuration and tenant isolation logic.
+-   **Follow User's Detailed Instructions:** The user is highly technical and provides very specific, prescriptive instructions. Adhere to them closely, especially regarding the implementation of the P0 fixes.
 
 **documents and test reports created in this job**
--   : Documentation for the new test runner framework.
--   , : General project user manuals.
--   : Contains all final reports from the project finalization phase.
--   : Contains standardized logs and summaries from the smoke test runs.
+-   
+-   
+-    (Continuously updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
--   A series of messages providing final review checklists and acceptance criteria for hardening the release/testing process.
--   The user confirms the agent's plan to implement Strict CI Mode and better artifact generation.
--   The user provides a final, detailed Acceptance Criteria checklist for the hardened CI/CD process.
--   The user accepts the final state of the hardened release process and provides a template for a PR/Release Note to formalize the completion of the work.
+-   A series of messages where the user and agent collaboratively design and document the self-serve verification process (P1-B and P1-B-S) for the deployment blocker fix. This includes defining commands, expected outputs, and creating the  files.
+-   The user confirms the plan to add a  endpoint to unblock the self-serve testing flow.
+-   After the agent confirms the endpoint is added, the user abruptly pivots.
+-   **Message #895:** The user provides a new, comprehensive list of 13 critical P0 release blockers and hygiene issues that must be fixed before any verification can happen.
+-   **Message #898:** The user gives the final go-ahead to start working on the new P0/hygiene list, specifying implementation details (e.g., use feature flags for KYC, get a playbook for Adyen). This is the current active task.
 
 **Project Health Check:**
--   **Broken:** The application is architecturally incompatible with the target deployment platform (PostgreSQL/Redis vs. MongoDB). This is a critical blocker.
--   **Mocked:** A mock poker provider () is still used for testing the poker gateway.
+-   **Broken:** The application remains undeployable on the target platform until the PostgreSQL/Redis vs. MongoDB incompatibility is fully resolved *and verified*. Several P0 security/release blockers have also been identified.
+-   **Mocked:** A mock poker provider () is used for testing. The KYC flow is also mocked and needs to be disabled for production.
 
 **3rd Party Integrations**
--   **Stripe:** For payment processing.
--   **Adyen:** For payment processing.
--   **PostgreSQL / SQLModel:** Backend database ORM.
--   **APScheduler:** For running background jobs.
--   **Redis (ARQ):** For background job queuing.
+-   **Stripe:** Payment processing.
+-   **Adyen:** Payment processing (P0 blocker: HMAC verification is a stub).
+-   **PostgreSQL / SQLModel:** Backend database.
+-   **Redis (ARQ):** Background job queuing.
+-   **APScheduler:** Background jobs.
 
 **Testing status**
 -   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:**
     -   
-    -   Multiple E2E runner scripts in 
--   **Known regressions:** The CI/CD pipeline was a major regression that was comprehensively fixed and hardened.
+    -   
+    -   
+    -   
+    -   
+    -   
+    -   
+    -   
+    -   
+-   **Known regressions:** None. The agent has been adding tests to prevent regressions.
 
 **Credentials to test flow:**
-Test runners and CI jobs use environment variables for credentials:
--    (default: )
--    (default: )
+-   Test JWT tokens are generated dynamically within the ============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: anyio-4.11.0, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 56 items / 34 errors
+
+==================================== ERRORS ====================================
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_ ERROR collecting _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py _
+ImportError while importing test module '/app/_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+________________________ ERROR collecting backend/tests ________________________
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1140: in _find_and_load_unlocked
+    ???
+E   ModuleNotFoundError: No module named 'tests.conftest'
+_______________________ ERROR collecting backend_test.py _______________________
+import file mismatch:
+imported module 'backend_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py
+which is not the same as the test file we want to collect:
+  /app/backend_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting feature_flags_test.py ____________________
+import file mismatch:
+imported module 'feature_flags_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/feature_flags_test.py
+which is not the same as the test file we want to collect:
+  /app/feature_flags_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting focused_regression_test.py __________________
+import file mismatch:
+imported module 'focused_regression_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/focused_regression_test.py
+which is not the same as the test file we want to collect:
+  /app/focused_regression_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting jwt_auth_test.py _______________________
+import file mismatch:
+imported module 'jwt_auth_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/jwt_auth_test.py
+which is not the same as the test file we want to collect:
+  /app/jwt_auth_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting p0_patch1_test.py ______________________
+import file mismatch:
+imported module 'p0_patch1_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/p0_patch1_test.py
+which is not the same as the test file we want to collect:
+  /app/p0_patch1_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting patch1_smoke_test.py _____________________
+import file mismatch:
+imported module 'patch1_smoke_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch1_smoke_test.py
+which is not the same as the test file we want to collect:
+  /app/patch1_smoke_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting patch2_test.py ________________________
+import file mismatch:
+imported module 'patch2_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/patch2_test.py
+which is not the same as the test file we want to collect:
+  /app/patch2_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting player_management_test.py __________________
+import file mismatch:
+imported module 'player_management_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/player_management_test.py
+which is not the same as the test file we want to collect:
+  /app/player_management_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting reports_test.py _______________________
+import file mismatch:
+imported module 'reports_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/reports_test.py
+which is not the same as the test file we want to collect:
+  /app/reports_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting scripts/test_velocity_stub.py ________________
+ImportError while importing test module '/app/scripts/test_velocity_stub.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/test_velocity_stub.py:8: in <module>
+    from app.backend.app.services.tenant_policy_enforcement import check_velocity_limit
+E   ModuleNotFoundError: No module named 'app.backend'
+__________________ ERROR collecting tenant_isolation_test.py ___________________
+import file mismatch:
+imported module 'tenant_isolation_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_isolation_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_isolation_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tenant_kill_switch_test.py __________________
+import file mismatch:
+imported module 'tenant_kill_switch_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_kill_switch_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_kill_switch_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_______________________ ERROR collecting tenant_test.py ________________________
+import file mismatch:
+imported module 'tenant_test' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/tenant_test.py
+which is not the same as the test file we want to collect:
+  /app/tenant_test.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_api_key_robot.py ____________________
+import file mismatch:
+imported module 'test_api_key_robot' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_api_key_robot.py
+which is not the same as the test file we want to collect:
+  /app/test_api_key_robot.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_bonus_config.py _____________________
+import file mismatch:
+imported module 'test_bonus_config' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_config.py
+which is not the same as the test file we want to collect:
+  /app/test_bonus_config.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_bonus_trigger.py ____________________
+import file mismatch:
+imported module 'test_bonus_trigger' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_bonus_trigger.py
+which is not the same as the test file we want to collect:
+  /app/test_bonus_trigger.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting test_client_upload.py ____________________
+ImportError while importing test module '/app/test_client_upload.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_client_upload.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+_________________ ERROR collecting test_client_upload_clean.py _________________
+import file mismatch:
+imported module 'test_client_upload_clean' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_client_upload_clean.py
+which is not the same as the test file we want to collect:
+  /app/test_client_upload_clean.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________________ ERROR collecting test_dice_fixed.py ______________________
+ImportError while importing test module '/app/test_dice_fixed.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_dice_fixed.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+______________________ ERROR collecting test_dice_only.py ______________________
+ImportError while importing test module '/app/test_dice_only.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_dice_only.py:7: in <module>
+    from backend_test import CasinoAdminAPITester
+E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+___________________ ERROR collecting test_ff_enforcement.py ____________________
+import file mismatch:
+imported module 'test_ff_enforcement' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_ff_enforcement.py
+which is not the same as the test file we want to collect:
+  /app/test_ff_enforcement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_finance_endpoints.py __________________
+import file mismatch:
+imported module 'test_finance_endpoints' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_finance_endpoints.py
+which is not the same as the test file we want to collect:
+  /app/test_finance_endpoints.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_game_assets_only.py ___________________
+import file mismatch:
+imported module 'test_game_assets_only' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_game_assets_only.py
+which is not the same as the test file we want to collect:
+  /app/test_game_assets_only.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting test_reconciliation_only.py _________________
+import file mismatch:
+imported module 'test_reconciliation_only' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_reconciliation_only.py
+which is not the same as the test file we want to collect:
+  /app/test_reconciliation_only.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting test_redaction_direct.py ___________________
+ImportError while importing test module '/app/test_redaction_direct.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_redaction_direct.py:11: in <module>
+    from app.services.audit import AuditLogger
+backend/app/services/audit.py:5: in <module>
+    from app.models.sql_models import AdminUser, AuditEvent
+E   ImportError: cannot import name 'AuditEvent' from 'app.models.sql_models' (/app/_ci_zip/unzipped/slot-database_son_1612-main/backend/app/models/sql_models.py)
+___________________ ERROR collecting test_review_specific.py ___________________
+import file mismatch:
+imported module 'test_review_specific' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_review_specific.py
+which is not the same as the test file we want to collect:
+  /app/test_review_specific.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting test_robot_orchestrator.py __________________
+import file mismatch:
+imported module 'test_robot_orchestrator' has this __file__ attribute:
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/test_robot_orchestrator.py
+which is not the same as the test file we want to collect:
+  /app/test_robot_orchestrator.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_runner_utils.py __________________
+ImportError while importing test module '/app/tests/test_runner_utils.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_runner_utils'
+__________ ERROR collecting tests/test_withdraw_admin_idempotency.py ___________
+ImportError while importing test module '/app/tests/test_withdraw_admin_idempotency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_withdraw_admin_idempotency'
+_____________ ERROR collecting tests/test_withdraw_idempotency.py ______________
+ImportError while importing test module '/app/tests/test_withdraw_idempotency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'tests.test_withdraw_idempotency'
+=============================== warnings summary ===============================
+_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17
+  /app/_ci_zip/unzipped/slot-database_son_1612-main/backend_test.py:17: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: _ci_zip/unzipped/slot-database_son_1612-main/backend_test.py)
+    class TestResult:
+
+backend_regression_test.py:21
+  /app/backend_regression_test.py:21: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: backend_regression_test.py)
+    class TestResult:
+
+p2_observability_final_test.py:30
+  /app/p2_observability_final_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_final_test.py)
+    class TestResult:
+
+p2_observability_test.py:30
+  /app/p2_observability_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_test.py)
+    class TestResult:
+
+../root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295
+  /root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+test_audit_comprehensive.py:27
+  /app/test_audit_comprehensive.py:27: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: test_audit_comprehensive.py)
+    class TestResult:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_client_upload.py
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_fixed.py
+ERROR _ci_zip/unzipped/slot-database_son_1612-main/test_dice_only.py
+ERROR backend/tests - ModuleNotFoundError: No module named 'tests.conftest'
+ERROR backend_test.py
+ERROR feature_flags_test.py
+ERROR focused_regression_test.py
+ERROR jwt_auth_test.py
+ERROR p0_patch1_test.py
+ERROR patch1_smoke_test.py
+ERROR patch2_test.py
+ERROR player_management_test.py
+ERROR reports_test.py
+ERROR scripts/test_velocity_stub.py
+ERROR tenant_isolation_test.py
+ERROR tenant_kill_switch_test.py
+ERROR tenant_test.py
+ERROR test_api_key_robot.py
+ERROR test_bonus_config.py
+ERROR test_bonus_trigger.py
+ERROR test_client_upload.py
+ERROR test_client_upload_clean.py
+ERROR test_dice_fixed.py
+ERROR test_dice_only.py
+ERROR test_ff_enforcement.py
+ERROR test_finance_endpoints.py
+ERROR test_game_assets_only.py
+ERROR test_reconciliation_only.py
+ERROR test_redaction_direct.py
+ERROR test_review_specific.py
+ERROR test_robot_orchestrator.py
+ERROR tests/test_runner_utils.py
+ERROR tests/test_withdraw_admin_idempotency.py
+ERROR tests/test_withdraw_idempotency.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 34 errors during collection !!!!!!!!!!!!!!!!!!!
+======================== 6 warnings, 34 errors in 0.72s ======================== fixtures.
+-   The default admin user for CI runners is  / .
 
 **What agent forgot to execute**
--   The agent **never addressed the critical deployment blocker** reported by the Deployment Agent in message #704 (PostgreSQL/Redis vs. MongoDB). The agent fixed the CI pipeline but failed to bring this fundamental incompatibility back to the user's attention, leaving the application undeployable on the target platform.</analysis>
+-   The agent has been following the user's instructions closely. The pivot to the new P0 blockers was directed by the user, so nothing was forgotten, but priorities were reset.</analysis>
