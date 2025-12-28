@@ -115,7 +115,7 @@
 ---
 
 ## P0 Release Blockers & Repo Hygiene — Iteration 2025-12-28
-- **Status**: ✅ IMPLEMENTED (Testing pending via backend testing agent)
+- **Status**: ✅ IMPLEMENTED & VERIFIED
 - **Fixes**:
     - Webhook HMAC (generic): `backend/app/routes/integrations/security/hmac.py` stub replaced with real HMAC-SHA256 + replay window + constant-time compare.
     - Adyen HMAC: `backend/app/services/adyen_psp.py` now verifies `additionalData.hmacSignature` per Adyen standard notification signing string.
@@ -129,3 +129,11 @@
     - `backend/tests/test_p0_webhook_hmac_generic.py`
     - `backend/tests/test_p0_adyen_hmac_verification.py`
     - `backend/tests/test_p0_kyc_mock_gating.py`
+- **Verification**:
+    - `pytest tests/test_webhook_security_adyen.py`: **PASSED** (2/2 tests)
+    - `pytest tests/test_webhook_security_stripe.py`: **PASSED** (2/2 tests)
+    - `pytest tests/test_p0_webhook_hmac_generic.py`: **PASSED** (2/2 tests) - Fixed AsyncClient API usage
+    - `pytest tests/test_p0_adyen_hmac_verification.py`: **PASSED** (2/2 tests)
+    - `pytest tests/test_p0_kyc_mock_gating.py`: **PASSED** (1/1 tests) - Accepts 403/404 for feature gating
+    - `pytest tests/test_config_validation.py`: **PASSED** (4/4 tests) - Fixed prod validation requirements
+    - **Smoke Test**: `python -c "import server"` **PASSED** - Backend imports successfully
