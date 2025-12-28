@@ -85,6 +85,9 @@
 - **Policy aligned**:
     - Tenant boundary → **404** (resource not found)
     - Role boundary → **403** (forbidden)
-    - List endpoints → 200 with filtered/empty results (implicitly enforced elsewhere)
+    - List endpoints → **200 + empty** (no enumeration leakage)
+- **Added guardrails**:
+    - List endpoint coverage: `/api/v1/players` wrong-tenant returns empty
+    - Role boundary coverage: non-owner cannot call `/api/v1/admin/create-tenant-admin` (403)
 - **Verification**:
     - `pytest -q backend/tests/test_tenant_isolation.py` → **PASSED**
