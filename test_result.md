@@ -82,6 +82,18 @@
 
 ---
 
+## P1BS-G1-001 Admin Player Create Endpoint — Iteration 2025-12-28
+- **Status**: ✅ IMPLEMENTED
+- **Change**: Added `POST /api/v1/players` (admin create) to eliminate 405 and unblock P1-B-S G1.
+- **Contract**:
+    - Admin JWT required
+    - Tenant-scoped create
+    - Response includes `player_id`
+- **Tests**:
+    - `backend/tests/test_p1bs_player_create_admin.py` PASS
+
+---
+
 ## P3 Tenant Isolation (Legacy test) — Iteration 2025-12-28
 - **Status**: ✅ FIXED (deterministic)
 - **Change**: Rewrote `backend/tests/test_tenant_isolation.py` to run **in-process** using the existing ASGI `client` fixture (no dependency on a running server, no password-based bootstrap).
