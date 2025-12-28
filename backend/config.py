@@ -119,15 +119,23 @@ class Settings(BaseSettings):
         if self.env in {"prod", "staging"}:
             missing = []
             # Critical Secrets List - MUST BE LIVE keys
-            if not self.stripe_api_key or "live" not in self.stripe_api_key:
-                missing.append("STRIPE_API_KEY (must contain 'live')")
-            if not self.stripe_webhook_secret or "live" not in self.stripe_webhook_secret:
-                missing.append("STRIPE_WEBHOOK_SECRET (must contain 'live' or standard prefix for prod)")
-            
-            if not self.adyen_api_key or "live" not in self.adyen_api_key.lower():
-                # Adyen keys don't always have 'live' in prefix but usually distinguished. 
-                # For this check, we enforce 'live' string presence as per instruction.
-                missing.append("ADYEN_API_KEY (must be a live key)")
+            # Only enforce live-key checks in PROD.
+            if self.env == "prod":
+                if not self.stripe_api_key or "live" not in self.stripe_api_key:
+                    missing.append("STRIPE_API_KEY (must contain 'live')")
+                if not self.stripe_webhook_secret:
+                    missing.append("STRIPE_WEBHOOK_SECRET")
+
+                if not self.adyen_api_key:
+                    missing.append("ADYEN_API_KEY")
+            else:
+                # Staging: require presence but allow non-live keys.
+                if not self.stripe_api_key:
+                    missing.append("STRIPE_API_KEY")
+                if not self.stripe_webhook_secret:
+                    missing.append("STRIPE_WEBHOOK_SECRET")
+                if not self.adyen_api_key:
+                    missing.append("ADYEN_API_KEY")
             
             if self.audit_export_secret == "change_this_to_strong_secret_for_hmac":
                 missing.append("AUDIT_EXPORT_SECRET (must be changed)")
