@@ -56,3 +56,15 @@
 - `app/backend/app/services/adyen_psp.py`: Updated with signature Stub.
 -   `e2e/tests/stripe-deposit.spec.ts`: New E2E test.
 -   `backend/tests/test_tenant_policy_enforcement.py`: New backend policy test.
+
+---
+
+## P0 Deploy Config Refactor (External Postgres+Redis) — Iteration 2025-12-28
+- **Status**: ✅ IMPLEMENTED (Self-test: unit tests)
+- **Changes**:
+    - Added shared DSN helper: `backend/app/core/connection_strings.py`
+    - Alembic now derives sync DSN via helper (supports `SYNC_DATABASE_URL` / `DATABASE_URL_SYNC`)
+    - Startup logs a masked config snapshot (`config.snapshot`) for DB/Redis
+    - `docker-compose.yml` and `docker-compose.prod.yml` now support `localdb` vs `external` profiles
+- **Verification**:
+    - `pytest -q backend/tests/test_connection_strings.py`: **PASSED**
