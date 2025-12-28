@@ -31,6 +31,17 @@ def run_script(script_name):
     
     # Retry Policy: 1 retry for network glitches
     retries = 1
+    
+    # Pass environment variables
+    # We ensure BOOTSTRAP credentials are set for runner_utils.py to pick up
+    env = os.environ.copy()
+    if not env.get("BOOTSTRAP_OWNER_EMAIL"):
+        env["BOOTSTRAP_OWNER_EMAIL"] = "admin@casino.com" # Fallback/Default for local
+    if not env.get("BOOTSTRAP_OWNER_PASSWORD"):
+        env["BOOTSTRAP_OWNER_PASSWORD"] = "Admin123!" # Fallback/Default for local
+    if not env.get("API_BASE_URL"):
+        env["API_BASE_URL"] = "http://localhost:8001/api/v1"
+
     for attempt in range(retries + 1):
         try:
             # We run via subprocess to isolate event loops
@@ -38,7 +49,8 @@ def run_script(script_name):
                 [sys.executable, script_path],
                 capture_output=True,
                 text=True,
-                timeout=120 # 2 min timeout per script
+                timeout=120, # 2 min timeout per script
+                env=env
             )
             
             if result.returncode == 0:
