@@ -122,47 +122,47 @@ async def adyen_webhook(
             tx_id = req_item.get("merchantReference")
             success = req_item.get("success") == "true"
             psp_reference = req_item.get("pspReference")
-             
-             # Find Transaction
-             stmt = select(Transaction).where(Transaction.id == tx_id)
-             tx = (await session.execute(stmt)).scalars().first()
-             
-             if not tx:
-                 logger.warning(f"Adyen Webhook: Transaction {tx_id} not found")
-                 continue
-                 
-             # Replay Check
-             if tx.status == "completed":
-                 logger.info(f"Adyen Webhook: Replay detected for {tx_id}")
-                 # No-op 200
-                 metrics.record_webhook_replay()
-                 continue
+            
+            # Find Transaction
+            stmt = select(Transaction).where(Transaction.id == tx_id)
+            tx = (await session.execute(stmt)).scalars().first()
+            
+            if not tx:
+                logger.warning(f"Adyen Webhook: Transaction {tx_id} not found")
+                continue
+                
+            # Replay Check
+            if tx.status == "completed":
+                logger.info(f"Adyen Webhook: Replay detected for {tx_id}")
+                # No-op 200
+                metrics.record_webhook_replay()
+                continue
 
-             if success:
-                 # Apply Balance
-                 await apply_wallet_delta_with_ledger(
-                    session,
-                    tenant_id=tx.tenant_id,
-                    player_id=tx.player_id,
-                    tx_id=tx.id,
-                    event_type="deposit_succeeded",
-                    delta_available=tx.amount,
-                    delta_held=0.0,
-                    currency=tx.currency,
-                    idempotency_key=f"adyen:{psp_reference}:capture",
-                    provider="adyen",
-                    provider_ref=psp_reference,
-                    provider_event_id=psp_reference
+            if success:
+                # Apply Balance
+                await apply_wallet_delta_with_ledger(
+                   session,
+                   tenant_id=tx.tenant_id,
+                   player_id=tx.player_id,
+                   tx_id=tx.id,
+                   event_type="deposit_succeeded",
+                   delta_available=tx.amount,
+                   delta_held=0.0,
+                   currency=tx.currency,
+                   idempotency_key=f"adyen:{psp_reference}:capture",
+                   provider="adyen",
+                   provider_ref=psp_reference,
+                   provider_event_id=psp_reference
                 )
-                 tx.status = "completed"
-                 tx.state = "completed"
-                 session.add(tx)
-                 await session.commit()
-             else:
-                 tx.status = "failed"
-                 tx.state = "failed"
-                 session.add(tx)
-                 await session.commit()
+                tx.status = "completed"
+                tx.state = "completed"
+                session.add(tx)
+                await session.commit()
+            else:
+                tx.status = "failed"
+                tx.state = "failed"
+                session.add(tx)
+                await session.commit()
 
         # PAYOUT-REAL-001: Handle Payout Webhooks
         elif event_code == "PAYOUT_THIRDPARTY":
