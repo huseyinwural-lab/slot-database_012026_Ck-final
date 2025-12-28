@@ -5,7 +5,7 @@ import pytest_asyncio
 from sqlmodel import select
 
 from app.models.sql_models import AdminUser, Tenant
-from app.utils.auth import create_access_token
+from jose import jwt
 
 
 def _token(*, admin_id: str, email: str, tenant_id: str, role: str) -> str:
