@@ -374,7 +374,7 @@ async def test_trigger_webhook(
         attempt = (await session.execute(stmt)).scalars().first()
         
         if not attempt:
-             raise HTTPException(status_code=404, detail="Payout Attempt not found")
+            raise HTTPException(status_code=404, detail="Payout Attempt not found")
              
         # Mock Adyen sends merchantReference = "payout_{attempt_id}"
         # So we use that to mimic the real webhook payload
