@@ -33,23 +33,9 @@ def _is_sqlite_url(url: str) -> bool:
     return driver.startswith("sqlite")
 
 
-def _redis_connectable(redis_url: str) -> bool:
-    parsed = urlparse(redis_url)
-    host = parsed.hostname
-    port = parsed.port or 6379
-    if not host:
-        return False
-
-    timeout = 2
+async def _redis_connectable(redis_url: str) -> bool:
     try:
-        sock = socket.create_connection((host, port), timeout=timeout)
-        try:
-            if parsed.scheme == "rediss":
-                ctx = ssl.create_default_context()
-                sock = ctx.wrap_socket(sock, server_hostname=host)
-            return True
-        finally:
-            sock.close()
+        return await redis_ping(redis_url)
     except Exception:
         return False
 
