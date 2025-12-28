@@ -59,31 +59,10 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 def _get_sync_url(async_url: str) -> str:
-    """Normalize async URLs (aiosqlite/asyncpg) to sync drivers for Alembic.
+    """Normalize application DB URL into a synchronous URL for Alembic."""
 
-    Alembic uses synchronous DB drivers under the hood. This helper ensures that
-    we can point migrations at the same database as the async application layer
-    without requiring async drivers in the migration context.
-    """
-    import os
-    # P1: Explicitly check for SYNC URL env var first (Best practice for CI/Prod stability)
-    env_sync_url = os.environ.get("DATABASE_URL_SYNC")
-    if env_sync_url:
-        return env_sync_url
-
-    url = make_url(async_url)
-    drivername = url.drivername
-
-    if drivername.endswith("+aiosqlite"):
-        url = url.set(drivername="sqlite")
-    elif drivername.endswith("+asyncpg"):
-        # Explicitly use psycopg2 for PostgreSQL sync operations
-        url = url.set(drivername="postgresql+psycopg2")
-    elif drivername == "postgresql":
-        # Ensure driver is set if just 'postgresql'
-        url = url.set(drivername="postgresql+psycopg2")
-
-    return str(url)
+    # Prefer explicit sync URL if provided.
+    return derive_sync_database_url(database_url=async_url, sync_database_url=settings.sync_database_url)
 
 
 def run_migrations_online() -> None:
