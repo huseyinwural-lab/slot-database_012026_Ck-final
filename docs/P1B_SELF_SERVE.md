@@ -166,3 +166,117 @@ Keep DB/Redis checks bounded (e.g. ~0.5–2s). In allowlist/VPC/DNS failures, yo
 If Steps 1–3 are satisfied (and optionally Step 4), P1-B is considered **Go** from a deployment-readiness perspective.
 
 Next (optional): standardize a one-page closure report template (“evidence checklist + outputs + timestamps”).
+
+---
+
+## Evidence Output Template (Audit Trail)
+
+> Goal: provide a compact, reproducible evidence trail without leaking secrets.
+> Paste outputs in this structure. Mask credentials and sensitive hosts as per rules above.
+
+### Metadata
+- Date (UTC): 2025-__-__T__ :__ :__Z
+- Environment: staging | prod | ci
+- Service version: $(curl -sS http://localhost:8001/api/version | head -c 200)
+- Git SHA (if available): ________
+- Runner/Host (masked): ________
+- Operator: ________ (optional)
+
+---
+
+### Step 1 — External Migration Gate (Postgres)
+
+**Command**
+```bash
+cd /app/backend
+export ENV=staging
+export CI_STRICT=1
+export DATABASE_URL='postgresql+asyncpg://user:***@host:5432/db'
+export REDIS_URL='redis://:***@host:6379/0'
+
+alembic upgrade head
+echo "EXIT_CODE=$?"
+alembic current
+echo "EXIT_CODE=$?"
+```
+
+**Exit Codes**
+- alembic upgrade head: EXIT_CODE=0|non-0
+- alembic current: EXIT_CODE=0|non-0
+
+**Output (first/last lines)**
+- upgrade head (first 10 lines):
+  - ...
+- upgrade head (last 10 lines):
+  - ...
+- current:
+  - ...
+
+---
+
+### Step 2 — Runtime Ready Gate (DB + Redis)
+
+**Command**
+```bash
+curl -sS -i http://localhost:8001/api/ready
+echo "EXIT_CODE=$?"
+curl -sS -i http://localhost:8001/api/version
+echo "EXIT_CODE=$?"
+```
+
+**Expected**
+- /api/ready: HTTP 200
+- Response includes dependencies.database=connected, dependencies.redis=connected
+- If present: dependencies.migrations=head (or equivalent)
+
+**Output (full)**
+- /api/ready:
+  - ...
+- /api/version:
+  - ...
+
+---
+
+### Step 3 — Negative Proof (Redis broken => Ready 503)
+
+**Command**
+```bash
+export REDIS_URL='redis://:***@127.0.0.1:1/0'
+# restart service if required by your runtime
+curl -sS -i http://localhost:8001/api/ready
+echo "EXIT_CODE=$?"
+```
+
+**Expected**
+- /api/ready: HTTP 503
+- dependencies.redis=unreachable (or equivalent)
+
+**Output (full)**
+- /api/ready:
+  - ...
+
+---
+
+### Optional Step 4 — Fail-fast (strict mode, no listener)
+
+**Command**
+```bash
+cd /app/backend
+export CI_STRICT=1
+unset REDIS_URL
+pytest -q backend/tests/test_runtime_failfast_redis_uvicorn.py
+echo "EXIT_CODE=$?"
+```
+
+**Expected**
+- EXIT_CODE=0
+
+**Output**
+- ...
+
+---
+
+## Implementation Notes (small but valuable)
+- Always fill the “Service version” field — it closes the loop on “which build produced this evidence?”.
+- Calling out `dependencies.migrations` in Step 2 helps catch migration drift at runtime.
+- This template is artifact-friendly: you can store it as a CI artifact without secrets.
