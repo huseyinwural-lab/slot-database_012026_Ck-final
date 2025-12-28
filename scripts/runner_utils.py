@@ -43,7 +43,8 @@ def get_env_config():
         if not config["ADMIN_PASS"]: missing.append("BOOTSTRAP_OWNER_PASSWORD")
         
         if missing:
-            logger.critical(f"[CI_STRICT] Missing required env vars: {', '.join(missing)}")
+            # We print directly to stderr because logging might be buffered or redirected
+            print(f"[CI_STRICT] Missing required env vars: {', '.join(missing)}", file=sys.stderr)
             sys.exit(2) # Config Error
 
     # Fallbacks for non-strict mode
@@ -82,7 +83,10 @@ def sanitize_log(data):
             for pat in sensitive_patterns:
                 if pat in data:
                     parts = data.split(pat)
-                    return parts[0] + pat + "***REDACTED***" + (parts[1][20:] if len(parts[1]) > 20 else "")
+                    # Simple masking logic: keep pattern, redact rest or fixed length
+                    # Be careful not to infinite loop if multiple occurrences
+                    # Just masking the first occurrence as proof of concept for simple logs
+                    return parts[0] + pat + "***REDACTED***" 
             return data
             
     if isinstance(data, dict):
