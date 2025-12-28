@@ -223,3 +223,26 @@ async def test_same_tenant_insufficient_role_403(client, seeded):
     )
 
     assert r.status_code == 403, r.text
+
+
+
+@pytest.mark.asyncio
+async def test_transactions_list_wrong_tenant_empty_all_pages(client, seeded):
+    # Critical: finance/ledger list endpoints must not leak across tenants.
+    for url in (
+        "/api/v1/finance/transactions?page=1&page_size=50",
+        "/api/v1/finance/transactions?page=2&page_size=50",
+    ):
+        r = await client.get(
+            url,
+            headers={"Authorization": f"Bearer {seeded['tenant_token']}"},
+        )
+
+        assert r.status_code == 200, r.text
+        body = r.json()
+        items = body.get("items") or []
+        assert items == [], f"Expected empty items for wrong tenant. url={url}"
+
+        meta = body.get("meta") or {}
+        if "total" in meta and meta.get("total") is not None:
+            assert meta.get("total") == 0, f"Expected meta.total==0 for wrong tenant. url={url}"
