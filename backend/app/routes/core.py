@@ -150,6 +150,34 @@ async def update_player(
     await session.commit()
     return {"message": "Player updated"}
 
+
+
+@router.delete("/players/{player_id}")
+async def disable_player(
+    player_id: str,
+    request: Request,
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    """Soft delete a player (disable).
+
+    Tenant boundary: wrong tenant -> 404.
+    """
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    stmt = select(Player).where(Player.id == player_id, Player.tenant_id == tenant_id)
+    res = await session.execute(stmt)
+    player = res.scalars().first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    player.status = "disabled"
+    session.add(player)
+    await session.commit()
+
+    return {"message": "Player disabled"}
+
 # --- FINANCE ---
 @router.get("/finance/transactions", response_model=dict)
 async def get_transactions(
