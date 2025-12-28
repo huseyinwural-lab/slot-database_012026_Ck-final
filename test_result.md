@@ -76,3 +76,15 @@
         - ✅ Config snapshot logging verified - only logs host/port/dbname/sslmode/tls, NO secrets leaked
         - ✅ Alembic env.py correctly imports and uses `derive_sync_database_url` for offline migrations
         - ✅ Bootstrap auth smoke test - login fails as expected (bootstrap not enabled in this environment)
+
+---
+
+## P3 Tenant Isolation (Legacy test) — Iteration 2025-12-28
+- **Status**: ✅ FIXED (deterministic)
+- **Change**: Rewrote `backend/tests/test_tenant_isolation.py` to run **in-process** using the existing ASGI `client` fixture (no dependency on a running server, no password-based bootstrap).
+- **Policy aligned**:
+    - Tenant boundary → **404** (resource not found)
+    - Role boundary → **403** (forbidden)
+    - List endpoints → 200 with filtered/empty results (implicitly enforced elsewhere)
+- **Verification**:
+    - `pytest -q backend/tests/test_tenant_isolation.py` → **PASSED**
