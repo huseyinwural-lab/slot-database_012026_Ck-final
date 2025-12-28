@@ -284,28 +284,28 @@ async def test_trigger_webhook(
             raise HTTPException(status_code=404, detail="Payout Attempt not found for this TX")
 
         if success:
-             if tx and tx.status != "completed":
-                 await apply_wallet_delta_with_ledger(
-                    session,
-                    tenant_id=tx.tenant_id,
-                    player_id=tx.player_id,
-                    tx_id=tx.id,
-                    event_type="withdrawal_succeeded",
-                    delta_available=0.0,
-                    delta_held=-tx.amount, 
-                    currency=tx.currency,
-                    idempotency_key=f"adyen:{psp_reference}:payout",
-                    provider="adyen",
-                    provider_ref=psp_reference,
-                    provider_event_id=psp_reference
+            if tx and tx.status != "completed":
+                await apply_wallet_delta_with_ledger(
+                   session,
+                   tenant_id=tx.tenant_id,
+                   player_id=tx.player_id,
+                   tx_id=tx.id,
+                   event_type="withdrawal_succeeded",
+                   delta_available=0.0,
+                   delta_held=-tx.amount, 
+                   currency=tx.currency,
+                   idempotency_key=f"adyen:{psp_reference}:payout",
+                   provider="adyen",
+                   provider_ref=psp_reference,
+                   provider_event_id=psp_reference
                 )
-                 tx.status = "completed"
-                 tx.state = "paid"
-                 attempt.status = "success"
-                 session.add(tx)
-                 session.add(attempt)
-                 await session.commit()
-                 return {"status": "simulated_payout_success"}
+                tx.status = "completed"
+                tx.state = "paid"
+                attempt.status = "success"
+                session.add(tx)
+                session.add(attempt)
+                await session.commit()
+                return {"status": "simulated_payout_success"}
         else:
              if tx:
                  tx.status = "payout_failed"
