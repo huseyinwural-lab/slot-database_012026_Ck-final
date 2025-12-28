@@ -75,6 +75,7 @@ services:
       - LOG_FORMAT=plain
     volumes:
       - ./backend:/app
+    profiles: ["external"]
 
   # 🏢 Admin Frontend (B2B)
   frontend-admin:
