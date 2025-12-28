@@ -134,6 +134,6 @@
     - `pytest tests/test_webhook_security_stripe.py`: **PASSED** (2/2 tests)
     - `pytest tests/test_p0_webhook_hmac_generic.py`: **PASSED** (2/2 tests) - Fixed AsyncClient API usage
     - `pytest tests/test_p0_adyen_hmac_verification.py`: **PASSED** (2/2 tests)
-    - `pytest tests/test_p0_kyc_mock_gating.py`: **PASSED** (1/1 tests) - Accepts 403/404 for feature gating
+    - `pytest tests/test_p0_kyc_mock_gating.py`: **PASSED** (1/1 tests) - Accepts 403/404 (feature flag vs mock gating order)
     - `pytest tests/test_config_validation.py`: **PASSED** (4/4 tests) - Fixed prod validation requirements
     - **Smoke Test**: `python -c "import server"` **PASSED** - Backend imports successfully
