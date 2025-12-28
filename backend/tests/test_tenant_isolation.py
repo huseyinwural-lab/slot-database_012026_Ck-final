@@ -246,3 +246,40 @@ async def test_transactions_list_wrong_tenant_empty_all_pages(client, seeded):
         meta = body.get("meta") or {}
         if "total" in meta and meta.get("total") is not None:
             assert meta.get("total") == 0, f"Expected meta.total==0 for wrong tenant. url={url}"
+
+
+
+@pytest.mark.asyncio
+async def test_player_update_wrong_tenant_404(client, seeded):
+    r = await client.put(
+        f"/api/v1/players/{seeded['player_id']}",
+        json={"username": "should_not_update"},
+        headers={"Authorization": f"Bearer {seeded['tenant_token']}"},
+    )
+    assert r.status_code == 404, r.text
+
+
+@pytest.mark.asyncio
+async def test_player_disable_wrong_tenant_404(client, seeded):
+    r = await client.delete(
+        f"/api/v1/players/{seeded['player_id']}",
+        headers={"Authorization": f"Bearer {seeded['tenant_token']}"},
+    )
+    assert r.status_code == 404, r.text
+
+
+@pytest.mark.asyncio
+async def test_player_disable_same_tenant_200_and_status_disabled(client, seeded):
+    # Owner is in default_casino tenant, where seeded player exists.
+    r = await client.delete(
+        f"/api/v1/players/{seeded['player_id']}",
+        headers={"Authorization": f"Bearer {seeded['owner_token']}"},
+    )
+    assert r.status_code == 200, r.text
+
+    r2 = await client.get(
+        f"/api/v1/players/{seeded['player_id']}",
+        headers={"Authorization": f"Bearer {seeded['owner_token']}"},
+    )
+    assert r2.status_code == 200, r2.text
+    assert r2.json().get("status") == "disabled"
