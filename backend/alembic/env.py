@@ -63,6 +63,11 @@ def _get_sync_url(async_url: str) -> str:
     we can point migrations at the same database as the async application layer
     without requiring async drivers in the migration context.
     """
+    import os
+    # P1: Explicitly check for SYNC URL env var first (Best practice for CI/Prod stability)
+    env_sync_url = os.environ.get("DATABASE_URL_SYNC")
+    if env_sync_url:
+        return env_sync_url
 
     url = make_url(async_url)
     drivername = url.drivername
@@ -70,7 +75,11 @@ def _get_sync_url(async_url: str) -> str:
     if drivername.endswith("+aiosqlite"):
         url = url.set(drivername="sqlite")
     elif drivername.endswith("+asyncpg"):
-        url = url.set(drivername="postgresql")
+        # Explicitly use psycopg2 for PostgreSQL sync operations
+        url = url.set(drivername="postgresql+psycopg2")
+    elif drivername == "postgresql":
+        # Ensure driver is set if just 'postgresql'
+        url = url.set(drivername="postgresql+psycopg2")
 
     return str(url)
 
