@@ -3,7 +3,6 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 import uuid
 
-from fastapi import Query
 
 from sqlmodel import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
