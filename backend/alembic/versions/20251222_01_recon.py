@@ -1,6 +1,6 @@
 """reconciliation_findings table
 
-Revision ID: 20251222_01_reconciliation_findings
+Revision ID: 20251222_01_recon
 Revises: 
 Create Date: 2025-12-22
 
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "20251222_01_reconciliation_findings"
+revision = "20251222_01_recon"
 down_revision = "abcd1234_ledgertables"
 branch_labels = None
 depends_on = None
