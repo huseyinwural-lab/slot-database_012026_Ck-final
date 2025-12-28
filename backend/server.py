@@ -49,12 +49,9 @@ if settings.env in {"prod", "staging"} or is_ci_strict:
 
     if not (os.getenv("REDIS_URL") or "").strip():
         raise RuntimeError("REDIS_URL must be set (prod/staging or CI_STRICT)")
-    # Redis is critical: fail-fast if unreachable.
-    # NOTE: This uses a lightweight async PING under the hood.
-    # Since we are at import-time (sync), we validate only presence here.
-    # Runtime readiness will enforce actual connectivity.
-    # (Avoids blocking import with an event loop bootstrap.)
-    pass
+    # Redis is critical. We validate reachability at readiness.
+    # At import-time (sync), we only enforce presence to avoid event-loop bootstrap here.
+    # (Runtime /api/ready will report redis=unreachable and return 503.)
 
 # Fail-fast for prod/staging secrets
 if settings.env in {"prod", "staging"}:
