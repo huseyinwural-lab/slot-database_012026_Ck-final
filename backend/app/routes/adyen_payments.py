@@ -169,21 +169,21 @@ async def adyen_webhook(
             tx_id = req_item.get("merchantReference") # We sent "payout_{attempt_id}"
             success = req_item.get("success") == "true"
             psp_reference = req_item.get("pspReference")
-             
-             # Extract Attempt ID from reference
-             # format: payout_{attempt_id}
-             if not tx_id or not tx_id.startswith("payout_"):
-                 logger.warning(f"Adyen Webhook: Invalid payout reference {tx_id}")
-                 continue
-                 
-             attempt_id = tx_id.replace("payout_", "")
-             
-             # Find Attempt
-             from app.models.sql_models import PayoutAttempt
-             attempt = await session.get(PayoutAttempt, attempt_id)
-             if not attempt:
-                 logger.warning(f"Adyen Webhook: PayoutAttempt {attempt_id} not found")
-                 continue
+            
+            # Extract Attempt ID from reference
+            # format: payout_{attempt_id}
+            if not tx_id or not tx_id.startswith("payout_"):
+                logger.warning(f"Adyen Webhook: Invalid payout reference {tx_id}")
+                continue
+                
+            attempt_id = tx_id.replace("payout_", "")
+            
+            # Find Attempt
+            from app.models.sql_models import PayoutAttempt
+            attempt = await session.get(PayoutAttempt, attempt_id)
+            if not attempt:
+                logger.warning(f"Adyen Webhook: PayoutAttempt {attempt_id} not found")
+                continue
                  
              # Find Transaction
              tx = await session.get(Transaction, attempt.withdraw_tx_id)
