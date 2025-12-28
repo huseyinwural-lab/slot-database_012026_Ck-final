@@ -60,10 +60,9 @@ async def get_kyc_queue(
     request: Request,
     session: AsyncSession = Depends(get_session),
     _ = Depends(feature_required("can_manage_kyc")),
-    _kyc_mock_guard()
-
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    _kyc_mock_guard()
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     
     stmt = select(Player).where(Player.tenant_id == tenant_id, Player.kyc_status == "pending")
