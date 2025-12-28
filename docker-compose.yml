@@ -91,6 +91,23 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    profiles: ["localdb"]
+
+  # 🏢 Admin Frontend (B2B) — EXTERNAL mode
+  frontend-admin-external:
+    build: ./frontend
+    container_name: casino_admin_external
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8001
+    depends_on:
+      - backend-external
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    profiles: ["external"]
 
   # 🎰 Player Frontend (B2C)
   frontend-player:
@@ -106,6 +123,23 @@ services:
     volumes:
       - ./frontend-player:/app
       - /app/node_modules
+    profiles: ["localdb"]
+
+  # 🎰 Player Frontend (B2C) — EXTERNAL mode
+  frontend-player-external:
+    build: ./frontend-player
+    container_name: casino_player_external
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - VITE_API_URL=http://localhost:8001/api/v1
+    depends_on:
+      - backend-external
+    volumes:
+      - ./frontend-player:/app
+      - /app/node_modules
+    profiles: ["external"]
 
 volumes:
   postgres_data:
