@@ -1,8 +1,9 @@
 version: '3.8'
 
 services:
-  # 🐘 PostgreSQL Database
+  # 🐘 PostgreSQL Database (LOCAL ONLY)
   postgres:
+    profiles: ["localdb"]
     image: postgres:15-alpine
     container_name: casino_postgres
     restart: always
@@ -15,6 +16,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: casino_db
 
+  # 🧱 Redis (LOCAL ONLY)
+  redis:
+    profiles: ["localdb"]
+    image: redis:7-alpine
+    container_name: casino_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
   # 🐍 Backend (API)
   backend:
     build: ./backend
@@ -22,10 +32,40 @@ services:
     restart: always
     ports:
       - "8001:8001"
-    depends_on:
-      - postgres
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
+      # External mode: set these in your environment/.env
+      - DATABASE_URL=${DATABASE_URL}
+      - SYNC_DATABASE_URL=${SYNC_DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+
+      - ENV=dev
+      - DEBUG=True
+      - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=HS256
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=plain
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+    profiles: ["localdb"]
+
+  backend-external:
+    build: ./backend
+    container_name: casino_backend_external
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      # External mode: requires DATABASE_URL and REDIS_URL
+      - DATABASE_URL=${DATABASE_URL}
+      - SYNC_DATABASE_URL=${SYNC_DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+
       - ENV=dev
       - DEBUG=True
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
