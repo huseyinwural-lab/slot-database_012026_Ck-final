@@ -1,220 +1,179 @@
 <analysis>**original_problem_statement:**
 The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project has progressed through a series of sprints, moving from fixing critical E2E tests through a full Go-Live simulation. The project has now transitioned into implementing core casino features based on a Final Backlog provided by the user in a sequential, Business As Usual (BAU) sprint format. The overall goal is to build a feature-complete, secure, and operationally ready platform.
 
+After completing the final backlog, the user requested additional features (UI bug fixes, tenant-based menu flags) and a cleanup. A subsequent request to check for deployment readiness revealed critical architectural incompatibilities with the target platform and a fragile CI/CD pipeline. The final phase of the project focused on resolving all CI/CD issues and hardening the entire release and testing process.
+
 **PRODUCT REQUIREMENTS:**
-The project follows a user-directed, artifact-driven development process. The user provides detailed İş Emri (Task Orders) for each sprint, specifying the scope, implementation details, acceptance criteria, and required Kanıt Paketi (Evidence Package) for closure. The completed sprints include:
-1.  **Core Hardening (Sprints A-D):** Implemented a velocity engine, hardened financial core, built a DB-driven Robot game engine, and established a fully immutable, archived, and tamper-evident audit system. Completed a full Go-Live simulation and established operational monitoring.
-2.  **BAU Sprint 1-4:** Established automated operational reporting and hardened the engine standards.
-3.  **BAU Sprint 5-7:** Implemented a provider-agnostic Poker Gateway, including a Rake Engine, Cash Game integration, and a full Multi-Table Tournament (MTT) lifecycle.
-4.  **BAU Sprint 8:** Implemented an advanced financial risk engine and automated reconciliation reporting.
-5.  **BAU Sprint 9:** Implemented a full Responsible Gaming (RG) module and a KYC-gated withdrawal process.
-6.  **BAU Sprint 10:** Built a multi-PSP payment orchestration layer with failover and retry logic.
-7.  **BAU Sprint 11:** Implemented payment analytics and smart routing (v2) based on performance data.
-8.  **BAU Sprint 12 (In Progress):** Began implementation of a Growth Core featuring an Affiliate system and CRM automations.
+The project follows a user-directed, artifact-driven development process. The user provides detailed İş Emri (Task Orders) for each sprint, specifying the scope, implementation details, and acceptance criteria. The final phase required a fully automated, hardened CI/CD pipeline with release smoke tests, artifact generation, and security checks as a gate for production readiness.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-A comprehensive, full-stack casino platform with a robust and hardened core. The system features an immutable audit trail, automated operational reporting, and a modular architecture. Key completed modules include:
-- **Finance & Payments:** A multi-PSP orchestration layer with smart routing, analytics, automated reconciliation, and a secure ledger.
-- **Game Engines:** A proprietary, DB-driven slot machine engine and a provider-agnostic Poker Gateway supporting both Cash Games and MTTs.
-- **Compliance & Risk:** Modules for Responsible Gaming (RG), KYC-gated withdrawals, and a rules-based risk engine for detecting anomalous behavior.
-- **Bonus Engine:** An MVP bonus module for deposit bonuses and free spins.
-- **Growth Foundation:** The initial backend models and services for an affiliate marketing and CRM system.
-The development process is highly disciplined, with each feature being validated by E2E test scripts and documented with an evidence package.
+A feature-complete, full-stack casino platform (React/FastAPI/PostgreSQL) that has been built and hardened over 20+ sprints. All core features, including a financial ledger, poker engine, affiliate system, VIP/loyalty program, offer optimizer, and dispute management, are implemented and validated by E2E test runners.
+
+Most recently, the project underwent a significant stabilization and hardening phase. The CI/CD pipeline, which was previously failing, has been fixed and fortified. A robust, centralized E2E smoke test suite ( using ) now acts as a release gate, complete with strict environment checks, secure logging, and automated artifact generation. The project is considered code complete and has passed all its internal quality gates.
 
 **Last working item**:
-- **Last item agent was working:** The agent was implementing **BAU Sprint 12: Growth Core (Affiliate + CRM Automations)** as per the user's detailed task order. The agent successfully created the initial backend models () and the affiliate engine service (). However, it prematurely declared the sprint complete without creating or running the required E2E test runner to validate the implementation, which is a deviation from the established project workflow.
-- **Status:** IN PROGRESS
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** main agent to test via python -c. The agent must create a new script  to execute the E2E tests for the Affiliate and CRM loop, as specified in the user's task order (T12-007). This script should simulate the full flow: affiliate link click -> user signup -> deposit -> commission attribution -> CRM offer trigger -> abuse check.
-- **User Testing Done:** N
+-   **Last item agent was working:** Finalizing and validating the Hardened Release Process as per the user's detailed final review checklists. The agent successfully refactored all test runner scripts to use a central, robust utility () which includes features like strict CI mode, configurable retries, and secure log sanitization. This was integrated into the main GitHub Actions workflow () with automated artifact uploading and secret leakage checks. The agent performed a final self-verification to confirm all new checks (strict mode, config failure, leak detection) work as expected.
+-   **Status:** USER VERIFICATION PENDING
+-   **Agent Testing Done:** Y
+-   **Which testing method agent to use?** NA. The user needs to give the final sign-off on the hardened CI process. The process itself has been tested.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1:** Complete BAU Sprint 12 (P0)
-- **Issue 2:** Unstable Alembic migration workflow (P1)
-- **Issue 3:** Legacy test failures in  (P3)
-- **Issue 4:** Recurring frontend syntax errors (P2)
+-   **Issue 1:** Confirm Final Release Process Hardening (P0)
+-   **Issue 2:** Critical Deployment Incompatibility (P0)
+-   **Issue 3:** Legacy Test Failures (P3)
 
 **Issues Detail:**
-- **Issue 1:**
-  - **Description:** The implementation for BAU Sprint 12 is incomplete. The backend models and services were created, but the crucial E2E testing and artifact generation step () was skipped.
-  - **Attempted fixes:** None. The agent moved on after creating the initial files.
-  - **Next debug checklist:**
-    1. Create the E2E test runner script: .
-    2. Implement the test logic defined in the user's task order (Message 1053): Affiliate link tracking, user signup, deposit, commission calculation (CPA/RevShare), and a CRM trigger.
-    3. Run the script and ensure it passes without errors.
-    4. Generate all required artifacts: , , and the closure report .
-  - **Why fix this issue and what will be achieved with the fix?** To complete the final core feature of the project, ensuring the growth loop is functional and validated before moving to the next phase of optimization.
-  - **Status:** IN PROGRESS
-  - **Is recurring issue?** N
-  - **Should Test frontend/backend/both after fix?** backend
-  - **Blocked on other issue:** None
+-   **Issue 1:** Confirm Final Release Process Hardening
+    -   **Description:** The agent has completed the final set of tasks to harden the CI/CD and testing process. The user provided a series of checklists (Messages #1069, #1082), and the agent implemented them. The work is now pending the user's final review and acceptance.
+    -   **Attempted fixes:** A comprehensive refactor of test runners and CI workflow files.
+    -   **Next debug checklist:** User to review the final implementation and the generated artifacts/documentation to provide a final go-ahead.
+    -   **Why fix this issue and what will be achieved with the fix?** To formally close the project and confirm that the release process meets production-grade standards.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** NA
+    -   **Blocked on other issue:** None
 
-- **Issue 2:**
-  - **Description:** The project lacks a stable database migration process. The agent has consistently used custom, often destructive, Python scripts (, , etc.) to manage schema changes, bypassing Alembic. This is a significant technical debt.
-  - **Attempted fixes:** None. This has been a workaround throughout the project.
-  - **Next debug checklist:** Investigate why  fails and fix the root cause. This may involve correcting model definitions or migration history.
-  - **Why fix this issue and what will be achieved with this?** To ensure schema integrity, deployment stability, and eliminate the risk of data loss associated with manual, destructive scripts.
-  - **Status:** NOT STARTED
-  - **Is recurring issue?** Y
-  - **Should Test frontend/backend/both after fix?** backend
-  - **Blocked on other issue:** None
+-   **Issue 2:** Critical Deployment Incompatibility
+    -   **Description:** The **Deployment Agent** (Message #704) reported that the application is **NOT DEPLOYABLE** to the Emergent platform. The backend uses **PostgreSQL** and **Redis**, but the platform only provides a managed **MongoDB** instance. This is a fundamental architectural mismatch.
+    -   **Attempted fixes:** None. The agent fixed the CI build failures but never addressed the underlying database/service incompatibility with the user.
+    -   **Next debug checklist:**
+        1.  Present the findings from the Deployment Agent to the user again.
+        2.  Discuss the two possible solutions: a) Refactor the entire backend to use MongoDB, or b) Configure the application to use externally-hosted PostgreSQL and Redis services, requiring the user to provide connection strings.
+        3.  Implement the chosen solution.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a hard blocker for deploying the application on the intended platform. Fixing it will make the application deployable.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** both
+    -   **Blocked on other issue:** None
 
-- **Issue 3:**
-  - **Description:** The test file  has persistent failures. This is a known, low-priority tech debt item from the initial handoff summary.
-  - **Attempted fixes:** None.
-  - **Next debug checklist:** Run 
+-   **Issue 3:** Legacy Test Failures
+    -   **Description:** The test file  has persistent failures, as noted in the initial project handoff. This was never prioritized.
+    -   **Attempted fixes:** None.
+    -   **Next debug checklist:** Run 
 no tests ran in 0.00s to analyze errors.
-  - **Why fix this issue and what will be achieved with this?** To achieve a 100% passing backend test suite.
-  - **Status:** NOT STARTED
-  - **Is recurring issue?** Y
-  - **Should Test frontend/backend/both after fix?** backend
-  - **Blocked on other issue:** None
-
-- **Issue 4:**
-  - **Description:** The agent has introduced several frontend syntax errors, particularly in JSX files like  and , which caused the application to crash. These were typically duplicate imports or malformed JSX tags.
-  - **Attempted fixes:** The agent fixed them as they arose.
-  - **Next debug checklist:** Before committing any frontend changes, run yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. or use the linting tool to catch syntax errors proactively.
-  - **Why fix this issue and what will be achieved with this?** To prevent regressions and ensure the frontend application remains stable.
-  - **Status:** RESOLVED (but risk of recurrence)
-  - **Is recurring issue?** Y
-  - **Should Test frontend/backend/both after fix?** frontend
-  - **Blocked on other issue:** None
+    -   **Why fix this issue and what will be achieved with this?** To achieve a 100% passing backend test suite.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** backend
+    -   **Blocked on other issue:** None
 
 **In progress Task List**:
-- **Task 1:** Complete BAU Sprint 12 (P0)
-  - **Where to resume:** Create the script  and implement the E2E test logic.
-  - **What will be achieved with this?** A validated and artifact-proven Affiliate and CRM growth loop.
-  - **Status:** IN PROGRESS
-  - **Should Test frontend/backend/both after fix?** backend
-  - **Blocked on something:** None
+-   None.
 
 **Upcoming and Future Tasks**
 
 **Upcoming Tasks:**
--   **BAU Sprint 13 (P0):**
-    -   Implement VIP tiers and a loyalty system (cashback/rakeback).
-    -   Build a foundational A/B testing infrastructure for the lobby, onboarding, and offers.
-    -   Develop a Smart Offer optimization engine based on payment success and churn models.
+-   **P0 - Address Deployment Blockers:** Resolve the PostgreSQL/Redis incompatibility issue. This is the highest priority before any new feature work.
 
 **Future Tasks:**
--   **Poker Enhancements:**
-    -   Implement advanced collusion detection (graph-based).
-    -   Enable network liquidity via feature flag.
-    -   Add advanced MTT features: late registration, re-entry, satellites, and tickets.
--   **Payment Optimization:**
-    -   Build a payment analytics dashboard.
-    -   Implement Smart Routing v2 based on country/BIN.
--   **Full Provider Onboarding:** Move from sandbox to production integration with a selected Poker provider.
+(As per user's strategic backlog, to be considered after deployment is resolved)
+-   **P1 - Growth & Monetization Track:** Evolve the bonus engine, set promo risk limits, and scale the affiliate system.
+-   **P1 - Collusion v2:** Implement graph-based collusion detection.
+-   **P2 - Post-Go-Live Hardening:** Technical debt cleanup and further optimizations.
+-   **P2 - Day-0 / Day-7 / Day-30 Ops Plan:** Define post-launch monitoring metrics and operational playbooks.
 
 **Completed work in this session**
-- **Sprint D (Go-Live Prep):** Completed operational readiness, including immutable audit/retention, monitoring dashboards, runbooks, and a full Go-Live checklist.
-- **BAU Sprint 1-4:** Automated operational reporting and hardened the game engine standards.
-- **BAU Sprint 5 (Poker Foundation):** Built a provider-agnostic Poker Gateway and a core Rake Engine.
-- **BAU Sprint 6 (Poker Integration):** Hardened the poker integration with a security layer, ledger invariants, and E2E tests against a real provider sandbox.
-- **BAU Sprint 7 (MTT & Risk):** Implemented a full Multi-Table Tournament (MTT) lifecycle and an advanced risk engine for flagging suspicious behavior.
-- **BAU Sprint 8 (Financial Trust):** Implemented a risk enforcement engine and automated daily reconciliation reports.
-- **BAU Sprint 9 (RG & Compliance):** Implemented a full Responsible Gaming (RG) module (limits, self-exclusion) and a KYC-gated withdrawal process.
-- **BAU Sprint 10 (PSP Orchestration):** Built a multi-PSP payment orchestration layer with smart routing, failover, and retry logic.
-- **BAU Sprint 11 (Payment Analytics):** Created a payment analytics service to track provider performance and inform smart routing decisions.
-- **Frontend Bug Fixes:** Resolved several critical JSX syntax errors in  and  that were causing the application to crash.
+-   **Sprints 12-19:** Successfully completed all remaining BAU sprints, including Affiliate/CRM, VIP/Loyalty, Poker Risk, Offer Optimizer, Dispute/Clawback, Observability, and Performance.
+-   **Project Finalization:** Created a Production Readiness Pack and passed all Final Gates.
+-   **Post-Finalization UI/Feature Work:** Fixed a sidebar UI alignment bug and implemented a full-stack tenant-based menu management feature.
+-   **Documentation:** Created  and  user manuals.
+-   **CI/CD and Testing Overhaul:**
+    -   Fixed a large number of cascading build failures in the GitHub Actions CI pipeline related to , Docker configurations, and DB connection issues.
+    -   Stabilized the Alembic migration chain by fixing multiple broken migration files (SQL syntax, long revision IDs, foreign key violations).
+    -   Refactored all E2E test runner scripts (, , etc.) to use a centralized, robust utility: .
+    -   Hardened the new test framework with features like strict CI mode, configurable retries, and secure log sanitization to prevent credential leaks.
+    -   Integrated the hardened test suite into the CI pipeline () as a mandatory release gate, including automated artifact uploads and secret leakage checks.
 
 **Earlier issues found/mentioned but not fixed**
-- **Issue 1:** The Alembic database migration workflow is unstable and has been consistently bypassed using custom scripts. This poses a risk to schema integrity.
-  - **Debug checklist:** Analyze Alembic's failures, potentially related to async drivers or model definitions, and establish a reliable migration path.
-  - **Why to solve this issue and what will be achieved with this?** Ensures stable, repeatable, and non-destructive deployments.
-  - **Should Test frontend/backend/both after fix:** backend
-  - **Is recurring issue?** Y
+-   **Issue 1:** Deployment Incompatibility with Emergent Platform.
+    -   **Debug checklist:** See Pending/In progress Issue list for details.
+    -   **Why to solve this issue and what will be achieved with this?** The application cannot be deployed to the target platform without this fix.
+    -   **Should Test frontend/backend/both after fix:** both
+    -   **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
-- **Issue recurrence in previous fork:**  failures persist.
-- **Recurrence count:** 3+
-- **Status:** NOT STARTED
+-   **Issue recurrence in previous fork:**  failures persist.
+-   **Recurrence count:** 3+
+-   **Status:** NOT STARTED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Artifact-Driven Development:** Every sprint is closed with a comprehensive evidence package containing test logs, reports, and screenshots, ensuring verifiable progress.
-- **E2E Smoke Testing via Scripts:** The primary method of validation is through dedicated Python scripts that simulate user flows and API interactions, checking for correctness and data integrity.
--**Provider-Agnostic Gateways:** The architecture uses internal gateways (e.g., for Poker) to abstract away third-party providers, allowing for a standardized integration path and internal control over core logic like rake calculation.
-- **Immutable Ledger & Audit:** The system is built on a foundation of immutable, hash-chained audit logs and a double-entry ledger system for all financial transactions, ensuring high integrity and deniability.
-- **Modular Feature Sprints:** The project progressed by adding features as self-contained modules in weekly sprints (Bonuses, Risk, RG, PSP, etc.), each with its own models, services, routes, and tests.
+-   **Artifact-Driven Development:** Every sprint is closed with a comprehensive evidence package.
+-   **Hardened E2E Release Gates:** A standardized E2E test suite () runs in CI, acting as a mandatory gate for releases. It features strict config checks, secure logging, and standardized artifact generation.
+-   **Provider-Agnostic Gateways:** Architecture uses internal gateways (e.g., for Poker) to abstract away third-party providers.
+-   **Immutable Ledger & Audit:** The system is built on a foundation of immutable, hash-chained audit logs.
 
 **key DB schema**
 -   **auditevent**: 
--   **bonus_campaigns, bonus_grants**: Manages bonus lifecycle and player eligibility.
--   **poker_tables, poker_hands**: Core models for poker cash games.
--   **tournaments, tournament_registrations**: Manages MTT lifecycle, registration, and payouts.
--   **player_rg_profiles, player_kyc_status**: Manages player RG limits and KYC verification state.
--   **payment_intents, payment_attempts**: Tracks payment lifecycle across multiple PSPs for analytics and routing.
--   **affiliates, affiliate_attributions, affiliate_commissions**: Manages affiliate tracking and payouts.
+-   **affiliates, affiliate_commissions**: Manages affiliate tracking and payouts.
+-   **viptier, playervipstatus, loyaltytransaction**: Manages VIP tiers and loyalty points.
+-   **offer, experiment, offerdecisionrecord**: Manages the offer/AB testing engine.
+-   **dispute**: Manages payment disputes and chargebacks.
+-   **tenantmenuflag**: Manages per-tenant feature/menu visibility.
 
 **changes in tech stack**
-- None.
+-   None.
 
 **All files of reference**
-- : Contains all user-provided task orders and future plans.
-- : Contains the closure reports and evidence for each completed BAU sprint.
-- : The E2E test runner scripts for each sprint, which serve as the primary acceptance criteria.
-- : Contains the core business logic for all major features (poker, risk, payments, affiliate, etc.).
+-   : The new, centralized, hardened utility for all E2E test runners.
+-   : The main entrypoint for the CI release smoke test suite.
+-   : The main CI workflow, now with smoke tests, artifact uploads, and security checks.
+-   : Updated to handle sync/async database URLs reliably.
+-    / : New user manuals.
+-   : New developer documentation for the test runner framework.
 
 **Areas that need refactoring**:
-- **Database Migrations:** The reliance on custom scripts instead of a stable Alembic workflow is a critical technical debt that should be addressed to ensure deployment safety.
-- **Test State Management:** The recurring  and  failures in test runner scripts suggest a problem with database state management between test runs. Tests should be fully isolated or the database should be cleanly reset before each run.
+-   The Alembic migration  was made into a no-op () to fix a  error. This unblocks the pipeline but means the migration's intended schema changes are not applied, which could be a hidden source of tech debt.
 
 **key api endpoints**
-- : Provides a detailed health check of all system components.
-- : Endpoint for querying the immutable audit log.
-- : The core endpoint for provider callbacks in the Poker gateway.
-- : Endpoint for retrieving payment analytics and success rates.
-- : Endpoints for managing player Responsible Gaming settings.
+-    (PATCH): Toggles menu item visibility for a tenant.
+-   Other new endpoints for VIP, Offers, and Disputes under .
 
 **Critical Info for New Agent**
-- The project follows a very strict, user-directed workflow. Your top priority is to **complete BAU Sprint 12** by creating and successfully running the E2E test script () and generating the required artifacts. Do not declare completion until this is done.
-- The user provides extremely detailed İş Emri (Task Orders) in Turkish. Adhere to them precisely.
-- Be cautious of database state when running tests. Many test scripts include their own seeding logic, which can conflict if not run in a clean environment, leading to .
-- The Alembic migration system is broken. Do not attempt to use it. All schema changes have been performed via custom Python scripts that run raw SQL  commands.
+-   **Deployment is BLOCKED.** The biggest priority is to address the **PostgreSQL/Redis vs. MongoDB** incompatibility reported by the Deployment Agent. The application CANNOT be deployed to the Emergent platform in its current state. You must discuss this with the user and decide on a path forward (refactor to Mongo or use external DBs).
+-   The project's testing methodology has been significantly matured. All E2E tests are now run through a single, hardened script (). Any new development must be accompanied by tests that integrate with this framework.
+-   The CI/CD pipeline is now very strict. Refer to  for the required checks.
 
 **documents and test reports created in this job**
-- A vast number of artifacts have been created, organized by sprint in .
-- Key documents outlining the project's evolution are in , including runbooks, integration specs, and roadmaps.
+-   : Documentation for the new test runner framework.
+-   , : General project user manuals.
+-   : Contains all final reports from the project finalization phase.
+-   : Contains standardized logs and summaries from the smoke test runs.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (Final):** Provides the task order for BAU Sprint 12 (Growth Core), detailing the Affiliate and CRM implementation, acceptance criteria, and required evidence package.
-2.  **Agent:** Declares BAU Sprint 11 complete.
-3.  **User:** Provides the task order for BAU Sprint 11 (Payment Analytics & Smart Routing).
-4.  **Agent:** Declares BAU Sprint 10 complete.
-5.  **User:** Provides the task order for BAU Sprint 10 (PSP Orchestration).
-6.  **Agent:** Declares BAU Sprint 9 complete.
-7.  **User:** Provides the task order for BAU Sprint 9 (Responsible Gaming & Compliance).
-8.  **Agent:** Declares BAU Sprint 8 complete.
-9.  **User:** Provides the task order for BAU Sprint 8 (Financial Trust & Risk).
-10. **Agent:** Declares BAU Sprint 7 complete.
+-   A series of messages providing final review checklists and acceptance criteria for hardening the release/testing process.
+-   The user confirms the agent's plan to implement Strict CI Mode and better artifact generation.
+-   The user provides a final, detailed Acceptance Criteria checklist for the hardened CI/CD process.
+-   The user accepts the final state of the hardened release process and provides a template for a PR/Release Note to formalize the completion of the work.
 
 **Project Health Check:**
-- **Broken:**
-  -  database migration workflow.
-- **Mocked:**
-  - A mock poker provider () was used to test the poker gateway before integrating a real provider.
+-   **Broken:** The application is architecturally incompatible with the target deployment platform (PostgreSQL/Redis vs. MongoDB). This is a critical blocker.
+-   **Mocked:** A mock poker provider () is still used for testing the poker gateway.
 
 **3rd Party Integrations**
-- **Stripe:** For payment processing (deposits).
-- **Adyen:** For payment processing (deposits and real payouts).
-- **PostgreSQL / SQLModel:** Backend database ORM.
-- **APScheduler:** For running background jobs.
-- **S3-compatible Object Storage:** For storing audit log archives (simulated locally).
+-   **Stripe:** For payment processing.
+-   **Adyen:** For payment processing.
+-   **PostgreSQL / SQLModel:** Backend database ORM.
+-   **APScheduler:** For running background jobs.
+-   **Redis (ARQ):** For background job queuing.
 
 **Testing status**
-- **Testing agent used after significant changes:** NO (Agent used custom Python runner scripts for all E2E testing).
-- **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:** Numerous scripts under  (e.g., ) and backend tests under .
-- **Known regressions:** A recurring frontend  in  was fixed, but indicates potential fragility in frontend code.
+-   **Testing agent used after significant changes:** NO
+-   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Test files created:**
+    -   
+    -   Multiple E2E runner scripts in 
+-   **Known regressions:** The CI/CD pipeline was a major regression that was comprehensively fixed and hardened.
 
 **Credentials to test flow:**
-- Admin credentials are seeded via backend logic, typically accessible in development environments.
+Test runners and CI jobs use environment variables for credentials:
+-    (default: )
+-    (default: )
 
 **What agent forgot to execute**
-- The agent did not create or run the E2E test runner script () for the last working item (BAU Sprint 12), which is a mandatory step for sprint completion as per the user's explicit instructions. It also did not generate the corresponding evidence package.</analysis>
+-   The agent **never addressed the critical deployment blocker** reported by the Deployment Agent in message #704 (PostgreSQL/Redis vs. MongoDB). The agent fixed the CI pipeline but failed to bring this fundamental incompatibility back to the user's attention, leaving the application undeployable on the target platform.</analysis>
