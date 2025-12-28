@@ -98,18 +98,15 @@ async def adyen_webhook(
     session: AsyncSession = Depends(get_session),
     adyen: AdyenPSP = Depends(get_adyen_service)
 ):
-    """
-    Handle Adyen Webhooks (Notification).
-    """
+    """Handle Adyen Webhooks (Notification)."""
+
+    raw_body = await request.body()
     body = await request.json()
-    
-    # Signature Verification (Simplified)
-    # Adyen usually puts signature in notificationItems structure, not header
-    # But let's assume standard practice or verify using the payload content
-    # For now, we trust verify_webhook_signature stub
+
+    # Signature Verification (Adyen HMAC in additionalData.hmacSignature)
     if not adyen.verify_webhook_signature(body, ""):
-         raise HTTPException(status_code=401, detail="WEBHOOK_SIGNATURE_INVALID")
-         metrics.record_webhook_signature_failure("adyen")
+        metrics.record_webhook_signature_failure("adyen")
+        raise HTTPException(status_code=401, detail="WEBHOOK_SIGNATURE_INVALID")
     
     # Basic validation structure for Adyen
     notification_items = body.get("notificationItems", [])

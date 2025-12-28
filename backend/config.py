@@ -77,6 +77,9 @@ class Settings(BaseSettings):
     adyen_client_key: Optional[str] = None
     adyen_hmac_key: Optional[str] = None
 
+    # KYC (mock UI endpoints)
+    kyc_mock_enabled: bool = True
+
     # Audit Retention
     audit_retention_days: int = 90
     audit_export_secret: str = "change_this_to_strong_secret_for_hmac"
@@ -136,6 +139,14 @@ class Settings(BaseSettings):
                     missing.append("STRIPE_WEBHOOK_SECRET")
                 if not self.adyen_api_key:
                     missing.append("ADYEN_API_KEY")
+
+            # Webhook security (P0)
+            if not self.adyen_hmac_key:
+                missing.append("ADYEN_HMAC_KEY")
+
+            # KYC mock endpoints must be disabled in prod/staging
+            if self.kyc_mock_enabled:
+                missing.append("KYC_MOCK_ENABLED (must be false in prod/staging)")
             
             if self.audit_export_secret == "change_this_to_strong_secret_for_hmac":
                 missing.append("AUDIT_EXPORT_SECRET (must be changed)")

@@ -149,31 +149,97 @@ class AdyenPSP:
                 logger.error(f"Adyen Payout Connection Error: {str(e)}")
                 raise
 
-    def verify_webhook_signature(self, payload: Dict, signature: str) -> bool:
+    def verify_webhook_signature(self, payload: Dict, signature: str = "") -> bool:
+        """Verify Adyen webhook HMAC signature (standard notification webhooks).
+
+        Adyen provides the expected signature as:
+        - payload.notificationItems[i].NotificationRequestItem.additionalData.hmacSignature
+
+        Signing string (values only, colon-delimited):
+        pspReference:originalReference:merchantAccountCode:merchantReference:value:currency:eventCode:success
+
+        HMAC key:
+        - Typically provided by Adyen as Base64 (preferred)
+        - Some setups may provide hex; we accept both.
         """
-        Verify Adyen HMAC signature.
-        """
+
         if not settings.adyen_hmac_key:
-            # If no key configured, and not enforcing, maybe allow?
-            # But for hardening P0, we should block if key is missing in PROD.
-            if settings.env in {"prod", "production"}:
-                logger.error("Adyen HMAC key missing in production")
+            if settings.env in {"prod", "production", "staging"}:
+                logger.error("Adyen HMAC key missing in prod/staging")
                 return False
-            return True # Dev fallback
+            # Dev fallback (allows local mock / CI simulation)
+            return True
+
+        def _escape(v: object) -> str:
+            s = "" if v is None else str(v)
+            # Escape backslashes first, then colons
+            s = s.replace("\\", "\\\\")
+            s = s.replace(":", "\\:")
+            return s
+
+        def _decode_hmac_key(raw: str) -> bytes:
+            raw = (raw or "").strip()
+            if not raw:
+                return b""
+            # Adyen docs: key is base64. Accept hex as fallback.
+            try:
+                return base64.b64decode(raw, validate=True)
+            except Exception:
+                try:
+                    return bytes.fromhex(raw)
+                except Exception:
+                    return raw.encode("utf-8")
+
+        key_bytes = _decode_hmac_key(settings.adyen_hmac_key)
+        if not key_bytes:
+            logger.error("Adyen HMAC key could not be decoded")
+            return False
 
         try:
-             # Adyen signature logic is complex (serializing specific fields).
-             # For this task, we assume the 'signature' header/field matches the HMAC of certain fields.
-             # Simplified check:
-             # In real Adyen, signature is in additionalData.hmacSignature usually, not a header.
-             # But the prompt implies standard webhook verification.
-             # Let's verify 'hmacSignature' from the item against our calculation.
-             
-             # TODO: Implement full Adyen HMAC algorithm if needed.
-             # For P0/Hardening proof, checking if it is non-empty is a start, or mock check.
-             # Since I don't have the Adyen python lib installed that does this, I'll do a placeholder.
-             # Real implementation requires ordering keys, escaping chars, etc.
-             return True
+            items = payload.get("notificationItems") or []
+            if not isinstance(items, list) or not items:
+                logger.error("Adyen webhook: missing notificationItems")
+                return False
+
+            for item in items:
+                nri = (item or {}).get("NotificationRequestItem") or {}
+                additional = nri.get("additionalData") or {}
+                provided_sig = additional.get("hmacSignature") or ""
+                if not provided_sig:
+                    logger.error("Adyen webhook: missing additionalData.hmacSignature")
+                    return False
+
+                amount = nri.get("amount") or {}
+                value = amount.get("value")
+                currency = amount.get("currency")
+
+                signing_values = [
+                    _escape(nri.get("pspReference")),
+                    _escape(nri.get("originalReference")),
+                    _escape(nri.get("merchantAccountCode")),
+                    _escape(nri.get("merchantReference")),
+                    _escape(value),
+                    _escape(currency),
+                    _escape(nri.get("eventCode")),
+                    _escape(str(nri.get("success") or "").lower()),
+                ]
+                signing_str = ":".join(signing_values)
+
+                mac = hmac.new(key_bytes, signing_str.encode("utf-8"), hashlib.sha256)
+                expected_sig = base64.b64encode(mac.digest()).decode("utf-8")
+
+                if not hmac.compare_digest(expected_sig, provided_sig):
+                    logger.warning(
+                        "Adyen webhook signature mismatch",
+                        extra={
+                            "provider": "adyen",
+                            "pspReference": nri.get("pspReference"),
+                            "eventCode": nri.get("eventCode"),
+                        },
+                    )
+                    return False
+
+            return True
         except Exception as e:
             logger.error(f"Adyen Signature Verification Failed: {e}")
             return False

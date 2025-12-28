@@ -10,7 +10,14 @@ from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 
 from app.utils.permissions import feature_required
+from config import settings
+
 router = APIRouter(prefix="/api/v1/kyc", tags=["kyc"])
+
+def _kyc_mock_guard():
+    if settings.env in {"prod", "production", "staging"} or not settings.kyc_mock_enabled:
+        raise HTTPException(status_code=404, detail="Not Found")
+
 
 @router.get("/dashboard")
 async def get_kyc_dashboard(
@@ -89,6 +96,8 @@ async def review_document(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    _kyc_mock_guard()
+
     # Mock implementation since we don't have a Documents table
     # We extract player ID from the mock doc_id (doc_{player_id}_{idx}) or use doc_id as player_id
     player_id = doc_id
