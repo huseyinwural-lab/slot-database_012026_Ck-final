@@ -323,7 +323,7 @@ async def readiness_check():
         # Redis check (critical in prod/staging/CI_STRICT)
         redis_status = "skipped"
         if settings.env in {"prod", "staging"} or is_ci_strict:
-            redis_status = "connected" if _redis_connectable(settings.redis_url) else "unreachable"
+            redis_status = "connected" if await _redis_connectable(settings.redis_url) else "unreachable"
             if redis_status != "connected":
                 from fastapi import HTTPException
 
