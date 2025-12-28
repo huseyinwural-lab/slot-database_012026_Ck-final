@@ -86,7 +86,7 @@ services:
     environment:
       - REACT_APP_BACKEND_URL=http://localhost:8001
     depends_on:
-      - backend-external
+      - backend
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -101,7 +101,7 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8001/api/v1
     depends_on:
-      - backend-external
+      - backend
     volumes:
       - ./frontend-player:/app
       - /app/node_modules
