@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 # - SQLite DB URLs are forbidden in these environments.
 # - Redis is treated as CRITICAL dependency in these environments.
 import os
-import socket
-import ssl
-from urllib.parse import urlparse
+from app.core.redis_health import redis_ping
 
 from sqlalchemy.engine.url import make_url
 
