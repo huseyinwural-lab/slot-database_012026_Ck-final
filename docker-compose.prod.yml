@@ -26,7 +26,10 @@ services:
         condition: service_healthy
     environment:
       PYTHONUNBUFFERED: "1"
-      DATABASE_URL: ${DATABASE_URL}
+      # Sync URL for Alembic migrations (psycopg2)
+      DATABASE_URL_SYNC: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
+      # Async URL for Application (asyncpg)
+      DATABASE_URL: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
       ENV: ${ENV:-prod}
       DEBUG: "False"
       JWT_SECRET: ${JWT_SECRET}
