@@ -786,7 +786,7 @@ Form:
 3. Generate
 
 Response:
-API Key: sk_live_abc123xyz456... (SHOWN ONCE)
+API Key: sk_live_***REDACTED*** (SHOWN ONCE)
 Key ID: key_789
 
 ⚠️ Save the API key in a secure location!

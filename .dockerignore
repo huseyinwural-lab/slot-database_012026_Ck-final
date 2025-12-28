@@ -1,0 +1,38 @@
+# OS
+.DS_Store
+
+# Git / VCS
+.git
+
+# Python
+**/__pycache__
+**/*.pyc
+.venv
+venv
+
+# Node
+**/node_modules
+**/.pnp
+**/.yarn
+
+# Build outputs
+**/build
+**/dist
+**/.next
+
+# Test artifacts / CI junk
+_ci_*/
+ci_artifacts/
+artifacts/
+playwright-report/
+**/test-results/
+
+# Logs
+**/*.log
+
+# Local DB / dumps
+**/*.db
+**/*.sqlite
+**/*.sql
+**/*.dump
+backups/
