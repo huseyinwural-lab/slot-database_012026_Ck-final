@@ -110,3 +110,22 @@
     - Role boundary coverage: non-owner cannot call `/api/v1/admin/create-tenant-admin` (403)
 - **Verification**:
     - `pytest -q backend/tests/test_tenant_isolation.py` → **PASSED**
+
+
+---
+
+## P0 Release Blockers & Repo Hygiene — Iteration 2025-12-28
+- **Status**: ✅ IMPLEMENTED (Testing pending via backend testing agent)
+- **Fixes**:
+    - Webhook HMAC (generic): `backend/app/routes/integrations/security/hmac.py` stub replaced with real HMAC-SHA256 + replay window + constant-time compare.
+    - Adyen HMAC: `backend/app/services/adyen_psp.py` now verifies `additionalData.hmacSignature` per Adyen standard notification signing string.
+    - Adyen webhook route: `backend/app/routes/adyen_payments.py` now records signature failures and rejects invalid signatures (401).
+    - KYC MOCK endpoints gated: `backend/app/routes/kyc.py` blocked in prod/staging and when `KYC_MOCK_ENABLED=false`.
+    - Prod/staging strict validation: `backend/config.py.validate_prod_secrets()` now requires `ADYEN_HMAC_KEY` and requires `KYC_MOCK_ENABLED=false`.
+    - Hygiene: added `.dockerignore`, removed `_ci_*` directories and repo-root `.gitconfig`.
+    - Hygiene: redacted `sk_live_` example in `USER_GUIDE.md`.
+    - Hygiene: updated `.env.example` files (backend+frontend) to include required vars.
+- **Tests added**:
+    - `backend/tests/test_p0_webhook_hmac_generic.py`
+    - `backend/tests/test_p0_adyen_hmac_verification.py`
+    - `backend/tests/test_p0_kyc_mock_gating.py`
