@@ -222,7 +222,7 @@ class P0DeployConfigTestSuite:
                 r'from app\.core\.connection_strings import derive_sync_database_url',
                 r'derive_sync_database_url\(',
                 r'def run_migrations_offline\(',
-                r'sync_url.*=.*derive_sync_database_url'
+                r'_get_sync_url.*derive_sync_database_url'
             ]
             
             missing_patterns = []
