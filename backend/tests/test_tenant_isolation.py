@@ -93,6 +93,31 @@ async def seeded(async_session_factory):
         await session.refresh(tenant_admin)
         await session.refresh(player)
 
+
+        # Transaction in default tenant to validate list filtering does not leak
+        from app.models.sql_models import Transaction
+        from datetime import datetime
+
+        existing_tx = (
+            await session.execute(select(Transaction).where(Transaction.tenant_id == "default_casino"))
+        ).scalars().first()
+        if not existing_tx:
+            session.add(
+                Transaction(
+                    tenant_id="default_casino",
+                    player_id=player.id,
+                    type="deposit",
+                    amount=10.0,
+                    currency="USD",
+                    status="completed",
+                    state="completed",
+                    balance_after=10.0,
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                )
+            )
+            await session.commit()
+
         return {
             "owner_token": _make_admin_token(admin_id=owner.id, tenant_id=owner.tenant_id, email=owner.email),
             "tenant_token": _make_admin_token(
