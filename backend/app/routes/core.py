@@ -88,8 +88,15 @@ async def get_players(
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     query = query.where(Player.tenant_id == tenant_id)
     
+    # Status has precedence over include_disabled.
     if status and status != "all":
         query = query.where(Player.status == status)
+    else:
+        # Default: hide disabled players unless include_disabled is truthy.
+        truthy = {"1", "true", "yes"}
+        include = (include_disabled or "").strip().lower() in truthy
+        if not include:
+            query = query.where(Player.status != "disabled")
         
     if search:
         query = query.where(
