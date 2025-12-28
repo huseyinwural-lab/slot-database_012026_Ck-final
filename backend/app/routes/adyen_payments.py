@@ -277,11 +277,11 @@ async def test_trigger_webhook(
         attempt = (await session.execute(stmt)).scalars().first()
         
         if not attempt:
-             # If attempt missing (maybe manual curl test?), create one or fail?
-             # For E2E robustness, if we can't find attempt, we might fail.
-             # But let's log warning and try to proceed if possible? 
-             # No, ledger needs idempotency which usually links to attempt.
-             raise HTTPException(status_code=404, detail="Payout Attempt not found for this TX")
+            # If attempt missing (maybe manual curl test?), create one or fail?
+            # For E2E robustness, if we can't find attempt, we might fail.
+            # But let's log warning and try to proceed if possible? 
+            # No, ledger needs idempotency which usually links to attempt.
+            raise HTTPException(status_code=404, detail="Payout Attempt not found for this TX")
 
         if success:
              if tx and tx.status != "completed":
