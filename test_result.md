@@ -60,14 +60,16 @@
 ---
 
 ## P0 Deploy Config Refactor (External Postgres+Redis) — Iteration 2025-12-28
-- **Status**: ✅ IMPLEMENTED & VERIFIED (Self-test: unit tests + Regression tests)
+- **Status**: ✅ IMPLEMENTED & HARDENED (Self-test + Regression)
 - **Changes**:
     - Added shared DSN helper: `backend/app/core/connection_strings.py`
-    - Alembic now derives sync DSN via helper (supports `SYNC_DATABASE_URL` / `DATABASE_URL_SYNC`)
+    - Alembic now derives sync DSN via helper (supports canonical `SYNC_DATABASE_URL` + legacy `DATABASE_URL_SYNC`)
     - Startup logs a masked config snapshot (`config.snapshot`) for DB/Redis
+    - Added P0.8 fail-fast guard: prod/staging or `CI_STRICT=1` requires `DATABASE_URL` and forbids sqlite scheme
+    - Added leak-guard tests to prevent `user:pass@` / token / Bearer leaks
     - `docker-compose.yml` and `docker-compose.prod.yml` now support `localdb` vs `external` profiles
 - **Verification**:
-    - `pytest -q backend/tests/test_connection_strings.py`: **PASSED**
+    - `pytest -q backend/tests/test_connection_strings.py tests/test_failfast_ci_strict.py tests/test_config_snapshot_leak_guard.py`: **PASSED**
     - **P0 Deploy Config Refactor Regression Test Suite**: **ALL PASSED (5/5)**
         - ✅ Health endpoint (`/api/health`) returns 200 JSON with status and environment
         - ✅ Ready endpoint (`/api/ready`) returns 200 JSON with database connectivity status
