@@ -227,11 +227,11 @@ async def test_same_tenant_insufficient_role_403(client, seeded):
 
 
 @pytest.mark.asyncio
-async def test_transactions_list_wrong_tenant_empty_all_pages(client, seeded):
-    # Critical: finance/ledger list endpoints must not leak across tenants.
+async def test_withdrawals_list_wrong_tenant_empty_all_pages(client, seeded):
+    # Critical: finance list endpoints must not leak across tenants.
     for url in (
-        "/api/v1/finance/transactions?page=1&page_size=50",
-        "/api/v1/finance/transactions?page=2&page_size=50",
+        "/api/v1/finance/withdrawals?limit=50&offset=0",
+        "/api/v1/finance/withdrawals?limit=50&offset=50",
     ):
         r = await client.get(
             url,
