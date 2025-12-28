@@ -133,9 +133,12 @@ class Settings(BaseSettings):
                 missing.append("AUDIT_EXPORT_SECRET (must be changed)")
                 
             if self.audit_archive_backend == "s3":
-                if not self.audit_s3_access_key: missing.append("AUDIT_S3_ACCESS_KEY")
-                if not self.audit_s3_secret_key: missing.append("AUDIT_S3_SECRET_KEY")
-                if not self.audit_s3_bucket: missing.append("AUDIT_S3_BUCKET")
+                if not self.audit_s3_access_key:
+                    missing.append("AUDIT_S3_ACCESS_KEY")
+                if not self.audit_s3_secret_key:
+                    missing.append("AUDIT_S3_SECRET_KEY")
+                if not self.audit_s3_bucket:
+                    missing.append("AUDIT_S3_BUCKET")
 
             if missing:
                 raise ValueError(
