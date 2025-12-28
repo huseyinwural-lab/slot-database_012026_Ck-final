@@ -88,7 +88,7 @@
     - List endpoints → **200 + empty** (no enumeration leakage)
 - **Added guardrails**:
     - List endpoint coverage: `/api/v1/players` wrong-tenant returns empty
-    - Finance list coverage: `/api/v1/finance/transactions` wrong-tenant returns empty (page=1 & page=2) and `meta.total==0` when present
+    - Finance list coverage: `/api/v1/finance/withdrawals` wrong-tenant returns empty (offset=0 & offset=50) and `meta.total==0` when present
     - Player mutation coverage: wrong-tenant `PUT /api/v1/players/{id}` → 404; soft-delete `DELETE /api/v1/players/{id}` → 404
     - Disabled visibility: default list hides disabled; `include_disabled=1` includes them (status filter takes precedence)
     - Role boundary coverage: non-owner cannot call `/api/v1/admin/create-tenant-admin` (403)
