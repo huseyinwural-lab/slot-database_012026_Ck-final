@@ -27,7 +27,10 @@ jobs:
     env:
       ENV: test
       # Explicitly matching the service credentials below (postgres:postgres)
+      # Using asyncpg for application logic tests
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:54320/app_test
+      # Using psycopg2 for Alembic migrations (via env.py logic)
+      DATABASE_URL_SYNC: postgresql+psycopg2://postgres:postgres@127.0.0.1:54320/app_test
 
     steps:
       - name: Checkout
