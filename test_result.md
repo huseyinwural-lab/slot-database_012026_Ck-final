@@ -61,6 +61,9 @@
 
 ## P0 Deploy Config Refactor (External Postgres+Redis) — Iteration 2025-12-28
 - **Status**: ✅ IMPLEMENTED & HARDENED (Self-test + Regression)
+- **Docs**:
+    - `docs/P1B_SELF_SERVE.md`: External Postgres+Redis go/no-go proof pack + audit template
+    - `docs/P1B_MONEY_SMOKE.md`: PSP-free minimal money-loop smoke (manual ledger adjust)
 - **Changes**:
     - Added shared DSN helper: `backend/app/core/connection_strings.py`
     - Alembic now derives sync DSN via helper (supports canonical `SYNC_DATABASE_URL` + legacy `DATABASE_URL_SYNC`)
@@ -89,6 +92,7 @@
 - **Added guardrails**:
     - List endpoint coverage: `/api/v1/players` wrong-tenant returns empty
     - Finance list coverage: `/api/v1/finance/withdrawals` wrong-tenant returns empty (offset=0 & offset=50) and `meta.total==0` when present
+    - Money-smoke support: added admin PSP-free endpoints under `/api/v1/admin/ledger/adjust` + wallet/ledger snapshots
     - Player mutation coverage: wrong-tenant `PUT /api/v1/players/{id}` → 404; soft-delete `DELETE /api/v1/players/{id}` → 404
     - Disabled visibility: default list hides disabled; `include_disabled=1` includes them (status filter takes precedence)
     - Role boundary coverage: non-owner cannot call `/api/v1/admin/create-tenant-admin` (403)
