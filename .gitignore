@@ -99,7 +99,6 @@ backups/
 .gitconfig
 # frontend cache packs (should not be committed)
 frontend/node_modules/.cache/
-# (no need to list individual pack files)
 frontend/node_modules/.cache/default-development/0.pack
 frontend/node_modules/.cache/default-development/5.pack
 frontend/node_modules/.cache/default-development/9.pack
