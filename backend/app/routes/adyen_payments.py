@@ -358,7 +358,6 @@ async def test_trigger_webhook(
         # Let's just implement the logic here for simulation.
         
         psp_reference = payload.get("psp_reference") or f"sim_payout_{uuid.uuid4()}"
-        merchant_reference = payload.get("merchant_reference") # Must match "payout_{attempt_id}"
         success = payload.get("success", True)
         
         # We need to find the TX and Attempt.
