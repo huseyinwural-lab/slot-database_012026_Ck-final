@@ -144,7 +144,7 @@ class P0DeployConfigTestSuite:
             for log_file in log_files:
                 try:
                     result = subprocess.run(
-                        ["tail", "-n", "100", log_file],
+                        ["tail", "-n", "200", log_file],
                         capture_output=True,
                         text=True,
                         timeout=10
@@ -165,13 +165,13 @@ class P0DeployConfigTestSuite:
                 self.log_result("Config Snapshot Security", False, "No config.snapshot events found in logs")
                 return False
             
-            # Check for leaked secrets in config.snapshot lines
+            # Check for leaked secrets in config.snapshot lines and surrounding context
             secret_patterns = [
-                r'password["\']?\s*:\s*["\'][^"\']+["\']',  # password fields
-                r'secret["\']?\s*:\s*["\'][^"\']+["\']',    # secret fields
-                r'token["\']?\s*:\s*["\'][^"\']+["\']',     # token fields
-                r'key["\']?\s*:\s*["\'][^"\']+["\']',       # key fields (but allow host/port/dbname)
-                r'user["\']?\s*:\s*["\'][^"\']+["\']',      # user fields
+                r'password["\']?\s*[:=]\s*["\'][^"\']+["\']',  # password fields
+                r'secret["\']?\s*[:=]\s*["\'][^"\']+["\']',    # secret fields
+                r'token["\']?\s*[:=]\s*["\'][^"\']+["\']',     # token fields
+                r'api_key["\']?\s*[:=]\s*["\'][^"\']+["\']',   # api_key fields
+                r'username["\']?\s*[:=]\s*["\'][^"\']+["\']',  # username fields
             ]
             
             leaked_secrets = []
@@ -179,26 +179,46 @@ class P0DeployConfigTestSuite:
                 for pattern in secret_patterns:
                     matches = re.findall(pattern, line, re.IGNORECASE)
                     if matches:
-                        # Filter out allowed fields (host, port, dbname, sslmode)
-                        for match in matches:
-                            if not any(allowed in match.lower() for allowed in ['host', 'port', 'dbname', 'sslmode', 'tls', 'scheme', 'driver']):
-                                leaked_secrets.append(match)
+                        leaked_secrets.extend(matches)
             
             if leaked_secrets:
                 self.log_result("Config Snapshot Security", False, 
                               f"Found potential secret leaks: {leaked_secrets}")
                 return False
             
-            # Verify that allowed fields are present
+            # Verify that allowed fields are present (host, port, dbname, sslmode, tls)
             allowed_fields_found = []
             for line in config_snapshot_lines:
-                if any(field in line.lower() for field in ['host', 'port', 'dbname', 'sslmode', 'tls']):
+                if any(field in line.lower() for field in ['host', 'port', 'dbname', 'sslmode', 'tls', 'driver', 'scheme']):
                     allowed_fields_found.append(line.strip())
             
-            self.log_result("Config Snapshot Security", True, 
-                          f"Found {len(config_snapshot_lines)} config.snapshot events, no secrets leaked. "
-                          f"Allowed fields present: {len(allowed_fields_found) > 0}")
-            return True
+            # Test the actual summarize functions to ensure they work correctly
+            try:
+                import sys
+                sys.path.append('/app/backend')
+                from app.core.connection_strings import summarize_database_url, summarize_redis_url
+                from config import settings
+                
+                db_summary = summarize_database_url(settings.database_url)
+                redis_summary = summarize_redis_url(settings.redis_url)
+                
+                # Verify no sensitive data in summaries
+                sensitive_keys = ['password', 'user', 'username', 'secret', 'token', 'api_key']
+                for summary in [db_summary, redis_summary]:
+                    for key in summary.keys():
+                        if any(sensitive in key.lower() for sensitive in sensitive_keys):
+                            self.log_result("Config Snapshot Security", False, 
+                                          f"Sensitive key found in summary: {key}")
+                            return False
+                
+                self.log_result("Config Snapshot Security", True, 
+                              f"Found {len(config_snapshot_lines)} config.snapshot events, no secrets leaked. "
+                              f"DB summary: {db_summary}, Redis summary: {redis_summary}")
+                return True
+                
+            except Exception as e:
+                self.log_result("Config Snapshot Security", False, f"Error testing summary functions: {e}")
+                return False
             
         except Exception as e:
             self.log_result("Config Snapshot Security", False, f"Exception: {str(e)}")
