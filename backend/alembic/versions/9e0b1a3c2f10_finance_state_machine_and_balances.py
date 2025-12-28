@@ -58,12 +58,12 @@ def upgrade() -> None:
         op.add_column("transaction", sa.Column("metadata", sa.JSON(), nullable=True))
         op.add_column("transaction", sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")))
 
-    # Backfill minimal state from existing status/type (quoted table name for safety)
+    # Backfill minimal state from existing status/type (Fixed quotes for PostgreSQL compatibility)
     conn.execute(sa.text(
-        'UPDATE "transaction" SET state = "completed" WHERE type="deposit" AND status="completed"'
+        "UPDATE \"transaction\" SET state = 'completed' WHERE type = 'deposit' AND status = 'completed'"
     ))
     conn.execute(sa.text(
-        'UPDATE "transaction" SET state = "requested" WHERE type="withdrawal" AND status="pending"'
+        "UPDATE \"transaction\" SET state = 'requested' WHERE type = 'withdrawal' AND status = 'pending'"
     ))
 
     # Partial unique indexes for idempotency and provider events
