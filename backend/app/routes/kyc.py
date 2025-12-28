@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Dict, Any
 from datetime import datetime
 
+# NOTE: This module is MOCKED UI support only and is gated off in prod/staging.
+
 from app.core.database import get_session
 from app.models.sql_models import Player, AdminUser
 from app.utils.auth import get_current_admin
