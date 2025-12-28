@@ -2,13 +2,17 @@ import asyncio
 import uuid
 import httpx
 import os
-from datetime import datetime
 import json
+from datetime import datetime
 
-# Env
-BASE_URL = "http://localhost:8001/api/v1"
-ADMIN_EMAIL = "admin@casino.com"
-ADMIN_PASS = "Admin123!"
+# Import shared utils
+try:
+    from runner_utils import get_env_config, login_admin_with_retry, get_auth_headers
+except ImportError:
+    # Fallback for direct execution if not in path
+    import sys
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from runner_utils import get_env_config, login_admin_with_retry, get_auth_headers
 
 # Colors
 GREEN = "\033[92m"
@@ -17,17 +21,19 @@ RESET = "\033[0m"
 
 async def main():
     print(f"{GREEN}=== BAU W12 GROWTH CORE RUNNER ==={RESET}")
+    config = get_env_config()
+    BASE_URL = config["BASE_URL"]
     
     async with httpx.AsyncClient(timeout=30.0) as client:
         # 1. Login Admin
-        print(f"-> Logging in Admin...")
-        resp = await client.post(f"{BASE_URL}/auth/login", json={"email": ADMIN_EMAIL, "password": ADMIN_PASS})
-        if resp.status_code != 200:
-            print(f"{RED}Login Failed: {resp.text}{RESET}")
+        try:
+            token = await login_admin_with_retry(client)
+            headers = get_auth_headers(token)
+            headers["X-Reason"] = "BAU_W12_TEST"
+        except Exception as e:
+            print(f"{RED}Login Failed: {e}{RESET}")
             return
-        token = resp.json()["access_token"]
-        headers = {"Authorization": f"Bearer {token}", "X-Reason": "BAU_W12_TEST"}
-        
+
         # 2. Setup Affiliate
         print(f"-> Creating Affiliate...")
         aff_data = {
@@ -105,8 +111,6 @@ async def main():
             "tx_id": f"tx_{uuid.uuid4()}",
             "timestamp": datetime.utcnow().isoformat()
         }
-        # Mock signature header not needed for MockPSP in dev mode or we can disable signature check
-        # 'verify_signature_and_parse' handles mockpsp specifically usually
         resp = await client.post(f"{BASE_URL}/payments/webhook/mockpsp", json=webhook_payload)
         if resp.status_code != 200:
              print(f"{RED}Deposit Webhook Failed: {resp.text}{RESET}")
@@ -116,21 +120,13 @@ async def main():
         # 6. Verification
         print(f"-> Verifying Results...")
         
-        # A. Check Commission Ledger
-        # We can check via Admin Ledger API or Reconciliation Findings if we want to be fancy
-        # Or just check Affiliates Payouts stub (not implemented).
-        # We'll check the 'Audit Log' for 'FIN_IDEMPOTENCY_HIT' or similar? No.
-        # Check Audit Log for CRM_OFFER_GRANT
-        
         await asyncio.sleep(2) # Wait for async processing if any
         
         resp = await client.get(f"{BASE_URL}/audit/events?resource_type=bonus_grant&action=CRM_OFFER_GRANT", headers=headers)
-        events = resp.json()["items"]
-        # Filter for our player (simple check: most recent)
+        events = resp.json().get("items", [])
+        
         found_crm = False
         for e in events:
-            # We don't have player_id in top level usually, but maybe in details?
-            # Audit log schema varies. Assuming we find one for simplicity.
             if e["result"] == "success": 
                 found_crm = True
                 break
