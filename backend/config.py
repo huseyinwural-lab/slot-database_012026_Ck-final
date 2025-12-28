@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import AliasChoices, Field
 from typing import List, Optional
 import json
 from arq.connections import RedisSettings
@@ -9,6 +10,12 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "sqlite+aiosqlite:////app/backend/casino.db"
+    # Optional explicit sync URL for Alembic / sync tooling.
+    # Supports both env names for backward compatibility.
+    sync_database_url: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("SYNC_DATABASE_URL", "DATABASE_URL_SYNC"),
+    )
     db_pool_size: int = 5
     db_max_overflow: int = 10
 
@@ -47,7 +54,8 @@ class Settings(BaseSettings):
     max_tx_velocity_count: int = 5
     max_tx_velocity_window_minutes: int = 1
 
-    redis_url: str = "redis://redis:6379/0"
+    # NOTE: Default is localhost to avoid docker-compose host coupling.
+    redis_url: str = "redis://localhost:6379/0"
     recon_runner: str = "background"
 
     @property
