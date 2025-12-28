@@ -14,10 +14,15 @@ configure_logging(level=settings.log_level, fmt=settings.get_log_format())
 
 logger = logging.getLogger(__name__)
 
-# P0.8: Fail-fast DB config guard
-# - In prod/staging OR CI_STRICT=1 -> DATABASE_URL must be set and must not be sqlite.
-# - In dev/local -> sqlite fallback is allowed.
+# P0.8: Fail-fast DB/Redis config guard
+# - In prod/staging OR CI_STRICT=1 -> DATABASE_URL and REDIS_URL must be set.
+# - SQLite DB URLs are forbidden in these environments.
+# - Redis is treated as CRITICAL dependency in these environments.
 import os
+import socket
+import ssl
+from urllib.parse import urlparse
+
 from sqlalchemy.engine.url import make_url
 
 is_ci_strict = (os.getenv("CI_STRICT") or "").strip().lower() in {"1", "true", "yes"}
@@ -29,12 +34,39 @@ def _is_sqlite_url(url: str) -> bool:
         return False
     return driver.startswith("sqlite")
 
+
+def _redis_connectable(redis_url: str) -> bool:
+    parsed = urlparse(redis_url)
+    host = parsed.hostname
+    port = parsed.port or 6379
+    if not host:
+        return False
+
+    timeout = 2
+    try:
+        sock = socket.create_connection((host, port), timeout=timeout)
+        try:
+            if parsed.scheme == "rediss":
+                ctx = ssl.create_default_context()
+                sock = ctx.wrap_socket(sock, server_hostname=host)
+            return True
+        finally:
+            sock.close()
+    except Exception:
+        return False
+
+
 if settings.env in {"prod", "staging"} or is_ci_strict:
-    # Ensure this is not silently falling back to config default.
+    # Ensure this is not silently falling back to config defaults.
     if not (os.getenv("DATABASE_URL") or "").strip():
         raise RuntimeError("DATABASE_URL must be set (prod/staging or CI_STRICT)")
     if _is_sqlite_url(settings.database_url):
         raise RuntimeError("SQLite DATABASE_URL is not allowed in prod/staging or CI_STRICT")
+
+    if not (os.getenv("REDIS_URL") or "").strip():
+        raise RuntimeError("REDIS_URL must be set (prod/staging or CI_STRICT)")
+    if not _redis_connectable(settings.redis_url):
+        raise RuntimeError("REDIS_URL is unreachable (prod/staging or CI_STRICT)")
 
 # Fail-fast for prod/staging secrets
 if settings.env in {"prod", "staging"}:
@@ -278,11 +310,15 @@ async def health_check():
 
 @app.get("/api/readiness")
 async def readiness_check():
-    """Readiness probe: checks DB connectivity + migration state (lightweight)."""
+    """Readiness probe: checks DB connectivity + migration state (lightweight).
+
+    In prod/staging (and CI_STRICT), Redis is treated as a CRITICAL dependency.
+    """
     try:
         from app.core.database import engine
         from sqlalchemy import text
 
+        # DB check
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
 
@@ -296,20 +332,41 @@ async def readiness_check():
                 if settings.env in {"prod", "staging"}:
                     raise
 
+        # Redis check (critical in prod/staging/CI_STRICT)
+        redis_status = "skipped"
+        if settings.env in {"prod", "staging"} or is_ci_strict:
+            redis_status = "connected" if _redis_connectable(settings.redis_url) else "unreachable"
+            if redis_status != "connected":
+                from fastapi import HTTPException
+
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "status": "degraded",
+                        "dependencies": {"database": "connected", "redis": "unreachable", "migrations": "ok"},
+                    },
+                )
+
         return {
             "status": "ready",
             "dependencies": {
                 "database": "connected",
+                "redis": redis_status,
                 "migrations": "ok" if version else "unknown",
             },
             "alembic_version": version,
         }
     except Exception as exc:  # pragma: no cover - defensive
-        logger.exception("readiness check failed", exc_info=exc)
+        # Pass through HTTPException as-is
         from fastapi import HTTPException
+
+        if isinstance(exc, HTTPException):
+            raise
+
+        logger.exception("readiness check failed", exc_info=exc)
         raise HTTPException(
             status_code=503,
-            detail={"status": "degraded", "dependencies": {"database": "unreachable", "migrations": "unknown"}},
+            detail={"status": "degraded", "dependencies": {"database": "unreachable", "redis": "unknown", "migrations": "unknown"}},
         )
 
 
