@@ -60,7 +60,7 @@
 ---
 
 ## P0 Deploy Config Refactor (External Postgres+Redis) — Iteration 2025-12-28
-- **Status**: ✅ IMPLEMENTED (Self-test: unit tests)
+- **Status**: ✅ IMPLEMENTED & VERIFIED (Self-test: unit tests + Regression tests)
 - **Changes**:
     - Added shared DSN helper: `backend/app/core/connection_strings.py`
     - Alembic now derives sync DSN via helper (supports `SYNC_DATABASE_URL` / `DATABASE_URL_SYNC`)
@@ -68,3 +68,9 @@
     - `docker-compose.yml` and `docker-compose.prod.yml` now support `localdb` vs `external` profiles
 - **Verification**:
     - `pytest -q backend/tests/test_connection_strings.py`: **PASSED**
+    - **P0 Deploy Config Refactor Regression Test Suite**: **ALL PASSED (5/5)**
+        - ✅ Health endpoint (`/api/health`) returns 200 JSON with status and environment
+        - ✅ Ready endpoint (`/api/ready`) returns 200 JSON with database connectivity status
+        - ✅ Config snapshot logging verified - only logs host/port/dbname/sslmode/tls, NO secrets leaked
+        - ✅ Alembic env.py correctly imports and uses `derive_sync_database_url` for offline migrations
+        - ✅ Bootstrap auth smoke test - login fails as expected (bootstrap not enabled in this environment)
