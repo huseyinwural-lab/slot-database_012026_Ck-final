@@ -14,16 +14,35 @@ configure_logging(level=settings.log_level, fmt=settings.get_log_format())
 
 logger = logging.getLogger(__name__)
 
+# P0.8: Fail-fast DB config guard
+# - In prod/staging OR CI_STRICT=1 -> DATABASE_URL must be set and must not be sqlite.
+# - In dev/local -> sqlite fallback is allowed.
+import os
+from sqlalchemy.engine.url import make_url
+
+is_ci_strict = (os.getenv("CI_STRICT") or "").strip().lower() in {"1", "true", "yes"}
+
+def _is_sqlite_url(url: str) -> bool:
+    try:
+        driver = make_url(url).drivername
+    except Exception:
+        return False
+    return driver.startswith("sqlite")
+
+if settings.env in {"prod", "staging"} or is_ci_strict:
+    # Ensure this is not silently falling back to config default.
+    if not (os.getenv("DATABASE_URL") or "").strip():
+        raise RuntimeError("DATABASE_URL must be set (prod/staging or CI_STRICT)")
+    if _is_sqlite_url(settings.database_url):
+        raise RuntimeError("SQLite DATABASE_URL is not allowed in prod/staging or CI_STRICT")
+
 # Fail-fast for prod/staging secrets
 if settings.env in {"prod", "staging"}:
     if not settings.jwt_secret or settings.jwt_secret in {"secret", "change_this_secret_in_production_env"}:
         raise RuntimeError("JWT_SECRET must be set to a strong value in prod/staging")
-    if not settings.database_url:
-        raise RuntimeError("DATABASE_URL must be set in prod/staging")
 
     # Bootstrap should not be left enabled in production.
     # We don't hard-block here to keep emergency recovery possible, but we log loudly.
-    import os
     if (os.getenv("BOOTSTRAP_ENABLED") or "").lower() == "true":
         logger.warning("BOOTSTRAP_ENABLED=true in prod/staging. This should be one-shot only.")
 
