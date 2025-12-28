@@ -21,18 +21,37 @@ async def main():
         # 1. Login Admin
         print(f"-> Logging in Admin...")
         resp = await client.post(f"{BASE_URL}/auth/login", json={"email": ADMIN_EMAIL, "password": ADMIN_PASS})
-        token = resp.json()["access_token"]
+        
+        if resp.status_code != 200:
+             print(f"{RED}Login Failed: {resp.status_code} {resp.text}{RESET}")
+             return
+
+        token_data = resp.json()
+        token = token_data.get("access_token")
+        
+        if not token:
+             print(f"{RED}Login Response missing access_token: {token_data}{RESET}")
+             return
+             
         admin_headers = {"Authorization": f"Bearer {token}"}
         
         # 2. Setup Test Player
         print(f"-> Registering Player...")
         player_email = f"policy_{uuid.uuid4().hex[:6]}@example.com"
         resp = await client.post(f"{BASE_URL}/auth/player/register", json={"email": player_email, "password": "password123", "username": "PolicyUser"})
-        player_id = resp.json()["player_id"]
+        if resp.status_code != 200:
+             print(f"{RED}Register Failed: {resp.text}{RESET}")
+             return
+        player_id = resp.json().get("player_id")
         
         # Login Player
         resp = await client.post(f"{BASE_URL}/auth/player/login", json={"email": player_email, "password": "password123"})
-        p_token = resp.json()["access_token"]
+        if resp.status_code != 200:
+             print(f"{RED}Player Login Failed: {resp.text}{RESET}")
+             return
+             
+        p_token_data = resp.json()
+        p_token = p_token_data.get("access_token")
         p_headers = {"Authorization": f"Bearer {p_token}"}
         
         # --- TEST 1: KYC UNVERIFIED WITHDRAWAL BLOCK ---
@@ -85,16 +104,19 @@ async def main():
                 # Some systems allow login but block play.
                 # Try Play (Mock Spin) if login succeeded
                 if resp.status_code == 200:
-                    ex_token = resp.json()["access_token"]
-                    ex_headers = {"Authorization": f"Bearer {ex_token}"}
-                    # Try a spin (Mock Provider)
-                    spin_payload = {"session_id": "dummy", "amount": 1.0} 
-                    # Use generic authorized endpoint to check block
-                    resp = await client.post(f"{BASE_URL}/player/wallet/withdraw", json=withdraw_payload, headers=ex_headers)
-                    if resp.status_code == 403:
-                        print(f"{GREEN}   [PASS] Action Blocked (RG) after login{RESET}")
+                    ex_token = resp.json().get("access_token")
+                    if ex_token:
+                        ex_headers = {"Authorization": f"Bearer {ex_token}"}
+                        # Try a spin (Mock Provider)
+                        spin_payload = {"session_id": "dummy", "amount": 1.0} 
+                        # Use generic authorized endpoint to check block
+                        resp = await client.post(f"{BASE_URL}/player/wallet/withdraw", json=withdraw_payload, headers=ex_headers)
+                        if resp.status_code == 403:
+                            print(f"{GREEN}   [PASS] Action Blocked (RG) after login{RESET}")
+                        else:
+                            print(f"{RED}   [FAIL] Action Allowed for Excluded Player{RESET}")
                     else:
-                        print(f"{RED}   [FAIL] Action Allowed for Excluded Player{RESET}")
+                         print(f"{RED}   [FAIL] Login succeeded but no token returned?{RESET}")
                 else:
                     print(f"{GREEN}   [PASS] Login Blocked/Restricted ({resp.status_code}){RESET}")
 
