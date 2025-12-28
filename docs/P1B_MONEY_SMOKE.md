@@ -186,3 +186,92 @@ NO-GO if ANY true:
 ## Follow-up (out of scope for this doc)
 - PSP sandbox flow (Stripe/Adyen) including webhook + idempotency (P1-B-S2)
 - Withdraw hold/approve/paid lifecycle smoke (if not covered by adjust endpoints)
+
+---
+
+## APPENDIX: One-shot evidence capture (single paste)
+
+### Goal
+Run G0→G4 in one go, keep output order deterministic, and share as a single paste.
+
+### Usage
+1) Set `BASE_URL` and `ADMIN_JWT` in your external environment shell.
+2) Run the script below.
+3) Copy the entire output and paste it back to this channel.
+4) Before sharing, mask only secrets/tokens/credentials as per rules.
+
+### One-shot command (bash)
+```bash
+set -euo pipefail
+
+BASE_URL="${BASE_URL:?set BASE_URL}"
+ADMIN_JWT="${ADMIN_JWT:?set ADMIN_JWT}"
+
+# helper: request wrapper
+req() { bash -c "$1"; echo; }
+
+echo -e "\n===== G0: /api/ready =====\n"
+req "curl -sS -i \"$BASE_URL/api/ready\""
+
+echo -e "\n===== G0: /api/version =====\n"
+req "curl -sS -i \"$BASE_URL/api/version\""
+
+echo -e "\n===== G1: POST /api/v1/players =====\n"
+# IMPORTANT: prefer canonical payload from this doc.
+# Below is a common-safe payload; adjust if validation fails (e.g., username required).
+PLAYER_CREATE_RESP="$(curl -sS -i -X POST \"$BASE_URL/api/v1/players\" \
+  -H \"Authorization: Bearer $ADMIN_JWT\" \
+  -H \"Content-Type: application/json\" \
+  -d '{"email":"p1b_smoke_'$(date +%s)'@example.com","username":"p1b_smoke_'$(date +%s)'","password":"TempPass!123"}')"
+echo "$PLAYER_CREATE_RESP"
+echo
+
+# Extract player_id if present (best-effort; works if body contains "id" or "player_id")
+PLAYER_ID="$(echo "$PLAYER_CREATE_RESP" | tail -n 1 | sed -n 's/.*"player_id"[[:space:]]*:[[:space:]]*"\([^"]\+\)".*/\1/p')"
+if [ -z "${PLAYER_ID:-}" ]; then
+  PLAYER_ID="$(echo "$PLAYER_CREATE_RESP" | tail -n 1 | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]\+\)".*/\1/p')"
+fi
+
+if [ -z "${PLAYER_ID:-}" ]; then
+  echo -e "\n===== STOP: player_id not found (G1 likely FAIL). Paste output as-is for NO-GO evaluation. =====\n"
+  exit 0
+fi
+
+echo -e "\n===== G2: Wallet before =====\n"
+req "curl -sS -i \"$BASE_URL/api/v1/admin/players/$PLAYER_ID/wallet\" -H \"Authorization: Bearer $ADMIN_JWT\""
+
+echo -e "\n===== G2: Ledger before =====\n"
+req "curl -sS -i \"$BASE_URL/api/v1/admin/players/$PLAYER_ID/ledger/balance\" -H \"Authorization: Bearer $ADMIN_JWT\""
+
+echo -e "\n===== G3: Credit + replay (Idempotency-Key: p1b-credit-001) =====\n"
+req "curl -sS -i -X POST \"$BASE_URL/api/v1/admin/ledger/adjust\" \
+  -H \"Authorization: Bearer $ADMIN_JWT\" \
+  -H \"Content-Type: application/json\" \
+  -H \"Idempotency-Key: p1b-credit-001\" \
+  -d '{"player_id":"$PLAYER_ID","delta":100,"reason":"P1-B-S smoke credit","currency":"USD"}'"
+
+req "curl -sS -i -X POST \"$BASE_URL/api/v1/admin/ledger/adjust\" \
+  -H \"Authorization: Bearer $ADMIN_JWT\" \
+  -H \"Content-Type: application/json\" \
+  -H \"Idempotency-Key: p1b-credit-001\" \
+  -d '{"player_id":"$PLAYER_ID","delta":100,"reason":"P1-B-S smoke credit","currency":"USD"}'"
+
+echo -e "\n===== G4: Debit + replay (Idempotency-Key: p1b-debit-001) =====\n"
+req "curl -sS -i -X POST \"$BASE_URL/api/v1/admin/ledger/adjust\" \
+  -H \"Authorization: Bearer $ADMIN_JWT\" \
+  -H \"Content-Type: application/json\" \
+  -H \"Idempotency-Key: p1b-debit-001\" \
+  -d '{"player_id":"$PLAYER_ID","delta":-40,"reason":"P1-B-S smoke debit","currency":"USD"}'"
+
+req "curl -sS -i -X POST \"$BASE_URL/api/v1/admin/ledger/adjust\" \
+  -H \"Authorization: Bearer $ADMIN_JWT\" \
+  -H \"Content-Type: application/json\" \
+  -H \"Idempotency-Key: p1b-debit-001\" \
+  -d '{"player_id":"$PLAYER_ID","delta":-40,"reason":"P1-B-S smoke debit","currency":"USD"}'"
+
+echo -e "\n===== DONE: Paste this entire output (mask tokens only) =====\n"
+```
+
+### Masking reminder
+- Mask only: `Authorization: Bearer <token>` → `Authorization: Bearer ***`
+- Do NOT mask: `player_id`, HTTP status codes, `idempotent_replay`
