@@ -2,6 +2,8 @@ import sys
 import os
 import subprocess
 import time
+import json
+import datetime
 
 # Colors
 GREEN = "\033[92m"
@@ -10,6 +12,7 @@ BLUE = "\033[94m"
 RESET = "\033[0m"
 
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+ARTIFACTS_DIR = "/app/artifacts/release_smoke"
 
 # Runners to execute in order
 RUNNERS = [
@@ -24,7 +27,7 @@ def run_script(script_name):
     script_path = os.path.join(SCRIPTS_DIR, script_name)
     if not os.path.exists(script_path):
         print(f"{RED}[ERROR] Script not found: {script_name}{RESET}")
-        return False
+        return {"name": script_name, "status": "missing", "duration": 0}
         
     print(f"{BLUE}-> Running {script_name}...{RESET}")
     start = time.time()
@@ -33,14 +36,17 @@ def run_script(script_name):
     retries = 1
     
     # Pass environment variables
-    # We ensure BOOTSTRAP credentials are set for runner_utils.py to pick up
     env = os.environ.copy()
     if not env.get("BOOTSTRAP_OWNER_EMAIL"):
-        env["BOOTSTRAP_OWNER_EMAIL"] = "admin@casino.com" # Fallback/Default for local
+        env["BOOTSTRAP_OWNER_EMAIL"] = "admin@casino.com"
     if not env.get("BOOTSTRAP_OWNER_PASSWORD"):
-        env["BOOTSTRAP_OWNER_PASSWORD"] = "Admin123!" # Fallback/Default for local
+        env["BOOTSTRAP_OWNER_PASSWORD"] = "Admin123!"
     if not env.get("API_BASE_URL"):
         env["API_BASE_URL"] = "http://localhost:8001/api/v1"
+
+    last_result = None
+    stdout_log = ""
+    stderr_log = ""
 
     for attempt in range(retries + 1):
         try:
@@ -53,45 +59,87 @@ def run_script(script_name):
                 env=env
             )
             
+            stdout_log = result.stdout
+            stderr_log = result.stderr
+            last_result = result
+
             if result.returncode == 0:
                 duration = time.time() - start
                 print(f"{GREEN}[PASS] {script_name} ({duration:.2f}s){RESET}")
-                # Optional: Print stdout if needed, or save to log
-                return True
+                return {
+                    "name": script_name, 
+                    "status": "pass", 
+                    "duration": duration,
+                    "stdout": stdout_log
+                }
             else:
                 if attempt < retries:
                     print(f"{BLUE}   [RETRY] {script_name} failed, retrying...{RESET}")
                     continue
                 else:
                     print(f"{RED}[FAIL] {script_name} (Exit: {result.returncode}){RESET}")
-                    print("--- STDOUT ---")
-                    print(result.stdout)
+                    # Only print stderr to console on failure
                     print("--- STDERR ---")
-                    print(result.stderr)
-                    return False
+                    print(stderr_log)
+                    return {
+                        "name": script_name, 
+                        "status": "fail", 
+                        "duration": time.time() - start,
+                        "error_code": result.returncode,
+                        "stdout": stdout_log,
+                        "stderr": stderr_log
+                    }
                     
         except subprocess.TimeoutExpired:
             print(f"{RED}[TIMEOUT] {script_name} exceeded 120s{RESET}")
-            return False
+            return {"name": script_name, "status": "timeout", "duration": 120}
             
-    return False
+    return {"name": script_name, "status": "unknown", "duration": 0}
 
 def main():
     print(f"{GREEN}=== T15-003: E2E RELEASE MATRIX (SMOKE) ==={RESET}")
     
+    # Ensure artifacts dir exists
+    os.makedirs(ARTIFACTS_DIR, exist_ok=True)
+    
+    results = []
     success_count = 0
     failures = []
     
     for runner in RUNNERS:
-        if run_script(runner):
+        res = run_script(runner)
+        results.append(res)
+        
+        # Save individual logs
+        with open(f"{ARTIFACTS_DIR}/{runner}.log", "w") as f:
+            f.write(f"=== {runner} ===\n")
+            f.write(f"Status: {res['status']}\n")
+            f.write("--- STDOUT ---\n")
+            f.write(res.get("stdout", ""))
+            f.write("\n--- STDERR ---\n")
+            f.write(res.get("stderr", ""))
+
+        if res["status"] == "pass":
             success_count += 1
         else:
             failures.append(runner)
             
+    # Save Summary
+    summary = {
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "total": len(RUNNERS),
+        "passed": success_count,
+        "failed": len(failures),
+        "results": results
+    }
+    with open(f"{ARTIFACTS_DIR}/summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+
     print(f"\n{BLUE}=== SUMMARY ==={RESET}")
     print(f"Total: {len(RUNNERS)}")
     print(f"Passed: {success_count}")
     print(f"Failed: {len(failures)}")
+    print(f"Artifacts saved to: {ARTIFACTS_DIR}")
     
     if failures:
         print(f"{RED}Failed Runners: {', '.join(failures)}{RESET}")
