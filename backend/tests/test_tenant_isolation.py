@@ -106,6 +106,30 @@ async def seeded(async_session_factory):
 @pytest.mark.asyncio
 async def test_tenant_admin_header_forbidden_403(client, seeded):
     r = await client.get(
+
+        # Transaction in default tenant to validate list filtering does not leak
+        from app.models.sql_models import Transaction
+        from datetime import datetime
+
+        existing_tx = (
+            await session.execute(select(Transaction).where(Transaction.tenant_id == "default_casino"))
+        ).scalars().first()
+        if not existing_tx:
+            session.add(
+                Transaction(
+                    tenant_id="default_casino",
+                    player_id=player.id,
+                    type="deposit",
+                    amount=10.0,
+                    currency="USD",
+                    status="completed",
+                    state="completed",
+                    balance_after=10.0,
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                )
+            )
+
         "/api/v1/api-keys/",
         headers={
             "Authorization": f"Bearer {seeded['tenant_token']}",
