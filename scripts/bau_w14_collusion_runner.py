@@ -21,7 +21,18 @@ async def main():
         # 1. Login Admin
         print(f"-> Logging in Admin...")
         resp = await client.post(f"{BASE_URL}/auth/login", json={"email": ADMIN_EMAIL, "password": ADMIN_PASS})
-        token = resp.json()["access_token"]
+        
+        if resp.status_code != 200:
+             print(f"{RED}Login Failed: {resp.status_code} {resp.text}{RESET}")
+             return
+
+        token_data = resp.json()
+        token = token_data.get("access_token")
+        
+        if not token:
+             print(f"{RED}Login Response missing access_token: {token_data}{RESET}")
+             return
+
         headers = {"Authorization": f"Bearer {token}", "X-Reason": "BAU_W14_TEST"}
         
         # 2. Simulate Flagging
