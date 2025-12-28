@@ -218,27 +218,27 @@ async def adyen_webhook(
                    provider_ref=psp_reference,
                    provider_event_id=psp_reference
                 )
-                 tx.status = "completed"
-                 tx.state = "paid"
-                 metrics.record_payout_result(True)
-                 attempt.status = "success"
-                 
-             else:
-                 # Payout Failed
-                 # We should Refund the Held amount? Or just mark failed and let admin retry?
-                 # Usually if payout fails, funds verify logic might keep them held until manual review.
-                 # Or we auto-refund to available.
-                 # For safety in this Sprint, we mark as 'payout_failed' and keep funds held.
-                 # Admin can 'Reject' to refund, or 'Retry'.
-                 tx.status = "payout_failed"
-                 tx.state = "payout_failed"
-                 metrics.record_payout_result(False)
-                 attempt.status = "failed"
-                 attempt.error_code = req_item.get("reason", "Payout Failed")
-             
-             session.add(tx)
-             session.add(attempt)
-             await session.commit()
+                tx.status = "completed"
+                tx.state = "paid"
+                metrics.record_payout_result(True)
+                attempt.status = "success"
+                
+            else:
+                # Payout Failed
+                # We should Refund the Held amount? Or just mark failed and let admin retry?
+                # Usually if payout fails, funds verify logic might keep them held until manual review.
+                # Or we auto-refund to available.
+                # For safety in this Sprint, we mark as 'payout_failed' and keep funds held.
+                # Admin can 'Reject' to refund, or 'Retry'.
+                tx.status = "payout_failed"
+                tx.state = "payout_failed"
+                metrics.record_payout_result(False)
+                attempt.status = "failed"
+                attempt.error_code = req_item.get("reason", "Payout Failed")
+            
+            session.add(tx)
+            session.add(attempt)
+            await session.commit()
 
     return {"status": "[accepted]"}
 
