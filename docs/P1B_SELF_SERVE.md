@@ -87,7 +87,7 @@ curl -sS -i http://localhost:8001/api/version
 
 ### Pass Criteria
 - `/api/ready` returns **200**
-- Response indicates DB connected and Redis connected (field names may vary)
+- Response indicates DB connected and Redis connected (field names may vary; in this repo `/api/ready` currently returns `dependencies.database|redis|migrations`)
 
 ### Evidence to Share (masked)
 - Full response headers + body of `/api/ready`
