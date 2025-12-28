@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from httpx import AsyncClient, ASGITransport
 import hmac
 import hashlib
+from unittest.mock import patch
 
 from app.routes.integrations.security.hmac import verify_hmac_signature
 
@@ -25,14 +26,15 @@ async def test_generic_hmac_verification_success():
     msg = f"{ts}.".encode("utf-8") + body
     sig = hmac.new(secret.encode("utf-8"), msg, hashlib.sha256).hexdigest()
 
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post(
-            "/cb",
-            content=body,
-            headers={"X-Signature": sig, "X-Timestamp": ts},
-        )
-        assert resp.status_code == 200
+    with patch("config.settings.webhook_signature_enforced", True):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/cb",
+                content=body,
+                headers={"X-Signature": sig, "X-Timestamp": ts},
+            )
+            assert resp.status_code == 200
 
 
 @pytest.mark.asyncio
@@ -50,11 +52,12 @@ async def test_generic_hmac_verification_failure():
     body = b"{\"hello\":\"world\"}"
     ts = "1700000000"
 
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post(
-            "/cb",
-            content=body,
-            headers={"X-Signature": "deadbeef", "X-Timestamp": ts},
-        )
-        assert resp.status_code == 401
+    with patch("config.settings.webhook_signature_enforced", True):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/cb",
+                content=body,
+                headers={"X-Signature": "deadbeef", "X-Timestamp": ts},
+            )
+            assert resp.status_code == 401
