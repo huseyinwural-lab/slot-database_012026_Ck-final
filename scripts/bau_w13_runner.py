@@ -5,10 +5,13 @@ import os
 from datetime import datetime
 import json
 
-# Env
-BASE_URL = "http://localhost:8001/api/v1"
-ADMIN_EMAIL = "admin@casino.com"
-ADMIN_PASS = "Admin123!"
+# Import shared utils
+try:
+    from runner_utils import get_env_config, login_admin_with_retry, get_auth_headers
+except ImportError:
+    import sys
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from runner_utils import get_env_config, login_admin_with_retry, get_auth_headers
 
 # Colors
 GREEN = "\033[92m"
@@ -17,16 +20,18 @@ RESET = "\033[0m"
 
 async def main():
     print(f"{GREEN}=== BAU W13 MIGRATION & VIP LOYALTY RUNNER ==={RESET}")
+    config = get_env_config()
+    BASE_URL = config["BASE_URL"]
     
     async with httpx.AsyncClient(timeout=30.0) as client:
         # 1. Login Admin
-        print(f"-> Logging in Admin...")
-        resp = await client.post(f"{BASE_URL}/auth/login", json={"email": ADMIN_EMAIL, "password": ADMIN_PASS})
-        if resp.status_code != 200:
-            print(f"{RED}Login Failed: {resp.text}{RESET}")
+        try:
+            token = await login_admin_with_retry(client)
+            headers = get_auth_headers(token)
+            headers["X-Reason"] = "BAU_W13_TEST"
+        except Exception as e:
+            print(f"{RED}Login Failed: {e}{RESET}")
             return
-        token = resp.json()["access_token"]
-        headers = {"Authorization": f"Bearer {token}", "X-Reason": "BAU_W13_TEST"}
         
         # 2. Setup VIP Tiers
         print(f"-> Creating VIP Tiers...")
@@ -41,8 +46,7 @@ async def main():
             if resp.status_code == 200:
                 print(f"   Created Tier: {t['name']}")
             else:
-                # Might already exist
-                pass
+                pass # Might exist
 
         # 3. Create Player & Login
         print(f"-> Registering Player...")
@@ -94,15 +98,6 @@ async def main():
              return
         cash = resp.json()["cash_received"]
         print(f"{GREEN}   Redeemed: ${cash}{RESET}")
-        
-        # Verify Wallet
-        resp = await client.get(f"{BASE_URL}/player/wallet/balance", headers=player_headers) # Assuming this endpoint exists
-        # If not, check /auth/player/login response or specific endpoint
-        # Or check /vip/me again? No, wallet balance.
-        # Let's check 'balance_real' from login or profile if endpoints are missing.
-        # But wait, PlayerWallet usually has 'balance'.
-        # Try /api/v1/player/wallet/balance
-        # Or just trust the redeem response for now if endpoint is tricky.
         
         # 7. Generate Snapshot
         snapshot = {
