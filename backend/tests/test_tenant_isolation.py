@@ -283,3 +283,51 @@ async def test_player_disable_same_tenant_200_and_status_disabled(client, seeded
     )
     assert r2.status_code == 200, r2.text
     assert r2.json().get("status") == "disabled"
+
+
+
+@pytest.mark.asyncio
+async def test_disabled_player_hidden_by_default_and_visible_with_include(client, seeded):
+    # Disable the seeded player first
+    r_del = await client.delete(
+        f"/api/v1/players/{seeded['player_id']}",
+        headers={"Authorization": f"Bearer {seeded['owner_token']}"},
+    )
+    assert r_del.status_code == 200, r_del.text
+
+    # Default list must hide disabled
+    r_list = await client.get(
+        "/api/v1/players?page=1&page_size=50",
+        headers={"Authorization": f"Bearer {seeded['owner_token']}"},
+    )
+    assert r_list.status_code == 200, r_list.text
+    ids = [p["id"] for p in (r_list.json().get("items") or [])]
+    assert seeded["player_id"] not in ids
+
+    # include_disabled=1 must include disabled
+    r_list2 = await client.get(
+        "/api/v1/players?page=1&page_size=50&include_disabled=1",
+        headers={"Authorization": f"Bearer {seeded['owner_token']}"},
+    )
+    assert r_list2.status_code == 200, r_list2.text
+    items2 = r_list2.json().get("items") or []
+    found = [p for p in items2 if p["id"] == seeded["player_id"]]
+    assert found and found[0].get("status") == "disabled"
+
+    # status=disabled should include; status wins over include_disabled
+    r_list3 = await client.get(
+        "/api/v1/players?page=1&page_size=50&status=disabled",
+        headers={"Authorization": f"Bearer {seeded['owner_token']}"},
+    )
+    assert r_list3.status_code == 200, r_list3.text
+    items3 = r_list3.json().get("items") or []
+    assert any(p["id"] == seeded["player_id"] for p in items3)
+
+    # status=active + include_disabled=1 -> should NOT include (status wins)
+    r_list4 = await client.get(
+        "/api/v1/players?page=1&page_size=50&status=active&include_disabled=1",
+        headers={"Authorization": f"Bearer {seeded['owner_token']}"},
+    )
+    assert r_list4.status_code == 200, r_list4.text
+    items4 = r_list4.json().get("items") or []
+    assert not any(p["id"] == seeded["player_id"] for p in items4)
