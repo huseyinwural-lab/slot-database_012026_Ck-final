@@ -28,8 +28,10 @@ class TestRunnerUtils(unittest.TestCase):
         self.assertEqual(masked_obj["token"], "***REDACTED***")
 
     def test_get_env_config_defaults(self):
-        config = get_env_config()
-        self.assertEqual(config["BASE_URL"], "http://localhost:8001/api/v1")
+        # Ensure we don't leak environment if strict is not set
+        with patch.dict(os.environ, {}, clear=True):
+            config = get_env_config()
+            self.assertEqual(config["BASE_URL"], "http://localhost:8001/api/v1")
 
     @patch("os.environ.get")
     def test_strict_mode_fail(self, mock_env):
@@ -50,7 +52,11 @@ class TestRunnerUtils(unittest.TestCase):
         mock_resp.json.return_value = {"access_token": "valid"}
         mock_post.return_value = mock_resp
         
-        token = await login_admin_with_retry(AsyncMock())
+        # We need an AsyncClient mock passed in
+        client = AsyncMock()
+        client.post = mock_post
+        
+        token = await login_admin_with_retry(client)
         self.assertEqual(token, "valid")
 
 if __name__ == '__main__':
