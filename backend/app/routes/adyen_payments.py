@@ -196,27 +196,27 @@ async def adyen_webhook(
                 continue
                 metrics.record_webhook_replay()
 
-             if success:
-                 # Ledger: Apply 'withdrawal_succeeded' (Unlock held funds and reduce balance permanently)
-                 # Wait, for withdrawal:
-                 # 1. Created: Delta Available -X, Delta Held +X
-                 # 2. Paid: Delta Held -X (burn)
-                 # Let's check 'apply_wallet_delta_with_ledger' logic for 'withdrawal_succeeded'
-                 # It should reduce 'held' balance.
-                 
-                 await apply_wallet_delta_with_ledger(
-                    session,
-                    tenant_id=tx.tenant_id,
-                    player_id=tx.player_id,
-                    tx_id=tx.id,
-                    event_type="withdrawal_succeeded", # burns the held amount
-                    delta_available=0.0,
-                    delta_held=-tx.amount, # Reduce held
-                    currency=tx.currency,
-                    idempotency_key=f"adyen:{psp_reference}:payout",
-                    provider="adyen",
-                    provider_ref=psp_reference,
-                    provider_event_id=psp_reference
+            if success:
+                # Ledger: Apply 'withdrawal_succeeded' (Unlock held funds and reduce balance permanently)
+                # Wait, for withdrawal:
+                # 1. Created: Delta Available -X, Delta Held +X
+                # 2. Paid: Delta Held -X (burn)
+                # Let's check 'apply_wallet_delta_with_ledger' logic for 'withdrawal_succeeded'
+                # It should reduce 'held' balance.
+                
+                await apply_wallet_delta_with_ledger(
+                   session,
+                   tenant_id=tx.tenant_id,
+                   player_id=tx.player_id,
+                   tx_id=tx.id,
+                   event_type="withdrawal_succeeded", # burns the held amount
+                   delta_available=0.0,
+                   delta_held=-tx.amount, # Reduce held
+                   currency=tx.currency,
+                   idempotency_key=f"adyen:{psp_reference}:payout",
+                   provider="adyen",
+                   provider_ref=psp_reference,
+                   provider_event_id=psp_reference
                 )
                  tx.status = "completed"
                  tx.state = "paid"
