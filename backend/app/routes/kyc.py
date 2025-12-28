@@ -26,6 +26,8 @@ async def get_kyc_dashboard(
     current_admin: AdminUser = Depends(get_current_admin),
     _ = Depends(feature_required("can_manage_kyc")),
 ):
+    _kyc_mock_guard()
+
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     
     # Counts
