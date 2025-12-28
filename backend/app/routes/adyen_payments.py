@@ -406,12 +406,12 @@ async def test_trigger_webhook(
                 await session.commit()
                 return {"status": "simulated_payout_success"}
         else:
-             tx = await session.get(Transaction, tx_id)
-             if tx:
-                 tx.status = "payout_failed"
-                 tx.state = "payout_failed"
-                 attempt.status = "failed"
-                 session.add(tx)
-                 session.add(attempt)
-                 await session.commit()
-                 return {"status": "simulated_payout_failed"}
+            tx = await session.get(Transaction, tx_id)
+            if tx:
+                tx.status = "payout_failed"
+                tx.state = "payout_failed"
+                attempt.status = "failed"
+                session.add(tx)
+                session.add(attempt)
+                await session.commit()
+                return {"status": "simulated_payout_failed"}
