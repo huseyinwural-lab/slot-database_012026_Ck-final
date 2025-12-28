@@ -31,7 +31,6 @@ async def seeded(async_session_factory):
 
     async with async_session_factory() as session:
         # Tenants must match IDs used in tenant-context header logic.
-        # Tenants must match IDs used in tenant-context header logic.
         for tenant_id, name, ttype in (
             ("default_casino", "Default Casino", "owner"),
             ("demo_renter", "Demo Renter", "renter"),
