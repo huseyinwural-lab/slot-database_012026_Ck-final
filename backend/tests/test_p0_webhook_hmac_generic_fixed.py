@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from httpx import AsyncClient, ASGITransport
 import hmac
 import hashlib
+import time
 from unittest.mock import patch
 
 from app.routes.integrations.security.hmac import verify_hmac_signature
@@ -22,7 +23,7 @@ async def test_generic_hmac_verification_success():
         return {"ok": True}
 
     body = b"{\"hello\":\"world\"}"
-    ts = "1700000000"
+    ts = str(int(time.time()))  # Use current timestamp
     msg = f"{ts}.".encode("utf-8") + body
     sig = hmac.new(secret.encode("utf-8"), msg, hashlib.sha256).hexdigest()
 
@@ -50,7 +51,7 @@ async def test_generic_hmac_verification_failure():
         return {"ok": True}
 
     body = b"{\"hello\":\"world\"}"
-    ts = "1700000000"
+    ts = str(int(time.time()))  # Use current timestamp
 
     with patch("config.settings.webhook_signature_enforced", True):
         transport = ASGITransport(app=app)
