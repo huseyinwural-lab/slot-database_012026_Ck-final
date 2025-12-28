@@ -74,6 +74,7 @@ async def get_players(
     request: Request,
     status: Optional[str] = None,
     search: Optional[str] = None,
+    include_disabled: Optional[str] = Query(None),
     pagination: PaginationParams = Depends(get_pagination_params),
     current_admin: AdminUser = Depends(get_current_admin),
     session: AsyncSession = Depends(get_session)
