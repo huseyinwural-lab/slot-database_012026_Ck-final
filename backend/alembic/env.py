@@ -7,8 +7,10 @@ from sqlalchemy import pool, create_engine
 from sqlalchemy.engine import Connection
 from sqlalchemy.engine.url import make_url
 
+from app.core.connection_strings import derive_sync_database_url
+
 # P1-001: Correct import path for settings
-from app.core.database import SQLModel # Use absolute path
+from app.core.database import SQLModel  # Use absolute path
 # Import all models to register with metadata
 from app.models import (
     sql_models, game_models, robot_models, growth_models, bonus_models, reconciliation,
