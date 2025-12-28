@@ -69,7 +69,7 @@
     - Added leak-guard tests to prevent `user:pass@` / token / Bearer leaks
     - `docker-compose.yml` and `docker-compose.prod.yml` now support `localdb` vs `external` profiles
 - **Verification**:
-    - `pytest -q backend/tests/test_connection_strings.py tests/test_failfast_ci_strict.py tests/test_config_snapshot_leak_guard.py tests/test_runtime_failfast_uvicorn.py tests/test_runtime_local_smoke_uvicorn.py tests/test_runtime_alembic_sqlite_smoke.py`: **PASSED**
+    - `pytest -q backend/tests/test_connection_strings.py tests/test_failfast_ci_strict.py tests/test_config_snapshot_leak_guard.py tests/test_runtime_failfast_uvicorn.py tests/test_runtime_local_smoke_uvicorn.py tests/test_runtime_alembic_sqlite_smoke.py tests/test_alembic_heads_guard.py`: **PASSED**
     - **P0 Deploy Config Refactor Regression Test Suite**: **ALL PASSED (5/5)**
         - ✅ Health endpoint (`/api/health`) returns 200 JSON with status and environment
         - ✅ Ready endpoint (`/api/ready`) returns 200 JSON with database connectivity status
