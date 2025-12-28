@@ -166,9 +166,9 @@ async def adyen_webhook(
 
         # PAYOUT-REAL-001: Handle Payout Webhooks
         elif event_code == "PAYOUT_THIRDPARTY":
-             tx_id = req_item.get("merchantReference") # We sent "payout_{attempt_id}"
-             success = req_item.get("success") == "true"
-             psp_reference = req_item.get("pspReference")
+            tx_id = req_item.get("merchantReference") # We sent "payout_{attempt_id}"
+            success = req_item.get("success") == "true"
+            psp_reference = req_item.get("pspReference")
              
              # Extract Attempt ID from reference
              # format: payout_{attempt_id}
