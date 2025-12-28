@@ -9,12 +9,19 @@ from jose import jwt
 
 
 def _token(*, admin_id: str, email: str, tenant_id: str, role: str) -> str:
-    from datetime import timedelta
+    # IMPORTANT: app-side auth uses config.settings (root config.py), not backend.config.
+    # Use the same settings to generate tokens deterministically.
+    from config import settings
+    from datetime import datetime
 
-    return create_access_token(
-        data={"sub": admin_id, "email": email, "tenant_id": tenant_id, "role": role},
-        expires_delta=timedelta(hours=1),
-    )
+    payload = {
+        "sub": admin_id,
+        "email": email,
+        "tenant_id": tenant_id,
+        "role": role,
+        "exp": int(datetime.utcnow().timestamp() + 3600),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 @pytest_asyncio.fixture(scope="function")
