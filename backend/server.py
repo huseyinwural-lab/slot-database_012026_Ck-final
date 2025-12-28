@@ -193,6 +193,23 @@ async def on_startup():
             "log_format": settings.get_log_format(),
         },
     )
+
+    # P0.7: Config snapshot (NO secrets). Helps debug connection issues quickly.
+    try:
+        from app.core.connection_strings import summarize_database_url, summarize_redis_url
+
+        logger.info(
+            "config.snapshot",
+            extra={
+                "event": "config.snapshot",
+                "db": summarize_database_url(settings.database_url),
+                "redis": summarize_redis_url(settings.redis_url),
+            },
+        )
+    except Exception:
+        # Best effort; don't block startup.
+        pass
+
     try:
         from app.core.database import engine
         from sqlalchemy.ext.asyncio import AsyncSession
