@@ -184,17 +184,17 @@ async def adyen_webhook(
             if not attempt:
                 logger.warning(f"Adyen Webhook: PayoutAttempt {attempt_id} not found")
                 continue
-                 
-             # Find Transaction
-             tx = await session.get(Transaction, attempt.withdraw_tx_id)
-             if not tx:
-                 logger.warning("Adyen Webhook: Withdrawal TX not found")
-                 continue
-                 
-             if tx.status == "completed":
-                 logger.info(f"Adyen Webhook: Payout already completed {tx.id}")
-                 continue
-                 metrics.record_webhook_replay()
+                
+            # Find Transaction
+            tx = await session.get(Transaction, attempt.withdraw_tx_id)
+            if not tx:
+                logger.warning("Adyen Webhook: Withdrawal TX not found")
+                continue
+                
+            if tx.status == "completed":
+                logger.info(f"Adyen Webhook: Payout already completed {tx.id}")
+                continue
+                metrics.record_webhook_replay()
 
              if success:
                  # Ledger: Apply 'withdrawal_succeeded' (Unlock held funds and reduce balance permanently)
