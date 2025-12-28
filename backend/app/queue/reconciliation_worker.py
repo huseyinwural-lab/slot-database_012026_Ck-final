@@ -22,7 +22,7 @@ class WorkerSettings:
     functions = [reconciliation_run_job]
 
     # Redis connection
-    redis_settings = RedisSettings.from_dsn(settings.redis_url)
+    redis_settings = settings.arq_redis_settings
 
     # Timeouts / retries (can be tuned via env-backed Settings later if needed)
     max_jobs = 10
