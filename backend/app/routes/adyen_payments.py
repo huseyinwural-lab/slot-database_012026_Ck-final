@@ -119,9 +119,9 @@ async def adyen_webhook(
         
         # We process 'AUTHORISATION' event
         if event_code == "AUTHORISATION":
-             tx_id = req_item.get("merchantReference")
-             success = req_item.get("success") == "true"
-             psp_reference = req_item.get("pspReference")
+            tx_id = req_item.get("merchantReference")
+            success = req_item.get("success") == "true"
+            psp_reference = req_item.get("pspReference")
              
              # Find Transaction
              stmt = select(Transaction).where(Transaction.id == tx_id)
