@@ -1,7 +1,7 @@
 """add unique index on reconciliation_findings
 
 Revision ID: 20251222_02_reconciliation_findings_unique_idx
-Revises: 20251222_01_recon
+Revises: inc_ver_len
 Create Date: 2025-12-22
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "20251222_02_reconciliation_findings_unique_idx"
-down_revision = "20251222_01_recon"
+down_revision = "inc_ver_len"
 branch_labels = None
 depends_on = None
 
