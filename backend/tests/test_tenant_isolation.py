@@ -163,3 +163,37 @@ async def test_owner_impersonation_works_for_other_tenant_200(client, seeded):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body.get("tenant_id") == "demo_renter"
+
+
+
+@pytest.mark.asyncio
+async def test_list_wrong_tenant_returns_empty_200(client, seeded):
+    # List endpoints must not leak cross-tenant data.
+    r = await client.get(
+        "/api/v1/players?page=1&page_size=10",
+        headers={"Authorization": f"Bearer {seeded['tenant_token']}"},
+    )
+
+    assert r.status_code == 200, r.text
+    body = r.json()
+    items = body.get("items") or []
+    assert items == [], "Expected empty list for wrong-tenant list query"
+
+
+@pytest.mark.asyncio
+async def test_same_tenant_insufficient_role_403(client, seeded):
+    # Role boundary (not tenant boundary): same tenant but non-owner calling owner-only endpoint -> 403.
+    payload = {
+        "email": "new.tenant.admin@demo-renter.test",
+        "tenant_id": "demo_renter",
+        "password": "TenantAdmin123!",
+        "full_name": "Tenant Admin",
+    }
+
+    r = await client.post(
+        "/api/v1/admin/create-tenant-admin",
+        json=payload,
+        headers={"Authorization": f"Bearer {seeded['tenant_token']}"},
+    )
+
+    assert r.status_code == 403, r.text
