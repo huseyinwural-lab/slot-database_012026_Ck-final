@@ -70,6 +70,91 @@ async def get_dashboard_stats(
         pending_kyc_count=pending_kyc
     )
 
+
+@router.post("/players", status_code=201)
+async def create_player_admin(
+    request: Request,
+    payload: dict = Body(...),
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    """Admin create player (P1BS-G1-001).
+
+    Contract:
+    - Path: POST /api/v1/players
+    - Tenant boundary: created in caller tenant only
+    - Password required
+    - Response includes player_id
+    """
+
+    # RBAC: require admin role
+    if getattr(current_admin, "role", None) != "Admin":
+        raise HTTPException(status_code=403, detail={"error_code": "FORBIDDEN"})
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    username = payload.get("username")
+    password = payload.get("password")
+    email = payload.get("email") or f"{username}@example.com" if username else None
+
+    if not username:
+        raise HTTPException(status_code=400, detail={"error_code": "USERNAME_REQUIRED"})
+    if not password:
+        raise HTTPException(status_code=400, detail={"error_code": "PASSWORD_REQUIRED"})
+
+    # Uniqueness (tenant scope)
+    existing = (
+        await session.execute(select(Player).where(Player.tenant_id == tenant_id, Player.username == username))
+    ).scalars().first()
+    if existing:
+        raise HTTPException(status_code=409, detail={"error_code": "USERNAME_EXISTS"})
+
+    if email:
+        existing_email = (
+            await session.execute(select(Player).where(Player.tenant_id == tenant_id, Player.email == email))
+        ).scalars().first()
+        if existing_email:
+            raise HTTPException(status_code=409, detail={"error_code": "EMAIL_EXISTS"})
+
+    from app.utils.auth import get_password_hash
+
+    player = Player(
+        tenant_id=tenant_id,
+        username=username,
+        email=email or "",
+        password_hash=get_password_hash(password),
+    )
+    session.add(player)
+    await session.commit()
+    await session.refresh(player)
+
+    # Audit (best-effort)
+    try:
+        from app.services.audit import audit
+
+        request_id = request.headers.get("X-Request-Id", "unknown")
+        await audit.log(
+            admin=current_admin,
+            action="player.create",
+            module="player",
+            target_id=player.id,
+            details={"username": username, "email": email},
+            session=session,
+            request_id=request_id,
+            tenant_id=tenant_id,
+            resource_type="player",
+            result="success",
+        )
+        await session.commit()
+    except Exception:
+        pass
+
+    return {
+        "player_id": player.id,
+        "username": player.username,
+        "status": player.status,
+    }
+
 # --- PLAYERS ---
 @router.get("/players", response_model=PaginatedResponsePublic[PlayerPublic])
 async def get_players(
