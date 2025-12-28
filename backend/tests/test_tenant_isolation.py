@@ -30,6 +30,29 @@ async def seeded(async_session_factory):
     """
 
     async with async_session_factory() as session:
+        # Transaction in default tenant to validate list filtering does not leak
+        from app.models.sql_models import Transaction
+        from datetime import datetime
+
+        existing_tx = (
+            await session.execute(select(Transaction).where(Transaction.tenant_id == "default_casino"))
+        ).scalars().first()
+        if not existing_tx:
+            session.add(
+                Transaction(
+                    tenant_id="default_casino",
+                    player_id=player.id,
+                    type="deposit",
+                    amount=10.0,
+                    currency="USD",
+                    status="completed",
+                    state="completed",
+                    balance_after=10.0,
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                )
+            )
+
         # Tenants must match IDs used in tenant-context header logic.
         for tenant_id, name, ttype in (
             ("default_casino", "Default Casino", "owner"),
