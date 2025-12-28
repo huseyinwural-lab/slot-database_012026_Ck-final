@@ -116,7 +116,7 @@ class Settings(BaseSettings):
 
     def validate_prod_secrets(self) -> None:
         """P0-OPS-001: Strict Production Validation."""
-        if self.env in {"prod"}:
+        if self.env in {"prod", "staging"}:
             missing = []
             # Critical Secrets List - MUST BE LIVE keys
             if not self.stripe_api_key or "live" not in self.stripe_api_key:
