@@ -127,6 +127,10 @@ app.include_router(payouts.router)
 from app.routes import core
 app.include_router(core.router)
 
+# Admin ledger/manual adjustments (P1-B-S: PSP-free money-loop smoke)
+from app.routes import ledger_admin
+app.include_router(ledger_admin.router)
+
 from app.routes import payments
 app.include_router(payments.router)
 
