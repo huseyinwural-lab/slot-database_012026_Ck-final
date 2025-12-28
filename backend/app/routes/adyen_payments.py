@@ -100,7 +100,6 @@ async def adyen_webhook(
 ):
     """Handle Adyen Webhooks (Notification)."""
 
-    raw_body = await request.body()
     body = await request.json()
 
     # Signature Verification (Adyen HMAC in additionalData.hmacSignature)
