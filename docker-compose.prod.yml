@@ -1,7 +1,9 @@
 version: '3.8'
 
 services:
+  # LOCAL ONLY: Postgres/Redis containers are behind the "localdb" profile.
   postgres:
+    profiles: ["localdb"]
     image: postgres:15-alpine
     restart: always
     environment:
@@ -16,20 +18,27 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    profiles: ["localdb"]
+    image: redis:7-alpine
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Default backend service expects EXTERNAL DATABASE_URL / REDIS_URL.
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
     restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
     environment:
       PYTHONUNBUFFERED: "1"
-      # Sync URL for Alembic migrations (psycopg2)
-      DATABASE_URL_SYNC: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
-      # Async URL for Application (asyncpg)
-      DATABASE_URL: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
+      DATABASE_URL: ${DATABASE_URL}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
       ENV: ${ENV:-prod}
       DEBUG: "False"
       JWT_SECRET: ${JWT_SECRET}
