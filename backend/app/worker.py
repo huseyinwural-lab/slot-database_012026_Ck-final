@@ -14,7 +14,7 @@ async def startup(ctx):
     logger.info("Worker starting...")
     # Engine is initialized at module level in app.core.database
     from app.core.database import engine
-    logger.info(f"DB Engine initialized: {engine.url}")
+    logger.info("worker.db_engine_initialized", extra={"event": "worker.db_engine_initialized"})
 
 async def shutdown(ctx):
     logger.info("Worker shutting down...")
