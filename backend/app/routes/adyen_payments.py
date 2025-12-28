@@ -307,14 +307,14 @@ async def test_trigger_webhook(
                 await session.commit()
                 return {"status": "simulated_payout_success"}
         else:
-             if tx:
-                 tx.status = "payout_failed"
-                 tx.state = "payout_failed"
-                 attempt.status = "failed"
-                 session.add(tx)
-                 session.add(attempt)
-                 await session.commit()
-                 return {"status": "simulated_payout_failed"}
+            if tx:
+                tx.status = "payout_failed"
+                tx.state = "payout_failed"
+                attempt.status = "failed"
+                session.add(tx)
+                session.add(attempt)
+                await session.commit()
+                return {"status": "simulated_payout_failed"}
         return {"status": "payout_processed"}
 
     # Handle Deposit Simulation (Default)
