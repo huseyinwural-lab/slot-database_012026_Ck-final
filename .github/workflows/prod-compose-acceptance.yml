@@ -174,7 +174,7 @@ jobs:
           # Run smoke inside the running backend service container so artifacts are produced
           # in the same filesystem we copy from.
           docker compose -f docker-compose.prod.yml --profile localdb exec -T backend \
-            sh -lc 'export CI_STRICT=1; export API_BASE_URL="$API_BASE/api/v1"; export BOOTSTRAP_OWNER_EMAIL="${BOOTSTRAP_OWNER_EMAIL}"; export BOOTSTRAP_OWNER_PASSWORD="${BOOTSTRAP_OWNER_PASSWORD}"; export ARTIFACTS_DIR=/app/artifacts/release_smoke; python /app/scripts/release_smoke.py'
+            sh -lc 'export CI_STRICT=1; export API_BASE_URL="http://127.0.0.1:8001/api/v1"; export BOOTSTRAP_OWNER_EMAIL="${BOOTSTRAP_OWNER_EMAIL}"; export BOOTSTRAP_OWNER_PASSWORD="${BOOTSTRAP_OWNER_PASSWORD}"; export ARTIFACTS_DIR=/app/artifacts/release_smoke; python3 /app/scripts/release_smoke.py'
 
           # Copy artifacts out of the running backend service container to workspace for upload.
           BACKEND_ID="$(docker compose -f docker-compose.prod.yml --profile localdb ps -q backend | head -n 1)"
