@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,7 @@ const ReconciliationPanel = () => {
   const [schedule, setSchedule] = useState({ provider: 'Stripe', frequency: 'daily', auto_fetch_enabled: false });
   const [scheduleLoading, setScheduleLoading] = useState(false);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
       const res = await api.get('/v1/finance/reconciliation');
       setReports(res.data || []);
@@ -34,7 +34,7 @@ const ReconciliationPanel = () => {
     } catch (err) {
       toast.error('Failed to load reconciliation history');
     }
-  };
+  }, [selectedReport]);
 
   const fetchSchedule = async (currentProvider = provider) => {
     setScheduleLoading(true);
@@ -60,7 +60,7 @@ const ReconciliationPanel = () => {
 
   useEffect(() => {
     fetchHistory();
-  }, []);
+  }, [fetchHistory]);
 
   const handleUpload = async () => {
     if (!selectedFile) return;

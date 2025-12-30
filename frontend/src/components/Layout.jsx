@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { Search, LogOut, CreditCard, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,10 @@ const Layout = ({ children }) => {
 
   const { isOwner, tenantName, hasFeature, capabilities } = useCapabilities();
   
-  const menuFlags = capabilities?.menu_flags || {};
+  const menuFlags = useMemo(
+    () => capabilities?.menu_flags || {},
+    [capabilities?.menu_flags]
+  );
 
   // Theme Config based on Role
   const theme = isOwner ? {
