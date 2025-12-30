@@ -83,8 +83,43 @@ def upgrade() -> None:
             return False
         return any(ix.get("name") == index_name for ix in indexes)
 
+    def columns_exist(table_name: str, columns: list[str]) -> bool:
+        conn = op.get_bind()
+        dialect = conn.dialect.name
+
+        if dialect == "postgresql":
+            # Only create indexes when ALL referenced columns exist.
+            for col in columns:
+                present = (
+                    conn.execute(
+                        sa.text(
+                            """
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_schema = current_schema()
+                              AND table_name = :table
+                              AND column_name = :col
+                            """
+                        ),
+                        {"table": table_name, "col": col},
+                    ).scalar()
+                    is not None
+                )
+                if not present:
+                    return False
+            return True
+
+        insp = sa.inspect(conn)
+        try:
+            cols = {c.get("name") for c in insp.get_columns(table_name)}
+        except Exception:
+            return False
+        return all(c in cols for c in columns)
+
     def safe_create_index(index_name, table_name, columns):
         ix = op.f(index_name)
+        if not columns_exist(table_name, columns):
+            return
         if not index_exists(ix, table_name):
             op.create_index(ix, table_name, columns, unique=False)
 
