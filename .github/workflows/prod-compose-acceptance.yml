@@ -36,6 +36,9 @@ jobs:
       # CI db connection string (service name is 'postgres' in compose)
       DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/casino_db"
 
+      # Sync DSN for Alembic/psycopg2 (must match POSTGRES_PASSWORD above)
+      SYNC_DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/casino_db"
+
       # Redis is optional for this release gate (Admin+Backend only)
       REDIS_REQUIRED: "false"
 
