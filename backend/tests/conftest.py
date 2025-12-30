@@ -19,17 +19,29 @@ from app.utils.auth_player import get_current_player
 from app.utils.auth import create_access_token
 
 
+# ------------------------------------------------------------
+# AsyncIO loop discipline
+# ------------------------------------------------------------
+# In CI, pytest can create a new event loop per test. If an AsyncEngine is created
+# on a different loop (e.g. via asyncio.run), asyncpg/SQLAlchemy can raise:
+#   "got Future ... attached to a different loop"
+# A session-scoped loop prevents cross-loop reuse.
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.new_event_loop()
+    try:
+        yield loop
+    finally:
+        loop.close()
+
+
 # ---------- Test DB (async sqlite) ----------
 TEST_DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "test_casino.db"))
 TEST_DB_URL = f"sqlite+aiosqlite:///{TEST_DB_PATH}"
 
 
-def _run(coro):
-    return asyncio.run(coro)
-
-
 @pytest.fixture(scope="session")
-def async_engine():
+def async_engine(event_loop):
     # Her test koşusunda temiz DB
     if os.path.exists(TEST_DB_PATH):
         os.remove(TEST_DB_PATH)
@@ -40,8 +52,14 @@ def async_engine():
         async with engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.create_all)
 
-    _run(_init())
-    return engine
+    event_loop.run_until_complete(_init())
+
+    yield engine
+
+    # Cleanup
+    event_loop.run_until_complete(engine.dispose())
+    if os.path.exists(TEST_DB_PATH):
+        os.remove(TEST_DB_PATH)
 
 
 @pytest.fixture(scope="session")
