@@ -180,7 +180,7 @@ jobs:
             -e ARTIFACTS_DIR=/app/artifacts/release_smoke \
             backend sh -lc 'python /app/scripts/release_smoke.py'
 
-          # Copy artifacts out of the backend container to workspace for upload.
+          # Copy artifacts out of the *running backend service container* to workspace for upload.
           BACKEND_ID="$(docker compose -f docker-compose.prod.yml --profile localdb ps -q backend | head -n 1)"
           mkdir -p artifacts/release_smoke
           docker cp "${BACKEND_ID}:/app/artifacts/release_smoke/." artifacts/release_smoke/
