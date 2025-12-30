@@ -141,14 +141,21 @@
 
 ---
 
-## P0 Migration Fix — robotdefinition FK dependency (Iteration 2025-12-30)
-- **Issue**: `gamerobotbinding.robot_id` FK references `robotdefinition.id` but `robotdefinition` table is not created before FK, causing Postgres `UndefinedTable` and backend container unhealthy during migrations.
-- **Fix**: Added guarded `robotdefinition` create block in `backend/alembic/versions/6512f9dafb83_register_game_models_fixed_2.py` immediately before `gamerobotbinding` creation.
-- **Tests**:
-    - `pytest -q backend/tests/test_alembic_heads_guard.py` → **PASSED** (2/2)
-    - `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py` → **PASSED** (1/1)
-- **Regression Test (2025-12-30)**:
+## P0 Migration Fix — FK dependency ordering (Iteration 2025-12-30)
+- **Issue**: Multiple FK dependency errors in `6512f9dafb83_register_game_models_fixed_2.py`:
+    - `gamerobotbinding.robot_id` FK references `robotdefinition.id` but `robotdefinition` table not created before FK
+    - `gameevent.round_id` FK references `gameround.id` but `gameround` table not created before FK
+    - Causing Postgres `UndefinedTable` errors and backend container unhealthy during migrations
+- **Fix**: Added guarded creation blocks with correct ordering in migration file:
+    - **Lines 258-273**: `robotdefinition` table creation (before `gamerobotbinding`)
+    - **Lines 408-427**: `gamesession` table creation 
+    - **Lines 428-451**: `gameround` table creation
+    - **Lines 452-468**: `gameevent` table creation (after `gameround` dependency)
+- **Verification (2025-12-30)**:
     - `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py backend/tests/test_alembic_heads_guard.py` → **PASSED** (3/3)
     - `alembic upgrade head` on fresh SQLite database → **PASSED** (no FK dependency errors)
-    - Migration `6512f9dafb83_register_game_models_fixed_2.py` correctly creates `robotdefinition` table before `gamerobotbinding` table
-    - **Status**: ✅ VERIFIED - robotdefinition FK fix working correctly
+    - **Table Creation Order Verified**:
+        - ✅ `robotdefinition` (line 258) → `gamerobotbinding` (line 274)
+        - ✅ `gamesession` (line 408) & `gameround` (line 428) → `gameevent` (line 452)
+    - **Comprehensive Test Suite**: `/app/alembic_fk_dependency_test.py` → **PASSED** (4/4 tests)
+    - **Status**: ✅ VERIFIED - All FK dependency ordering issues resolved
