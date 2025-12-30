@@ -17,31 +17,37 @@ const Reports = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-        let endpoint = '/v1/reports/overview';
-        if (activeTab === 'financial') endpoint = '/v1/reports/financial';
-        if (activeTab === 'players') endpoint = '/v1/reports/players/ltv';
-        if (activeTab === 'games') endpoint = '/v1/reports/games';
-        if (activeTab === 'providers') endpoint = '/v1/reports/providers';
-        if (activeTab === 'bonuses') endpoint = '/v1/reports/bonuses';
-        if (activeTab === 'affiliates') endpoint = '/v1/reports/affiliates';
-        if (activeTab === 'risk') endpoint = '/v1/reports/risk';
-        if (activeTab === 'rg') endpoint = '/v1/reports/rg';
-        if (activeTab === 'kyc') endpoint = '/v1/reports/kyc';
-        if (activeTab === 'crm') endpoint = '/v1/reports/crm';
-        if (activeTab === 'cms') endpoint = '/v1/reports/cms';
-        if (activeTab === 'operational') endpoint = '/v1/reports/operational';
-        if (activeTab === 'scheduled') endpoint = '/v1/reports/schedules';
-        if (activeTab === 'exports') endpoint = '/v1/reports/exports';
-        
-        const res = await api.get(endpoint);
-        setData(res.data);
-    } catch (err) { console.error(err); } finally { setLoading(false); }
-  };
+      let endpoint = '/v1/reports/overview';
+      if (activeTab === 'financial') endpoint = '/v1/reports/financial';
+      if (activeTab === 'players') endpoint = '/v1/reports/players/ltv';
+      if (activeTab === 'games') endpoint = '/v1/reports/games';
+      if (activeTab === 'providers') endpoint = '/v1/reports/providers';
+      if (activeTab === 'bonuses') endpoint = '/v1/reports/bonuses';
+      if (activeTab === 'affiliates') endpoint = '/v1/reports/affiliates';
+      if (activeTab === 'risk') endpoint = '/v1/reports/risk';
+      if (activeTab === 'rg') endpoint = '/v1/reports/rg';
+      if (activeTab === 'kyc') endpoint = '/v1/reports/kyc';
+      if (activeTab === 'crm') endpoint = '/v1/reports/crm';
+      if (activeTab === 'cms') endpoint = '/v1/reports/cms';
+      if (activeTab === 'operational') endpoint = '/v1/reports/operational';
+      if (activeTab === 'scheduled') endpoint = '/v1/reports/schedules';
+      if (activeTab === 'exports') endpoint = '/v1/reports/exports';
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+      const res = await api.get(endpoint);
+      setData(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleExport = async (type) => {
     try {

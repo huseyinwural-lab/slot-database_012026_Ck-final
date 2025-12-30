@@ -27,26 +27,28 @@ const PlayerDetail = () => {
   const [isAdjOpen, setIsAdjOpen] = useState(false);
   const [adjForm, setAdjForm] = useState({ amount: 0, type: 'real', note: '' });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-        const [pRes, tRes, kRes, lRes] = await Promise.all([
-            api.get(`/v1/players/${id}`),
-            api.get(`/v1/players/${id}/transactions`),
-            api.get(`/v1/players/${id}/kyc`),
-            api.get(`/v1/players/${id}/logs`)
-        ]);
-        setPlayer(pRes.data);
-        setTransactions(tRes.data);
-        setKycDocs(kRes.data);
-        setLogs(lRes.data);
+      const [pRes, tRes, kRes, lRes] = await Promise.all([
+        api.get(`/v1/players/${id}`),
+        api.get(`/v1/players/${id}/transactions`),
+        api.get(`/v1/players/${id}/kyc`),
+        api.get(`/v1/players/${id}/logs`),
+      ]);
+      setPlayer(pRes.data);
+      setTransactions(tRes.data);
+      setKycDocs(kRes.data);
+      setLogs(lRes.data);
     } catch (err) {
-        toast.error("Failed to load player data");
+      toast.error("Failed to load player data");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-  };
+  }, [id]);
 
-  useEffect(() => { fetchData(); }, [id]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleStatusChange = async (newStatus) => {
     try {
