@@ -64,12 +64,11 @@ services:
     ports:
       - "8001:8001"
     healthcheck:
-      # Use custom healthcheck script or curl (ensure curl is installed)
       test: ["CMD-SHELL", "curl -fsS http://localhost:8001/api/ready || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
+      interval: 5s
+      timeout: 2s
+      retries: 30
+      start_period: 60s
 
   frontend-admin:
     build:

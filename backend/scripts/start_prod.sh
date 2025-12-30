@@ -38,8 +38,35 @@ retry_cmd() {
 
 # Run migrations before starting the app
 if [ "$ENV_NAME" = "prod" ] || [ "$ENV_NAME" = "staging" ]; then
+  echo "[start_prod] $(date -Iseconds) Waiting for Postgres readiness (ENV=$ENV_NAME)"
+
+  python - <<'PY'
+import os
+import time
+import psycopg2
+
+dsn = os.getenv("SYNC_DATABASE_URL") or os.getenv("DATABASE_URL")
+if not dsn:
+    raise SystemExit("[start_prod] FATAL: Missing SYNC_DATABASE_URL/DATABASE_URL")
+
+# Convert async DSN to sync DSN if needed
+if "+asyncpg" in dsn:
+    dsn = dsn.replace("postgresql+asyncpg://", "postgresql://")
+
+for i in range(60):
+    try:
+        psycopg2.connect(dsn).close()
+        print("[start_prod] Postgres ready")
+        break
+    except Exception as e:
+        print(f"[start_prod] Waiting for Postgres... ({i+1}/60) {e}")
+        time.sleep(1)
+else:
+    raise SystemExit("[start_prod] Postgres did not become ready")
+PY
+
   echo "[start_prod] $(date -Iseconds) Running alembic migrations (ENV=$ENV_NAME)"
-  
+
   # Retry alembic upgrade to handle DB warmup race conditions
   if retry_cmd alembic upgrade head; then
       echo "[start_prod] $(date -Iseconds) Migrations applied successfully."
@@ -49,8 +76,6 @@ if [ "$ENV_NAME" = "prod" ] || [ "$ENV_NAME" = "staging" ]; then
   fi
 
   echo "[start_prod] $(date -Iseconds) Running one-shot owner bootstrap (if env vars present)"
-  # Bootstrap is also critical, but '|| true' was used before. 
-  # Let's keep it safe but log explicitly.
   if python /app/scripts/bootstrap_owner.py; then
       echo "[start_prod] $(date -Iseconds) Bootstrap completed or skipped."
   else
