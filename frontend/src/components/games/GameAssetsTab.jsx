@@ -25,7 +25,7 @@ const GameAssetsTab = ({ game }) => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, asset: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const loadAssets = async () => {
+  const loadAssets = useCallback(async () => {
     if (!game) return;
     setLoading(true);
     try {
@@ -37,11 +37,11 @@ const GameAssetsTab = ({ game }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [game]);
 
   useEffect(() => {
     loadAssets();
-  }, [game?.id]);
+  }, [loadAssets]);
 
   const openUploadFor = (assetType, language = null) => {
     setUploadDialog({ open: true, context: { assetType, language } });
