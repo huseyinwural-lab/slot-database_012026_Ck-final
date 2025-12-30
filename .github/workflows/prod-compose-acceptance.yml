@@ -98,7 +98,7 @@ jobs:
           mkdir -p ci_artifacts
 
           # Fresh DB için volume’ları sil
-          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
+          docker compose -f docker-compose.prod.yml --profile localdb down -v --remove-orphans || true
 
           # Runner disk / build cache kaynaklı fail’leri minimize et
           docker system prune -af || true
@@ -356,4 +356,4 @@ jobs:
       - name: Tear down
         if: always()
         run: |
-          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
+          docker compose -f docker-compose.prod.yml --profile localdb down -v --remove-orphans || true
