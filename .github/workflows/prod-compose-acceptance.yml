@@ -72,26 +72,21 @@ jobs:
           docker version
           docker compose version
 
-      - name: Set bootstrap credentials for CI
+      - name: Set CI admin credentials (deterministic)
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           set -euo pipefail
 
-          if [ -n "${{ secrets.BOOTSTRAP_OWNER_EMAIL }}" ] && [ -n "${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}" ]; then
-            echo "Using BOOTSTRAP_OWNER_* from GitHub Secrets"
-            EMAIL="${{ secrets.BOOTSTRAP_OWNER_EMAIL }}"
-            PASS="${{ secrets.BOOTSTRAP_OWNER_PASSWORD }}"
-          else
-            echo "BOOTSTRAP_OWNER_* secrets not set; using ephemeral CI bootstrap credentials"
-            EMAIL="ci.owner@example.com"
-            PASS="CI-Temp-$(date +%s)-A!"
-          fi
+          # Deterministic CI admin credentials.
+          # CI should not rely on prod/staging bootstrap behavior.
+          EMAIL="admin@casino.com"
+          PASS="Admin123!"
 
           echo "BOOTSTRAP_ENABLED=false" >> "$GITHUB_ENV"
           echo "BOOTSTRAP_OWNER_EMAIL=$EMAIL" >> "$GITHUB_ENV"
           echo "BOOTSTRAP_OWNER_PASSWORD=$PASS" >> "$GITHUB_ENV"
 
-          # Keep E2E credentials in sync with bootstrap
+          # Keep E2E credentials in sync
           echo "E2E_OWNER_EMAIL=$EMAIL" >> "$GITHUB_ENV"
           echo "E2E_OWNER_PASSWORD=$PASS" >> "$GITHUB_ENV"
 
@@ -166,6 +161,16 @@ jobs:
           set -euo pipefail
           echo "Running Release Smoke Suite (Strict Mode)..."
           
+
+      - name: Seed deterministic CI admin user
+        run: |
+          set -euo pipefail
+          echo "Seeding CI admin user via /api/v1/admin/seed (ENV=ci only)"
+          code="$(curl -sS -o /tmp/seed.json -w "%{http_code}" -X POST "${API_BASE}/api/v1/admin/seed")"
+          echo "HTTP $code"
+          cat /tmp/seed.json
+          test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201" || test "$code" = "200"
+
           # Inject CI variables explicitly
           export CI_STRICT=1
           export API_BASE_URL="$API_BASE/api/v1"
