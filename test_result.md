@@ -238,15 +238,14 @@
   - ✅ Page loads without blank screen at http://localhost:3000
   - ✅ Login form renders correctly with all required elements
   - ✅ No fatal JavaScript runtime errors (only expected CORS errors)
+  - ❌ Login blocked due to external backend URL not accessible (expected behavior)
+  - ✅ Frontend build and rendering stable after CI-unblock changes
+- **Status**: ✅ FRONTEND STABLE - CI unblock successful, backend connectivity issue is environmental
 
 ## P0 Backend CI Check — Reconciliation Test (Iteration 2025-12-30)
 - **Test**: `pytest -q backend/tests/test_reconciliation_runs_api.py -q`
 - **Result**: ✅ PASS
 - **Note**: Observed SQLAlchemy warning about non-checked-in connection being GC’ed (pool cleanup). Test suite still passes; follow-up hardening can be done post-gate if needed.
-
-  - ❌ Login blocked due to external backend URL not accessible (expected behavior)
-  - ✅ Frontend build and rendering stable after CI-unblock changes
-- **Status**: ✅ FRONTEND STABLE - CI unblock successful, backend connectivity issue is environmental
 
 
 ---
