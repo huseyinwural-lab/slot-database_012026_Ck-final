@@ -286,3 +286,19 @@
 
 - **Fix**: Added session-scoped autouse fixture in `backend/tests/conftest.py` to patch `app.core.database.engine` and `async_session` to the test sqlite async engine; also aligns `settings.database_url` + `DATABASE_URL` env.
 - **Verification**: `pytest -q backend/tests/test_reconciliation_runs_api.py -q` → ✅ PASS
+
+---
+
+## P0 Backend CI Sanity Test — Post-Fix Verification (Iteration 2025-12-30)
+- **Status**: ✅ ALL TESTS PASSED
+- **Test Results**:
+  - ✅ **Health Endpoint**: `/api/health` returns 200 with status "healthy" and environment "dev"
+  - ✅ **Ready Endpoint**: `/api/ready` returns 200 with status "ready", database "connected", redis "skipped", migrations "unknown"
+  - ✅ **Readiness Endpoint**: `/api/readiness` returns 200 with status "ready" (alias for ready endpoint)
+  - ✅ **Server Import**: Backend server module imports successfully without ValueError for missing secrets in dev environment
+  - ✅ **Reconciliation Tests**: `pytest tests/test_reconciliation_runs_api.py` passes (3/3 tests) with NO "Future attached to a different loop" errors
+- **Observations**:
+  - SQLAlchemy warning about non-checked-in connection being GC'ed observed but tests still pass
+  - No critical errors or blocking issues found
+  - All CI fix requirements verified successfully
+- **Verification**: Backend CI sanity test suite → ✅ PASS (5/5 tests)
