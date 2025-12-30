@@ -52,11 +52,41 @@ def upgrade() -> None:
                server_default='0.0')
 
     # 3. FIX AUDIT EVENT INDEXES
-    def safe_create_index(index_name, table_name, columns):
+    # IMPORTANT: Do NOT swallow SQL errors. If an index creation fails in Postgres,
+    # the transaction is aborted and Alembic will later error with InFailedSqlTransaction.
+
+    def index_exists(index_name: str, table_name: str) -> bool:
+        conn = op.get_bind()
+        dialect = conn.dialect.name
+
+        if dialect == "postgresql":
+            return (
+                conn.execute(
+                    sa.text(
+                        """
+                        SELECT 1
+                        FROM pg_indexes
+                        WHERE schemaname = current_schema()
+                          AND indexname = :name
+                        """
+                    ),
+                    {"name": index_name},
+                ).scalar()
+                is not None
+            )
+
+        # Fallback for SQLite/other dialects
+        insp = sa.inspect(conn)
         try:
-            op.create_index(op.f(index_name), table_name, columns, unique=False)
+            indexes = insp.get_indexes(table_name)
         except Exception:
-            pass 
+            return False
+        return any(ix.get("name") == index_name for ix in indexes)
+
+    def safe_create_index(index_name, table_name, columns):
+        ix = op.f(index_name)
+        if not index_exists(ix, table_name):
+            op.create_index(ix, table_name, columns, unique=False)
 
     safe_create_index('ix_auditevent_chain_id', 'auditevent', ['chain_id'])
     safe_create_index('ix_auditevent_prev_row_hash', 'auditevent', ['prev_row_hash'])
