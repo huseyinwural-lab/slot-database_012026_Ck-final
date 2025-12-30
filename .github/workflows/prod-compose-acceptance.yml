@@ -156,12 +156,6 @@ jobs:
           docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 postgres || true
           exit 1
 
-      - name: Run Release Smoke Tests (P2.1)
-        run: |
-          set -euo pipefail
-          echo "Running Release Smoke Suite (Strict Mode)..."
-          
-
       - name: Seed deterministic CI admin user
         run: |
           set -euo pipefail
@@ -169,8 +163,13 @@ jobs:
           code="$(curl -sS -o /tmp/seed.json -w "%{http_code}" -X POST "${API_BASE}/api/v1/admin/seed")"
           echo "HTTP $code"
           cat /tmp/seed.json
-          test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201" || test "$code" = "200"
+          test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201"
 
+      - name: Run Release Smoke Tests (P2.1)
+        run: |
+          set -euo pipefail
+          echo "Running Release Smoke Suite (Strict Mode)..."
+          
           # Inject CI variables explicitly
           export CI_STRICT=1
           export API_BASE_URL="$API_BASE/api/v1"
