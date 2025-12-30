@@ -166,6 +166,8 @@ jobs:
           test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201"
 
       - name: Run Release Smoke Tests (P2.1)
+        env:
+          ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/release_smoke
         run: |
           set -euo pipefail
           echo "Running Release Smoke Suite (Strict Mode)..."
@@ -184,17 +186,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-smoke-logs
-          path: /app/artifacts/release_smoke/
+          path: artifacts/release_smoke/
 
       - name: Check for Secret Leakage (P2.4)
         if: always()
         run: |
           echo "Checking logs for leaked secrets..."
-          if grep -r "Bearer " /app/artifacts/release_smoke/ | grep -v "***REDACTED***"; then
+          if grep -r "Bearer " artifacts/release_smoke/ | grep -v "***REDACTED***"; then
             echo "FAIL: Found unmasked Bearer token in logs!"
             exit 1
           fi
-          if grep -r "access_token" /app/artifacts/release_smoke/ | grep -v "***REDACTED***"; then
+          if grep -r "access_token" artifacts/release_smoke/ | grep -v "***REDACTED***"; then
              echo "FAIL: Found unmasked access_token in logs!"
              # We exit 1 to fail the build if leak found, even if tests passed
              exit 1

@@ -12,7 +12,41 @@ BLUE = "\033[94m"
 RESET = "\033[0m"
 
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
-ARTIFACTS_DIR = "/app/artifacts/release_smoke"
+
+
+def resolve_artifacts_dir():
+    """Resolve a writable artifacts directory.
+
+    CI runners may not allow writing to absolute paths like /app/.
+    Priority:
+      1) ARTIFACTS_DIR / RELEASE_SMOKE_ARTIFACTS_DIR env override
+      2) $GITHUB_WORKSPACE/artifacts/release_smoke (or ./artifacts/release_smoke)
+      3) /tmp/release_smoke fallback
+    """
+    from pathlib import Path
+
+    raw = os.getenv("ARTIFACTS_DIR") or os.getenv("RELEASE_SMOKE_ARTIFACTS_DIR")
+    if raw:
+        p = Path(raw)
+    else:
+        p = Path(os.getenv("GITHUB_WORKSPACE", ".")) / "artifacts" / "release_smoke"
+
+    try:
+        p.mkdir(parents=True, exist_ok=True)
+        testfile = p / ".write_test"
+        testfile.write_text("ok")
+        try:
+            testfile.unlink()
+        except FileNotFoundError:
+            pass
+        return str(p)
+    except Exception:
+        p2 = Path("/tmp") / "release_smoke"
+        p2.mkdir(parents=True, exist_ok=True)
+        return str(p2)
+
+
+ARTIFACTS_DIR = resolve_artifacts_dir()
 
 RUNNERS = [
     "bau_w12_runner.py",
@@ -81,7 +115,6 @@ def run_script(script_name):
 
 def main():
     print(f"{GREEN}=== T15-003: E2E RELEASE MATRIX (SMOKE) - STRICT MODE ==={RESET}")
-    os.makedirs(ARTIFACTS_DIR, exist_ok=True)
     
     start_all = datetime.datetime.utcnow()
     results = []
