@@ -15,9 +15,9 @@ configure_logging(level=settings.log_level, fmt=settings.get_log_format())
 logger = logging.getLogger(__name__)
 
 # P0.8: Fail-fast DB/Redis config guard
-# - In prod/staging OR CI_STRICT=1 -> DATABASE_URL and REDIS_URL must be set.
+# - In prod/staging OR CI_STRICT=1 -> DATABASE_URL must be set.
 # - SQLite DB URLs are forbidden in these environments.
-# - Redis is treated as CRITICAL dependency in these environments.
+# - Redis is OPTIONAL in prod/staging unless REDIS_REQUIRED=true.
 import os
 from app.core.redis_health import redis_ping
 
@@ -47,11 +47,11 @@ if settings.env in {"prod", "staging"} or is_ci_strict:
     if _is_sqlite_url(settings.database_url):
         raise RuntimeError("SQLite DATABASE_URL is not allowed in prod/staging or CI_STRICT")
 
-    if not (os.getenv("REDIS_URL") or "").strip():
-        raise RuntimeError("REDIS_URL must be set (prod/staging or CI_STRICT)")
-    # Redis is critical. We validate reachability at readiness.
-    # At import-time (sync), we only enforce presence to avoid event-loop bootstrap here.
-    # (Runtime /api/ready will report redis=unreachable and return 503.)
+    # Redis is optional unless explicitly required.
+    if bool(getattr(settings, "redis_required", False)):
+        if not (os.getenv("REDIS_URL") or "").strip():
+            raise RuntimeError("REDIS_URL must be set when REDIS_REQUIRED=true")
+        # Reachability is validated at readiness.
 
 # Fail-fast for prod/staging secrets
 if settings.env in {"prod", "staging"}:
@@ -301,7 +301,7 @@ async def health_check():
 async def readiness_check():
     """Readiness probe: checks DB connectivity + migration state (lightweight).
 
-    In prod/staging (and CI_STRICT), Redis is treated as a CRITICAL dependency.
+    If REDIS_REQUIRED=true, Redis is treated as a CRITICAL dependency.
     """
     try:
         from app.core.database import engine
@@ -321,9 +321,9 @@ async def readiness_check():
                 if settings.env in {"prod", "staging"}:
                     raise
 
-        # Redis check (critical in prod/staging/CI_STRICT)
+        # Redis check (critical only when explicitly required)
         redis_status = "skipped"
-        if settings.env in {"prod", "staging"} or is_ci_strict:
+        if bool(getattr(settings, "redis_required", False)):
             redis_status = "connected" if await _redis_connectable(settings.redis_url) else "unreachable"
             if redis_status != "connected":
                 from fastapi import HTTPException

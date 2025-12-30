@@ -54,8 +54,11 @@ class Settings(BaseSettings):
     max_tx_velocity_count: int = 5
     max_tx_velocity_window_minutes: int = 1
 
-    # NOTE: Default is localhost to avoid docker-compose host coupling.
+    # Redis / Queue
+    # Default is localhost to avoid docker-compose host coupling.
+    # In prod/staging, Redis is OPTIONAL unless REDIS_REQUIRED=true.
     redis_url: str = "redis://localhost:6379/0"
+    redis_required: bool = False
     recon_runner: str = "background"
 
     @property

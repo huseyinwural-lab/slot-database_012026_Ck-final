@@ -36,12 +36,15 @@ jobs:
       # CI db connection string (service name is 'postgres' in compose)
       DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/casino_db"
 
+      # Redis is optional for this release gate (Admin+Backend only)
+      REDIS_REQUIRED: "false"
+
       DB_POOL_SIZE: "5"
       DB_MAX_OVERFLOW: "10"
 
       # CORS: Explicit allowlist for CI (no wildcard) to match prod/staging rules
-      # Browser origin will be http://localhost:3000 (and player http://localhost:3001)
-      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
+      # Browser origin will be http://localhost:3000
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
 
 
       # Frontend build args

@@ -39,6 +39,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       SYNC_DATABASE_URL: ${SYNC_DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
+      REDIS_REQUIRED: ${REDIS_REQUIRED:-false}
       ENV: ${ENV:-prod}
       DEBUG: "False"
       JWT_SECRET: ${JWT_SECRET}
@@ -85,6 +86,7 @@ services:
       - "3000:80"
 
   frontend-player:
+    profiles: ["player"]
     build:
       context: ./frontend-player
       dockerfile: Dockerfile.prod
