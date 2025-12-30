@@ -21,7 +21,7 @@ ENV REACT_APP_VERSION=$APP_VERSION
 ENV REACT_APP_GIT_SHA=$GIT_SHA
 ENV REACT_APP_BUILD_TIME=$BUILD_TIME
 
-RUN yarn build
+RUN CI=false yarn build
 
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
