@@ -159,3 +159,20 @@
         - ✅ `gamesession` (line 408) & `gameround` (line 428) → `gameevent` (line 452)
     - **Comprehensive Test Suite**: `/app/alembic_fk_dependency_test.py` → **PASSED** (4/4 tests)
     - **Status**: ✅ VERIFIED - All FK dependency ordering issues resolved
+
+---
+
+## P0 Postgres Migration Fix — Boolean Default Value (Iteration 2025-12-30)
+- **Issue**: Postgres migration crash in `backend/alembic/versions/3c4ee35573cd_t13_001_schema_drift_reset_full.py`:
+    - `adminuser.mfa_enabled` server_default was `sa.text('0')` causing Postgres DatatypeMismatch
+    - Boolean columns in Postgres require `'false'`/`'true'` string literals, not numeric `'0'`/`'1'`
+- **Fix**: Changed server_default from `sa.text('0')` to `sa.text('false')` on line 179:
+    - **Before**: `server_default=sa.text('0')`
+    - **After**: `server_default=sa.text('false')`
+- **Verification (2025-12-30)**:
+    - ✅ **Migration File Content**: Confirmed line 179 contains `server_default=sa.text('false')`
+    - ✅ **Pytest Tests**: `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py backend/tests/test_alembic_heads_guard.py` → **PASSED** (3/3)
+    - ✅ **Alembic Upgrade**: `alembic upgrade head` on fresh SQLite database → **PASSED** (no errors)
+    - ✅ **Column Behavior**: `mfa_enabled` column defaults to falsy value (0/False) as expected
+    - **Comprehensive Test Suite**: `/app/postgres_migration_test.py` → **PASSED** (4/4 tests)
+    - **Status**: ✅ VERIFIED - Postgres migration crash fix confirmed working
