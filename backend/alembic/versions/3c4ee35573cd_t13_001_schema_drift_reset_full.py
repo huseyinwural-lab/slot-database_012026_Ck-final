@@ -176,7 +176,7 @@ def upgrade() -> None:
 
     # 2. ADMIN USER DRIFT
     if not column_exists('adminuser', 'mfa_enabled'):
-        op.add_column('adminuser', sa.Column('mfa_enabled', sa.Boolean(), nullable=False, server_default=sa.text('0')))
+        op.add_column('adminuser', sa.Column('mfa_enabled', sa.Boolean(), nullable=False, server_default=sa.text('false')))
     
     # 3. AFFILIATE DRIFT
     if not column_exists('affiliate', 'commission_type'):
