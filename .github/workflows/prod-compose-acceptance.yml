@@ -119,7 +119,7 @@ jobs:
             exit 1
           fi
 
-          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker compose -f docker-compose.prod.yml --profile localdb up -d --remove-orphans
           docker compose -f docker-compose.prod.yml ps | tee ci_artifacts/compose_ps_inline.txt
           docker compose -f docker-compose.prod.yml logs --no-color --tail=200 | tee ci_artifacts/compose_logs_inline_tail200.txt || true
           docker ps -a
