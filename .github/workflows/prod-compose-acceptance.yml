@@ -222,14 +222,14 @@ jobs:
         run: |
           echo "Verifying admin user creation in DB..."
           sleep 5
-          docker compose -f docker-compose.prod.yml exec -T postgres \
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres \
             psql -U postgres -d casino_db -c "select count(*) from adminuser;"
           
-          docker compose -f docker-compose.prod.yml exec -T postgres \
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres \
             psql -U postgres -d casino_db -c "select id, email, role, status from adminuser;"
           
           # Check Tenants
-          docker compose -f docker-compose.prod.yml exec -T postgres \
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres \
             psql -U postgres -d casino_db -c "select id, name from tenant;"
 
       # Login test is the ultimate truth. If this passes, we are good.
