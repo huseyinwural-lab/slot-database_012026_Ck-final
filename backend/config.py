@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, model_validator
 from typing import List, Optional
 import json
 from arq.connections import RedisSettings
