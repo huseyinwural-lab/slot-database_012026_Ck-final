@@ -25,6 +25,8 @@ const GameEngineTab = ({ game, onUpdated }) => {
   const [customJson, setCustomJson] = useState('{}');
 
   const loadData = useCallback(async () => {
+    if (!game?.id) return;
+
     setLoading(true);
     try {
       const [stdRes, confRes] = await Promise.all([
@@ -32,7 +34,7 @@ const GameEngineTab = ({ game, onUpdated }) => {
         api.get(`/v1/engine/game/${game.id}/config`)
       ]);
       setProfiles(stdRes.data);
-      
+
       const conf = confRes.data;
       setEngineState({
         mode: conf.mode || 'STANDARD',
@@ -43,18 +45,14 @@ const GameEngineTab = ({ game, onUpdated }) => {
       setCustomJson(JSON.stringify(conf.params || {}, null, 2));
     } catch (e) {
       toast.error('Failed to load engine data');
-  }, [game?.id]);
-
-  useEffect(() => {
-    if (!game?.id) return;
-    loadData();
-  }, [loadData, game?.id]);
-
-
     } finally {
       setLoading(false);
     }
-  };
+  }, [game?.id]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleSave = async () => {
     if (!reason) {
