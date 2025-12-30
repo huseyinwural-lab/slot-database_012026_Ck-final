@@ -59,6 +59,14 @@ class Settings(BaseSettings):
     # In prod/staging, Redis is OPTIONAL unless REDIS_REQUIRED=true.
     redis_url: str = "redis://localhost:6379/0"
     redis_required: bool = False
+
+    # If REDIS_URL is unset/blank, keep a safe default unless Redis is required.
+    # (Pydantic will otherwise override the default with an empty string.)
+    @model_validator(mode="after")
+    def _normalize_redis_url(self):
+        if (self.redis_url or "").strip() == "":
+            self.redis_url = "redis://localhost:6379/0"
+        return self
     recon_runner: str = "background"
 
     @property
