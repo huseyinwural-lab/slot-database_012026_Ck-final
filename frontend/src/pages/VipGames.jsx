@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,21 +16,23 @@ const VipGames = () => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-        const res = await api.get('/v1/games');
-        // Handle both Array and Paginated Response
-        const all = Array.isArray(res.data) ? res.data : (res.data.items || []);
-        setAllGames(all);
-        setVipGames(all.filter(g => g.tags && g.tags.includes('VIP')));
+      const res = await api.get('/v1/games');
+      // Handle both Array and Paginated Response
+      const all = Array.isArray(res.data) ? res.data : (res.data.items || []);
+      setAllGames(all);
+      setVipGames(all.filter(g => g.tags && g.tags.includes('VIP')));
     } catch (err) {
-        console.error(err);
+      console.error(err);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const toggleVipStatus = async (game, isVip) => {
     try {

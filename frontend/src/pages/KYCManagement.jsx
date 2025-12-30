@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,20 +20,26 @@ const KYCManagement = () => {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-        if (activeTab === 'dashboard') {
-            const res = await api.get('/v1/kyc/dashboard');
-            setStats(res.data);
-        } else if (activeTab === 'queue') {
-            const res = await api.get('/v1/kyc/queue');
-            setQueue(res.data);
-        }
-    } catch (err) { toast.error("Load failed"); } finally { setLoading(false); }
-  };
+      if (activeTab === 'dashboard') {
+        const res = await api.get('/v1/kyc/dashboard');
+        setStats(res.data);
+      } else if (activeTab === 'queue') {
+        const res = await api.get('/v1/kyc/queue');
+        setQueue(res.data);
+      }
+    } catch (err) {
+      toast.error("Load failed");
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleReview = async (doc, status) => {
     try {

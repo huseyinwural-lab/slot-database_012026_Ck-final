@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,19 +40,23 @@ const RiskManagement = () => {
   const [selectedCase, setSelectedCase] = useState(null);
   const [caseNote, setCaseNote] = useState("");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-        if (activeTab === 'dashboard') setDashboard((await api.get('/v1/risk/dashboard')).data);
-        if (activeTab === 'rules') setRules((await api.get('/v1/risk/rules')).data);
-        if (activeTab === 'velocity') setVelocity((await api.get('/v1/risk/velocity')).data);
-        if (activeTab === 'blacklist') setBlacklist((await api.get('/v1/risk/blacklist')).data);
-        if (activeTab === 'cases') setCases((await api.get('/v1/risk/cases')).data);
-        if (activeTab === 'alerts') setAlerts((await api.get('/v1/risk/alerts')).data);
-        if (activeTab === 'investigation') setEvidence((await api.get('/v1/risk/evidence')).data);
-    } catch (err) { console.error(err); }
-  };
+      if (activeTab === 'dashboard') setDashboard((await api.get('/v1/risk/dashboard')).data);
+      if (activeTab === 'rules') setRules((await api.get('/v1/risk/rules')).data);
+      if (activeTab === 'velocity') setVelocity((await api.get('/v1/risk/velocity')).data);
+      if (activeTab === 'blacklist') setBlacklist((await api.get('/v1/risk/blacklist')).data);
+      if (activeTab === 'cases') setCases((await api.get('/v1/risk/cases')).data);
+      if (activeTab === 'alerts') setAlerts((await api.get('/v1/risk/alerts')).data);
+      if (activeTab === 'investigation') setEvidence((await api.get('/v1/risk/evidence')).data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [activeTab]);
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleCreateRule = async () => {
     try { await api.post('/v1/risk/rules', newRule); setIsRuleOpen(false); fetchData(); toast.success("Rule Created"); } catch { toast.error("Failed"); }
