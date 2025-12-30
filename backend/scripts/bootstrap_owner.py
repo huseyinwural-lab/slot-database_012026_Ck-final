@@ -58,6 +58,9 @@ async def main() -> None:
         from sqlmodel import select, SQLModel
 
         from app.core.database import engine
+        # Ensure all models are registered before SQLModel relationships are configured.
+        # (Fixes: Tenant.games Relationship referencing "Game")
+        from app.models import game_models  # noqa: F401
         from app.models.sql_models import AdminUser, Tenant
         from app.utils.auth import get_password_hash
 

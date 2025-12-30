@@ -23,6 +23,14 @@ jobs:
       # CI için dummy secret yeterli; prod’da GitHub Secrets kullanın
       JWT_SECRET: "ci_dummy_secret_change_me"
 
+      # Required secrets for staging validation (dummy values for CI)
+      STRIPE_API_KEY: "sk_test_ci_dummy"
+      STRIPE_WEBHOOK_SECRET: "whsec_ci_dummy"
+      ADYEN_API_KEY: "adyen_ci_dummy"
+      ADYEN_HMAC_KEY: "adyen_hmac_ci_dummy"
+      KYC_MOCK_ENABLED: "false"
+      AUDIT_EXPORT_SECRET: "ci_dummy_audit_export_secret"
+
       # Bootstrap credentials are set in a step (either from secrets or generated ephemerally)
       # to avoid CI failing when repository secrets are not configured.
 
