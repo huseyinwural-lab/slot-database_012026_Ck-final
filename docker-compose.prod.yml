@@ -34,8 +34,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     restart: always
-    env_file:
-      - ./backend/.env
+# env_file removed (CI should not hard-fail if backend/.env is absent)
     environment:
       PYTHONUNBUFFERED: "1"
       DATABASE_URL: ${DATABASE_URL}
