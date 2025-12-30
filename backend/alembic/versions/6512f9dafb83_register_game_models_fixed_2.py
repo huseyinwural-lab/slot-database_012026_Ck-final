@@ -403,6 +403,52 @@ def upgrade() -> None:
         op.create_index(op.f('ix_chargebackcase_tenant_id'), 'chargebackcase', ['tenant_id'], unique=False)
         op.create_index(op.f('ix_chargebackcase_transaction_id'), 'chargebackcase', ['transaction_id'], unique=False)
 
+
+    # FIX: gamesession + gameround must exist before gameevent FK (round_id -> gameround.id)
+    if not table_exists('gamesession'):
+        op.create_table(
+            'gamesession',
+            sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('player_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('game_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('provider_session_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('currency', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('created_at', sa.DateTime(), nullable=False),
+            sa.Column('last_activity_at', sa.DateTime(), nullable=False),
+            sa.ForeignKeyConstraint(['tenant_id'], ['tenant.id']),
+            sa.ForeignKeyConstraint(['game_id'], ['game.id']),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_gamesession_tenant_id'), 'gamesession', ['tenant_id'], unique=False)
+        op.create_index(op.f('ix_gamesession_player_id'), 'gamesession', ['player_id'], unique=False)
+        op.create_index(op.f('ix_gamesession_provider_session_id'), 'gamesession', ['provider_session_id'], unique=False)
+
+    if not table_exists('gameround'):
+        op.create_table(
+            'gameround',
+            sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('player_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('session_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('game_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('provider_round_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('status', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('total_bet', sa.Float(), nullable=False),
+            sa.Column('total_win', sa.Float(), nullable=False),
+            sa.Column('created_at', sa.DateTime(), nullable=False),
+            sa.Column('updated_at', sa.DateTime(), nullable=False),
+            sa.ForeignKeyConstraint(['tenant_id'], ['tenant.id']),
+            sa.ForeignKeyConstraint(['session_id'], ['gamesession.id']),
+            sa.ForeignKeyConstraint(['game_id'], ['game.id']),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_gameround_tenant_id'), 'gameround', ['tenant_id'], unique=False)
+        op.create_index(op.f('ix_gameround_provider_round_id'), 'gameround', ['provider_round_id'], unique=False)
+        op.create_index(op.f('ix_gameround_session_id'), 'gameround', ['session_id'], unique=False)
+        op.create_index(op.f('ix_gameround_game_id'), 'gameround', ['game_id'], unique=False)
+
     if not table_exists('gameevent'):
         op.create_table('gameevent',
         sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
