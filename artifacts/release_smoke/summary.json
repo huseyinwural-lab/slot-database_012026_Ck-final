@@ -1,41 +1,41 @@
 {
   "suite_name": "release_smoke_matrix",
-  "started_at": "2025-12-28T11:48:26.701358",
-  "finished_at": "2025-12-28T11:50:07.896082",
-  "duration_ms": 101194,
+  "started_at": "2025-12-30T20:38:17.754016",
+  "finished_at": "2025-12-30T20:38:48.958257",
+  "duration_ms": 31204,
   "total": 5,
   "passed": 5,
   "failed": 0,
-  "api_base_url": "http://localhost:8001/api/v1",
+  "api_base_url": "default",
   "results": [
     {
       "name": "bau_w12_runner.py",
       "status": "pass",
-      "duration_ms": 20235,
+      "duration_ms": 6298,
       "exit_code": 0
     },
     {
       "name": "bau_w13_runner.py",
       "status": "pass",
-      "duration_ms": 20236,
+      "duration_ms": 6216,
       "exit_code": 0
     },
     {
       "name": "bau_w14_mtt_runner.py",
       "status": "pass",
-      "duration_ms": 20244,
+      "duration_ms": 6249,
       "exit_code": 0
     },
     {
       "name": "bau_w14_collusion_runner.py",
       "status": "pass",
-      "duration_ms": 20239,
+      "duration_ms": 6218,
       "exit_code": 0
     },
     {
       "name": "policy_enforcement_test.py",
       "status": "pass",
-      "duration_ms": 20238,
+      "duration_ms": 6218,
       "exit_code": 0
     }
   ]
