@@ -42,7 +42,7 @@ const GameManagement = () => {
   const [importJob, setImportJob] = useState(null);
   const [importItems, setImportItems] = useState([]);
 
-  const fetchAll = async (category = 'all', page = 1, pageSizeOverride) => {
+  const fetchAll = useCallback(async (category = 'all', page = 1, pageSizeOverride) => {
     try {
       const gameParams = {};
       if (category && category !== 'all') gameParams.category = category;
@@ -61,11 +61,11 @@ const GameManagement = () => {
     } catch {
       toast.error('Failed to load games');
     }
-  };
+  }, [gamesPageSize]);
 
   useEffect(() => {
     fetchAll(gameCategory, 1);
-  }, [gameCategory]);
+  }, [fetchAll, gameCategory]);
 
   const handleToggleGame = async (gameId) => {
     try {
