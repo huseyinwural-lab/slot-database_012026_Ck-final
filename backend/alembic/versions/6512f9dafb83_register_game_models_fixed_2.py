@@ -254,37 +254,8 @@ def upgrade() -> None:
         op.create_index(op.f('ix_gameconfigversion_tenant_id'), 'gameconfigversion', ['tenant_id'], unique=False)
 
 
-    # FIX: robotdefinition must exist before gamerobotbinding FK
-    if not table_exists('robotdefinition'):
-        op.create_table(
-            'robotdefinition',
-            sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-            sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-            sa.Column('schema_version', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-            sa.Column('config', sa.JSON(), nullable=True),
-            sa.Column('config_hash', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-            sa.Column('is_active', sa.Boolean(), nullable=False),
-            sa.Column('created_at', sa.DateTime(), nullable=False),
-            sa.Column('updated_at', sa.DateTime(), nullable=False),
-            sa.PrimaryKeyConstraint('id')
-        )
-        op.create_index(op.f('ix_robotdefinition_name'), 'robotdefinition', ['name'], unique=False)
-        op.create_index(op.f('ix_robotdefinition_config_hash'), 'robotdefinition', ['config_hash'], unique=False)
-
-    if not table_exists('gamerobotbinding'):
-        op.create_table('gamerobotbinding',
-        sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column('tenant_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column('game_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column('robot_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column('is_enabled', sa.Boolean(), nullable=False),
-        sa.Column('effective_from', sa.DateTime(), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['robot_id'], ['robotdefinition.id'], ),
-        sa.PrimaryKeyConstraint('id')
-        )
-        op.create_index(op.f('ix_gamerobotbinding_game_id'), 'gamerobotbinding', ['game_id'], unique=False)
-        op.create_index(op.f('ix_gamerobotbinding_tenant_id'), 'gamerobotbinding', ['tenant_id'], unique=False)
+    # NOTE: Robot models are introduced in a dedicated migration (4de54ad60828_add_robot_models_fixed).
+    # Keeping them out of this migration prevents FK ordering and duplicate-table issues.
 
     if not table_exists('player'):
         op.create_table('player',
