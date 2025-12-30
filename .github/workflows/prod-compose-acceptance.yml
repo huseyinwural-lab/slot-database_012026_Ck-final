@@ -166,22 +166,43 @@ jobs:
           test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201"
 
 
-      - name: Run Release Smoke Tests (P2.1) (inside backend image)
+      - name: Stage CI scripts into backend container (P0)
         run: |
           set -euo pipefail
-          echo "Running Release Smoke Suite inside backend image..."
 
-          # Run smoke inside the running backend service container so artifacts are produced
-          # in the same filesystem we copy from.
-          docker compose -f docker-compose.prod.yml --profile localdb exec -T backend \
-            sh -lc 'export CI_STRICT=1; export API_BASE_URL="http://127.0.0.1:8001/api/v1"; export BOOTSTRAP_OWNER_EMAIL="${BOOTSTRAP_OWNER_EMAIL}"; export BOOTSTRAP_OWNER_PASSWORD="${BOOTSTRAP_OWNER_PASSWORD}"; export ARTIFACTS_DIR=/app/artifacts/release_smoke; python3 /app/scripts/release_smoke.py'
+          BACKEND_ID="$(docker compose -f docker-compose.prod.yml --profile localdb ps -q backend | head -n 1)"
+          test -n "$BACKEND_ID" || (echo "backend container id not found" && exit 1)
+          echo "BACKEND_ID=$BACKEND_ID"
 
-          # Copy artifacts out of the running backend service container to workspace for upload.
+          # Copy repo-root ./scripts into the running backend container (image build context is ./backend)
+          docker cp scripts "${BACKEND_ID}:/app/ci_scripts"
+
+          # Prove files exist and python3 is available
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T backend sh -lc '
+            ls -la /app/ci_scripts/release_smoke.py && python3 -V
+          '
+
+          # Ensure artifacts dir exists
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T backend sh -lc 'mkdir -p /app/artifacts/release_smoke'
+
+      - name: Run Release Smoke Tests (P2.1) (inside backend container)
+        run: |
+          set -euo pipefail
+          echo "Running Release Smoke Suite inside backend container..."
+
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T backend sh -lc '
+            export CI_STRICT=1
+            export API_BASE_URL="http://127.0.0.1:8001/api/v1"
+            export BOOTSTRAP_OWNER_EMAIL="'"${BOOTSTRAP_OWNER_EMAIL}"'"
+            export BOOTSTRAP_OWNER_PASSWORD="'"${BOOTSTRAP_OWNER_PASSWORD}"'"
+            export ARTIFACTS_DIR=/app/artifacts/release_smoke
+            python3 /app/ci_scripts/release_smoke.py
+          '
+
           BACKEND_ID="$(docker compose -f docker-compose.prod.yml --profile localdb ps -q backend | head -n 1)"
           mkdir -p artifacts/release_smoke
           docker cp "${BACKEND_ID}:/app/artifacts/release_smoke/." artifacts/release_smoke/
 
-          # Guard: ensure artifacts exist (helps diagnose silent failures)
           test -n "$(ls -A artifacts/release_smoke 2>/dev/null)" || (echo "No smoke artifacts found" && exit 1)
 
       - name: Upload Smoke Test Artifacts (P2.2)
