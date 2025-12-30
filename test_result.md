@@ -274,5 +274,15 @@
 - **Status**: ✅ FIXED LOCALLY (commit needed in repo)
 
 ## P0 CI Blocker — asyncpg “different loop” (Iteration 2025-12-30)
+
+## P0 CI Blocker — Backend Unhealthy (Postgres warmup race) (Iteration 2025-12-30)
+- **RCA**: Backend container started migrations before Postgres accepted connections ("connection refused" to host `postgres:5432`). Healthcheck also ran while app was still applying migrations.
+- **Fixes**:
+  - `backend/scripts/start_prod.sh`: Added explicit Postgres readiness wait (psycopg2 connect loop up to 60s) **before** `alembic upgrade head`.
+  - `docker-compose.prod.yml`: Tuned backend healthcheck to be more tolerant during migrations:
+    - interval: 5s, timeout: 2s, retries: 30, start_period: 60s
+  - `prod-compose-acceptance.yml`: On readiness timeout, CI now prints `docker compose ps` + backend/postgres logs (tail 200) to make failures diagnosable.
+- **Status**: ✅ READY FOR CI RUN
+
 - **Fix**: Added session-scoped autouse fixture in `backend/tests/conftest.py` to patch `app.core.database.engine` and `async_session` to the test sqlite async engine; also aligns `settings.database_url` + `DATABASE_URL` env.
 - **Verification**: `pytest -q backend/tests/test_reconciliation_runs_api.py -q` → ✅ PASS
