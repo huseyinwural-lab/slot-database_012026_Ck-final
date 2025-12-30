@@ -264,3 +264,15 @@
   - `cd frontend && yarn build` → **PASS** (warnings only)
   - Not: `CI=true yarn build` halen fail ediyor (beklenen; CI job Docker build’de `CI=false` ile override ediliyor)
 - **Status**: ✅ READY FOR CI RUN
+
+
+## P0 CI Blocker — Frontend Frozen Lockfile (Iteration 2025-12-30)
+- **Issue**: `frontend-lint.yml` uses `yarn install --frozen-lockfile` under `working-directory: frontend`.
+- **Fix**: Regenerated `frontend/yarn.lock` via fresh install:
+  - `cd frontend && rm -rf node_modules && yarn install`
+  - Verified `cd frontend && yarn install --frozen-lockfile` passes.
+- **Status**: ✅ FIXED LOCALLY (commit needed in repo)
+
+## P0 CI Blocker — asyncpg “different loop” (Iteration 2025-12-30)
+- **Fix**: Added session-scoped autouse fixture in `backend/tests/conftest.py` to patch `app.core.database.engine` and `async_session` to the test sqlite async engine; also aligns `settings.database_url` + `DATABASE_URL` env.
+- **Verification**: `pytest -q backend/tests/test_reconciliation_runs_api.py -q` → ✅ PASS
