@@ -147,3 +147,8 @@
 - **Tests**:
     - `pytest -q backend/tests/test_alembic_heads_guard.py` → **PASSED** (2/2)
     - `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py` → **PASSED** (1/1)
+- **Regression Test (2025-12-30)**:
+    - `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py backend/tests/test_alembic_heads_guard.py` → **PASSED** (3/3)
+    - `alembic upgrade head` on fresh SQLite database → **PASSED** (no FK dependency errors)
+    - Migration `6512f9dafb83_register_game_models_fixed_2.py` correctly creates `robotdefinition` table before `gamerobotbinding` table
+    - **Status**: ✅ VERIFIED - robotdefinition FK fix working correctly
