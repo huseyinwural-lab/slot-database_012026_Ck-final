@@ -37,7 +37,7 @@ retry_cmd() {
 }
 
 # Run migrations before starting the app
-if [ "$ENV_NAME" = "prod" ] || [ "$ENV_NAME" = "staging" ]; then
+if [ "$ENV_NAME" = "prod" ] || [ "$ENV_NAME" = "staging" ] || [ "$ENV_NAME" = "ci" ]; then
   echo "[start_prod] $(date -Iseconds) Waiting for Postgres readiness (ENV=$ENV_NAME)"
 
   python - <<'PY'

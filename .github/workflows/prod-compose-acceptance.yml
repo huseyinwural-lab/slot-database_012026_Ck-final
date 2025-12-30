@@ -13,8 +13,8 @@ jobs:
     timeout-minutes: 25
 
     env:
-      # Uygulamanın prod/staging davranışını tetiklemek için
-      ENV: staging
+      # CI acceptance environment (prod/staging secret gates should NOT run here)
+      ENV: ci
       SEED_ON_STARTUP: "false"
       DEBUG: "false"
       LOG_FORMAT: json
