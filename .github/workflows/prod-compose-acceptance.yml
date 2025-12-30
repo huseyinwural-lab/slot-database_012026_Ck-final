@@ -148,7 +148,14 @@ jobs:
             echo "Waiting for /api/ready ... ($i) code=$code"
             sleep 2
           done
+
           echo "Readiness did not become ready in time"
+          echo "=== docker compose ps ==="
+          docker compose -f docker-compose.prod.yml --profile localdb ps || true
+          echo "=== backend logs (tail 200) ==="
+          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 backend || true
+          echo "=== postgres logs (tail 200) ==="
+          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 postgres || true
           exit 1
 
       - name: Run Release Smoke Tests (P2.1)
