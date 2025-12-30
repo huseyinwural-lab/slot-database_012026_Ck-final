@@ -166,26 +166,27 @@ jobs:
           test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201"
 
 
-      - name: Install backend python deps for release_smoke scripts
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
-
-      - name: Run Release Smoke Tests (P2.1)
-        env:
-          ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/release_smoke
+      - name: Run Release Smoke Tests (P2.1) (inside backend image)
         run: |
           set -euo pipefail
-          echo "Running Release Smoke Suite (Strict Mode)..."
-          
-          # Inject CI variables explicitly
-          export CI_STRICT=1
-          export API_BASE_URL="$API_BASE/api/v1"
-          export BOOTSTRAP_OWNER_EMAIL="${BOOTSTRAP_OWNER_EMAIL}"
-          export BOOTSTRAP_OWNER_PASSWORD="${BOOTSTRAP_OWNER_PASSWORD}"
-          
-          # Execute runner
-          python3 scripts/release_smoke.py
+          echo "Running Release Smoke Suite inside backend image..."
+
+          # Run smoke in a one-off backend container so we don't depend on host Python deps.
+          docker compose -f docker-compose.prod.yml --profile localdb run --rm \
+            -e CI_STRICT=1 \
+            -e API_BASE_URL="$API_BASE/api/v1" \
+            -e BOOTSTRAP_OWNER_EMAIL="${BOOTSTRAP_OWNER_EMAIL}" \
+            -e BOOTSTRAP_OWNER_PASSWORD="${BOOTSTRAP_OWNER_PASSWORD}" \
+            -e ARTIFACTS_DIR=/app/artifacts/release_smoke \
+            backend sh -lc 'python /app/scripts/release_smoke.py'
+
+          # Copy artifacts out of the backend container to workspace for upload.
+          BACKEND_ID="$(docker compose -f docker-compose.prod.yml --profile localdb ps -q backend | head -n 1)"
+          mkdir -p artifacts/release_smoke
+          docker cp "${BACKEND_ID}:/app/artifacts/release_smoke/." artifacts/release_smoke/
+
+          # Guard: ensure artifacts exist (helps diagnose silent failures)
+          test -n "$(ls -A artifacts/release_smoke 2>/dev/null)" || (echo "No smoke artifacts found" && exit 1)
 
       - name: Upload Smoke Test Artifacts (P2.2)
         if: always()
