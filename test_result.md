@@ -137,3 +137,13 @@
     - `pytest tests/test_p0_kyc_mock_gating.py`: **PASSED** (1/1 tests) - Accepts 403/404 (feature flag vs mock gating order)
     - `pytest tests/test_config_validation.py`: **PASSED** (4/4 tests) - Fixed prod validation requirements
     - **Smoke Test**: `python -c "import server"` **PASSED** - Backend imports successfully
+
+
+---
+
+## P0 Migration Fix — robotdefinition FK dependency (Iteration 2025-12-30)
+- **Issue**: `gamerobotbinding.robot_id` FK references `robotdefinition.id` but `robotdefinition` table is not created before FK, causing Postgres `UndefinedTable` and backend container unhealthy during migrations.
+- **Fix**: Added guarded `robotdefinition` create block in `backend/alembic/versions/6512f9dafb83_register_game_models_fixed_2.py` immediately before `gamerobotbinding` creation.
+- **Tests**:
+    - `pytest -q backend/tests/test_alembic_heads_guard.py` → **PASSED** (2/2)
+    - `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py` → **PASSED** (1/1)
