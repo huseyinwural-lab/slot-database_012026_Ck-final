@@ -34,13 +34,16 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     restart: always
+    env_file:
+      - ./backend/.env
     environment:
       PYTHONUNBUFFERED: "1"
       DATABASE_URL: ${DATABASE_URL}
-      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-}
+      REDIS_URL: ${REDIS_URL:-}
       REDIS_REQUIRED: ${REDIS_REQUIRED:-false}
       ENV: ${ENV:-prod}
+      CI_STRICT: ${CI_STRICT:-0}
       DEBUG: "False"
       JWT_SECRET: ${JWT_SECRET}
       JWT_ALGORITHM: HS256
