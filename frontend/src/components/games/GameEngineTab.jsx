@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -24,11 +24,7 @@ const GameEngineTab = ({ game, onUpdated }) => {
   const [reason, setReason] = useState('');
   const [customJson, setCustomJson] = useState('{}');
 
-  useEffect(() => {
-    loadData();
-  }, [game.id]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [stdRes, confRes] = await Promise.all([
@@ -47,6 +43,14 @@ const GameEngineTab = ({ game, onUpdated }) => {
       setCustomJson(JSON.stringify(conf.params || {}, null, 2));
     } catch (e) {
       toast.error('Failed to load engine data');
+  }, [game?.id]);
+
+  useEffect(() => {
+    if (!game?.id) return;
+    loadData();
+  }, [loadData, game?.id]);
+
+
     } finally {
       setLoading(false);
     }
