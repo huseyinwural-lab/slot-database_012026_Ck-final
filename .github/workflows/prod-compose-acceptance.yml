@@ -107,7 +107,7 @@ jobs:
           # BuildKit output'u root-cause'u net gösterir (stack trace yerine gerçek fail-to-solve)
           # Ayrıca build output'u artifact'e yazıyoruz ki tek seferde RCA yapılabilsin.
           set +e
-          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml build --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
+          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb build --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
           build_rc=${PIPESTATUS[0]}
           set -e
 
@@ -120,8 +120,8 @@ jobs:
           fi
 
           docker compose -f docker-compose.prod.yml --profile localdb up -d --remove-orphans
-          docker compose -f docker-compose.prod.yml ps | tee ci_artifacts/compose_ps_inline.txt
-          docker compose -f docker-compose.prod.yml logs --no-color --tail=200 | tee ci_artifacts/compose_logs_inline_tail200.txt || true
+          docker compose -f docker-compose.prod.yml --profile localdb ps | tee ci_artifacts/compose_ps_inline.txt
+          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 | tee ci_artifacts/compose_logs_inline_tail200.txt || true
           docker ps -a
 
       - name: Wait for API readiness
@@ -274,11 +274,11 @@ jobs:
           set +e
           mkdir -p ci_artifacts
 
-          docker compose -f docker-compose.prod.yml ps > ci_artifacts/compose_ps.txt || true
-          docker compose -f docker-compose.prod.yml logs --no-color --tail=300 backend > ci_artifacts/backend.log || true
-          docker compose -f docker-compose.prod.yml logs --no-color --tail=200 postgres > ci_artifacts/postgres.log || true
+          docker compose -f docker-compose.prod.yml --profile localdb ps > ci_artifacts/compose_ps.txt || true
+          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=300 backend > ci_artifacts/backend.log || true
+          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 postgres > ci_artifacts/postgres.log || true
 
-          BACKEND_ID=$(docker compose -f docker-compose.prod.yml ps -q backend 2>/dev/null || true)
+          BACKEND_ID=$(docker compose -f docker-compose.prod.yml --profile localdb ps -q backend 2>/dev/null || true)
           if [ -n "$BACKEND_ID" ]; then
             docker inspect "$BACKEND_ID" > ci_artifacts/backend_inspect_full.json || true
             docker inspect "$BACKEND_ID" --format '{{json .State.Health}}' > ci_artifacts/backend_health.json || true
