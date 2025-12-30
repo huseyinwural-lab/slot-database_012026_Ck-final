@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,18 +21,22 @@ const ApprovalQueue = () => {
   const [selectedReq, setSelectedReq] = useState(null);
   const [note, setNote] = useState("");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-        if (activeTab === 'pending' || activeTab === 'approved' || activeTab === 'rejected') {
-            const status = activeTab === 'pending' ? 'pending' : activeTab;
-            setRequests((await api.get(`/v1/approvals/requests?status=${status}`)).data);
-        }
-        if (activeTab === 'rules') setRules((await api.get('/v1/approvals/rules')).data);
-        if (activeTab === 'delegations') setDelegations((await api.get('/v1/approvals/delegations')).data);
-    } catch (err) { console.error(err); }
-  };
+      if (activeTab === 'pending' || activeTab === 'approved' || activeTab === 'rejected') {
+        const status = activeTab === 'pending' ? 'pending' : activeTab;
+        setRequests((await api.get(`/v1/approvals/requests?status=${status}`)).data);
+      }
+      if (activeTab === 'rules') setRules((await api.get('/v1/approvals/rules')).data);
+      if (activeTab === 'delegations') setDelegations((await api.get('/v1/approvals/delegations')).data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [activeTab]);
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAction = async (action) => {
     if (!selectedReq) return;

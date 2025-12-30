@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,22 +33,26 @@ const CMSManagement = () => {
   const [isPageOpen, setIsPageOpen] = useState(false);
   const [newPage, setNewPage] = useState({ title: '', slug: '', template: 'static' });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-        if (activeTab === 'dashboard') setDashboard((await api.get('/v1/cms/dashboard')).data);
-        if (activeTab === 'pages') setPages((await api.get('/v1/cms/pages')).data);
-        if (activeTab === 'banners') setBanners((await api.get('/v1/cms/banners')).data);
-        if (activeTab === 'collections') setCollections((await api.get('/v1/cms/collections')).data);
-        if (activeTab === 'popups') setPopups((await api.get('/v1/cms/popups')).data);
-        if (activeTab === 'translations') setTranslations((await api.get('/v1/cms/translations')).data);
-        if (activeTab === 'media') setMedia((await api.get('/v1/cms/media')).data);
-        if (activeTab === 'legal') setLegal((await api.get('/v1/cms/legal')).data);
-        if (activeTab === 'experiments') setExperiments((await api.get('/v1/cms/experiments')).data);
-        if (activeTab === 'audit') setAudit((await api.get('/v1/cms/audit')).data);
-    } catch (err) { console.error(err); }
-  };
+      if (activeTab === 'dashboard') setDashboard((await api.get('/v1/cms/dashboard')).data);
+      if (activeTab === 'pages') setPages((await api.get('/v1/cms/pages')).data);
+      if (activeTab === 'banners') setBanners((await api.get('/v1/cms/banners')).data);
+      if (activeTab === 'collections') setCollections((await api.get('/v1/cms/collections')).data);
+      if (activeTab === 'popups') setPopups((await api.get('/v1/cms/popups')).data);
+      if (activeTab === 'translations') setTranslations((await api.get('/v1/cms/translations')).data);
+      if (activeTab === 'media') setMedia((await api.get('/v1/cms/media')).data);
+      if (activeTab === 'legal') setLegal((await api.get('/v1/cms/legal')).data);
+      if (activeTab === 'experiments') setExperiments((await api.get('/v1/cms/experiments')).data);
+      if (activeTab === 'audit') setAudit((await api.get('/v1/cms/audit')).data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [activeTab]);
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleCreatePage = async () => {
     try { await api.post('/v1/cms/pages', newPage); setIsPageOpen(false); fetchData(); toast.success("Page Created"); } catch { toast.error("Failed"); }

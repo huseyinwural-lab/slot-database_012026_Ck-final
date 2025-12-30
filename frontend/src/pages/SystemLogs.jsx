@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,26 +25,32 @@ const SystemLogs = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-        let endpoint = '/v1/logs/events';
-        if (activeTab === 'cron') endpoint = '/v1/logs/cron';
-        if (activeTab === 'health') endpoint = '/v1/logs/health';
-        if (activeTab === 'deployments') endpoint = '/v1/logs/deployments';
-        if (activeTab === 'config') endpoint = '/v1/logs/config';
-        if (activeTab === 'errors') endpoint = '/v1/logs/errors';
-        if (activeTab === 'queues') endpoint = '/v1/logs/queues';
-        if (activeTab === 'db') endpoint = '/v1/logs/db';
-        if (activeTab === 'cache') endpoint = '/v1/logs/cache';
-        if (activeTab === 'archive') endpoint = '/v1/logs/archive';
-        
-        const res = await api.get(endpoint);
-        setData(res.data);
-    } catch (err) { console.error(err); } finally { setLoading(false); }
-  };
+      let endpoint = '/v1/logs/events';
+      if (activeTab === 'cron') endpoint = '/v1/logs/cron';
+      if (activeTab === 'health') endpoint = '/v1/logs/health';
+      if (activeTab === 'deployments') endpoint = '/v1/logs/deployments';
+      if (activeTab === 'config') endpoint = '/v1/logs/config';
+      if (activeTab === 'errors') endpoint = '/v1/logs/errors';
+      if (activeTab === 'queues') endpoint = '/v1/logs/queues';
+      if (activeTab === 'db') endpoint = '/v1/logs/db';
+      if (activeTab === 'cache') endpoint = '/v1/logs/cache';
+      if (activeTab === 'archive') endpoint = '/v1/logs/archive';
 
-  useEffect(() => { fetchData(); }, [activeTab]);
+      const res = await api.get(endpoint);
+      setData(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const runCron = async () => {
     try { await api.post('/v1/logs/cron/run', { job_name: "manual_trigger" }); toast.success("Job Started"); fetchData(); } catch { toast.error("Failed"); }
