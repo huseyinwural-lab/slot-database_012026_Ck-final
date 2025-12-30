@@ -100,6 +100,15 @@ jobs:
 
           mkdir -p ci_artifacts
 
+          # Ensure backend/.env does not hard-fail compose on some runners
+          if [ -f backend/.env.example ] && [ ! -f backend/.env ]; then
+            cp backend/.env.example backend/.env
+          fi
+          if [ ! -f backend/.env ]; then
+            touch backend/.env
+          fi
+
+
           # Fresh DB için volume’ları sil
           docker compose -f docker-compose.prod.yml --profile localdb down -v --remove-orphans || true
 
