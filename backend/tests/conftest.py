@@ -37,8 +37,7 @@ def event_loop():
 
 def _run(coro):
     # Run a coroutine on the session-scoped event loop to avoid cross-loop issues.
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(coro)
+    return asyncio.get_event_loop().run_until_complete(coro)
 
 
 # ---------- Test DB (async sqlite) ----------
