@@ -41,17 +41,15 @@ def _run_uvicorn(env_overrides: dict, *, timeout_seconds: int = 5) -> tuple[int,
     return proc.returncode or 0, combined
 
 
-def test_runtime_failfast_ci_strict_redis_url_unset_fails():
-    # In CI_STRICT, REDIS_URL must be present.
+def test_runtime_failfast_ci_strict_redis_url_unset_fails_when_required():
+    # Redis is optional unless REDIS_REQUIRED=true.
     code, logs = _run_uvicorn(
         {
-            "ENV": "staging",
+            "ENV": "dev",
             "CI_STRICT": "1",
             "DATABASE_URL": "postgresql+asyncpg://user:pass@127.0.0.1:1/db",
+            "REDIS_REQUIRED": "true",
             "REDIS_URL": "",
-            # Avoid other staging validations
-            "JWT_SECRET": "test_secret",
-            "CORS_ORIGINS": '["http://localhost"]',
         },
         timeout_seconds=5,
     )
