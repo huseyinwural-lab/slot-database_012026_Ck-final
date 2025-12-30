@@ -119,7 +119,7 @@ jobs:
           # BuildKit output'u root-cause'u net gösterir (stack trace yerine gerçek fail-to-solve)
           # Ayrıca build output'u artifact'e yazıyoruz ki tek seferde RCA yapılabilsin.
           set +e
-          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb build --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
+          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb build --build-arg CI=false --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
           build_rc=${PIPESTATUS[0]}
           set -e
 

@@ -15,13 +15,15 @@ ARG REACT_APP_BACKEND_URL
 ARG APP_VERSION
 ARG GIT_SHA
 ARG BUILD_TIME
+# CI flag used by CRA/CRACO to treat warnings as errors. In CI we override via build-arg.
+ARG CI
 
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 ENV REACT_APP_VERSION=$APP_VERSION
 ENV REACT_APP_GIT_SHA=$GIT_SHA
 ENV REACT_APP_BUILD_TIME=$BUILD_TIME
 
-RUN CI=false yarn build
+RUN CI=$CI yarn build
 
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
