@@ -165,6 +165,12 @@ jobs:
           cat /tmp/seed.json
           test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201"
 
+
+      - name: Install backend python deps for release_smoke scripts
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
       - name: Run Release Smoke Tests (P2.1)
         env:
           ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/release_smoke
