@@ -176,3 +176,25 @@
     - ✅ **Column Behavior**: `mfa_enabled` column defaults to falsy value (0/False) as expected
     - **Comprehensive Test Suite**: `/app/postgres_migration_test.py` → **PASSED** (4/4 tests)
     - **Status**: ✅ VERIFIED - Postgres migration crash fix confirmed working
+
+---
+
+## P0 Migration Patch — T15 Drift Fix Final V2 (Iteration 2025-12-30)
+- **Issue**: Alembic migration `0968ae561847_t15_drift_fix_final_v2.py` needed verification after patching to:
+    - Remove try/except swallowing for index creation
+    - Set mfa_enabled default to `sa.text('false')`
+    - Add index_exists (pg_indexes for Postgres, inspect for others)
+    - Add columns_exist guard so on SQLite (where auditevent lacks chain_id) we skip creating those indexes instead of crashing
+- **Verification Requirements**:
+    - `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py backend/tests/test_alembic_heads_guard.py` passes
+    - `alembic upgrade head` on fresh SQLite completes
+    - Confirm migration no longer contains `except Exception: pass`
+- **Verification (2025-12-30)**:
+    - ✅ **Pytest Tests**: `pytest -q backend/tests/test_runtime_alembic_sqlite_smoke.py backend/tests/test_alembic_heads_guard.py` → **PASSED** (3/3)
+    - ✅ **Alembic Upgrade**: `alembic upgrade head` on fresh SQLite database → **PASSED** (no errors)
+    - ✅ **No Exception Swallowing**: Confirmed migration file contains no `except Exception: pass` statements
+    - ✅ **MFA Default Value**: Confirmed `server_default=sa.text('false')` is present on line 32
+    - ✅ **Guard Functions**: Verified presence of `index_exists`, `columns_exist`, and `safe_create_index` functions
+    - ✅ **Postgres Index Check**: Confirmed pg_indexes query for Postgres dialect detection
+    - **Comprehensive Test Suite**: `/app/migration_verification_test.py` → **PASSED** (6/6 tests)
+    - **Status**: ✅ VERIFIED - All migration patch requirements confirmed working
