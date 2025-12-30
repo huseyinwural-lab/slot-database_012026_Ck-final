@@ -35,6 +35,12 @@ def event_loop():
         loop.close()
 
 
+def _run(coro):
+    # Run a coroutine on the session-scoped event loop to avoid cross-loop issues.
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(coro)
+
+
 # ---------- Test DB (async sqlite) ----------
 TEST_DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "test_casino.db"))
 TEST_DB_URL = f"sqlite+aiosqlite:///{TEST_DB_PATH}"
