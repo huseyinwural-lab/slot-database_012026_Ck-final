@@ -303,6 +303,15 @@
 - **Status**: ✅ ALL TESTS PASSED
 - **Test Results**:
   - ✅ **Health Endpoint**: `/api/health` returns 200 with status "healthy" and environment "dev"
+
+## P0 CI Blocker — Backend unhealthy root cause (Iteration 2025-12-30)
+- **Artifact RCA** (prod-compose-artifacts): backend healthcheck failed because backend process **crashed on import**:
+  - `ValueError: CRITICAL: Missing required secrets for staging environment` (STRIPE/ADYEN keys, KYC_MOCK_ENABLED=false, AUDIT_EXPORT_SECRET)
+- **Fix**: `prod-compose-acceptance.yml` now provides dummy CI values for required staging validation:
+  - `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`, `ADYEN_API_KEY`, `ADYEN_HMAC_KEY`, `KYC_MOCK_ENABLED=false`, `AUDIT_EXPORT_SECRET`
+- **Additional fix**: `scripts/bootstrap_owner.py` now imports `app.models.game_models` to ensure SQLModel relationships resolve (fixes `Tenant.games` -> `Game` mapper error during bootstrap).
+- **Status**: ✅ READY FOR CI RUN
+
   - ✅ **Ready Endpoint**: `/api/ready` returns 200 with status "ready", database "connected", redis "skipped", migrations "unknown"
   - ✅ **Readiness Endpoint**: `/api/readiness` returns 200 with status "ready" (alias for ready endpoint)
   - ✅ **Server Import**: Backend server module imports successfully without ValueError for missing secrets in dev environment
