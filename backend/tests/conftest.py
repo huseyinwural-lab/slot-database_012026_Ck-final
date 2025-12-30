@@ -72,6 +72,26 @@ def async_session_factory(async_engine):
     return async_sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
 
+# ---------- Global DB patch (deterministic test isolation) ----------
+# Some modules use app.core.database.engine / app.core.database.async_session directly.
+# In CI, server.py is imported before dependency overrides are applied, and engine is
+# created at import time from env DATABASE_URL (often Postgres/asyncpg). This can lead to
+# loop mismatch errors (asyncpg "Future attached to a different loop") and tests hitting
+# the wrong database.
+#
+# We force the global engine + session factory to point to the test engine.
+@pytest.fixture(scope="session", autouse=True)
+def _patch_global_db(async_engine):
+    import app.core.database as db
+
+    db.engine = async_engine
+    db.async_session = async_sessionmaker(db.engine, expire_on_commit=False, class_=AsyncSession)
+
+    # Keep settings/env aligned so any late imports don't create a Postgres engine.
+    settings.database_url = TEST_DB_URL
+    os.environ["DATABASE_URL"] = TEST_DB_URL
+
+
 # ---------- Dependency overrides ----------
 
 def make_override_get_session(async_session_factory):
