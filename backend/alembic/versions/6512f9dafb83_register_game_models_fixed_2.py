@@ -253,6 +253,24 @@ def upgrade() -> None:
         op.create_index(op.f('ix_gameconfigversion_game_id'), 'gameconfigversion', ['game_id'], unique=False)
         op.create_index(op.f('ix_gameconfigversion_tenant_id'), 'gameconfigversion', ['tenant_id'], unique=False)
 
+
+    # FIX: robotdefinition must exist before gamerobotbinding FK
+    if not table_exists('robotdefinition'):
+        op.create_table(
+            'robotdefinition',
+            sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('schema_version', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('config', sa.JSON(), nullable=True),
+            sa.Column('config_hash', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+            sa.Column('is_active', sa.Boolean(), nullable=False),
+            sa.Column('created_at', sa.DateTime(), nullable=False),
+            sa.Column('updated_at', sa.DateTime(), nullable=False),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_robotdefinition_name'), 'robotdefinition', ['name'], unique=False)
+        op.create_index(op.f('ix_robotdefinition_config_hash'), 'robotdefinition', ['config_hash'], unique=False)
+
     if not table_exists('gamerobotbinding'):
         op.create_table('gamerobotbinding',
         sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
