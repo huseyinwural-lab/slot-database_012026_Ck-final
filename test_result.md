@@ -341,6 +341,17 @@
   - In `ENV in {prod, staging, ci}`: returns **503** with `migrations=behind` if DB is not at head.
   - In dev/local: keeps backward-compatible behavior (may be `unknown`).
 
+## P0 CI Smoke Unblock — Schema drift guard migration (Iteration 2025-12-31)
+- **Motivation**: CI smoke still failing due to tables existing with missing columns (schema drift). We need an idempotent guard at the head of migrations.
+- **Added migration**: `backend/alembic/versions/20251231_02_schema_drift_guard.py` (new Alembic head)
+  - Ensures (IF NOT EXISTS semantics via information_schema) the following columns exist:
+    - `player.wagering_requirement` (FLOAT, NOT NULL, DEFAULT 0)
+    - `player.wagering_remaining` (FLOAT, NOT NULL, DEFAULT 0)
+    - `auditevent.actor_role` (VARCHAR/TEXT, NULLABLE)
+    - `auditevent.status` (VARCHAR/TEXT, NULLABLE)
+- **Expected outcome**: eliminates repeated CI failures from missing-column drift during smoke flows.
+
+
 ## P0 CI Smoke Unblock — player.wagering_requirement missing (Iteration 2025-12-31)
 - **RCA (from CI backend logs)**: `POST /api/v1/auth/player/register` returns 500 due to Postgres error `column player.wagering_requirement does not exist`.
   - This indicates `player` table existed but was created without newer wagering columns (schema drift caused by `if not table_exists('player')` migrations).
