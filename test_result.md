@@ -339,3 +339,10 @@
 - **Fix**: Added Alembic revision `backend/alembic/versions/20251230_01_add_auditevent_actor_role.py` to add nullable `auditevent.actor_role` (VARCHAR).
 - **Sanity**: Post-fix login request now returns **HTTP 401 INVALID_CREDENTIALS** (i.e., no 500; endpoint is reachable). This environment cannot run the CI Postgres schema check (`\d+ auditevent`) directly.
 - **Status**: ✅ READY FOR CI RUN (schema evidence should be collected in CI)
+
+
+## P0 CI Smoke Unblock — Login rate limit in ENV=ci (Iteration 2025-12-31)
+- **RCA**: Smoke suite triggers multiple admin login attempts; in `ENV=ci` the RateLimitMiddleware was using prod limits (5/min) causing HTTP 429 and failing `bau_w13_runner.py`.
+- **Fix**: `backend/app/middleware/rate_limit.py` now treats `env=ci` as dev-like for rate limiting.
+  - `is_dev` set includes `ci` → login limit becomes 100/min in CI.
+- **Sanity**: Repeated login attempts do not hit 429 in this environment.
