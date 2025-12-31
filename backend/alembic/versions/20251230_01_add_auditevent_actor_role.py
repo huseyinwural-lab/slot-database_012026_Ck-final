@@ -16,6 +16,9 @@ import sqlalchemy as sa
 # revision identifiers, used by Alembic.
 revision = "20251230_01"
 down_revision = "c553520d78cd"
+
+# NOTE: This column is also guarded by later drift-guard migrations.
+
 branch_labels = None
 depends_on = None
 
