@@ -19,6 +19,11 @@ logger = logging.getLogger(__name__)
 # - SQLite DB URLs are forbidden in these environments.
 # - Redis is OPTIONAL in prod/staging unless REDIS_REQUIRED=true.
 import os
+from pathlib import Path
+from alembic.config import Config as AlembicConfig
+from alembic.script import ScriptDirectory
+
+
 from app.core.redis_health import redis_ping
 
 from sqlalchemy.engine.url import make_url
