@@ -304,7 +304,10 @@ async def health_check():
 
 @app.get("/api/readiness")
 async def readiness_check():
-    """Readiness probe: checks DB connectivity + migration state (lightweight).
+    """Readiness probe: checks DB connectivity + migration state.
+
+    IMPORTANT: In prod/staging/ci we must not return READY if DB alembic_version is
+    behind local migration head.
 
     If REDIS_REQUIRED=true, Redis is treated as a CRITICAL dependency.
     """
@@ -312,19 +315,50 @@ async def readiness_check():
         from app.core.database import engine
         from sqlalchemy import text
 
+        def _local_alembic_head() -> str:
+            # Load alembic config from backend/alembic.ini
+            here = Path(__file__).resolve().parent
+            alembic_ini = str(here / "alembic.ini")
+            cfg = AlembicConfig(alembic_ini)
+            cfg.set_main_option("script_location", "alembic")
+            script = ScriptDirectory.from_config(cfg)
+            heads = list(script.get_heads())
+            return heads[0] if heads else "unknown"
+
+        expected_head = _local_alembic_head()
+
         # DB check
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
 
-            version = None
+            db_version = None
             try:
-                # Migration check (lightweight): read version table.
-                # - prod/staging: expected to exist after alembic upgrade head
-                # - dev/local: may not exist (create_all path). In that case we do not fail readiness.
-                version = (await conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))).scalar() or "unknown"
+                db_version = (await conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))).scalar() or "unknown"
             except Exception:
-                if settings.env in {"prod", "staging"}:
+                # dev/local may not have alembic_version; do not fail readiness there
+                if settings.env in {"prod", "staging", "ci"}:
                     raise
+
+        # Strict migration comparison in prod/staging/ci
+        migrations_status = "unknown"
+        if db_version and expected_head and db_version != "unknown" and expected_head != "unknown":
+            migrations_status = "ok" if db_version == expected_head else "behind"
+
+        if settings.env in {"prod", "staging", "ci"} and migrations_status == "behind":
+            from fastapi import HTTPException
+
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "status": "degraded",
+                    "dependencies": {
+                        "database": "connected",
+                        "redis": "unknown",
+                        "migrations": "behind",
+                    },
+                    "alembic": {"db": db_version, "head": expected_head},
+                },
+            )
 
         # Redis check (critical only when explicitly required)
         redis_status = "skipped"
@@ -337,7 +371,8 @@ async def readiness_check():
                     status_code=503,
                     detail={
                         "status": "degraded",
-                        "dependencies": {"database": "connected", "redis": "unreachable", "migrations": "ok"},
+                        "dependencies": {"database": "connected", "redis": "unreachable", "migrations": migrations_status},
+                        "alembic": {"db": db_version, "head": expected_head},
                     },
                 )
 
@@ -346,9 +381,9 @@ async def readiness_check():
             "dependencies": {
                 "database": "connected",
                 "redis": redis_status,
-                "migrations": "ok" if version else "unknown",
+                "migrations": migrations_status,
             },
-            "alembic_version": version,
+            "alembic": {"db": db_version, "head": expected_head},
         }
     except Exception as exc:  # pragma: no cover - defensive
         # Pass through HTTPException as-is
