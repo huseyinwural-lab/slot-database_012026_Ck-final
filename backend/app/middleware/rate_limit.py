@@ -27,7 +27,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Relax limits in dev/local/test to avoid blocking integration tests
         try:
             from config import settings
-            is_dev = getattr(settings, "env", "dev") in {"dev", "local", "test"}
+            is_dev = getattr(settings, "env", "dev") in {"dev", "local", "test", "ci"}
         except Exception:
             is_dev = False
 
