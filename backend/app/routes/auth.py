@@ -81,9 +81,23 @@ async def login(
     # Never log raw identifiers; use surrogate hash
     resource_id = sha256_surrogate(form_data.email)
 
+    async def _audit_best_effort(**kwargs):
+        """Audit is best-effort for auth flows.
+
+        Rationale: schema drift (e.g., missing columns) must not break login.
+        If audit fails, we rollback the session to avoid leaving the txn aborted.
+        """
+        try:
+            await audit.log_event(session=session, **kwargs)
+        except Exception as exc:
+            logger.warning("audit.log_event failed (best-effort)", exc_info=exc)
+            try:
+                await session.rollback()
+            except Exception:
+                pass
+
     if not admin:
-        await audit.log_event(
-            session=session,
+        await _audit_best_effort(
             request_id=request_id,
             actor_user_id="unknown",
             tenant_id="unknown",
@@ -97,8 +111,7 @@ async def login(
         raise auth_error
 
     if not admin.is_active or admin.status != "active":
-        await audit.log_event(
-            session=session,
+        await _audit_best_effort(
             request_id=request_id,
             actor_user_id=str(admin.id),
             tenant_id=str(admin.tenant_id),
@@ -116,8 +129,7 @@ async def login(
     if not is_valid:
         admin.failed_login_attempts += 1
 
-        await audit.log_event(
-            session=session,
+        await _audit_best_effort(
             request_id=request_id,
             actor_user_id=str(admin.id),
             tenant_id=str(admin.tenant_id),
@@ -135,8 +147,7 @@ async def login(
     # 3. Success Update
     admin.failed_login_attempts = 0
 
-    await audit.log_event(
-        session=session,
+    await _audit_best_effort(
         request_id=request_id,
         actor_user_id=str(admin.id),
         tenant_id=str(admin.tenant_id),
