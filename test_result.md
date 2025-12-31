@@ -321,3 +321,10 @@
   - No critical errors or blocking issues found
   - All CI fix requirements verified successfully
 - **Verification**: Backend CI sanity test suite → ✅ PASS (5/5 tests)
+
+
+## P0 Login 500 Unblock — auditevent.actor_role (Iteration 2025-12-31)
+- **RCA**: `/api/v1/auth/login` triggers audit logging; query selects `auditevent.actor_role` but column missing in Postgres → 500.
+- **Fix**: Added Alembic revision `backend/alembic/versions/20251230_01_add_auditevent_actor_role.py` to add nullable `auditevent.actor_role` (VARCHAR).
+- **Sanity**: Post-fix login request now returns **HTTP 401 INVALID_CREDENTIALS** (i.e., no 500; endpoint is reachable). This environment cannot run the CI Postgres schema check (`\d+ auditevent`) directly.
+- **Status**: ✅ READY FOR CI RUN (schema evidence should be collected in CI)
