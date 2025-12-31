@@ -340,6 +340,14 @@
 - **Readiness strict migration check**: `backend/server.py` `/api/readiness` now compares DB `alembic_version` vs local Alembic script head.
   - In `ENV in {prod, staging, ci}`: returns **503** with `migrations=behind` if DB is not at head.
   - In dev/local: keeps backward-compatible behavior (may be `unknown`).
+
+## P0 CI Smoke Unblock — player.wagering_requirement missing (Iteration 2025-12-31)
+- **RCA (from CI backend logs)**: `POST /api/v1/auth/player/register` returns 500 due to Postgres error `column player.wagering_requirement does not exist`.
+  - This indicates `player` table existed but was created without newer wagering columns (schema drift caused by `if not table_exists('player')` migrations).
+- **Fix**: Added Alembic revision `backend/alembic/versions/20251231_01_add_player_wagering_columns.py`:
+  - Idempotently adds missing `player.wagering_requirement` and `player.wagering_remaining` with server_default 0.
+- **Expected outcome**: `bau_w13_runner.py` should pass once CI applies this migration.
+
 - **Migration included**: `backend/alembic/versions/20251230_01_add_auditevent_actor_role.py` adds nullable `auditevent.actor_role`.
 - **Sanity**:
   - `GET /api/ready` returns 200 in this env (migrations unknown because alembic_version not present here), and reports local head `20251230_01`.
