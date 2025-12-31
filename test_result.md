@@ -323,6 +323,17 @@
 - **Verification**: Backend CI sanity test suite → ✅ PASS (5/5 tests)
 
 
+## P0 Login 500 Unblock + Readiness Hardening (Iteration 2025-12-31)
+- **Login best-effort audit**: `backend/app/routes/auth.py` updated so audit logging failures do **not** fail login (prevents 500 on schema drift). Transaction rollback is best-effort to avoid aborted txn state.
+- **Readiness strict migration check**: `backend/server.py` `/api/readiness` now compares DB `alembic_version` vs local Alembic script head.
+  - In `ENV in {prod, staging, ci}`: returns **503** with `migrations=behind` if DB is not at head.
+  - In dev/local: keeps backward-compatible behavior (may be `unknown`).
+- **Migration included**: `backend/alembic/versions/20251230_01_add_auditevent_actor_role.py` adds nullable `auditevent.actor_role`.
+- **Sanity**:
+  - `GET /api/ready` returns 200 in this env (migrations unknown because alembic_version not present here), and reports local head `20251230_01`.
+  - `POST /api/v1/auth/login` no longer 500s (returns 401 invalid creds in this env).
+
+
 ## P0 Login 500 Unblock — auditevent.actor_role (Iteration 2025-12-31)
 - **RCA**: `/api/v1/auth/login` triggers audit logging; query selects `auditevent.actor_role` but column missing in Postgres → 500.
 - **Fix**: Added Alembic revision `backend/alembic/versions/20251230_01_add_auditevent_actor_role.py` to add nullable `auditevent.actor_role` (VARCHAR).
