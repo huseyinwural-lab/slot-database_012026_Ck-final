@@ -125,11 +125,13 @@ jobs:
           # Ayrıca build output'u artifact'e yazıyoruz ki tek seferde RCA yapılabilsin.
           set +e
           DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb --profile player build --build-arg CI=false --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
-
-          echo "== forcing backend rebuild (no-cache) to avoid stale layers =="
-          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb build --no-cache backend | tee ci_artifacts/backend_build_no_cache.log
-
           build_rc=${PIPESTATUS[0]}
+
+          if [ "$build_rc" = "0" ]; then
+            echo "== forcing backend rebuild (no-cache) to avoid stale layers =="
+            DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb build --no-cache backend | tee ci_artifacts/backend_build_no_cache.log || true
+          fi
+
           set -e
 
           if [ "$build_rc" != "0" ]; then
