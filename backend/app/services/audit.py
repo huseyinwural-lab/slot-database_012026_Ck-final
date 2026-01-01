@@ -149,8 +149,10 @@ class AuditLogger:
         tid = tenant_id or getattr(admin, "tenant_id", "unknown")
         
         status = "SUCCESS"
-        if result == "failed": status = "FAILED"
-        if result == "blocked": status = "DENIED"
+        if result == "failed":
+            status = "FAILED"
+        if result == "blocked":
+            status = "DENIED"
 
         await AuditLogger.log_event(
             session=session,
