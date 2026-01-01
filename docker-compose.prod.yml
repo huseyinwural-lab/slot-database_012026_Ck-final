@@ -29,6 +29,50 @@ services:
       retries: 10
 
   # Default backend service expects EXTERNAL DATABASE_URL / REDIS_URL.
+
+  backend-migrate:
+    profiles: ["localdb"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    restart: "no"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DATABASE_URL: ${DATABASE_URL}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-}
+      REDIS_URL: ${REDIS_URL:-}
+      REDIS_REQUIRED: ${REDIS_REQUIRED:-false}
+      ENV: ${ENV:-prod}
+      CI_STRICT: ${CI_STRICT:-0}
+      DEBUG: "False"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: HS256
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+      DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-10}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-auto}
+
+      # Build metadata
+      APP_VERSION: ${APP_VERSION:-unknown}
+      GIT_SHA: ${GIT_SHA:-unknown}
+      BUILD_TIME: ${BUILD_TIME:-unknown}
+
+      # Security: No defaults/fallbacks for credentials
+      BOOTSTRAP_ENABLED: "false"
+      BOOTSTRAP_OWNER_EMAIL: ${BOOTSTRAP_OWNER_EMAIL}
+    depends_on:
+      backend-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+
+      BOOTSTRAP_OWNER_PASSWORD: ${BOOTSTRAP_OWNER_PASSWORD}
+    command: ["sh", "-lc", "alembic upgrade head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   backend:
     build:
       context: ./backend
