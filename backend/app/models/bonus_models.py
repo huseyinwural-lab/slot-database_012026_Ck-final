@@ -21,8 +21,9 @@ class BonusCampaign(SQLModel, table=True):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class BonusGrant(SQLModel, table=True):
     """An instance of a bonus given to a player."""
