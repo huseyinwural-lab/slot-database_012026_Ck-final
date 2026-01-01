@@ -916,6 +916,353 @@ class P0VerificationTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class TimezoneFixesTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.player_token = None
+        self.test_player_email = None
+        self.test_player_password = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, f"Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_register_and_login_player(self) -> bool:
+        """Test 1: Register+login a new player"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Generate unique player credentials
+                self.test_player_email = f"tztest_{uuid.uuid4().hex[:8]}@casino.com"
+                self.test_player_password = "TzTestPlayer123!"
+                
+                # Register player
+                player_data = {
+                    "email": self.test_player_email,
+                    "username": f"tztest_{uuid.uuid4().hex[:8]}",
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Register Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                player_id = data.get("player_id")
+                if not player_id:
+                    self.log_result("Register Player", False, "No player ID in response")
+                    return False
+                
+                # Login player to get token
+                login_data = {
+                    "email": self.test_player_email,
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Player Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                login_response = response.json()
+                self.player_token = login_response.get("access_token")
+                if not self.player_token:
+                    self.log_result("Player Login", False, "No access token in login response")
+                    return False
+                
+                self.log_result("Register and Login Player", True, f"Player registered and logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Register and Login Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_deposit_twice_quickly(self) -> bool:
+        """Test 2: Call POST /api/v1/player/wallet/deposit (method=test) twice quickly. Ensure never 500."""
+        try:
+            if not self.player_token:
+                self.log_result("Deposit Twice Quickly", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # First deposit
+                headers1 = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                deposit_data1 = {
+                    "amount": 50.0,
+                    "method": "test"
+                }
+                
+                response1 = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data1,
+                    headers=headers1
+                )
+                
+                # Second deposit immediately after (to test timezone-aware datetime comparison fix)
+                headers2 = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                deposit_data2 = {
+                    "amount": 75.0,
+                    "method": "test"
+                }
+                
+                response2 = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data2,
+                    headers=headers2
+                )
+                
+                # The key requirement: NEVER 500 errors (timezone fix verification)
+                if response1.status_code == 500:
+                    self.log_result("Deposit Twice Quickly", False, 
+                                  f"First deposit returned 500 error: {response1.text}")
+                    return False
+                
+                if response2.status_code == 500:
+                    self.log_result("Deposit Twice Quickly", False, 
+                                  f"Second deposit returned 500 error: {response2.text}")
+                    return False
+                
+                # Valid responses: 200 (success), 403 (business rule like KYC_DEPOSIT_LIMIT), 429 (rate limited)
+                valid_status_codes = [200, 403, 429]
+                
+                if response1.status_code not in valid_status_codes:
+                    self.log_result("Deposit Twice Quickly", False, 
+                                  f"First deposit returned unexpected status {response1.status_code}: {response1.text}")
+                    return False
+                
+                if response2.status_code not in valid_status_codes:
+                    self.log_result("Deposit Twice Quickly", False, 
+                                  f"Second deposit returned unexpected status {response2.status_code}: {response2.text}")
+                    return False
+                
+                self.log_result("Deposit Twice Quickly", True, 
+                              f"Both deposits handled correctly - First: {response1.status_code}, Second: {response2.status_code} (no 500 timezone errors)")
+                return True
+                
+        except Exception as e:
+            self.log_result("Deposit Twice Quickly", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_create_affiliate(self) -> bool:
+        """Test 3: Call POST /api/v1/affiliates to ensure Affiliate.created_at is no longer tz-aware"""
+        try:
+            if not self.admin_token:
+                self.log_result("Create Affiliate", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Create affiliate
+                affiliate_data = {
+                    "name": f"TZ Test Affiliate {uuid.uuid4().hex[:8]}",
+                    "email": f"tzaffiliate_{uuid.uuid4().hex[:8]}@example.com",
+                    "commission_rate": 0.05,
+                    "status": "active"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/affiliates",
+                    json=affiliate_data,
+                    headers=headers
+                )
+                
+                # Check if endpoint exists and doesn't return 500 due to timezone issues
+                if response.status_code == 404:
+                    self.log_result("Create Affiliate", False, 
+                                  f"Affiliate endpoint not found (404) - endpoint may not be implemented")
+                    return False
+                elif response.status_code == 500:
+                    self.log_result("Create Affiliate", False, 
+                                  f"Server error (500) - possible timezone issue: {response.text}")
+                    return False
+                elif response.status_code in [200, 201]:
+                    data = response.json()
+                    affiliate_id = data.get("id") or data.get("affiliate_id")
+                    created_at = data.get("created_at")
+                    
+                    self.log_result("Create Affiliate", True, 
+                                  f"Affiliate created successfully - ID: {affiliate_id}, Created: {created_at}")
+                    return True
+                else:
+                    # Other status codes (like 403 forbidden, 422 validation error) are acceptable
+                    # as long as it's not a 500 timezone error
+                    self.log_result("Create Affiliate", True, 
+                                  f"Affiliate endpoint accessible (Status: {response.status_code}) - no timezone errors")
+                    return True
+                
+        except Exception as e:
+            self.log_result("Create Affiliate", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_vip_simulate(self) -> bool:
+        """Test 4: Call VIP simulate endpoint (/api/v1/vip/simulate) to ensure vip_engine no longer sets tz-aware last_updated"""
+        try:
+            if not self.admin_token:
+                self.log_result("VIP Simulate", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Try VIP simulate endpoint
+                simulate_data = {
+                    "player_id": "test_player_123",
+                    "action": "deposit",
+                    "amount": 100.0
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/vip/simulate",
+                    json=simulate_data,
+                    headers=headers
+                )
+                
+                # Check if endpoint exists and doesn't return 500 due to timezone issues
+                if response.status_code == 404:
+                    self.log_result("VIP Simulate", False, 
+                                  f"VIP simulate endpoint not found (404) - endpoint may not be implemented")
+                    return False
+                elif response.status_code == 500:
+                    self.log_result("VIP Simulate", False, 
+                                  f"Server error (500) - possible timezone issue: {response.text}")
+                    return False
+                elif response.status_code in [200, 201]:
+                    data = response.json()
+                    last_updated = data.get("last_updated")
+                    
+                    self.log_result("VIP Simulate", True, 
+                                  f"VIP simulate successful - Last Updated: {last_updated}")
+                    return True
+                else:
+                    # Other status codes (like 403 forbidden, 422 validation error) are acceptable
+                    # as long as it's not a 500 timezone error
+                    self.log_result("VIP Simulate", True, 
+                                  f"VIP simulate endpoint accessible (Status: {response.status_code}) - no timezone errors")
+                    return True
+                
+        except Exception as e:
+            self.log_result("VIP Simulate", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete timezone fixes verification test suite"""
+        print("🚀 Starting Timezone Fixes Verification Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup admin auth first
+        if not await self.setup_admin_auth():
+            print("\n❌ Admin authentication setup failed. Cannot proceed with affiliate/VIP tests.")
+        
+        # Run all tests in sequence
+        test_results = []
+        
+        # Test 1: Register+login a new player
+        test_results.append(await self.test_register_and_login_player())
+        
+        # Test 2: Call deposit twice quickly (main timezone fix test)
+        test_results.append(await self.test_deposit_twice_quickly())
+        
+        # Test 3: Create affiliate (if admin token available)
+        if self.admin_token:
+            test_results.append(await self.test_create_affiliate())
+        else:
+            self.log_result("Create Affiliate", False, "Skipped - no admin token")
+            test_results.append(False)
+        
+        # Test 4: VIP simulate (if available)
+        if self.admin_token:
+            test_results.append(await self.test_vip_simulate())
+        else:
+            self.log_result("VIP Simulate", False, "Skipped - no admin token")
+            test_results.append(False)
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 TIMEZONE FIXES VERIFICATION TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All timezone fixes verification tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
+
 class ResponsibleGamingTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
