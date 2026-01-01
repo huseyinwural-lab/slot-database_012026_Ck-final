@@ -5,7 +5,7 @@ from app.models.sql_models import Player
 from app.utils.auth_player import get_current_player
 from app.services.audit import audit
 from app.models.rg_models import PlayerRGProfile
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/v1/rg", tags=["responsible_gaming"])
 
@@ -89,5 +89,3 @@ async def set_player_exclusion(
         "duration_hours": duration_hours,
         "self_excluded_until": profile.self_excluded_until.isoformat(),
     }
-
-    return {"status": "excluded", "period_days": period_days}
