@@ -4,7 +4,7 @@ test.describe('Smart Game Loop', () => {
   test.setTimeout(120000);
 
   test('Session -> Smart Spin -> Valid Audit', async ({ page }) => {
-    const API_URL = 'http://localhost:8001';
+    const API_URL = process.env.E2E_API_BASE || 'http://localhost:8001';
     
     // 1. Setup User
     const uniqueId = Date.now();
