@@ -1,9 +1,9 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 
 // Environments
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8001';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000'; // Admin
-const PLAYER_URL = 'http://localhost:3001';
+const BACKEND_URL = process.env.E2E_API_BASE || process.env.BACKEND_URL || 'http://localhost:8001';
+const FRONTEND_URL = process.env.E2E_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000'; // Admin
+const PLAYER_URL = process.env.PLAYER_APP_URL || 'http://localhost:3001';
 
 const PLAYER_EMAIL = `ux-test-${Date.now()}@example.com`;
 const PLAYER_PASSWORD = 'Player123!';

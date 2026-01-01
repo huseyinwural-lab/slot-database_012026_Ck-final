@@ -4,9 +4,9 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
   test.setTimeout(180000); 
 
   test('Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid', async ({ page, browser }) => {
-    const PLAYER_APP_URL = 'http://localhost:3001';
-    const ADMIN_APP_URL = 'http://localhost:3000';
-    const API_URL = 'http://localhost:8001';
+    const PLAYER_APP_URL = process.env.PLAYER_APP_URL || 'http://localhost:3001';
+    const ADMIN_APP_URL = process.env.E2E_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
+    const API_URL = process.env.E2E_API_BASE || 'http://localhost:8001';
 
     // === DATA SETUP ===
     const uniqueId = Date.now();

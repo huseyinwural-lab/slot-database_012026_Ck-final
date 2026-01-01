@@ -4,7 +4,7 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
   test('User can initiate deposit and see balance update after simulated webhook', async ({ page, request }) => {
     test.setTimeout(90000);
     
-    const PLAYER_APP_URL = 'http://localhost:3001';
+    const PLAYER_APP_URL = process.env.PLAYER_APP_URL || 'http://localhost:3001';
 
     // Debug console logs from browser
     page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));

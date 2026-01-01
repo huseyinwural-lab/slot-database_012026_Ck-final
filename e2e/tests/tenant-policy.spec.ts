@@ -1,9 +1,9 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 
 // Environments
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8001';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-const PLAYER_URL = 'http://localhost:3001'; // Assuming default
+const BACKEND_URL = process.env.E2E_API_BASE || process.env.BACKEND_URL || 'http://localhost:8001';
+const FRONTEND_URL = process.env.E2E_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
+const PLAYER_URL = process.env.PLAYER_APP_URL || 'http://localhost:3001'; // Assuming default
 
 const LS_TOKEN_KEY = 'admin_token';
 const LS_PLAYER_TOKEN_KEY = 'player_token';
