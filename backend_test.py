@@ -559,11 +559,253 @@ class AdminReview002TestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
-async def main():
-    """Main test runner"""
-    test_suite = AdminReview002TestSuite()
-    success = await test_suite.run_all_tests()
-    return success
+class ResponsibleGamingTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.player_token = None
+        self.test_player_email = None
+        self.test_player_password = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def test_rg_endpoint_exists(self) -> bool:
+        """Test 1: Verify backend has new endpoint POST /api/v1/rg/player/exclusion (must not 404)"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Try to call the endpoint without auth to see if it exists (should get 401/403, not 404)
+                response = await client.post(
+                    f"{self.base_url}/rg/player/exclusion",
+                    json={"type": "self_exclusion", "duration_hours": 24}
+                )
+                
+                # We expect 401 (unauthorized) or 403 (forbidden), NOT 404 (not found)
+                if response.status_code == 404:
+                    self.log_result("RG Endpoint Exists", False, 
+                                  f"Endpoint returned 404 - endpoint does not exist")
+                    return False
+                elif response.status_code in [401, 403]:
+                    self.log_result("RG Endpoint Exists", True, 
+                                  f"Endpoint exists (returned {response.status_code} as expected)")
+                    return True
+                else:
+                    self.log_result("RG Endpoint Exists", True, 
+                                  f"Endpoint exists (returned {response.status_code})")
+                    return True
+                    
+        except Exception as e:
+            self.log_result("RG Endpoint Exists", False, f"Exception: {str(e)}")
+            return False
+    
+    async def create_and_login_player(self) -> bool:
+        """Test 2: Create a player (register) and login to obtain player token"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Generate unique player credentials
+                self.test_player_email = f"rgtest_{uuid.uuid4().hex[:8]}@example.com"
+                self.test_player_password = "RGTestPlayer123!"
+                
+                # Register player
+                player_data = {
+                    "email": self.test_player_email,
+                    "username": f"rgtest_{uuid.uuid4().hex[:8]}",
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Create Player", False, 
+                                  f"Registration failed - Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                reg_data = response.json()
+                player_id = reg_data.get("player_id")
+                if not player_id:
+                    self.log_result("Create Player", False, "No player ID in registration response")
+                    return False
+                
+                self.log_result("Create Player", True, f"Player registered with ID: {player_id}")
+                
+                # Login player to get token
+                login_data = {
+                    "email": self.test_player_email,
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Player Login", False, 
+                                  f"Login failed - Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                login_response = response.json()
+                self.player_token = login_response.get("access_token")
+                if not self.player_token:
+                    self.log_result("Player Login", False, "No access token in login response")
+                    return False
+                
+                self.log_result("Player Login", True, f"Player logged in successfully, token length: {len(self.player_token)}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create and Login Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_self_exclusion(self) -> bool:
+        """Test 3: Call POST /api/v1/rg/player/exclusion with body {"type":"self_exclusion","duration_hours":24} using Bearer player token; expect HTTP 200"""
+        try:
+            if not self.player_token:
+                self.log_result("Self Exclusion", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.player_token}"}
+                
+                exclusion_data = {
+                    "type": "self_exclusion",
+                    "duration_hours": 24
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/rg/player/exclusion",
+                    json=exclusion_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Self Exclusion", False, 
+                                  f"Expected 200, got {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                status = data.get("status")
+                exclusion_type = data.get("type")
+                duration_hours = data.get("duration_hours")
+                
+                if status != "ok":
+                    self.log_result("Self Exclusion", False, f"Expected status 'ok', got '{status}'")
+                    return False
+                
+                if exclusion_type != "self_exclusion":
+                    self.log_result("Self Exclusion", False, f"Expected type 'self_exclusion', got '{exclusion_type}'")
+                    return False
+                
+                if duration_hours != 24:
+                    self.log_result("Self Exclusion", False, f"Expected duration_hours 24, got {duration_hours}")
+                    return False
+                
+                self.log_result("Self Exclusion", True, 
+                              f"Self-exclusion successful: status={status}, type={exclusion_type}, duration={duration_hours}h")
+                return True
+                
+        except Exception as e:
+            self.log_result("Self Exclusion", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_login_enforcement(self) -> bool:
+        """Test 4: Call POST /api/v1/auth/player/login again for same player; expect HTTP 403 with detail RG_SELF_EXCLUDED"""
+        try:
+            if not self.test_player_email or not self.test_player_password:
+                self.log_result("Login Enforcement", False, "No player credentials available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": self.test_player_email,
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 403:
+                    self.log_result("Login Enforcement", False, 
+                                  f"Expected 403, got {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                detail = data.get("detail")
+                
+                if detail != "RG_SELF_EXCLUDED":
+                    self.log_result("Login Enforcement", False, 
+                                  f"Expected detail 'RG_SELF_EXCLUDED', got '{detail}'")
+                    return False
+                
+                self.log_result("Login Enforcement", True, 
+                              f"Login correctly blocked with 403 and detail 'RG_SELF_EXCLUDED'")
+                return True
+                
+        except Exception as e:
+            self.log_result("Login Enforcement", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete Responsible Gaming test suite"""
+        print("🚀 Starting Responsible Gaming Player Exclusion Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Run all tests in sequence
+        test_results = []
+        
+        # Test 1: Verify RG endpoint exists
+        test_results.append(await self.test_rg_endpoint_exists())
+        
+        # Test 2: Create player and login
+        test_results.append(await self.create_and_login_player())
+        
+        # Test 3: Self-exclusion
+        test_results.append(await self.test_self_exclusion())
+        
+        # Test 4: Login enforcement
+        test_results.append(await self.test_login_enforcement())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 RESPONSIBLE GAMING TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All Responsible Gaming tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())
