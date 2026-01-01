@@ -55,7 +55,7 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         data: Dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.utcnow().isoformat(),
             "level": record.levelname,
             "message": record.getMessage(),
             "request_id": getattr(record, "request_id", None),
