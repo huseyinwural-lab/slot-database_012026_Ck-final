@@ -49,8 +49,8 @@ jobs:
       DB_MAX_OVERFLOW: "10"
 
       # CORS: Explicit allowlist for CI (no wildcard) to match prod/staging rules
-      # Browser origin will be http://localhost:3000
-      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      # Browser origins: admin=3000, player=3001
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
 
 
       # Frontend build args
@@ -61,7 +61,8 @@ jobs:
       GIT_SHA: "ci"
       BUILD_TIME: "ci"
 
-      VITE_API_URL: "http://localhost:3000/api/v1"
+      # Player app should call backend directly to avoid admin-proxy CORS preflight issues
+      VITE_API_URL: "http://127.0.0.1:8001/api/v1"
 
     steps:
       - name: Checkout
