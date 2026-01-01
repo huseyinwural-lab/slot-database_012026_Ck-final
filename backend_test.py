@@ -1034,37 +1034,45 @@ class E2EBlockerTestSuite:
             return False
     
     async def fund_player_and_create_withdrawal(self) -> bool:
-        """Fund player account and create a withdrawal request"""
+        """Fund player account using admin ledger adjust and create a withdrawal request"""
         try:
-            if not self.player_token:
-                self.log_result("Fund Player and Create Withdrawal", False, "No player token available")
+            if not self.admin_token or not self.player_token or not self.test_player_id:
+                self.log_result("Fund Player and Create Withdrawal", False, "Missing required tokens or player ID")
                 return False
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {
+                # Use admin ledger adjust to fund the player account (bypasses KYC limits)
+                admin_headers = {
+                    "Authorization": f"Bearer {self.admin_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                adjust_data = {
+                    "player_id": self.test_player_id,
+                    "delta": 1000.0,
+                    "reason": "E2E test funding",
+                    "currency": "USD"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/admin/ledger/adjust",
+                    json=adjust_data,
+                    headers=admin_headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Fund Player Account (Admin)", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                self.log_result("Fund Player Account (Admin)", True, "Player funded via admin ledger adjust")
+                
+                # Now create withdrawal request using player token
+                player_headers = {
                     "Authorization": f"Bearer {self.player_token}",
                     "Idempotency-Key": str(uuid.uuid4())
                 }
                 
-                # Make a test deposit first
-                deposit_data = {
-                    "amount": 1000.0,
-                    "method": "test"
-                }
-                
-                response = await client.post(
-                    f"{self.base_url}/player/wallet/deposit",
-                    json=deposit_data,
-                    headers=headers
-                )
-                
-                if response.status_code != 200:
-                    self.log_result("Fund Player Account", False, 
-                                  f"Status: {response.status_code}, Response: {response.text}")
-                    return False
-                
-                # Now create withdrawal request
-                headers["Idempotency-Key"] = str(uuid.uuid4())  # New idempotency key
                 withdrawal_data = {
                     "amount": 100.0,
                     "method": "test_bank",
@@ -1074,7 +1082,7 @@ class E2EBlockerTestSuite:
                 response = await client.post(
                     f"{self.base_url}/player/wallet/withdraw",
                     json=withdrawal_data,
-                    headers=headers
+                    headers=player_headers
                 )
                 
                 if response.status_code != 200:
