@@ -338,6 +338,49 @@ jobs:
           cat /tmp/login.json
           test "$code" = "200"
 
+
+      - name: Deposit smoke (P0-B)
+        run: |
+          set -euo pipefail
+          API="$API_BASE"
+
+          echo "Registering E2E player..."
+          EMAIL="smoke_player_$(date +%s)@example.com"
+          PASS="Password123!"
+
+          code="$(curl -sS -o /tmp/p_reg.json -w "%{http_code}" \
+            -X POST "$API/api/v1/auth/player/register" \
+            -H 'content-type: application/json' \
+            --data "{\"email\":\"$EMAIL\",\"username\":\"smoke\",\"password\":\"$PASS\",\"tenant_id\":\"default_casino\"}")"
+          echo "register HTTP $code" && cat /tmp/p_reg.json
+          test "$code" = "200" || test "$code" = "201" || test "$code" = "400"  # 400=already exists
+
+          echo "Logging in player..."
+          code="$(curl -sS -o /tmp/p_login.json -w "%{http_code}" \
+            -X POST "$API/api/v1/auth/player/login" \
+            -H 'content-type: application/json' \
+            --data "{\"email\":\"$EMAIL\",\"password\":\"$PASS\",\"tenant_id\":\"default_casino\"}")"
+          echo "login HTTP $code" && cat /tmp/p_login.json
+          test "$code" = "200"
+
+          TOKEN=$(python3 - <<'PY'
+import json
+print(json.load(open('/tmp/p_login.json'))['access_token'])
+PY
+)
+
+          echo "Calling deposit..."
+          IDEM="ci-dep-$(date +%s)"
+          code="$(curl -sS -o /tmp/p_dep.json -w "%{http_code}" \
+            -X POST "$API/api/v1/player/wallet/deposit" \
+            -H 'content-type: application/json' \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Idempotency-Key: $IDEM" \
+            -H "X-Mock-Outcome: success" \
+            --data '{"amount": 10, "method": "test"}')"
+          echo "deposit HTTP $code" && cat /tmp/p_dep.json
+          test "$code" = "200" || test "$code" = "201"
+
       - name: Dump localhost resolution
         if: always()
         run: |
