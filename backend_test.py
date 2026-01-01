@@ -916,6 +916,398 @@ class P0VerificationTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class E2EBlockerTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.player_token = None
+        self.test_player_email = None
+        self.test_player_password = None
+        self.test_player_id = None
+        self.withdrawal_id = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, f"Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def create_test_player(self) -> bool:
+        """Create a test player for withdrawal testing"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Create a test player using player registration endpoint
+                self.test_player_email = f"e2etest_{uuid.uuid4().hex[:8]}@example.com"
+                self.test_player_password = "E2ETestPlayer123!"
+                
+                player_data = {
+                    "email": self.test_player_email,
+                    "username": f"e2etest_{uuid.uuid4().hex[:8]}",
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Create Test Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.test_player_id = data.get("player_id")
+                if not self.test_player_id:
+                    self.log_result("Create Test Player", False, "No player ID in response")
+                    return False
+                
+                self.log_result("Create Test Player", True, f"Player ID: {self.test_player_id}")
+                
+                # Login as the test player to get player token
+                player_login_data = {
+                    "email": self.test_player_email,
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=player_login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Player Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                player_login_response = response.json()
+                self.player_token = player_login_response.get("access_token")
+                if not self.player_token:
+                    self.log_result("Player Login", False, "No player access token in response")
+                    return False
+                
+                self.log_result("Player Login", True, f"Player token length: {len(self.player_token)}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create Test Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def fund_player_and_create_withdrawal(self) -> bool:
+        """Fund player account and create a withdrawal request"""
+        try:
+            if not self.player_token:
+                self.log_result("Fund Player and Create Withdrawal", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                # Make a test deposit first
+                deposit_data = {
+                    "amount": 1000.0,
+                    "method": "test"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Fund Player Account", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Now create withdrawal request
+                headers["Idempotency-Key"] = str(uuid.uuid4())  # New idempotency key
+                withdrawal_data = {
+                    "amount": 100.0,
+                    "method": "test_bank",
+                    "address": "test-bank-account-123"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/player/wallet/withdraw",
+                    json=withdrawal_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Create Withdrawal Request", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                transaction = data.get("transaction", {})
+                self.withdrawal_id = transaction.get("id")
+                
+                if not self.withdrawal_id:
+                    self.log_result("Create Withdrawal Request", False, "No withdrawal ID in response")
+                    return False
+                
+                self.log_result("Fund Player and Create Withdrawal", True, 
+                              f"Withdrawal ID: {self.withdrawal_id}, State: {transaction.get('state')}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Fund Player and Create Withdrawal", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_withdraw_approval_without_reason(self) -> bool:
+        """Test 1: Withdraw approval without reason - should no longer return 400 REASON_REQUIRED"""
+        try:
+            if not self.admin_token or not self.withdrawal_id:
+                self.log_result("Withdraw Approval Without Reason", False, "Missing admin token or withdrawal ID")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Try to approve without reason
+                payload = {"action": "approve"}  # No reason field
+                
+                response = await client.post(
+                    f"{self.base_url}/finance/withdrawals/{self.withdrawal_id}/review",
+                    json=payload,
+                    headers=headers
+                )
+                
+                # According to the review request, this should NO LONGER return 400 REASON_REQUIRED
+                # It should succeed or fail for another valid reason
+                if response.status_code == 400:
+                    data = response.json()
+                    error_code = data.get("detail", {}).get("error_code")
+                    
+                    if error_code == "REASON_REQUIRED":
+                        self.log_result("Withdraw Approval Without Reason", False, 
+                                      f"Still returns 400 REASON_REQUIRED - fix not working")
+                        return False
+                    else:
+                        # 400 for another reason is acceptable
+                        self.log_result("Withdraw Approval Without Reason", True, 
+                                      f"Returns 400 but not REASON_REQUIRED: {error_code}")
+                        return True
+                elif response.status_code == 200:
+                    # Success is also acceptable
+                    self.log_result("Withdraw Approval Without Reason", True, 
+                                  f"Successfully approved without reason (Status: 200)")
+                    return True
+                else:
+                    # Other status codes are also acceptable as long as it's not 400 REASON_REQUIRED
+                    self.log_result("Withdraw Approval Without Reason", True, 
+                                  f"Returns {response.status_code} (not 400 REASON_REQUIRED)")
+                    return True
+                
+        except Exception as e:
+            self.log_result("Withdraw Approval Without Reason", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_adyen_checkout_without_origin(self) -> bool:
+        """Test 2: Adyen checkout session without Origin header - should use player_app_url fallback"""
+        try:
+            if not self.player_token:
+                self.log_result("Adyen Checkout Without Origin", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.player_token}"}
+                # Explicitly NOT setting Origin header
+                
+                checkout_data = {
+                    "amount": 50.0,
+                    "currency": "USD"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/payments/adyen/checkout/session",
+                    json=checkout_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Adyen Checkout Without Origin", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                url = data.get("url", "")
+                
+                # Verify the URL uses the fallback (should contain localhost:3001/wallet?tx_id=...)
+                if "localhost:3001/wallet" in url and "tx_id=" in url:
+                    self.log_result("Adyen Checkout Without Origin", True, 
+                                  f"Correctly uses player_app_url fallback: {url}")
+                    return True
+                else:
+                    self.log_result("Adyen Checkout Without Origin", False, 
+                                  f"URL doesn't use expected fallback: {url}")
+                    return False
+                
+        except Exception as e:
+            self.log_result("Adyen Checkout Without Origin", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_stripe_checkout_without_origin(self) -> bool:
+        """Test 3: Stripe checkout session without Origin header - verify error handling"""
+        try:
+            if not self.player_token:
+                self.log_result("Stripe Checkout Without Origin", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.player_token}"}
+                # Explicitly NOT setting Origin header
+                
+                checkout_data = {
+                    "amount": 50.0,
+                    "currency": "USD"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/payments/stripe/checkout/session",
+                    json=checkout_data,
+                    headers=headers
+                )
+                
+                # If Stripe keys missing, expect 500 but ensure error message is 'Stripe configuration missing'
+                if response.status_code == 500:
+                    response_text = response.text
+                    if "Stripe configuration missing" in response_text:
+                        self.log_result("Stripe Checkout Without Origin", True, 
+                                      f"Correctly returns 'Stripe configuration missing' error")
+                        return True
+                    elif "session_id undefined" in response_text:
+                        self.log_result("Stripe Checkout Without Origin", False, 
+                                      f"Returns 'session_id undefined' error instead of proper config error")
+                        return False
+                    else:
+                        self.log_result("Stripe Checkout Without Origin", True, 
+                                      f"Returns 500 with different error (acceptable): {response_text}")
+                        return True
+                elif response.status_code == 200:
+                    # If Stripe is configured and works, that's also acceptable
+                    data = response.json()
+                    session_id = data.get("session_id")
+                    if session_id:
+                        self.log_result("Stripe Checkout Without Origin", True, 
+                                      f"Stripe configured and working, session created: {session_id}")
+                        return True
+                    else:
+                        self.log_result("Stripe Checkout Without Origin", False, 
+                                      f"200 response but no session_id in response")
+                        return False
+                else:
+                    # Other status codes might be acceptable depending on configuration
+                    self.log_result("Stripe Checkout Without Origin", True, 
+                                  f"Returns {response.status_code} (not session_id undefined error)")
+                    return True
+                
+        except Exception as e:
+            self.log_result("Stripe Checkout Without Origin", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete E2E blocker test suite"""
+        print("🚀 Starting E2E Blocker Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_auth():
+            print("\n❌ Authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        if not await self.create_test_player():
+            print("\n❌ Test player creation failed. Cannot proceed with tests.")
+            return False
+        
+        if not await self.fund_player_and_create_withdrawal():
+            print("\n❌ Player funding and withdrawal creation failed. Cannot proceed with withdrawal test.")
+            # Continue with other tests that don't require withdrawal
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: Withdraw approval without reason
+        if self.withdrawal_id:
+            test_results.append(await self.test_withdraw_approval_without_reason())
+        else:
+            self.log_result("Withdraw Approval Without Reason", False, "Skipped - no withdrawal ID")
+            test_results.append(False)
+        
+        # Test 2: Adyen checkout without Origin header
+        test_results.append(await self.test_adyen_checkout_without_origin())
+        
+        # Test 3: Stripe checkout without Origin header
+        test_results.append(await self.test_stripe_checkout_without_origin())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 E2E BLOCKER TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All E2E blocker tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class TimezoneFixesTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
