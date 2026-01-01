@@ -1911,7 +1911,13 @@ async def main():
     # Check which test suite to run based on command line args or run both
     import sys
     
-    if len(sys.argv) > 1 and sys.argv[1] == "p0":
+    if len(sys.argv) > 1 and sys.argv[1] == "e2e":
+        # Run only E2E blocker tests (priority for this review request)
+        print("Running E2E blocker tests only...")
+        e2e_suite = E2EBlockerTestSuite()
+        success = await e2e_suite.run_all_tests()
+        return success
+    elif len(sys.argv) > 1 and sys.argv[1] == "p0":
         # Run only P0 verification tests
         print("Running P0 verification tests only...")
         p0_suite = P0VerificationTestSuite()
@@ -1930,23 +1936,23 @@ async def main():
         success = await admin_suite.run_all_tests()
         return success
     elif len(sys.argv) > 1 and sys.argv[1] == "timezone":
-        # Run only Timezone Fixes tests (as requested in review)
+        # Run only Timezone Fixes tests
         print("Running Timezone Fixes verification tests only...")
         tz_suite = TimezoneFixesTestSuite()
         success = await tz_suite.run_all_tests()
         return success
     else:
-        # Run Timezone Fixes verification tests (as requested in review)
-        print("Running Timezone Fixes verification tests...")
-        tz_suite = TimezoneFixesTestSuite()
-        tz_success = await tz_suite.run_all_tests()
+        # Run E2E blocker tests (priority for this review request)
+        print("Running E2E blocker tests (priority for review request)...")
+        e2e_suite = E2EBlockerTestSuite()
+        e2e_success = await e2e_suite.run_all_tests()
         
         print("\n" + "=" * 80)
         print("🏁 FINAL SUMMARY")
         print("=" * 80)
-        print(f"Timezone Fixes Verification Tests: {'✅ PASSED' if tz_success else '❌ FAILED'}")
+        print(f"E2E Blocker Tests: {'✅ PASSED' if e2e_success else '❌ FAILED'}")
         
-        return tz_success
+        return e2e_success
 
 
 if __name__ == "__main__":
