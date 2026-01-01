@@ -16,7 +16,9 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
 
     // 1. Register via API
     console.log(`Registering user ${email}...`);
-    const registerRes = await request.post('http://localhost:8001/api/v1/auth/player/register', {
+    const API_URL = process.env.E2E_API_BASE || 'http://localhost:8001';
+
+    const registerRes = await request.post(`${API_URL}/api/v1/auth/player/register`, {
         data: {
             username: `user${uniqueId}`,
             email: email,
