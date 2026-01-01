@@ -1092,7 +1092,13 @@ async def main():
     # Check which test suite to run based on command line args or run both
     import sys
     
-    if len(sys.argv) > 1 and sys.argv[1] == "rg":
+    if len(sys.argv) > 1 and sys.argv[1] == "p0":
+        # Run only P0 verification tests
+        print("Running P0 verification tests only...")
+        p0_suite = P0VerificationTestSuite()
+        success = await p0_suite.run_all_tests()
+        return success
+    elif len(sys.argv) > 1 and sys.argv[1] == "rg":
         # Run only Responsible Gaming tests
         print("Running Responsible Gaming tests only...")
         rg_suite = ResponsibleGamingTestSuite()
@@ -1105,17 +1111,17 @@ async def main():
         success = await admin_suite.run_all_tests()
         return success
     else:
-        # Run Responsible Gaming tests (as requested in review)
-        print("Running Responsible Gaming tests...")
-        rg_suite = ResponsibleGamingTestSuite()
-        rg_success = await rg_suite.run_all_tests()
+        # Run P0 verification tests (as requested in review)
+        print("Running P0 verification tests...")
+        p0_suite = P0VerificationTestSuite()
+        p0_success = await p0_suite.run_all_tests()
         
         print("\n" + "=" * 80)
         print("🏁 FINAL SUMMARY")
         print("=" * 80)
-        print(f"Responsible Gaming Tests: {'✅ PASSED' if rg_success else '❌ FAILED'}")
+        print(f"P0 Verification Tests: {'✅ PASSED' if p0_success else '❌ FAILED'}")
         
-        return rg_success
+        return p0_success
 
 
 if __name__ == "__main__":
