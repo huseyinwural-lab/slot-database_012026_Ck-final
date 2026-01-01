@@ -410,7 +410,7 @@ jobs:
 
           if [ "$code" != "200" ] && [ "$code" != "201" ]; then
             echo "=== Deposit failed; capturing backend logs tail ==="
-            docker compose -f docker-compose.prod.yml --profile localdb logs backend --since 10m | tail -n 400 > ci_artifacts/backend_tail_after_deposit.txt || true
+            docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=400 backend > ci_artifacts/backend_tail_after_deposit.txt || true
             exit 1
           fi
 

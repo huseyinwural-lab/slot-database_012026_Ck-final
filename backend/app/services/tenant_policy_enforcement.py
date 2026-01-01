@@ -13,6 +13,19 @@ from app.models.sql_models import Tenant, Transaction, Player
 ActionType = Literal["deposit", "withdraw"]
 
 
+def _naive_utc(dt: datetime) -> datetime:
+    """Force a datetime into naive UTC.
+
+    DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
+    - If tz-aware: convert to UTC then drop tzinfo.
+    - If naive: assume it's already UTC.
+    """
+
+    if dt.tzinfo is None:
+        return dt
+    return dt.astimezone(timezone.utc).replace(tzinfo=None)
+
+
 @dataclass
 class TenantLimitUsage:
     tenant_id: str
@@ -70,9 +83,9 @@ async def ensure_within_tenant_daily_limits(
 
     # DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
     # Keep comparisons deterministic by using naive UTC timestamps.
-    now = now or datetime.utcnow()
-    day_start = datetime(year=now.year, month=now.month, day=now.day)
-    day_end = day_start + timedelta(days=1)
+    now = _naive_utc(now or datetime.utcnow())
+    day_start = _naive_utc(datetime(year=now.year, month=now.month, day=now.day))
+    day_end = _naive_utc(day_start + timedelta(days=1))
 
     if action == "deposit":
         stmt = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
@@ -143,8 +156,8 @@ async def check_velocity_limit(
 
     # DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
     # Keep comparisons deterministic by using naive UTC timestamps.
-    now = datetime.utcnow()
-    window_start = now - timedelta(minutes=window_minutes)
+    now = _naive_utc(datetime.utcnow())
+    window_start = _naive_utc(now - timedelta(minutes=window_minutes))
 
     stmt = select(func.count(Transaction.id)).where(
         Transaction.player_id == player_id,
