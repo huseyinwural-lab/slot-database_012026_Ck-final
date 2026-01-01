@@ -888,6 +888,9 @@ class P0VerificationTestSuite:
         # Test 6: CORS preflight
         test_results.append(await self.test_cors_preflight())
         
+        # Test 7: Deposit velocity check (specific to review request)
+        test_results.append(await self.test_deposit_velocity_check())
+        
         # Summary
         print("\n" + "=" * 80)
         print("📊 P0 VERIFICATION TEST SUMMARY")
