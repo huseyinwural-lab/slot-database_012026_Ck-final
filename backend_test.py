@@ -559,6 +559,283 @@ class AdminReview002TestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class P0VerificationTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.player_token = None
+        self.test_player_email = None
+        self.test_player_password = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def test_seed_admin(self) -> bool:
+        """Test 1: Seed admin via POST /api/v1/admin/seed"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(f"{self.base_url}/admin/seed")
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Seed Admin", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.log_result("Seed Admin", True, f"Admin seeded successfully: {data}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Seed Admin", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_admin_login(self) -> bool:
+        """Test 2: Login admin (admin@casino.com/Admin123!)"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, f"Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_register_player(self) -> bool:
+        """Test 3: Register a new player"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Generate unique player credentials
+                self.test_player_email = f"p0test_{uuid.uuid4().hex[:8]}@casino.com"
+                self.test_player_password = "P0TestPlayer123!"
+                
+                player_data = {
+                    "email": self.test_player_email,
+                    "username": f"p0test_{uuid.uuid4().hex[:8]}",
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Register Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                player_id = data.get("player_id")
+                if not player_id:
+                    self.log_result("Register Player", False, "No player ID in response")
+                    return False
+                
+                self.log_result("Register Player", True, f"Player registered with ID: {player_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Register Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_player_login(self) -> bool:
+        """Test 4: Login player"""
+        try:
+            if not self.test_player_email or not self.test_player_password:
+                self.log_result("Player Login", False, "No player credentials available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": self.test_player_email,
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Player Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.player_token = data.get("access_token")
+                if not self.player_token:
+                    self.log_result("Player Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Player Login", True, f"Player logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Player Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_player_deposit(self) -> bool:
+        """Test 5: Call POST /api/v1/player/wallet/deposit with required Idempotency-Key and method=test"""
+        try:
+            if not self.player_token:
+                self.log_result("Player Deposit", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                deposit_data = {
+                    "amount": 100.0,
+                    "method": "test"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Player Deposit", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.log_result("Player Deposit", True, f"Deposit successful: {data}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Player Deposit", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_cors_preflight(self) -> bool:
+        """Test 6: Call OPTIONS preflight to /api/v1/auth/player/login with Origin=http://localhost:3001 and verify CORS headers"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Origin": "http://localhost:3001",
+                    "Access-Control-Request-Method": "POST",
+                    "Access-Control-Request-Headers": "Content-Type,Authorization"
+                }
+                
+                response = await client.options(
+                    f"{self.base_url}/auth/player/login",
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 204]:
+                    self.log_result("CORS Preflight", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Check CORS headers
+                cors_origin = response.headers.get("Access-Control-Allow-Origin")
+                cors_methods = response.headers.get("Access-Control-Allow-Methods")
+                cors_headers = response.headers.get("Access-Control-Allow-Headers")
+                
+                # Verify that the origin is allowed
+                origin_allowed = (cors_origin == "*" or 
+                                cors_origin == "http://localhost:3001" or
+                                "localhost:3001" in cors_origin)
+                
+                if not origin_allowed:
+                    self.log_result("CORS Preflight", False, 
+                                  f"Origin not allowed. Access-Control-Allow-Origin: {cors_origin}")
+                    return False
+                
+                self.log_result("CORS Preflight", True, 
+                              f"CORS headers valid - Origin: {cors_origin}, Methods: {cors_methods}, Headers: {cors_headers}")
+                return True
+                
+        except Exception as e:
+            self.log_result("CORS Preflight", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete P0 verification test suite"""
+        print("🚀 Starting P0 Backend Verification Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Run all tests in sequence
+        test_results = []
+        
+        # Test 1: Seed admin
+        test_results.append(await self.test_seed_admin())
+        
+        # Test 2: Admin login
+        test_results.append(await self.test_admin_login())
+        
+        # Test 3: Register player
+        test_results.append(await self.test_register_player())
+        
+        # Test 4: Player login
+        test_results.append(await self.test_player_login())
+        
+        # Test 5: Player deposit
+        test_results.append(await self.test_player_deposit())
+        
+        # Test 6: CORS preflight
+        test_results.append(await self.test_cors_preflight())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 P0 VERIFICATION TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All P0 verification tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class ResponsibleGamingTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
