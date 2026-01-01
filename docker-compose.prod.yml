@@ -61,17 +61,11 @@ services:
       # Security: No defaults/fallbacks for credentials
       BOOTSTRAP_ENABLED: "false"
       BOOTSTRAP_OWNER_EMAIL: ${BOOTSTRAP_OWNER_EMAIL}
-    depends_on:
-      backend-migrate:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_healthy
-
       BOOTSTRAP_OWNER_PASSWORD: ${BOOTSTRAP_OWNER_PASSWORD}
-    command: ["sh", "-lc", "alembic upgrade head"]
     depends_on:
       postgres:
         condition: service_healthy
+    command: ["sh", "-lc", "alembic upgrade head"]
 
   backend:
     build:
