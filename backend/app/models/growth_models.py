@@ -60,4 +60,6 @@ class GrowthEvent(SQLModel, table=True):
     payload: Dict = Field(default={}, sa_column=Column(JSON))
     
     processed: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+    # Use naive UTC datetime to avoid tz-aware insertion errors.
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
