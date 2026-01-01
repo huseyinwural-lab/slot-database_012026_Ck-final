@@ -4,8 +4,8 @@ test.describe('Casino E2E with Security', () => {
   test.setTimeout(120000);
 
   test('Full Loop with Signed Webhooks', async ({ page }) => {
-    const API_URL = 'http://localhost:8001';
-    const PLAYER_APP_URL = 'http://localhost:3001';
+    const API_URL = process.env.E2E_API_BASE || 'http://localhost:8001';
+    const PLAYER_APP_URL = process.env.PLAYER_APP_URL || 'http://localhost:3001';
     
     // 1. Setup User
     const uniqueId = Date.now();
