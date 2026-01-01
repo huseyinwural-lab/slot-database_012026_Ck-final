@@ -425,7 +425,7 @@
     - Access-Control-Allow-Origin: http://localhost:3001
     - Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
     - Access-Control-Allow-Headers: Content-Type,Authorization
-- **Backend URL**: https://paywallet-hub.preview.emergentagent.com
+- **Backend URL**: http://localhost:8001 (local sanity); CI uses http://127.0.0.1:8001
 - **Verification**: ✅ ALL P0 BACKEND VERIFICATION REQUIREMENTS MET (6/6 tests passed)
 
 ---
