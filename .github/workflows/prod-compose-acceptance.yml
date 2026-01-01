@@ -185,24 +185,52 @@ jobs:
           test "$HEAD" = "$CURR"
 
           echo "== critical columns guard =="
-          docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres psql -U postgres -d casino_db -v ON_ERROR_STOP=1 -c "\
-            WITH required(table_name, column_name) AS (\
-              VALUES\
-                ('player','wagering_requirement'),\
-                ('player','wagering_remaining'),\
-                ('auditevent','actor_role'),\
-                ('auditevent','status')\
-            )\
-            SELECT r.table_name, r.column_name\
-            FROM required r\
-            LEFT JOIN information_schema.columns c\
-              ON c.table_name = r.table_name AND c.column_name = r.column_name\
-            WHERE c.column_name IS NULL;\
-          " | tee ci_artifacts/schema_guard_missing_columns.txt
 
-          if [ -s ci_artifacts/schema_guard_missing_columns.txt ]; then
-            echo "FAIL: Missing critical columns"
-            cat ci_artifacts/schema_guard_missing_columns.txt
+          MISSING_COUNT=$(docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres \
+            psql -U postgres -d casino_db -tA -v ON_ERROR_STOP=1 -c "\
+              WITH required(table_name, column_name) AS (\
+                VALUES\
+                  ('player','wagering_requirement'),\
+                  ('player','wagering_remaining'),\
+                  ('auditevent','actor_role'),\
+                  ('auditevent','status')\
+              ),\
+              missing AS (\
+                SELECT r.table_name, r.column_name\
+                FROM required r\
+                LEFT JOIN information_schema.columns c\
+                  ON c.table_schema='public'\
+                 AND c.table_name = r.table_name\
+                 AND c.column_name = r.column_name\
+                WHERE c.column_name IS NULL\
+              )\
+              SELECT COUNT(*) FROM missing;\
+            ")
+
+          echo "MISSING_COUNT=${MISSING_COUNT}"
+
+          if [ "${MISSING_COUNT}" -eq 0 ]; then
+            echo "PASS: All critical columns present"
+          else
+            echo "FAIL: Missing critical columns (${MISSING_COUNT})"
+            docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres \
+              psql -U postgres -d casino_db -v ON_ERROR_STOP=1 -c "\
+                WITH required(table_name, column_name) AS (\
+                  VALUES\
+                    ('player','wagering_requirement'),\
+                    ('player','wagering_remaining'),\
+                    ('auditevent','actor_role'),\
+                    ('auditevent','status')\
+                )\
+                SELECT r.table_name, r.column_name\
+                FROM required r\
+                LEFT JOIN information_schema.columns c\
+                  ON c.table_schema='public'\
+                 AND c.table_name = r.table_name\
+                 AND c.column_name = r.column_name\
+                WHERE c.column_name IS NULL\
+                ORDER BY 1,2;\
+              " | tee ci_artifacts/schema_guard_missing_columns.txt
             exit 1
           fi
 
