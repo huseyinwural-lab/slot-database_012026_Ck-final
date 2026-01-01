@@ -352,6 +352,20 @@ jobs:
           test "$code" = "200"
 
 
+
+      - name: Assert tenant_policy_enforcement timezone patch is in running backend (P0-B)
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts
+
+          echo "=== check_velocity_limit source (first 120 lines) ===" | tee ci_artifacts/check_velocity_limit_source.txt
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T backend \
+            sh -lc 'python -c "import inspect; from app.services import tenant_policy_enforcement as t; print(inspect.getsource(t.check_velocity_limit))"' \
+            | tee -a ci_artifacts/check_velocity_limit_source.txt
+
+          # Fail-fast: the fix requires datetime.utcnow()
+          grep -q "datetime\.utcnow\(" ci_artifacts/check_velocity_limit_source.txt
+
       - name: Deposit smoke (P0-B)
         run: |
           set -euo pipefail
