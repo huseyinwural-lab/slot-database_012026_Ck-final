@@ -409,6 +409,12 @@
   - Seed + player register/login + `/api/v1/player/wallet/deposit` çağrısı local env’de 200 dönüyor.
 - **Status**: ✅ IMPLEMENTED (CI/E2E run verification pending)
 
+## CI YAML Parse Fix — heredoc removal (Iteration 2026-01-01)
+- **Issue**: `prod-compose-acceptance.yml` YAML parser fail (Invalid workflow) due to heredoc block inside `run: |`.
+- **Fix**: Removed heredoc token extraction and replaced with deterministic python one-liner + mask.
+- **Status**: ✅ VERIFIED (local yaml.safe_load parses workflow)
+
+
 ---
 
 ## P0 Backend Verification — Post-Fix Testing (Iteration 2026-01-01)
