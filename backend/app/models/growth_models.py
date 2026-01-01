@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON
 import uuid
@@ -44,7 +44,8 @@ class AffiliateAttribution(SQLModel, table=True):
     link_id: Optional[str] = None
     
     attribution_type: str = "last_click"
-    attributed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+    attributed_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     
     # Status
     status: str = "active" # active, revoked (fraud)

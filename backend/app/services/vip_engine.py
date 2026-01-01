@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from datetime import datetime, timezone
+from datetime import datetime
 import uuid
 
 from app.models.vip_models import PlayerVipStatus, VipTier, LoyaltyTransaction

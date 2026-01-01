@@ -182,9 +182,10 @@ async def create_deposit(
     cap = float(settings.kyc_unverified_daily_deposit_cap)
     if current_player.kyc_status != "verified":
         # Calculate today's completed deposits
-        from datetime import datetime, timezone, timedelta
-        now = datetime.now(timezone.utc)
-        start = datetime(year=now.year, month=now.month, day=now.day, tzinfo=timezone.utc)
+        # DB stores TIMESTAMP WITHOUT TIME ZONE, so keep comparisons naive UTC.
+        from datetime import datetime, timedelta
+        now = datetime.utcnow()
+        start = datetime(year=now.year, month=now.month, day=now.day)
         end = start + timedelta(days=1)
 
         cap_stmt = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
