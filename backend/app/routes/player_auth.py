@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from datetime import datetime, timezone, timedelta
+from app.models.rg_models import PlayerRGProfile
 import uuid
 
 from app.models.sql_models import Player
@@ -63,7 +64,18 @@ async def login_player(payload: dict = Body(...), session: AsyncSession = Depend
     
     if not player or not verify_password(payload.get("password"), player.password_hash):
         raise HTTPException(401, "Invalid credentials")
-        
+
+    # RG self-exclusion enforcement (deterministic): block login if player is self-excluded.
+    stmt_rg = select(PlayerRGProfile).where(PlayerRGProfile.player_id == player.id)
+    res_rg = await session.execute(stmt_rg)
+    profile = res_rg.scalars().first()
+    if profile:
+        if bool(getattr(profile, "self_excluded_permanent", False)):
+            raise HTTPException(status_code=403, detail="RG_SELF_EXCLUDED")
+        until = getattr(profile, "self_excluded_until", None)
+        if until and until > datetime.utcnow():
+            raise HTTPException(status_code=403, detail="RG_SELF_EXCLUDED")
+
     token = create_access_token(
         data={"sub": player.id, "role": "player", "tenant_id": tenant_id},
         expires_delta=timedelta(days=7)
