@@ -69,8 +69,14 @@ async def create_checkout_session(
 
     host_url = str(request.base_url).rstrip("/")
     origin = request.headers.get("origin")
+    # In CI/E2E runs, the request Origin header may be missing due to proxying.
+    # Fallback to configured player URL (or first CORS origin) to keep checkout deterministic.
     if not origin:
-        raise HTTPException(status_code=400, detail="Origin header required for redirect construction")
+        origin = settings.player_app_url or (
+            settings.cors_origins[0]
+            if isinstance(settings.cors_origins, list) and settings.cors_origins
+            else "http://localhost:3001"
+        )
 
     success_url = f"{origin}/wallet?session_id={{CHECKOUT_SESSION_ID}}&status=success"
     cancel_url = f"{origin}/wallet?status=cancel"
