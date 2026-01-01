@@ -102,7 +102,7 @@ async def create_deposit(
 
     # Test-only payment method gate: allow "test" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
-    is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test"}
+    is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test", "ci"}
     if method == "test" and not is_test_mode:
         raise HTTPException(status_code=400, detail={"error_code": "PAYMENT_METHOD_NOT_ALLOWED"})
 
@@ -436,7 +436,7 @@ async def create_withdrawal(
 
     # Test-only withdraw method gate: allow "test_bank" only in dev/local/test or when flag enabled
     env = (settings.env or "").lower()
-    is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test"}
+    is_test_mode = settings.allow_test_payment_methods or env in {"dev", "local", "test", "ci"}
     if method == "test_bank" and not is_test_mode:
         raise HTTPException(status_code=400, detail={"error_code": "WITHDRAW_METHOD_NOT_ALLOWED"})
 
