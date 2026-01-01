@@ -128,7 +128,7 @@ api.interceptors.response.use(
 
     // 401: Unauthorized -> Logout + toast
     if (error.response?.status === 401) {
-      await showToast('warning', 'Unauthorized', 'Your session has expired. Please sign in again.');
+      await showToast('warning', 'Unauthorized', 'Session invalid. Please sign in again.');
       if (typeof window !== 'undefined') {
         localStorage.removeItem('admin_token');
         localStorage.removeItem('admin_user');
