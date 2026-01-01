@@ -807,6 +807,40 @@ class ResponsibleGamingTestSuite:
             return False
 
 
+async def main():
+    """Main test runner"""
+    print("🎯 Backend Test Suite Runner")
+    print("=" * 80)
+    
+    # Check which test suite to run based on command line args or run both
+    import sys
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "rg":
+        # Run only Responsible Gaming tests
+        print("Running Responsible Gaming tests only...")
+        rg_suite = ResponsibleGamingTestSuite()
+        success = await rg_suite.run_all_tests()
+        return success
+    elif len(sys.argv) > 1 and sys.argv[1] == "admin":
+        # Run only Admin Review tests
+        print("Running Admin Review tests only...")
+        admin_suite = AdminReview002TestSuite()
+        success = await admin_suite.run_all_tests()
+        return success
+    else:
+        # Run Responsible Gaming tests (as requested in review)
+        print("Running Responsible Gaming tests...")
+        rg_suite = ResponsibleGamingTestSuite()
+        rg_success = await rg_suite.run_all_tests()
+        
+        print("\n" + "=" * 80)
+        print("🏁 FINAL SUMMARY")
+        print("=" * 80)
+        print(f"Responsible Gaming Tests: {'✅ PASSED' if rg_success else '❌ FAILED'}")
+        
+        return rg_success
+
+
 if __name__ == "__main__":
     success = asyncio.run(main())
     exit(0 if success else 1)
