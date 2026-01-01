@@ -1,0 +1,30 @@
+{
+  "Status": "healthy",
+  "FailingStreak": 0,
+  "Log": [
+    {
+      "Start": "2026-01-01T23:03:05.26498353Z",
+      "End": "2026-01-01T23:03:05.326021859Z",
+      "ExitCode": 0,
+      "Output": "{\"status\":\"ready\",\"dependencies\":{\"database\":\"connected\",\"redis\":\"skipped\",\"migrations\":\"ok\"},\"alembic\":{\"db\":\"20260101_01\",\"head\":\"20260101_01\"}}"
+    },
+    {
+      "Start": "2026-01-01T23:03:10.326664168Z",
+      "End": "2026-01-01T23:03:10.507515131Z",
+      "ExitCode": 0,
+      "Output": "{\"status\":\"ready\",\"dependencies\":{\"database\":\"connected\",\"redis\":\"skipped\",\"migrations\":\"ok\"},\"alembic\":{\"db\":\"20260101_01\",\"head\":\"20260101_01\"}}"
+    },
+    {
+      "Start": "2026-01-01T23:03:15.508571681Z",
+      "End": "2026-01-01T23:03:15.591344527Z",
+      "ExitCode": 0,
+      "Output": "{\"status\":\"ready\",\"dependencies\":{\"database\":\"connected\",\"redis\":\"skipped\",\"migrations\":\"ok\"},\"alembic\":{\"db\":\"20260101_01\",\"head\":\"20260101_01\"}}"
+    },
+    {
+      "Start": "2026-01-01T23:03:20.592302917Z",
+      "End": "2026-01-01T23:03:20.645648634Z",
+      "ExitCode": 0,
+      "Output": "{\"status\":\"ready\",\"dependencies\":{\"database\":\"connected\",\"redis\":\"skipped\",\"migrations\":\"ok\"},\"alembic\":{\"db\":\"20260101_01\",\"head\":\"20260101_01\"}}"
+    }
+  ]
+}
