@@ -26,7 +26,8 @@ class VipEngine:
         # Update Balance
         status.lifetime_points += points
         status.current_points += points
-        status.last_updated = datetime.now(timezone.utc)
+        # DB uses TIMESTAMP WITHOUT TIME ZONE
+        status.last_updated = datetime.utcnow()
         session.add(status)
         
         # Log Transaction
@@ -54,7 +55,8 @@ class VipEngine:
             
         # 1. Deduct Points
         status.current_points -= points_to_redeem
-        status.last_updated = datetime.now(timezone.utc)
+        # DB uses TIMESTAMP WITHOUT TIME ZONE
+        status.last_updated = datetime.utcnow()
         session.add(status)
         
         # 2. Log Loyalty Tx

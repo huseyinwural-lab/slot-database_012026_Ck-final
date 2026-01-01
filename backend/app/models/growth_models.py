@@ -19,7 +19,8 @@ class Affiliate(SQLModel, table=True):
     commission_rate: float = 0.0 # Legacy field for DB compatibility
     
     status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class AffiliateLink(SQLModel, table=True):
     """Tracking Links."""
@@ -32,7 +33,8 @@ class AffiliateLink(SQLModel, table=True):
     
     clicks: int = 0
     signups: int = 0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class AffiliateAttribution(SQLModel, table=True):
     """Player -> Affiliate Mapping."""
