@@ -363,11 +363,9 @@ jobs:
           echo "login HTTP $code" && cat /tmp/p_login.json
           test "$code" = "200"
 
-          TOKEN=$(python3 - <<'PY'
-import json
-print(json.load(open('/tmp/p_login.json'))['access_token'])
-PY
-)
+          TOKEN="$(python3 -c "import json; print(json.load(open('/tmp/p_login.json'))['access_token'])")"
+          echo "::add-mask::$TOKEN"
+          echo "TOKEN acquired (masked)"
 
           echo "Calling deposit..."
           IDEM="ci-dep-$(date +%s)"
