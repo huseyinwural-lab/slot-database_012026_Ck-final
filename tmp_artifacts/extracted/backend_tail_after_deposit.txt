@@ -1,0 +1,400 @@
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 189, in __call__
+backend-1  |     with collapse_excgroups():
+backend-1  |   File "/usr/local/lib/python3.11/contextlib.py", line 158, in __exit__
+backend-1  |     self.gen.throw(typ, value, traceback)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+backend-1  |     response = await self.dispatch_func(request, call_next)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/middleware/request_logging.py", line 39, in dispatch
+backend-1  |     response = await call_next(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 165, in call_next
+backend-1  |     raise app_exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 151, in coro
+backend-1  |     await self.app(scope, receive_or_disconnect, send_no_error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 189, in __call__
+backend-1  |     with collapse_excgroups():
+backend-1  |   File "/usr/local/lib/python3.11/contextlib.py", line 158, in __exit__
+backend-1  |     self.gen.throw(typ, value, traceback)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+backend-1  |     response = await self.dispatch_func(request, call_next)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/middleware/rate_limit.py", line 79, in dispatch
+backend-1  |     return await call_next(request)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 165, in call_next
+backend-1  |     raise app_exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 151, in coro
+backend-1  |     await self.app(scope, receive_or_disconnect, send_no_error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+backend-1  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+backend-1  |     await route.handle(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+backend-1  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+backend-1  |     response = await func(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+backend-1  |     raw_response = await run_endpoint_function(
+backend-1  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+backend-1  |     return await dependant.call(**values)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/routes/vip.py", line 63, in simulate_activity
+backend-1  |     await engine.award_points(
+backend-1  |   File "/app/app/services/vip_engine.py", line 44, in award_points
+backend-1  |     await self._check_tier_upgrade(session, status)
+backend-1  |   File "/app/app/services/vip_engine.py", line 105, in _check_tier_upgrade
+backend-1  |     best_tier = (await session.execute(stmt)).scalars().first()
+backend-1  |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py", line 449, in execute
+backend-1  |     result = await greenlet_spawn(
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+backend-1  |     result = context.switch(value)
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+backend-1  |     return self._execute_internal(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2228, in _execute_internal
+backend-1  |     ) = compile_state_cls.orm_pre_session_exec(
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 577, in orm_pre_session_exec
+backend-1  |     session._autoflush()
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 3051, in _autoflush
+backend-1  |     raise e.with_traceback(sys.exc_info()[2])
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 3040, in _autoflush
+backend-1  |     self.flush()
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+backend-1  |     self._flush(objects)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4466, in _flush
+backend-1  |     with util.safe_reraise():
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+backend-1  |     raise exc_value.with_traceback(exc_tb)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+backend-1  |     flush_context.execute()
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+backend-1  |     rec.execute(self)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+backend-1  |     util.preloaded.orm_persistence.save_obj(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 85, in save_obj
+backend-1  |     _emit_update_statements(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 912, in _emit_update_statements
+backend-1  |     c = connection.execute(
+backend-1  |         ^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+backend-1  |     return meth(
+backend-1  |            ^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+backend-1  |     return connection._execute_clauseelement(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+backend-1  |     ret = self._execute_context(
+backend-1  |           ^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+backend-1  |     return self._exec_single_context(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+backend-1  |     self._handle_dbapi_exception(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+backend-1  |     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+backend-1  |     self.dialect.do_execute(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+backend-1  |     cursor.execute(statement, parameters)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+backend-1  |     self._adapt_connection.await_(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+backend-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+backend-1  |     value = await result
+backend-1  |             ^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+backend-1  |     self._handle_exception(error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+backend-1  |     self._adapt_connection._handle_exception(error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+backend-1  |     raise translated_error from error
+backend-1  | sqlalchemy.exc.DBAPIError: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+backend-1  | (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $3: datetime.datetime(2026, 1, 1, 22, 46, 12... (can't subtract offset-naive and offset-aware datetimes)
+backend-1  | [SQL: UPDATE playervipstatus SET lifetime_points=$1::FLOAT, current_points=$2::FLOAT, last_updated=$3::TIMESTAMP WITHOUT TIME ZONE WHERE playervipstatus.player_id = $4::VARCHAR]
+backend-1  | [parameters: (1500.0, 1500.0, datetime.datetime(2026, 1, 1, 22, 46, 12, 959115, tzinfo=datetime.timezone.utc), '743751e9-400b-46df-9a71-a3399a9646c3')]
+backend-1  | (Background on this error at: https://sqlalche.me/e/20/dbapi)
+backend-1  | {"timestamp": "2026-01-01T22:46:13.456324+00:00", "level": "INFO", "message": "request", "request_id": "bc9a86f6-0558-40bf-a36c-8b05b4434adb", "tenant_id": null, "path": "/api/v1/auth/login", "method": "POST", "status_code": 200, "duration_ms": 263.76206000009006}
+backend-1  | INFO:     127.0.0.1:60664 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:13.461171+00:00", "level": "INFO", "message": "request", "request_id": "67866e58-19e3-4422-bf49-a178b3cae2dc", "tenant_id": null, "path": "/api/v1/poker/mtt", "method": "POST", "status_code": 404, "duration_ms": 1.4522999999826425}
+backend-1  | INFO:     127.0.0.1:60664 - "POST /api/v1/poker/mtt HTTP/1.1" 404 Not Found
+backend-1  | {"timestamp": "2026-01-01T22:46:13.948731+00:00", "level": "INFO", "message": "request", "request_id": "55d3d0d0-6045-4d42-bd14-8ff334e39c61", "tenant_id": null, "path": "/api/v1/auth/login", "method": "POST", "status_code": 200, "duration_ms": 263.6331720000271}
+backend-1  | INFO:     127.0.0.1:60672 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:13.958314+00:00", "level": "INFO", "message": "request", "request_id": "af99eabd-f207-47dd-9c88-c2faa313e516", "tenant_id": null, "path": "/api/v1/admin/risk/players/23b480c4-4a2c-44cd-bf37-0c20fa63ec87/flag", "method": "POST", "status_code": 200, "duration_ms": 6.010905000039202}
+backend-1  | INFO:     127.0.0.1:60672 - "POST /api/v1/admin/risk/players/23b480c4-4a2c-44cd-bf37-0c20fa63ec87/flag HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:13.966594+00:00", "level": "INFO", "message": "request", "request_id": "af99eabd-f207-47dd-9c88-c2faa313e516", "tenant_id": null, "path": "/api/v1/admin/risk/signals", "method": "GET", "status_code": 200, "duration_ms": 5.722755000078905}
+backend-1  | INFO:     127.0.0.1:60672 - "GET /api/v1/admin/risk/signals?type=MANUAL_FLAG HTTP/1.1" 200 OK
+backend-1  | INFO:     127.0.0.1:60682 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:14.470010+00:00", "level": "INFO", "message": "request", "request_id": "7e2d415c-d134-4f03-8575-266cb1b13f1a", "tenant_id": null, "path": "/api/v1/auth/login", "method": "POST", "status_code": 200, "duration_ms": 267.0736669999769}
+backend-1  | {"timestamp": "2026-01-01T22:46:14.740611+00:00", "level": "INFO", "message": "request", "request_id": "27c4c024-ba10-4645-9e51-e6599d12f05a", "tenant_id": null, "path": "/api/v1/auth/player/register", "method": "POST", "status_code": 200, "duration_ms": 264.96154799997385}
+backend-1  | INFO:     127.0.0.1:60682 - "POST /api/v1/auth/player/register HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:15.002990+00:00", "level": "INFO", "message": "request", "request_id": "22169688-63b2-445b-86bb-2f9fe8fec562", "tenant_id": null, "path": "/api/v1/auth/player/login", "method": "POST", "status_code": 200, "duration_ms": 259.45564499988905}
+backend-1  | INFO:     127.0.0.1:60682 - "POST /api/v1/auth/player/login HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:15.043319+00:00", "level": "INFO", "message": "request", "request_id": "5d3d3c43-5bde-4464-bf35-ba82f60cf805", "tenant_id": null, "path": "/api/v1/payments/webhook/mockpsp", "method": "POST", "status_code": 200, "duration_ms": 37.49990799997249}
+backend-1  | INFO:     127.0.0.1:60682 - "POST /api/v1/payments/webhook/mockpsp HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:15.049515+00:00", "level": "INFO", "message": "request", "request_id": "88ea6996-db3e-4e21-a83c-ce5c654eeede", "tenant_id": null, "path": "/api/v1/player/wallet/withdraw", "method": "POST", "status_code": 422, "duration_ms": 3.6196129999552795}
+backend-1  | INFO:     127.0.0.1:60682 - "POST /api/v1/player/wallet/withdraw HTTP/1.1" 422 Unprocessable Entity
+backend-1  | {"timestamp": "2026-01-01T22:46:15.057697+00:00", "level": "INFO", "message": "request", "request_id": "0dc0cb6a-53b1-4468-b584-c39c40f7facb", "tenant_id": null, "path": "/api/v1/rg/player/exclusion", "method": "POST", "status_code": 200, "duration_ms": 5.6856680000691995}
+backend-1  | INFO:     127.0.0.1:60682 - "POST /api/v1/rg/player/exclusion HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:15.320630+00:00", "level": "INFO", "message": "request", "request_id": "a488f912-b4b5-490d-a311-a5852335b8cf", "tenant_id": null, "path": "/api/v1/auth/player/login", "method": "POST", "status_code": 403, "duration_ms": 260.51271699998324}
+backend-1  | INFO:     127.0.0.1:60682 - "POST /api/v1/auth/player/login HTTP/1.1" 403 Forbidden
+backend-1  | {"timestamp": "2026-01-01T22:46:15.833436+00:00", "level": "INFO", "message": "request", "request_id": "be450607-873a-44cd-8dd1-96801f9b6e00", "tenant_id": null, "path": "/api/ready", "method": "GET", "status_code": 200, "duration_ms": 12.680407999823728}
+backend-1  | INFO:     127.0.0.1:60694 - "GET /api/ready HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:16.019066+00:00", "level": "INFO", "message": "request", "request_id": "a511d001-a15e-4363-b71f-5062da104b41", "tenant_id": null, "path": "/api/health", "method": "GET", "status_code": 200, "duration_ms": 1.1996660000477277}
+backend-1  | INFO:     172.18.0.1:35134 - "GET /api/health HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:20.895545+00:00", "level": "INFO", "message": "request", "request_id": "46c66ba1-bad8-412d-bd19-98c0a2c8f1c9", "tenant_id": null, "path": "/api/ready", "method": "GET", "status_code": 200, "duration_ms": 7.900720999941768}
+backend-1  | INFO:     127.0.0.1:59458 - "GET /api/ready HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:21.721995+00:00", "level": "INFO", "message": "request", "request_id": "12dee6e1-a0ab-4ef0-b300-074d9a8111e1", "tenant_id": null, "path": "/api/v1/auth/login", "method": "POST", "status_code": 200, "duration_ms": 267.28491199992277}
+backend-1  | INFO:     172.18.0.1:48684 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:22.981903+00:00", "level": "INFO", "message": "request", "request_id": "2b0a01b2-daac-4fb5-9de2-e8a162ac2b4b", "tenant_id": null, "path": "/api/v1/auth/player/register", "method": "POST", "status_code": 200, "duration_ms": 272.55717899993215}
+backend-1  | INFO:     172.18.0.1:48694 - "POST /api/v1/auth/player/register HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:23.261633+00:00", "level": "INFO", "message": "request", "request_id": "6bc8b9fe-f786-40b3-b884-7590263f6436", "tenant_id": null, "path": "/api/v1/auth/player/login", "method": "POST", "status_code": 200, "duration_ms": 262.7634059999764}
+backend-1  | INFO:     172.18.0.1:48710 - "POST /api/v1/auth/player/login HTTP/1.1" 200 OK
+backend-1  | {"timestamp": "2026-01-01T22:46:23.312037+00:00", "level": "ERROR", "message": "request failed", "request_id": "b8858deb-6aa3-4174-b599-bcfa6e983639", "tenant_id": null, "path": "/api/v1/player/wallet/deposit", "method": "POST", "status_code": 500, "duration_ms": 13.812391000101343, "exc_info": "Traceback (most recent call last):\n  File \"asyncpg/protocol/prepared_stmt.pyx\", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\n  File \"asyncpg/protocol/codecs/base.pyx\", line 227, in asyncpg.protocol.protocol.Codec.encode\n  File \"asyncpg/protocol/codecs/base.pyx\", line 129, in asyncpg.protocol.protocol.Codec.encode_scalar\n  File \"asyncpg/pgproto/./codecs/datetime.pyx\", line 152, in asyncpg.pgproto.pgproto.timestamp_encode\nTypeError: can't subtract offset-naive and offset-aware datetimes\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 550, in _prepare_and_execute\n    self._rows = deque(await prepared_stmt.fetch(*parameters))\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 176, in fetch\n    data = await self.__bind_execute(args, 0, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 241, in __bind_execute\n    data, status, _ = await self.__do_execute(\n                      ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 230, in __do_execute\n    return await executor(protocol)\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"asyncpg/protocol/protocol.pyx\", line 186, in bind_execute\n  File \"asyncpg/protocol/prepared_stmt.pyx\", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\nasyncpg.exceptions.DataError: invalid input for query argument $5: datetime.datetime(2026, 1, 1, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context\n    self.dialect.do_execute(\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py\", line 952, in do_execute\n    cursor.execute(statement, parameters)\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 585, in execute\n    self._adapt_connection.await_(\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 132, in await_only\n    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 196, in greenlet_spawn\n    value = await result\n            ^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 563, in _prepare_and_execute\n    self._handle_exception(error)\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 513, in _handle_exception\n    self._adapt_connection._handle_exception(error)\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 797, in _handle_exception\n    raise translated_error from error\nsqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.Error: <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $5: datetime.datetime(2026, 1, 1, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/app/app/middleware/request_logging.py\", line 39, in dispatch\n    response = await call_next(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py\", line 165, in call_next\n    raise app_exc\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py\", line 151, in coro\n    await self.app(scope, receive_or_disconnect, send_no_error)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py\", line 189, in __call__\n    with collapse_excgroups():\n  File \"/usr/local/lib/python3.11/contextlib.py\", line 158, in __exit__\n    self.gen.throw(typ, value, traceback)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/_utils.py\", line 93, in collapse_excgroups\n    raise exc\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py\", line 191, in __call__\n    response = await self.dispatch_func(request, call_next)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/app/middleware/rate_limit.py\", line 79, in dispatch\n    return await call_next(request)\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py\", line 165, in call_next\n    raise app_exc\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py\", line 151, in coro\n    await self.app(scope, receive_or_disconnect, send_no_error)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py\", line 85, in __call__\n    await self.app(scope, receive, send)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py\", line 65, in __call__\n    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 64, in wrapped_app\n    raise exc\n  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 756, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 776, in app\n    await route.handle(scope, receive, send)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 297, in handle\n    await self.app(scope, receive, send)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 77, in app\n    await wrap_app_handling_exceptions(app, request)(scope, receive, send)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 64, in wrapped_app\n    raise exc\n  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 72, in app\n    response = await func(request)\n               ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/fastapi/routing.py\", line 278, in app\n    raw_response = await run_endpoint_function(\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/fastapi/routing.py\", line 191, in run_endpoint_function\n    return await dependant.call(**values)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/app/app/routes/player_wallet.py\", line 197, in create_deposit\n    current_total = (await session.execute(cap_stmt)).scalar_one() or 0.0\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py\", line 449, in execute\n    result = await greenlet_spawn(\n             ^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 201, in greenlet_spawn\n    result = context.throw(*sys.exc_info())\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 2351, in execute\n    return self._execute_internal(\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 2249, in _execute_internal\n    result: Result[Any] = compile_state_cls.orm_execute_statement(\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py\", line 306, in orm_execute_statement\n    result = conn.execute(\n             ^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1419, in execute\n    return meth(\n           ^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py\", line 527, in _execute_on_connection\n    return connection._execute_clauseelement(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1641, in _execute_clauseelement\n    ret = self._execute_context(\n          ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1846, in _execute_context\n    return self._exec_single_context(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1986, in _exec_single_context\n    self._handle_dbapi_exception(\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 2363, in _handle_dbapi_exception\n    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context\n    self.dialect.do_execute(\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py\", line 952, in do_execute\n    cursor.execute(statement, parameters)\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 585, in execute\n    self._adapt_connection.await_(\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 132, in await_only\n    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 196, in greenlet_spawn\n    value = await result\n            ^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 563, in _prepare_and_execute\n    self._handle_exception(error)\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 513, in _handle_exception\n    self._adapt_connection._handle_exception(error)\n  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 797, in _handle_exception\n    raise translated_error from error\nsqlalchemy.exc.DBAPIError: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $5: datetime.datetime(2026, 1, 1, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)\n[SQL: SELECT coalesce(sum(transaction.amount), $1::INTEGER) AS coalesce_1 \nFROM transaction \nWHERE transaction.player_id = $2::VARCHAR AND transaction.type = $3::VARCHAR AND transaction.state = $4::VARCHAR AND transaction.created_at >= $5::TIMESTAMP WITHOUT TIME ZONE AND transaction.created_at < $6::TIMESTAMP WITHOUT TIME ZONE]\n[parameters: (0, '57c6296d-61c8-470e-9af5-de035c309261', 'deposit', 'completed', datetime.datetime(2026, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 1, 2, 0, 0, tzinfo=datetime.timezone.utc))]\n(Background on this error at: https://sqlalche.me/e/20/dbapi)"}
+backend-1  | INFO:     172.18.0.1:48722 - "POST /api/v1/player/wallet/deposit HTTP/1.1" 500 Internal Server Error
+backend-1  | ERROR:    Exception in ASGI application
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "asyncpg/protocol/prepared_stmt.pyx", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg
+backend-1  |   File "asyncpg/protocol/codecs/base.pyx", line 227, in asyncpg.protocol.protocol.Codec.encode
+backend-1  |   File "asyncpg/protocol/codecs/base.pyx", line 129, in asyncpg.protocol.protocol.Codec.encode_scalar
+backend-1  |   File "asyncpg/pgproto/./codecs/datetime.pyx", line 152, in asyncpg.pgproto.pgproto.timestamp_encode
+backend-1  | TypeError: can't subtract offset-naive and offset-aware datetimes
+backend-1  | 
+backend-1  | The above exception was the direct cause of the following exception:
+backend-1  | 
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+backend-1  |     self._rows = deque(await prepared_stmt.fetch(*parameters))
+backend-1  |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py", line 176, in fetch
+backend-1  |     data = await self.__bind_execute(args, 0, timeout)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py", line 241, in __bind_execute
+backend-1  |     data, status, _ = await self.__do_execute(
+backend-1  |                       ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py", line 230, in __do_execute
+backend-1  |     return await executor(protocol)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "asyncpg/protocol/protocol.pyx", line 186, in bind_execute
+backend-1  |   File "asyncpg/protocol/prepared_stmt.pyx", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg
+backend-1  | asyncpg.exceptions.DataError: invalid input for query argument $5: datetime.datetime(2026, 1, 1, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)
+backend-1  | 
+backend-1  | The above exception was the direct cause of the following exception:
+backend-1  | 
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+backend-1  |     self.dialect.do_execute(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+backend-1  |     cursor.execute(statement, parameters)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+backend-1  |     self._adapt_connection.await_(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+backend-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+backend-1  |     value = await result
+backend-1  |             ^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+backend-1  |     self._handle_exception(error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+backend-1  |     self._adapt_connection._handle_exception(error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+backend-1  |     raise translated_error from error
+backend-1  | sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.Error: <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $5: datetime.datetime(2026, 1, 1, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)
+backend-1  | 
+backend-1  | The above exception was the direct cause of the following exception:
+backend-1  | 
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+backend-1  |     result = await app(  # type: ignore[func-returns-value]
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+backend-1  |     return await self.app(scope, receive, send)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+backend-1  |     await super().__call__(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 123, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+backend-1  |     await self.app(scope, receive, _send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 189, in __call__
+backend-1  |     with collapse_excgroups():
+backend-1  |   File "/usr/local/lib/python3.11/contextlib.py", line 158, in __exit__
+backend-1  |     self.gen.throw(typ, value, traceback)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+backend-1  |     response = await self.dispatch_func(request, call_next)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/middleware/metrics_middleware.py", line 21, in dispatch
+backend-1  |     raise e
+backend-1  |   File "/app/app/middleware/metrics_middleware.py", line 11, in dispatch
+backend-1  |     response = await call_next(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 165, in call_next
+backend-1  |     raise app_exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 151, in coro
+backend-1  |     await self.app(scope, receive_or_disconnect, send_no_error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 189, in __call__
+backend-1  |     with collapse_excgroups():
+backend-1  |   File "/usr/local/lib/python3.11/contextlib.py", line 158, in __exit__
+backend-1  |     self.gen.throw(typ, value, traceback)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+backend-1  |     response = await self.dispatch_func(request, call_next)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/middleware/request_context.py", line 22, in dispatch
+backend-1  |     response = await call_next(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 165, in call_next
+backend-1  |     raise app_exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 151, in coro
+backend-1  |     await self.app(scope, receive_or_disconnect, send_no_error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 189, in __call__
+backend-1  |     with collapse_excgroups():
+backend-1  |   File "/usr/local/lib/python3.11/contextlib.py", line 158, in __exit__
+backend-1  |     self.gen.throw(typ, value, traceback)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+backend-1  |     response = await self.dispatch_func(request, call_next)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/middleware/request_logging.py", line 39, in dispatch
+backend-1  |     response = await call_next(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 165, in call_next
+backend-1  |     raise app_exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 151, in coro
+backend-1  |     await self.app(scope, receive_or_disconnect, send_no_error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 189, in __call__
+backend-1  |     with collapse_excgroups():
+backend-1  |   File "/usr/local/lib/python3.11/contextlib.py", line 158, in __exit__
+backend-1  |     self.gen.throw(typ, value, traceback)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+backend-1  |     response = await self.dispatch_func(request, call_next)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/middleware/rate_limit.py", line 79, in dispatch
+backend-1  |     return await call_next(request)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 165, in call_next
+backend-1  |     raise app_exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 151, in coro
+backend-1  |     await self.app(scope, receive_or_disconnect, send_no_error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+backend-1  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+backend-1  |     await route.handle(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+backend-1  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+backend-1  |     response = await func(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+backend-1  |     raw_response = await run_endpoint_function(
+backend-1  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+backend-1  |     return await dependant.call(**values)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/app/routes/player_wallet.py", line 197, in create_deposit
+backend-1  |     current_total = (await session.execute(cap_stmt)).scalar_one() or 0.0
+backend-1  |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py", line 449, in execute
+backend-1  |     result = await greenlet_spawn(
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+backend-1  |     result = context.throw(*sys.exc_info())
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+backend-1  |     return self._execute_internal(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+backend-1  |     result: Result[Any] = compile_state_cls.orm_execute_statement(
+backend-1  |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+backend-1  |     result = conn.execute(
+backend-1  |              ^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+backend-1  |     return meth(
+backend-1  |            ^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+backend-1  |     return connection._execute_clauseelement(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+backend-1  |     ret = self._execute_context(
+backend-1  |           ^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+backend-1  |     return self._exec_single_context(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+backend-1  |     self._handle_dbapi_exception(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+backend-1  |     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+backend-1  |     self.dialect.do_execute(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+backend-1  |     cursor.execute(statement, parameters)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+backend-1  |     self._adapt_connection.await_(
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+backend-1  |     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+backend-1  |     value = await result
+backend-1  |             ^^^^^^^^^^^^
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+backend-1  |     self._handle_exception(error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+backend-1  |     self._adapt_connection._handle_exception(error)
+backend-1  |   File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+backend-1  |     raise translated_error from error
+backend-1  | sqlalchemy.exc.DBAPIError: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $5: datetime.datetime(2026, 1, 1, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)
+backend-1  | [SQL: SELECT coalesce(sum(transaction.amount), $1::INTEGER) AS coalesce_1 
+backend-1  | FROM transaction 
+backend-1  | WHERE transaction.player_id = $2::VARCHAR AND transaction.type = $3::VARCHAR AND transaction.state = $4::VARCHAR AND transaction.created_at >= $5::TIMESTAMP WITHOUT TIME ZONE AND transaction.created_at < $6::TIMESTAMP WITHOUT TIME ZONE]
+backend-1  | [parameters: (0, '57c6296d-61c8-470e-9af5-de035c309261', 'deposit', 'completed', datetime.datetime(2026, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 1, 2, 0, 0, tzinfo=datetime.timezone.utc))]
+backend-1  | (Background on this error at: https://sqlalche.me/e/20/dbapi)
