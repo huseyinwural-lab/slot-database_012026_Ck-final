@@ -437,7 +437,7 @@ jobs:
         working-directory: e2e
         env:
           E2E_BASE_URL: "http://localhost:3000"
-          # UI calls go via same-origin /api proxy (avoid direct :8001 from browser)
+          PLAYER_APP_URL: "http://localhost:3001"
           # Keep APIRequestContext using API_BASE if needed by tests
           E2E_API_BASE: ${{ env.API_BASE }}
           E2E_OWNER_EMAIL: ${{ env.BOOTSTRAP_OWNER_EMAIL }}
