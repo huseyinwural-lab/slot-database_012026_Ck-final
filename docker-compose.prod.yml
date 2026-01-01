@@ -73,6 +73,11 @@ services:
       dockerfile: Dockerfile.prod
     restart: always
 # env_file removed (CI should not hard-fail if backend/.env is absent)
+    depends_on:
+      backend-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
     environment:
       PYTHONUNBUFFERED: "1"
       DATABASE_URL: ${DATABASE_URL}
@@ -114,12 +119,6 @@ services:
       dockerfile: Dockerfile.prod
       args:
         REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL}
-    depends_on:
-      backend-migrate:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_healthy
-
         APP_VERSION: ${APP_VERSION:-unknown}
         GIT_SHA: ${GIT_SHA:-unknown}
         BUILD_TIME: ${BUILD_TIME:-unknown}
