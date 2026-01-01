@@ -1,98 +1,83 @@
 <analysis>**original_problem_statement:**
 The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project is in its final phase, focusing on resolving deployment blockers and hardening the application.
 
-Initially, the main task was to address a critical deployment incompatibility: the application uses PostgreSQL and Redis, but the target Emergent platform only provides MongoDB. The agent and user collaborated extensively to refactor the application's configuration to be driven entirely by environment variables, allowing it to connect to external databases.
+Initially, the main task was to address a critical deployment incompatibility: the application uses PostgreSQL and Redis, but the target Emergent platform only provides MongoDB. This was resolved.
 
-However, a series of P0 release blockers and repository hygiene issues were identified, which became the top priority. After fixing those, the focus has shifted to fixing the CI pipeline (), which is failing due to a cascade of issues including Alembic migration errors, environment variable misconfigurations, and frontend build failures. The ultimate goal is to get a green CI run to unblock the final self-serve verification process by the user's Ops/Dev team.
+However, a series of P0 release blockers and repository hygiene issues were identified, which became the top priority. After fixing those, the focus has shifted to fixing the  CI pipeline and the  Playwright test suite, which are failing due to a cascade of issues including schema drift, environment misconfigurations, and service availability problems. The ultimate goal is to get green CI/E2E runs to unblock the final self-serve verification process by the user's Ops/Dev team.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Deployment Readiness:** The application must be configurable via environment variables (, ) to connect to external PostgreSQL and Redis services.
-2.  **Production Hardening (P0 Blockers):** Webhook signature verification must be implemented, mock KYC endpoints must be disabled in production, and the repository must be cleaned of artifacts and insecure credentials.
-3.  **CI/CD Pipeline Stability:** The  workflow must pass successfully on a Postgres-backed environment. This is the current primary goal.
+1.  **Deployment Readiness:** The application must be configurable via environment variables (, ) to connect to external PostgreSQL and Redis services. (DONE)
+2.  **Production Hardening (P0 Blockers):** Webhook signature verification must be implemented, mock KYC endpoints must be disabled in production, and the repository must be cleaned of artifacts and insecure credentials. (DONE)
+3.  **CI/CD Pipeline Stability:** The  workflow and the  Playwright test suite must pass successfully. This is the current primary goal.
 4.  **Verification:** The deployment fixes must be verifiable through a self-serve evidence pack that the user's Ops/Dev team can run once the CI is stable.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-A full-stack casino platform (React/FastAPI/PostgreSQL) that has undergone significant hardening. A long series of critical P0 security and hygiene issues have been resolved. The application's database and service connections are now fully configurable via environment variables.
+A full-stack casino platform (React/FastAPI/PostgreSQL) that has undergone significant hardening. A long series of critical P0 issues have been resolved (security, hygiene, Alembic migrations, CI environment). The application is now being tested with a  CI pipeline and a separate E2E Playwright test suite.
 
-However, the main  CI pipeline is broken. The agent has been working through a chain of failures:
-- Multiple Alembic migration errors on PostgreSQL (foreign key dependencies, data type mismatches, transaction aborts) have been patched.
-- CI environment configuration issues (e.g., missing ) have been addressed in the workflow files.
-- The  service has been isolated into a separate  profile to simplify the main deployment.
-- The agent is currently stuck trying to fix frontend build failures.
+The  smoke tests are now passing after numerous fixes. However, the full  test suite is failing massively. The agent correctly diagnosed that the previous session expired issue was due to a stale token and has implemented fixes. The current primary blockers are that the  application is not running during the E2E tests, and the core deposit API is returning a 500 error. The agent was in the process of fixing both issues simultaneously.
 
 **Last working item**:
--   **Last item agent was working:** The agent was trying to resolve a cascade of frontend CI failures. This involved multiple steps:
-    1.  Fixing a yarn install v1.22.22
-[1/4] Resolving packages...
-success Already up-to-date.
-Done in 0.19s. error by updating .
-    2.  Attempting to fix dozens of ESLint errors () across many React components by manually adding  to data-fetching functions.
-    3.  The  command continued to fail, seemingly due to the sheer number of unresolved linting errors being treated as build failures. The agent was in a loop of fixing a few files, re-running lint/build, and seeing it fail again.
+-   **Last item agent was working:** The agent was working on fixing two critical, parallel P0 blockers identified from the E2E test logs:
+    1.  **Player App Not Running:** Multiple tests were failing with . The agent attempted to fix this by modifying  and the CI workflow ( and ) to explicitly include the  service in the  command.
+    2.  **Deposit API 500 Error:** Almost all tests involving the money path (deposits, withdrawals) were failing with a 500 error from the backend. The agent identified this as a critical blocker and started investigating the code in , while also running a  command to reproduce.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent (once the build is successful).
+-   **Which testing method agent to use?** Frontend testing agent (to verify the player app UI at  is up and running) and Backend analysis (to debug the Deposit 500 error by examining backend logs during the E2E run).
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** The  CI pipeline is broken (P0)
--   **Issue 2:** Critical Deployment Incompatibility & Verification (P0)
--   **Issue 3:** Confirm Final Release Process Hardening (P1)
+-   **Issue 1:** E2E Playwright test suite is failing (P0)
+-   **Issue 2:**  CI pipeline needs final verification (P1)
+-   **Issue 3:** Critical Deployment Incompatibility & Verification (P0)
 
 **Issues Detail:**
--   **Issue 1:** The  CI pipeline is broken
-    -   **Description:** The main CI workflow is failing due to a chain of multiple independent issues. This is the absolute highest priority blocker.
-        -   **Frontend Build Failure:** The yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. (via ) step is failing. The logs suggest this is due to a large number of ESLint warnings () being treated as errors. The agent was stuck in a loop trying to fix these manually.
-        -   **Backend Test Failure:** The  was failing with a  error. The agent attempted a fix in  by managing the event loop, but a full successful test run in CI has not been confirmed since.
-        -   **Environment Sanity:** The pipeline was previously failing due to  not being found and  being empty. The agent has added steps to the workflow to mitigate this, but it needs verification in a full run.
+-   **Issue 1:** E2E Playwright test suite is failing
+    -   **Description:** The main E2E test suite has a high failure rate (13/25 failed). The agent was working on two main causes.
+        -   **P0 Sub-Issue: Player App Not Running:** Many tests fail because they cannot connect to .
+        -   **P0 Sub-Issue: Deposit API returns HTTP 500:** All money path tests fail due to an internal server error when trying to make a deposit. The root cause is unknown.
+        -   **P1 Sub-Issue: Seed Data Missing:**  and  tests fail to find seeded data like the 'Classic 777' robot/game.
+        -   **P1 Sub-Issue: Brands API 404:** The frontend calls , which doesn't exist, causing noise in logs.
     -   **Attempted fixes:**
-        -   For the frontend build, the agent manually added  to many functions in many files, but this was inefficient and did not solve the problem globally. The build still fails.
-        -   For the backend tests,  was modified to manage the asyncio event loop better.
-        -   For the CI environment,  and an explicit  were added to the workflow YAML.
+        -   For the Player App: The agent edited  to include a  service and modified the CI workflow to run  with the  flag. This has not been verified in a CI run.
+        -   For the Deposit 500: The agent started investigating  but has not yet found the root cause or applied a fix.
     -   **Next debug checklist:**
-        1.  **Frontend First:** Focus on fixing the frontend build. Instead of manual, one-by-one fixes, try a more systematic approach:
-            -   Run yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. to see how many issues can be auto-corrected.
-            -   Review the  or  configuration to see if warnings as errors can be temporarily disabled in CI to unblock the build and isolate the problem.
-            -   If many components follow the same problematic data-fetching pattern, refactor one component correctly as a template and apply it to the others.
-        2.  **CI/Env:** Once the frontend builds, trigger the full  workflow.
-        3.  **Backend Tests:** If the  error returns, analyze the full stack trace. It's likely a fixture scope issue or an engine being created at import time.
-    -   **Why fix this issue and what will be achieved with the fix?** A green CI pipeline is the mandatory gate for any deployment or further verification. Without it, no progress can be validated.
+        1.  **Verify Player App:** Trigger the E2E workflow and confirm  starts and is accessible on port 3001. Check the  output in the CI logs.
+        2.  **Debug Deposit 500:** Once the player app is up, the next blocker is the 500 error. The CI workflow was modified to dump backend logs on failure. Analyze the full stack trace for the deposit request to find the new root cause (it's no longer the  column issue).
+        3.  **Seed Data:** After the primary blockers are fixed, investigate the E2E seeding process to ensure games and robots are created before tests run.
+    -   **Why fix this issue and what will be achieved with the fix?** A green E2E suite is a mandatory gate for verifying the application's core functionality before go-live.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** both
     -   **Blocked on other issue:** None. This is the primary blocker.
 
--   **Issue 2:** Critical Deployment Incompatibility & Verification
-    -   **Description:** The original goal: verify that the app can be deployed on an external environment using environment variables for PostgreSQL and Redis. This is blocked until the CI pipeline is green.
-    -   **Attempted fixes:** The agent has completed the necessary code refactoring and created comprehensive documentation (, ) for the verification process.
-    -   **Next debug checklist:** This task is blocked. Once Issue 1 is resolved, the next step is to provide the user with the final evidence pack request for their Ops team to execute.
-    -   **Why fix this issue and what will be achieved with the fix?** This is the fundamental blocker for deploying the application.
-    -   **Status:** BLOCKED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** Issue 1: The  CI pipeline is broken
-
--   **Issue 3:** Confirm Final Release Process Hardening
-    -   **Description:** A major overhaul of the CI/CD and testing process was completed in a previous session. This work is pending the user's final review and acceptance.
+-   **Issue 2:**  CI pipeline needs final verification
+    -   **Description:** The smoke tests in this pipeline are now passing (5/5), but the full verification of the environment hardening and schema drift fixes requires a stable, green run. The introduction of the  service and schema guards also needs to be confirmed as stable.
     -   **Status:** USER VERIFICATION PENDING
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** NA
-    -   **Blocked on other issue:** None.
+    -   **Blocked on other issue:** Issue 1. All focus is on the E2E suite.
+
+-   **Issue 3:** Critical Deployment Incompatibility & Verification
+    -   **Description:** The original goal: verify that the app can be deployed on an external environment using environment variables. This is blocked until CI/E2E pipelines are green.
+    -   **Status:** BLOCKED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** both
+    -   **Blocked on other issue:** Issue 1 & 2.
 
 **In progress Task List**:
--   **Task 1:** Fix the  CI Pipeline (P0)
-    -   **Where to resume:** Resume by fixing the frontend build failure. The agent was stuck fixing ESLint  errors. A better strategy is needed than manual, one-off fixes.
-    -   **What will be achieved with this?** A green CI run, which will unblock the deployment verification process.
+-   **Task 1:** Fix the E2E Playwright test suite (P0)
+    -   **Where to resume:** The agent has just applied edits to  and the E2E workflow () to start the . The next step is to trigger a CI run to verify if  is now accessible. Simultaneously, the agent must analyze the backend logs from the failed CI run to find the root cause of the  error.
+    -   **What will be achieved with this?** A green E2E run, which will unblock the final verification process.
     -   **Status:** IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** both
     -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
--   **(P0) External Verification (P1-B, P1-B-S):** Once the CI pipeline is fixed, the next step is to guide the user's team to execute the self-serve verification packs (, ) and provide the output to confirm the deployment configuration works.
+-   **(P0) External Verification (P1-B, P1-B-S):** Once CI/E2E pipelines are fixed, guide the user's team to execute the self-serve verification packs (, ).
+-   **(P1) Seed Data for E2E:** Create a robust seeding mechanism for E2E tests to ensure entities like games and robots exist.
 
 **Future Tasks:**
 -   **(P1) Growth & Monetization Track:** Evolve the bonus engine, set promo risk limits, and scale the affiliate system.
@@ -101,90 +86,93 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 -   **(P2) Day-0 / Day-7 / Day-30 Ops Plan:** Define post-launch monitoring metrics and operational playbooks.
 
 **Completed work in this session**
-- **Alembic Migration Hardening:**
-  - Fixed multiple  errors in migrations by ensuring tables with foreign key dependencies are created in the correct order (e.g.,  before ,  before ).
-  - Fixed  for a boolean column () by changing the  from  to .
-  - Removed a  anti-pattern from a migration file () that was masking SQL errors and causing  failures.
-  - Consolidated duplicate  table creation logic into a single migration file () to prevent relation already exists errors.
-- **CI/CD Workflow Fixes ():**
-  - Added a step to  to prevent  from failing if the file is missing.
-  - Explicitly set  in the workflow environment to fix Alembic authentication failures with Postgres.
-  - Isolated the  service into a  profile in  to exclude it from the default CI run, simplifying the deployment target.
-- **Backend Configuration & Testing:**
-  - Made Redis connection optional, controlled by a  environment variable, to allow the application to start even if Redis is unavailable.
-  - Attempted to fix an  loop mismatch error in backend tests by refactoring .
-- **Repository Hygiene & P0 Blockers:**
-  - Completed the full list of P0/Hygiene issues from the initial handoff, including implementing HMAC verification, disabling mock KYC, creating , removing secrets, and creating  files.
-- **Frontend Linting (In Progress):**
-  - Updated  to resolve  inconsistencies.
-  - Fixed a large number of  ESLint errors across dozens of frontend components by wrapping data-fetching functions in .
+- **CI/CD Pipeline Hardening:**
+  - Added a dedicated  service to  to ensure migrations run before the backend starts.
+  - Added CI steps to  to hard-fail if the DB schema is not at the latest Alembic head or if critical columns are missing.
+- **Schema Drift Fixes (Alembic):**
+  - Created idempotent Alembic migrations to add missing columns to the  table (, ) and the  table (, , , , , and various JSON/hash fields).
+- **Backend Runtime Fixes:**
+  - Fixed multiple  errors by changing  to  in , , , and .
+  - Fixed  failure by adding a  endpoint and enforcing self-exclusion checks in the player login flow.
+  - Fixed  failure by relaxing the login rate-limit for .
+- **E2E Test Environment Fixes:**
+  - Patched  to clear old auth files and generate a fresh admin token for each run, fixing the session expired issue.
+  - Updated the frontend 401 handler to show a clearer Session invalid message.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1:** The   process is failing.
-    -   **Debug checklist:**
-        1.  Examine the  or  build configuration. Determine if ESLint warnings are being treated as errors ( often does this).
-        2.  Try running yarn run v1.22.22
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. to auto-resolve simple issues.
-        3.  Systematically fix the remaining  errors. The  pattern is correct, but it needs to be applied consistently and with the correct dependency arrays.
-    -   **Why to solve this issue and what will be achieved with this?** The frontend cannot be built or deployed without fixing this. It's a hard blocker for the CI pipeline.
-    -   **Should Test frontend/backend/both after fix:** frontend
+-   **Issue 1:** Seed data is missing for E2E tests (, ).
+    -   **Debug checklist:** Review the E2E test setup. There is no clear seeding step for games or robots. A pre-test script or fixture is needed to create this data.
+    -   **Why to solve this issue and what will be achieved with this?** This will enable a set of currently failing tests to pass and validate core game/robot functionality.
+    -   **Should Test frontend/backend/both after fix:** backend
     -   **Is recurring issue?** Y
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork:**  failures.
 -   **Recurrence count:** 3+
--   **Status:** RESOLVED (All tests in this file now pass, and a broader set of migration/CI issues has become the new recurring problem).
+-   **Status:** RESOLVED. The new recurring issue is the fragility of the CI/E2E pipelines due to schema drift and environment inconsistencies.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Environment-Driven Configuration:** All infrastructure dependencies (DB, Redis) are configured via environment variables.
--   **Deterministic Migrations:** Ensuring Alembic migrations are idempotent and handle dependencies correctly (e.g., table creation order for foreign keys) is critical. Postgres is much stricter than SQLite.
--   **CI/CD Hardening:** The process of iteratively finding and fixing failures in a complex CI workflow () involving build, lint, migrations, and tests.
--   **Docker Compose Profiles:** Used to selectively enable/disable services (, ) in different environments (CI vs. local).
--   **React Hooks & Effects:** Correctly managing dependencies in  with  is a major focus for fixing the frontend build.
+-   **CI/CD Pipeline as Code:** The entire CI process is defined in YAML, including service dependencies and assertions.
+-   **Docker Compose for CI:** Using  with profiles (, ) to manage services for different CI jobs.
+-   **Declarative Migrations (Alembic):** Managing DB schema changes. The session highlighted the need for idempotent migrations (e.g., ) to prevent failures on reruns.
+-   **Separate Migration Service:** A  service in Docker Compose was added to ensure the database schema is upgraded before the application backend starts, preventing race conditions.
+-   **Playwright for E2E Testing:** A full suite of E2E tests runs against the deployed application in the CI environment.
 
 **key DB schema**
-- No new schema was intentionally added. The work focused on making the existing schema, defined across many Alembic migrations, actually build correctly on PostgreSQL.
+-   **player:** Added  (FLOAT) and  (FLOAT).
+-   **auditevent:** Added  (VARCHAR),  (VARCHAR),  (VARCHAR),  (VARCHAR),  (VARCHAR), and various JSONB and hash chain columns.
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   : The CI workflow file, modified to add env vars and steps.
--   : Modified to use profiles for .
--   : Core logic for environment variables, including the new optional Redis feature.
--   : Numerous migration files were patched to fix Postgres-specific errors. Key ones are , , and .
--   : Modified to handle  event loops for tests.
--    & : Many files in these directories were modified to fix ESLint errors.
+-   : Main CI workflow, heavily modified with new guard steps and service logic.
+-   : Defines all services. A new  service was added, and dependencies were updated.
+-   : New migration to fix schema drift.
+-   : New migration to fix audit schema drift.
+-   , : Patched to implement self-exclusion logic.
+-   : Multiple model files patched to fix  timezone issues.
+-   : Patched to force creation of a fresh auth token for every E2E run.
 
 **Areas that need refactoring**:
--   The frontend components have inconsistent data-fetching patterns, leading to widespread ESLint  issues. A standardized custom hook (e.g., ) could simplify this and prevent future errors.
--   The Alembic migration chain is fragile and has required multiple hot-fixes. Consolidating or squashing migrations could improve stability, but would be a high-risk operation.
+-   The E2E test suite lacks a coherent seeding strategy. Tests either seed their own data (leading to potential conflicts) or rely on a pre-existing state that is not guaranteed in CI. A centralized, pre-test seeding script is needed.
+-   The  usage is inconsistent across the backend. While the immediate blockers were patched by using , a proper solution would be to use  columns in PostgreSQL and consistently use tz-aware datetimes in the application.
 
 **key api endpoints**
-- No new endpoints were created. The focus was on making the existing application stable and deployable.
+-    (NEW):  endpoint to set a player's self-exclusion.
+-   :  endpoint modified to check for self-exclusion and return 403 if the player is excluded.
+-   :  endpoint that is currently returning HTTP 500 during E2E tests.
 
 **Critical Info for New Agent**
--   **The CI Pipeline is the Main Blocker:** Your primary, immediate goal is to get the  workflow to run successfully (all green). Do not get distracted by other tasks.
--   **Fix Failures Sequentially:** The CI pipeline is a chain of dominoes. Fixing one failure (e.g., frontend lint) will likely reveal the next (e.g., frontend build, backend tests). Address them one by one.
--   **Frontend Build is the Current Wall:** The agent was stuck fixing  errors. You need a more systematic approach than fixing one file at a time. Try , and if that's not enough, focus on fixing one component perfectly and use it as a template.
--   **User is Technical and Process-Oriented:** The user expects a methodical approach. They have established a clear process of waiting for evidence packs (CI run links, logs) to verify fixes. Do not claim a fix is complete until you have this evidence.
--   **The Goal is a Single Paste Evidence:** The entire conversation has converged on the user needing a single, clean CI run from which they can get all the evidence they need to give a final GO on the deployment readiness.
+-   The primary goal is to get the **E2E test suite to pass**. Do not get distracted by other tasks.
+-   The two main blockers are:
+    1.  **Player App Not Running ( REFUSED):** A fix has been *attempted* by adding the  service to the CI  command. You must **verify** this works in the next CI run.
+    2.  **Deposit API 500 Error:** This is the next critical blocker. The previous schema drift issues were fixed, so this is a *new* underlying problem. You must analyze the backend logs from the E2E run to find the stack trace and fix it.
+-   The user is highly technical and expects a deterministic, evidence-based approach. Analyze logs, form a hypothesis, propose a fix, and then verify with a CI run.
+-   The CI now includes a  service. The backend app will not start until migrations are complete.
+-   The CI also has guard steps that will fail the job early if the DB schema is not at the latest Alembic head or if certain critical columns are missing.
 
 **documents and test reports created in this job**
--   : Updated with results from P0 blocker fixes and migration tests.
+-   : Updated multiple times to reflect test outcomes.
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-- The last 10+ messages are a deep, technical back-and-forth in Turkish between the user and the agent, diagnosing and attempting to fix a chain of CI failures.
-- **The pattern:** The user runs the CI, it fails, they paste the logs. The agent analyzes the logs, identifies a root cause (e.g.,  in migration, , frontend lint errors), proposes a fix, and applies it. The user then asks the agent to confirm the next steps, which is always to re-run the CI and provide a new evidence pack.
-- The conversation has covered multiple failures: Alembic FK dependencies, boolean default errors, transaction aborts, missing , and finally, the current blocker of frontend linting/build errors.
-- The last user message was a yı b yi de uygulayabilirsin. hangisi gerekliyse (you can apply a or b. whichever is necessary), and then tamam devam et (ok, continue), giving the agent the green light to proceed with the proposed fixes to unblock the CI.
+The user has been providing the failing CI/E2E logs and is focused on getting the pipelines green. The user is highly technical, provides specific instructions, and expects the agent to analyze the logs and propose a concrete fix.
+-   User confirmed the agent's plan to fix the  failure by adding the required endpoint and logic.
+-   User provided logs showing  was still failing, but with a new root cause (schema drift).
+-   User provided a detailed task list to fix the schema drift with a new guard migration.
+-   User provided logs showing the guard step itself was failing due to a logic error.
+-   User provided logs showing  and  failing due to  errors.
+-   User provided logs showing  failing due to audit schema drift.
+-   User provided E2E test results showing widespread failures and asked for a detailed analysis.
+-   User confirmed the agent's plan to fix the two P0 E2E blockers (Player App down, Deposit 500) simultaneously.
 
 **Project Health Check:**
--   **Broken:** The application is not deployable because the primary CI/CD pipeline () is failing. Multiple blockers across the frontend build and backend tests have been identified.
--   **Mocked:** A mock poker provider and mock KYC flow still exist.
+-   **Broken:** The application is not verifiable due to a massively failing E2E test suite. The core money path is broken.
 
 **3rd Party Integrations**
 -   **Stripe:** Payment processing.
@@ -194,179 +182,14 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 -   **APScheduler:** Background jobs.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
+-   **Testing agent used after significant changes:** YES, a backend testing agent was used to verify the self-exclusion logic.
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:**
-    -   
-    -   
-    -   
--   **Known regressions:** The CI pipeline is the main regression. It was likely working at some point before the recent flurry of changes.
+-   **Test files created:** None. Existing test files were analyzed and fixed.
+-   **Known regressions:** The E2E test suite is the main regression. While individual components have been fixed, the integrated environment is not stable.
 
 **Credentials to test flow:**
--   Test JWT tokens are generated dynamically within the ============================= test session starts ==============================
-platform linux -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0
-rootdir: /app
-configfile: pytest.ini
-plugins: anyio-4.11.0, asyncio-1.3.0
-asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
-collected 207 items / 7 errors
-
-==================================== ERRORS ====================================
-________________ ERROR collecting scripts/test_velocity_stub.py ________________
-ImportError while importing test module '/app/scripts/test_velocity_stub.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-scripts/test_velocity_stub.py:8: in <module>
-    from app.backend.app.services.tenant_policy_enforcement import check_velocity_limit
-E   ModuleNotFoundError: No module named 'app.backend'
-____________________ ERROR collecting test_client_upload.py ____________________
-ImportError while importing test module '/app/test_client_upload.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_client_upload.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/backend_test.py)
-_____________________ ERROR collecting test_dice_fixed.py ______________________
-ImportError while importing test module '/app/test_dice_fixed.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_dice_fixed.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/backend_test.py)
-______________________ ERROR collecting test_dice_only.py ______________________
-ImportError while importing test module '/app/test_dice_only.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_dice_only.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/backend_test.py)
-_________________ ERROR collecting tests/test_runner_utils.py __________________
-ImportError while importing test module '/app/tests/test_runner_utils.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'tests.test_runner_utils'
-__________ ERROR collecting tests/test_withdraw_admin_idempotency.py ___________
-ImportError while importing test module '/app/tests/test_withdraw_admin_idempotency.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'tests.test_withdraw_admin_idempotency'
-_____________ ERROR collecting tests/test_withdraw_idempotency.py ______________
-ImportError while importing test module '/app/tests/test_withdraw_idempotency.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'tests.test_withdraw_idempotency'
-=============================== warnings summary ===============================
-../root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295
-  /root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
-
-../root/.venv/lib/python3.11/site-packages/pydantic/_migration.py:283
-  /root/.venv/lib/python3.11/site-packages/pydantic/_migration.py:283: UserWarning: `pydantic.generics:GenericModel` has been moved to `pydantic.BaseModel`.
-    warnings.warn(f'`{import_path}` has been moved to `{new_location}`.')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:24
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:24: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('amount')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:30
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:30: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('quantity')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:36
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('stripe_price_id')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:44
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:44: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('payment_methods')
-
-backend/server.py:223
-  /app/backend/server.py:223: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    @app.on_event("startup")
-
-../root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495
-../root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495
-../root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495
-  /root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    return self.router.on_event(event_type)
-
-backend/server.py:362
-  /app/backend/server.py:362: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    @app.on_event("shutdown")
-
-backend/server.py:379
-  /app/backend/server.py:379: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    @app.on_event("shutdown")
-
-backend_regression_test.py:21
-  /app/backend_regression_test.py:21: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: backend_regression_test.py)
-    class TestResult:
-
-p2_observability_final_test.py:30
-  /app/p2_observability_final_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_final_test.py)
-    class TestResult:
-
-p2_observability_test.py:30
-  /app/p2_observability_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_test.py)
-    class TestResult:
-
-test_audit_comprehensive.py:27
-  /app/test_audit_comprehensive.py:27: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: test_audit_comprehensive.py)
-    class TestResult:
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-=========================== short test summary info ============================
-ERROR scripts/test_velocity_stub.py
-ERROR test_client_upload.py
-ERROR test_dice_fixed.py
-ERROR test_dice_only.py
-ERROR tests/test_runner_utils.py
-ERROR tests/test_withdraw_admin_idempotency.py
-ERROR tests/test_withdraw_idempotency.py
-!!!!!!!!!!!!!!!!!!! Interrupted: 7 errors during collection !!!!!!!!!!!!!!!!!!!!
-======================== 16 warnings, 7 errors in 1.87s ======================== fixtures.
--   The default admin user for CI runners is  / .
+-   The E2E tests use  /  for admin login, seeded via a CI step.
+-   Player accounts are registered dynamically within the tests.
 
 **What agent forgot to execute**
-- The agent got stuck in a repetitive loop of manually fixing individual frontend linting errors instead of taking a more strategic approach. It could have tried using , modifying the linting rules in the CI, or refactoring the problematic components more holistically. It failed to break the cycle of fix one file, re-lint, fail, repeat.</analysis>
+- The agent has been diligent in following the user's lead. However, the last set of actions to fix the two main E2E blockers ( not running and ) was a series of rapid edits across workflow and compose files. The agent has not yet had a chance to run the CI and verify if these fixes work or if they introduced new issues. The immediate next step must be to run the E2E workflow and analyze the new result.</analysis>
