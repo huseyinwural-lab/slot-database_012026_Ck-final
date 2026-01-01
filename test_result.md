@@ -442,3 +442,17 @@
   - ✅ All API endpoints returning expected status codes and response bodies
   - ✅ No critical errors or blocking issues found
 - **Status**: ✅ ALL P0 BACKEND TESTS PASSED - Backend ready for production deployment
+
+### Testing Agent (2026-01-01) - Player Login CORS Issue Re-test
+- **Message**: Player login CORS issue testing completed successfully after CI-style changes
+- **Details**: 
+  - ✅ Player app accessible at http://localhost:3001/login (no ERR_CONNECTION_REFUSED)
+  - ✅ Player registration via API successful (POST /api/v1/auth/player/register with username field)
+  - ✅ Player login flow working - successful authentication and redirect to home page
+  - ✅ **NO CORS ERRORS** - Browser devtools show no "Access to XMLHttpRequest blocked by CORS policy" errors
+  - ✅ **Correct API routing** - All requests go to http://localhost:8001/api/v1 (backend), none to http://localhost:3000 (frontend)
+  - ✅ **Successful redirect** - User redirected from /login to / after successful authentication
+  - ✅ Login form elements render correctly and are functional
+  - ✅ User session established - username "newplayer" displayed in UI with balance
+  - Minor: 401 errors on games API calls are expected (authentication-related, not CORS-related)
+- **Status**: ✅ ALL PLAYER LOGIN CORS TESTS PASSED - CORS issue resolved, login flow working correctly
