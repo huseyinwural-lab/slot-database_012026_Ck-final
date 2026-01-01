@@ -377,3 +377,19 @@
 - **Fix**: `backend/app/middleware/rate_limit.py` now treats `env=ci` as dev-like for rate limiting.
   - `is_dev` set includes `ci` → login limit becomes 100/min in CI.
 - **Sanity**: Repeated login attempts do not hit 429 in this environment.
+
+
+## P0-B Deposit 500 — Deterministic Fix (Iteration 2026-01-01)
+- **RCA (code-level)**:
+  - `backend/app/services/wallet_ledger.py` içinde syntax/flow bug vardı:
+    - `allow_negative: bool = False,` yanlışlıkla tuple’a dönüyordu ve ayrıca `return True` sonrası unreachable block vardı.
+  - Bu bug, CI/E2E Postgres environment’ında import/runtime aşamasında 500’e kadar gidebilecek kritik bir kırılganlık.
+- **Fix**:
+  - `allow_negative` parametresi fonksiyon imzasında düzgün keyword arg olarak tanımlandı.
+  - Invariant check bloğu `return` öncesine alındı (unreachable code kaldırıldı).
+- **E2E alignment (P0-A destek)**:
+  - E2E testlerinde player UI URL’leri `PLAYER_APP_URL` env ile override edilebilir hale getirildi.
+  - CI Playwright job env’ine `PLAYER_APP_URL=http://localhost:3001` eklendi.
+- **Local sanity**:
+  - Seed + player register/login + `/api/v1/player/wallet/deposit` çağrısı local env’de 200 dönüyor.
+- **Status**: ✅ IMPLEMENTED (CI/E2E run verification pending)
