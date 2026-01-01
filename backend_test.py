@@ -1,19 +1,12 @@
 #!/usr/bin/env python3
 """
-Backend ADMIN-REVIEW-002 Withdrawal Review API Test Suite
+Backend Test Suite
 
 This test suite validates:
-1. Login as admin
-2. Create a test player and withdrawal request (or use existing)
-3. Test Approve Withdrawal:
-   - Call POST /api/v1/finance/withdrawals/{id}/review with action='approve' but NO reason. Expect 400 REASON_REQUIRED.
-   - Call again WITH reason='Good to go'. Expect 200 OK.
-4. Test Mark Paid:
-   - Call POST /api/v1/finance/withdrawals/{id}/mark-paid without body or reason. Expect 400 REASON_REQUIRED (or 422 validation error).
-   - Call again WITH body {"reason": "Done"}. Expect 200 OK.
-5. Verify audit logs contain the reason.
+1. ADMIN-REVIEW-002 Withdrawal Review API
+2. Responsible Gaming (RG) Player Exclusion and Login Enforcement
 
-Tests are designed to run against the localhost backend service.
+Tests are designed to run against the configured backend service.
 """
 
 import asyncio
@@ -26,8 +19,18 @@ import os
 import uuid
 import subprocess
 
-# Use localhost backend for testing as requested
-BACKEND_URL = "http://localhost:8001"
+# Use backend URL from frontend/.env as specified in the review request
+def get_backend_url():
+    try:
+        with open("/app/frontend/.env", "r") as f:
+            for line in f:
+                if line.startswith("REACT_APP_BACKEND_URL="):
+                    return line.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return "http://localhost:8001"  # fallback
+
+BACKEND_URL = get_backend_url()
 
 class AdminReview002TestSuite:
     def __init__(self):
