@@ -346,7 +346,7 @@ async def mark_withdrawal_paid(
             "old_state": old_state,
             "new_state": tx.state,
             "reviewed_by": str(current_admin.id),
-            "reviewed_at": datetime.now(timezone.utc).isoformat(),
+            "reviewed_at": datetime.utcnow().isoformat(),
             "request_id": request_id,
             "balance_available_before": before_available,
             "balance_available_after": after_available,
