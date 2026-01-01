@@ -141,7 +141,9 @@ async def check_velocity_limit(
     limit_count = settings.max_tx_velocity_count
     window_minutes = settings.max_tx_velocity_window_minutes
 
-    now = datetime.now(timezone.utc)
+    # DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
+    # Keep comparisons deterministic by using naive UTC timestamps.
+    now = datetime.utcnow()
     window_start = now - timedelta(minutes=window_minutes)
 
     stmt = select(func.count(Transaction.id)).where(
