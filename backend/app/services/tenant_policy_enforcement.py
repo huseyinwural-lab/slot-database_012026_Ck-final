@@ -68,8 +68,10 @@ async def ensure_within_tenant_daily_limits(
 
     limit_dec = Decimal(str(limit_value))
 
-    now = now or datetime.now(timezone.utc)
-    day_start = datetime(year=now.year, month=now.month, day=now.day, tzinfo=timezone.utc)
+    # DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
+    # Keep comparisons deterministic by using naive UTC timestamps.
+    now = now or datetime.utcnow()
+    day_start = datetime(year=now.year, month=now.month, day=now.day)
     day_end = day_start + timedelta(days=1)
 
     if action == "deposit":
