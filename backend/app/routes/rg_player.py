@@ -5,7 +5,7 @@ from app.models.sql_models import Player
 from app.utils.auth_player import get_current_player
 from app.services.audit import audit
 from app.models.rg_models import PlayerRGProfile
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/api/v1/rg", tags=["responsible_gaming"])
 
