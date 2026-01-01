@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     max_tx_velocity_count: int = 5
     max_tx_velocity_window_minutes: int = 1
 
+
+    # Player frontend base URL (used for payment redirect construction when Origin header is absent)
+    player_app_url: str = "http://localhost:3001"
+
     # Redis / Queue
     # Default is localhost to avoid docker-compose host coupling.
     # In prod/staging, Redis is OPTIONAL unless REDIS_REQUIRED=true.
