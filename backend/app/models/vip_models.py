@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON
 import uuid
@@ -17,7 +17,7 @@ class VipTier(SQLModel, table=True):
     rakeback_percent: float = 0.0
     
     config: Dict = Field(default={}, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class PlayerVipStatus(SQLModel, table=True):
     """Current state of a player's loyalty."""
@@ -47,4 +47,4 @@ class LoyaltyTransaction(SQLModel, table=True):
     
     balance_after: float = 0.0
     
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
