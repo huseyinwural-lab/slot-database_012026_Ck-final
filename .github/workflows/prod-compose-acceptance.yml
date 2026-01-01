@@ -413,6 +413,26 @@ jobs:
           echo "Frontend did not become ready in time"
           exit 1
 
+
+      - name: Wait for Frontend (player)
+        run: |
+          set -e
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3001/" || true)
+            if [ "$code" = "200" ]; then
+              echo "Player frontend OK"
+              exit 0
+            fi
+            echo "Waiting for player frontend ... ($i) code=$code"
+            sleep 2
+          done
+          echo "Player frontend did not become ready in time"
+          echo "=== docker compose ps ==="
+          docker compose -f docker-compose.prod.yml --profile localdb --profile player ps || true
+          echo "=== frontend-player logs (tail 200) ==="
+          docker compose -f docker-compose.prod.yml --profile localdb --profile player logs --no-color --tail=200 frontend-player || true
+          exit 1
+
       - name: UI smoke matrix (Playwright)
         working-directory: e2e
         env:
