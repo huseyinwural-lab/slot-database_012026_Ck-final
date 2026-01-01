@@ -165,6 +165,47 @@ jobs:
       - name: Seed deterministic CI admin user
         run: |
           set -euo pipefail
+
+      - name: Assert migrations at head + critical columns present (P0)
+        run: |
+          set -euo pipefail
+
+          echo "== alembic heads (local) =="
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T backend sh -lc 'alembic heads'
+
+          echo "== alembic current (db) =="
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T backend sh -lc 'alembic current'
+
+          HEAD="$(docker compose -f docker-compose.prod.yml --profile localdb exec -T backend sh -lc 'alembic heads | head -n 1 | cut -d " " -f1')"
+          CURR="$(docker compose -f docker-compose.prod.yml --profile localdb exec -T backend sh -lc 'alembic current | head -n 1 | cut -d " " -f1')"
+
+          echo "HEAD=$HEAD"
+          echo "CURR=$CURR"
+          test -n "$HEAD" && test -n "$CURR"
+          test "$HEAD" = "$CURR"
+
+          echo "== critical columns guard =="
+          docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres psql -U postgres -d casino_db -v ON_ERROR_STOP=1 -c "\
+            WITH required(table_name, column_name) AS (\
+              VALUES\
+                ('player','wagering_requirement'),\
+                ('player','wagering_remaining'),\
+                ('auditevent','actor_role'),\
+                ('auditevent','status')\
+            )\
+            SELECT r.table_name, r.column_name\
+            FROM required r\
+            LEFT JOIN information_schema.columns c\
+              ON c.table_name = r.table_name AND c.column_name = r.column_name\
+            WHERE c.column_name IS NULL;\
+          " | tee ci_artifacts/schema_guard_missing_columns.txt
+
+          if [ -s ci_artifacts/schema_guard_missing_columns.txt ]; then
+            echo "FAIL: Missing critical columns"
+            cat ci_artifacts/schema_guard_missing_columns.txt
+            exit 1
+          fi
+
           echo "Seeding CI admin user via /api/v1/admin/seed (ENV=ci only)"
           code="$(curl -sS -o /tmp/seed.json -w "%{http_code}" -X POST "${API_BASE}/api/v1/admin/seed")"
           echo "HTTP $code"
