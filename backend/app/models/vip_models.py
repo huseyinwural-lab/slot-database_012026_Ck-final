@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON
 import uuid
@@ -29,7 +29,9 @@ class PlayerVipStatus(SQLModel, table=True):
     lifetime_points: float = 0.0
     current_points: float = 0.0 # Redeemable balance
     
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+    # Use naive UTC datetime to avoid tz-aware insertion errors.
+    last_updated: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class LoyaltyTransaction(SQLModel, table=True):
     """Ledger for Loyalty Points."""
