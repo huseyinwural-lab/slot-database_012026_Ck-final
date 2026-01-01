@@ -131,7 +131,7 @@ async def grant_bonus(
     wagering_mult = campaign.config.get("wagering_mult", 35)
     target = amount * wagering_mult
     expiry_hours = campaign.config.get("expiry_hours", 24)
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
+    expires_at = datetime.utcnow() + timedelta(hours=expiry_hours)
     
     grant = BonusGrant(
         tenant_id=campaign.tenant_id,
