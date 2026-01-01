@@ -1041,11 +1041,25 @@ class E2EBlockerTestSuite:
                 return False
             
             async with httpx.AsyncClient(timeout=30.0) as client:
+                # First, approve KYC for the player
+                admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                kyc_payload = {"status": "approved"}
+                response = await client.post(
+                    f"{self.base_url}/kyc/documents/{self.test_player_id}/review",
+                    json=kyc_payload,
+                    headers=admin_headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Approve Player KYC", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    # Continue anyway, maybe KYC is not required in this environment
+                else:
+                    self.log_result("Approve Player KYC", True, "Player KYC approved")
+                
                 # Use admin ledger adjust to fund the player account (bypasses KYC limits)
-                admin_headers = {
-                    "Authorization": f"Bearer {self.admin_token}",
-                    "Idempotency-Key": str(uuid.uuid4())
-                }
+                admin_headers["Idempotency-Key"] = str(uuid.uuid4())
                 
                 adjust_data = {
                     "player_id": self.test_player_id,
