@@ -92,7 +92,7 @@ test.describe('Stripe Deposit Flow (Simulated)', () => {
     console.log('Triggering webhook simulation...');
     expect(sessionId).toBeTruthy();
 
-    const webhookRes = await request.post('http://localhost:8001/api/v1/payments/stripe/test-trigger-webhook', {
+    const webhookRes = await request.post(`${API_URL}/api/v1/payments/stripe/test-trigger-webhook`, {
         data: {
             type: 'checkout.session.completed',
             session_id: sessionId
