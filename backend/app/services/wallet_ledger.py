@@ -157,9 +157,6 @@ async def apply_wallet_delta_with_ledger(
     # The ledger WalletBalance snapshot is allowed to diverge temporarily in
     # some LEDGER-02B test scenarios (e.g. enforce OFF + mismatch telemetry),
     # so we only enforce hard non-negativity on the Player-facing balances.
-    _assert_non_negative("player.balance_real_available", float(player.balance_real_available))
-    _assert_non_negative("player.balance_real_held", float(player.balance_real_held))
-
     if not allow_negative:
         _assert_non_negative("player.balance_real_available", float(player.balance_real_available))
         _assert_non_negative("player.balance_real_held", float(player.balance_real_held))
