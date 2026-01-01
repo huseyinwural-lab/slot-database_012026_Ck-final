@@ -64,7 +64,9 @@ async def create_checkout_session(
     # 2. Construct Return URL
     origin = request.headers.get("origin")
     if not origin:
-        origin = settings.cors_origins[0] if isinstance(settings.cors_origins, list) else "http://localhost:3000"
+        origin = settings.player_app_url or (
+            settings.get_cors_origins()[0] if settings.get_cors_origins() else "http://localhost:3001"
+        )
     
     return_url = f"{origin}/wallet?provider=adyen&tx_id={tx_id}"
 
