@@ -483,3 +483,12 @@
 - Added CI **ledger tables guard** (fails early if `ledgertransaction` or `walletbalance` missing).
 - Added a CI **deposit smoke** step (player register/login + deposit) to surface deposit failures before Playwright.
 - Added a final `upload-artifact` step so artifacts created after the earlier upload still get published.
+
+
+## P0-B Deposit 500 (TZ-naive vs TZ-aware) — Fix (Iteration 2026-01-01)
+- **RCA**: Postgres `TIMESTAMP WITHOUT TIME ZONE` columns compared against tz-aware datetimes caused asyncpg `can't subtract offset-naive and offset-aware datetimes` during tenant policy checks.
+- **Fix**: `backend/app/services/tenant_policy_enforcement.py`
+  - Use naive UTC timestamps for policy windows: `datetime.utcnow()`
+  - Remove tzinfo from `day_start` and velocity window calculations.
+- **Local sanity**: register/login + `POST /api/v1/player/wallet/deposit` returns **200** (no 500).
+- **CI expectation**: Deposit smoke step should now go green.
