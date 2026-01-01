@@ -1,0 +1,5 @@
+NAME                                    IMAGE                                 COMMAND                  SERVICE          CREATED          STATUS                    PORTS
+slot-database_122025-backend-1          slot-database_122025-backend          "/app/scripts/start_…"   backend          19 seconds ago   Up 5 seconds (healthy)    0.0.0.0:8001->8001/tcp, [::]:8001->8001/tcp
+slot-database_122025-frontend-admin-1   slot-database_122025-frontend-admin   "/docker-entrypoint.…"   frontend-admin   19 seconds ago   Up Less than a second     0.0.0.0:3000->80/tcp, [::]:3000->80/tcp
+slot-database_122025-postgres-1         postgres:15-alpine                    "docker-entrypoint.s…"   postgres         19 seconds ago   Up 18 seconds (healthy)   5432/tcp
+slot-database_122025-redis-1            redis:7-alpine                        "docker-entrypoint.s…"   redis            19 seconds ago   Up 18 seconds (healthy)   6379/tcp
