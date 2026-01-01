@@ -19,7 +19,7 @@ async def ops_health_check(
     
     health = {
         "status": "green",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.utcnow().isoformat(),
         "components": {}
     }
     
