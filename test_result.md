@@ -492,3 +492,36 @@
   - Remove tzinfo from `day_start` and velocity window calculations.
 - **Local sanity**: register/login + `POST /api/v1/player/wallet/deposit` returns **200** (no 500).
 - **CI expectation**: Deposit smoke step should now go green.
+
+---
+
+## P0-B Deposit 500 Fix Verification — Testing Agent (Iteration 2026-01-01)
+- **Status**: ✅ VERIFIED - Deposit 500 errors FIXED
+- **Test Results**:
+  - ✅ **Player Registration**: New player registration successful (Status: 200)
+  - ✅ **Player Login**: Player authentication successful (Status: 200)
+  - ✅ **First Deposit**: `POST /api/v1/player/wallet/deposit` returns 200 (Status: 200, Amount: 50.0 USD, State: completed)
+  - ✅ **Second Deposit (Velocity Check)**: Immediate second deposit returns 403 KYC_DEPOSIT_LIMIT (Status: 403, NOT 500)
+  - ✅ **CORS Preflight**: `OPTIONS /api/v1/auth/player/login` with Origin=http://localhost:3001 returns proper CORS headers
+    - Access-Control-Allow-Origin: http://localhost:3001
+    - Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+    - Access-Control-Allow-Headers: Content-Type,Authorization
+    - Status: 200
+- **Key Verification**: NO 500 errors encountered during tenant policy time comparisons - the timezone issue is RESOLVED
+- **Business Logic**: 403 KYC_DEPOSIT_LIMIT errors are expected business logic, not system errors
+- **Verification**: ✅ ALL REVIEW REQUEST REQUIREMENTS MET (2/2 tests passed)
+
+---
+
+## Agent Communication
+
+### Testing Agent (2026-01-01) - P0-B Deposit 500 Fix Verification
+- **Message**: P0-B deposit 500 fix verification testing completed successfully
+- **Details**: 
+  - ✅ Tenant policy time comparison errors RESOLVED - no 500 errors during rapid deposit calls
+  - ✅ First deposit successful (200) with completed transaction
+  - ✅ Second deposit handled correctly (403 KYC_DEPOSIT_LIMIT) - business logic working as expected
+  - ✅ CORS configuration allows frontend origin http://localhost:3001 with proper headers
+  - ✅ Velocity query path tested - no timezone-related crashes in tenant policy enforcement
+  - ✅ All API endpoints returning expected status codes and response bodies
+- **Status**: ✅ ALL P0-B DEPOSIT FIX VERIFICATION TESTS PASSED - Ready for production deployment
