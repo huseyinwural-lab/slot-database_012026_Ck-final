@@ -1,4 +1,7 @@
-"""create ledger_transactions and wallet_balances tables
+"""DEPRECATED: create ledgertransaction + walletbalance tables
+
+NOTE: This migration is kept only for historical reasons.
+A newer guard migration (20260101_02) is now wired into the active Alembic chain.
 
 Revision ID: abcd1234_ledgertables
 Revises: 9e0b1a3c2f10
