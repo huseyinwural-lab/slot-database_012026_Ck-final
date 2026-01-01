@@ -160,8 +160,8 @@ async def apply_wallet_delta_with_ledger(
     _assert_non_negative("player.balance_real_available", float(player.balance_real_available))
     _assert_non_negative("player.balance_real_held", float(player.balance_real_held))
 
-    return True
-
     if not allow_negative:
         _assert_non_negative("player.balance_real_available", float(player.balance_real_available))
         _assert_non_negative("player.balance_real_held", float(player.balance_real_held))
+
+    return True
