@@ -56,16 +56,39 @@ async function loginWithRetry(apiBaseUrl: string, email: string, password: strin
 }
 
 export default async function globalSetup(config: FullConfig) {
-  const adminToken = await loginWithRetry(API_BASE, OWNER_EMAIL, OWNER_PASSWORD);
-
-  // Persist token for API-based tests
   const fs = await import('fs');
   const path = await import('path');
+
+  // Always start fresh: remove any cached tokens/storageState that may be expired.
   const authDir = path.resolve(__dirname, '.auth');
+  try {
+    if (fs.existsSync(authDir)) {
+      for (const fn of fs.readdirSync(authDir)) {
+        if (
+          fn === 'admin-token.json' ||
+          fn === 'admin.json' ||
+          fn.startsWith('storageState') ||
+          fn.endsWith('.json')
+        ) {
+          try {
+            fs.unlinkSync(path.join(authDir, fn));
+          } catch {}
+        }
+      }
+    }
+  } catch {}
+
   if (!fs.existsSync(authDir)) {
     fs.mkdirSync(authDir, { recursive: true });
   }
+
+  const adminToken = await loginWithRetry(API_BASE, OWNER_EMAIL, OWNER_PASSWORD);
+
+  // Persist token for API-based tests
   fs.writeFileSync(path.join(authDir, 'admin-token.json'), JSON.stringify({ token: adminToken }), 'utf-8');
+  if (!fs.existsSync(path.join(authDir, 'admin-token.json'))) {
+    throw new Error('[global-setup] admin-token.json was not created');
+  }
 
   // Create storageState by performing a real UI login so that
   // localStorage + any auth-related state is consistent with production flows.
@@ -95,4 +118,8 @@ export default async function globalSetup(config: FullConfig) {
   // Persist storageState for all tests
   await context.storageState({ path: path.join(authDir, 'admin.json') });
   await browser.close();
+
+  if (!fs.existsSync(path.join(authDir, 'admin.json'))) {
+    throw new Error('[global-setup] admin.json storageState was not created');
+  }
 }

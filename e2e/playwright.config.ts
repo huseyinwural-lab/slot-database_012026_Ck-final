@@ -6,7 +6,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: false,
   workers: 1,
-  // globalSetup: require.resolve('./global-setup'),
+  globalSetup: require.resolve('./global-setup'),
   retries: 0,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {
