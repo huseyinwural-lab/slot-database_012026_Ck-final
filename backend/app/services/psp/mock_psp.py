@@ -55,7 +55,7 @@ class MockPSP:
         # Determine effective status with optional outcome override.
         effective_status = status
         env = (settings.env or "").lower()
-        if env in {"dev", "local", "test"}:
+        if env in {"dev", "local", "test", "ci"}:
             override = self._outcome_overrides.get(psp_idem_key)
             if override == "fail":
                 # Map fail outcome to provider-agnostic FAILED status.
