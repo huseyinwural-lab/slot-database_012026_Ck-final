@@ -123,7 +123,7 @@ jobs:
           # BuildKit output'u root-cause'u net gösterir (stack trace yerine gerçek fail-to-solve)
           # Ayrıca build output'u artifact'e yazıyoruz ki tek seferde RCA yapılabilsin.
           set +e
-          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb build --build-arg CI=false --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
+          DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml --profile localdb --profile player build --build-arg CI=false --pull --no-cache --progress=plain | tee ci_artifacts/compose_build.log
           build_rc=${PIPESTATUS[0]}
           set -e
 
@@ -135,9 +135,9 @@ jobs:
             exit 1
           fi
 
-          docker compose -f docker-compose.prod.yml --profile localdb up -d --remove-orphans
-          docker compose -f docker-compose.prod.yml --profile localdb ps | tee ci_artifacts/compose_ps_inline.txt
-          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 | tee ci_artifacts/compose_logs_inline_tail200.txt || true
+          docker compose -f docker-compose.prod.yml --profile localdb --profile player up -d --remove-orphans
+          docker compose -f docker-compose.prod.yml --profile localdb --profile player ps | tee ci_artifacts/compose_ps_inline.txt
+          docker compose -f docker-compose.prod.yml --profile localdb --profile player logs --no-color --tail=200 | tee ci_artifacts/compose_logs_inline_tail200.txt || true
           docker ps -a
 
       - name: Wait for API readiness
