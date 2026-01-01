@@ -235,6 +235,19 @@ jobs:
             exit 1
           fi
 
+          echo "== ledger tables guard =="
+          LEDGER_MISSING=$(docker compose -f docker-compose.prod.yml --profile localdb exec -T postgres \
+            psql -U postgres -d casino_db -tA -v ON_ERROR_STOP=1 -c "\
+              SELECT COUNT(*) FROM (\
+                SELECT to_regclass('public.ledgertransaction') AS t\
+                UNION ALL\
+                SELECT to_regclass('public.walletbalance')\
+              ) s WHERE s.t IS NULL;\
+            ")
+          echo "LEDGER_MISSING=${LEDGER_MISSING}"
+          test "${LEDGER_MISSING}" -eq 0
+
+
           echo "Seeding CI admin user via /api/v1/admin/seed (ENV=ci only)"
           code="$(curl -sS -o /tmp/seed.json -w "%{http_code}" -X POST "${API_BASE}/api/v1/admin/seed")"
           echo "HTTP $code"
@@ -433,6 +446,30 @@ jobs:
           node-version: '20'
           cache: 'yarn'
           cache-dependency-path: e2e/yarn.lock
+
+      - name: CORS preflight (player -> backend) (P0-A)
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts
+
+          echo "=== OPTIONS to backend (expected to allow Origin http://localhost:3001) ===" | tee ci_artifacts/cors_preflight.txt
+          curl -i -X OPTIONS "${API_BASE}/api/v1/auth/player/login" \
+            -H "Origin: http://localhost:3001" \
+            -H "Access-Control-Request-Method: POST" \
+            -H "Access-Control-Request-Headers: content-type,authorization" \
+            | tee -a ci_artifacts/cors_preflight.txt
+
+          echo "" | tee -a ci_artifacts/cors_preflight.txt
+          echo "=== OPTIONS via admin frontend proxy (diagnostic only) ===" | tee -a ci_artifacts/cors_preflight.txt
+          curl -i -X OPTIONS "http://localhost:3000/api/v1/auth/player/login" \
+            -H "Origin: http://localhost:3001" \
+            -H "Access-Control-Request-Method: POST" \
+            -H "Access-Control-Request-Headers: content-type,authorization" \
+            | tee -a ci_artifacts/cors_preflight.txt
+
+          # Fail-fast: backend must explicitly allow player origin.
+          grep -i "access-control-allow-origin" ci_artifacts/cors_preflight.txt | grep -q "http://localhost:3001"
+
 
       - name: Install E2E deps
         working-directory: e2e
