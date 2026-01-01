@@ -366,7 +366,7 @@ jobs:
           mkdir -p ci_artifacts
 
           docker compose -f docker-compose.prod.yml --profile localdb ps > ci_artifacts/compose_ps.txt || true
-          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=300 backend > ci_artifacts/backend.log || true
+          docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=5000 backend > ci_artifacts/backend.log || true
           docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 postgres > ci_artifacts/postgres.log || true
 
           BACKEND_ID=$(docker compose -f docker-compose.prod.yml --profile localdb ps -q backend 2>/dev/null || true)
@@ -418,12 +418,12 @@ jobs:
         run: |
           set -e
           for i in {1..60}; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3001/" || true)
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3001/login" || true)
             if [ "$code" = "200" ]; then
               echo "Player frontend OK"
               exit 0
             fi
-            echo "Waiting for player frontend ... ($i) code=$code"
+            echo "Waiting for player frontend (/login) ... ($i) code=$code"
             sleep 2
           done
           echo "Player frontend did not become ready in time"
