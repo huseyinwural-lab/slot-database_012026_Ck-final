@@ -5,7 +5,7 @@ import crypto from 'crypto';
 const LS_TOKEN_KEY = process.env.LS_TOKEN_KEY || 'admin_token';
 
 // Backend / frontend base URLs
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8001'; // FastAPI root (behind /api)
+const BACKEND_URL = process.env.E2E_API_BASE || process.env.BACKEND_URL || 'http://localhost:8001'; // FastAPI root (behind /api)
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Admin (owner) creds - must match environment or be overridden by env
