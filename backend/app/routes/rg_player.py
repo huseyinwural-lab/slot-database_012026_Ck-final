@@ -35,7 +35,7 @@ async def self_exclude(
         resource_type="player",
         resource_id=current_player.id,
         result="success",
-        details={"period_days": period_days}
+        details={"period_days": period_days},
     )
     
     session.add(current_player)
