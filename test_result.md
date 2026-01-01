@@ -476,3 +476,10 @@
   - ✅ Casino lobby page loads correctly after login with proper navigation
   - Minor: Some AxiosError console messages observed but non-blocking (likely related to missing games data)
 - **Status**: ✅ ALL SANITY CHECKS PASSED - Player login flow working correctly, no CORS issues, proper backend routing confirmed
+
+
+### CI Improvements (2026-01-01)
+- Added CI **CORS preflight** fail-fast step (Origin http://localhost:3001) and saves output to `ci_artifacts/cors_preflight.txt`.
+- Added CI **ledger tables guard** (fails early if `ledgertransaction` or `walletbalance` missing).
+- Added a CI **deposit smoke** step (player register/login + deposit) to surface deposit failures before Playwright.
+- Added a final `upload-artifact` step so artifacts created after the earlier upload still get published.
