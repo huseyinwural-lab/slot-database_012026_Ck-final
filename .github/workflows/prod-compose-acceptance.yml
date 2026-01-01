@@ -440,6 +440,14 @@ jobs:
           name: prod-compose-artifacts
           path: ci_artifacts/**
 
+      # Re-upload at end too, because later steps (CORS preflight / E2E) also write into ci_artifacts.
+      - name: Upload compose artifacts (final) (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-compose-artifacts-final
+          path: ci_artifacts/**
+
       - name: Setup Node (for Playwright)
         uses: actions/setup-node@v4
         with:
