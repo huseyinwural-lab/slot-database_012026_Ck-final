@@ -77,11 +77,38 @@ def upgrade() -> None:
             sa.Column("status", sa.String(), nullable=True),
         )
 
+    if not _column_exists("auditevent", "reason"):
+        op.add_column(
+            "auditevent",
+            sa.Column("reason", sa.String(), nullable=True),
+        )
+
+    if not _column_exists("auditevent", "ip_address"):
+        op.add_column(
+            "auditevent",
+            sa.Column("ip_address", sa.String(), nullable=True),
+        )
+
+    if not _column_exists("auditevent", "user_agent"):
+        op.add_column(
+            "auditevent",
+            sa.Column("user_agent", sa.String(), nullable=True),
+        )
+
 
 def downgrade() -> None:
     # Best-effort downgrade (columns may not exist).
     if _column_exists("auditevent", "status"):
         op.drop_column("auditevent", "status")
+
+    if _column_exists("auditevent", "user_agent"):
+        op.drop_column("auditevent", "user_agent")
+
+    if _column_exists("auditevent", "ip_address"):
+        op.drop_column("auditevent", "ip_address")
+
+    if _column_exists("auditevent", "reason"):
+        op.drop_column("auditevent", "reason")
 
     if _column_exists("auditevent", "actor_role"):
         op.drop_column("auditevent", "actor_role")
