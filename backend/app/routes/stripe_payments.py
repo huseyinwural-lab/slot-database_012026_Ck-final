@@ -73,9 +73,7 @@ async def create_checkout_session(
     # Fallback to configured player URL (or first CORS origin) to keep checkout deterministic.
     if not origin:
         origin = settings.player_app_url or (
-            settings.cors_origins[0]
-            if isinstance(settings.cors_origins, list) and settings.cors_origins
-            else "http://localhost:3001"
+            settings.get_cors_origins()[0] if settings.get_cors_origins() else "http://localhost:3001"
         )
 
     success_url = f"{origin}/wallet?session_id={{CHECKOUT_SESSION_ID}}&status=success"
