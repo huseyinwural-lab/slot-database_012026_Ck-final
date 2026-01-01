@@ -786,6 +786,81 @@ class P0VerificationTestSuite:
             self.log_result("CORS Preflight", False, f"Exception: {str(e)}")
             return False
     
+    async def test_deposit_velocity_check(self) -> bool:
+        """Test 7: Call POST /api/v1/player/wallet/deposit twice quickly to test velocity query path and ensure no 500 errors"""
+        try:
+            if not self.player_token:
+                self.log_result("Deposit Velocity Check", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # First deposit
+                headers1 = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                deposit_data1 = {
+                    "amount": 50.0,
+                    "method": "test"
+                }
+                
+                response1 = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data1,
+                    headers=headers1
+                )
+                
+                # Second deposit immediately after (to hit velocity query path)
+                headers2 = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                deposit_data2 = {
+                    "amount": 75.0,
+                    "method": "test"
+                }
+                
+                response2 = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data2,
+                    headers=headers2
+                )
+                
+                # Check first deposit
+                if response1.status_code == 500:
+                    self.log_result("Deposit Velocity Check", False, 
+                                  f"First deposit returned 500 error: {response1.text}")
+                    return False
+                
+                # Check second deposit
+                if response2.status_code == 500:
+                    self.log_result("Deposit Velocity Check", False, 
+                                  f"Second deposit returned 500 error: {response2.text}")
+                    return False
+                
+                # Both deposits should return either 200 (success) or 429 (rate limited), NOT 500
+                valid_status_codes = [200, 429]
+                
+                if response1.status_code not in valid_status_codes:
+                    self.log_result("Deposit Velocity Check", False, 
+                                  f"First deposit returned unexpected status {response1.status_code}: {response1.text}")
+                    return False
+                
+                if response2.status_code not in valid_status_codes:
+                    self.log_result("Deposit Velocity Check", False, 
+                                  f"Second deposit returned unexpected status {response2.status_code}: {response2.text}")
+                    return False
+                
+                self.log_result("Deposit Velocity Check", True, 
+                              f"Both deposits successful - First: {response1.status_code}, Second: {response2.status_code} (no 500 errors)")
+                return True
+                
+        except Exception as e:
+            self.log_result("Deposit Velocity Check", False, f"Exception: {str(e)}")
+            return False
+    
     async def run_all_tests(self):
         """Run the complete P0 verification test suite"""
         print("🚀 Starting P0 Backend Verification Test Suite...")
