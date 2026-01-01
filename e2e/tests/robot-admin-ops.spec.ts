@@ -4,7 +4,7 @@ test.describe('Robot Admin Ops', () => {
   test.setTimeout(120000);
 
   test('Admin Clone -> Bind -> Player Spin Verify', async ({ page }) => {
-    const API_URL = 'http://localhost:8001';
+    const API_URL = process.env.E2E_API_BASE || 'http://localhost:8001';
     
     // 1. Admin Login
     const adminContext = await pwRequest.newContext({ baseURL: API_URL });
