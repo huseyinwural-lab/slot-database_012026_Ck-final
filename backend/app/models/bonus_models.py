@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON
 import uuid
