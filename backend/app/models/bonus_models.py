@@ -41,7 +41,8 @@ class BonusGrant(SQLModel, table=True):
     
     status: str = "active" # active | completed | expired | forfeited
     
-    granted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+    granted_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     expires_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     
