@@ -511,6 +511,8 @@
 - **Business Logic**: 403 KYC_DEPOSIT_LIMIT errors are expected business logic, not system errors
 - **Verification**: ✅ ALL REVIEW REQUEST REQUIREMENTS MET (2/2 tests passed)
 
+**Note**: Testing agent created `detailed_deposit_test.py` during verification. It is not required for production/CI; we can remove it if you want the repo clean.
+
 ---
 
 ## Agent Communication
