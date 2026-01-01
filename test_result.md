@@ -462,3 +462,17 @@
   - ✅ User session established - username "newplayer" displayed in UI with balance
   - Minor: 401 errors on games API calls are expected (authentication-related, not CORS-related)
 - **Status**: ✅ ALL PLAYER LOGIN CORS TESTS PASSED - CORS issue resolved, login flow working correctly
+
+### Testing Agent (2026-01-01) - Quick Sanity Check Post-Latest Fixes
+- **Message**: Quick sanity check completed successfully after latest fixes
+- **Details**: 
+  - ✅ Player app loads correctly at http://localhost:3001/login with proper login form
+  - ✅ Player registration via API successful (POST /api/v1/auth/player/register)
+  - ✅ Player login via UI successful - form accepts email/password and authenticates
+  - ✅ **NO CORS ERRORS** - No "Access to XMLHttpRequest blocked by CORS policy" errors detected
+  - ✅ **Correct API routing** - Login request goes to http://localhost:8001/api/v1/auth/player/login (backend port 8001, NOT frontend port 3000)
+  - ✅ **Successful redirect** - User redirected from /login to / after successful authentication
+  - ✅ User session established - username "testplayer123" displayed in UI with $0.00 balance
+  - ✅ Casino lobby page loads correctly after login with proper navigation
+  - Minor: Some AxiosError console messages observed but non-blocking (likely related to missing games data)
+- **Status**: ✅ ALL SANITY CHECKS PASSED - Player login flow working correctly, no CORS issues, proper backend routing confirmed
