@@ -32,7 +32,7 @@ class MockPSP:
         """
 
         env = (settings.env or "").lower()
-        if env not in {"dev", "local", "test"}:
+        if env not in {"dev", "local", "test", "ci"}:
             # In staging/prod, ignore any attempt to override outcomes.
             return
 
