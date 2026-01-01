@@ -1537,18 +1537,24 @@ async def main():
         admin_suite = AdminReview002TestSuite()
         success = await admin_suite.run_all_tests()
         return success
+    elif len(sys.argv) > 1 and sys.argv[1] == "timezone":
+        # Run only Timezone Fixes tests (as requested in review)
+        print("Running Timezone Fixes verification tests only...")
+        tz_suite = TimezoneFixesTestSuite()
+        success = await tz_suite.run_all_tests()
+        return success
     else:
-        # Run P0 verification tests (as requested in review)
-        print("Running P0 verification tests...")
-        p0_suite = P0VerificationTestSuite()
-        p0_success = await p0_suite.run_all_tests()
+        # Run Timezone Fixes verification tests (as requested in review)
+        print("Running Timezone Fixes verification tests...")
+        tz_suite = TimezoneFixesTestSuite()
+        tz_success = await tz_suite.run_all_tests()
         
         print("\n" + "=" * 80)
         print("🏁 FINAL SUMMARY")
         print("=" * 80)
-        print(f"P0 Verification Tests: {'✅ PASSED' if p0_success else '❌ FAILED'}")
+        print(f"Timezone Fixes Verification Tests: {'✅ PASSED' if tz_success else '❌ FAILED'}")
         
-        return p0_success
+        return tz_success
 
 
 if __name__ == "__main__":
