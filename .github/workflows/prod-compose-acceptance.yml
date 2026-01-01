@@ -67,6 +67,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Assert expected drift-guard migration exists (P0)
+        run: |
+          set -euo pipefail
+          test -f backend/alembic/versions/20251231_02_schema_drift_guard.py
+          echo "OK: drift-guard migration file present"
+          echo "CHECKOUT_SHA=$(git rev-parse HEAD)"
       - name: Show Docker versions
         run: |
           docker version
