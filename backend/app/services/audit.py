@@ -63,7 +63,9 @@ class AuditLogger:
     ) -> None:
         
         # Ensure timestamp is consistent (strip microseconds to avoid DB roundtrip issues)
-        timestamp = datetime.now(timezone.utc).replace(microsecond=0)
+        # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+        # Use naive UTC datetime to avoid tz-aware insertion errors.
+        timestamp = datetime.utcnow().replace(microsecond=0)
         
         # 1. Fetch previous hash for this tenant chain
         stmt = select(AuditEvent).where(AuditEvent.tenant_id == tenant_id).order_by(desc(AuditEvent.sequence)).limit(1)
