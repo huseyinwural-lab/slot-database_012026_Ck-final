@@ -1440,6 +1440,27 @@ class P0RegressionTestSuite:
                 
                 self.log_result("Player Login", True, f"Player token length: {len(self.player_token)}")
                 
+                # Approve KYC for the player using admin token
+                if not self.admin_token:
+                    self.log_result("Approve Player KYC", False, "No admin token available")
+                    return False
+                
+                admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
+                kyc_payload = {"status": "approved"}
+                
+                response = await client.post(
+                    f"{self.base_url}/kyc/documents/{self.test_player_id}/review",
+                    json=kyc_payload,
+                    headers=admin_headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Approve Player KYC", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    # Continue anyway, maybe KYC is not required in this environment
+                else:
+                    self.log_result("Approve Player KYC", True, "Player KYC approved")
+                
                 # Fund player account using admin ledger adjust
                 if not self.admin_token:
                     self.log_result("Fund Player Account", False, "No admin token available")
