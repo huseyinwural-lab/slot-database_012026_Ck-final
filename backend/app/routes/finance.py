@@ -256,6 +256,7 @@ async def mark_withdrawal_paid(
     - held -= amount (available unchanged)
     """
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    payload = payload or {}
     reason = (payload.get("reason") or "").strip()
     if not reason:
         # CI/E2E hardening: default reason if client omitted it.
