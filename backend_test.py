@@ -2291,7 +2291,7 @@ class CISeedGameTypeTestSuite:
                 self.log_result("Client Games Classic777 with Type", False, "No player token available")
                 return False
             
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {self.player_token}"}
                 
                 response = await client.get(
