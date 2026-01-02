@@ -774,3 +774,16 @@
   - ✅ CRM engine triggers bonus grants correctly for FIRST_DEPOSIT events
   - ✅ All review request requirements satisfied: 5/5 tests passed (100%)
 - **Status**: ✅ ALL CRM FIRST_DEPOSIT BONUS GRANT TIMEZONE BUG REGRESSION TESTS PASSED - Timezone bug is resolved
+
+### Testing Agent (2026-01-02) - E2E Regression Smoke Test for P0 Fixes
+- **Message**: E2E regression smoke testing completed for P0 fixes verification
+- **Details**: 
+  - ✅ **Admin App (http://localhost:3000)**: Login successful with admin@casino.com/Admin123!, navigated to Tenants page
+  - ✅ **Capabilities Loading**: No 't.map is not a function' errors found on Tenants page where capabilities are loaded
+  - ✅ **Admin Console Logs**: Clean console logs with successful capability fetching, no critical errors
+  - ✅ **Player App (http://localhost:3001)**: App accessible, registration and wallet pages load correctly
+  - ❌ **Player Authentication Issue**: Player registration/login flow has authentication problems causing 401 errors
+  - ❌ **Stripe Deposit Critical Issue**: Pay with Stripe button does not generate session_id=cs_test_ or tx_id in URL - stays on wallet page
+  - ❌ **Console Errors**: AxiosError and 401 Unauthorized errors in player app preventing proper payment flow
+  - ⚠️ **Payment Status**: No 'Verifying payment...' status visible due to authentication issues
+- **Status**: ✅ ADMIN APP TESTS PASSED - ❌ PLAYER APP STRIPE INTEGRATION BLOCKED BY AUTHENTICATION ISSUES
