@@ -698,3 +698,37 @@
     - Game found: external_id=classic777, name=Classic 777, type=slot, id=59c2e316-a938-412e-a6b9-b749441ba33b
     - Exact output: [{"tenant_id":"default_casino","external_id":"classic777","provider_id":"mock","rtp":96.5,"name":"Classic 777","category":"slot","image_url":null,"id":"59c2e316-a938-412e-a6b9-b749441ba33b","type":"slot","is_active":true,"provider":"mock","status":"active","configuration":{"preset":"classic777"},"created_at":"2026-01-02T00:01:53.411255"}]
 - **Status**: ✅ ALL REVIEW REQUEST REQUIREMENTS VERIFIED (5/5 tests passed)
+
+---
+
+## CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression Test — Iteration 2026-01-02
+- **Status**: ✅ ALL TESTS PASSED
+- **Test Results**:
+  - ✅ **Admin Login**: Admin authentication successful with admin@casino.com/Admin123!
+  - ✅ **Create Bonus Campaign**: Deposit match bonus campaign created successfully with proper configuration
+  - ✅ **Activate Bonus Campaign**: Campaign status successfully set to active
+  - ✅ **Register New Player**: New player registration successful with unique player ID
+  - ✅ **MockPSP Webhook**: `POST /api/v1/payments/webhook/mockpsp` with event_type=deposit_captured returns 200 (NO 500 errors)
+    - Webhook Response: {'status': 'ok', 'idempotent': False, 'tx_id': '0243fc7f-5061-4e8d-a479-c7d4ad4b3186'}
+  - ✅ **Verify Bonus Grant**: BonusGrant row successfully inserted in database
+    - Grant ID: 095fb974-d82c-428d-820e-a0ce3640e760
+    - Amount: 50.0 USD, Status: active
+- **Key Verification**: **NO TIMEZONE-RELATED 500 ERRORS** - The CRM FIRST_DEPOSIT bonus grant timezone bug has been resolved
+- **Backend URL**: https://paywallet-hub.preview.emergentagent.com/api/v1
+- **Verification**: ✅ ALL REGRESSION TEST REQUIREMENTS MET (5/5 tests passed)
+
+---
+
+## Agent Communication
+
+### Testing Agent (2026-01-02) - CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression Test
+- **Message**: CRM FIRST_DEPOSIT bonus grant timezone bug regression testing completed successfully
+- **Details**: 
+  - ✅ **Regression Test PASSED** - MockPSP webhook with event_type=deposit_captured returns 200 (no 500 timezone errors)
+  - ✅ Admin authentication and bonus campaign creation/activation working correctly
+  - ✅ Player registration and webhook processing functional
+  - ✅ **BonusGrant row successfully inserted** - Confirmed via /api/v1/bonuses/player/{player_id} endpoint
+  - ✅ **NO TIMEZONE-RELATED CRASHES** - The webhook processes deposit_captured events without timezone comparison errors
+  - ✅ CRM engine triggers bonus grants correctly for FIRST_DEPOSIT events
+  - ✅ All review request requirements satisfied: 5/5 tests passed (100%)
+- **Status**: ✅ ALL CRM FIRST_DEPOSIT BONUS GRANT TIMEZONE BUG REGRESSION TESTS PASSED - Timezone bug is resolved
