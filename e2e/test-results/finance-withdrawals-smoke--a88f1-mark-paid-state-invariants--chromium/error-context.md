@@ -1,0 +1,384 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - heading "Platform Admin" [level=1] [ref=e6]
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: Core
+          - list [ref=e12]:
+            - listitem [ref=e13]:
+              - link "Dashboard" [ref=e14] [cursor=pointer]:
+                - /url: /
+                - img [ref=e15]
+                - generic [ref=e20]: Dashboard
+            - listitem [ref=e21]:
+              - link "Players" [ref=e22] [cursor=pointer]:
+                - /url: /players
+                - img [ref=e23]
+                - generic [ref=e28]: Players
+            - listitem [ref=e29]:
+              - link "Finance" [ref=e30] [cursor=pointer]:
+                - /url: /finance
+                - img [ref=e31]
+                - generic [ref=e33]: Finance
+            - listitem [ref=e34]:
+              - link "Withdrawals" [ref=e35] [cursor=pointer]:
+                - /url: /finance/withdrawals
+                - img [ref=e36]
+                - generic [ref=e38]: Withdrawals
+            - listitem [ref=e39]:
+              - link "All Revenue" [ref=e40] [cursor=pointer]:
+                - /url: /revenue/all-tenants
+                - img [ref=e41]
+                - generic [ref=e44]: All Revenue
+            - listitem [ref=e45]:
+              - link "Games" [ref=e46] [cursor=pointer]:
+                - /url: /games
+                - img [ref=e47]
+                - generic [ref=e49]: Games
+            - listitem [ref=e50]:
+              - link "VIP Games" [ref=e51] [cursor=pointer]:
+                - /url: /vip-games
+                - img [ref=e52]
+                - generic [ref=e54]: VIP Games
+        - generic [ref=e55]:
+          - generic [ref=e56]: Operations
+          - list [ref=e57]:
+            - listitem [ref=e58]:
+              - link "KYC Verification" [ref=e59] [cursor=pointer]:
+                - /url: /kyc
+                - img [ref=e60]
+                - generic [ref=e63]: KYC Verification
+            - listitem [ref=e64]:
+              - link "CRM & Comms" [ref=e65] [cursor=pointer]:
+                - /url: /crm
+                - img [ref=e66]
+                - generic [ref=e69]: CRM & Comms
+            - listitem [ref=e70]:
+              - link "Bonuses" [ref=e71] [cursor=pointer]:
+                - /url: /bonuses
+                - img [ref=e72]
+                - generic [ref=e76]: Bonuses
+            - listitem [ref=e77]:
+              - link "Affiliates" [ref=e78] [cursor=pointer]:
+                - /url: /affiliates
+                - img [ref=e79]
+                - generic [ref=e84]: Affiliates
+            - listitem [ref=e85]:
+              - link "Kill Switch" [ref=e86] [cursor=pointer]:
+                - /url: /kill-switch
+                - img [ref=e87]
+                - generic [ref=e89]: Kill Switch
+            - listitem [ref=e90]:
+              - link "Support" [ref=e91] [cursor=pointer]:
+                - /url: /support
+                - img [ref=e92]
+                - generic [ref=e94]: Support
+        - generic [ref=e95]:
+          - generic [ref=e96]: Risk & Compliance
+          - list [ref=e97]:
+            - listitem [ref=e98]:
+              - link "Risk Rules" [ref=e99] [cursor=pointer]:
+                - /url: /risk
+                - img [ref=e100]
+                - generic [ref=e102]: Risk Rules
+            - listitem [ref=e103]:
+              - link "Fraud Check" [ref=e104] [cursor=pointer]:
+                - /url: /fraud
+                - img [ref=e105]
+                - generic [ref=e107]: Fraud Check
+            - listitem [ref=e108]:
+              - link "Approval Queue" [ref=e109] [cursor=pointer]:
+                - /url: /approvals
+                - img [ref=e110]
+                - generic [ref=e113]: Approval Queue
+            - listitem [ref=e114]:
+              - link "Responsible Gaming" [ref=e115] [cursor=pointer]:
+                - /url: /rg
+                - img [ref=e116]
+                - generic [ref=e120]: Responsible Gaming
+        - generic [ref=e121]:
+          - generic [ref=e122]: Game Engine
+          - list [ref=e123]:
+            - listitem [ref=e124]:
+              - link "Robots" [ref=e125] [cursor=pointer]:
+                - /url: /robots
+                - img [ref=e126]
+                - generic [ref=e129]: Robots
+            - listitem [ref=e130]:
+              - link "Math Assets" [ref=e131] [cursor=pointer]:
+                - /url: /math-assets
+                - img [ref=e132]
+                - generic [ref=e137]: Math Assets
+        - generic [ref=e138]:
+          - generic [ref=e139]: System
+          - list [ref=e140]:
+            - listitem [ref=e141]:
+              - link "CMS" [ref=e142] [cursor=pointer]:
+                - /url: /cms
+                - img [ref=e143]
+                - generic [ref=e146]: CMS
+            - listitem [ref=e147]:
+              - link "Reports" [ref=e148] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e149]
+                - generic [ref=e151]: Reports
+            - listitem [ref=e152]:
+              - link "Logs" [ref=e153] [cursor=pointer]:
+                - /url: /logs
+                - img [ref=e154]
+                - generic [ref=e157]: Logs
+            - listitem [ref=e158]:
+              - link "Audit Log" [ref=e159] [cursor=pointer]:
+                - /url: /audit
+                - img [ref=e160]
+                - generic [ref=e163]: Audit Log
+            - listitem [ref=e164]:
+              - link "Admin Users" [ref=e165] [cursor=pointer]:
+                - /url: /admins
+                - img [ref=e166]
+                - generic [ref=e178]: Admin Users
+            - listitem [ref=e179]:
+              - link "Tenants" [ref=e180] [cursor=pointer]:
+                - /url: /tenants
+                - img [ref=e181]
+                - generic [ref=e184]: Tenants
+            - listitem [ref=e185]:
+              - link "API Keys" [ref=e186] [cursor=pointer]:
+                - /url: /keys
+                - img [ref=e187]
+                - generic [ref=e190]: API Keys
+            - listitem [ref=e191]:
+              - link "Feature Flags" [ref=e192] [cursor=pointer]:
+                - /url: /features
+                - img [ref=e193]
+                - generic [ref=e196]: Feature Flags
+            - listitem [ref=e197]:
+              - link "Simulator" [ref=e198] [cursor=pointer]:
+                - /url: /simulator
+                - img [ref=e199]
+                - generic [ref=e201]: Simulator
+            - listitem [ref=e202]:
+              - link "Settings" [ref=e203] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e204]
+                - generic [ref=e207]: Settings
+      - button "Logout" [ref=e209] [cursor=pointer]:
+        - img [ref=e210]
+        - text: Logout
+    - main [ref=e213]:
+      - generic [ref=e214]:
+        - generic [ref=e216]:
+          - img [ref=e217]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e220]
+        - generic [ref=e221]:
+          - generic [ref=e222]:
+            - img [ref=e223]
+            - combobox [ref=e226] [cursor=pointer]:
+              - generic: Global Context
+              - img [ref=e227]
+          - generic [ref=e229]:
+            - paragraph [ref=e230]: Super Owner
+            - paragraph [ref=e231]: admin@casino.com
+          - generic [ref=e232]: SO
+      - generic [ref=e233]:
+        - generic [ref=e234]:
+          - generic [ref=e236]:
+            - heading "Withdrawals" [level=2] [ref=e237]:
+              - img [ref=e238]
+              - text: Withdrawals
+            - paragraph [ref=e241]: Review, approve or reject player withdrawal requests and track payout status.
+          - generic [ref=e242]:
+            - generic [ref=e243]:
+              - generic [ref=e244]: Filters
+              - generic [ref=e245]: Filter withdrawal requests by state, player and date range.
+            - generic [ref=e247]:
+              - generic [ref=e248]:
+                - text: State
+                - combobox "State" [ref=e249] [cursor=pointer]:
+                  - generic: All
+                  - img [ref=e250]
+              - generic [ref=e252]:
+                - text: Player ID
+                - textbox "Player ID" [ref=e253]:
+                  - /placeholder: Player ID (optional)
+              - generic [ref=e254]:
+                - generic [ref=e255]: Date from
+                - textbox "Date from" [ref=e256]
+              - generic [ref=e257]:
+                - generic [ref=e258]: Date to
+                - textbox "Date to" [ref=e259]
+              - button "Apply" [ref=e260] [cursor=pointer]
+          - generic [ref=e261]:
+            - generic [ref=e263]:
+              - generic [ref=e264]: Withdrawal Requests
+              - generic [ref=e265]: 8 total results. Page 1 of 1.
+            - table [ref=e269]:
+              - rowgroup [ref=e270]:
+                - row "Tx ID Player ID Amount State Created Reviewed By Reviewed At Actions" [ref=e271]:
+                  - columnheader "Tx ID" [ref=e272]
+                  - columnheader "Player ID" [ref=e273]
+                  - columnheader "Amount" [ref=e274]
+                  - columnheader "State" [ref=e275]
+                  - columnheader "Created" [ref=e276]
+                  - columnheader "Reviewed By" [ref=e277]
+                  - columnheader "Reviewed At" [ref=e278]
+                  - columnheader "Actions" [ref=e279]
+              - rowgroup [ref=e280]:
+                - row "d4e7184e-9f37-4c8a-92d7-93fa00ee4612 1ce05434-5ad1-4fde-b104-dbf05f60bd9e 10 USD Paid 1/2/2026, 10:50:12 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/2/2026, 10:50:12 PM" [ref=e281] [cursor=pointer]:
+                  - cell "d4e7184e-9f37-4c8a-92d7-93fa00ee4612" [ref=e282]:
+                    - generic [ref=e283]:
+                      - generic [ref=e284]: d4e7184e-9f37-4c8a-92d7-93fa00ee4612
+                      - button [ref=e285]:
+                        - img
+                  - cell "1ce05434-5ad1-4fde-b104-dbf05f60bd9e" [ref=e286]
+                  - cell "10 USD" [ref=e287]
+                  - cell "Paid" [ref=e288]:
+                    - generic [ref=e289]: Paid
+                  - cell "1/2/2026, 10:50:12 PM" [ref=e290]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e291]
+                  - cell "1/2/2026, 10:50:12 PM" [ref=e292]
+                  - cell [ref=e293]
+                - row "7ceefb75-1a5f-43e6-a360-3f334031e963 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/2/2026, 10:50:11 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/2/2026, 10:50:11 PM" [ref=e295] [cursor=pointer]:
+                  - cell "7ceefb75-1a5f-43e6-a360-3f334031e963" [ref=e296]:
+                    - generic [ref=e297]:
+                      - generic [ref=e298]: 7ceefb75-1a5f-43e6-a360-3f334031e963
+                      - button [ref=e299]:
+                        - img
+                  - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e300]
+                  - cell "20 USD" [ref=e301]
+                  - cell "Paid" [ref=e302]:
+                    - generic [ref=e303]: Paid
+                  - cell "1/2/2026, 10:50:11 PM" [ref=e304]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e305]
+                  - cell "1/2/2026, 10:50:11 PM" [ref=e306]
+                  - cell [ref=e307]
+                - row "66b9e836-42b6-404a-91e4-2b64f776c3f7 a28e35be-6948-49dc-9f71-124308568599 10 USD Approved 1/2/2026, 10:48:00 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/2/2026, 10:48:00 PM Mark Paid Start Payout" [ref=e309] [cursor=pointer]:
+                  - cell "66b9e836-42b6-404a-91e4-2b64f776c3f7" [ref=e310]:
+                    - generic [ref=e311]:
+                      - generic [ref=e312]: 66b9e836-42b6-404a-91e4-2b64f776c3f7
+                      - button [ref=e313]:
+                        - img
+                  - cell "a28e35be-6948-49dc-9f71-124308568599" [ref=e314]
+                  - cell "10 USD" [ref=e315]
+                  - cell "Approved" [ref=e316]:
+                    - generic [ref=e317]: Approved
+                  - cell "1/2/2026, 10:48:00 PM" [ref=e318]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e319]
+                  - cell "1/2/2026, 10:48:00 PM" [ref=e320]
+                  - cell "Mark Paid Start Payout" [ref=e321]:
+                    - generic [ref=e322]:
+                      - button "Mark Paid" [ref=e323]:
+                        - img
+                        - text: Mark Paid
+                      - button "Start Payout" [ref=e324]:
+                        - img
+                        - text: Start Payout
+                - row "9d2c5305-9c1f-4a61-a6b4-5c07457f148f 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/2/2026, 10:47:59 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/2/2026, 10:47:59 PM" [ref=e326] [cursor=pointer]:
+                  - cell "9d2c5305-9c1f-4a61-a6b4-5c07457f148f" [ref=e327]:
+                    - generic [ref=e328]:
+                      - generic [ref=e329]: 9d2c5305-9c1f-4a61-a6b4-5c07457f148f
+                      - button [ref=e330]:
+                        - img
+                  - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e331]
+                  - cell "20 USD" [ref=e332]
+                  - cell "Paid" [ref=e333]:
+                    - generic [ref=e334]: Paid
+                  - cell "1/2/2026, 10:47:59 PM" [ref=e335]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e336]
+                  - cell "1/2/2026, 10:47:59 PM" [ref=e337]
+                  - cell [ref=e338]
+                - row "a9a41159-4aa8-4a31-9eb8-4c363526ac03 9804127c-50c7-43b1-b6e2-21faeba9cd5d 100 USD Approved 1/2/2026, 9:20:48 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/2/2026, 9:20:48 PM Mark Paid Start Payout" [ref=e340] [cursor=pointer]:
+                  - cell "a9a41159-4aa8-4a31-9eb8-4c363526ac03" [ref=e341]:
+                    - generic [ref=e342]:
+                      - generic [ref=e343]: a9a41159-4aa8-4a31-9eb8-4c363526ac03
+                      - button [ref=e344]:
+                        - img
+                  - cell "9804127c-50c7-43b1-b6e2-21faeba9cd5d" [ref=e345]
+                  - cell "100 USD" [ref=e346]
+                  - cell "Approved" [ref=e347]:
+                    - generic [ref=e348]: Approved
+                  - cell "1/2/2026, 9:20:48 PM" [ref=e349]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e350]
+                  - cell "1/2/2026, 9:20:48 PM" [ref=e351]
+                  - cell "Mark Paid Start Payout" [ref=e352]:
+                    - generic [ref=e353]:
+                      - button "Mark Paid" [ref=e354]:
+                        - img
+                        - text: Mark Paid
+                      - button "Start Payout" [ref=e355]:
+                        - img
+                        - text: Start Payout
+                - row "d5c9e704-7c4d-498a-9a3d-4417ed1d2d0e b992e403-6c1f-4ff2-b109-2b1992b6c05b 100 USD Approved 1/2/2026, 9:20:00 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/2/2026, 9:20:00 PM Mark Paid Start Payout" [ref=e357] [cursor=pointer]:
+                  - cell "d5c9e704-7c4d-498a-9a3d-4417ed1d2d0e" [ref=e358]:
+                    - generic [ref=e359]:
+                      - generic [ref=e360]: d5c9e704-7c4d-498a-9a3d-4417ed1d2d0e
+                      - button [ref=e361]:
+                        - img
+                  - cell "b992e403-6c1f-4ff2-b109-2b1992b6c05b" [ref=e362]
+                  - cell "100 USD" [ref=e363]
+                  - cell "Approved" [ref=e364]:
+                    - generic [ref=e365]: Approved
+                  - cell "1/2/2026, 9:20:00 PM" [ref=e366]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e367]
+                  - cell "1/2/2026, 9:20:00 PM" [ref=e368]
+                  - cell "Mark Paid Start Payout" [ref=e369]:
+                    - generic [ref=e370]:
+                      - button "Mark Paid" [ref=e371]:
+                        - img
+                        - text: Mark Paid
+                      - button "Start Payout" [ref=e372]:
+                        - img
+                        - text: Start Payout
+                - row "c59d4636-36fd-4e18-b7ee-d84c597d9af1 62ec9e81-4a4b-444c-ae57-40b449ce6873 100 USD Approved 1/2/2026, 9:19:31 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/2/2026, 9:19:31 PM Mark Paid Start Payout" [ref=e374] [cursor=pointer]:
+                  - cell "c59d4636-36fd-4e18-b7ee-d84c597d9af1" [ref=e375]:
+                    - generic [ref=e376]:
+                      - generic [ref=e377]: c59d4636-36fd-4e18-b7ee-d84c597d9af1
+                      - button [ref=e378]:
+                        - img
+                  - cell "62ec9e81-4a4b-444c-ae57-40b449ce6873" [ref=e379]
+                  - cell "100 USD" [ref=e380]
+                  - cell "Approved" [ref=e381]:
+                    - generic [ref=e382]: Approved
+                  - cell "1/2/2026, 9:19:31 PM" [ref=e383]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e384]
+                  - cell "1/2/2026, 9:19:31 PM" [ref=e385]
+                  - cell "Mark Paid Start Payout" [ref=e386]:
+                    - generic [ref=e387]:
+                      - button "Mark Paid" [ref=e388]:
+                        - img
+                        - text: Mark Paid
+                      - button "Start Payout" [ref=e389]:
+                        - img
+                        - text: Start Payout
+                - row "da432a22-ca99-4d97-bea0-5df9f81844ee cd7c7c46-f697-4b5e-af59-bfe30f9c5b80 100 USD Approved 1/1/2026, 11:57:16 PM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/1/2026, 11:57:16 PM Mark Paid Start Payout" [ref=e391] [cursor=pointer]:
+                  - cell "da432a22-ca99-4d97-bea0-5df9f81844ee" [ref=e392]:
+                    - generic [ref=e393]:
+                      - generic [ref=e394]: da432a22-ca99-4d97-bea0-5df9f81844ee
+                      - button [ref=e395]:
+                        - img
+                  - cell "cd7c7c46-f697-4b5e-af59-bfe30f9c5b80" [ref=e396]
+                  - cell "100 USD" [ref=e397]
+                  - cell "Approved" [ref=e398]:
+                    - generic [ref=e399]: Approved
+                  - cell "1/1/2026, 11:57:16 PM" [ref=e400]
+                  - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e401]
+                  - cell "1/1/2026, 11:57:16 PM" [ref=e402]
+                  - cell "Mark Paid Start Payout" [ref=e403]:
+                    - generic [ref=e404]:
+                      - button "Mark Paid" [ref=e405]:
+                        - img
+                        - text: Mark Paid
+                      - button "Start Payout" [ref=e406]:
+                        - img
+                        - text: Start Payout
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e408] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e409]:
+      - img [ref=e410]
+      - paragraph [ref=e411]: Made with Emergent
+```
