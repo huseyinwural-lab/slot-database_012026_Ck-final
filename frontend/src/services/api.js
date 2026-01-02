@@ -1,9 +1,14 @@
 import axios from 'axios';
 import { setLastError } from './supportDiagnostics';
 
-// Prefer explicit env var; otherwise use same-origin (works with Nginx /api reverse proxy in prod images)
-const RAW_API_URL = process.env.REACT_APP_BACKEND_URL
-  || (typeof window !== 'undefined' ? window.location.origin : '');
+// Prefer explicit env var.
+// Local dev (CRA) can override backend to avoid CORS issues when REACT_APP_BACKEND_URL
+// points to an external preview domain.
+const LOCAL_DEV_API_URL = process.env.REACT_APP_BACKEND_URL_LOCAL;
+const RAW_API_URL =
+  (process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL)
+    ? LOCAL_DEV_API_URL
+    : (process.env.REACT_APP_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : ''));
 
 // Prevent mixed-content in HTTPS environments.
 // If the app is served over HTTPS but the backend URL is HTTP (common misconfig), upgrade.
