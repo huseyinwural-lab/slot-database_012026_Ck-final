@@ -31,7 +31,10 @@ const SettingsPanel = () => {
 
   const fetchData = async (tab = activeTab) => {
     try {
-      if (tab === 'brands') setBrands((await api.get('/v1/settings/brands')).data);
+      if (tab === 'brands') {
+        const data = (await api.get('/v1/settings/brands')).data;
+        setBrands(Array.isArray(data) ? data : []);
+      }
       if (tab === 'currencies') setCurrencies((await api.get('/v1/settings/currencies')).data);
       if (tab === 'countries') setCountryRules((await api.get('/v1/settings/country-rules')).data);
       if (tab === 'defaults') setPlatformDefaults((await api.get('/v1/settings/platform-defaults')).data);
