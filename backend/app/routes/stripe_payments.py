@@ -43,6 +43,33 @@ async def create_checkout_session(
     Create a Stripe Checkout Session for a deposit.
     """
     if not STRIPE_API_KEY:
+        # CI/dev/test deterministic mock: allow simulated checkout without real Stripe keys.
+        if settings.env.lower() in {"ci", "test", "dev"} or settings.stripe_mock:
+            session_id = f"cs_test_{uuid.uuid4().hex}"
+            tx_id = str(uuid.uuid4())
+
+            # Create a placeholder transaction for later simulated webhook.
+            tx = Transaction(
+                id=tx_id,
+                tenant_id=current_player.tenant_id,
+                player_id=current_player.id,
+                type="deposit",
+                amount=float(body.amount),
+                currency=body.currency,
+                status="pending_provider",
+                provider="stripe",
+                provider_ref=session_id,
+                provider_event_id=session_id,
+            )
+            session.add(tx)
+            await session.commit()
+
+            origin = request.headers.get("origin") or settings.player_app_url
+            return {
+                "session_id": session_id,
+                "url": f"{origin}/wallet?session_id={session_id}&status=success&tx_id={tx_id}",
+            }
+
         raise HTTPException(status_code=500, detail="Stripe configuration missing")
 
     if body.amount < 10.0:
