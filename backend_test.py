@@ -1405,7 +1405,8 @@ class CRMBonusGrantRegressionTestSuite:
                         "expiry_hours": 24
                     },
                     "start_date": None,
-                    "end_date": None
+                    "end_date": None,
+                    "reason": "CRM regression test campaign creation"
                 }
                 
                 response = await client.post(
