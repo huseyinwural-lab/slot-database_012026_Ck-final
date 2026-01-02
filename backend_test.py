@@ -1330,6 +1330,275 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class CISeedVerificationTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.player_token = None
+        self.test_player_email = None
+        self.test_player_password = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_auth(self) -> bool:
+        """Setup admin and player authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Admin login
+                admin_login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=admin_login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                
+                # Create and login player for client-games endpoint
+                self.test_player_email = f"ciseed_{uuid.uuid4().hex[:8]}@casino.com"
+                self.test_player_password = "CISeedPlayer123!"
+                
+                player_data = {
+                    "email": self.test_player_email,
+                    "username": f"ciseed_{uuid.uuid4().hex[:8]}",
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Player Registration", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login player
+                player_login_data = {
+                    "email": self.test_player_email,
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=player_login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Player Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                player_data = response.json()
+                self.player_token = player_data.get("access_token")
+                if not self.player_token:
+                    self.log_result("Player Login", False, "No player access token in response")
+                    return False
+                
+                self.log_result("Player Login", True, "Player logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Setup Auth", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_ci_seed_endpoint(self) -> bool:
+        """Test 1: Call POST /api/v1/ci/seed and ensure it returns 200"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(f"{self.base_url}/ci/seed")
+                
+                if response.status_code != 200:
+                    self.log_result("CI Seed Endpoint", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                seeded = data.get("seeded")
+                game_external_id = data.get("game_external_id")
+                robot_name = data.get("robot_name")
+                
+                if not seeded:
+                    self.log_result("CI Seed Endpoint", False, "Seeded flag is not True")
+                    return False
+                
+                if game_external_id != "classic777":
+                    self.log_result("CI Seed Endpoint", False, 
+                                  f"Expected game_external_id 'classic777', got '{game_external_id}'")
+                    return False
+                
+                if robot_name != "Classic 777":
+                    self.log_result("CI Seed Endpoint", False, 
+                                  f"Expected robot_name 'Classic 777', got '{robot_name}'")
+                    return False
+                
+                self.log_result("CI Seed Endpoint", True, 
+                              f"Successfully seeded - Game: {game_external_id}, Robot: {robot_name}")
+                return True
+                
+        except Exception as e:
+            self.log_result("CI Seed Endpoint", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_client_games_classic777(self) -> bool:
+        """Test 2: Call GET /api/v1/player/client-games and confirm an item with external_id=classic777 exists"""
+        try:
+            if not self.player_token:
+                self.log_result("Client Games Classic777", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.player_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/player/client-games/",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Client Games Classic777", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                games = response.json()
+                
+                # Look for game with external_id=classic777
+                classic777_found = False
+                for game in games:
+                    if game.get("external_id") == "classic777":
+                        classic777_found = True
+                        self.log_result("Client Games Classic777", True, 
+                                      f"Found classic777 game: {game.get('name')} (ID: {game.get('id')})")
+                        break
+                
+                if not classic777_found:
+                    self.log_result("Client Games Classic777", False, 
+                                  f"Game with external_id=classic777 not found. Available games: {[g.get('external_id') for g in games]}")
+                    return False
+                
+                return True
+                
+        except Exception as e:
+            self.log_result("Client Games Classic777", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_robots_classic777(self) -> bool:
+        """Test 3: Call GET /api/v1/robots and confirm a robot name contains 'Classic 777'"""
+        try:
+            if not self.admin_token:
+                self.log_result("Robots Classic777", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/robots/",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Robots Classic777", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                robots = data.get("items", [])
+                
+                # Look for robot with name containing 'Classic 777'
+                classic777_robot_found = False
+                for robot in robots:
+                    robot_name = robot.get("name", "")
+                    if "Classic 777" in robot_name:
+                        classic777_robot_found = True
+                        self.log_result("Robots Classic777", True, 
+                                      f"Found Classic 777 robot: {robot_name} (ID: {robot.get('id')})")
+                        break
+                
+                if not classic777_robot_found:
+                    self.log_result("Robots Classic777", False, 
+                                  f"Robot with name containing 'Classic 777' not found. Available robots: {[r.get('name') for r in robots]}")
+                    return False
+                
+                return True
+                
+        except Exception as e:
+            self.log_result("Robots Classic777", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete CI seed verification test suite"""
+        print("🚀 Starting CI Seed Verification Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup authentication
+        if not await self.setup_auth():
+            print("\n❌ Authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: CI seed endpoint
+        test_results.append(await self.test_ci_seed_endpoint())
+        
+        # Test 2: Client games endpoint for classic777
+        test_results.append(await self.test_client_games_classic777())
+        
+        # Test 3: Robots endpoint for Classic 777
+        test_results.append(await self.test_robots_classic777())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 CI SEED VERIFICATION TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All CI seed verification tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class TimezoneFixesTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
