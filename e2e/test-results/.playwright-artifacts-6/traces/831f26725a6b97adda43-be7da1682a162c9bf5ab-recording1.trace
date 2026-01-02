@@ -1,0 +1,29 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767394594768,"monotonicTime":300778.119,"sdkLanguage":"javascript","contextId":"request-context@9f86678e55697cdf72e4d98339e647a4","title":"stripe-deposit.spec.ts:4 › Stripe Deposit Flow (Simulated) › User can initiate deposit and see balance update after simulated webhook"}
+{"type":"before","callId":"call@14","startTime":300781.59,"class":"APIRequestContext","method":"fetch","params":{"url":"http://127.0.0.1:8001/api/v1/auth/player/register","method":"POST","jsonData":"{\"username\":\"user1767394594769\",\"email\":\"stripe_e2e_1767394594769@example.com\",\"password\":\"password123\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@39","beforeSnapshot":"before@call@14"}
+{"type":"log","callId":"call@14","time":300785.303,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/register"}
+{"type":"log","callId":"call@14","time":300785.343,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@14","time":300785.352,"message":"  accept: */*"}
+{"type":"log","callId":"call@14","time":300785.473,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@14","time":300785.491,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@14","time":300785.502,"message":"  content-length: 133"}
+{"type":"log","callId":"call@14","time":301036.552,"message":"← 200 OK"}
+{"type":"log","callId":"call@14","time":301036.585,"message":"  date: Fri, 02 Jan 2026 22:56:34 GMT"}
+{"type":"log","callId":"call@14","time":301036.594,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@14","time":301036.715,"message":"  content-length: 75"}
+{"type":"log","callId":"call@14","time":301036.73,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@14","time":301036.737,"message":"  x-request-id: 5ccec797-0d99-44b1-8a1d-576f0794addd"}
+{"type":"after","callId":"call@14","endTime":301038.304,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/register","status":200,"statusText":"OK","headers":[{"name":"date","value":"Fri, 02 Jan 2026 22:56:34 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"75"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"5ccec797-0d99-44b1-8a1d-576f0794addd"}],"fetchUid":"c0cfb372f59d9e6f5e6ccc2e28af7658"}},"afterSnapshot":"after@call@14"}
+{"type":"before","callId":"call@55","startTime":302367.69,"class":"APIRequestContext","method":"fetch","params":{"url":"http://127.0.0.1:8001/api/v1/payments/stripe/test-trigger-webhook","method":"POST","jsonData":"{\"type\":\"checkout.session.completed\",\"session_id\":\"cs_test_94a04c527c984de48e87a00a239ea743\"}","timeout":0},"stepId":"pw:api@61","beforeSnapshot":"before@call@55"}
+{"type":"log","callId":"call@55","time":302368.361,"message":"→ POST http://127.0.0.1:8001/api/v1/payments/stripe/test-trigger-webhook"}
+{"type":"log","callId":"call@55","time":302368.373,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@55","time":302368.377,"message":"  accept: */*"}
+{"type":"log","callId":"call@55","time":302368.381,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@55","time":302368.384,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@55","time":302368.386,"message":"  content-length: 93"}
+{"type":"log","callId":"call@55","time":302445.951,"message":"← 200 OK"}
+{"type":"log","callId":"call@55","time":302445.973,"message":"  date: Fri, 02 Jan 2026 22:56:35 GMT"}
+{"type":"log","callId":"call@55","time":302445.977,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@55","time":302445.98,"message":"  content-length: 77"}
+{"type":"log","callId":"call@55","time":302445.982,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@55","time":302445.984,"message":"  x-request-id: 69384c10-0e8e-4387-a94d-ea3724ff584a"}
+{"type":"after","callId":"call@55","endTime":302446.509,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/payments/stripe/test-trigger-webhook","status":200,"statusText":"OK","headers":[{"name":"date","value":"Fri, 02 Jan 2026 22:56:35 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"77"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"69384c10-0e8e-4387-a94d-ea3724ff584a"}],"fetchUid":"0e338e8ea9f2b8b0fac4f73afb46bf09"}},"afterSnapshot":"after@call@55"}
