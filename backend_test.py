@@ -2947,26 +2947,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run CRM FIRST_DEPOSIT bonus grant timezone bug regression test"""
-    print("🎯 CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression Test Suite Runner")
+    """Main test runner - Run BAU w12 blocker verification test"""
+    print("🎯 BAU w12 Blocker Verification Test Suite Runner")
     print("=" * 80)
     
-    # Run CRM bonus grant regression test suite
-    crm_regression_suite = CRMBonusGrantRegressionTestSuite()
-    crm_regression_success = await crm_regression_suite.run_all_tests()
+    # Run BAU w12 blocker test suite
+    bau_w12_suite = BAUw12BlockerTestSuite()
+    bau_w12_success = await bau_w12_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if crm_regression_success else "❌ FAIL"
-    print(f"{status}: CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression")
+    status = "✅ PASS" if bau_w12_success else "❌ FAIL"
+    print(f"{status}: BAU w12 Blocker Verification")
     
-    if crm_regression_success:
-        print("🎉 CRM FIRST_DEPOSIT bonus grant timezone bug regression test suite PASSED!")
+    if bau_w12_success:
+        print("🎉 BAU w12 blocker verification test suite PASSED!")
         return True
     else:
-        print("⚠️  CRM FIRST_DEPOSIT bonus grant timezone bug regression test suite failed.")
+        print("⚠️  BAU w12 blocker verification test suite failed.")
         return False
 
 
