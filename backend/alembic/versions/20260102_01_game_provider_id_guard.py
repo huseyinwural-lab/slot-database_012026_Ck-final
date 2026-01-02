@@ -28,8 +28,13 @@ def upgrade() -> None:
     inspector = sa.inspect(bind)
 
     cols = {c["name"] for c in inspector.get_columns("game")}
+
     if "provider_id" not in cols:
         op.add_column("game", sa.Column("provider_id", sa.String(), nullable=True))
+
+    if "external_id" not in cols:
+        op.add_column("game", sa.Column("external_id", sa.String(), nullable=True))
+        op.create_index("ix_game_external_id", "game", ["external_id"], unique=False)
 
 
 def downgrade() -> None:
