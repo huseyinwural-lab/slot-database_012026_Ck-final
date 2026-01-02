@@ -68,6 +68,7 @@ async def create_checkout_session(
             return {
                 "session_id": session_id,
                 "url": f"{origin}/wallet?session_id={session_id}&status=success&tx_id={tx_id}",
+                "tx_id": tx_id,
             }
 
         raise HTTPException(status_code=500, detail="Stripe configuration missing")
