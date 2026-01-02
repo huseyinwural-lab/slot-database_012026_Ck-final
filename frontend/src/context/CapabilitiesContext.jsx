@@ -21,7 +21,8 @@ export const CapabilitiesProvider = ({ children }) => {
       fetchCapabilities();
     } else {
       console.log('❌ No token, skipping capabilities fetch');
-      setCapabilities(null);
+      setCapabilitiesObject({});
+      setCapabilitiesList([]);
       setIsOwner(false);
       setLoading(false);
     }
