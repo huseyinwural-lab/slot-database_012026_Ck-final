@@ -18,6 +18,7 @@ import httpx
 import os
 import uuid
 import subprocess
+import re
 
 # Use backend URL from frontend/.env as specified in the review request
 def get_backend_url():
