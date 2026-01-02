@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, Request, Response, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 import csv
 import io
 import uuid
@@ -34,7 +34,8 @@ async def list_audit_events(
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
 
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=since_hours)
+    # DB stores TIMESTAMP WITHOUT TIME ZONE, keep comparisons naive UTC.
+    cutoff = datetime.utcnow() - timedelta(hours=since_hours)
 
     q = select(AuditEvent).where(AuditEvent.timestamp >= cutoff)
 
@@ -133,7 +134,8 @@ async def export_audit_events(
     await session.commit()
     
     # 2. Query
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=since_hours)
+    # DB stores TIMESTAMP WITHOUT TIME ZONE, keep comparisons naive UTC.
+    cutoff = datetime.utcnow() - timedelta(hours=since_hours)
     q = select(AuditEvent).where(AuditEvent.timestamp >= cutoff)
     
     if not getattr(current_admin, "is_platform_owner", False):
