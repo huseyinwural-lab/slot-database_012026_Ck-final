@@ -23,8 +23,9 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('player_token');
     const tenantId = getTenantId();
-    
-    if (token) {
+
+    if (token && config.headers.Authorization !== null) {
+      // Only attach auth if caller didn't explicitly disable it
       config.headers.Authorization = `Bearer ${token}`;
     }
     
