@@ -1397,7 +1397,7 @@ class CRMBonusGrantRegressionTestSuite:
                 }
                 
                 # Create campaign
-                campaign_data = {
+                payload = {
                     "name": f"CRM Test Deposit Match {uuid.uuid4().hex[:8]}",
                     "type": "deposit_match",
                     "config": {
@@ -1413,7 +1413,7 @@ class CRMBonusGrantRegressionTestSuite:
                 
                 response = await client.post(
                     f"{self.base_url}/bonuses/campaigns",
-                    json=campaign_data,
+                    json={"payload": payload},
                     headers=headers
                 )
                 
