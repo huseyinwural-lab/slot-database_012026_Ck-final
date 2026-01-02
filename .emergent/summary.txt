@@ -1,9 +1,9 @@
 <analysis>**original_problem_statement:**
 The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project is in its final phase, focusing on resolving deployment blockers and hardening the application.
 
-Initially, the main task was to address a critical deployment incompatibility: the application uses PostgreSQL and Redis, but the target Emergent platform only provides MongoDB. This was resolved.
+Initially, the main task was to address a critical deployment incompatibility (PostgreSQL/Redis vs. MongoDB). This was resolved.
 
-However, a series of P0 release blockers and repository hygiene issues were identified, which became the top priority. After fixing those, the focus has shifted to fixing the  CI pipeline and the  Playwright test suite, which are failing due to a cascade of issues including schema drift, environment misconfigurations, and service availability problems. The ultimate goal is to get green CI/E2E runs to unblock the final self-serve verification process by the user's Ops/Dev team.
+The current priority is to fix the  CI pipeline and the  Playwright test suite. These are failing due to a cascade of issues including schema drift, environment misconfigurations, and service availability problems. The ultimate goal is to achieve green CI/E2E runs to unblock the final self-serve verification process by the user's Ops/Dev team.
 
 **PRODUCT REQUIREMENTS:**
 1.  **Deployment Readiness:** The application must be configurable via environment variables (, ) to connect to external PostgreSQL and Redis services. (DONE)
@@ -14,70 +14,88 @@ However, a series of P0 release blockers and repository hygiene issues were iden
 **User's preferred language**: Turkish
 
 **what currently exists?**
-A full-stack casino platform (React/FastAPI/PostgreSQL) that has undergone significant hardening. A long series of critical P0 issues have been resolved (security, hygiene, Alembic migrations, CI environment). The application is now being tested with a  CI pipeline and a separate E2E Playwright test suite.
+A full-stack casino platform (React/FastAPI/PostgreSQL) that has undergone significant hardening. A long series of critical P0 issues have been resolved, including the initial player app down and deposit 500 blockers.
 
-The  smoke tests are now passing after numerous fixes. However, the full  test suite is failing massively. The agent correctly diagnosed that the previous session expired issue was due to a stale token and has implemented fixes. The current primary blockers are that the  application is not running during the E2E tests, and the core deposit API is returning a 500 error. The agent was in the process of fixing both issues simultaneously.
+The application is now in a state where the E2E Playwright test suite can run, but it's failing with 11/25 tests. The agent has just implemented a major P0 Fix Pack to address the next layer of blockers revealed by the tests:
+1.  Standardized  usage in  to fix withdrawal approval errors.
+2.  Implemented mock Stripe logic to handle missing API keys in CI.
+3.  Hardened the frontend  to prevent UI crashes.
+4.  Added a CI seeding mechanism for games and robots.
+5.  Fixed player authentication token handling in the player app.
+
+The effectiveness of this fix pack has not yet been verified by a full CI run.
 
 **Last working item**:
--   **Last item agent was working:** The agent was working on fixing two critical, parallel P0 blockers identified from the E2E test logs:
-    1.  **Player App Not Running:** Multiple tests were failing with . The agent attempted to fix this by modifying  and the CI workflow ( and ) to explicitly include the  service in the  command.
-    2.  **Deposit API 500 Error:** Almost all tests involving the money path (deposits, withdrawals) were failing with a 500 error from the backend. The agent identified this as a critical blocker and started investigating the code in , while also running a  command to reproduce.
+-   **Last item agent was working:** The agent was implementing a large, multi-part P0 Fix Pack to address the top failures in the E2E test suite. The goal was to resolve several critical issues simultaneously to significantly increase the test pass rate. The fixes included:
+    1.  **P0-A (UI Crash):** Normalizing the  data in  to prevent  errors.
+    2.  **P0-B (Withdrawal Fail):** Making the request body optional for the  endpoint in  to fix  errors.
+    3.  **P0-C (Webhook Security):** Adding a CI/dev-safe bypass for webhook signature verification in .
+    4.  **P0-D (Stripe Mock):** Enhancing the mock Stripe checkout in  to return a  in the redirect URL, aligning it with the E2E test's expectations.
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent (to verify the player app UI at  is up and running) and Backend analysis (to debug the Deposit 500 error by examining backend logs during the E2E run).
+-   **Agent Testing Done:** Y (Local and partial testing agent validation for individual fixes, but no full E2E suite run).
+-   **Which testing method agent to use?** Frontend testing agent. The agent must trigger the full Playwright E2E test suite via the  workflow and analyze the new set of failures.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 -   **Issue 1:** E2E Playwright test suite is failing (P0)
--   **Issue 2:**  CI pipeline needs final verification (P1)
--   **Issue 3:** Critical Deployment Incompatibility & Verification (P0)
+-   **Issue 2:** UI crash due to  (P0)
+-   **Issue 3:** Finance  endpoint fails with 422 (P0)
+-   **Issue 4:** Webhook signature check fails tests (P0)
+-   **Issue 5:** Stripe mock flow is incomplete (P0)
 
 **Issues Detail:**
 -   **Issue 1:** E2E Playwright test suite is failing
-    -   **Description:** The main E2E test suite has a high failure rate (13/25 failed). The agent was working on two main causes.
-        -   **P0 Sub-Issue: Player App Not Running:** Many tests fail because they cannot connect to .
-        -   **P0 Sub-Issue: Deposit API returns HTTP 500:** All money path tests fail due to an internal server error when trying to make a deposit. The root cause is unknown.
-        -   **P1 Sub-Issue: Seed Data Missing:**  and  tests fail to find seeded data like the 'Classic 777' robot/game.
-        -   **P1 Sub-Issue: Brands API 404:** The frontend calls , which doesn't exist, causing noise in logs.
-    -   **Attempted fixes:**
-        -   For the Player App: The agent edited  to include a  service and modified the CI workflow to run  with the  flag. This has not been verified in a CI run.
-        -   For the Deposit 500: The agent started investigating  but has not yet found the root cause or applied a fix.
+    -   **Description:** The primary E2E suite has a high failure rate (11/25 failed). The latest set of applied fixes aims to address the top blockers, but verification is pending.
     -   **Next debug checklist:**
-        1.  **Verify Player App:** Trigger the E2E workflow and confirm  starts and is accessible on port 3001. Check the  output in the CI logs.
-        2.  **Debug Deposit 500:** Once the player app is up, the next blocker is the 500 error. The CI workflow was modified to dump backend logs on failure. Analyze the full stack trace for the deposit request to find the new root cause (it's no longer the  column issue).
-        3.  **Seed Data:** After the primary blockers are fixed, investigate the E2E seeding process to ensure games and robots are created before tests run.
-    -   **Why fix this issue and what will be achieved with the fix?** A green E2E suite is a mandatory gate for verifying the application's core functionality before go-live.
+        1.  Trigger the  workflow.
+        2.  Analyze the Playwright test summary to see which of the 11 failures have been resolved.
+        3.  For any remaining failures, download the  and  to analyze traces and backend logs.
+        4.  Prioritize any remaining  or hard UI crashes.
+    -   **Why fix this issue and what will be achieved with the fix?** A green E2E suite is the mandatory gate for Go-Live.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** None. This is the primary blocker.
 
--   **Issue 2:**  CI pipeline needs final verification
-    -   **Description:** The smoke tests in this pipeline are now passing (5/5), but the full verification of the environment hardening and schema drift fixes requires a stable, green run. The introduction of the  service and schema guards also needs to be confirmed as stable.
+-   **Issue 2:** UI crash due to 
+    -   **Description:** Multiple UI-driven tests (, ) are timing out because the admin frontend crashes immediately after loading capabilities.
+    -   **Attempted fixes:** The agent created  in addition to  in  to provide a safe-to-map array.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Frontend testing agent
+
+-   **Issue 3:** Finance  endpoint fails with 422
+    -   **Description:** The  test fails because the call to mark a withdrawal as paid fails with a  error, indicating a missing request body.
+    -   **Attempted fixes:** The agent modified  to make the payload for the  endpoint optional, providing default values in a CI/test environment.
     -   **Status:** USER VERIFICATION PENDING
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** NA
-    -   **Blocked on other issue:** Issue 1. All focus is on the E2E suite.
+    -   **Should Test frontend/backend/both after fix?** Backend testing agent (or full E2E).
 
--   **Issue 3:** Critical Deployment Incompatibility & Verification
-    -   **Description:** The original goal: verify that the app can be deployed on an external environment using environment variables. This is blocked until CI/E2E pipelines are green.
-    -   **Status:** BLOCKED
+-   **Issue 4:** Webhook signature check fails tests
+    -   **Description:** The  test fails with a  error.
+    -   **Attempted fixes:** The agent planned to modify  to bypass signature validation if  is  or .
+    -   **Status:** IN PROGRESS
     -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Backend testing agent (or full E2E).
+
+-   **Issue 5:** Stripe mock flow is incomplete
+    -   **Description:** While the Stripe mock now generates a , the  test fails because the redirect URL is missing the  that the test polls for.
+    -   **Attempted fixes:** The agent modified  to include the transaction ID in the mock checkout session's redirect URL.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** Issue 1 & 2.
 
 **In progress Task List**:
--   **Task 1:** Fix the E2E Playwright test suite (P0)
-    -   **Where to resume:** The agent has just applied edits to  and the E2E workflow () to start the . The next step is to trigger a CI run to verify if  is now accessible. Simultaneously, the agent must analyze the backend logs from the failed CI run to find the root cause of the  error.
-    -   **What will be achieved with this?** A green E2E run, which will unblock the final verification process.
+-   **Task 1:** Verify the P0 Fix Pack and stabilize the E2E test suite (P0)
+    -   **Where to resume:** The agent has just applied a large batch of fixes. The immediate next action is to run the  GitHub Actions workflow and analyze the new test results and logs to see which of the 11 failures are resolved.
+    -   **What will be achieved with this?** A significant reduction in E2E test failures, bringing the project closer to a green CI run.
     -   **Status:** IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** both
     -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
--   **(P0) External Verification (P1-B, P1-B-S):** Once CI/E2E pipelines are fixed, guide the user's team to execute the self-serve verification packs (, ).
--   **(P1) Seed Data for E2E:** Create a robust seeding mechanism for E2E tests to ensure entities like games and robots exist.
+-   **(P1) External Verification (P1-B, P1-B-S):** Once CI/E2E pipelines are fixed, guide the user's team to execute the self-serve verification packs (, ).
+-   **(P1) Fix Brands API 404:** The frontend calls , which doesn't exist, causing noise in logs. Add a stub endpoint.
 
 **Future Tasks:**
 -   **(P1) Growth & Monetization Track:** Evolve the bonus engine, set promo risk limits, and scale the affiliate system.
@@ -86,93 +104,92 @@ The  smoke tests are now passing after numerous fixes. However, the full  test s
 -   **(P2) Day-0 / Day-7 / Day-30 Ops Plan:** Define post-launch monitoring metrics and operational playbooks.
 
 **Completed work in this session**
-- **CI/CD Pipeline Hardening:**
-  - Added a dedicated  service to  to ensure migrations run before the backend starts.
-  - Added CI steps to  to hard-fail if the DB schema is not at the latest Alembic head or if critical columns are missing.
-- **Schema Drift Fixes (Alembic):**
-  - Created idempotent Alembic migrations to add missing columns to the  table (, ) and the  table (, , , , , and various JSON/hash fields).
-- **Backend Runtime Fixes:**
-  - Fixed multiple  errors by changing  to  in , , , and .
-  - Fixed  failure by adding a  endpoint and enforcing self-exclusion checks in the player login flow.
-  - Fixed  failure by relaxing the login rate-limit for .
-- **E2E Test Environment Fixes:**
-  - Patched  to clear old auth files and generate a fresh admin token for each run, fixing the session expired issue.
-  - Updated the frontend 401 handler to show a clearer Session invalid message.
+-   **P0 Deposit 500 Fix:** Resolved the critical  error by fixing  timezone-aware vs. naive mismatches in , , , and .
+-   **P0 Player App/CORS Fix:** Resolved  and CORS errors by correctly configuring the player app's  and the backend's  in the CI environment.
+-   **P0 CI Seeding Fix:** Resolved the  500 error by adding a series of idempotent Alembic migrations to fix schema drift in the  and  tables (adding , , , etc.).
+-   **P0 CI Smoke Test Fixes:** Resolved multiple test failures in the  suite by fixing  mismatches in  (for ) and  (for ).
+-   **CI Workflow Hardening:**
+    -   Made CI debug/evidence steps non-blocking ().
+    -   Added automatic capture of backend logs to a CI artifact on test failure.
+    -   Replaced fragile  commands with safer Python scripts for source code assertions.
+-   **Player Auth Fix:** Correctly implemented  for player token handling in the React player app.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1:** Seed data is missing for E2E tests (, ).
-    -   **Debug checklist:** Review the E2E test setup. There is no clear seeding step for games or robots. A pre-test script or fixture is needed to create this data.
-    -   **Why to solve this issue and what will be achieved with this?** This will enable a set of currently failing tests to pass and validate core game/robot functionality.
+-   **Issue 1:** Brands API returns 404
+    -   **Debug checklist:** The frontend makes a call to , which does not exist in the backend.
+    -   **Why to solve this issue and what will be achieved with this?** This will remove log noise and make the application's startup behavior cleaner.
     -   **Should Test frontend/backend/both after fix:** backend
     -   **Is recurring issue?** Y
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:**  failures.
--   **Recurrence count:** 3+
--   **Status:** RESOLVED. The new recurring issue is the fragility of the CI/E2E pipelines due to schema drift and environment inconsistencies.
+-   **Issue recurrence in previous fork:** CI/E2E pipeline fragility due to schema drift and environment inconsistencies.
+-   **Recurrence count:** High. This entire session was dedicated to battling this recurrence.
+-   **Status:** IN PROGRESS. While many root causes were fixed with guard migrations and hardening, the E2E suite is not yet stable.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **CI/CD Pipeline as Code:** The entire CI process is defined in YAML, including service dependencies and assertions.
--   **Docker Compose for CI:** Using  with profiles (, ) to manage services for different CI jobs.
--   **Declarative Migrations (Alembic):** Managing DB schema changes. The session highlighted the need for idempotent migrations (e.g., ) to prevent failures on reruns.
--   **Separate Migration Service:** A  service in Docker Compose was added to ensure the database schema is upgraded before the application backend starts, preventing race conditions.
--   **Playwright for E2E Testing:** A full suite of E2E tests runs against the deployed application in the CI environment.
+-   **Idempotent Alembic Migrations:** Using  to write migrations that only run if a schema change (like adding a column) is needed. This was critical to fixing schema drift.
+-   **CI/CD Hardening:** Making the CI pipeline more robust by adding non-blocking evidence-gathering steps and automatically capturing logs on failure.
+-   **Mocking in CI:** Implementing logic in application code (e.g., for Stripe payments) that activates only in a  or  environment to remove external dependencies from tests.
+-   **Systematic Debugging of Timezone Issues:** Consistently replacing  (aware) with  (naive) to match the  columns in PostgreSQL.
 
 **key DB schema**
--   **player:** Added  (FLOAT) and  (FLOAT).
--   **auditevent:** Added  (VARCHAR),  (VARCHAR),  (VARCHAR),  (VARCHAR),  (VARCHAR), and various JSONB and hash chain columns.
+-   **game:** Added  (VARCHAR),  (VARCHAR),  (BOOLEAN).
+-   **robotdefinition:** Added  (BOOLEAN),  (DATETIME),  (VARCHAR).
+-   **ledgertransaction, walletbalance:** New tables created via migration.
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   : Main CI workflow, heavily modified with new guard steps and service logic.
--   : Defines all services. A new  service was added, and dependencies were updated.
--   : New migration to fix schema drift.
--   : New migration to fix audit schema drift.
--   , : Patched to implement self-exclusion logic.
--   : Multiple model files patched to fix  timezone issues.
--   : Patched to force creation of a fresh auth token for every E2E run.
+-   : Heavily modified to harden CI steps, add seeding, and manage environment variables.
+-   : Modified to fix a  bug on withdrawal approval and make the  payload optional.
+-   : Modified to add a mock checkout session for CI environments.
+-   : Modified to create a  array to prevent crashes from .
+-   : New file to provide an idempotent seeding mechanism for E2E tests.
+-   New Alembic migrations in  for  and  schema drift.
+-   Multiple other backend files patched for  timezone issues (, , , ).
 
 **Areas that need refactoring**:
--   The E2E test suite lacks a coherent seeding strategy. Tests either seed their own data (leading to potential conflicts) or rely on a pre-existing state that is not guaranteed in CI. A centralized, pre-test seeding script is needed.
--   The  usage is inconsistent across the backend. While the immediate blockers were patched by using , a proper solution would be to use  columns in PostgreSQL and consistently use tz-aware datetimes in the application.
+-   ** usage:** The project is plagued by timezone-aware vs. naive  issues. While many have been patched by switching to , the root cause is the  column type. A future task should be a full audit and potential migration to  for consistency.
+-   **E2E Test Seeding:** The  endpoint is a good step, but the test suite would be more robust if each test file declared its own data dependencies and used fixtures, rather than relying on a single global seed step.
 
 **key api endpoints**
--    (NEW):  endpoint to set a player's self-exclusion.
--   :  endpoint modified to check for self-exclusion and return 403 if the player is excluded.
--   :  endpoint that is currently returning HTTP 500 during E2E tests.
+-    (NEW):  endpoint to seed test data (games, robots) for the CI environment.
+-   :  endpoint. The  error was fixed.
+-   :  endpoint that was failing with 500, now potentially failing with 422. Fix applied, pending verification.
+-   :  endpoint that fails with 422. Fix applied, pending verification.
+-   :  endpoint. Mock logic added for CI.
+-   :  endpoint. Still returns 404.
 
 **Critical Info for New Agent**
--   The primary goal is to get the **E2E test suite to pass**. Do not get distracted by other tasks.
--   The two main blockers are:
-    1.  **Player App Not Running ( REFUSED):** A fix has been *attempted* by adding the  service to the CI  command. You must **verify** this works in the next CI run.
-    2.  **Deposit API 500 Error:** This is the next critical blocker. The previous schema drift issues were fixed, so this is a *new* underlying problem. You must analyze the backend logs from the E2E run to find the stack trace and fix it.
--   The user is highly technical and expects a deterministic, evidence-based approach. Analyze logs, form a hypothesis, propose a fix, and then verify with a CI run.
--   The CI now includes a  service. The backend app will not start until migrations are complete.
--   The CI also has guard steps that will fail the job early if the DB schema is not at the latest Alembic head or if certain critical columns are missing.
+-   **Your primary goal is to get the E2E Playwright suite to pass.** It is currently failing 11/25 tests. Do not get sidetracked.
+-   **You are picking up right after a large P0 Fix Pack was applied.** These fixes target the most critical E2E failures (withdrawal , Stripe mock flow, and a frontend crash). Your **IMMEDIATE** next step is to run the  workflow and analyze the new test results.
+-   The user is highly technical and expects a deterministic, evidence-based approach. Analyze logs and test traces to form a hypothesis before applying a fix.
+-   The most common and recurring bug class in this project is  timezone mismatches (). If you see a new 500 error, this is the most likely cause. The standard fix has been to replace  with .
 
 **documents and test reports created in this job**
--   : Updated multiple times to reflect test outcomes.
 -   
 -   
+-   
+-   
+-   
+-   
+-    (heavily updated with test findings)
 
 **Last 10 User Messages and any pending HUMAN messages**
-The user has been providing the failing CI/E2E logs and is focused on getting the pipelines green. The user is highly technical, provides specific instructions, and expects the agent to analyze the logs and propose a concrete fix.
--   User confirmed the agent's plan to fix the  failure by adding the required endpoint and logic.
--   User provided logs showing  was still failing, but with a new root cause (schema drift).
--   User provided a detailed task list to fix the schema drift with a new guard migration.
--   User provided logs showing the guard step itself was failing due to a logic error.
--   User provided logs showing  and  failing due to  errors.
--   User provided logs showing  failing due to audit schema drift.
--   User provided E2E test results showing widespread failures and asked for a detailed analysis.
--   User confirmed the agent's plan to fix the two P0 E2E blockers (Player App down, Deposit 500) simultaneously.
+The user has been driving the process of debugging the CI/E2E pipeline.
+-   User provided logs and confirmed the agent's plan to fix a  in the workflow file.
+-   User provided new logs showing a  error and confirmed the agent's analysis of a  mismatch.
+-   User provided new logs showing E2E tests are now running but failing with multiple new errors.
+-   User requested a strong finish and asked the agent to continue with the plan.
+-   User confirmed the agent's detailed plan to fix the next 4 P0 blockers (UI crash,  422, webhook signature, and incomplete Stripe mock).
+-   The last user message was Evet — başlayabilirsin. (Yes — you can start.), giving the green light to implement the comprehensive P0 Fix Pack.
 
 **Project Health Check:**
--   **Broken:** The application is not verifiable due to a massively failing E2E test suite. The core money path is broken.
+-   **Broken:** The application is not verifiable. Although many foundational CI/CD issues and  bugs have been fixed, the E2E test suite is still failing heavily (11/25), which blocks the project's Go-Live.
 
 **3rd Party Integrations**
 -   **Stripe:** Payment processing.
@@ -182,14 +199,15 @@ The user has been providing the failing CI/E2E logs and is focused on getting th
 -   **APScheduler:** Background jobs.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES, a backend testing agent was used to verify the self-exclusion logic.
+-   **Testing agent used after significant changes:** YES. The agent used backend and frontend testing agents to verify individual fixes for  issues, CORS, CI seeding, and Stripe mocking.
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None. Existing test files were analyzed and fixed.
--   **Known regressions:** The E2E test suite is the main regression. While individual components have been fixed, the integrated environment is not stable.
+-   **Test files created:** None. Existing test files were analyzed.
+-   **Known regressions:** The E2E test suite remains the main regression. Failures have shifted from infrastructure issues to more subtle application logic and frontend/backend contract mismatches.
 
 **Credentials to test flow:**
--   The E2E tests use  /  for admin login, seeded via a CI step.
--   Player accounts are registered dynamically within the tests.
+-   Admin:  / 
+-   Player accounts are registered dynamically within the E2E tests.
 
 **What agent forgot to execute**
-- The agent has been diligent in following the user's lead. However, the last set of actions to fix the two main E2E blockers ( not running and ) was a series of rapid edits across workflow and compose files. The agent has not yet had a chance to run the CI and verify if these fixes work or if they introduced new issues. The immediate next step must be to run the E2E workflow and analyze the new result.</analysis>
+-   The agent hasn't had a chance to run the full CI/E2E pipeline after applying the last major P0 Fix Pack. This is the most critical pending action.
+-   The agent has not yet implemented the fix for . This was part of the approved plan but was not included in the last set of file edits.</analysis>
