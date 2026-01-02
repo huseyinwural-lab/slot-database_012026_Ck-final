@@ -152,12 +152,6 @@ const WalletPage = () => {
          {
            amount: parseFloat(depositAmount),
            currency: 'USD',
-         },
-         {
-           // Avoid accidental auth failures in UI tests due to stale tokens.
-           // Backend uses current_player dependency for Stripe/Adyen endpoints,
-           // but in CI we rely on mock mode; let the call proceed.
-           headers: { Authorization: null },
          }
        );
        
