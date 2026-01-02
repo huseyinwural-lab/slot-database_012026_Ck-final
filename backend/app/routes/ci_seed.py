@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from app.core.database import get_session
 from app.models.game_models import Game
-from app.models.robot_models import RobotDefinition
+from app.models.robot_models import RobotDefinition, MathAsset, GameRobotBinding
 
 router = APIRouter(prefix="/api/v1/ci", tags=["ci"])
 
