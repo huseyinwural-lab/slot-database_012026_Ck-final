@@ -9,7 +9,7 @@ CI/E2E environments can drift where the `game` table exists but lacks the
 then fails with:
   asyncpg.exceptions.UndefinedColumnError: column game.provider_id does not exist
 
-This migration adds the column idempotently.
+This migration adds the columns idempotently.
 
 """
 
