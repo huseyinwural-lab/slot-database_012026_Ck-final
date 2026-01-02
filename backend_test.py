@@ -2208,9 +2208,9 @@ async def main():
         success = await tz_suite.run_all_tests()
         return success
     elif len(sys.argv) > 1 and sys.argv[1] == "ci_seed":
-        # Run only CI Seed verification tests
-        print("Running CI Seed verification tests only...")
-        ci_suite = CISeedVerificationTestSuite()
+        # Run only CI Seed endpoint tests
+        print("Running CI Seed endpoint tests only...")
+        ci_suite = CISeedEndpointTestSuite()
         success = await ci_suite.run_all_tests()
         return success
     else:
