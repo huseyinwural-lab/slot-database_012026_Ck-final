@@ -1330,6 +1330,184 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class BAUw12BlockerTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_audit_events_endpoint(self) -> bool:
+        """Test GET /api/v1/audit/events?since_hours=24&resource_type=bonus_grant&action=CRM_OFFER_GRANT"""
+        try:
+            if not self.admin_token:
+                self.log_result("Audit Events Endpoint", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                params = {
+                    "since_hours": 24,
+                    "resource_type": "bonus_grant",
+                    "action": "CRM_OFFER_GRANT"
+                }
+                
+                response = await client.get(
+                    f"{self.base_url}/audit/events",
+                    params=params,
+                    headers=headers
+                )
+                
+                # Check status code
+                if response.status_code != 200:
+                    self.log_result("Audit Events Endpoint", False, 
+                                  f"Status: {response.status_code}, Response: {response.text[:200]}")
+                    return False
+                
+                # Get first ~200 chars of response body
+                response_text = response.text
+                response_preview = response_text[:200] if len(response_text) > 200 else response_text
+                
+                self.log_result("Audit Events Endpoint", True, 
+                              f"Status: 200, Response preview: {response_preview}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Audit Events Endpoint", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_audit_export_endpoint(self) -> bool:
+        """Test GET /api/v1/audit/export?since_hours=24"""
+        try:
+            if not self.admin_token:
+                self.log_result("Audit Export Endpoint", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                params = {"since_hours": 24}
+                
+                response = await client.get(
+                    f"{self.base_url}/audit/export",
+                    params=params,
+                    headers=headers
+                )
+                
+                # Check status code
+                if response.status_code != 200:
+                    self.log_result("Audit Export Endpoint", False, 
+                                  f"Status: {response.status_code}, Response: {response.text[:200]}")
+                    return False
+                
+                # Check if response is CSV format
+                response_text = response.text
+                response_preview = response_text[:200] if len(response_text) > 200 else response_text
+                
+                # Basic CSV validation - should have headers or comma-separated values
+                is_csv = ("," in response_text or 
+                         response_text.startswith("id,") or 
+                         "Content-Type" in str(response.headers) and "csv" in str(response.headers.get("Content-Type", "")))
+                
+                if not is_csv:
+                    self.log_result("Audit Export Endpoint", False, 
+                                  f"Status: 200 but response doesn't appear to be CSV. Response preview: {response_preview}")
+                    return False
+                
+                self.log_result("Audit Export Endpoint", True, 
+                              f"Status: 200, CSV response preview: {response_preview}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Audit Export Endpoint", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete BAU w12 blocker test suite"""
+        print("🚀 Starting BAU w12 Blocker Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_admin_auth():
+            print("\n❌ Authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: Audit events endpoint
+        test_results.append(await self.test_audit_events_endpoint())
+        
+        # Test 2: Audit export endpoint
+        test_results.append(await self.test_audit_export_endpoint())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 BAU w12 BLOCKER TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All BAU w12 blocker tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class CRMBonusGrantRegressionTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
