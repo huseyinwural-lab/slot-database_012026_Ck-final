@@ -2758,26 +2758,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run CI seed endpoint with game.type guard verification"""
-    print("🎯 CI Seed Endpoint with Game.Type Guard Test Suite Runner")
+    """Main test runner - Run CRM FIRST_DEPOSIT bonus grant timezone bug regression test"""
+    print("🎯 CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression Test Suite Runner")
     print("=" * 80)
     
-    # Run CI seed endpoint with game.type guard test suite
-    ci_seed_type_suite = CISeedGameTypeTestSuite()
-    ci_seed_type_success = await ci_seed_type_suite.run_all_tests()
+    # Run CRM bonus grant regression test suite
+    crm_regression_suite = CRMBonusGrantRegressionTestSuite()
+    crm_regression_success = await crm_regression_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if ci_seed_type_success else "❌ FAIL"
-    print(f"{status}: CI Seed Endpoint with Game.Type Guard")
+    status = "✅ PASS" if crm_regression_success else "❌ FAIL"
+    print(f"{status}: CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression")
     
-    if ci_seed_type_success:
-        print("🎉 CI seed endpoint with game.type guard test suite PASSED!")
+    if crm_regression_success:
+        print("🎉 CRM FIRST_DEPOSIT bonus grant timezone bug regression test suite PASSED!")
         return True
     else:
-        print("⚠️  CI seed endpoint with game.type guard test suite failed.")
+        print("⚠️  CRM FIRST_DEPOSIT bonus grant timezone bug regression test suite failed.")
         return False
 
 
