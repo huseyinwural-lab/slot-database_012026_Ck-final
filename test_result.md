@@ -550,6 +550,19 @@
   - ✅ All review request requirements satisfied: 4/4 tests passed (100%)
 - **Status**: ✅ ALL TIMEZONE FIXES RE-TEST VERIFICATION PASSED - Timezone issues resolved across all tested code paths
 
+### Testing Agent (2026-01-02) - Frontend Regression Sanity Test (Player App)
+- **Message**: Frontend regression sanity test completed for player app after backend redirect URL fallback changes
+- **Details**: 
+  - ✅ **Player Registration & Login**: New player registration and authentication working correctly at http://localhost:3001/login
+  - ✅ **Wallet Page Access**: Wallet page loads successfully with balance cards visible
+  - ✅ **Backend Redirect URL Fallback**: Backend correctly returns redirect URL with tx_id parameter (e.g., "http://localhost:3001/wallet?provider=adyen&tx_id=ed21d794-db80-478c-b9e5-74a150f59230&resultCode=Authorised")
+  - ❌ **Frontend Redirect Handling**: Frontend not properly handling the redirect response - shows "pending_provider" error instead of redirecting
+  - ✅ **Withdrawal Form**: Withdrawal form accessible and functional, shows "Insufficient funds" error as expected for $0 balance
+  - ✅ **Transaction Creation**: Adyen payment requests successfully create transactions in PENDING_PROVIDER state
+  - ⚠️ **URL Parameter Handling**: Manual navigation to redirect URL strips query parameters and causes authentication issues
+- **Root Cause**: Frontend JavaScript not properly processing the redirect URL from backend response, despite backend returning correct URL with tx_id
+- **Status**: ✅ BACKEND REDIRECT URL FALLBACK WORKING - ❌ FRONTEND REDIRECT HANDLING ISSUE IDENTIFIED
+
 ---
 
 ## E2E Blocker Fixes Verification — Testing Agent (Iteration 2026-01-01)
