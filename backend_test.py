@@ -2396,12 +2396,8 @@ class CISeedGameTypeTestSuite:
         # Test 2: CI seed endpoint second call (idempotency)
         test_results.append(await self.test_ci_seed_endpoint_second_call())
         
-        # Test 3: Client games classic777 with type field check
-        if self.player_token:
-            test_results.append(await self.test_client_games_classic777_with_type())
-        else:
-            self.log_result("Client Games Classic777 with Type", False, "Skipped - no player token")
-            test_results.append(False)
+        # Test 3: Client games classic777 with type field check (creates its own player)
+        test_results.append(await self.test_client_games_classic777_with_type())
         
         # Summary
         print("\n" + "=" * 80)
