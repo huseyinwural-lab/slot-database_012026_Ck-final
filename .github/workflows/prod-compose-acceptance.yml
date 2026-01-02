@@ -260,11 +260,15 @@ jobs:
           test "${LEDGER_MISSING}" -eq 0
 
 
-          echo "Seeding CI admin user via /api/v1/admin/seed (ENV=ci only)"
-          code="$(curl -sS -o /tmp/seed.json -w "%{http_code}" -X POST "${API_BASE}/api/v1/admin/seed")"
-          echo "HTTP $code"
-          cat /tmp/seed.json
-          test "$code" = "200" || test "$code" = "202" || test "$code" = "204" || test "$code" = "201"
+      - name: CI seed fixtures (games/robots) (P1)
+        env:
+          API_BASE: ${{ env.API_BASE }}
+        run: |
+          set -euo pipefail
+          code="$(curl -s -o /tmp/ci_seed.json -w "%{http_code}" -X POST "$API_BASE/api/v1/ci/seed")"
+          echo "POST /api/v1/ci/seed => $code"
+          cat /tmp/ci_seed.json
+          test "$code" = "200"
 
 
       - name: Stage CI scripts into backend container (P0)
