@@ -4,7 +4,8 @@ import api from '../services/api';
 export const CapabilitiesContext = createContext();
 
 export const CapabilitiesProvider = ({ children }) => {
-  const [capabilities, setCapabilities] = useState(null);
+  const [capabilitiesObject, setCapabilitiesObject] = useState({});
+  const [capabilitiesList, setCapabilitiesList] = useState([]);
   const [isOwner, setIsOwner] = useState(false);
   const [tenantRole, setTenantRole] = useState(null);
   const [tenantName, setTenantName] = useState('');
