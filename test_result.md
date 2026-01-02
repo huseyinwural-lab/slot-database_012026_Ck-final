@@ -558,6 +558,15 @@
   - ✅ **Backend Redirect URL Fallback**: Backend correctly returns redirect URL with tx_id parameter (e.g., "http://localhost:3001/wallet?provider=adyen&tx_id=ed21d794-db80-478c-b9e5-74a150f59230&resultCode=Authorised")
   - ❌ **Frontend Redirect Handling**: Frontend not properly handling the redirect response - shows "pending_provider" error instead of redirecting
   - ✅ **Withdrawal Form**: Withdrawal form accessible and functional, shows "Insufficient funds" error as expected for $0 balance
+
+## CI Seed 500 Fix (Game table schema drift) — Iteration 2026-01-02
+- **RCA**: CI Postgres had `game` table missing columns referenced by SQLModel (`provider_id`, later also `external_id`). `/api/v1/ci/seed` query failed with asyncpg `UndefinedColumnError`.
+- **Fix**: Added Alembic guard migration `20260102_01_game_provider_id_guard.py` to idempotently add missing `provider_id` and `external_id` columns (plus index) when absent.
+- **Verification**:
+  - Local: `POST /api/v1/ci/seed` returns 200.
+  - Backend testing agent: seed endpoint returns 200 and is idempotent; client-games contains `classic777`.
+- **CI expectation**: `CI seed fixtures (games/robots)` step should now return 200.
+
   - ✅ **Transaction Creation**: Adyen payment requests successfully create transactions in PENDING_PROVIDER state
   - ⚠️ **URL Parameter Handling**: Manual navigation to redirect URL strips query parameters and causes authentication issues
 - **Root Cause**: Frontend JavaScript not properly processing the redirect URL from backend response, despite backend returning correct URL with tx_id
