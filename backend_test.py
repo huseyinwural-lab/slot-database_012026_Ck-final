@@ -3306,26 +3306,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run BAU w12 blocker verification test"""
-    print("🎯 BAU w12 Blocker Verification Test Suite Runner")
+    """Main test runner - Run P0 backend regression test suite"""
+    print("🎯 P0 Backend Regression Test Suite Runner")
     print("=" * 80)
     
-    # Run BAU w12 blocker test suite
-    bau_w12_suite = BAUw12BlockerTestSuite()
-    bau_w12_success = await bau_w12_suite.run_all_tests()
+    # Run P0 regression test suite (primary focus for this review request)
+    p0_regression_suite = P0RegressionTestSuite()
+    p0_regression_success = await p0_regression_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if bau_w12_success else "❌ FAIL"
-    print(f"{status}: BAU w12 Blocker Verification")
+    status = "✅ PASS" if p0_regression_success else "❌ FAIL"
+    print(f"{status}: P0 Backend Regression Tests")
     
-    if bau_w12_success:
-        print("🎉 BAU w12 blocker verification test suite PASSED!")
+    if p0_regression_success:
+        print("🎉 P0 backend regression test suite PASSED!")
         return True
     else:
-        print("⚠️  BAU w12 blocker verification test suite failed.")
+        print("⚠️  P0 backend regression test suite failed.")
         return False
 
 
