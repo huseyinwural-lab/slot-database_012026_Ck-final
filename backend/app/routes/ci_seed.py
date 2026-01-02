@@ -85,17 +85,20 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
     # Robot
     stmt = select(RobotDefinition).where(RobotDefinition.name == "Classic 777")
     robot = (await session.execute(stmt)).scalars().first()
-    if not robot:
-        robot_config = {
-            "preset": "classic777",
-            "lines": 20,
-            "reelset_ref": reel_ref,
-            "paytable_ref": pay_ref,
-        }
-        import hashlib
-        import json
 
-        robot_hash = hashlib.sha256(json.dumps(robot_config, sort_keys=True).encode()).hexdigest()
+    robot_config = {
+        "preset": "classic777",
+        "lines": 20,
+        "reelset_ref": reel_ref,
+        "paytable_ref": pay_ref,
+    }
+
+    import hashlib
+    import json
+
+    robot_hash = hashlib.sha256(json.dumps(robot_config, sort_keys=True).encode()).hexdigest()
+
+    if not robot:
         robot = RobotDefinition(
             name="Classic 777",
             schema_version="1.0",
@@ -104,6 +107,11 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
             is_active=True,
         )
         session.add(robot)
+    else:
+        # Ensure existing robot (from earlier seeds) has required refs
+        if (robot.config or {}).get("reelset_ref") != reel_ref or (robot.config or {}).get("paytable_ref") != pay_ref:
+            robot.config = robot_config
+            robot.config_hash = robot_hash
 
     await session.flush()
 
