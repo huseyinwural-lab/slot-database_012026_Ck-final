@@ -851,3 +851,36 @@
   - ✅ **Payment Status**: Shows "Verifying payment..." status as expected
   - ⚠️ **Minor**: Some 500 Internal Server Error messages in console (non-blocking, likely payment status polling)
 - **Status**: ✅ ALL STRIPE DEPOSIT TESTS PASSED - Player app Stripe integration working correctly
+
+### Testing Agent (2026-01-02) - E2E Playwright Test Suite Results (Payment/Wallet Focus)
+- **Message**: E2E Playwright test suite execution completed with focus on payment/wallet regressions after latest fixes
+- **Environment Variables Set**:
+  - E2E_API_BASE=http://127.0.0.1:8001
+  - E2E_BASE_URL=http://localhost:3000
+  - WEBHOOK_TEST_SECRET=ci_webhook_test_secret
+  - PLAYER_APP_URL=http://localhost:3001
+- **Test Results Summary**:
+  - ✅ **money-path.spec.ts**: ALL 4 TESTS PASSED (19.8s) - Deterministic webhook signature support working correctly
+  - ✅ **adyen-deposit.spec.ts**: PASSED (14.0s) - Adyen deposit flow working
+  - ✅ **release-smoke-money-loop.spec.ts**: PASSED (19.0s) - Full money cycle working
+  - ✅ **crm-aff-matrix.spec.ts**: ALL 4 TESTS PASSED (25.4s) - CRM and affiliates working
+  - ❌ **stripe-deposit.spec.ts**: FAILED - Payment Successful message not visible, 500 Internal Server Errors during webhook simulation
+  - ❌ **player-wallet-ux.spec.ts**: TIMEOUT - Pay Now button not found/clickable (60s timeout)
+  - ❌ **finance-withdrawals-smoke.spec.ts**: FAILED - 422 error "Field required" for mark-paid endpoint body
+  - ❌ **payout-real-provider.spec.ts**: TIMEOUT - Invalid login URL /admin/login (should be /login)
+  - ❌ **smart-game-loop.spec.ts**: FAILED - Spin API call not successful (backend 4xx/5xx)
+  - ❌ **robot-admin-ops.spec.ts**: FAILED - Spin API call not successful (backend 4xx/5xx)
+  - ❌ **tenant-policy.spec.ts**: TIMEOUT - Payments Policy tab not responding, brands.map error in frontend
+  - ⏭️ **finance-withdrawals.spec.ts**: ALL 6 TESTS SKIPPED
+  - ⏸️ **game-loop.spec.ts**: TIMEOUT (120s) - Test hanging
+- **Key Findings**:
+  - **Webhook signature support**: ✅ WORKING - money-path tests confirm deterministic webhook signatures are functioning
+  - **Payment regressions**: ❌ STRIPE ISSUES - 500 errors during webhook simulation, UI not showing success messages
+  - **Backend API issues**: Multiple game/spin endpoints returning 4xx/5xx errors
+  - **Frontend issues**: brands.map error, timeout issues with UI interactions
+  - **Contract mismatches**: mark-paid endpoint expecting body field, invalid admin login URL
+- **Trace Files Available**:
+  - stripe-deposit trace: test-results/stripe-deposit-Stripe-Depo-be661-ate-after-simulated-webhook-chromium/trace.zip
+  - player-wallet-ux trace: test-results/player-wallet-ux-Player-Wa-16218-history-and-balance-updates-chromium/trace.zip
+  - finance-withdrawals-smoke trace: test-results/finance-withdrawals-smoke--a88f1-mark-paid-state-invariants--chromium/trace.zip
+- **Status**: ✅ WEBHOOK SIGNATURE FIXES VERIFIED - ❌ MULTIPLE PAYMENT/WALLET REGRESSIONS IDENTIFIED
