@@ -67,8 +67,8 @@ export const CapabilitiesProvider = ({ children }) => {
   };
 
   const hasFeature = (featureKey) => {
-    if (!capabilities) return false;
-    return capabilities[featureKey] === true;
+    if (!capabilitiesObject) return false;
+    return capabilitiesObject[featureKey] === true;
   };
 
   return (
