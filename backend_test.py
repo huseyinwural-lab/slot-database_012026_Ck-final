@@ -1600,9 +1600,6 @@ class P0RegressionTestSuite:
                 session_id = data.get("session_id")
                 url = data.get("url", "")
                 
-                # Debug: print the full response to understand the structure
-                print(f"DEBUG: Stripe checkout response: {data}")
-                
                 # Verify session_id starts with cs_test_
                 if not session_id or not session_id.startswith("cs_test_"):
                     self.log_result("Stripe Mock Checkout", False, 
