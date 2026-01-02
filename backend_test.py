@@ -1330,6 +1330,326 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class CRMBonusGrantRegressionTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.test_player_id = None
+        self.test_player_email = None
+        self.test_player_password = None
+        self.campaign_id = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def create_deposit_match_bonus_campaign(self) -> bool:
+        """Create a deposit_match bonus campaign and set status active"""
+        try:
+            if not self.admin_token:
+                self.log_result("Create Bonus Campaign", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Create campaign
+                campaign_data = {
+                    "name": f"CRM Test Deposit Match {uuid.uuid4().hex[:8]}",
+                    "type": "deposit_match",
+                    "config": {
+                        "multiplier": 1.0,
+                        "min_deposit": 10.0,
+                        "max_bonus": 100.0,
+                        "wagering_mult": 35,
+                        "expiry_hours": 24
+                    },
+                    "start_date": None,
+                    "end_date": None
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/bonuses/campaigns",
+                    json=campaign_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Create Bonus Campaign", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.campaign_id = data.get("id")
+                if not self.campaign_id:
+                    self.log_result("Create Bonus Campaign", False, "No campaign ID in response")
+                    return False
+                
+                self.log_result("Create Bonus Campaign", True, f"Campaign created with ID: {self.campaign_id}")
+                
+                # Set status to active
+                status_data = {"status": "active"}
+                
+                response = await client.post(
+                    f"{self.base_url}/bonuses/campaigns/{self.campaign_id}/status",
+                    json=status_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Activate Bonus Campaign", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                self.log_result("Activate Bonus Campaign", True, "Campaign status set to active")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create Bonus Campaign", False, f"Exception: {str(e)}")
+            return False
+    
+    async def register_new_player(self) -> bool:
+        """Register a new player"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Generate unique player credentials
+                self.test_player_email = f"crmtest_{uuid.uuid4().hex[:8]}@casino.com"
+                self.test_player_password = "CRMTestPlayer123!"
+                
+                player_data = {
+                    "email": self.test_player_email,
+                    "username": f"crmtest_{uuid.uuid4().hex[:8]}",
+                    "password": self.test_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Register New Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.test_player_id = data.get("player_id")
+                if not self.test_player_id:
+                    self.log_result("Register New Player", False, "No player ID in response")
+                    return False
+                
+                self.log_result("Register New Player", True, f"Player registered with ID: {self.test_player_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Register New Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def call_mockpsp_webhook(self) -> bool:
+        """Call POST /api/v1/payments/webhook/mockpsp with event_type=deposit_captured"""
+        try:
+            if not self.test_player_id:
+                self.log_result("MockPSP Webhook", False, "No player ID available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Generate unique transaction identifiers
+                tx_id = str(uuid.uuid4())
+                provider_event_id = f"mockpsp_evt_{uuid.uuid4().hex[:12]}"
+                
+                webhook_payload = {
+                    "event_type": "deposit_captured",
+                    "tenant_id": "default_casino",
+                    "player_id": self.test_player_id,
+                    "tx_id": tx_id,
+                    "amount": 50.0,
+                    "currency": "USD",
+                    "provider": "mockpsp",
+                    "provider_ref": f"mockpsp_ref_{uuid.uuid4().hex[:8]}",
+                    "provider_event_id": provider_event_id,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/payments/webhook/mockpsp",
+                    json=webhook_payload
+                )
+                
+                # Verify webhook returns 200 (no 500)
+                if response.status_code == 500:
+                    self.log_result("MockPSP Webhook", False, 
+                                  f"Webhook returned 500 error (timezone bug): {response.text}")
+                    return False
+                
+                if response.status_code != 200:
+                    self.log_result("MockPSP Webhook", False, 
+                                  f"Webhook returned unexpected status {response.status_code}: {response.text}")
+                    return False
+                
+                data = response.json()
+                webhook_status = data.get("status")
+                
+                if webhook_status != "ok":
+                    self.log_result("MockPSP Webhook", False, 
+                                  f"Webhook status not 'ok': {webhook_status}")
+                    return False
+                
+                self.log_result("MockPSP Webhook", True, 
+                              f"Webhook processed successfully - Status: {response.status_code}, Response: {data}")
+                return True
+                
+        except Exception as e:
+            self.log_result("MockPSP Webhook", False, f"Exception: {str(e)}")
+            return False
+    
+    async def verify_bonus_grant_created(self) -> bool:
+        """Verify that a BonusGrant row was inserted via available endpoint or DB query"""
+        try:
+            if not self.admin_token or not self.test_player_id:
+                self.log_result("Verify Bonus Grant", False, "Missing admin token or player ID")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Query player bonuses to verify grant was created
+                response = await client.get(
+                    f"{self.base_url}/bonuses/player/{self.test_player_id}",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Verify Bonus Grant", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                bonuses = response.json()
+                
+                if not bonuses:
+                    self.log_result("Verify Bonus Grant", False, "No bonus grants found for player")
+                    return False
+                
+                # Look for a bonus grant related to our campaign
+                matching_grant = None
+                for bonus in bonuses:
+                    if bonus.get("campaign_id") == self.campaign_id and bonus.get("status") == "active":
+                        matching_grant = bonus
+                        break
+                
+                if not matching_grant:
+                    self.log_result("Verify Bonus Grant", False, 
+                                  f"No active bonus grant found for campaign {self.campaign_id}")
+                    return False
+                
+                grant_amount = matching_grant.get("amount_granted", 0)
+                grant_status = matching_grant.get("status")
+                grant_id = matching_grant.get("id")
+                
+                self.log_result("Verify Bonus Grant", True, 
+                              f"BonusGrant created successfully - ID: {grant_id}, Amount: {grant_amount}, Status: {grant_status}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Verify Bonus Grant", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete CRM FIRST_DEPOSIT bonus grant regression test suite"""
+        print("🚀 Starting CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Run all tests in sequence as per review request
+        test_results = []
+        
+        # Step 1: Login admin
+        test_results.append(await self.setup_admin_auth())
+        if not self.admin_token:
+            print("\n❌ Admin authentication failed. Cannot proceed with tests.")
+            return False
+        
+        # Step 2: Create a deposit_match bonus campaign and set status active
+        test_results.append(await self.create_deposit_match_bonus_campaign())
+        if not self.campaign_id:
+            print("\n❌ Bonus campaign creation failed. Cannot proceed with tests.")
+            return False
+        
+        # Step 3: Register a new player
+        test_results.append(await self.register_new_player())
+        if not self.test_player_id:
+            print("\n❌ Player registration failed. Cannot proceed with tests.")
+            return False
+        
+        # Step 4: Call POST /api/v1/payments/webhook/mockpsp with event_type=deposit_captured
+        test_results.append(await self.call_mockpsp_webhook())
+        
+        # Step 5: Verify webhook returns 200 (no 500) and confirm BonusGrant row was inserted
+        test_results.append(await self.verify_bonus_grant_created())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 CRM BONUS GRANT REGRESSION TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All CRM FIRST_DEPOSIT bonus grant regression tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class CISeedEndpointTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
