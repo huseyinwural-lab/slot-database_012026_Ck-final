@@ -29,6 +29,7 @@ class CRMEngine:
         if campaign:
             # Grant
             # Use logic from Bonus Route/Service (duplicated here for simplicity/speed)
+            now = datetime.utcnow()
             grant = BonusGrant(
                 id=str(uuid.uuid4()),
                 tenant_id=tenant_id,
@@ -38,8 +39,8 @@ class CRMEngine:
                 initial_balance=50.0,
                 wagering_target=50.0 * 35,
                 status="active",
-                granted_at=datetime.now(timezone.utc),
-                expires_at=datetime.now(timezone.utc) + timedelta(hours=24)
+                granted_at=now,
+                expires_at=now + timedelta(hours=24),
             )
             session.add(grant)
             
