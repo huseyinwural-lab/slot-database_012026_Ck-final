@@ -246,7 +246,7 @@ async def review_withdrawal(
 async def mark_withdrawal_paid(
     request: Request,
     tx_id: str,
-    payload: dict = Body(...),
+    payload: dict | None = Body(None),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
