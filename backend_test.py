@@ -1330,10 +1330,9 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
-class CISeedVerificationTestSuite:
+class CISeedEndpointTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
-        self.admin_token = None
         self.player_token = None
         self.test_player_email = None
         self.test_player_password = None
