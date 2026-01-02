@@ -75,7 +75,8 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
             "1": 10,
             "2": 20,
         }
-        import hashlib, json
+        import hashlib
+        import json
 
         pay_hash = hashlib.sha256(json.dumps(pay_content, sort_keys=True).encode()).hexdigest()
         pay_asset = MathAsset(ref_key=pay_ref, type="paytable", version="1.0", content=pay_content, content_hash=pay_hash)
