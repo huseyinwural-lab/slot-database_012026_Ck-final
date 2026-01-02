@@ -47,7 +47,8 @@ export const CapabilitiesProvider = ({ children }) => {
       const data = response.data;
 
       console.log('✅ Capabilities fetched:', data);
-      setCapabilities(data.features || {});
+      setCapabilitiesObject(data.features || {});
+      setCapabilitiesList(Object.entries(data.features || {}).map(([key, value]) => ({ key, value })));
       setIsOwner(data.is_owner || false);
       setTenantRole(data.tenant_role || null);
       setTenantName(data.tenant_name || 'Casino');
@@ -56,7 +57,8 @@ export const CapabilitiesProvider = ({ children }) => {
       console.error('Failed to fetch capabilities:', error);
       // If token exists but capabilities fail (e.g., 403/503 due to tenant context),
       // keep the user authenticated; just mark capabilities as empty.
-      setCapabilities({});
+      setCapabilitiesObject({});
+      setCapabilitiesList([]);
       setIsOwner(false);
     } finally {
       setLoading(false);
