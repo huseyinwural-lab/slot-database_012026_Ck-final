@@ -1391,7 +1391,10 @@ class CRMBonusGrantRegressionTestSuite:
                 return False
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                headers = {
+                    "Authorization": f"Bearer {self.admin_token}",
+                    "X-Reason": "CRM regression test campaign creation"
+                }
                 
                 # Create campaign
                 campaign_data = {
@@ -1408,14 +1411,10 @@ class CRMBonusGrantRegressionTestSuite:
                     "end_date": None
                 }
                 
-                # Add reason as query parameter
-                params = {"reason": "CRM regression test campaign creation"}
-                
                 response = await client.post(
                     f"{self.base_url}/bonuses/campaigns",
                     json=campaign_data,
-                    headers=headers,
-                    params=params
+                    headers=headers
                 )
                 
                 if response.status_code != 200:
