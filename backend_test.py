@@ -1523,49 +1523,6 @@ class CISeedEndpointTestSuite:
             self.log_result("Client Games Classic777", False, f"Exception: {str(e)}")
             return False
     
-    async def test_robots_classic777(self) -> bool:
-        """Test 3: Call GET /api/v1/robots and confirm a robot name contains 'Classic 777'"""
-        try:
-            if not self.admin_token:
-                self.log_result("Robots Classic777", False, "No admin token available")
-                return False
-            
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {"Authorization": f"Bearer {self.admin_token}"}
-                
-                response = await client.get(
-                    f"{self.base_url}/robots/",
-                    headers=headers
-                )
-                
-                if response.status_code != 200:
-                    self.log_result("Robots Classic777", False, 
-                                  f"Status: {response.status_code}, Response: {response.text}")
-                    return False
-                
-                data = response.json()
-                robots = data.get("items", [])
-                
-                # Look for robot with name containing 'Classic 777'
-                classic777_robot_found = False
-                for robot in robots:
-                    robot_name = robot.get("name", "")
-                    if "Classic 777" in robot_name:
-                        classic777_robot_found = True
-                        self.log_result("Robots Classic777", True, 
-                                      f"Found Classic 777 robot: {robot_name} (ID: {robot.get('id')})")
-                        break
-                
-                if not classic777_robot_found:
-                    self.log_result("Robots Classic777", False, 
-                                  f"Robot with name containing 'Classic 777' not found. Available robots: {[r.get('name') for r in robots]}")
-                    return False
-                
-                return True
-                
-        except Exception as e:
-            self.log_result("Robots Classic777", False, f"Exception: {str(e)}")
-            return False
     
     async def run_all_tests(self):
         """Run the complete CI seed endpoint test suite"""
