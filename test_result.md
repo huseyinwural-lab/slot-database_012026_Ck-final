@@ -638,6 +638,17 @@
   - ✅ Game with external_id=classic777 successfully created and accessible via client-games endpoint
   - ✅ Robot with name 'Classic 777' successfully created and accessible via robots endpoint
   - ✅ All endpoints tested are working correctly for E2E test requirements
+
+## CI Seed 500 Fix v3 (Game.is_active + RobotDefinition drift) — Iteration 2026-01-02
+- **RCA**: CI Postgres drift continued: `game.is_active` missing (and likely `robotdefinition.is_active/updated_at/config_hash` missing next), causing `/api/v1/ci/seed` to 500 due to SQLAlchemy selecting all model columns.
+- **Fix**:
+  - Added `20260102_03_game_is_active_guard.py` (Revises `20260102_02`): idempotently adds `game.is_active` with backfill TRUE and server_default TRUE.
+  - Added `20260102_04_robotdefinition_guard.py` (Revises `20260102_03`): idempotently adds `robotdefinition.is_active`, `updated_at`, `config_hash` with deterministic backfills.
+- **Head**: Alembic head is now `20260102_04`.
+- **Local evidence**:
+  - `GET /api/ready` shows `alembic.head=20260102_04`.
+  - `POST /api/v1/ci/seed` returns 200.
+
   - ✅ Authentication flows (admin and player) working correctly
   - ✅ No critical errors or blocking issues found
 - **Status**: ✅ ALL CI SEED VERIFICATION TESTS PASSED - E2E test dependencies verified working correctly
