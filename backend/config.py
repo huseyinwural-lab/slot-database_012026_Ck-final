@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     player_app_url: str = "http://localhost:3001"
 
     # Redis / Queue
+
+    stripe_mock: bool = False
+
     # Default is localhost to avoid docker-compose host coupling.
     # In prod/staging, Redis is OPTIONAL unless REDIS_REQUIRED=true.
     redis_url: str = "redis://localhost:6379/0"
