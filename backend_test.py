@@ -2232,6 +2232,12 @@ async def main():
         tz_suite = TimezoneFixesTestSuite()
         success = await tz_suite.run_all_tests()
         return success
+    elif len(sys.argv) > 1 and sys.argv[1] == "ci_seed":
+        # Run only CI Seed verification tests
+        print("Running CI Seed verification tests only...")
+        ci_suite = CISeedVerificationTestSuite()
+        success = await ci_suite.run_all_tests()
+        return success
     else:
         # Run E2E blocker tests (priority for this review request)
         print("Running E2E blocker tests (priority for review request)...")
