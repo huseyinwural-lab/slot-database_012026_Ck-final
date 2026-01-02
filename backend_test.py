@@ -1405,14 +1405,17 @@ class CRMBonusGrantRegressionTestSuite:
                         "expiry_hours": 24
                     },
                     "start_date": None,
-                    "end_date": None,
-                    "reason": "CRM regression test campaign creation"
+                    "end_date": None
                 }
+                
+                # Add reason as query parameter
+                params = {"reason": "CRM regression test campaign creation"}
                 
                 response = await client.post(
                     f"{self.base_url}/bonuses/campaigns",
                     json=campaign_data,
-                    headers=headers
+                    headers=headers,
+                    params=params
                 )
                 
                 if response.status_code != 200:
