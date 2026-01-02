@@ -196,7 +196,7 @@ async def review_withdrawal(
         )
 
     tx.reviewed_by = current_admin.id
-    tx.reviewed_at = datetime.now(timezone.utc)
+    tx.reviewed_at = datetime.utcnow()
 
     session.add(tx)
 
@@ -1001,10 +1001,10 @@ async def run_wallet_reconciliation(
     if date:
         target_date = date_cls.fromisoformat(date)
     else:
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         target_date = date_cls(year=now.year, month=now.month, day=now.day)
 
-    day_start = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc)
+    day_start = datetime(target_date.year, target_date.month, target_date.day)
     day_end = day_start + timedelta(days=1)
 
     # Create reconciliation run
@@ -1117,11 +1117,11 @@ async def get_wallet_reconciliation_summary(
     if date:
         target_date = date_cls.fromisoformat(date)
     else:
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         target_date = date_cls(year=now.year, month=now.month, day=now.day)
 
     # Latest run for this provider and window_start date
-    day_start = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc)
+    day_start = datetime(target_date.year, target_date.month, target_date.day)
 
     query = select(ReconciliationRun).where(
         ReconciliationRun.provider == provider,
@@ -1177,10 +1177,10 @@ async def list_wallet_reconciliation_findings(
     if date:
         target_date = date_cls.fromisoformat(date)
     else:
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         target_date = date_cls(year=now.year, month=now.month, day=now.day)
 
-    day_start = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc)
+    day_start = datetime(target_date.year, target_date.month, target_date.day)
 
     # Latest run for this provider and date
     query = select(ReconciliationRun).where(
