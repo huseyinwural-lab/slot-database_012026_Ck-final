@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.utils.auth import get_current_admin, AdminUser
 
 router = APIRouter(prefix="/api/v1/settings", tags=["settings"])
