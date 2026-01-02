@@ -92,7 +92,8 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
             "reelset_ref": reel_ref,
             "paytable_ref": pay_ref,
         }
-        import hashlib, json
+        import hashlib
+        import json
 
         robot_hash = hashlib.sha256(json.dumps(robot_config, sort_keys=True).encode()).hexdigest()
         robot = RobotDefinition(
