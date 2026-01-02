@@ -732,3 +732,45 @@
   - ✅ CRM engine triggers bonus grants correctly for FIRST_DEPOSIT events
   - ✅ All review request requirements satisfied: 5/5 tests passed (100%)
 - **Status**: ✅ ALL CRM FIRST_DEPOSIT BONUS GRANT TIMEZONE BUG REGRESSION TESTS PASSED - Timezone bug is resolved
+
+---
+
+## BAU w12 Blocker Verification — Iteration 2026-01-02
+- **Status**: ✅ ALL TESTS PASSED
+- **Test Results**:
+  - ✅ **Admin Login**: Admin authentication successful with admin@casino.com/Admin123!
+  - ✅ **Audit Events Endpoint**: `GET /api/v1/audit/events?since_hours=24&resource_type=bonus_grant&action=CRM_OFFER_GRANT` returns 200 (NO timezone crash)
+    - Status: 200
+    - Response preview: {"items":[{"id":"a5e13b8b-69f9-4960-a499-47599d3b7ac6","timestamp":"2026-01-02T19:51:12","request_id":"crm_b4210b30-69bd-4bd1-93b3-14a079b89938","actor_user_id":"system-crm","actor_role":null,"tenant_
+  - ✅ **Audit Export Endpoint**: `GET /api/v1/audit/export?since_hours=24` returns 200 and returns CSV
+    - Status: 200
+    - CSV response preview: timestamp,action,status,reason,actor,resource_type,resource_id,request_id,ip\n2026-01-02T20:19:24,AUDIT_EXPORT,SUCCESS,Manual CSV Export,c2352046-ebc4-4675-bbf2-2eebbe43e453,audit_log,,15994aa0-5ba9-4
+- **Key Verification**: **NO TIMEZONE-RELATED CRASHES** - Both audit endpoints handle timezone parameters correctly without 500 errors
+- **Backend URL**: https://paywallet-hub.preview.emergentagent.com/api/v1
+- **Verification**: ✅ ALL BAU w12 BLOCKER VERIFICATION REQUIREMENTS MET (2/2 tests passed)
+
+---
+
+## Agent Communication
+
+### Testing Agent (2026-01-02) - BAU w12 Blocker Verification
+- **Message**: BAU w12 blocker verification testing completed successfully
+- **Details**: 
+  - ✅ **Admin Login**: Admin authentication working correctly
+  - ✅ **Audit Events Endpoint**: GET /api/v1/audit/events with timezone parameters (since_hours=24) returns 200 without timezone crashes
+  - ✅ **Audit Export Endpoint**: GET /api/v1/audit/export with timezone parameters (since_hours=24) returns 200 and proper CSV format
+  - ✅ **NO TIMEZONE-RELATED 500 ERRORS** - Both audit endpoints handle timezone filtering correctly
+  - ✅ All review request requirements satisfied: 2/2 tests passed (100%)
+- **Status**: ✅ ALL BAU w12 BLOCKER VERIFICATION TESTS PASSED - Timezone issues in audit endpoints resolved
+
+### Testing Agent (2026-01-02) - CRM FIRST_DEPOSIT Bonus Grant Timezone Bug Regression Test
+- **Message**: CRM FIRST_DEPOSIT bonus grant timezone bug regression testing completed successfully
+- **Details**: 
+  - ✅ **Regression Test PASSED** - MockPSP webhook with event_type=deposit_captured returns 200 (no 500 timezone errors)
+  - ✅ Admin authentication and bonus campaign creation/activation working correctly
+  - ✅ Player registration and webhook processing functional
+  - ✅ **BonusGrant row successfully inserted** - Confirmed via /api/v1/bonuses/player/{player_id} endpoint
+  - ✅ **NO TIMEZONE-RELATED CRASHES** - The webhook processes deposit_captured events without timezone comparison errors
+  - ✅ CRM engine triggers bonus grants correctly for FIRST_DEPOSIT events
+  - ✅ All review request requirements satisfied: 5/5 tests passed (100%)
+- **Status**: ✅ ALL CRM FIRST_DEPOSIT BONUS GRANT TIMEZONE BUG REGRESSION TESTS PASSED - Timezone bug is resolved
