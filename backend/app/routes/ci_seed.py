@@ -111,7 +111,7 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
     stmt = select(GameRobotBinding).where(
         GameRobotBinding.game_id == game.id,
         GameRobotBinding.robot_id == robot.id,
-        GameRobotBinding.is_enabled == True,
+        GameRobotBinding.is_enabled,
     )
     binding = (await session.execute(stmt)).scalars().first()
     if not binding:
