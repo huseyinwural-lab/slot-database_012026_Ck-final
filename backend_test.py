@@ -1597,7 +1597,7 @@ class P0RegressionTestSuite:
                 
                 data = response.json()
                 session_id = data.get("session_id")
-                tx_id = data.get("tx_id")
+                url = data.get("url", "")
                 
                 # Debug: print the full response to understand the structure
                 print(f"DEBUG: Stripe checkout response: {data}")
@@ -1608,9 +1608,18 @@ class P0RegressionTestSuite:
                                   f"session_id doesn't start with cs_test_: {session_id}")
                     return False
                 
+                # Extract tx_id from URL if not directly present
+                tx_id = data.get("tx_id")
+                if not tx_id and "tx_id=" in url:
+                    # Extract tx_id from URL
+                    import re
+                    tx_id_match = re.search(r'tx_id=([^&]+)', url)
+                    if tx_id_match:
+                        tx_id = tx_id_match.group(1)
+                
                 # Verify tx_id is present
                 if not tx_id:
-                    self.log_result("Stripe Mock Checkout", False, f"tx_id not present in response. Full response: {data}")
+                    self.log_result("Stripe Mock Checkout", False, f"tx_id not found in response or URL. Full response: {data}")
                     return False
                 
                 # Store session_id for webhook test
