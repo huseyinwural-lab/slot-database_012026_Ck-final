@@ -1350,33 +1350,10 @@ class CISeedEndpointTestSuite:
         if details:
             print(f"    {details}")
     
-    async def setup_auth(self) -> bool:
-        """Setup admin and player authentication"""
+    async def setup_player_auth(self) -> bool:
+        """Setup player authentication for client-games endpoint"""
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                # Admin login
-                admin_login_data = {
-                    "email": "admin@casino.com",
-                    "password": "Admin123!"
-                }
-                
-                response = await client.post(
-                    f"{self.base_url}/auth/login",
-                    json=admin_login_data
-                )
-                
-                if response.status_code != 200:
-                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
-                    return False
-                
-                data = response.json()
-                self.admin_token = data.get("access_token")
-                if not self.admin_token:
-                    self.log_result("Admin Login", False, "No access token in response")
-                    return False
-                
-                self.log_result("Admin Login", True, "Admin logged in successfully")
-                
                 # Create and login player for client-games endpoint
                 self.test_player_email = f"ciseed_{uuid.uuid4().hex[:8]}@casino.com"
                 self.test_player_password = "CISeedPlayer123!"
@@ -1425,7 +1402,7 @@ class CISeedEndpointTestSuite:
                 return True
                 
         except Exception as e:
-            self.log_result("Setup Auth", False, f"Exception: {str(e)}")
+            self.log_result("Setup Player Auth", False, f"Exception: {str(e)}")
             return False
     
     async def test_ci_seed_endpoint(self) -> bool:
