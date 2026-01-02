@@ -59,7 +59,8 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
             ]
         }
         # Hash must match MathAsset schema
-        import hashlib, json
+        import hashlib
+        import json
 
         reel_hash = hashlib.sha256(json.dumps(reel_content, sort_keys=True).encode()).hexdigest()
         reel_asset = MathAsset(ref_key=reel_ref, type="reelset", version="1.0", content=reel_content, content_hash=reel_hash)
