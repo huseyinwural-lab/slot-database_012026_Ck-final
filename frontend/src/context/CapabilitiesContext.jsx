@@ -31,7 +31,7 @@ export const CapabilitiesProvider = ({ children }) => {
   useEffect(() => {
     const handleFocus = () => {
       const token = localStorage.getItem('admin_token');
-      if (token && !capabilities) {
+      if (token && !capabilitiesObject) {
         console.log('🔄 Window focused, refetching capabilities');
         fetchCapabilities();
       }
@@ -39,7 +39,7 @@ export const CapabilitiesProvider = ({ children }) => {
     
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [capabilities]);
+  }, [capabilitiesObject]);
 
   const fetchCapabilities = async () => {
     try {
