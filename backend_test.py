@@ -2287,12 +2287,54 @@ class CISeedGameTypeTestSuite:
     async def test_client_games_classic777_with_type(self) -> bool:
         """Test 3: Call GET /api/v1/player/client-games and verify classic777 exists with type field"""
         try:
-            if not self.player_token:
-                self.log_result("Client Games Classic777 with Type", False, "No player token available")
-                return False
-            
+            # Create a fresh player for this test
             async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-                headers = {"Authorization": f"Bearer {self.player_token}"}
+                # Create and login a fresh player for client-games endpoint
+                fresh_player_email = f"clientgames_{uuid.uuid4().hex[:8]}@casino.com"
+                fresh_player_password = "ClientGamesPlayer123!"
+                
+                player_data = {
+                    "email": fresh_player_email,
+                    "username": f"clientgames_{uuid.uuid4().hex[:8]}",
+                    "password": fresh_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Client Games Classic777 with Type", False, 
+                                  f"Player registration failed - Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login the fresh player
+                player_login_data = {
+                    "email": fresh_player_email,
+                    "password": fresh_player_password,
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=player_login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Client Games Classic777 with Type", False, 
+                                  f"Player login failed - Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                player_data = response.json()
+                fresh_player_token = player_data.get("access_token")
+                if not fresh_player_token:
+                    self.log_result("Client Games Classic777 with Type", False, "No player access token in response")
+                    return False
+                
+                # Now call client-games with the fresh token
+                headers = {"Authorization": f"Bearer {fresh_player_token}"}
                 
                 response = await client.get(
                     f"{self.base_url}/player/client-games",
