@@ -1,10 +1,11 @@
 import hmac
-import os
 import time
 from hashlib import sha256
 from typing import Tuple
 
 from fastapi import HTTPException, Request
+
+from config import settings
 
 WEBHOOK_SECRET_ENV = "WEBHOOK_SECRET"
 DEFAULT_TOLERANCE_SECONDS = 300  # 75 dakika
@@ -18,22 +19,22 @@ def _get_secret() -> bytes:
     """Return webhook signing secret.
 
     Contract:
-    - In prod/staging we require WEBHOOK_SECRET to be set.
-    - In ci/test/dev we allow a deterministic test secret via WEBHOOK_TEST_SECRET
-      so E2E can send a real signature without weakening prod security.
+    - In prod/staging we require WEBHOOK_SECRET.
+    - In ci/test/dev we allow a deterministic WEBHOOK_TEST_SECRET so E2E can
+      send a real signature without weakening prod security.
+
+    NOTE: We use config.settings (BaseSettings + env_file) so local dev works
+    without exporting env vars.
     """
 
-    secret = os.environ.get(WEBHOOK_SECRET_ENV)
-    if secret:
-        return secret.encode("utf-8")
+    if settings.webhook_secret:
+        return settings.webhook_secret.encode("utf-8")
 
-    env = (os.environ.get("ENV") or "dev").lower()
+    env = (settings.env or "dev").lower()
     if env in {"ci", "test", "dev", "local"}:
-        test_secret = os.environ.get("WEBHOOK_TEST_SECRET")
-        if test_secret:
-            return test_secret.encode("utf-8")
+        if settings.webhook_test_secret:
+            return settings.webhook_test_secret.encode("utf-8")
 
-    # Fail explicitly so behaviour is predictable.
     raise HTTPException(status_code=500, detail={"error_code": "WEBHOOK_SECRET_MISSING"})
 
 

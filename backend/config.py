@@ -86,6 +86,11 @@ class Settings(BaseSettings):
     ledger_balance_mismatch_log: bool = True
 
     webhook_signature_enforced: bool = False
+
+    # Generic webhook signature (used by finance payout webhook endpoint)
+    webhook_secret: Optional[str] = Field(default=None, validation_alias=AliasChoices("WEBHOOK_SECRET"))
+    webhook_test_secret: Optional[str] = Field(default=None, validation_alias=AliasChoices("WEBHOOK_TEST_SECRET"))
+
     webhook_secret_mockpsp: str = "changeme-mockpsp-secret"
     stripe_api_key: Optional[str] = None
     stripe_webhook_secret: Optional[str] = None
