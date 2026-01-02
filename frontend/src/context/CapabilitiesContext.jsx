@@ -48,8 +48,10 @@ export const CapabilitiesProvider = ({ children }) => {
       const data = response.data;
 
       console.log('✅ Capabilities fetched:', data);
-      setCapabilitiesObject(data.features || {});
-      setCapabilitiesList(Object.entries(data.features || {}).map(([key, value]) => ({ key, value })));
+      const featuresObj = data.features || {};
+      setCapabilitiesObject(featuresObj);
+      // Always keep an array available for `.map(...)` usage across UI.
+      setCapabilitiesList(Object.keys(featuresObj));
       setIsOwner(data.is_owner || false);
       setTenantRole(data.tenant_role || null);
       setTenantName(data.tenant_name || 'Casino');
