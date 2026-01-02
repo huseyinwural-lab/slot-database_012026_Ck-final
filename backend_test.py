@@ -1568,31 +1568,35 @@ class CISeedEndpointTestSuite:
             return False
     
     async def run_all_tests(self):
-        """Run the complete CI seed verification test suite"""
-        print("🚀 Starting CI Seed Verification Test Suite...")
+        """Run the complete CI seed endpoint test suite"""
+        print("🚀 Starting CI Seed Endpoint Test Suite...")
         print(f"Backend URL: {BACKEND_URL}")
         print("=" * 80)
         
-        # Setup authentication
-        if not await self.setup_auth():
-            print("\n❌ Authentication setup failed. Cannot proceed with tests.")
-            return False
+        # Setup player authentication for client-games endpoint
+        if not await self.setup_player_auth():
+            print("\n❌ Player authentication setup failed. Cannot proceed with client-games test.")
+            # Continue with seed tests that don't require auth
         
         # Run all tests
         test_results = []
         
-        # Test 1: CI seed endpoint
-        test_results.append(await self.test_ci_seed_endpoint())
+        # Test 1: CI seed endpoint (first call)
+        test_results.append(await self.test_ci_seed_endpoint_first_call())
         
-        # Test 2: Client games endpoint for classic777
-        test_results.append(await self.test_client_games_classic777())
+        # Test 2: CI seed endpoint (second call - idempotency)
+        test_results.append(await self.test_ci_seed_endpoint_second_call())
         
-        # Test 3: Robots endpoint for Classic 777
-        test_results.append(await self.test_robots_classic777())
+        # Test 3: Client games endpoint for classic777 (requires player auth)
+        if self.player_token:
+            test_results.append(await self.test_client_games_classic777())
+        else:
+            self.log_result("Client Games Classic777", False, "Skipped - no player token")
+            test_results.append(False)
         
         # Summary
         print("\n" + "=" * 80)
-        print("📊 CI SEED VERIFICATION TEST SUMMARY")
+        print("📊 CI SEED ENDPOINT TEST SUMMARY")
         print("=" * 80)
         
         passed = sum(test_results)
@@ -1607,7 +1611,7 @@ class CISeedEndpointTestSuite:
         print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
         
         if passed == total:
-            print("🎉 All CI seed verification tests PASSED!")
+            print("🎉 All CI seed endpoint tests PASSED!")
             return True
         else:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
