@@ -23,7 +23,10 @@ jobs:
       # CI için dummy secret yeterli; prod’da GitHub Secrets kullanın
       JWT_SECRET: "ci_dummy_secret_change_me"
 
-      # NOTE: We deliberately do NOT provide payment/webhook secrets in CI acceptance.
+      # CI deterministic webhook signing secret (used ONLY for /finance/.../webhook E2E signature headers)
+      WEBHOOK_TEST_SECRET: "ci_webhook_test_secret"
+
+      # NOTE: We deliberately do NOT provide production payment/webhook secrets in CI acceptance.
       # Prod/staging secret gates should not run under ENV=ci.
 
       # Bootstrap credentials are set in a step (either from secrets or generated ephemerally)

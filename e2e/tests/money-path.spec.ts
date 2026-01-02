@@ -23,6 +23,25 @@ function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
 
+const WEBHOOK_TEST_SECRET = process.env.WEBHOOK_TEST_SECRET || process.env.WEBHOOK_SECRET || '';
+
+function webhookSigHeadersForJsonPayload(payload: any) {
+  if (!WEBHOOK_TEST_SECRET) return {};
+
+  const ts = Math.floor(Date.now() / 1000).toString();
+  const rawBody = Buffer.from(JSON.stringify(payload));
+  const sig = crypto
+    .createHmac('sha256', WEBHOOK_TEST_SECRET)
+    .update(`${ts}.`)
+    .update(rawBody)
+    .digest('hex');
+
+  return {
+    'X-Webhook-Timestamp': ts,
+    'X-Webhook-Signature': sig,
+  };
+}
+
 async function apiLoginAdmin(apiBaseUrl: string, email: string, password: string) {
   const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
   const res = await ctx.post('/api/v1/auth/login', {
@@ -318,7 +337,10 @@ async function callPayoutWebhook(
 ) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
-    extraHTTPHeaders: authHeaders(adminToken),
+    extraHTTPHeaders: {
+      ...authHeaders(adminToken),
+      ...webhookSigHeadersForJsonPayload(payload),
+    },
   });
   const res = await ctx.post('/api/v1/finance/withdrawals/payout/webhook', {
     data: payload,

@@ -15,11 +15,26 @@ class WebhookSignatureError(HTTPException):
 
 
 def _get_secret() -> bytes:
+    """Return webhook signing secret.
+
+    Contract:
+    - In prod/staging we require WEBHOOK_SECRET to be set.
+    - In ci/test/dev we allow a deterministic test secret via WEBHOOK_TEST_SECRET
+      so E2E can send a real signature without weakening prod security.
+    """
+
     secret = os.environ.get(WEBHOOK_SECRET_ENV)
-    if not secret:
-        # For local/dev we still fail explicitly so that behaviour is predictable.
-        raise HTTPException(status_code=500, detail={"error_code": "WEBHOOK_SECRET_MISSING"})
-    return secret.encode("utf-8")
+    if secret:
+        return secret.encode("utf-8")
+
+    env = (os.environ.get("ENV") or "dev").lower()
+    if env in {"ci", "test", "dev", "local"}:
+        test_secret = os.environ.get("WEBHOOK_TEST_SECRET")
+        if test_secret:
+            return test_secret.encode("utf-8")
+
+    # Fail explicitly so behaviour is predictable.
+    raise HTTPException(status_code=500, detail={"error_code": "WEBHOOK_SECRET_MISSING"})
 
 
 def _compute_signature(secret: bytes, timestamp: str, raw_body: bytes) -> str:
