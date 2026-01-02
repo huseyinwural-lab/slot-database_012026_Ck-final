@@ -1,0 +1,44 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767395318611,"monotonicTime":13014.351,"sdkLanguage":"javascript","contextId":"request-context@eae827f8dddbc4e78e2e838423340b8d","title":"game-loop.spec.ts:6 › Casino E2E with Security › Full Loop with Signed Webhooks"}
+{"type":"before","callId":"call@13","startTime":13016.312,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/register","method":"POST","jsonData":"{\"username\":\"gamer1767395318608\",\"email\":\"secure_gamer_1767395318608@example.com\",\"password\":\"Password123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@38","beforeSnapshot":"before@call@13"}
+{"type":"log","callId":"call@13","time":13019.85,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/register"}
+{"type":"log","callId":"call@13","time":13019.884,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@13","time":13019.894,"message":"  accept: */*"}
+{"type":"log","callId":"call@13","time":13019.998,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@13","time":13020.017,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":13020.027,"message":"  content-length: 137"}
+{"type":"log","callId":"call@13","time":13270.427,"message":"← 200 OK"}
+{"type":"log","callId":"call@13","time":13270.482,"message":"  date: Fri, 02 Jan 2026 23:08:38 GMT"}
+{"type":"log","callId":"call@13","time":13270.492,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@13","time":13270.513,"message":"  content-length: 75"}
+{"type":"log","callId":"call@13","time":13270.524,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":13270.529,"message":"  x-request-id: 9123f5ad-85e9-4bfe-8fa3-b59ea953681d"}
+{"type":"after","callId":"call@13","endTime":13272.19,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/register","status":200,"statusText":"OK","headers":[{"name":"date","value":"Fri, 02 Jan 2026 23:08:38 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"75"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"9123f5ad-85e9-4bfe-8fa3-b59ea953681d"}],"fetchUid":"49fbe4d73f9c1b22f108fffbdaac451c"}},"afterSnapshot":"after@call@13"}
+{"type":"before","callId":"call@15","startTime":13273.811,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"secure_gamer_1767395318608@example.com\",\"password\":\"Password123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@39","beforeSnapshot":"before@call@15"}
+{"type":"log","callId":"call@15","time":13274.342,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
+{"type":"log","callId":"call@15","time":13274.355,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@15","time":13274.362,"message":"  accept: */*"}
+{"type":"log","callId":"call@15","time":13274.367,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@15","time":13274.372,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@15","time":13274.376,"message":"  content-length: 105"}
+{"type":"log","callId":"call@15","time":13516.2,"message":"← 200 OK"}
+{"type":"log","callId":"call@15","time":13516.227,"message":"  date: Fri, 02 Jan 2026 23:08:38 GMT"}
+{"type":"log","callId":"call@15","time":13516.233,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@15","time":13516.237,"message":"  content-length: 377"}
+{"type":"log","callId":"call@15","time":13516.241,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@15","time":13516.245,"message":"  x-request-id: a7b922c6-d7bf-4fff-b45c-a11af1e437b5"}
+{"type":"after","callId":"call@15","endTime":13557.388,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Fri, 02 Jan 2026 23:08:38 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"377"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"a7b922c6-d7bf-4fff-b45c-a11af1e437b5"}],"fetchUid":"ea34e588ba16a34e3e5e6ae5c9ae85c7"}},"afterSnapshot":"after@call@15"}
+{"type":"before","callId":"call@18","startTime":13559.577,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","headers":[{"name":"Authorization","value":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3OGM5YTBjYS03MDdlLTRjMTItYmQ0NC1mYTZlODMyODE0ZGMiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMDAxMTl9.dafhcmHEYc2NHvOFUWfqf_m-naE1jm2KId4WpB8DW18"}],"jsonData":"{\"amount\":100,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@40","beforeSnapshot":"before@call@18"}
+{"type":"log","callId":"call@18","time":13560.09,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
+{"type":"log","callId":"call@18","time":13560.102,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@18","time":13560.107,"message":"  accept: */*"}
+{"type":"log","callId":"call@18","time":13560.111,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@18","time":13560.115,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3OGM5YTBjYS03MDdlLTRjMTItYmQ0NC1mYTZlODMyODE0ZGMiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMDAxMTl9.dafhcmHEYc2NHvOFUWfqf_m-naE1jm2KId4WpB8DW18"}
+{"type":"log","callId":"call@18","time":13560.12,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@18","time":13560.124,"message":"  content-length: 30"}
+{"type":"log","callId":"call@18","time":13564.238,"message":"← 400 Bad Request"}
+{"type":"log","callId":"call@18","time":13564.257,"message":"  date: Fri, 02 Jan 2026 23:08:38 GMT"}
+{"type":"log","callId":"call@18","time":13564.264,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@18","time":13564.269,"message":"  content-length: 52"}
+{"type":"log","callId":"call@18","time":13564.273,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@18","time":13564.277,"message":"  x-request-id: 00bc1b9e-98d1-46bd-8f95-50ecbd0d0d36"}
+{"type":"after","callId":"call@18","endTime":13605.321,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":400,"statusText":"Bad Request","headers":[{"name":"date","value":"Fri, 02 Jan 2026 23:08:38 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"52"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"00bc1b9e-98d1-46bd-8f95-50ecbd0d0d36"}],"fetchUid":"ae3a5089bc8f252272b3bd84f8923962"}},"afterSnapshot":"after@call@18"}
