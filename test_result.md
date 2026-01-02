@@ -884,3 +884,34 @@
   - player-wallet-ux trace: test-results/player-wallet-ux-Player-Wa-16218-history-and-balance-updates-chromium/trace.zip
   - finance-withdrawals-smoke trace: test-results/finance-withdrawals-smoke--a88f1-mark-paid-state-invariants--chromium/trace.zip
 - **Status**: ✅ WEBHOOK SIGNATURE FIXES VERIFIED - ❌ MULTIPLE PAYMENT/WALLET REGRESSIONS IDENTIFIED
+
+### Testing Agent (2026-01-02) - E2E Full Suite Re-run After Latest Fixes
+- **Message**: E2E Playwright full test suite re-run completed after latest webhook and finance fixes
+- **Environment Variables Set**:
+  - E2E_API_BASE=http://127.0.0.1:8001
+  - E2E_BASE_URL=http://localhost:3000
+  - WEBHOOK_TEST_SECRET=ci_webhook_test_secret
+  - PLAYER_APP_URL=http://localhost:3001
+- **Test Results Summary (25 total tests)**:
+  - ✅ **adyen-deposit.spec.ts**: PASSED (2.4s) - Adyen deposit flow working correctly
+  - ✅ **crm-aff-matrix.spec.ts**: ALL 4 TESTS PASSED (3.8s, 3.6s, 3.3s, 3.1s) - CRM and affiliates working correctly
+  - ✅ **money-path.spec.ts**: 2/4 TESTS PASSED - P06-201 (1.8s) and P06-203 (1.7s) working correctly
+  - ❌ **money-path.spec.ts**: 2/4 TESTS FAILED - P06-202 and P06-204 failed due to deposit limit exceeded (422 LIMIT_EXCEEDED: used_today=350.0, limit=50.0)
+  - ❌ **finance-withdrawals-smoke.spec.ts**: FAILED (2.0s) - Backend 4xx/5xx error during mark-paid operation
+  - ❌ **game-loop.spec.ts**: TIMEOUT (2.1m) - Test hanging during full loop execution
+  - ❌ **payout-real-provider.spec.ts**: TIMEOUT (1.0m) - Admin payout flow timeout
+  - ⏭️ **finance-withdrawals.spec.ts**: ALL 6 TESTS SKIPPED - Test suite not executed
+  - ⚠️ **Other tests**: Not completed due to timeout/execution limits
+- **Key Findings**:
+  - **Webhook deterministic signature**: ✅ WORKING - money-path tests confirm HMAC headers are properly implemented
+  - **Deposit limit enforcement**: ❌ BLOCKING TESTS - Tenant daily deposit limit (50.0 USD) exceeded with 350.0 USD used today
+  - **Finance mark-paid endpoint**: ❌ STILL FAILING - Backend returning 4xx/5xx errors despite optional body fix
+  - **Game/Robot endpoints**: ❌ BACKEND ISSUES - Spin API calls returning 4xx/5xx errors
+  - **Test timeouts**: ❌ PERFORMANCE ISSUES - Multiple tests timing out during execution
+- **Trace Files Available**:
+  - money-path P06-202 trace: test-results/money-path-P06-202-Deposit-bbb5c-es-balance-fail-is-net-zero-chromium/trace.zip
+  - money-path P06-204 trace: test-results/money-path-P06-204-Replay-dedupe-for-payout-and-webhook-chromium/trace.zip
+  - finance-withdrawals-smoke trace: test-results/finance-withdrawals-smoke--a88f1-mark-paid-state-invariants--chromium/trace.zip
+  - game-loop trace: test-results/game-loop-Casino-E2E-with--912a4-l-Loop-with-Signed-Webhooks-chromium/trace.zip
+  - payout-real-provider trace: test-results/payout-real-provider-Admin-b7665-ayout-and-see-status-change-chromium/trace.zip
+- **Status**: ✅ WEBHOOK FIXES VERIFIED - ❌ MULTIPLE CRITICAL ISSUES IDENTIFIED (deposit limits, backend errors, timeouts)
