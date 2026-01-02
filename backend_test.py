@@ -1599,6 +1599,9 @@ class P0RegressionTestSuite:
                 session_id = data.get("session_id")
                 tx_id = data.get("tx_id")
                 
+                # Debug: print the full response to understand the structure
+                print(f"DEBUG: Stripe checkout response: {data}")
+                
                 # Verify session_id starts with cs_test_
                 if not session_id or not session_id.startswith("cs_test_"):
                     self.log_result("Stripe Mock Checkout", False, 
@@ -1607,7 +1610,7 @@ class P0RegressionTestSuite:
                 
                 # Verify tx_id is present
                 if not tx_id:
-                    self.log_result("Stripe Mock Checkout", False, "tx_id not present in response")
+                    self.log_result("Stripe Mock Checkout", False, f"tx_id not present in response. Full response: {data}")
                     return False
                 
                 # Store session_id for webhook test
