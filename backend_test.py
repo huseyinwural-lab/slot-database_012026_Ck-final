@@ -1405,14 +1405,14 @@ class CISeedEndpointTestSuite:
             self.log_result("Setup Player Auth", False, f"Exception: {str(e)}")
             return False
     
-    async def test_ci_seed_endpoint(self) -> bool:
-        """Test 1: Call POST /api/v1/ci/seed and ensure it returns 200"""
+    async def test_ci_seed_endpoint_first_call(self) -> bool:
+        """Test 1: Call POST /api/v1/ci/seed first time and ensure it returns 200"""
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(f"{self.base_url}/ci/seed")
                 
                 if response.status_code != 200:
-                    self.log_result("CI Seed Endpoint", False, 
+                    self.log_result("CI Seed Endpoint (First Call)", False, 
                                   f"Status: {response.status_code}, Response: {response.text}")
                     return False
                 
@@ -1422,25 +1422,63 @@ class CISeedEndpointTestSuite:
                 robot_name = data.get("robot_name")
                 
                 if not seeded:
-                    self.log_result("CI Seed Endpoint", False, "Seeded flag is not True")
+                    self.log_result("CI Seed Endpoint (First Call)", False, "Seeded flag is not True")
                     return False
                 
                 if game_external_id != "classic777":
-                    self.log_result("CI Seed Endpoint", False, 
+                    self.log_result("CI Seed Endpoint (First Call)", False, 
                                   f"Expected game_external_id 'classic777', got '{game_external_id}'")
                     return False
                 
                 if robot_name != "Classic 777":
-                    self.log_result("CI Seed Endpoint", False, 
+                    self.log_result("CI Seed Endpoint (First Call)", False, 
                                   f"Expected robot_name 'Classic 777', got '{robot_name}'")
                     return False
                 
-                self.log_result("CI Seed Endpoint", True, 
+                self.log_result("CI Seed Endpoint (First Call)", True, 
                               f"Successfully seeded - Game: {game_external_id}, Robot: {robot_name}")
                 return True
                 
         except Exception as e:
-            self.log_result("CI Seed Endpoint", False, f"Exception: {str(e)}")
+            self.log_result("CI Seed Endpoint (First Call)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_ci_seed_endpoint_second_call(self) -> bool:
+        """Test 2: Call POST /api/v1/ci/seed second time to verify idempotency (no errors if entities already exist)"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(f"{self.base_url}/ci/seed")
+                
+                if response.status_code != 200:
+                    self.log_result("CI Seed Endpoint (Second Call - Idempotency)", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                seeded = data.get("seeded")
+                game_external_id = data.get("game_external_id")
+                robot_name = data.get("robot_name")
+                
+                if not seeded:
+                    self.log_result("CI Seed Endpoint (Second Call - Idempotency)", False, "Seeded flag is not True")
+                    return False
+                
+                if game_external_id != "classic777":
+                    self.log_result("CI Seed Endpoint (Second Call - Idempotency)", False, 
+                                  f"Expected game_external_id 'classic777', got '{game_external_id}'")
+                    return False
+                
+                if robot_name != "Classic 777":
+                    self.log_result("CI Seed Endpoint (Second Call - Idempotency)", False, 
+                                  f"Expected robot_name 'Classic 777', got '{robot_name}'")
+                    return False
+                
+                self.log_result("CI Seed Endpoint (Second Call - Idempotency)", True, 
+                              f"Idempotent call successful - Game: {game_external_id}, Robot: {robot_name}")
+                return True
+                
+        except Exception as e:
+            self.log_result("CI Seed Endpoint (Second Call - Idempotency)", False, f"Exception: {str(e)}")
             return False
     
     async def test_client_games_classic777(self) -> bool:
