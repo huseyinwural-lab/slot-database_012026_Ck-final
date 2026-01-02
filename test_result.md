@@ -578,6 +578,17 @@
 - **Status**: ✅ ALL E2E BLOCKER TESTS PASSED
 - **Test Results**:
   - ✅ **Withdraw Approval Without Reason**: POST /api/v1/finance/withdrawals/{tx_id}/review without reason field now returns 200 (SUCCESS) instead of 400 REASON_REQUIRED - Fix working correctly
+
+## CI Seed 500 Fix v2 (Game table schema drift: type) — Iteration 2026-01-02
+- **RCA**: CI Postgres had `game` table missing column `type` referenced by SQLModel (`Game.type`). `/api/v1/ci/seed` failed with `UndefinedColumnError: column game.type does not exist`.
+- **Fix**: Added Alembic guard migration `20260102_02_game_type_guard.py` (head) to idempotently add `game.type` and backfill:
+  - If `core_type` exists: `type = core_type`
+  - Else default `type='slot'`
+  - Creates `ix_game_type`.
+- **Verification**:
+  - Local: `POST /api/v1/ci/seed` returns 200 and is idempotent.
+  - `GET /api/v1/player/client-games/` (note trailing slash) with player token returns `classic777` including `type: "slot"`.
+
   - ✅ **Adyen Checkout Without Origin**: POST /api/v1/payments/adyen/checkout/session without Origin header correctly uses player_app_url fallback (http://localhost:3001/wallet?provider=adyen&tx_id=...)
   - ✅ **Stripe Checkout Without Origin**: POST /api/v1/payments/stripe/checkout/session without Origin header returns 520 (not session_id undefined error) - Error handling working correctly
 - **Key Verification**: All three E2E blocker scenarios from review request verified working:
