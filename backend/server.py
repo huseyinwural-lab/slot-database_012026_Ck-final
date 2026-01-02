@@ -222,6 +222,10 @@ app.include_router(poker_mtt_player.router)
 from app.routes import reconciliation as reconciliation_router
 app.include_router(reconciliation_router.router)
 
+from app.routes import ci_seed
+app.include_router(ci_seed.router)
+
+
 
 
 # Startup Event
