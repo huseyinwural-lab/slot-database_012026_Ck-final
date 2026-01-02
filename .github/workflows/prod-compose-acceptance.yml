@@ -169,9 +169,15 @@ jobs:
           docker compose -f docker-compose.prod.yml --profile localdb logs --no-color --tail=200 postgres || true
           exit 1
 
-      - name: Seed deterministic CI admin user
+      - name: Seed super-admin user (P0)
+        env:
+          API_BASE: ${{ env.API_BASE }}
         run: |
           set -euo pipefail
+          code="$(curl -s -o /tmp/seed.json -w "%{http_code}" -X POST "$API_BASE/api/v1/admin/seed")"
+          echo "POST /api/v1/admin/seed => $code"
+          cat /tmp/seed.json
+          test "$code" = "200"
 
       - name: Assert migrations at head + critical columns present (P0)
         run: |
