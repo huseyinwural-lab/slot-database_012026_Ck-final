@@ -1429,7 +1429,10 @@ class CRMBonusGrantRegressionTestSuite:
                 self.log_result("Create Bonus Campaign", True, f"Campaign created with ID: {self.campaign_id}")
                 
                 # Set status to active
-                status_data = {"status": "active"}
+                status_data = {
+                    "status": "active",
+                    "reason": "CRM regression test campaign activation"
+                }
                 
                 response = await client.post(
                     f"{self.base_url}/bonuses/campaigns/{self.campaign_id}/status",
