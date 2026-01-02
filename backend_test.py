@@ -1572,7 +1572,14 @@ class CRMBonusGrantRegressionTestSuite:
                 
                 if not bonuses:
                     self.log_result("Verify Bonus Grant", False, "No bonus grants found for player")
+                    # Let's also check if there are any bonuses at all for debugging
+                    print(f"DEBUG: Player {self.test_player_id} has no bonus grants")
                     return False
+                
+                # Debug: Print all bonuses for this player
+                print(f"DEBUG: Found {len(bonuses)} bonus grants for player {self.test_player_id}")
+                for i, bonus in enumerate(bonuses):
+                    print(f"DEBUG: Bonus {i+1}: campaign_id={bonus.get('campaign_id')}, status={bonus.get('status')}, amount={bonus.get('amount_granted')}")
                 
                 # Look for a bonus grant related to our campaign
                 matching_grant = None
@@ -1582,8 +1589,19 @@ class CRMBonusGrantRegressionTestSuite:
                         break
                 
                 if not matching_grant:
-                    self.log_result("Verify Bonus Grant", False, 
-                                  f"No active bonus grant found for campaign {self.campaign_id}")
+                    # Check if there's any grant for our campaign regardless of status
+                    any_grant = None
+                    for bonus in bonuses:
+                        if bonus.get("campaign_id") == self.campaign_id:
+                            any_grant = bonus
+                            break
+                    
+                    if any_grant:
+                        self.log_result("Verify Bonus Grant", False, 
+                                      f"Found bonus grant for campaign {self.campaign_id} but status is '{any_grant.get('status')}', not 'active'")
+                    else:
+                        self.log_result("Verify Bonus Grant", False, 
+                                      f"No bonus grant found for campaign {self.campaign_id}")
                     return False
                 
                 grant_amount = matching_grant.get("amount_granted", 0)
