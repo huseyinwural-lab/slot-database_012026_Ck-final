@@ -74,7 +74,9 @@ export const CapabilitiesProvider = ({ children }) => {
   return (
     <CapabilitiesContext.Provider
       value={{
-        capabilities,
+        capabilities: capabilitiesObject, // Keep backward compatibility
+        capabilitiesObject,
+        capabilitiesList,
         loading,
         isOwner,
         tenantRole,
