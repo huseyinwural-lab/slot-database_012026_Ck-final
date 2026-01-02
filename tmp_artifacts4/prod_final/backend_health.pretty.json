@@ -1,0 +1,18 @@
+{
+  "Status": "healthy",
+  "FailingStreak": 0,
+  "Log": [
+    {
+      "Start": "2026-01-02T18:28:35.030614886Z",
+      "End": "2026-01-02T18:28:35.088918524Z",
+      "ExitCode": 0,
+      "Output": "{\"status\":\"ready\",\"dependencies\":{\"database\":\"connected\",\"redis\":\"skipped\",\"migrations\":\"ok\"},\"alembic\":{\"db\":\"20260102_01\",\"head\":\"20260102_01\"}}"
+    },
+    {
+      "Start": "2026-01-02T18:28:40.090453027Z",
+      "End": "2026-01-02T18:28:40.180010486Z",
+      "ExitCode": 0,
+      "Output": "{\"status\":\"ready\",\"dependencies\":{\"database\":\"connected\",\"redis\":\"skipped\",\"migrations\":\"ok\"},\"alembic\":{\"db\":\"20260102_01\",\"head\":\"20260102_01\"}}"
+    }
+  ]
+}
