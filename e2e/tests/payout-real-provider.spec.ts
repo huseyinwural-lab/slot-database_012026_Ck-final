@@ -2,18 +2,18 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Admin Payout Real Provider Flow', () => {
   test('Admin can initiate payout and see status change', async ({ page }) => {
-    // 1. Login as Admin
-    await page.goto('http://localhost:3000/admin/login');
-    await page.fill('input[name="email"]', 'admin@casino.com');
-    await page.fill('input[name="password"]', 'Admin123!');
-    await page.click('button[type="submit"]');
-    
+    // NOTE: Admin app uses /login (no /admin prefix)
+    await page.goto('http://localhost:3000/login');
+    await page.fill('#email', 'admin@casino.com');
+    await page.fill('#password', 'Admin123!');
+    await page.click('button:has-text("Sign In")');
+
     // Wait for dashboard
-    await expect(page).toHaveURL(/\/admin\/dashboard/);
+    await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
 
     // 2. Navigate to Finance/Withdrawals
-    await page.click('a[href="/admin/finance/withdrawals"]');
-    await expect(page).toHaveURL(/\/admin\/finance\/withdrawals/);
+    await page.goto('http://localhost:3000/finance/withdrawals');
+    await expect(page).toHaveURL(/\/finance\/withdrawals/);
 
     // 3. Find a pending withdrawal (We assume one exists or we create one via API in setup)
     // For this test, we look for any row with status "Approved" (ready for payout)
