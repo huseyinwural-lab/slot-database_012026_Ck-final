@@ -4,7 +4,7 @@ from typing import Literal, Optional
 from sqlmodel import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 
 
 from app.core.errors import AppError
