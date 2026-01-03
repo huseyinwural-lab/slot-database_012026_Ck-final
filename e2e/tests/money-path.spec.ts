@@ -67,7 +67,7 @@ async function apiLoginAdmin(apiBaseUrl, email, password) {
 async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
   const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
 
-  const extractToken = (json: any): string | null =>
+  const extractToken = (json) =>
     json?.access_token || json?.token || json?.data?.access_token || json?.data?.token || null;
 
   const extractPlayerId = (json: any): string | null =>
