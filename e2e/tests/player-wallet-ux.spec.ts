@@ -28,7 +28,7 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
   const json = await res.json();
   return { 
     token: json.access_token || json.token,
-    playerId: json.player_id || json.user?.id 
+    playerId: json.user?.id 
   };
 }
 
