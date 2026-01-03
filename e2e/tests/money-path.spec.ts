@@ -25,7 +25,7 @@ function authHeaders(token) {
 
 const WEBHOOK_TEST_SECRET = process.env.WEBHOOK_TEST_SECRET || process.env.WEBHOOK_SECRET || 'ci_webhook_test_secret';
 
-function webhookSigHeadersForJsonPayload(payload: any) {
+function webhookSigHeadersForJsonPayload(payload) {
   if (!WEBHOOK_TEST_SECRET) return {};
 
   const ts = Math.floor(Date.now() / 1000).toString();
