@@ -351,7 +351,7 @@ async function callPayoutWebhook(
   if (!res.ok()) {
     throw new Error(`webhook failed ${res.status()} body=${text}`);
   }
-  return json as any;
+  return json;
 }
 
 // UI helpers -----------------------------------------------------------
