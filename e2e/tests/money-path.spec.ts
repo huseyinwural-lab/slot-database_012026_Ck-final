@@ -204,7 +204,7 @@ async function playerDeposit(
   amount,
   mockOutcome = 'success',
 ) {
-  const headers: Record<string, string> = {
+  const headers = {
     Authorization: `Bearer ${playerToken}`,
     'Idempotency-Key': idemKey('e2e-deposit'),
   };
