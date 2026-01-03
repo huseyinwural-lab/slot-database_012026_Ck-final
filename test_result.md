@@ -66,6 +66,15 @@
     - `pytest tests/test_refund_flow.py`: **PASSED** (Admin refund logic).
     - `pytest tests/test_payout_provider.py`: **PASSED** (Prod gating).
 
+## Additional Artifacts / Notes
+- Added deterministic CI seed at start of E2E via `e2e/global-setup.ts` (hard-fails on seed error).
+- Seed endpoint `/api/v1/ci/seed` now ensures:
+    - game `classic777`
+    - math assets (reelset/paytable)
+    - robot config has `reelset_ref`/`paytable_ref`
+    - robot binding is enabled and older enabled bindings are disabled
+    - tenant daily limits reset to stable state
+
 ## Artifacts
 - `app/backend/app/routes/finance_refunds.py`: Refund endpoint.
 - `app/backend/app/services/adyen_psp.py`: Updated with signature Stub.
