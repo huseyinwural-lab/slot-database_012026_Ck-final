@@ -886,3 +886,204 @@
 {"type":"log","callId":"call@2910","time":320266.747,"message":"retrying click action"}
 {"type":"log","callId":"call@2910","time":320266.749,"message":"  waiting 500ms"}
 {"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416838521.jpeg","width":1280,"height":720,"timestamp":320292.802,"frameSwapWallTime":1767416838517.3162}
+{"type":"log","callId":"call@2910","time":320767.583,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":320778.9,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":320778.918,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":320779.575,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":639.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"234","lang":"en"},[[81,20]],[[81,21]],[[78,11]]],"viewport":{"width":1280,"height":720},"timestamp":320782.081,"wallTime":1767416839010,"collectionTime":1.7000000029802322,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[81,14]],"viewport":{"width":1280,"height":720},"timestamp":320782.195,"wallTime":1767416839010,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":320782.849,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":320782.856,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":320782.858,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416839038.jpeg","width":1280,"height":720,"timestamp":320809.912,"frameSwapWallTime":1767416839034.4}
+{"type":"log","callId":"call@2910","time":321283.772,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":321295.301,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":321295.318,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":321295.973,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"793","lang":"en"},[[82,20]],[[82,21]],[[79,11]]],"viewport":{"width":1280,"height":720},"timestamp":321298.124,"wallTime":1767416839526,"collectionTime":1.5,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[82,14]],"viewport":{"width":1280,"height":720},"timestamp":321298.274,"wallTime":1767416839526,"collectionTime":0,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":321298.931,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":321298.977,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":321298.981,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416839555.jpeg","width":1280,"height":720,"timestamp":321327.17,"frameSwapWallTime":1767416839551.3188}
+{"type":"log","callId":"call@2910","time":321799.818,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":321811.923,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":321811.935,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":321812.204,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":[[1,0]],"viewport":{"width":1280,"height":720},"timestamp":321814.461,"wallTime":1767416840042,"collectionTime":1.5,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[83,14]],"viewport":{"width":1280,"height":720},"timestamp":321814.607,"wallTime":1767416840042,"collectionTime":0.09999999403953552,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":321815.233,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":321815.24,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":321815.242,"message":"  waiting 500ms"}
+{"type":"log","callId":"call@2910","time":322316.002,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":322328.561,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":322328.576,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":322329.195,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":873.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"lang":"en"},[[84,20]],[[84,21]],[[81,11]]],"viewport":{"width":1280,"height":720},"timestamp":322331.917,"wallTime":1767416840560,"collectionTime":1.5,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[84,14]],"viewport":{"width":1280,"height":720},"timestamp":322332.035,"wallTime":1767416840560,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":322332.77,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":322332.779,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":322332.782,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416840587.jpeg","width":1280,"height":720,"timestamp":322359.264,"frameSwapWallTime":1767416840583.7869}
+{"type":"log","callId":"call@2910","time":322833.602,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":322845.131,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":322845.144,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":322845.754,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":639.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"234","lang":"en"},[[85,20]],[[85,21]],[[82,11]]],"viewport":{"width":1280,"height":720},"timestamp":322847.892,"wallTime":1767416841076,"collectionTime":1.3999999985098839,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[85,14]],"viewport":{"width":1280,"height":720},"timestamp":322848.005,"wallTime":1767416841076,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":322848.625,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":322848.631,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":322848.633,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416841104.jpeg","width":1280,"height":720,"timestamp":322876.215,"frameSwapWallTime":1767416841100.679}
+{"type":"log","callId":"call@2910","time":323349.382,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":323361.829,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":323361.844,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":323362.482,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"793","lang":"en"},[[86,20]],[[86,21]],[[83,11]]],"viewport":{"width":1280,"height":720},"timestamp":323364.671,"wallTime":1767416841592,"collectionTime":1.6000000014901161,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[86,14]],"viewport":{"width":1280,"height":720},"timestamp":323364.767,"wallTime":1767416841593,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":323365.411,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":323365.418,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":323365.42,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416841621.jpeg","width":1280,"height":720,"timestamp":323393.234,"frameSwapWallTime":1767416841617.753}
+{"type":"log","callId":"call@2910","time":323866.259,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":323878.663,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":323878.675,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":323878.96,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":[[1,0]],"viewport":{"width":1280,"height":720},"timestamp":323881.131,"wallTime":1767416842109,"collectionTime":1.3999999985098839,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[87,14]],"viewport":{"width":1280,"height":720},"timestamp":323881.236,"wallTime":1767416842109,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":323881.836,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":323881.843,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":323881.845,"message":"  waiting 500ms"}
+{"type":"log","callId":"call@2910","time":324382.642,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":324395.143,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":324395.179,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":324395.761,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":873.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"lang":"en"},[[88,20]],[[88,21]],[[85,11]]],"viewport":{"width":1280,"height":720},"timestamp":324398.424,"wallTime":1767416842626,"collectionTime":1.6000000014901161,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[88,14]],"viewport":{"width":1280,"height":720},"timestamp":324398.556,"wallTime":1767416842626,"collectionTime":0,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":324399.252,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":324399.262,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":324399.265,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416842654.jpeg","width":1280,"height":720,"timestamp":324426.285,"frameSwapWallTime":1767416842650.788}
+{"type":"log","callId":"call@2910","time":324900.088,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":324911.797,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":324911.813,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":324912.428,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":639.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"234","lang":"en"},[[89,20]],[[89,21]],[[86,11]]],"viewport":{"width":1280,"height":720},"timestamp":324914.539,"wallTime":1767416843142,"collectionTime":1.4000000059604645,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[89,14]],"viewport":{"width":1280,"height":720},"timestamp":324914.671,"wallTime":1767416843142,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":324915.267,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":324915.274,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":324915.276,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416843171.jpeg","width":1280,"height":720,"timestamp":324943.287,"frameSwapWallTime":1767416843167.726}
+{"type":"log","callId":"call@2910","time":325415.984,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":325428.423,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":325428.438,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":325429.076,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"793","lang":"en"},[[90,20]],[[90,21]],[[87,11]]],"viewport":{"width":1280,"height":720},"timestamp":325431.227,"wallTime":1767416843659,"collectionTime":1.3999999985098839,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[90,14]],"viewport":{"width":1280,"height":720},"timestamp":325431.36,"wallTime":1767416843659,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":325431.98,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":325431.986,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":325431.989,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416843688.jpeg","width":1280,"height":720,"timestamp":325460.287,"frameSwapWallTime":1767416843684.3618}
+{"type":"log","callId":"call@2910","time":325932.814,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":325945.398,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":325945.411,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":325945.699,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":[[1,0]],"viewport":{"width":1280,"height":720},"timestamp":325948.222,"wallTime":1767416844176,"collectionTime":1.6999999955296516,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[91,14]],"viewport":{"width":1280,"height":720},"timestamp":325948.404,"wallTime":1767416844176,"collectionTime":0.20000000298023224,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":325949.006,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":325949.013,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":325949.015,"message":"  waiting 500ms"}
+{"type":"log","callId":"call@2910","time":326449.797,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":326461.697,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":326461.71,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":326462.584,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":873.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"lang":"en"},[[92,20]],[[92,21]],[[89,11]]],"viewport":{"width":1280,"height":720},"timestamp":326464.785,"wallTime":1767416844692,"collectionTime":1.5,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[92,14]],"viewport":{"width":1280,"height":720},"timestamp":326464.938,"wallTime":1767416844693,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":326465.754,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":326465.766,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":326465.768,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416844721.jpeg","width":1280,"height":720,"timestamp":326492.671,"frameSwapWallTime":1767416844717.0862}
+{"type":"log","callId":"call@2910","time":326966.662,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":326978.329,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":326978.342,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":326978.905,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":639.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"234","lang":"en"},[[93,20]],[[93,21]],[[90,11]]],"viewport":{"width":1280,"height":720},"timestamp":326981.148,"wallTime":1767416845209,"collectionTime":1.4000000059604645,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[93,14]],"viewport":{"width":1280,"height":720},"timestamp":326981.274,"wallTime":1767416845209,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":326981.942,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":326981.952,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":326981.954,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416845237.jpeg","width":1280,"height":720,"timestamp":327009.457,"frameSwapWallTime":1767416845233.938}
+{"type":"log","callId":"call@2910","time":327482.75,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":327495.014,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":327495.029,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":327495.669,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"793","lang":"en"},[[94,20]],[[94,21]],[[91,11]]],"viewport":{"width":1280,"height":720},"timestamp":327497.833,"wallTime":1767416845726,"collectionTime":1.3999999985098839,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[94,14]],"viewport":{"width":1280,"height":720},"timestamp":327497.988,"wallTime":1767416845726,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":327498.627,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":327498.634,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":327498.636,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416845754.jpeg","width":1280,"height":720,"timestamp":327526.513,"frameSwapWallTime":1767416845750.957}
+{"type":"log","callId":"call@2910","time":327999.436,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":328011.68,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":328011.691,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":328011.939,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":[[1,0]],"viewport":{"width":1280,"height":720},"timestamp":328014.177,"wallTime":1767416846242,"collectionTime":1.3999999985098839,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[95,14]],"viewport":{"width":1280,"height":720},"timestamp":328014.298,"wallTime":1767416846242,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":328014.956,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":328014.966,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":328014.968,"message":"  waiting 500ms"}
+{"type":"log","callId":"call@2910","time":328515.762,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":328528.312,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":328528.329,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":328529.248,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":873.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"lang":"en"},[[96,20]],[[96,21]],[[93,11]]],"viewport":{"width":1280,"height":720},"timestamp":328531.343,"wallTime":1767416846759,"collectionTime":1.3999999985098839,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[96,14]],"viewport":{"width":1280,"height":720},"timestamp":328531.489,"wallTime":1767416846759,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":328532.2,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":328532.206,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":328532.209,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416846787.jpeg","width":1280,"height":720,"timestamp":328559.319,"frameSwapWallTime":1767416846783.77}
+{"type":"log","callId":"call@2910","time":329033.088,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":329045.015,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":329045.028,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":329045.702,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":639.56,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"234","lang":"en"},[[97,20]],[[97,21]],[[94,11]]],"viewport":{"width":1280,"height":720},"timestamp":329048.019,"wallTime":1767416847276,"collectionTime":1.6000000014901161,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[97,14]],"viewport":{"width":1280,"height":720},"timestamp":329048.117,"wallTime":1767416847276,"collectionTime":0.09999999403953552,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":329048.79,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":329048.797,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":329048.799,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416847304.jpeg","width":1280,"height":720,"timestamp":329076.092,"frameSwapWallTime":1767416847300.565}
+{"type":"log","callId":"call@2910","time":329549.653,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":329561.763,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":329561.78,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":329562.519,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":["HTML",{"__playwright_scroll_left_":"793","lang":"en"},[[98,20]],[[98,21]],[[95,11]]],"viewport":{"width":1280,"height":720},"timestamp":329565.069,"wallTime":1767416847793,"collectionTime":1.6000000014901161,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[98,14]],"viewport":{"width":1280,"height":720},"timestamp":329565.171,"wallTime":1767416847793,"collectionTime":0.10000000149011612,"resourceOverrides":[],"isMainFrame":false}}
+{"type":"log","callId":"call@2910","time":329565.855,"message":"  <iframe src=\"about:blank\" id=\"webpack-dev-server-client-overlay\"></iframe> intercepts pointer events"}
+{"type":"log","callId":"call@2910","time":329565.862,"message":"retrying click action"}
+{"type":"log","callId":"call@2910","time":329565.864,"message":"  waiting 500ms"}
+{"type":"screencast-frame","pageId":"page@d85ae03d241a387899044c7871fc4c52","sha1":"page@d85ae03d241a387899044c7871fc4c52-1767416847821.jpeg","width":1280,"height":720,"timestamp":329593.544,"frameSwapWallTime":1767416847817.632}
+{"type":"log","callId":"call@2910","time":330066.737,"message":"  waiting for element to be visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":330078.329,"message":"  element is visible, enabled and stable"}
+{"type":"log","callId":"call@2910","time":330078.341,"message":"  scrolling into view if needed"}
+{"type":"log","callId":"call@2910","time":330078.683,"message":"  done scrolling"}
+{"type":"input","callId":"call@2910","point":{"x":80.6,"y":167},"inputSnapshot":"input@call@2910"}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@423a27f68be223bfb4bc596fc7153e81","frameUrl":"http://localhost:3000/settings","doctype":"html","html":[[1,0]],"viewport":{"width":1280,"height":720},"timestamp":330080.645,"wallTime":1767416848308,"collectionTime":1.1999999955296516,"resourceOverrides":[],"isMainFrame":true}}
+{"type":"frame-snapshot","snapshot":{"callId":"call@2910","snapshotName":"input@call@2910","pageId":"page@d85ae03d241a387899044c7871fc4c52","frameId":"frame@f35059196835d4006689d0845545b7dc","frameUrl":"about:blank","html":[[99,14]],"viewport":{"width":1280,"height":720},"timestamp":330080.764,"wallTime":1767416848308,"collectionTime":0.20000000298023224,"resourceOverrides":[],"isMainFrame":false}}
