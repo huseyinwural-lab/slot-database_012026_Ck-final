@@ -87,7 +87,7 @@
             - heading "Transaction History" [level=3] [ref=e96]:
               - img [ref=e97]
               - text: Transaction History
-            - generic [ref=e101]: Showing 1 records
+            - generic [ref=e101]: Showing 2 records
           - table [ref=e104]:
             - rowgroup [ref=e105]:
               - row "Type Amount State Date ID" [ref=e106]:
@@ -97,29 +97,42 @@
                 - columnheader "Date" [ref=e110]
                 - columnheader "ID" [ref=e111]
             - rowgroup [ref=e112]:
-              - row "deposit +$40.00 created 1/3/2026, 1:11:13 AM 0adff366..." [ref=e113]:
+              - row "deposit +$20.00 created 1/3/2026, 1:12:30 AM dd1a39df..." [ref=e113]:
                 - cell "deposit" [ref=e114]:
                   - generic [ref=e115]:
                     - img [ref=e116]
                     - generic [ref=e119]: deposit
-                - cell "+$40.00" [ref=e120]
+                - cell "+$20.00" [ref=e120]
                 - cell "created" [ref=e121]:
                   - generic [ref=e122]: created
-                - cell "1/3/2026, 1:11:13 AM" [ref=e123]
-                - cell "0adff366..." [ref=e124]:
-                  - button "0adff366..." [ref=e125] [cursor=pointer]:
-                    - text: 0adff366...
+                - cell "1/3/2026, 1:12:30 AM" [ref=e123]
+                - cell "dd1a39df..." [ref=e124]:
+                  - button "dd1a39df..." [ref=e125] [cursor=pointer]:
+                    - text: dd1a39df...
                     - img [ref=e126]
-          - generic [ref=e129]:
-            - button "Previous Page" [disabled] [ref=e130]:
-              - img [ref=e131]
+              - row "deposit +$40.00 created 1/3/2026, 1:12:07 AM c0009c0e..." [ref=e129]:
+                - cell "deposit" [ref=e130]:
+                  - generic [ref=e131]:
+                    - img [ref=e132]
+                    - generic [ref=e135]: deposit
+                - cell "+$40.00" [ref=e136]
+                - cell "created" [ref=e137]:
+                  - generic [ref=e138]: created
+                - cell "1/3/2026, 1:12:07 AM" [ref=e139]
+                - cell "c0009c0e..." [ref=e140]:
+                  - button "c0009c0e..." [ref=e141] [cursor=pointer]:
+                    - text: c0009c0e...
+                    - img [ref=e142]
+          - generic [ref=e145]:
+            - button "Previous Page" [disabled] [ref=e146]:
+              - img [ref=e147]
               - text: Previous
-            - generic [ref=e133]: Page 1 of 1
-            - button "Next Page" [disabled] [ref=e134]:
+            - generic [ref=e149]: Page 1 of 1
+            - button "Next Page" [disabled] [ref=e150]:
               - text: Next
-              - img [ref=e135]
-  - contentinfo [ref=e137]:
-    - generic [ref=e138]:
-      - paragraph [ref=e139]: © 2025 CasinoLobby. All rights reserved.
-      - paragraph [ref=e140]: Responsible Gaming | 18+
+              - img [ref=e151]
+  - contentinfo [ref=e153]:
+    - generic [ref=e154]:
+      - paragraph [ref=e155]: © 2025 CasinoLobby. All rights reserved.
+      - paragraph [ref=e156]: Responsible Gaming | 18+
 ```
