@@ -238,10 +238,10 @@ async function playerDeposit(
 }
 
 async function playerWithdraw(
-  apiBaseUrl: string,
-  playerToken: string,
-  amount: number,
-): Promise<{ txId: string }> {
+  apiBaseUrl,
+  playerToken,
+  amount,
+) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
     extraHTTPHeaders: {
