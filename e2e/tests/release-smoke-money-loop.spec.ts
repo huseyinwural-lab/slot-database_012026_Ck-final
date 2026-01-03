@@ -156,7 +156,9 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
         headers: { 'Authorization': `Bearer ${adminToken}` },
         data: { decision: 'approve', reason: 'Smoke Test Approval' },
       });
-      expect(approveRes.ok()).toBeTruthy();
+      if (!approveRes.ok()) {
+        throw new Error(`approve failed ${approveRes.status()} body=${await approveRes.text()}`);
+      }
 
       await expect.poll(async () => {
         const w = await apiContext.get(`/api/v1/finance/withdrawals/${withdrawTxId}`, {
