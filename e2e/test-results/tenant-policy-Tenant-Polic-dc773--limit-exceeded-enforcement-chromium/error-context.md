@@ -57,73 +57,65 @@
             - button "Deposit" [ref=e64] [cursor=pointer]
             - button "Withdraw" [ref=e65] [cursor=pointer]
           - generic [ref=e67]:
-            - heading "Request Withdrawal" [level=3] [ref=e68]
-            - generic [ref=e69]:
-              - generic [ref=e70]:
-                - generic [ref=e71]: Withdrawal Amount
-                - spinbutton [ref=e72]: "20"
-              - generic [ref=e73]:
-                - heading "Bank Account Details" [level=4] [ref=e74]
-                - generic [ref=e75]:
-                  - generic [ref=e76]:
-                    - generic [ref=e77]: Account Holder Name
-                    - textbox "John Doe" [active] [ref=e78]
-                  - generic [ref=e79]:
-                    - generic [ref=e80]: Account Number
-                    - textbox "123456789" [ref=e81]: test-iban
-                  - generic [ref=e82]:
-                    - generic [ref=e83]:
-                      - generic [ref=e84]: Bank Code
-                      - textbox "021000021" [ref=e85]
-                    - generic [ref=e86]:
-                      - generic [ref=e87]: Branch Code
-                      - textbox "001" [ref=e88]
-                  - generic [ref=e89]:
-                    - generic [ref=e90]:
-                      - generic [ref=e91]: Country
-                      - textbox [ref=e92]: US
-                    - generic [ref=e93]:
-                      - generic [ref=e94]: Currency
-                      - textbox [ref=e95]: USD
-              - button "Request Withdrawal" [ref=e96] [cursor=pointer]
-        - generic [ref=e97]:
-          - generic [ref=e98]:
-            - heading "Transaction History" [level=3] [ref=e99]:
-              - img [ref=e100]
+            - heading "Deposit Funds" [level=3] [ref=e68]:
+              - img [ref=e69]
+              - text: Deposit Funds
+            - generic [ref=e72]:
+              - generic [ref=e73]: Payment Method
+              - generic [ref=e74]:
+                - button "Credit Card (Stripe)" [ref=e75] [cursor=pointer]
+                - button "Adyen (All Methods)" [ref=e76] [cursor=pointer]
+            - generic [ref=e77]:
+              - generic [ref=e78]: Amount ($)
+              - generic [ref=e79]:
+                - img [ref=e80]
+                - spinbutton [ref=e82]
+            - generic [ref=e83]:
+              - button "$50" [ref=e84] [cursor=pointer]
+              - button "$100" [ref=e85] [cursor=pointer]
+              - button "$500" [ref=e86] [cursor=pointer]
+            - button "Pay with Stripe" [ref=e87] [cursor=pointer]
+            - paragraph [ref=e88]:
+              - img [ref=e89]
+              - text: Secure Payment via Stripe
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - heading "Transaction History" [level=3] [ref=e93]:
+              - img [ref=e94]
               - text: Transaction History
-            - generic [ref=e104]: Showing 1 records
-          - table [ref=e107]:
-            - rowgroup [ref=e108]:
-              - row "Type Amount State Date ID" [ref=e109]:
-                - columnheader "Type" [ref=e110]
-                - columnheader "Amount" [ref=e111]
-                - columnheader "State" [ref=e112]
-                - columnheader "Date" [ref=e113]
-                - columnheader "ID" [ref=e114]
-            - rowgroup [ref=e115]:
-              - row "deposit +$100.00 completed 1/3/2026, 2:08:30 AM 4a7bd1a2..." [ref=e116]:
-                - cell "deposit" [ref=e117]:
-                  - generic [ref=e118]:
-                    - img [ref=e119]
-                    - generic [ref=e122]: deposit
-                - cell "+$100.00" [ref=e123]
-                - cell "completed" [ref=e124]:
-                  - generic [ref=e125]: completed
-                - cell "1/3/2026, 2:08:30 AM" [ref=e126]
-                - cell "4a7bd1a2..." [ref=e127]:
-                  - button "4a7bd1a2..." [ref=e128] [cursor=pointer]:
-                    - text: 4a7bd1a2...
-                    - img [ref=e129]
-          - generic [ref=e132]:
-            - button "Previous Page" [disabled] [ref=e133]:
-              - img [ref=e134]
+            - generic [ref=e98]: Showing 1 records
+          - table [ref=e101]:
+            - rowgroup [ref=e102]:
+              - row "Type Amount State Date ID" [ref=e103]:
+                - columnheader "Type" [ref=e104]
+                - columnheader "Amount" [ref=e105]
+                - columnheader "State" [ref=e106]
+                - columnheader "Date" [ref=e107]
+                - columnheader "ID" [ref=e108]
+            - rowgroup [ref=e109]:
+              - row "deposit +$100.00 completed 1/3/2026, 2:09:26 AM 8bbc3f5e..." [ref=e110]:
+                - cell "deposit" [ref=e111]:
+                  - generic [ref=e112]:
+                    - img [ref=e113]
+                    - generic [ref=e116]: deposit
+                - cell "+$100.00" [ref=e117]
+                - cell "completed" [ref=e118]:
+                  - generic [ref=e119]: completed
+                - cell "1/3/2026, 2:09:26 AM" [ref=e120]
+                - cell "8bbc3f5e..." [ref=e121]:
+                  - button "8bbc3f5e..." [ref=e122] [cursor=pointer]:
+                    - text: 8bbc3f5e...
+                    - img [ref=e123]
+          - generic [ref=e126]:
+            - button "Previous Page" [disabled] [ref=e127]:
+              - img [ref=e128]
               - text: Previous
-            - generic [ref=e136]: Page 1 of 1
-            - button "Next Page" [disabled] [ref=e137]:
+            - generic [ref=e130]: Page 1 of 1
+            - button "Next Page" [disabled] [ref=e131]:
               - text: Next
-              - img [ref=e138]
-  - contentinfo [ref=e140]:
-    - generic [ref=e141]:
-      - paragraph [ref=e142]: © 2025 CasinoLobby. All rights reserved.
-      - paragraph [ref=e143]: Responsible Gaming | 18+
+              - img [ref=e132]
+  - contentinfo [ref=e134]:
+    - generic [ref=e135]:
+      - paragraph [ref=e136]: © 2025 CasinoLobby. All rights reserved.
+      - paragraph [ref=e137]: Responsible Gaming | 18+
 ```
