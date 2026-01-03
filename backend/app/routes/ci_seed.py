@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.database import get_session
 from app.models.game_models import Game
+from app.models.sql_models import Tenant, Transaction
 from app.models.robot_models import RobotDefinition, MathAsset, GameRobotBinding
 
 router = APIRouter(prefix="/api/v1/ci", tags=["ci"])
@@ -23,6 +26,27 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
     """
 
     tenant_id = "default_casino"
+
+    # Ensure tenant has permissive limits for CI/E2E
+    tenant = await session.get(Tenant, tenant_id)
+    if tenant:
+        # Avoid LIMIT_EXCEEDED failures in E2E; CI covers functional correctness, not limit tuning.
+        if tenant.daily_deposit_limit is not None and tenant.daily_deposit_limit < 100000:
+            tenant.daily_deposit_limit = 100000.0
+        if tenant.daily_withdraw_limit is not None and tenant.daily_withdraw_limit < 100000:
+            tenant.daily_withdraw_limit = 100000.0
+
+        # Reset today's completed deposits to keep day-usage stable when DB persists between runs
+        for_tx = select(Transaction).where(
+            Transaction.tenant_id == tenant_id,
+            Transaction.type == "deposit",
+            Transaction.state == "completed",
+        )
+        txs = (await session.execute(for_tx)).scalars().all()
+        for tx in txs:
+            tx.created_at = datetime.utcnow() - timedelta(days=2)
+
+
 
     # Game
     stmt = select(Game).where(Game.tenant_id == tenant_id, Game.external_id == "classic777")
