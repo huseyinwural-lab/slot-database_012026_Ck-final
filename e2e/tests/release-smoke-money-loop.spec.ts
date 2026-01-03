@@ -6,7 +6,10 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
   test('Full Cycle: Deposit -> Withdraw -> Admin Payout -> Paid', async ({ page, browser }) => {
     const PLAYER_APP_URL = process.env.PLAYER_APP_URL || 'http://localhost:3001';
     const ADMIN_APP_URL = process.env.E2E_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
-    const API_URL = process.env.E2E_API_BASE || 'http://localhost:8001';
+
+    // IMPORTANT (CI determinism): In compose/CI, the app frontends proxy /api to the backend.
+    // Using the frontend origin avoids transient direct-to-backend connection drops ("socket hang up").
+    const API_URL = process.env.E2E_API_BASE || PLAYER_APP_URL;
 
     // === DATA SETUP ===
     const uniqueId = Date.now();
