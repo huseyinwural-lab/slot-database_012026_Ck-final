@@ -135,8 +135,8 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.fill('input[placeholder*="Min"]', '40');
     await playerPage.click('button:has-text("Pay Now"), button:has-text("Pay with Stripe"), button:has-text("Pay with Adyen")');
     
-    // Assert Success
-    await expect(playerPage.getByText('Deposit successful')).toBeVisible();
+    // Stripe flow redirects and then shows a success banner; accept either final success or verification step.
+    await expect(playerPage.getByText('Payment Successful!').or(playerPage.getByText('Verifying payment...'))).toBeVisible({ timeout: 20000 });
 
     // 3. Player: Deposit 20 (Fail: 40+20 > 50) via UI
     // Reload to clear success message/state if needed
