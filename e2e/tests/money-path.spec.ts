@@ -508,7 +508,7 @@ test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ pa
   expect(finalBalance.held_real).toBeCloseTo(0, 6);
 
   const listPaid = await adminListWithdrawals(BACKEND_URL, adminToken, { state: 'paid', limit: 50, offset: 0 });
-  const wPaid = (listPaid.items || []).find((w: any) => w.tx_id === txId || w.id === txId);
+  const wPaid = (listPaid.items || []).find((w) => w.tx_id === txId || w.id === txId);
   expect(wPaid, 'paid withdrawal must appear').toBeTruthy();
 
   // UI badge proof is covered by P06-201 + Admin UI tests; here we focus on
