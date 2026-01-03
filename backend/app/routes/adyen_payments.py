@@ -92,7 +92,7 @@ async def create_checkout_session(
     await session.commit()
 
     # Ensure UI contract has tx_id for deterministic redirect handling
-    return {"url": link_response.get("url") + f"&tx_id={tx_id}", "tx_id": tx_id}
+    return {"url": link_response.get("url"), "tx_id": tx_id}
 
 
 @router.post("/webhook")

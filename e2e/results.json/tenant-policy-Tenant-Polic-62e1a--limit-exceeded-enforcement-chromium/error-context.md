@@ -1,0 +1,992 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - heading "Platform Admin" [level=1] [ref=e6]
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: Core
+          - list [ref=e12]:
+            - listitem [ref=e13]:
+              - link "Dashboard" [ref=e14] [cursor=pointer]:
+                - /url: /
+                - img [ref=e15]
+                - generic [ref=e20]: Dashboard
+            - listitem [ref=e21]:
+              - link "Players" [ref=e22] [cursor=pointer]:
+                - /url: /players
+                - img [ref=e23]
+                - generic [ref=e28]: Players
+            - listitem [ref=e29]:
+              - link "Finance" [ref=e30] [cursor=pointer]:
+                - /url: /finance
+                - img [ref=e31]
+                - generic [ref=e33]: Finance
+            - listitem [ref=e34]:
+              - link "Withdrawals" [ref=e35] [cursor=pointer]:
+                - /url: /finance/withdrawals
+                - img [ref=e36]
+                - generic [ref=e38]: Withdrawals
+            - listitem [ref=e39]:
+              - link "All Revenue" [ref=e40] [cursor=pointer]:
+                - /url: /revenue/all-tenants
+                - img [ref=e41]
+                - generic [ref=e44]: All Revenue
+            - listitem [ref=e45]:
+              - link "Games" [ref=e46] [cursor=pointer]:
+                - /url: /games
+                - img [ref=e47]
+                - generic [ref=e49]: Games
+            - listitem [ref=e50]:
+              - link "VIP Games" [ref=e51] [cursor=pointer]:
+                - /url: /vip-games
+                - img [ref=e52]
+                - generic [ref=e54]: VIP Games
+        - generic [ref=e55]:
+          - generic [ref=e56]: Operations
+          - list [ref=e57]:
+            - listitem [ref=e58]:
+              - link "KYC Verification" [ref=e59] [cursor=pointer]:
+                - /url: /kyc
+                - img [ref=e60]
+                - generic [ref=e63]: KYC Verification
+            - listitem [ref=e64]:
+              - link "CRM & Comms" [ref=e65] [cursor=pointer]:
+                - /url: /crm
+                - img [ref=e66]
+                - generic [ref=e69]: CRM & Comms
+            - listitem [ref=e70]:
+              - link "Bonuses" [ref=e71] [cursor=pointer]:
+                - /url: /bonuses
+                - img [ref=e72]
+                - generic [ref=e76]: Bonuses
+            - listitem [ref=e77]:
+              - link "Affiliates" [ref=e78] [cursor=pointer]:
+                - /url: /affiliates
+                - img [ref=e79]
+                - generic [ref=e84]: Affiliates
+            - listitem [ref=e85]:
+              - link "Kill Switch" [ref=e86] [cursor=pointer]:
+                - /url: /kill-switch
+                - img [ref=e87]
+                - generic [ref=e89]: Kill Switch
+            - listitem [ref=e90]:
+              - link "Support" [ref=e91] [cursor=pointer]:
+                - /url: /support
+                - img [ref=e92]
+                - generic [ref=e94]: Support
+        - generic [ref=e95]:
+          - generic [ref=e96]: Risk & Compliance
+          - list [ref=e97]:
+            - listitem [ref=e98]:
+              - link "Risk Rules" [ref=e99] [cursor=pointer]:
+                - /url: /risk
+                - img [ref=e100]
+                - generic [ref=e102]: Risk Rules
+            - listitem [ref=e103]:
+              - link "Fraud Check" [ref=e104] [cursor=pointer]:
+                - /url: /fraud
+                - img [ref=e105]
+                - generic [ref=e107]: Fraud Check
+            - listitem [ref=e108]:
+              - link "Approval Queue" [ref=e109] [cursor=pointer]:
+                - /url: /approvals
+                - img [ref=e110]
+                - generic [ref=e113]: Approval Queue
+            - listitem [ref=e114]:
+              - link "Responsible Gaming" [ref=e115] [cursor=pointer]:
+                - /url: /rg
+                - img [ref=e116]
+                - generic [ref=e120]: Responsible Gaming
+        - generic [ref=e121]:
+          - generic [ref=e122]: Game Engine
+          - list [ref=e123]:
+            - listitem [ref=e124]:
+              - link "Robots" [ref=e125] [cursor=pointer]:
+                - /url: /robots
+                - img [ref=e126]
+                - generic [ref=e129]: Robots
+            - listitem [ref=e130]:
+              - link "Math Assets" [ref=e131] [cursor=pointer]:
+                - /url: /math-assets
+                - img [ref=e132]
+                - generic [ref=e137]: Math Assets
+        - generic [ref=e138]:
+          - generic [ref=e139]: System
+          - list [ref=e140]:
+            - listitem [ref=e141]:
+              - link "CMS" [ref=e142] [cursor=pointer]:
+                - /url: /cms
+                - img [ref=e143]
+                - generic [ref=e146]: CMS
+            - listitem [ref=e147]:
+              - link "Reports" [ref=e148] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e149]
+                - generic [ref=e151]: Reports
+            - listitem [ref=e152]:
+              - link "Logs" [ref=e153] [cursor=pointer]:
+                - /url: /logs
+                - img [ref=e154]
+                - generic [ref=e157]: Logs
+            - listitem [ref=e158]:
+              - link "Audit Log" [ref=e159] [cursor=pointer]:
+                - /url: /audit
+                - img [ref=e160]
+                - generic [ref=e163]: Audit Log
+            - listitem [ref=e164]:
+              - link "Admin Users" [ref=e165] [cursor=pointer]:
+                - /url: /admins
+                - img [ref=e166]
+                - generic [ref=e178]: Admin Users
+            - listitem [ref=e179]:
+              - link "Tenants" [ref=e180] [cursor=pointer]:
+                - /url: /tenants
+                - img [ref=e181]
+                - generic [ref=e184]: Tenants
+            - listitem [ref=e185]:
+              - link "API Keys" [ref=e186] [cursor=pointer]:
+                - /url: /keys
+                - img [ref=e187]
+                - generic [ref=e190]: API Keys
+            - listitem [ref=e191]:
+              - link "Feature Flags" [ref=e192] [cursor=pointer]:
+                - /url: /features
+                - img [ref=e193]
+                - generic [ref=e196]: Feature Flags
+            - listitem [ref=e197]:
+              - link "Simulator" [ref=e198] [cursor=pointer]:
+                - /url: /simulator
+                - img [ref=e199]
+                - generic [ref=e201]: Simulator
+            - listitem [ref=e202]:
+              - link "Settings" [ref=e203] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e204]
+                - generic [ref=e207]: Settings
+      - button "Logout" [ref=e209] [cursor=pointer]:
+        - img [ref=e210]
+        - text: Logout
+    - main [ref=e213]:
+      - generic [ref=e214]:
+        - generic [ref=e216]:
+          - img [ref=e217]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e220]
+        - generic [ref=e221]:
+          - generic [ref=e222]:
+            - img [ref=e223]
+            - combobox [ref=e226] [cursor=pointer]:
+              - generic: Global Context
+              - img [ref=e227]
+          - generic [ref=e229]:
+            - paragraph [ref=e230]: Super Owner
+            - paragraph [ref=e231]: admin@casino.com
+          - generic [ref=e232]: SO
+      - generic [ref=e233]:
+        - generic [ref=e234]:
+          - generic [ref=e236]:
+            - heading "Withdrawals" [level=2] [ref=e237]:
+              - img [ref=e238]
+              - text: Withdrawals
+            - paragraph [ref=e241]: Review, approve or reject player withdrawal requests and track payout status.
+          - generic [ref=e242]:
+            - generic [ref=e243]:
+              - generic [ref=e244]: Filters
+              - generic [ref=e245]: Filter withdrawal requests by state, player and date range.
+            - generic [ref=e247]:
+              - generic [ref=e248]:
+                - text: State
+                - combobox "State" [ref=e249] [cursor=pointer]:
+                  - generic: All
+                  - img [ref=e250]
+              - generic [ref=e252]:
+                - text: Player ID
+                - textbox "Player ID" [ref=e253]:
+                  - /placeholder: Player ID (optional)
+              - generic [ref=e254]:
+                - generic [ref=e255]: Date from
+                - textbox "Date from" [ref=e256]
+              - generic [ref=e257]:
+                - generic [ref=e258]: Date to
+                - textbox "Date to" [ref=e259]
+              - button "Apply" [ref=e260] [cursor=pointer]
+          - generic [ref=e261]:
+            - generic [ref=e263]:
+              - generic [ref=e264]: Withdrawal Requests
+              - generic [ref=e265]: 164 total results. Page 1 of 4.
+            - generic [ref=e266]:
+              - table [ref=e269]:
+                - rowgroup [ref=e270]:
+                  - row "Tx ID Player ID Amount State Created Reviewed By Reviewed At Actions" [ref=e271]:
+                    - columnheader "Tx ID" [ref=e272]
+                    - columnheader "Player ID" [ref=e273]
+                    - columnheader "Amount" [ref=e274]
+                    - columnheader "State" [ref=e275]
+                    - columnheader "Created" [ref=e276]
+                    - columnheader "Reviewed By" [ref=e277]
+                    - columnheader "Reviewed At" [ref=e278]
+                    - columnheader "Actions" [ref=e279]
+                - rowgroup [ref=e280]:
+                  - row "e2046d99-b3b1-451a-a007-922e487cb43e a314bb53-5834-4e6f-8cae-fb8db2300a73 50 USD Requested 1/3/2026, 5:06:29 AM - - Approve Reject" [ref=e281] [cursor=pointer]:
+                    - cell "e2046d99-b3b1-451a-a007-922e487cb43e" [ref=e282]:
+                      - generic [ref=e283]:
+                        - generic [ref=e284]: e2046d99-b3b1-451a-a007-922e487cb43e
+                        - button [ref=e285]:
+                          - img
+                    - cell "a314bb53-5834-4e6f-8cae-fb8db2300a73" [ref=e286]
+                    - cell "50 USD" [ref=e287]
+                    - cell "Requested" [ref=e288]:
+                      - generic [ref=e289]: Requested
+                    - cell "1/3/2026, 5:06:29 AM" [ref=e290]
+                    - cell "-" [ref=e291]
+                    - cell "-" [ref=e292]
+                    - cell "Approve Reject" [ref=e293]:
+                      - generic [ref=e294]:
+                        - button "Approve" [ref=e295]:
+                          - img
+                          - text: Approve
+                        - button "Reject" [ref=e296]:
+                          - img
+                          - text: Reject
+                  - row "9afc7b32-129d-4888-af15-789c1d039046 c26155cc-7293-4225-bdba-fd8a07f370e9 10 USD Paid 1/3/2026, 5:06:24 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 5:06:24 AM" [ref=e298] [cursor=pointer]:
+                    - cell "9afc7b32-129d-4888-af15-789c1d039046" [ref=e299]:
+                      - generic [ref=e300]:
+                        - generic [ref=e301]: 9afc7b32-129d-4888-af15-789c1d039046
+                        - button [ref=e302]:
+                          - img
+                    - cell "c26155cc-7293-4225-bdba-fd8a07f370e9" [ref=e303]
+                    - cell "10 USD" [ref=e304]
+                    - cell "Paid" [ref=e305]:
+                      - generic [ref=e306]: Paid
+                    - cell "1/3/2026, 5:06:24 AM" [ref=e307]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e308]
+                    - cell "1/3/2026, 5:06:24 AM" [ref=e309]
+                    - cell [ref=e310]
+                  - row "2d7f9ec0-cda7-401c-a6a4-4cf0238ff325 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 5:06:23 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 5:06:23 AM" [ref=e312] [cursor=pointer]:
+                    - cell "2d7f9ec0-cda7-401c-a6a4-4cf0238ff325" [ref=e313]:
+                      - generic [ref=e314]:
+                        - generic [ref=e315]: 2d7f9ec0-cda7-401c-a6a4-4cf0238ff325
+                        - button [ref=e316]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e317]
+                    - cell "20 USD" [ref=e318]
+                    - cell "Paid" [ref=e319]:
+                      - generic [ref=e320]: Paid
+                    - cell "1/3/2026, 5:06:23 AM" [ref=e321]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e322]
+                    - cell "1/3/2026, 5:06:23 AM" [ref=e323]
+                    - cell [ref=e324]
+                  - row "4440063a-6c4d-4a02-a0a0-b1de629e0199 c5f58e08-b693-4e6e-b921-6d64f9f3013f 30 USD Paid 1/3/2026, 5:06:22 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 5:06:22 AM" [ref=e326] [cursor=pointer]:
+                    - cell "4440063a-6c4d-4a02-a0a0-b1de629e0199" [ref=e327]:
+                      - generic [ref=e328]:
+                        - generic [ref=e329]: 4440063a-6c4d-4a02-a0a0-b1de629e0199
+                        - button [ref=e330]:
+                          - img
+                    - cell "c5f58e08-b693-4e6e-b921-6d64f9f3013f" [ref=e331]
+                    - cell "30 USD" [ref=e332]
+                    - cell "Paid" [ref=e333]:
+                      - generic [ref=e334]: Paid
+                    - cell "1/3/2026, 5:06:22 AM" [ref=e335]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e336]
+                    - cell "1/3/2026, 5:06:22 AM" [ref=e337]
+                    - cell [ref=e338]
+                  - row "04d3fcc1-1d2f-4635-88d0-8f92ad5e9834 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 5:06:13 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 5:06:13 AM" [ref=e340] [cursor=pointer]:
+                    - cell "04d3fcc1-1d2f-4635-88d0-8f92ad5e9834" [ref=e341]:
+                      - generic [ref=e342]:
+                        - generic [ref=e343]: 04d3fcc1-1d2f-4635-88d0-8f92ad5e9834
+                        - button [ref=e344]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e345]
+                    - cell "10 USD" [ref=e346]
+                    - cell "Paid" [ref=e347]:
+                      - generic [ref=e348]: Paid
+                    - cell "1/3/2026, 5:06:13 AM" [ref=e349]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e350]
+                    - cell "1/3/2026, 5:06:13 AM" [ref=e351]
+                    - cell [ref=e352]
+                  - row "7c8431d1-2880-4764-88a7-f93d436f40dc 0edd9aae-89b3-4a4b-864c-e6bde88d62c4 50 USD Paid 1/3/2026, 4:56:17 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:56:19 AM" [ref=e354] [cursor=pointer]:
+                    - cell "7c8431d1-2880-4764-88a7-f93d436f40dc" [ref=e355]:
+                      - generic [ref=e356]:
+                        - generic [ref=e357]: 7c8431d1-2880-4764-88a7-f93d436f40dc
+                        - button [ref=e358]:
+                          - img
+                    - cell "0edd9aae-89b3-4a4b-864c-e6bde88d62c4" [ref=e359]
+                    - cell "50 USD" [ref=e360]
+                    - cell "Paid" [ref=e361]:
+                      - generic [ref=e362]: Paid
+                    - cell "1/3/2026, 4:56:17 AM" [ref=e363]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e364]
+                    - cell "1/3/2026, 4:56:19 AM" [ref=e365]
+                    - cell [ref=e366]
+                  - row "fbcd943a-ca3e-4974-9268-aae683d752af 0fd2a5df-a768-441a-bf9d-4cdfadc5edd5 10 USD Paid 1/3/2026, 4:56:13 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:56:13 AM" [ref=e368] [cursor=pointer]:
+                    - cell "fbcd943a-ca3e-4974-9268-aae683d752af" [ref=e369]:
+                      - generic [ref=e370]:
+                        - generic [ref=e371]: fbcd943a-ca3e-4974-9268-aae683d752af
+                        - button [ref=e372]:
+                          - img
+                    - cell "0fd2a5df-a768-441a-bf9d-4cdfadc5edd5" [ref=e373]
+                    - cell "10 USD" [ref=e374]
+                    - cell "Paid" [ref=e375]:
+                      - generic [ref=e376]: Paid
+                    - cell "1/3/2026, 4:56:13 AM" [ref=e377]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e378]
+                    - cell "1/3/2026, 4:56:13 AM" [ref=e379]
+                    - cell [ref=e380]
+                  - row "974cff12-039c-47e6-92bb-92e2e3303189 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:56:12 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:56:12 AM" [ref=e382] [cursor=pointer]:
+                    - cell "974cff12-039c-47e6-92bb-92e2e3303189" [ref=e383]:
+                      - generic [ref=e384]:
+                        - generic [ref=e385]: 974cff12-039c-47e6-92bb-92e2e3303189
+                        - button [ref=e386]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e387]
+                    - cell "20 USD" [ref=e388]
+                    - cell "Paid" [ref=e389]:
+                      - generic [ref=e390]: Paid
+                    - cell "1/3/2026, 4:56:12 AM" [ref=e391]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e392]
+                    - cell "1/3/2026, 4:56:12 AM" [ref=e393]
+                    - cell [ref=e394]
+                  - row "8c195c9f-56ff-4da3-a394-76cceb7a23ce 3bbeef71-5b30-4acd-81bb-f01a0c115aaf 30 USD Paid 1/3/2026, 4:56:11 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:56:11 AM" [ref=e396] [cursor=pointer]:
+                    - cell "8c195c9f-56ff-4da3-a394-76cceb7a23ce" [ref=e397]:
+                      - generic [ref=e398]:
+                        - generic [ref=e399]: 8c195c9f-56ff-4da3-a394-76cceb7a23ce
+                        - button [ref=e400]:
+                          - img
+                    - cell "3bbeef71-5b30-4acd-81bb-f01a0c115aaf" [ref=e401]
+                    - cell "30 USD" [ref=e402]
+                    - cell "Paid" [ref=e403]:
+                      - generic [ref=e404]: Paid
+                    - cell "1/3/2026, 4:56:11 AM" [ref=e405]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e406]
+                    - cell "1/3/2026, 4:56:11 AM" [ref=e407]
+                    - cell [ref=e408]
+                  - row "d94a113d-8065-41ae-aafa-bb3ce9ef0912 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:56:03 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:56:03 AM" [ref=e410] [cursor=pointer]:
+                    - cell "d94a113d-8065-41ae-aafa-bb3ce9ef0912" [ref=e411]:
+                      - generic [ref=e412]:
+                        - generic [ref=e413]: d94a113d-8065-41ae-aafa-bb3ce9ef0912
+                        - button [ref=e414]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e415]
+                    - cell "10 USD" [ref=e416]
+                    - cell "Paid" [ref=e417]:
+                      - generic [ref=e418]: Paid
+                    - cell "1/3/2026, 4:56:03 AM" [ref=e419]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e420]
+                    - cell "1/3/2026, 4:56:03 AM" [ref=e421]
+                    - cell [ref=e422]
+                  - row "a746f124-6550-4554-84d3-4311caa20727 fcdc2662-e91e-4f9f-9cef-bdbb979c043e 50 USD Paid 1/3/2026, 4:50:45 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:50:46 AM" [ref=e424] [cursor=pointer]:
+                    - cell "a746f124-6550-4554-84d3-4311caa20727" [ref=e425]:
+                      - generic [ref=e426]:
+                        - generic [ref=e427]: a746f124-6550-4554-84d3-4311caa20727
+                        - button [ref=e428]:
+                          - img
+                    - cell "fcdc2662-e91e-4f9f-9cef-bdbb979c043e" [ref=e429]
+                    - cell "50 USD" [ref=e430]
+                    - cell "Paid" [ref=e431]:
+                      - generic [ref=e432]: Paid
+                    - cell "1/3/2026, 4:50:45 AM" [ref=e433]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e434]
+                    - cell "1/3/2026, 4:50:46 AM" [ref=e435]
+                    - cell [ref=e436]
+                  - row "5100a44f-5c13-424e-93a9-769cc56ecc8f b49e565e-79f0-47d5-aa95-8d103f6f6316 10 USD Paid 1/3/2026, 4:50:40 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:50:40 AM" [ref=e438] [cursor=pointer]:
+                    - cell "5100a44f-5c13-424e-93a9-769cc56ecc8f" [ref=e439]:
+                      - generic [ref=e440]:
+                        - generic [ref=e441]: 5100a44f-5c13-424e-93a9-769cc56ecc8f
+                        - button [ref=e442]:
+                          - img
+                    - cell "b49e565e-79f0-47d5-aa95-8d103f6f6316" [ref=e443]
+                    - cell "10 USD" [ref=e444]
+                    - cell "Paid" [ref=e445]:
+                      - generic [ref=e446]: Paid
+                    - cell "1/3/2026, 4:50:40 AM" [ref=e447]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e448]
+                    - cell "1/3/2026, 4:50:40 AM" [ref=e449]
+                    - cell [ref=e450]
+                  - row "f2516d4c-9233-44e6-8df4-2dd723d97732 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:50:39 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:50:39 AM" [ref=e452] [cursor=pointer]:
+                    - cell "f2516d4c-9233-44e6-8df4-2dd723d97732" [ref=e453]:
+                      - generic [ref=e454]:
+                        - generic [ref=e455]: f2516d4c-9233-44e6-8df4-2dd723d97732
+                        - button [ref=e456]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e457]
+                    - cell "20 USD" [ref=e458]
+                    - cell "Paid" [ref=e459]:
+                      - generic [ref=e460]: Paid
+                    - cell "1/3/2026, 4:50:39 AM" [ref=e461]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e462]
+                    - cell "1/3/2026, 4:50:39 AM" [ref=e463]
+                    - cell [ref=e464]
+                  - row "c40ea245-b00e-414c-aa16-cbafe8cc4db4 7f131158-9a6f-42d3-92ac-719786ec2620 30 USD Paid 1/3/2026, 4:50:37 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:50:38 AM" [ref=e466] [cursor=pointer]:
+                    - cell "c40ea245-b00e-414c-aa16-cbafe8cc4db4" [ref=e467]:
+                      - generic [ref=e468]:
+                        - generic [ref=e469]: c40ea245-b00e-414c-aa16-cbafe8cc4db4
+                        - button [ref=e470]:
+                          - img
+                    - cell "7f131158-9a6f-42d3-92ac-719786ec2620" [ref=e471]
+                    - cell "30 USD" [ref=e472]
+                    - cell "Paid" [ref=e473]:
+                      - generic [ref=e474]: Paid
+                    - cell "1/3/2026, 4:50:37 AM" [ref=e475]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e476]
+                    - cell "1/3/2026, 4:50:38 AM" [ref=e477]
+                    - cell [ref=e478]
+                  - row "4fb43d76-7abc-48db-afe1-7a168a657493 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:50:29 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:50:29 AM" [ref=e480] [cursor=pointer]:
+                    - cell "4fb43d76-7abc-48db-afe1-7a168a657493" [ref=e481]:
+                      - generic [ref=e482]:
+                        - generic [ref=e483]: 4fb43d76-7abc-48db-afe1-7a168a657493
+                        - button [ref=e484]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e485]
+                    - cell "10 USD" [ref=e486]
+                    - cell "Paid" [ref=e487]:
+                      - generic [ref=e488]: Paid
+                    - cell "1/3/2026, 4:50:29 AM" [ref=e489]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e490]
+                    - cell "1/3/2026, 4:50:29 AM" [ref=e491]
+                    - cell [ref=e492]
+                  - row "bb985fd7-08f7-4a22-ab8b-a89d0b6b6635 a0c879ad-a811-4630-b926-c21f6f54bc9a 50 USD Paid 1/3/2026, 4:45:36 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:45:38 AM" [ref=e494] [cursor=pointer]:
+                    - cell "bb985fd7-08f7-4a22-ab8b-a89d0b6b6635" [ref=e495]:
+                      - generic [ref=e496]:
+                        - generic [ref=e497]: bb985fd7-08f7-4a22-ab8b-a89d0b6b6635
+                        - button [ref=e498]:
+                          - img
+                    - cell "a0c879ad-a811-4630-b926-c21f6f54bc9a" [ref=e499]
+                    - cell "50 USD" [ref=e500]
+                    - cell "Paid" [ref=e501]:
+                      - generic [ref=e502]: Paid
+                    - cell "1/3/2026, 4:45:36 AM" [ref=e503]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e504]
+                    - cell "1/3/2026, 4:45:38 AM" [ref=e505]
+                    - cell [ref=e506]
+                  - row "16f337ec-f237-47e2-a302-f815546fcd5e 29009653-074b-4bf0-ad8d-1166d4984c70 10 USD Paid 1/3/2026, 4:45:31 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:45:31 AM" [ref=e508] [cursor=pointer]:
+                    - cell "16f337ec-f237-47e2-a302-f815546fcd5e" [ref=e509]:
+                      - generic [ref=e510]:
+                        - generic [ref=e511]: 16f337ec-f237-47e2-a302-f815546fcd5e
+                        - button [ref=e512]:
+                          - img
+                    - cell "29009653-074b-4bf0-ad8d-1166d4984c70" [ref=e513]
+                    - cell "10 USD" [ref=e514]
+                    - cell "Paid" [ref=e515]:
+                      - generic [ref=e516]: Paid
+                    - cell "1/3/2026, 4:45:31 AM" [ref=e517]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e518]
+                    - cell "1/3/2026, 4:45:31 AM" [ref=e519]
+                    - cell [ref=e520]
+                  - row "a115db12-a360-418e-a465-82757cde26cc 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:45:30 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:45:30 AM" [ref=e522] [cursor=pointer]:
+                    - cell "a115db12-a360-418e-a465-82757cde26cc" [ref=e523]:
+                      - generic [ref=e524]:
+                        - generic [ref=e525]: a115db12-a360-418e-a465-82757cde26cc
+                        - button [ref=e526]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e527]
+                    - cell "20 USD" [ref=e528]
+                    - cell "Paid" [ref=e529]:
+                      - generic [ref=e530]: Paid
+                    - cell "1/3/2026, 4:45:30 AM" [ref=e531]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e532]
+                    - cell "1/3/2026, 4:45:30 AM" [ref=e533]
+                    - cell [ref=e534]
+                  - row "d23ff187-b1ba-4d4e-a8eb-e1708f33e8a6 8f04eedb-4522-4183-9f3d-c8cc4d33e9e4 30 USD Paid 1/3/2026, 4:45:28 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:45:29 AM" [ref=e536] [cursor=pointer]:
+                    - cell "d23ff187-b1ba-4d4e-a8eb-e1708f33e8a6" [ref=e537]:
+                      - generic [ref=e538]:
+                        - generic [ref=e539]: d23ff187-b1ba-4d4e-a8eb-e1708f33e8a6
+                        - button [ref=e540]:
+                          - img
+                    - cell "8f04eedb-4522-4183-9f3d-c8cc4d33e9e4" [ref=e541]
+                    - cell "30 USD" [ref=e542]
+                    - cell "Paid" [ref=e543]:
+                      - generic [ref=e544]: Paid
+                    - cell "1/3/2026, 4:45:28 AM" [ref=e545]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e546]
+                    - cell "1/3/2026, 4:45:29 AM" [ref=e547]
+                    - cell [ref=e548]
+                  - row "b840eaa7-db2b-4a54-b631-9a195a3a291e 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:45:20 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:45:20 AM" [ref=e550] [cursor=pointer]:
+                    - cell "b840eaa7-db2b-4a54-b631-9a195a3a291e" [ref=e551]:
+                      - generic [ref=e552]:
+                        - generic [ref=e553]: b840eaa7-db2b-4a54-b631-9a195a3a291e
+                        - button [ref=e554]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e555]
+                    - cell "10 USD" [ref=e556]
+                    - cell "Paid" [ref=e557]:
+                      - generic [ref=e558]: Paid
+                    - cell "1/3/2026, 4:45:20 AM" [ref=e559]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e560]
+                    - cell "1/3/2026, 4:45:20 AM" [ref=e561]
+                    - cell [ref=e562]
+                  - row "0a6c77f1-f11c-4a3b-a913-f4ee8bcae6d2 d1d3cf97-8b7a-4788-a46a-6e0f4189245b 50 USD Paid 1/3/2026, 4:40:26 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:40:28 AM" [ref=e564] [cursor=pointer]:
+                    - cell "0a6c77f1-f11c-4a3b-a913-f4ee8bcae6d2" [ref=e565]:
+                      - generic [ref=e566]:
+                        - generic [ref=e567]: 0a6c77f1-f11c-4a3b-a913-f4ee8bcae6d2
+                        - button [ref=e568]:
+                          - img
+                    - cell "d1d3cf97-8b7a-4788-a46a-6e0f4189245b" [ref=e569]
+                    - cell "50 USD" [ref=e570]
+                    - cell "Paid" [ref=e571]:
+                      - generic [ref=e572]: Paid
+                    - cell "1/3/2026, 4:40:26 AM" [ref=e573]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e574]
+                    - cell "1/3/2026, 4:40:28 AM" [ref=e575]
+                    - cell [ref=e576]
+                  - row "9808a3e8-dac4-42df-9c31-41a34761b915 5ee2d2b5-67ed-4ba3-aa10-ff9af32ed8d7 10 USD Paid 1/3/2026, 4:40:21 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:40:21 AM" [ref=e578] [cursor=pointer]:
+                    - cell "9808a3e8-dac4-42df-9c31-41a34761b915" [ref=e579]:
+                      - generic [ref=e580]:
+                        - generic [ref=e581]: 9808a3e8-dac4-42df-9c31-41a34761b915
+                        - button [ref=e582]:
+                          - img
+                    - cell "5ee2d2b5-67ed-4ba3-aa10-ff9af32ed8d7" [ref=e583]
+                    - cell "10 USD" [ref=e584]
+                    - cell "Paid" [ref=e585]:
+                      - generic [ref=e586]: Paid
+                    - cell "1/3/2026, 4:40:21 AM" [ref=e587]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e588]
+                    - cell "1/3/2026, 4:40:21 AM" [ref=e589]
+                    - cell [ref=e590]
+                  - row "cec507b2-38f8-4ad8-82e8-e5a1ee59a2af 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:40:20 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:40:20 AM" [ref=e592] [cursor=pointer]:
+                    - cell "cec507b2-38f8-4ad8-82e8-e5a1ee59a2af" [ref=e593]:
+                      - generic [ref=e594]:
+                        - generic [ref=e595]: cec507b2-38f8-4ad8-82e8-e5a1ee59a2af
+                        - button [ref=e596]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e597]
+                    - cell "20 USD" [ref=e598]
+                    - cell "Paid" [ref=e599]:
+                      - generic [ref=e600]: Paid
+                    - cell "1/3/2026, 4:40:20 AM" [ref=e601]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e602]
+                    - cell "1/3/2026, 4:40:20 AM" [ref=e603]
+                    - cell [ref=e604]
+                  - row "228eb465-d119-412b-bf0c-873cf05c61d2 c3587918-14bc-4972-8214-571b54eef2c9 30 USD Paid 1/3/2026, 4:40:19 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:40:19 AM" [ref=e606] [cursor=pointer]:
+                    - cell "228eb465-d119-412b-bf0c-873cf05c61d2" [ref=e607]:
+                      - generic [ref=e608]:
+                        - generic [ref=e609]: 228eb465-d119-412b-bf0c-873cf05c61d2
+                        - button [ref=e610]:
+                          - img
+                    - cell "c3587918-14bc-4972-8214-571b54eef2c9" [ref=e611]
+                    - cell "30 USD" [ref=e612]
+                    - cell "Paid" [ref=e613]:
+                      - generic [ref=e614]: Paid
+                    - cell "1/3/2026, 4:40:19 AM" [ref=e615]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e616]
+                    - cell "1/3/2026, 4:40:19 AM" [ref=e617]
+                    - cell [ref=e618]
+                  - row "91fc93aa-ae55-4bbf-9e38-68247b558f08 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:40:10 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:40:10 AM" [ref=e620] [cursor=pointer]:
+                    - cell "91fc93aa-ae55-4bbf-9e38-68247b558f08" [ref=e621]:
+                      - generic [ref=e622]:
+                        - generic [ref=e623]: 91fc93aa-ae55-4bbf-9e38-68247b558f08
+                        - button [ref=e624]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e625]
+                    - cell "10 USD" [ref=e626]
+                    - cell "Paid" [ref=e627]:
+                      - generic [ref=e628]: Paid
+                    - cell "1/3/2026, 4:40:10 AM" [ref=e629]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e630]
+                    - cell "1/3/2026, 4:40:10 AM" [ref=e631]
+                    - cell [ref=e632]
+                  - row "27484ab0-f269-463d-a0de-02a6b2d77f68 be52e996-98ae-4266-b702-9e216cdc572d 50 USD Paid 1/3/2026, 4:35:16 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:35:17 AM" [ref=e634] [cursor=pointer]:
+                    - cell "27484ab0-f269-463d-a0de-02a6b2d77f68" [ref=e635]:
+                      - generic [ref=e636]:
+                        - generic [ref=e637]: 27484ab0-f269-463d-a0de-02a6b2d77f68
+                        - button [ref=e638]:
+                          - img
+                    - cell "be52e996-98ae-4266-b702-9e216cdc572d" [ref=e639]
+                    - cell "50 USD" [ref=e640]
+                    - cell "Paid" [ref=e641]:
+                      - generic [ref=e642]: Paid
+                    - cell "1/3/2026, 4:35:16 AM" [ref=e643]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e644]
+                    - cell "1/3/2026, 4:35:17 AM" [ref=e645]
+                    - cell [ref=e646]
+                  - row "304edcd2-6100-4cc9-8701-b94d065ba7b2 a19ea1fa-3b6b-48aa-94ad-87417a56dc86 10 USD Paid 1/3/2026, 4:35:11 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:35:11 AM" [ref=e648] [cursor=pointer]:
+                    - cell "304edcd2-6100-4cc9-8701-b94d065ba7b2" [ref=e649]:
+                      - generic [ref=e650]:
+                        - generic [ref=e651]: 304edcd2-6100-4cc9-8701-b94d065ba7b2
+                        - button [ref=e652]:
+                          - img
+                    - cell "a19ea1fa-3b6b-48aa-94ad-87417a56dc86" [ref=e653]
+                    - cell "10 USD" [ref=e654]
+                    - cell "Paid" [ref=e655]:
+                      - generic [ref=e656]: Paid
+                    - cell "1/3/2026, 4:35:11 AM" [ref=e657]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e658]
+                    - cell "1/3/2026, 4:35:11 AM" [ref=e659]
+                    - cell [ref=e660]
+                  - row "fdb31b20-bc6e-46e8-b594-14dc582a0f8a 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:35:10 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:35:10 AM" [ref=e662] [cursor=pointer]:
+                    - cell "fdb31b20-bc6e-46e8-b594-14dc582a0f8a" [ref=e663]:
+                      - generic [ref=e664]:
+                        - generic [ref=e665]: fdb31b20-bc6e-46e8-b594-14dc582a0f8a
+                        - button [ref=e666]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e667]
+                    - cell "20 USD" [ref=e668]
+                    - cell "Paid" [ref=e669]:
+                      - generic [ref=e670]: Paid
+                    - cell "1/3/2026, 4:35:10 AM" [ref=e671]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e672]
+                    - cell "1/3/2026, 4:35:10 AM" [ref=e673]
+                    - cell [ref=e674]
+                  - row "7ccc614e-5ac9-446b-a3a1-b98275dd81ec 25689237-5073-4eb3-bb71-53d5477befab 30 USD Paid 1/3/2026, 4:35:09 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:35:09 AM" [ref=e676] [cursor=pointer]:
+                    - cell "7ccc614e-5ac9-446b-a3a1-b98275dd81ec" [ref=e677]:
+                      - generic [ref=e678]:
+                        - generic [ref=e679]: 7ccc614e-5ac9-446b-a3a1-b98275dd81ec
+                        - button [ref=e680]:
+                          - img
+                    - cell "25689237-5073-4eb3-bb71-53d5477befab" [ref=e681]
+                    - cell "30 USD" [ref=e682]
+                    - cell "Paid" [ref=e683]:
+                      - generic [ref=e684]: Paid
+                    - cell "1/3/2026, 4:35:09 AM" [ref=e685]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e686]
+                    - cell "1/3/2026, 4:35:09 AM" [ref=e687]
+                    - cell [ref=e688]
+                  - row "dce022e2-8435-4cdd-9846-ca881f8b4753 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:35:00 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:35:00 AM" [ref=e690] [cursor=pointer]:
+                    - cell "dce022e2-8435-4cdd-9846-ca881f8b4753" [ref=e691]:
+                      - generic [ref=e692]:
+                        - generic [ref=e693]: dce022e2-8435-4cdd-9846-ca881f8b4753
+                        - button [ref=e694]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e695]
+                    - cell "10 USD" [ref=e696]
+                    - cell "Paid" [ref=e697]:
+                      - generic [ref=e698]: Paid
+                    - cell "1/3/2026, 4:35:00 AM" [ref=e699]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e700]
+                    - cell "1/3/2026, 4:35:00 AM" [ref=e701]
+                    - cell [ref=e702]
+                  - row "811a32be-7529-4208-bd7e-5e23df8041b3 290b43d5-818b-4881-9778-631d01f78cfe 50 USD Paid 1/3/2026, 4:29:56 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:29:58 AM" [ref=e704] [cursor=pointer]:
+                    - cell "811a32be-7529-4208-bd7e-5e23df8041b3" [ref=e705]:
+                      - generic [ref=e706]:
+                        - generic [ref=e707]: 811a32be-7529-4208-bd7e-5e23df8041b3
+                        - button [ref=e708]:
+                          - img
+                    - cell "290b43d5-818b-4881-9778-631d01f78cfe" [ref=e709]
+                    - cell "50 USD" [ref=e710]
+                    - cell "Paid" [ref=e711]:
+                      - generic [ref=e712]: Paid
+                    - cell "1/3/2026, 4:29:56 AM" [ref=e713]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e714]
+                    - cell "1/3/2026, 4:29:58 AM" [ref=e715]
+                    - cell [ref=e716]
+                  - row "630685be-fdfa-4d2e-a1eb-7ebc062f162d b58d339b-6f26-455d-b82a-e29ddd68f543 10 USD Paid 1/3/2026, 4:29:51 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:29:51 AM" [ref=e718] [cursor=pointer]:
+                    - cell "630685be-fdfa-4d2e-a1eb-7ebc062f162d" [ref=e719]:
+                      - generic [ref=e720]:
+                        - generic [ref=e721]: 630685be-fdfa-4d2e-a1eb-7ebc062f162d
+                        - button [ref=e722]:
+                          - img
+                    - cell "b58d339b-6f26-455d-b82a-e29ddd68f543" [ref=e723]
+                    - cell "10 USD" [ref=e724]
+                    - cell "Paid" [ref=e725]:
+                      - generic [ref=e726]: Paid
+                    - cell "1/3/2026, 4:29:51 AM" [ref=e727]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e728]
+                    - cell "1/3/2026, 4:29:51 AM" [ref=e729]
+                    - cell [ref=e730]
+                  - row "a5de71d8-38e5-4304-ae86-e8d2234e4dae 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:29:50 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:29:50 AM" [ref=e732] [cursor=pointer]:
+                    - cell "a5de71d8-38e5-4304-ae86-e8d2234e4dae" [ref=e733]:
+                      - generic [ref=e734]:
+                        - generic [ref=e735]: a5de71d8-38e5-4304-ae86-e8d2234e4dae
+                        - button [ref=e736]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e737]
+                    - cell "20 USD" [ref=e738]
+                    - cell "Paid" [ref=e739]:
+                      - generic [ref=e740]: Paid
+                    - cell "1/3/2026, 4:29:50 AM" [ref=e741]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e742]
+                    - cell "1/3/2026, 4:29:50 AM" [ref=e743]
+                    - cell [ref=e744]
+                  - row "65213081-17db-4bf3-bd8a-c08eb59490c0 71c9ee8b-5ab3-49fe-9842-2fa3083b195f 30 USD Paid 1/3/2026, 4:29:48 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:29:49 AM" [ref=e746] [cursor=pointer]:
+                    - cell "65213081-17db-4bf3-bd8a-c08eb59490c0" [ref=e747]:
+                      - generic [ref=e748]:
+                        - generic [ref=e749]: 65213081-17db-4bf3-bd8a-c08eb59490c0
+                        - button [ref=e750]:
+                          - img
+                    - cell "71c9ee8b-5ab3-49fe-9842-2fa3083b195f" [ref=e751]
+                    - cell "30 USD" [ref=e752]
+                    - cell "Paid" [ref=e753]:
+                      - generic [ref=e754]: Paid
+                    - cell "1/3/2026, 4:29:48 AM" [ref=e755]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e756]
+                    - cell "1/3/2026, 4:29:49 AM" [ref=e757]
+                    - cell [ref=e758]
+                  - row "2d583b09-67a0-4cfc-bfa0-d3731c95ba35 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:29:40 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:29:40 AM" [ref=e760] [cursor=pointer]:
+                    - cell "2d583b09-67a0-4cfc-bfa0-d3731c95ba35" [ref=e761]:
+                      - generic [ref=e762]:
+                        - generic [ref=e763]: 2d583b09-67a0-4cfc-bfa0-d3731c95ba35
+                        - button [ref=e764]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e765]
+                    - cell "10 USD" [ref=e766]
+                    - cell "Paid" [ref=e767]:
+                      - generic [ref=e768]: Paid
+                    - cell "1/3/2026, 4:29:40 AM" [ref=e769]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e770]
+                    - cell "1/3/2026, 4:29:40 AM" [ref=e771]
+                    - cell [ref=e772]
+                  - row "8308fd33-14ab-4388-9354-f8ed4f08936f d804cbdb-7a93-4c42-90d6-3118a87e54e3 50 USD Paid 1/3/2026, 4:24:44 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:24:46 AM" [ref=e774] [cursor=pointer]:
+                    - cell "8308fd33-14ab-4388-9354-f8ed4f08936f" [ref=e775]:
+                      - generic [ref=e776]:
+                        - generic [ref=e777]: 8308fd33-14ab-4388-9354-f8ed4f08936f
+                        - button [ref=e778]:
+                          - img
+                    - cell "d804cbdb-7a93-4c42-90d6-3118a87e54e3" [ref=e779]
+                    - cell "50 USD" [ref=e780]
+                    - cell "Paid" [ref=e781]:
+                      - generic [ref=e782]: Paid
+                    - cell "1/3/2026, 4:24:44 AM" [ref=e783]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e784]
+                    - cell "1/3/2026, 4:24:46 AM" [ref=e785]
+                    - cell [ref=e786]
+                  - row "61f63d97-eaa1-4e4e-a85b-fbe11bf3632c 88d230f7-5f56-461f-8935-f2a5eb90e6c1 10 USD Paid 1/3/2026, 4:24:40 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:24:40 AM" [ref=e788] [cursor=pointer]:
+                    - cell "61f63d97-eaa1-4e4e-a85b-fbe11bf3632c" [ref=e789]:
+                      - generic [ref=e790]:
+                        - generic [ref=e791]: 61f63d97-eaa1-4e4e-a85b-fbe11bf3632c
+                        - button [ref=e792]:
+                          - img
+                    - cell "88d230f7-5f56-461f-8935-f2a5eb90e6c1" [ref=e793]
+                    - cell "10 USD" [ref=e794]
+                    - cell "Paid" [ref=e795]:
+                      - generic [ref=e796]: Paid
+                    - cell "1/3/2026, 4:24:40 AM" [ref=e797]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e798]
+                    - cell "1/3/2026, 4:24:40 AM" [ref=e799]
+                    - cell [ref=e800]
+                  - row "407ab906-a434-4ef5-a672-3f32b2350a4b 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:24:39 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:24:39 AM" [ref=e802] [cursor=pointer]:
+                    - cell "407ab906-a434-4ef5-a672-3f32b2350a4b" [ref=e803]:
+                      - generic [ref=e804]:
+                        - generic [ref=e805]: 407ab906-a434-4ef5-a672-3f32b2350a4b
+                        - button [ref=e806]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e807]
+                    - cell "20 USD" [ref=e808]
+                    - cell "Paid" [ref=e809]:
+                      - generic [ref=e810]: Paid
+                    - cell "1/3/2026, 4:24:39 AM" [ref=e811]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e812]
+                    - cell "1/3/2026, 4:24:39 AM" [ref=e813]
+                    - cell [ref=e814]
+                  - row "af2a952f-8104-43e4-94bb-c2cef95a636d 3c7c317b-9554-4ce9-8fe8-3c1abc1d17d2 30 USD Paid 1/3/2026, 4:24:38 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:24:38 AM" [ref=e816] [cursor=pointer]:
+                    - cell "af2a952f-8104-43e4-94bb-c2cef95a636d" [ref=e817]:
+                      - generic [ref=e818]:
+                        - generic [ref=e819]: af2a952f-8104-43e4-94bb-c2cef95a636d
+                        - button [ref=e820]:
+                          - img
+                    - cell "3c7c317b-9554-4ce9-8fe8-3c1abc1d17d2" [ref=e821]
+                    - cell "30 USD" [ref=e822]
+                    - cell "Paid" [ref=e823]:
+                      - generic [ref=e824]: Paid
+                    - cell "1/3/2026, 4:24:38 AM" [ref=e825]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e826]
+                    - cell "1/3/2026, 4:24:38 AM" [ref=e827]
+                    - cell [ref=e828]
+                  - row "2f79f728-e269-4874-83d9-447969826d91 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:24:29 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:24:30 AM" [ref=e830] [cursor=pointer]:
+                    - cell "2f79f728-e269-4874-83d9-447969826d91" [ref=e831]:
+                      - generic [ref=e832]:
+                        - generic [ref=e833]: 2f79f728-e269-4874-83d9-447969826d91
+                        - button [ref=e834]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e835]
+                    - cell "10 USD" [ref=e836]
+                    - cell "Paid" [ref=e837]:
+                      - generic [ref=e838]: Paid
+                    - cell "1/3/2026, 4:24:29 AM" [ref=e839]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e840]
+                    - cell "1/3/2026, 4:24:30 AM" [ref=e841]
+                    - cell [ref=e842]
+                  - row "609117ad-9eba-414c-82f6-303bf6685ce2 32935d04-3721-46d1-aa48-cadc7dbd5c66 50 USD Paid 1/3/2026, 4:16:24 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:16:25 AM" [ref=e844] [cursor=pointer]:
+                    - cell "609117ad-9eba-414c-82f6-303bf6685ce2" [ref=e845]:
+                      - generic [ref=e846]:
+                        - generic [ref=e847]: 609117ad-9eba-414c-82f6-303bf6685ce2
+                        - button [ref=e848]:
+                          - img
+                    - cell "32935d04-3721-46d1-aa48-cadc7dbd5c66" [ref=e849]
+                    - cell "50 USD" [ref=e850]
+                    - cell "Paid" [ref=e851]:
+                      - generic [ref=e852]: Paid
+                    - cell "1/3/2026, 4:16:24 AM" [ref=e853]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e854]
+                    - cell "1/3/2026, 4:16:25 AM" [ref=e855]
+                    - cell [ref=e856]
+                  - row "6a1c36ae-74c6-4c52-9645-d8dea5ef1d15 4b0f6974-acc2-49d2-96f9-7f489c381ec1 10 USD Paid 1/3/2026, 4:16:19 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:16:19 AM" [ref=e858] [cursor=pointer]:
+                    - cell "6a1c36ae-74c6-4c52-9645-d8dea5ef1d15" [ref=e859]:
+                      - generic [ref=e860]:
+                        - generic [ref=e861]: 6a1c36ae-74c6-4c52-9645-d8dea5ef1d15
+                        - button [ref=e862]:
+                          - img
+                    - cell "4b0f6974-acc2-49d2-96f9-7f489c381ec1" [ref=e863]
+                    - cell "10 USD" [ref=e864]
+                    - cell "Paid" [ref=e865]:
+                      - generic [ref=e866]: Paid
+                    - cell "1/3/2026, 4:16:19 AM" [ref=e867]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e868]
+                    - cell "1/3/2026, 4:16:19 AM" [ref=e869]
+                    - cell [ref=e870]
+                  - row "772db1e7-e74f-4c8f-a8c0-edef97b5d4ac 44f62674-8329-42a6-8b91-ac7fc90cf542 20 USD Paid 1/3/2026, 4:16:18 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:16:18 AM" [ref=e872] [cursor=pointer]:
+                    - cell "772db1e7-e74f-4c8f-a8c0-edef97b5d4ac" [ref=e873]:
+                      - generic [ref=e874]:
+                        - generic [ref=e875]: 772db1e7-e74f-4c8f-a8c0-edef97b5d4ac
+                        - button [ref=e876]:
+                          - img
+                    - cell "44f62674-8329-42a6-8b91-ac7fc90cf542" [ref=e877]
+                    - cell "20 USD" [ref=e878]
+                    - cell "Paid" [ref=e879]:
+                      - generic [ref=e880]: Paid
+                    - cell "1/3/2026, 4:16:18 AM" [ref=e881]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e882]
+                    - cell "1/3/2026, 4:16:18 AM" [ref=e883]
+                    - cell [ref=e884]
+                  - row "b4e646a3-2400-4658-8070-2b718224558c bbcbcacd-6cec-4aec-85b9-316a2279765b 30 USD Paid 1/3/2026, 4:16:17 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:16:17 AM" [ref=e886] [cursor=pointer]:
+                    - cell "b4e646a3-2400-4658-8070-2b718224558c" [ref=e887]:
+                      - generic [ref=e888]:
+                        - generic [ref=e889]: b4e646a3-2400-4658-8070-2b718224558c
+                        - button [ref=e890]:
+                          - img
+                    - cell "bbcbcacd-6cec-4aec-85b9-316a2279765b" [ref=e891]
+                    - cell "30 USD" [ref=e892]
+                    - cell "Paid" [ref=e893]:
+                      - generic [ref=e894]: Paid
+                    - cell "1/3/2026, 4:16:17 AM" [ref=e895]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e896]
+                    - cell "1/3/2026, 4:16:17 AM" [ref=e897]
+                    - cell [ref=e898]
+                  - row "8ed12a52-8367-49b1-b3e1-87194e0d7dd8 9a7bc583-72c7-4827-854c-125d818a8709 10 USD Paid 1/3/2026, 4:16:09 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:16:09 AM" [ref=e900] [cursor=pointer]:
+                    - cell "8ed12a52-8367-49b1-b3e1-87194e0d7dd8" [ref=e901]:
+                      - generic [ref=e902]:
+                        - generic [ref=e903]: 8ed12a52-8367-49b1-b3e1-87194e0d7dd8
+                        - button [ref=e904]:
+                          - img
+                    - cell "9a7bc583-72c7-4827-854c-125d818a8709" [ref=e905]
+                    - cell "10 USD" [ref=e906]
+                    - cell "Paid" [ref=e907]:
+                      - generic [ref=e908]: Paid
+                    - cell "1/3/2026, 4:16:09 AM" [ref=e909]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e910]
+                    - cell "1/3/2026, 4:16:09 AM" [ref=e911]
+                    - cell [ref=e912]
+                  - row "a534545f-127f-468d-b0a3-eb0b862249a5 ce1829f5-4deb-4726-a23d-e2acdbb54023 50 USD Paid 1/3/2026, 4:11:43 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:11:44 AM" [ref=e914] [cursor=pointer]:
+                    - cell "a534545f-127f-468d-b0a3-eb0b862249a5" [ref=e915]:
+                      - generic [ref=e916]:
+                        - generic [ref=e917]: a534545f-127f-468d-b0a3-eb0b862249a5
+                        - button [ref=e918]:
+                          - img
+                    - cell "ce1829f5-4deb-4726-a23d-e2acdbb54023" [ref=e919]
+                    - cell "50 USD" [ref=e920]
+                    - cell "Paid" [ref=e921]:
+                      - generic [ref=e922]: Paid
+                    - cell "1/3/2026, 4:11:43 AM" [ref=e923]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e924]
+                    - cell "1/3/2026, 4:11:44 AM" [ref=e925]
+                    - cell [ref=e926]
+                  - row "24519205-02ea-45fd-9da8-b9e2af26d572 ab3374a4-2d75-467c-b4ee-b395ea285c95 50 USD Approved 1/3/2026, 4:09:51 AM c2352046-ebc4-4675-bbf2-2eebbe43e453 1/3/2026, 4:09:52 AM Mark Paid Start Payout" [ref=e928] [cursor=pointer]:
+                    - cell "24519205-02ea-45fd-9da8-b9e2af26d572" [ref=e929]:
+                      - generic [ref=e930]:
+                        - generic [ref=e931]: 24519205-02ea-45fd-9da8-b9e2af26d572
+                        - button [ref=e932]:
+                          - img
+                    - cell "ab3374a4-2d75-467c-b4ee-b395ea285c95" [ref=e933]
+                    - cell "50 USD" [ref=e934]
+                    - cell "Approved" [ref=e935]:
+                      - generic [ref=e936]: Approved
+                    - cell "1/3/2026, 4:09:51 AM" [ref=e937]
+                    - cell "c2352046-ebc4-4675-bbf2-2eebbe43e453" [ref=e938]
+                    - cell "1/3/2026, 4:09:52 AM" [ref=e939]
+                    - cell "Mark Paid Start Payout" [ref=e940]:
+                      - generic [ref=e941]:
+                        - button "Mark Paid" [ref=e942]:
+                          - img
+                          - text: Mark Paid
+                        - button "Start Payout" [ref=e943]:
+                          - img
+                          - text: Start Payout
+                  - row "1bdabfcd-7f02-49f5-b6e2-23ba52b1fa49 dfbd60ad-0c48-4784-b1cf-7830144de033 50 USD Requested 1/3/2026, 4:08:56 AM - - Approve Reject" [ref=e945] [cursor=pointer]:
+                    - cell "1bdabfcd-7f02-49f5-b6e2-23ba52b1fa49" [ref=e946]:
+                      - generic [ref=e947]:
+                        - generic [ref=e948]: 1bdabfcd-7f02-49f5-b6e2-23ba52b1fa49
+                        - button [ref=e949]:
+                          - img
+                    - cell "dfbd60ad-0c48-4784-b1cf-7830144de033" [ref=e950]
+                    - cell "50 USD" [ref=e951]
+                    - cell "Requested" [ref=e952]:
+                      - generic [ref=e953]: Requested
+                    - cell "1/3/2026, 4:08:56 AM" [ref=e954]
+                    - cell "-" [ref=e955]
+                    - cell "-" [ref=e956]
+                    - cell "Approve Reject" [ref=e957]:
+                      - generic [ref=e958]:
+                        - button "Approve" [ref=e959]:
+                          - img
+                          - text: Approve
+                        - button "Reject" [ref=e960]:
+                          - img
+                          - text: Reject
+                  - row "e0cc2afd-f1e9-4e40-b65a-86b65cb3fa59 e6d4d3ca-185c-44b0-89a0-7e8765ac9f56 50 USD Requested 1/3/2026, 4:08:18 AM - - Approve Reject" [ref=e962] [cursor=pointer]:
+                    - cell "e0cc2afd-f1e9-4e40-b65a-86b65cb3fa59" [ref=e963]:
+                      - generic [ref=e964]:
+                        - generic [ref=e965]: e0cc2afd-f1e9-4e40-b65a-86b65cb3fa59
+                        - button [ref=e966]:
+                          - img
+                    - cell "e6d4d3ca-185c-44b0-89a0-7e8765ac9f56" [ref=e967]
+                    - cell "50 USD" [ref=e968]
+                    - cell "Requested" [ref=e969]:
+                      - generic [ref=e970]: Requested
+                    - cell "1/3/2026, 4:08:18 AM" [ref=e971]
+                    - cell "-" [ref=e972]
+                    - cell "-" [ref=e973]
+                    - cell "Approve Reject" [ref=e974]:
+                      - generic [ref=e975]:
+                        - button "Approve" [ref=e976]:
+                          - img
+                          - text: Approve
+                        - button "Reject" [ref=e977]:
+                          - img
+                          - text: Reject
+                  - row "98ac2ad2-28c4-49f5-a7a3-775737a624ab 587a6fd4-31e9-4fba-8a9e-e8b44fba8660 50 USD Requested 1/3/2026, 4:06:38 AM - - Approve Reject" [ref=e979] [cursor=pointer]:
+                    - cell "98ac2ad2-28c4-49f5-a7a3-775737a624ab" [ref=e980]:
+                      - generic [ref=e981]:
+                        - generic [ref=e982]: 98ac2ad2-28c4-49f5-a7a3-775737a624ab
+                        - button [ref=e983]:
+                          - img
+                    - cell "587a6fd4-31e9-4fba-8a9e-e8b44fba8660" [ref=e984]
+                    - cell "50 USD" [ref=e985]
+                    - cell "Requested" [ref=e986]:
+                      - generic [ref=e987]: Requested
+                    - cell "1/3/2026, 4:06:38 AM" [ref=e988]
+                    - cell "-" [ref=e989]
+                    - cell "-" [ref=e990]
+                    - cell "Approve Reject" [ref=e991]:
+                      - generic [ref=e992]:
+                        - button "Approve" [ref=e993]:
+                          - img
+                          - text: Approve
+                        - button "Reject" [ref=e994]:
+                          - img
+                          - text: Reject
+              - generic [ref=e996]:
+                - generic [ref=e997]: Showing 1–50 of 164
+                - navigation "pagination" [ref=e998]:
+                  - list [ref=e999]:
+                    - listitem [ref=e1000]:
+                      - generic "Go to previous page":
+                        - img
+                        - generic: Previous
+                    - listitem [ref=e1001]:
+                      - generic "Go to next page" [ref=e1002]:
+                        - generic [ref=e1003]: Next
+                        - img
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e1004] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e1005]:
+      - img [ref=e1006]
+      - paragraph [ref=e1007]: Made with Emergent
+  - iframe [ref=e1008]:
+    - generic [ref=f1e2]:
+      - generic [ref=f1e3]: "Compiled with problems:"
+      - button "Dismiss" [ref=f1e4] [cursor=pointer]: ×
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]: ERROR
+        - generic [ref=f1e8]: "[eslint] src/App.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ErrorBoundary.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/Layout.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/RequireAuth.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/RequireFeature.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/TenantSwitcher.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/BonusPerformanceCard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/CriticalAlertsPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/FTDCard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/FinancialSummary.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/FinancialTrendChart.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/LiveBetsTicker.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/LossLeadersTable.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/RetentionCard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/finance/ChargebackList.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/finance/ReconciliationPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/finance/TransactionDetailModal.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/ConfigDiffPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameAssetsTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameBlackjackRulesTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameClientTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameConfigPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameCrashMathTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameDiceMathTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameEngineTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GamePaytableTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GamePokerRulesTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameReelStripsTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameRobotTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameSlotAdvancedTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/ApiKeySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/BrandSettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/CountrySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/CurrencySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/PaymentsPolicySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/BonusSimulator.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/GameMathSimulator.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/SimulationArchive.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/SimulationOverview.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/alert.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/badge.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/button.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/card.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/checkbox.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/collapsible.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/command.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/dialog.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/dropdown-menu.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/input.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/label.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/pagination.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/popover.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/progress.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/scroll-area.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/select.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/separator.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/sheet.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/switch.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/table.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/tabs.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/textarea.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/tooltip.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/config/menu.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/context/CapabilitiesContext.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/index.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/lib/utils.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/APIKeysPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AcceptInvite.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AdminManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AffiliateManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/ApprovalQueue.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AuditLog.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/BonusManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/CMSManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/CRM.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Dashboard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/FeatureFlags.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Finance.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/FinanceWithdrawals.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/FraudCheck.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/GameManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/KYCManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/KillSwitchPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Login.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/MathAssetsPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/ModuleDisabled.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/OpsStatus.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/OwnerRevenue.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/PlayerDetail.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/PlayerList.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/PlayerWallet.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Reports.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/ResponsibleGaming.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/RiskManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/RobotsPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/SettingsPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/SimulationLab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Support.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/SystemLogs.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/TenantRevenue.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/TenantsPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/VipGames.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/api.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/moneyActions.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/moneyPathErrors.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/supportDiagnostics.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect Search for the keywords to learn more about each error."
+```
