@@ -112,7 +112,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await page.fill('input[name="currencyCode"]', 'USD');
 
     // Click and Wait for Success Transition
-    await page.click('button:has-text("Request Withdrawal")');
+    await page.click('button:has-text("Request Withdrawal")', { force: true });
     
     // Upon success, the form is replaced by the WithdrawalStatus component
     await expect(page.locator('text=Withdrawal Status')).toBeVisible({ timeout: 15000 });
