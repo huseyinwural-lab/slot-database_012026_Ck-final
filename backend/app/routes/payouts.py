@@ -51,6 +51,13 @@ async def initiate_payout(
     if request.player_id != current_player.id:
         raise HTTPException(status_code=403, detail={"error_code": "UNAUTHORIZED"})
 
+    logger.info(
+        "payout_initiate ok tenant=%s player=%s amount_minor=%s",
+        current_player.tenant_id,
+        current_player.id,
+        request.amount,
+    )
+
     amount_major = request.amount / 100.0
 
     # Enforce per-tenant daily withdraw limits
