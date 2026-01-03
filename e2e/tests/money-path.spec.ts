@@ -191,7 +191,7 @@ async function playerBalance(apiBaseUrl, playerToken) {
   });
 
   const res = await ctx.get('/api/v1/player/wallet/balance');
-  const json: any = await res.json().catch(async () => ({ raw: await res.text() }));
+  const json = await res.json().catch(async () => ({ raw: await res.text() }));
   if (!res.ok()) {
     throw new Error(`balance failed ${res.status()} body=${JSON.stringify(json)}`);
   }
