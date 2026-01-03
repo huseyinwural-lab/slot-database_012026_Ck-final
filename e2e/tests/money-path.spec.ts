@@ -199,11 +199,11 @@ async function playerBalance(apiBaseUrl, playerToken) {
 }
 
 async function playerDeposit(
-  apiBaseUrl: string,
-  playerToken: string,
-  amount: number,
-  mockOutcome: 'success' | 'fail' | null = 'success',
-): Promise<{ res: APIResponse; json: any }> {
+  apiBaseUrl,
+  playerToken,
+  amount,
+  mockOutcome = 'success',
+) {
   const headers: Record<string, string> = {
     Authorization: `Bearer ${playerToken}`,
     'Idempotency-Key': idemKey('e2e-deposit'),
