@@ -91,7 +91,7 @@ async def create_checkout_session(
     session.add(tx)
     await session.commit()
 
-    return {"url": link_response.get("url")}
+    return {"url": link_response.get("url"), "tx_id": tx_id}
 
 
 @router.post("/webhook")

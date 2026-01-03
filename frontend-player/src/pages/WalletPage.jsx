@@ -154,7 +154,15 @@ const WalletPage = () => {
            currency: 'USD',
          }
        );
-       
+
+       const txId = res.data?.tx_id;
+       if (txId) {
+         // Contract: write tx_id into URL immediately (provider-agnostic) for E2E determinism.
+         const url = new URL(window.location.href);
+         url.searchParams.set('tx_id', txId);
+         window.history.replaceState(null, '', url.toString());
+       }
+
        if (res.data.url) {
            // Redirect
            window.location.href = res.data.url;

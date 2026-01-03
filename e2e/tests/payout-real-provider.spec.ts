@@ -1,6 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Admin Payout Real Provider Flow', () => {
+  test.skip(
+    !process.env.REAL_PAYOUT_PROVIDER_ENABLED,
+    'Real payout provider not enabled in this environment'
+  );
   test('Admin can initiate payout and see status change', async ({ page }) => {
     // NOTE: Admin app uses /login (no /admin prefix)
     await page.goto('http://localhost:3000/login');
