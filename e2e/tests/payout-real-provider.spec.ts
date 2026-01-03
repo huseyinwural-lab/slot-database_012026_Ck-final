@@ -33,18 +33,15 @@ test.describe('Admin Payout Real Provider Flow', () => {
 
     // 5. Verify Status changes
     await expect(row).toContainText(/Payout Pending|Paid|Paid Out|Processing/i, { timeout: 15000 });
-        
-        // 6. Take Screenshot 1
-        await page.screenshot({ path: 'artifacts/sprint3-payout-proof/payout_pending.png' });
-        
-        // 7. Simulate Webhook (Backend API call)
-        // We can't easily do this from browser context without fetch, but we can assume
-        // the backend test covers the webhook part.
-        // In a real E2E, we might trigger a helper API to fire the webhook.
-        
-        // For Proof, we just verify the pending state here.
-    } else {
-        console.log('No approved withdrawals found to test payout.');
-    }
+
+    // 6. Take Screenshot 1
+    await page.screenshot({ path: 'artifacts/sprint3-payout-proof/payout_pending.png' });
+
+    // 7. Simulate Webhook (Backend API call)
+    // We can't easily do this from browser context without fetch, but we can assume
+    // the backend test covers the webhook part.
+    // In a real E2E, we might trigger a helper API to fire the webhook.
+
+    // For Proof, we just verify the pending state here.
   });
 });
