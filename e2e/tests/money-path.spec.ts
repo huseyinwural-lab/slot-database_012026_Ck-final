@@ -285,7 +285,7 @@ async function adminApproveWithdraw(apiBaseUrl, adminToken, txId) {
   }
 }
 
-async function adminListWithdrawals(apiBaseUrl: string, token: string, params: Record<string, any>) {
+async function adminListWithdrawals(apiBaseUrl, token, params) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
     extraHTTPHeaders: authHeaders(token),
