@@ -15,7 +15,7 @@ class SlotMath:
         # 1. Find Binding
         stmt = select(GameRobotBinding).where(
             GameRobotBinding.game_id == game_session.game_id,
-            GameRobotBinding.is_enabled == True
+            GameRobotBinding.is_enabled
         ).order_by(GameRobotBinding.created_at.desc())
         
         binding = (await session.execute(stmt)).scalars().first()
