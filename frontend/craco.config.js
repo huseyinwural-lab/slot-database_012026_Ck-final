@@ -92,17 +92,15 @@ const shouldCustomizeDevServer =
 if (shouldCustomizeDevServer) {
   webpackConfig.devServer = (devServerConfig) => {
     // In preview/prod-like reverse-proxy setups, CRA dev-server WebSocket
-    // may try to connect to :3000 which is not reachable externally.
-    // Force auto-detected host/port so it uses the browser origin instead.
-    if (!config.disableHotReload) {
-      devServerConfig.client = devServerConfig.client || {};
-      devServerConfig.client.webSocketURL = {
-        hostname: '0.0.0.0',
-        port: 0,
-        pathname: process.env.WDS_SOCKET_PATH || '/ws',
-        protocol: 'auto',
-      };
-    }
+    // must connect back to the *browser origin* (443) instead of hardcoding :3000.
+    // Always force origin-based websocket URL; this is safe in local dev too.
+    devServerConfig.client = devServerConfig.client || {};
+    devServerConfig.client.webSocketURL = {
+      protocol: 'auto',
+      hostname: '0.0.0.0',
+      port: 0,
+      pathname: process.env.WDS_SOCKET_PATH || '/ws',
+    };
 
     // If disabled, do not init dev-server WebSocket client/server.
     // This prevents "Network Error" toasts caused by WS failures in preview.
