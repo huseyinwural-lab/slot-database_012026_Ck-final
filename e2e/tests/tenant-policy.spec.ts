@@ -133,7 +133,7 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     
     // Input 40
     await playerPage.fill('input[placeholder*="Min"]', '40');
-    await playerPage.click('button:has-text("Pay Now")');
+    await playerPage.click('button:has-text("Pay Now"), button:has-text("Pay with Stripe"), button:has-text("Pay with Adyen")');
     
     // Assert Success
     await expect(playerPage.getByText('Deposit successful')).toBeVisible();
@@ -142,7 +142,7 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // Reload to clear success message/state if needed
     await playerPage.reload();
     await playerPage.fill('input[placeholder*="Min"]', '20');
-    await playerPage.click('button:has-text("Pay Now")');
+    await playerPage.click('button:has-text("Pay Now"), button:has-text("Pay with Stripe"), button:has-text("Pay with Adyen")');
 
     // Assert Failure
     await expect(playerPage.getByText(/limit/i)).toBeVisible(); // Matches 'Günlük işlem limiti aşıldı.'
