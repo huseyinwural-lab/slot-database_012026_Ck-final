@@ -559,7 +559,7 @@ test('P06-204: Replay / dedupe for payout and webhook', async ({ context, reques
     withdraw_tx_id: webhookTxId,
     provider: 'mockpsp',
     provider_event_id: providerEventId,
-    status: 'paid' as const,
+    status: 'paid',
   };
 
   // First webhook call should succeed
