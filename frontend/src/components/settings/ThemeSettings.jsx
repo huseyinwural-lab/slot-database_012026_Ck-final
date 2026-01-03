@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 
 const ThemeSettings = ({ brands }) => {
   const safeBrands = Array.isArray(brands) ? brands : [];
-  const [selectedBrand, setSelectedBrand] = useState(safeBrands[0]?.id || '');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const effectiveSelectedBrand = selectedBrand || safeBrands[0]?.id || '';
   const [theme, setTheme] = useState({
     brand_id: '',
     logo_url: '',
@@ -18,11 +19,6 @@ const ThemeSettings = ({ brands }) => {
   });
 
   useEffect(() => {
-    // Keep selection valid when brands list changes
-    if (!selectedBrand && safeBrands.length) {
-      setSelectedBrand(safeBrands[0].id);
-    }
-
     const fetchTheme = async (brandId) => {
       try {
         const res = await api.get(`/v1/settings/theme/${brandId}`);
@@ -33,12 +29,12 @@ const ThemeSettings = ({ brands }) => {
       }
     };
 
-    if (selectedBrand) fetchTheme(selectedBrand);
-  }, [selectedBrand, safeBrands.length]);
+    if (effectiveSelectedBrand) fetchTheme(effectiveSelectedBrand);
+  }, [effectiveSelectedBrand]);
 
   const handleSave = async () => {
     try {
-      await api.post('/v1/settings/theme', theme);
+      await api.post('/v1/settings/theme', { ...theme, brand_id: effectiveSelectedBrand });
       toast.success('Tema kaydedildi');
     } catch { toast.error('Başarısız'); }
   };
@@ -52,7 +48,7 @@ const ThemeSettings = ({ brands }) => {
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label>Select Brand</Label>
-          <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+          <Select value={effectiveSelectedBrand} onValueChange={setSelectedBrand}>
             <SelectTrigger><SelectValue placeholder="Marka Seç" /></SelectTrigger>
             <SelectContent>
               {safeBrands.map(b => <SelectItem key={b.id} value={b.id}>{b.brand_name}</SelectItem>)}
@@ -60,7 +56,7 @@ const ThemeSettings = ({ brands }) => {
           </Select>
         </div>
 
-        {selectedBrand && (
+        {effectiveSelectedBrand && (
           <div className="space-y-4 border p-4 rounded-lg">
             <div className="space-y-2">
               <Label>Logo URL</Label>
