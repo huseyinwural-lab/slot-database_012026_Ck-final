@@ -325,7 +325,7 @@ async function adminStartPayout(
     throw new Error(`payout failed ${res.status()} body=${text}`);
   }
 
-  return json as { transaction: any; payout_attempt: any };
+  return json;
 }
 
 async function callPayoutWebhook(
