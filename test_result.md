@@ -44,6 +44,15 @@
     - **E2E**: `e2e/tests/adyen-deposit.spec.ts` passed.
     - **Docs**: `docs/payments/adyen-integration.md`.
 
+## 5. Webhook Signature: Deterministic Test Mode
+- **Status**: ✅ IMPLEMENTED & VERIFIED
+- **Behavior**:
+    - Env `ENV in {ci,test,dev,local}` + `WEBHOOK_TEST_SECRET` set:
+        - Accepts `X-Webhook-Timestamp` + `X-Webhook-Signature` where signature is `HMAC_SHA256("{ts}." + raw_body, WEBHOOK_TEST_SECRET)`
+    - Prod/staging: still requires real `WEBHOOK_SECRET`
+- **Verification**:
+    - E2E: `e2e/tests/money-path.spec.ts` P06-204 passes (replay/dedupe)
+
 ## 6. Webhook Hardening & Refund (Sprint 2 - PR2)
 - **Status**: ✅ COMPLETED & VERIFIED
 - **Features**:
