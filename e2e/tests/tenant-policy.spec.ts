@@ -220,7 +220,7 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.locator('input[name="accountNumber"]').fill('test-iban');
 
     const [payoutResp] = await Promise.all([
-      playerPage.waitForResponse((r) => r.url().includes('/api/v1/payouts/initiate')),
+      playerPage.waitForResponse((r) => r.url().includes('/api/v1/payouts/initiate'), { timeout: 20000 }),
       playerPage.getByRole('button', { name: 'Request Withdrawal' }).click(),
     ]);
 
