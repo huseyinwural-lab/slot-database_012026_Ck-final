@@ -35,7 +35,7 @@ async function loginWithRetry(apiBaseUrl, email, password) {
     }
 
     const text = await res.text();
-    let json: any = null;
+    let json = null;
     try {
       json = JSON.parse(text);
     } catch {}
