@@ -218,8 +218,8 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.locator('input[name="accountNumber"]').fill('test-iban');
     await playerPage.getByRole('button', { name: 'Request Withdrawal' }).click();
     
-    // Assert Success
-    await expect(playerPage.getByText('Withdrawal requested successfully')).toBeVisible();
+    // Assert Success (UI shows a submitted banner in WithdrawalForm)
+    await expect(playerPage.getByText(/Withdrawal submitted/i)).toBeVisible({ timeout: 20000 });
 
     // 4. Player: Withdraw 15 (Fail: 20+15 > 30) via UI
     await playerPage.reload();
