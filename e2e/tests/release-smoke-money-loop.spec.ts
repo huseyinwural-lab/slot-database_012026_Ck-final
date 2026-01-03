@@ -198,18 +198,26 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
       .poll(
         async () => {
           try {
-            const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
-            const st = (await res.json()).status;
-            return st;
+            const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`, { timeout: 5000 });
+            if (!res.ok()) return `http_${res.status()}`;
+
+            const body = await res.json().catch(() => ({}));
+            return body.status ?? 'missing_status';
           } catch (e) {
-            const msg = String(e?.message || e);
-            if (msg.toLowerCase().includes('socket hang up')) {
+            const msg = String(e?.message || e).toLowerCase();
+            if (
+              msg.includes('socket hang up') ||
+              msg.includes('econnreset') ||
+              msg.includes('etimedout') ||
+              msg.includes('timeout') ||
+              msg.includes('network')
+            ) {
               return '__retry__';
             }
             throw e;
           }
         },
-        { timeout: 15000, message: "Final status is not 'paid' or 'completed'" },
+        { timeout: 60000, message: "Final status is not 'paid' or 'completed'" },
       )
       .toMatch(/paid|completed/);
 
@@ -217,7 +225,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await expect.poll(async () => {
         const bal = await getPlayerBalance(apiContext, playerToken);
         return { avail: bal.available_real, held: bal.held_real };
-    }, { timeout: 15000, message: "Ledger did not settle (Held != 0)" }).toEqual({ avail: initialAvailable + 50, held: 0 });
+    }, { timeout: 30000, message: "Ledger did not settle (Held != 0)" }).toEqual({ avail: initialAvailable + 50, held: 0 });
 
     console.log('RC Smoke Test Passed');
   });

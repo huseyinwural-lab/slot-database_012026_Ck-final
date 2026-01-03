@@ -5,20 +5,17 @@ import { setLastError } from './supportDiagnostics';
 // Local dev (CRA) can override backend to avoid CORS issues when REACT_APP_BACKEND_URL
 // points to an external preview domain.
 const LOCAL_DEV_API_URL = process.env.REACT_APP_BACKEND_URL_LOCAL;
-const RAW_API_URL =
+const RAW =
   (process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL)
     ? LOCAL_DEV_API_URL
-    : (process.env.REACT_APP_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : ''));
+    : (process.env.REACT_APP_BACKEND_URL || '');
 
-// Prevent mixed-content in HTTPS environments.
-// If the app is served over HTTPS but the backend URL is HTTP (common misconfig), upgrade.
-let API_URL = RAW_API_URL;
-if (typeof window !== 'undefined' && window.location?.protocol === 'https:' && API_URL.startsWith('http://')) {
-  API_URL = API_URL.replace(/^http:\/\//, 'https://');
-}
+// If no explicit backend is provided, default to same-origin proxy.
+// This is the most reliable option in previews and avoids mixed-content/CORS pitfalls.
+const API_BASE = RAW ? RAW.replace(/\/$/, '') : '';
 
 const api = axios.create({
-  baseURL: API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`,
+  baseURL: API_BASE ? (API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`) : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
