@@ -53,7 +53,7 @@ async function apiLoginAdmin(apiBaseUrl, email, password) {
     throw new Error(`admin login failed ${res.status()} body=${body}`);
   }
 
-  const json: any = await res.json();
+  const json = await res.json();
   const token = json.access_token || json.token || json.data?.access_token || json.data?.token;
   if (!token) {
     throw new Error(`admin login response missing token: ${JSON.stringify(json)}`);
@@ -111,7 +111,7 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, passw
     throw new Error(`player login failed ${res.status()} body=${body}`);
   }
 
-  const json: any = await res.json();
+  const json = await res.json();
   const token = extractToken(json);
   if (!token) {
     throw new Error(`player login response missing token: ${JSON.stringify(json)}`);
