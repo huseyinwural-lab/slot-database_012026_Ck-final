@@ -1,195 +1,207 @@
 <analysis>**original_problem_statement:**
 The user's core objective is to build, harden, and prepare a Payment/Wallet EPIC for a casino platform for its production Go-Live. The project is in its final phase, focusing on resolving deployment blockers and hardening the application.
 
-Initially, the main task was to address a critical deployment incompatibility (PostgreSQL/Redis vs. MongoDB). This was resolved.
-
 The current priority is to fix the  CI pipeline and the  Playwright test suite. These are failing due to a cascade of issues including schema drift, environment misconfigurations, and service availability problems. The ultimate goal is to achieve green CI/E2E runs to unblock the final self-serve verification process by the user's Ops/Dev team.
 
 **PRODUCT REQUIREMENTS:**
 1.  **Deployment Readiness:** The application must be configurable via environment variables (, ) to connect to external PostgreSQL and Redis services. (DONE)
 2.  **Production Hardening (P0 Blockers):** Webhook signature verification must be implemented, mock KYC endpoints must be disabled in production, and the repository must be cleaned of artifacts and insecure credentials. (DONE)
-3.  **CI/CD Pipeline Stability:** The  workflow and the  Playwright test suite must pass successfully. This is the current primary goal.
-4.  **Verification:** The deployment fixes must be verifiable through a self-serve evidence pack that the user's Ops/Dev team can run once the CI is stable.
+3.  **CI/CD Pipeline Stability:** The  workflow and the  Playwright test suite must pass successfully. This is the current primary goal. (IN PROGRESS)
+4.  **Verification:** The deployment fixes must be verifiable through a self-serve evidence pack that the user's Ops/Dev team can run once the CI is stable. (BLOCKED)
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-A full-stack casino platform (React/FastAPI/PostgreSQL) that has undergone significant hardening. A long series of critical P0 issues have been resolved, including the initial player app down and deposit 500 blockers.
+A full-stack casino platform (React/FastAPI/PostgreSQL) that has undergone significant hardening. The agent has successfully resolved a large number of failing Playwright E2E tests, bringing the suite from 11 failures down to 0 failures in local test runs. The fixes addressed critical contract issues between the frontend and backend, including webhook signature validation, Stripe/Adyen mock flows, and tenant policy enforcement.
 
-The application is now in a state where the E2E Playwright test suite can run, but it's failing with 11/25 tests. The agent has just implemented a major P0 Fix Pack to address the next layer of blockers revealed by the tests:
-1.  Standardized  usage in  to fix withdrawal approval errors.
-2.  Implemented mock Stripe logic to handle missing API keys in CI.
-3.  Hardened the frontend  to prevent UI crashes.
-4.  Added a CI seeding mechanism for games and robots.
-5.  Fixed player authentication token handling in the player app.
-
-The effectiveness of this fix pack has not yet been verified by a full CI run.
+However, a new blocker has emerged: the  CI workflow is failing due to a  drift in the  directory. This prevents any E2E tests from running in the main CI pipeline. The agent has identified the root cause and implemented a local fix by updating the  file.
 
 **Last working item**:
--   **Last item agent was working:** The agent was implementing a large, multi-part P0 Fix Pack to address the top failures in the E2E test suite. The goal was to resolve several critical issues simultaneously to significantly increase the test pass rate. The fixes included:
-    1.  **P0-A (UI Crash):** Normalizing the  data in  to prevent  errors.
-    2.  **P0-B (Withdrawal Fail):** Making the request body optional for the  endpoint in  to fix  errors.
-    3.  **P0-C (Webhook Security):** Adding a CI/dev-safe bypass for webhook signature verification in .
-    4.  **P0-D (Stripe Mock):** Enhancing the mock Stripe checkout in  to return a  in the redirect URL, aligning it with the E2E test's expectations.
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (Local and partial testing agent validation for individual fixes, but no full E2E suite run).
--   **Which testing method agent to use?** Frontend testing agent. The agent must trigger the full Playwright E2E test suite via the  workflow and analyze the new set of failures.
+-   **Last item agent was working:** The agent was fixing the  CI workflow, which was failing with a  error. The agent diagnosed this as a drift between  and . The agent ran yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.08s. in the  directory to update the lockfile and then verified that yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.10s. and yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. pass locally.
+-   **Status:** USER VERIFICATION PENDING
+-   **Agent Testing Done:** Y
+-   **Which testing method agent to use?** Manual verification by user. The user must use the Save to GitHub feature to push the updated  file. After the push, the  GitHub Actions workflow must be re-run to confirm the fix.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** E2E Playwright test suite is failing (P0)
--   **Issue 2:** UI crash due to  (P0)
--   **Issue 3:** Finance  endpoint fails with 422 (P0)
--   **Issue 4:** Webhook signature check fails tests (P0)
--   **Issue 5:** Stripe mock flow is incomplete (P0)
+-   **Issue 1:**  CI workflow fails due to  drift (P0)
+-   **Issue 2:** E2E Playwright test  fails in CI (P0 - Locally Fixed)
+-   **Issue 3:** E2E Playwright test  (P06-204) fails in CI due to webhook secret (P0 - Locally Fixed)
+-   **Issue 4:** E2E Playwright test  is not safely skipped in CI (P0 - Locally Fixed)
+-   **Issue 5:** Brands API returns 404 (P1)
 
 **Issues Detail:**
--   **Issue 1:** E2E Playwright test suite is failing
-    -   **Description:** The primary E2E suite has a high failure rate (11/25 failed). The latest set of applied fixes aims to address the top blockers, but verification is pending.
+-   **Issue 1:**  CI workflow fails due to  drift
+    -   **Description:** The  step in the  workflow fails because the  file is out of sync with . This blocks all frontend-related CI checks.
+    -   **Attempted fixes:** The agent ran yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.09s. within the  directory to regenerate  and confirmed locally that yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. and yarn run v1.22.22
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command. now pass.
     -   **Next debug checklist:**
-        1.  Trigger the  workflow.
-        2.  Analyze the Playwright test summary to see which of the 11 failures have been resolved.
-        3.  For any remaining failures, download the  and  to analyze traces and backend logs.
-        4.  Prioritize any remaining  or hard UI crashes.
-    -   **Why fix this issue and what will be achieved with the fix?** A green E2E suite is the mandatory gate for Go-Live.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** both
-
--   **Issue 2:** UI crash due to 
-    -   **Description:** Multiple UI-driven tests (, ) are timing out because the admin frontend crashes immediately after loading capabilities.
-    -   **Attempted fixes:** The agent created  in addition to  in  to provide a safe-to-map array.
+        1.  User needs to Save to GitHub to push the updated .
+        2.  Re-run the  workflow and verify it passes.
+        3.  Re-run the main  workflow.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a hard blocker for the entire CI/CD pipeline. Fixing it will allow the main E2E test suite to run and validate all the recent fixes.
     -   **Status:** USER VERIFICATION PENDING
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend testing agent
+    -   **Should Test frontend/backend/both after fix?** Frontend testing agent (CI workflow).
+    -   **Blocked on other issue:** None
 
--   **Issue 3:** Finance  endpoint fails with 422
-    -   **Description:** The  test fails because the call to mark a withdrawal as paid fails with a  error, indicating a missing request body.
-    -   **Attempted fixes:** The agent modified  to make the payload for the  endpoint optional, providing default values in a CI/test environment.
-    -   **Status:** USER VERIFICATION PENDING
+-   **Issue 2:** E2E Playwright test  fails in CI
+    -   **Description:** The test fails because it expects a  query parameter in the URL after a deposit is initiated, but the frontend was not consistently adding it.
+    -   **Attempted fixes:** The agent updated the backend (, ) to ensure  is always in the /. It also updated the frontend () to parse this  from the URL and also use  to add it if a checkout response provides it directly. The test now passes locally.
+    -   **Status:** USER VERIFICATION PENDING (Awaiting successful CI run)
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** both (via full E2E suite in CI)
+
+-   **Issue 3:** E2E Playwright test  (P06-204) fails in CI due to webhook secret
+    -   **Description:** The test fails with a  error because the backend requires a secret for webhook signature verification, which was missing in the CI environment.
+    -   **Attempted fixes:** The agent implemented a deterministic signature strategy.  was updated to use a default  in non-prod environments if the env var is missing. The E2E test helper was also updated to use the same default. The test now passes locally.
+    -   **Status:** USER VERIFICATION PENDING (Awaiting successful CI run)
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Backend testing agent (or full E2E).
+    -   **Should Test frontend/backend/both after fix?** Backend testing agent (via full E2E suite in CI)
 
--   **Issue 4:** Webhook signature check fails tests
-    -   **Description:** The  test fails with a  error.
-    -   **Attempted fixes:** The agent planned to modify  to bypass signature validation if  is  or .
-    -   **Status:** IN PROGRESS
+-   **Issue 4:** E2E Playwright test  is not safely skipped in CI
+    -   **Description:** This test requires real provider credentials and should be skipped in CI. It was running and failing.
+    -   **Attempted fixes:** The agent added an environment-guarded skip to the test: . The test is now correctly skipped in local runs.
+    -   **Status:** USER VERIFICATION PENDING (Awaiting successful CI run)
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Backend testing agent (or full E2E).
+    -   **Should Test frontend/backend/both after fix?** Frontend testing agent (via full E2E suite in CI)
 
--   **Issue 5:** Stripe mock flow is incomplete
-    -   **Description:** While the Stripe mock now generates a , the  test fails because the redirect URL is missing the  that the test polls for.
-    -   **Attempted fixes:** The agent modified  to include the transaction ID in the mock checkout session's redirect URL.
-    -   **Status:** USER VERIFICATION PENDING
+-   **Issue 5:** Brands API returns 404
+    -   **Description:** The frontend makes a call to , which does not exist in the backend, causing log noise.
+    -   **Attempted fixes:** No fix has been attempted. This is a lower-priority P1 issue.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** both
+    -   **Should Test frontend/backend/both after fix?** Backend
 
 **In progress Task List**:
--   **Task 1:** Verify the P0 Fix Pack and stabilize the E2E test suite (P0)
-    -   **Where to resume:** The agent has just applied a large batch of fixes. The immediate next action is to run the  GitHub Actions workflow and analyze the new test results and logs to see which of the 11 failures are resolved.
-    -   **What will be achieved with this?** A significant reduction in E2E test failures, bringing the project closer to a green CI run.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on something:** None.
+-   **Task 1:** Stabilize the Full CI/CD Pipeline (P0)
+    -   **Where to resume:** Waiting for the user to push the  fix via Save to GitHub. Once that is done, the agent must trigger and monitor the  and  workflows.
+    -   **What will be achieved with this?** A fully green CI pipeline, which is the primary gate for the project's Go-Live.
+    -   **Status:** BLOCKED (on user action)
+    -   **Should Test frontend/backend/both after fix?** both (via CI workflows)
+    -   **Blocked on something:** User action to push the  fix.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
 -   **(P1) External Verification (P1-B, P1-B-S):** Once CI/E2E pipelines are fixed, guide the user's team to execute the self-serve verification packs (, ).
--   **(P1) Fix Brands API 404:** The frontend calls , which doesn't exist, causing noise in logs. Add a stub endpoint.
+-   **(P1) Fix Brands API 404:** Add a stub endpoint for  to remove log noise.
 
 **Future Tasks:**
 -   **(P1) Growth & Monetization Track:** Evolve the bonus engine, set promo risk limits, and scale the affiliate system.
 -   **(P1) Collusion v2:** Implement graph-based collusion detection.
--   **(P2) Post-Go-Live Hardening:** Technical debt cleanup and further optimizations.
+-   **(P2) Post-Go-Live Hardening:** Technical debt cleanup and further optimizations (e.g., full  audit).
 -   **(P2) Day-0 / Day-7 / Day-30 Ops Plan:** Define post-launch monitoring metrics and operational playbooks.
 
 **Completed work in this session**
--   **P0 Deposit 500 Fix:** Resolved the critical  error by fixing  timezone-aware vs. naive mismatches in , , , and .
--   **P0 Player App/CORS Fix:** Resolved  and CORS errors by correctly configuring the player app's  and the backend's  in the CI environment.
--   **P0 CI Seeding Fix:** Resolved the  500 error by adding a series of idempotent Alembic migrations to fix schema drift in the  and  tables (adding , , , etc.).
--   **P0 CI Smoke Test Fixes:** Resolved multiple test failures in the  suite by fixing  mismatches in  (for ) and  (for ).
--   **CI Workflow Hardening:**
-    -   Made CI debug/evidence steps non-blocking ().
-    -   Added automatic capture of backend logs to a CI artifact on test failure.
-    -   Replaced fragile  commands with safer Python scripts for source code assertions.
--   **Player Auth Fix:** Correctly implemented  for player token handling in the React player app.
+-   **Local E2E Test Suite Stabilization:** Fixed all remaining failing Playwright tests, achieving a green run locally.
+-   **Webhook Signature Fix (P0-1):** Implemented a deterministic webhook signature for / environments in  to fix .
+-   ** URL Contract Fix (P0-2):** Ensured  is passed in checkout URLs and handled by the player wallet app, fixing .
+-   **Real Provider Test Skip (P0-3):** Added an env-guarded  to .
+-   **Finance Endpoint Fix:** Made the request body optional for the  endpoint.
+-   **Frontend Crash Guard:** Added an array guard in  to prevent  errors.
+-   **Game/Robot Logic Fixes:** Resolved multiple  errors in  and  tests related to  errors and incorrect config handling.
+-   **Tenant Policy Fixes:** Fixed both deposit and withdrawal limit enforcement tests in .
+-   ** Drift Fix (P0-4):** Identified that the  CI job was failing due to a desynchronized lockfile, updated  locally, and prepared it for the user to commit.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1:** Brands API returns 404
-    -   **Debug checklist:** The frontend makes a call to , which does not exist in the backend.
-    -   **Why to solve this issue and what will be achieved with this?** This will remove log noise and make the application's startup behavior cleaner.
+    -   **Debug checklist:** The frontend calls , which does not exist. A stub endpoint needs to be created in the backend.
+    -   **Why to solve this issue and what will be achieved with this?** This will remove log noise and make the application's behavior cleaner. It is a P1 priority.
     -   **Should Test frontend/backend/both after fix:** backend
     -   **Is recurring issue?** Y
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** CI/E2E pipeline fragility due to schema drift and environment inconsistencies.
--   **Recurrence count:** High. This entire session was dedicated to battling this recurrence.
--   **Status:** IN PROGRESS. While many root causes were fixed with guard migrations and hardening, the E2E suite is not yet stable.
+-   **Issue recurrence in previous fork:** CI/E2E pipeline fragility.
+-   **Recurrence count:** High. A new instance of this was the  drift in the  directory, which blocked the entire  CI workflow.
+-   **Status:** IN PROGRESS. The  fix is pending user commit.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Idempotent Alembic Migrations:** Using  to write migrations that only run if a schema change (like adding a column) is needed. This was critical to fixing schema drift.
--   **CI/CD Hardening:** Making the CI pipeline more robust by adding non-blocking evidence-gathering steps and automatically capturing logs on failure.
--   **Mocking in CI:** Implementing logic in application code (e.g., for Stripe payments) that activates only in a  or  environment to remove external dependencies from tests.
--   **Systematic Debugging of Timezone Issues:** Consistently replacing  (aware) with  (naive) to match the  columns in PostgreSQL.
+-   **CI/CD Pipeline Debugging:** Analyzing GitHub Actions logs to diagnose failures, specifically yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. errors.
+-   **Yarn Lockfile Synchronization:** Understanding that  and  must be in sync for CI/CD environments that use . The fix involves running yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. locally and committing the updated .
+-   **Deterministic Webhook Testing:** Modifying webhook security services to use a default, known secret in test/CI environments, allowing tests to deterministically generate and validate HMAC signatures without exposing production secrets.
+-   **E2E Test Contract Enforcement:** Updating frontend and backend code to enforce implicit contracts required by E2E tests, such as the presence of a  in a URL query parameter.
+-   **Environment-Guarded Test Execution:** Using  in Playwright to conditionally skip tests that depend on secrets or infrastructure not present in a standard CI environment.
 
 **key DB schema**
--   **game:** Added  (VARCHAR),  (VARCHAR),  (BOOLEAN).
--   **robotdefinition:** Added  (BOOLEAN),  (DATETIME),  (VARCHAR).
--   **ledgertransaction, walletbalance:** New tables created via migration.
+-   No significant DB schema changes were made in this session.
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   : Heavily modified to harden CI steps, add seeding, and manage environment variables.
--   : Modified to fix a  bug on withdrawal approval and make the  payload optional.
--   : Modified to add a mock checkout session for CI environments.
--   : Modified to create a  array to prevent crashes from .
--   : New file to provide an idempotent seeding mechanism for E2E tests.
--   New Alembic migrations in  for  and  schema drift.
--   Multiple other backend files patched for  timezone issues (, , , ).
+-   : The CI workflow that is currently failing.
+-   : The file that was out of sync and has been updated. **This is the critical file for the next step.**
+-   : Modified to implement the CI secret fallback.
+-   : Modified to handle the  in the URL.
+-   : Modified to include  in .
+-   : Modified to include  in .
+-   : Modified to conditionally skip based on an environment variable.
+-   : Modified to include a robust seeding step.
+-   : Modified to remove an invalid ESLint rule that was causing build failures.
 
 **Areas that need refactoring**:
--   ** usage:** The project is plagued by timezone-aware vs. naive  issues. While many have been patched by switching to , the root cause is the  column type. A future task should be a full audit and potential migration to  for consistency.
--   **E2E Test Seeding:** The  endpoint is a good step, but the test suite would be more robust if each test file declared its own data dependencies and used fixtures, rather than relying on a single global seed step.
+-   ** usage:** The project is plagued by timezone-aware vs. naive  issues. A full audit and potential migration to  is still a valid future task.
+-   **E2E Test Seeding:** The  endpoint is a good step, but the test suite would be more robust if each test file declared its own data dependencies and used fixtures.
+-   **ESLint Configuration:** The ESLint setup across the frontend projects caused build issues and required multiple interventions. It could benefit from being unified and simplified.
 
 **key api endpoints**
--    (NEW):  endpoint to seed test data (games, robots) for the CI environment.
--   :  endpoint. The  error was fixed.
--   :  endpoint that was failing with 500, now potentially failing with 422. Fix applied, pending verification.
--   :  endpoint that fails with 422. Fix applied, pending verification.
--   :  endpoint. Mock logic added for CI.
--   :  endpoint. Still returns 404.
+-   :  endpoint to seed test data, now called from .
+-   :  -  now includes .
+-   :  -  now includes .
+-   Webhook endpoints that rely on  for signature verification.
 
 **Critical Info for New Agent**
--   **Your primary goal is to get the E2E Playwright suite to pass.** It is currently failing 11/25 tests. Do not get sidetracked.
--   **You are picking up right after a large P0 Fix Pack was applied.** These fixes target the most critical E2E failures (withdrawal , Stripe mock flow, and a frontend crash). Your **IMMEDIATE** next step is to run the  workflow and analyze the new test results.
--   The user is highly technical and expects a deterministic, evidence-based approach. Analyze logs and test traces to form a hypothesis before applying a fix.
--   The most common and recurring bug class in this project is  timezone mismatches (). If you see a new 500 error, this is the most likely cause. The standard fix has been to replace  with .
+-   **Your immediate blocker is a failing CI workflow.** The  job is failing because  is out of sync.
+-   **The fix is ready but not pushed.** I have run yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. in the  directory and verified the fix locally. The user MUST use the **Save to GitHub** button to commit the updated  file.
+-   **Your first action:** After confirming the user has pushed the changes, you must re-run the  workflow. If it passes, trigger the main  workflow.
+-   **All E2E tests now pass locally.** I have fixed the three remaining critical E2E test failures identified by the user. The goal of the next CI run is to confirm these fixes hold in the CI environment.
+-   **Do not re-fix what is already done.** Assume the fixes for the webhook,  URL, and real-provider skip are correct until a full CI run proves otherwise. Focus solely on unblocking the CI pipeline first.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
--   
--   
--    (heavily updated with test findings)
+-   : Updated with the results of the local E2E test runs, showing 18/18 passed (with 7 skipped).
 
 **Last 10 User Messages and any pending HUMAN messages**
-The user has been driving the process of debugging the CI/E2E pipeline.
--   User provided logs and confirmed the agent's plan to fix a  in the workflow file.
--   User provided new logs showing a  error and confirmed the agent's analysis of a  mismatch.
--   User provided new logs showing E2E tests are now running but failing with multiple new errors.
--   User requested a strong finish and asked the agent to continue with the plan.
--   User confirmed the agent's detailed plan to fix the next 4 P0 blockers (UI crash,  422, webhook signature, and incomplete Stripe mock).
--   The last user message was Evet — başlayabilirsin. (Yes — you can start.), giving the green light to implement the comprehensive P0 Fix Pack.
+10.  User confirmed the  (release smoke money loop  contract) is necessary and provided a detailed breakdown of the required fix. (COMPLETED)
+9.  Agent asked for confirmation to add P0-6 to the task list. (COMPLETED)
+8.  User pointed out the  test is still failing due to the missing  in the URL, providing a detailed root cause analysis and a proposed permanent fix. (COMPLETED)
+7.  Agent reported that all local fixes were applied and passed, but a CI failure in  is now the blocker. (COMPLETED)
+6.  User replied evet (yes), confirming the agent should proceed with fixing the ESLint build issue. (COMPLETED)
+5.  Agent asked for confirmation to fix the  build blocker. (COMPLETED)
+4.  User explained that the new build failure is due to an invalid ESLint rule () and instructed the agent to remove it from the configuration. (COMPLETED)
+3.  User approved the plan to fix the 3 E2E blockers and added a new P0 task: fix the yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.05s. error. (COMPLETED)
+2.  Agent presented a final plan to fix the 3 remaining E2E test failures and the  issue, asking for user approval. (COMPLETED)
+1.  User analyzed the test results, confirmed 3 remaining blockers (,  missing from URL,  failing), and provided a detailed RCA and fix strategy for each. (COMPLETED)
 
 **Project Health Check:**
--   **Broken:** The application is not verifiable. Although many foundational CI/CD issues and  bugs have been fixed, the E2E test suite is still failing heavily (11/25), which blocks the project's Go-Live.
+-   **Broken:** The CI/CD pipeline is blocked. The  workflow fails, preventing the main E2E test suite from running. Although all tests pass locally, the project is not in a verifiable or deployable state until the CI pipeline is green.
 
 **3rd Party Integrations**
 -   **Stripe:** Payment processing.
@@ -199,15 +211,14 @@ The user has been driving the process of debugging the CI/E2E pipeline.
 -   **APScheduler:** Background jobs.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES. The agent used backend and frontend testing agents to verify individual fixes for  issues, CORS, CI seeding, and Stripe mocking.
+-   **Testing agent used after significant changes:** NO. The agent performed extensive manual testing by running individual and full Playwright test suites locally.
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None. Existing test files were analyzed.
--   **Known regressions:** The E2E test suite remains the main regression. Failures have shifted from infrastructure issues to more subtle application logic and frontend/backend contract mismatches.
+-   **Test files created:** None. The agent heavily modified existing E2E test files.
+-   **Known regressions:** A  drift was introduced, which broke the  CI workflow. This has been fixed locally but awaits a commit by the user.
 
 **Credentials to test flow:**
 -   Admin:  / 
 -   Player accounts are registered dynamically within the E2E tests.
 
 **What agent forgot to execute**
--   The agent hasn't had a chance to run the full CI/E2E pipeline after applying the last major P0 Fix Pack. This is the most critical pending action.
--   The agent has not yet implemented the fix for . This was part of the approved plan but was not included in the last set of file edits.</analysis>
+-   Nothing. The agent is currently blocked waiting for the user to commit the  file change to the repository. All planned fixes from the user's instructions have been implemented and validated locally.</analysis>
