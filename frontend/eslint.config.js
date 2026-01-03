@@ -1,5 +1,8 @@
 const reactHooks = require("eslint-plugin-react-hooks");
 
+// CRA/CRACO uses ESLint v8 internally during build. Ensure this flat config
+// is compatible by explicitly setting the rule options here.
+
 module.exports = [
   {
     files: ["src/**/*.{js,jsx}"],
