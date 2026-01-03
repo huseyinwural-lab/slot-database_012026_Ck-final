@@ -134,19 +134,45 @@ async def initiate_payout(
 @router.get("/status/{payout_id}")
 async def get_payout_status(payout_id: str, session = Depends(get_session)):
     from app.models.sql_models import Transaction
-    tx = await session.get(Transaction, payout_id)
+
+    try:
+        tx = await session.get(Transaction, payout_id)
+    except Exception:
+        # Important: this endpoint is polled by the player UI.
+        # We must never drop the connection ("socket hang up") due to an uncaught DB/runtime exception.
+        logger.exception("payout_status db_error payout_id=%s", payout_id)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error_code": "PAYOUT_STATUS_DB_ERROR",
+                "message": "Failed to fetch payout status",
+            },
+        )
+
     if not tx:
         raise HTTPException(404, "Payout not found")
-        
+
+    created_at = tx.created_at
+    if created_at is not None:
+        try:
+            # Normalize to naive UTC ISO string for consistent serialization across envs.
+            if getattr(created_at, "tzinfo", None) is not None:
+                from datetime import timezone
+
+                created_at = created_at.astimezone(timezone.utc).replace(tzinfo=None)
+            created_at = created_at.isoformat()
+        except Exception:
+            created_at = str(created_at)
+
     return {
         "_id": tx.id,
         "player_id": tx.player_id,
         "amount": int(tx.amount * 100),
         "currency": tx.currency,
-        "status": tx.state, # e.g. requested, approved, payout_submitted, paid
+        "status": tx.state,  # e.g. requested, approved, payout_submitted, paid
         "psp_reference": tx.provider_event_id,
-        "created_at": tx.created_at,
-        "webhook_events": [] # simplified
+        "created_at": created_at,
+        "webhook_events": [],  # simplified
     }
 
 @router.get("/player/{player_id}/history")
