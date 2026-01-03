@@ -150,7 +150,7 @@ async function getBalanceNoCache(request, apiBaseUrl, playerToken) {
     },
   });
   const text = await res.text();
-  let json: any = null;
+  let json = null;
   try {
     json = JSON.parse(text);
   } catch {}
@@ -225,7 +225,7 @@ async function playerDeposit(
   });
 
   const text = await res.text();
-  let json: any = null;
+  let json = null;
   try {
     json = JSON.parse(text);
   } catch {}
@@ -254,7 +254,7 @@ async function playerWithdraw(
     data: { amount, method: 'test_bank', address: 'e2e-test-bank' },
   });
   const text = await res.text();
-  let json: any = null;
+  let json = null;
   try {
     json = JSON.parse(text);
   } catch {}
@@ -316,7 +316,7 @@ async function adminStartPayout(
 
   const res = await ctx.post(`/api/v1/finance/withdrawals/${txId}/payout`);
   const text = await res.text();
-  let json: any = null;
+  let json = null;
   try {
     json = JSON.parse(text);
   } catch {}
@@ -344,7 +344,7 @@ async function callPayoutWebhook(
     data: payload,
   });
   const text = await res.text();
-  let json: any = null;
+  let json = null;
   try {
     json = JSON.parse(text);
   } catch {}
