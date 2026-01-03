@@ -378,7 +378,7 @@ async function robustLogin(page) {
   await expect(page.getByText('Dashboard', { exact: true }).first()).toBeVisible({ timeout: 10000 });
 }
 
-async function setTenantContext(page: any, tenantId: string) {
+async function setTenantContext(page, tenantId) {
   await page.evaluate((tid: string) => {
     localStorage.setItem('impersonate_tenant_id', tid);
   }, tenantId);
