@@ -43,7 +43,7 @@ class PayoutRequest(BaseModel):
 async def initiate_payout(
     request: PayoutRequest,
     session = Depends(get_session),
-    current_player=Depends(lambda: None),
+    current_player=Depends(get_current_player),
 ):
     # Use AdyenPSP service which handles Mocking in Dev
     merchant_reference = f"PAYOUT-{request.player_id}-{uuid.uuid4().hex[:8]}"
