@@ -126,7 +126,7 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
   return { token, playerId };
 }
 
-async function adminApproveKycForPlayerId(apiBaseUrl: string, adminToken: string, playerId: string) {
+async function adminApproveKycForPlayerId(apiBaseUrl, adminToken, playerId) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
     extraHTTPHeaders: authHeaders(adminToken),
@@ -141,7 +141,7 @@ async function adminApproveKycForPlayerId(apiBaseUrl: string, adminToken: string
   }
 }
 
-async function getBalanceNoCache(request: APIRequestContext, apiBaseUrl: string, playerToken: string) {
+async function getBalanceNoCache(request, apiBaseUrl, playerToken) {
   const res = await request.get(`${apiBaseUrl}/api/v1/player/wallet/balance?t=${Date.now()}`, {
     headers: {
       Authorization: `Bearer ${playerToken}`,
@@ -163,7 +163,7 @@ async function getBalanceNoCache(request: APIRequestContext, apiBaseUrl: string,
 async function pollUntil<T>(
   fn: () => Promise<T>,
   predicate: (value: T) => boolean,
-  opts: { timeoutMs?: number; intervalMs?: number; label?: string } = {},
+  opts = {},
 ): Promise<T> {
   const { timeoutMs = 15000, intervalMs = 250, label = 'poll' } = opts;
   const start = Date.now();
@@ -184,7 +184,7 @@ function closeTo(a: number, b: number, precision = 6) {
 }
 
 
-async function playerBalance(apiBaseUrl: string, playerToken: string) {
+async function playerBalance(apiBaseUrl, playerToken) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
     extraHTTPHeaders: authHeaders(playerToken),
