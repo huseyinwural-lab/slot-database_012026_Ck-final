@@ -71,7 +71,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     let depositTxId;
     
     // Trigger Deposit (Adyen)
-    await page.click('button:has-text("Adyen (All Methods)")');
+    await page.click('button:has-text("Adyen (All Methods)")', { force: true });
     await page.fill('input[placeholder="Min $10.00"]', '100');
     await page.click('button:has-text("Pay with Adyen")');
     
