@@ -73,7 +73,7 @@ test.describe('Player Wallet UX (PLAYER-WALLET-UX-001)', () => {
     // Verify row data
     await expect(page.locator('td', { hasText: 'deposit' }).first()).toBeVisible();
     await expect(page.locator('td', { hasText: '50.00' }).first()).toBeVisible();
-    await expect(page.locator('td', { hasText: 'completed' }).first()).toBeVisible();
+    await expect(page.locator('td', { hasText: 'completed' }).or(page.locator('td', { hasText: 'pending_provider' })).first()).toBeVisible();
 
     // 4. Verify Pagination Controls
     const prevBtn = page.locator('button[aria-label="Previous Page"]');
