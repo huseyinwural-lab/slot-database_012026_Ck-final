@@ -1589,6 +1589,7 @@ class PayoutStatusPollingTestSuite:
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 poll_results = []
+                example_responses = []
                 
                 for i in range(5):
                     try:
@@ -1601,6 +1602,10 @@ class PayoutStatusPollingTestSuite:
                             try:
                                 data = response.json()
                                 created_at = data.get("created_at")
+                                
+                                # Store example response for the first poll
+                                if i == 0:
+                                    example_responses.append(f"Example Response: {data}")
                                 
                                 # Assertion: created_at must be a string (or null)
                                 if created_at is not None and not isinstance(created_at, str):
@@ -1640,6 +1645,9 @@ class PayoutStatusPollingTestSuite:
                 success_count = len([result for result in poll_results if "SUCCESS" in result or "HTTP" in result])
                 
                 details = "\n    ".join(poll_results)
+                if example_responses:
+                    details += f"\n    {example_responses[0]}"
+                
                 self.log_result("Poll Payout Status", True, 
                               f"All 5 polls completed without connection drops:\n    {details}")
                 return True
