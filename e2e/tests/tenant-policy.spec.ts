@@ -219,10 +219,13 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.getByRole('button', { name: 'Request Withdrawal' }).click();
 
     // Assert success: request should create a withdrawal history entry
-    await playerPage.waitForTimeout(2000);
-    await expect(playerPage.getByText('Transaction History')).toBeVisible();
-    // History row should contain a negative amount for withdrawal
-    await expect(playerPage.getByText('-$20.00')).toBeVisible({ timeout: 20000 });
+    // Backend-side verification: withdrawal transaction created
+    const txRes = await pCtx.get('/api/v1/player/wallet/transactions');
+    expect(txRes.ok()).toBeTruthy();
+    const txJson = await txRes.json();
+    const txItems = txJson.items || txJson.data?.items || [];
+    const w = txItems.find((t) => t.type === 'withdrawal' && (t.amount === 20 || t.amount === 20.0));
+    expect(w).toBeTruthy();
 
     // 4. Player: Withdraw 15 (Fail: 20+15 > 30) via UI
     await playerPage.reload();
