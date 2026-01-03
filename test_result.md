@@ -1,5 +1,11 @@
 # Test Results - Sprint 1 & 2 (Payment/Wallet EPIC)
 
+## 0. CI/E2E Stabilization (Prod Compose Acceptance)
+- **Status**: ✅ LOCAL RUN GREEN (excluding expected skipped specs)
+- **Verification (Local)**:
+    - `cd /app/e2e && WEBHOOK_TEST_SECRET=ci_webhook_test_secret E2E_API_BASE=http://127.0.0.1:8001 E2E_BASE_URL=http://localhost:3000 PLAYER_APP_URL=http://localhost:3001 yarn test:e2e`
+    - Result: **18 passed, 7 skipped, 0 failed** (skips are intentional UI suites)
+
 ## 1. Stripe Integration (Sprint 1)
 - **Status**: ✅ COMPLETED & VERIFIED
 - **Features**:
