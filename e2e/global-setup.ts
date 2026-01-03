@@ -1,11 +1,11 @@
-import { FullConfig, request as pwRequest, chromium } from '@playwright/test';
+import { request as pwRequest, chromium } from '@playwright/test';
 
 const OWNER_EMAIL = process.env.E2E_OWNER_EMAIL || process.env.OWNER_EMAIL || 'admin@casino.com';
 const OWNER_PASSWORD = process.env.E2E_OWNER_PASSWORD || process.env.OWNER_PASSWORD || 'Admin123!';
 const API_BASE = process.env.E2E_API_BASE || process.env.BACKEND_URL || 'http://localhost:8001';
 const FRONTEND_URL = process.env.E2E_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
 
-async function loginWithRetry(apiBaseUrl: string, email: string, password: string): Promise<string> {
+async function loginWithRetry(apiBaseUrl, email, password) {
   const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
 
   let attempt = 0;
@@ -55,7 +55,7 @@ async function loginWithRetry(apiBaseUrl: string, email: string, password: strin
   throw new Error('[global-setup] admin login failed after max retries due to rate limiting');
 }
 
-export default async function globalSetup(config: FullConfig) {
+export default async function globalSetup() {
   const fs = await import('fs');
   const path = await import('path');
 
