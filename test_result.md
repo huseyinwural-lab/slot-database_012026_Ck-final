@@ -939,6 +939,18 @@
   - ❌ **game-loop.spec.ts**: TIMEOUT (2.1m) - Test hanging during full loop execution
   - ❌ **payout-real-provider.spec.ts**: TIMEOUT (1.0m) - Admin payout flow timeout
   - ⏭️ **finance-withdrawals.spec.ts**: ALL 6 TESTS SKIPPED - Test suite not executed
+
+---
+
+## P0 Payout Status Polling Hardening — Iteration 2026-01-03
+- **Change**: `/api/v1/payouts/status/{payout_id}` now catches uncaught DB/runtime exceptions and returns controlled HTTP 500 JSON (prevents "socket hang up"), and normalizes `created_at` to a stable string.
+- **Local Sanity**:
+  - Register/login player
+  - Deposit (method=test)
+  - Initiate payout
+  - Poll payout status → returns JSON with `created_at` as string
+- **Status**: ✅ IMPLEMENTED (CI verification pending)
+
   - ⚠️ **Other tests**: Not completed due to timeout/execution limits
 - **Key Findings**:
   - **Webhook deterministic signature**: ✅ WORKING - money-path tests confirm HMAC headers are properly implemented
