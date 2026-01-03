@@ -1,18 +1,18 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414277977,"monotonicTime":263170.245,"sdkLanguage":"javascript","contextId":"request-context@913811b592107a1be1b11ba704df497a","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}
-{"type":"before","callId":"call@531","startTime":263171.034,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","jsonData":"{\"amount\":40,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@40","beforeSnapshot":"before@call@531"}
-{"type":"log","callId":"call@531","time":263171.328,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
-{"type":"log","callId":"call@531","time":263171.336,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@531","time":263171.339,"message":"  accept: */*"}
-{"type":"log","callId":"call@531","time":263171.342,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@531","time":263171.344,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYzdjMzE3Yi05NTU0LTRjZTktOGZlOC0zYzFhYmMxZDE3ZDIiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTkwNzd9.EJl6TmF05OIZpeqxzPWQezyrAqCWAOYiedZGWhv6nSI"}
-{"type":"log","callId":"call@531","time":263171.348,"message":"  Idempotency-Key: e2e-deposit-1767414277975-200f9feb11d5"}
-{"type":"log","callId":"call@531","time":263171.35,"message":"  X-Mock-Outcome: success"}
-{"type":"log","callId":"call@531","time":263171.353,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@531","time":263171.356,"message":"  content-length: 29"}
-{"type":"log","callId":"call@531","time":263197.995,"message":"← 200 OK"}
-{"type":"log","callId":"call@531","time":263198.017,"message":"  date: Sat, 03 Jan 2026 04:24:36 GMT"}
-{"type":"log","callId":"call@531","time":263198.021,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@531","time":263198.024,"message":"  content-length: 361"}
-{"type":"log","callId":"call@531","time":263198.026,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@531","time":263198.029,"message":"  x-request-id: 59ba5c14-2b5f-49c3-aeb8-963c0bdaf047"}
-{"type":"after","callId":"call@531","endTime":263238.981,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:36 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"361"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"59ba5c14-2b5f-49c3-aeb8-963c0bdaf047"}],"fetchUid":"38b39454c5a86e05ac370f27ca42b0a0"}},"afterSnapshot":"after@call@531"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414588765,"monotonicTime":264524.881,"sdkLanguage":"javascript","contextId":"request-context@55b80d482cf500ce4d0525223aa38c85","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}
+{"type":"before","callId":"call@531","startTime":264525.702,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","jsonData":"{\"amount\":40,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@40","beforeSnapshot":"before@call@531"}
+{"type":"log","callId":"call@531","time":264526.067,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
+{"type":"log","callId":"call@531","time":264526.076,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@531","time":264526.079,"message":"  accept: */*"}
+{"type":"log","callId":"call@531","time":264526.082,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@531","time":264526.085,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MWM5ZWU4Yi01YWIzLTQ5ZmUtOTg0Mi0yZmEzMDgzYjE5NWYiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTkzODh9.Xhi8bqCH2tD-K6bBq6YwebqOt7-vDPm2neIxobk0ieM"}
+{"type":"log","callId":"call@531","time":264526.088,"message":"  Idempotency-Key: e2e-deposit-1767414588762-100221da65c9"}
+{"type":"log","callId":"call@531","time":264526.091,"message":"  X-Mock-Outcome: success"}
+{"type":"log","callId":"call@531","time":264526.094,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@531","time":264526.096,"message":"  content-length: 29"}
+{"type":"log","callId":"call@531","time":264560.994,"message":"← 200 OK"}
+{"type":"log","callId":"call@531","time":264561.015,"message":"  date: Sat, 03 Jan 2026 04:29:47 GMT"}
+{"type":"log","callId":"call@531","time":264561.019,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@531","time":264561.022,"message":"  content-length: 361"}
+{"type":"log","callId":"call@531","time":264561.025,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@531","time":264561.028,"message":"  x-request-id: e958baff-eaf7-4ff5-b458-f74246fe932f"}
+{"type":"after","callId":"call@531","endTime":264601.347,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:29:47 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"361"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"e958baff-eaf7-4ff5-b458-f74246fe932f"}],"fetchUid":"2ad3b77cb36ebdf760ed38249a6a2e92"}},"afterSnapshot":"after@call@531"}

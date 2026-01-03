@@ -1,15 +1,15 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414274933,"monotonicTime":260126.03,"sdkLanguage":"javascript","contextId":"request-context@9b038954561ac547b4ec07be17a6ca77","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
-{"type":"before","callId":"call@342","startTime":260126.806,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"e2e-money-path-player@example.com\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@35","beforeSnapshot":"before@call@342"}
-{"type":"log","callId":"call@342","time":260127.236,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
-{"type":"log","callId":"call@342","time":260127.245,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@342","time":260127.249,"message":"  accept: */*"}
-{"type":"log","callId":"call@342","time":260127.252,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@342","time":260127.256,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@342","time":260127.258,"message":"  content-length: 98"}
-{"type":"log","callId":"call@342","time":260368.693,"message":"← 200 OK"}
-{"type":"log","callId":"call@342","time":260368.716,"message":"  date: Sat, 03 Jan 2026 04:24:34 GMT"}
-{"type":"log","callId":"call@342","time":260368.72,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@342","time":260368.723,"message":"  content-length: 380"}
-{"type":"log","callId":"call@342","time":260368.726,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@342","time":260368.728,"message":"  x-request-id: 4277421f-8cb4-467b-a027-1b5d13a042d3"}
-{"type":"after","callId":"call@342","endTime":260411.041,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:34 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"380"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"4277421f-8cb4-467b-a027-1b5d13a042d3"}],"fetchUid":"14854811e666e5eba16ad39165d00264"}},"afterSnapshot":"after@call@342"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414585528,"monotonicTime":261287.263,"sdkLanguage":"javascript","contextId":"request-context@468728c7c4ba83d597da6d7356f89e17","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
+{"type":"before","callId":"call@342","startTime":261288.063,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"e2e-money-path-player@example.com\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@35","beforeSnapshot":"before@call@342"}
+{"type":"log","callId":"call@342","time":261288.517,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
+{"type":"log","callId":"call@342","time":261288.526,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@342","time":261288.529,"message":"  accept: */*"}
+{"type":"log","callId":"call@342","time":261288.532,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@342","time":261288.535,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@342","time":261288.537,"message":"  content-length: 98"}
+{"type":"log","callId":"call@342","time":261537.013,"message":"← 200 OK"}
+{"type":"log","callId":"call@342","time":261537.034,"message":"  date: Sat, 03 Jan 2026 04:29:44 GMT"}
+{"type":"log","callId":"call@342","time":261537.038,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@342","time":261537.041,"message":"  content-length: 380"}
+{"type":"log","callId":"call@342","time":261537.043,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@342","time":261537.046,"message":"  x-request-id: 8fb1d485-4ca7-42b2-bfba-0fab8b10cb1e"}
+{"type":"after","callId":"call@342","endTime":261578.363,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:29:44 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"380"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"8fb1d485-4ca7-42b2-bfba-0fab8b10cb1e"}],"fetchUid":"c558b5112a0b298a045c9899faaf5bcf"}},"afterSnapshot":"after@call@342"}

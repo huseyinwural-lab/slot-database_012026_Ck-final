@@ -1,15 +1,15 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414294095,"monotonicTime":279288.011,"sdkLanguage":"javascript","contextId":"request-context@2dfb5e635ab3fac3596e69254a640d62","title":"tenant-policy.spec.ts:79 › Tenant Policy Limits (E2E-POLICY-001) › Deposit limit exceeded enforcement"}
-{"type":"before","callId":"call@2647","startTime":279288.828,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/login","method":"POST","jsonData":"{\"email\":\"admin@casino.com\",\"password\":\"Admin123!\"}","timeout":0},"stepId":"pw:api@27","beforeSnapshot":"before@call@2647"}
-{"type":"log","callId":"call@2647","time":279289.134,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/login"}
-{"type":"log","callId":"call@2647","time":279289.142,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@2647","time":279289.146,"message":"  accept: */*"}
-{"type":"log","callId":"call@2647","time":279289.15,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@2647","time":279289.153,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@2647","time":279289.156,"message":"  content-length: 51"}
-{"type":"log","callId":"call@2647","time":279541.945,"message":"← 200 OK"}
-{"type":"log","callId":"call@2647","time":279541.967,"message":"  date: Sat, 03 Jan 2026 04:24:53 GMT"}
-{"type":"log","callId":"call@2647","time":279541.971,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@2647","time":279541.974,"message":"  content-length: 707"}
-{"type":"log","callId":"call@2647","time":279541.977,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@2647","time":279541.98,"message":"  x-request-id: dcc90583-74fd-4b67-a0f4-2cf6397a067d"}
-{"type":"after","callId":"call@2647","endTime":279542.335,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:53 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"707"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"dcc90583-74fd-4b67-a0f4-2cf6397a067d"}],"fetchUid":"2e24576aa3ccb0b308e3584ef458351a"}},"afterSnapshot":"after@call@2647"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414605907,"monotonicTime":281666.321,"sdkLanguage":"javascript","contextId":"request-context@c4df5484a8c983886435a2874cdbc56b","title":"tenant-policy.spec.ts:79 › Tenant Policy Limits (E2E-POLICY-001) › Deposit limit exceeded enforcement"}
+{"type":"before","callId":"call@2647","startTime":281667.245,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/login","method":"POST","jsonData":"{\"email\":\"admin@casino.com\",\"password\":\"Admin123!\"}","timeout":0},"stepId":"pw:api@27","beforeSnapshot":"before@call@2647"}
+{"type":"log","callId":"call@2647","time":281667.537,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/login"}
+{"type":"log","callId":"call@2647","time":281667.544,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@2647","time":281667.548,"message":"  accept: */*"}
+{"type":"log","callId":"call@2647","time":281667.551,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@2647","time":281667.555,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@2647","time":281667.558,"message":"  content-length: 51"}
+{"type":"log","callId":"call@2647","time":281929.834,"message":"← 200 OK"}
+{"type":"log","callId":"call@2647","time":281929.856,"message":"  date: Sat, 03 Jan 2026 04:30:05 GMT"}
+{"type":"log","callId":"call@2647","time":281929.86,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@2647","time":281929.864,"message":"  content-length: 707"}
+{"type":"log","callId":"call@2647","time":281929.867,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@2647","time":281929.871,"message":"  x-request-id: 6e92fdcf-c25a-4b53-868b-74d4e8f3f8c3"}
+{"type":"after","callId":"call@2647","endTime":281930.943,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:30:05 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"707"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"6e92fdcf-c25a-4b53-868b-74d4e8f3f8c3"}],"fetchUid":"865ae7151845853a4a938df335e7939c"}},"afterSnapshot":"after@call@2647"}
