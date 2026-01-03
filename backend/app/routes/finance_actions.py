@@ -79,9 +79,17 @@ async def retry_payout(
         raise HTTPException(status_code=422, detail={"error_code": "PAYMENT_RETRY_LIMIT_EXCEEDED", "message": f"Retry limit ({limit}) exceeded."})
 
     # Policy 2: Cooldown
-    cooldown = tenant.payout_cooldown_seconds or 60 # Default 60s
+    cooldown = tenant.payout_cooldown_seconds or 60  # Default 60s
     if last_attempt:
-        elapsed = (datetime.utcnow() - last_attempt.created_at).total_seconds()
+        # IMPORTANT (CI stability): Some DB columns are TIMESTAMP WITHOUT TIME ZONE.
+        # Normalize all comparisons to *naive UTC* to avoid
+        # "can't subtract offset-naive and offset-aware datetimes".
+        now_naive_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+        last_created = last_attempt.created_at
+        if getattr(last_created, "tzinfo", None) is not None:
+            last_created = last_created.astimezone(timezone.utc).replace(tzinfo=None)
+
+        elapsed = (now_naive_utc - last_created).total_seconds()
         if elapsed < cooldown:
             await audit.log_event(
                 session=session,
@@ -93,10 +101,16 @@ async def retry_payout(
                 resource_id=tx_id,
                 result="blocked",
                 details={"reason": "cooldown_active", "cooldown": cooldown, "elapsed": elapsed},
-                ip_address=request.client.host
+                ip_address=request.client.host,
             )
             await session.commit()
-            raise HTTPException(status_code=429, detail={"error_code": "PAYMENT_COOLDOWN_ACTIVE", "message": f"Please wait {int(cooldown - elapsed)}s before retrying."})
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "error_code": "PAYMENT_COOLDOWN_ACTIVE",
+                    "message": f"Please wait {int(cooldown - elapsed)}s before retrying.",
+                },
+            )
 
     # 3. Create New Attempt
     attempt = PayoutAttempt(
