@@ -14,8 +14,9 @@ const Home = () => {
   useEffect(() => {
     const fetchGames = async () => {
         try {
-            const res = await api.get('/games');
-            setGames(res.data);
+            const res = await api.get('/player/games');
+            const items = res.data?.items || res.data?.data?.items || [];
+            setGames(Array.isArray(items) ? items : []);
         } catch (err) {
             console.error(err);
         } finally {
@@ -27,9 +28,10 @@ const Home = () => {
 
   const handlePlay = async (gameId) => {
       try {
-          const res = await api.post('/games/launch', { game_id: gameId });
-          // URL is relative path like /game/{session_id}
-          navigate(res.data.url);
+          const res = await api.post('/player/client-games/launch', { game_id: gameId, currency: 'USD' });
+          // backend returns { url: "/game/{session_id}" }
+          const url = res.data?.url || res.data?.launch_url;
+          navigate(url);
       } catch (err) {
           alert("Failed to launch game");
       }
@@ -65,8 +67,8 @@ const Home = () => {
                         </div>
                     </div>
                     <CardContent className="p-3">
-                        <h3 className="font-semibold truncate">{game.title}</h3>
-                        <p className="text-xs text-muted-foreground capitalize">{game.provider_id}</p>
+                        <h3 className="font-semibold truncate">{game.name || game.title}</h3>
+                        <p className="text-xs text-muted-foreground capitalize">{game.provider_id || game.provider || ''}</p>
                     </CardContent>
                 </Card>
             ))
