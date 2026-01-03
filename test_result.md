@@ -1,5 +1,37 @@
 # Test Results - Sprint 1 & 2 (Payment/Wallet EPIC)
 
+## Payout Status Polling Stability Test — Iteration 2026-01-03
+- **Status**: ✅ COMPLETED & VERIFIED
+- **Test Goal**: Validate that GET /api/v1/payouts/status/{tx_id} never causes connection drops and returns controlled JSON on errors
+- **Test Steps**:
+  1. Register new player via POST /api/v1/auth/player/register (email+password+username)
+  2. Login via POST /api/v1/auth/player/login and capture access_token
+  3. Approve player KYC to allow deposits
+  4. Perform test deposit via POST /api/v1/player/wallet/deposit with Authorization Bearer token and Idempotency-Key
+  5. Initiate payout via POST /api/v1/payouts/initiate (amount in minor units: 1000) using player_id and token
+  6. Poll payout status 5 times in loop (GET /api/v1/payouts/status/{payout_id}) with small delays
+- **Assertions Verified**:
+  - ✅ Each GET returns HTTP 200 with JSON; `created_at` is a string (not null)
+  - ✅ No connection reset / socket hang up occurs during polling loop
+  - ✅ Clean HTTP responses (no dropped connections)
+- **Example Response**:
+  ```json
+  {
+    "_id": "476b61be-b690-43de-81e5-6550948de3dc",
+    "player_id": "a69c6055-6dbe-430d-959c-365fed25cfac", 
+    "amount": 1000,
+    "currency": "EUR",
+    "status": "requested",
+    "psp_reference": null,
+    "created_at": "2026-01-03T07:31:06.317192",
+    "webhook_events": []
+  }
+  ```
+- **Backend URL**: http://127.0.0.1:8001
+- **Verification**: ✅ ALL PAYOUT STATUS POLLING STABILITY REQUIREMENTS MET (1/1 tests passed)
+
+---
+
 ## 0. CI/E2E Stabilization (Prod Compose Acceptance)
 - **Status**: ✅ LOCAL RUN GREEN (excluding expected skipped specs)
 - **Verification (Local)**:
