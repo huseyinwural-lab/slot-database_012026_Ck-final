@@ -179,7 +179,7 @@ async function pollUntil(
   }
 }
 
-function closeTo(a: number, b: number, precision = 6) {
+function closeTo(a, b, precision = 6) {
   return Math.abs(a - b) < Math.pow(10, -precision);
 }
 
