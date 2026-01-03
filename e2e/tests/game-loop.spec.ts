@@ -44,7 +44,7 @@ test.describe('Casino E2E with Security', () => {
     
     // 5. Verify Balance Change
     await expect.poll(async () => {
-        const text = await page.locator('div:has-text("BAL:")').innerText();
+        const text = await page.locator('div.font-mono:has-text("BAL:")').first().innerText();
         return text;
     }, { timeout: 15000 }).not.toBe('BAL: $100.00');
     
