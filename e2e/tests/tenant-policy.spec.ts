@@ -251,6 +251,9 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.click('button:has-text("Withdraw")');
     await playerPage.locator('input[name="amount"]').fill('15');
     await playerPage.locator('input[name="accountNumber"]').fill('test-iban-2');
+    await playerPage.locator('input[name="accountHolderName"]').fill('John Doe');
+    await playerPage.locator('input[name="bankCode"]').fill('021000021');
+    await playerPage.locator('input[name="branchCode"]').fill('001');
     await playerPage.getByRole('button', { name: 'Request Withdrawal' }).click();
 
     // Assert Failure
