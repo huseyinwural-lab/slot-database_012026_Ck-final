@@ -447,7 +447,7 @@ test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ pa
   const path = await import('path');
   const tokenPath = path.resolve(__dirname, '../.auth/admin-token.json');
   const raw = fs.readFileSync(tokenPath, 'utf-8');
-  const adminToken = JSON.parse(raw).token as string;
+  const adminToken = JSON.parse(raw).token;
 
   // Her koşumda benzersiz player ile izolasyon
   const uniqueEmail = `e2e_p06_203_${Date.now()}@test.local`;
@@ -524,7 +524,7 @@ test('P06-204: Replay / dedupe for payout and webhook', async ({ context, reques
   const path = await import('path');
   const tokenPath = path.resolve(__dirname, '../.auth/admin-token.json');
   const raw = fs.readFileSync(tokenPath, 'utf-8');
-  const adminToken = JSON.parse(raw).token as string;
+  const adminToken = JSON.parse(raw).token;
   const { token: playerToken, playerId } = await apiRegisterOrLoginPlayer(BACKEND_URL, PLAYER_EMAIL, PLAYER_PASSWORD);
   await adminApproveKycForPlayerId(BACKEND_URL, adminToken, playerId);
 
