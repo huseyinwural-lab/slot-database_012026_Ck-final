@@ -15,11 +15,11 @@ const LS_TOKEN_KEY = process.env.LS_TOKEN_KEY || 'admin_token';
 
 // --- GENERIC HELPERS --------------------------------------------------------
 
-function idemKey(prefix: string) {
+function idemKey(prefix) {
   return `${prefix}-${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
 }
 
-function authHeaders(token: string) {
+function authHeaders(token) {
   return { Authorization: `Bearer ${token}` };
 }
 
