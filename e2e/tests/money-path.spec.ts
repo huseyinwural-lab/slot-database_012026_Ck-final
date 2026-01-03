@@ -271,7 +271,7 @@ async function playerWithdraw(
   return { txId };
 }
 
-async function adminApproveWithdraw(apiBaseUrl: string, adminToken: string, txId: string) {
+async function adminApproveWithdraw(apiBaseUrl, adminToken, txId) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
     extraHTTPHeaders: authHeaders(adminToken),
