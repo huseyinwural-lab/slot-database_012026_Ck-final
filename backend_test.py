@@ -1335,6 +1335,7 @@ class PayoutStatusPollingTestSuite:
     def __init__(self):
         # Use the specific base URL from review request
         self.base_url = "http://127.0.0.1:8001/api/v1"
+        self.admin_token = None
         self.player_token = None
         self.test_player_id = None
         self.payout_id = None
@@ -1351,6 +1352,37 @@ class PayoutStatusPollingTestSuite:
         print(f"{status}: {test_name}")
         if details:
             print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication for KYC approval"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
     
     async def register_player(self) -> bool:
         """Step 1: Register a new player via POST /api/v1/auth/player/register"""
@@ -1423,6 +1455,39 @@ class PayoutStatusPollingTestSuite:
                 
         except Exception as e:
             self.log_result("Login Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def approve_player_kyc(self) -> bool:
+        """Step 2.5: Approve player KYC to allow deposits"""
+        try:
+            if not self.admin_token or not self.test_player_id:
+                self.log_result("Approve Player KYC", False, "Missing admin token or player ID")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                kyc_payload = {"status": "approved"}
+                
+                response = await client.post(
+                    f"{self.base_url}/kyc/documents/{self.test_player_id}/review",
+                    json=kyc_payload,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Approve Player KYC", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    # Continue anyway, maybe KYC is not required in this environment
+                    return True
+                
+                data = response.json()
+                player_status = data.get("player_status")
+                
+                self.log_result("Approve Player KYC", True, f"Player KYC status: {player_status}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Approve Player KYC", False, f"Exception: {str(e)}")
             return False
     
     async def test_deposit(self) -> bool:
