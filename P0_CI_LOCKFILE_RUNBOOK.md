@@ -1,88 +1,59 @@
 # P0 CI LOCKFILE RUNBOOK (FINAL)
 
-## Problem
-CI şu adımda FAIL ediyor:
-yarn install --frozen-lockfile
-makefile:
-Hata:
-Your lockfile needs to be updated
-Yaml:
+## Hata
+CI şu adımda FAIL:
+- `yarn install --frozen-lockfile`
 
-Sebep:
-- `frontend/package.json` güncel
-- `frontend/yarn.lock` güncel değil
-- Bu iki dosya senkron olmadığı için CI deterministik olarak FAIL eder
+Hata mesajı:
+- `Your lockfile needs to be updated`
 
-Bu bir CI veya config problemi değildir.
+## Kök Sebep (Net)
+`frontend/package.json` ile `frontend/yarn.lock` senkron değil.
+Bu bir CI/config sorunu değil; lockfile güncelleme sorunu.
 
----
+## Kapsam
+Sadece şu dosya düzeltilecek ve commit edilecek:
+- `frontend/yarn.lock`
 
-## KAPSAM
-Bu runbook **SADECE** aşağıdaki dosya içindir:
-frontend/yarn.lock
-markdown:
+## Uygulama (Tek Hamle)
+> Repo kökünde çalıştır.
 
-Aşağıdaki klasörler **KAPSAM DIŞIDIR**:
-- `.emergent/`
-- `frontend-player/`
-- `e2e/`
-- `backend/`
-
----
-
-## TEK DOĞRU ÇÖZÜM
-
-### 1) Doğru branch
+### 1) Doğru branch ve güncel kod
 ```bash
 git checkout main
 git pull origin main
-2) Lockfile üretimi (zorunlu)
-Bash:
+```
+
+### 2) Lockfile üret (mutlaka frontend içinde)
+```bash
 cd frontend
 rm -rf node_modules
 yarn cache clean
 yarn install
-3) Kontrol
-Bash:
+cd ..
+```
+
+### 3) Sadece yarn.lock değiştiğini doğrula
+```bash
 git status
+```
+
 Beklenen:
-Bash:
-modified: frontend/yarn.lock
-Başka dosya OLMAMALI.
-________________________________________
-4) Commit + Push
-Bash:
+- `modified: frontend/yarn.lock`
+
+Başka dosya varsa: **staged etme / commit etme**.
+
+### 4) Commit + push (sadece yarn.lock)
+```bash
 git add frontend/yarn.lock
 git commit -m "chore(frontend): sync yarn.lock for frozen-lockfile CI"
 git push origin main
-5) GitHub UI doğrulama
-•	frontend/yarn.lock
-•	"Last commit" → dakikalar önce olmalı
-•	“3 weeks ago” görünüyorsa işlem BAŞARISIZDIR
-________________________________________
-6) CI
-•	frontend-lint.yml yeniden çalıştırılır
-•	Beklenen sonuç:
-frontend-lint PASS
-________________________________________
-YAPILMAYACAKLAR
-•	yarn.lock manuel editlenmez
-•	Başka dosya commit edilmez
-•	Debug / test eklenmez
-•	Alternatif çözüm denenmez
-________________________________________
-KAPANIŞ KRİTERİ
-frontend-lint PASS
-Bu sağlandığında P0 gate KAPANMIŞ kabul edilir.
-Yaml:
+```
 
----
+## Doğrulama
+GitHub → `frontend/yarn.lock`:
+- "Last commit" **dakikalar önce** görünmeli.
 
-## Nasıl kullanacaksın?
-- Bu dosyayı repo köküne ekle
-- Yazılımcıya **“sadece bu dosyayı uygula”** de
-- Slack / mail / WhatsApp’ta açıklama yapma
-
-İstersen bir sonraki adımda:
-- 📌 **Bu dosyayı README’ye bağlayalım**
-- 📌 veya **CI fail olduğunda otomatik link verelim**
+## Başarı Kriteri
+GitHub Actions:
+- `frontend-lint.yml` **PASS**
