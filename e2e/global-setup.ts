@@ -121,7 +121,7 @@ export default async function globalSetup() {
   // Wait for any potential rate limiting to clear
   await page.waitForTimeout(2000);
   
-  await page.click('button:has-text("Sign In")');
+  await page.click('button:has-text("Sign In")', { force: true });
 
   // Wait a bit for the login to process and any redirects
   await page.waitForTimeout(8000);
