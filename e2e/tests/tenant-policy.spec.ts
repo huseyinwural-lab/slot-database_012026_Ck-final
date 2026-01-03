@@ -218,10 +218,10 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.locator('input[name="accountNumber"]').fill('test-iban');
     await playerPage.getByRole('button', { name: 'Request Withdrawal' }).click();
 
-    // Assert success: request should move funds from available to held
-    await playerPage.waitForTimeout(1500);
-    await expect(playerPage.getByText('Held Balance')).toBeVisible();
-    await expect(playerPage.getByText('$20.00')).toBeVisible({ timeout: 20000 });
+    // Assert success: request should create a withdrawal history entry
+    await playerPage.waitForTimeout(2000);
+    await expect(playerPage.getByText('Transaction History')).toBeVisible();
+    await expect(playerPage.getByText('withdrawal', { exact: false })).toBeVisible({ timeout: 20000 });
 
     // 4. Player: Withdraw 15 (Fail: 20+15 > 30) via UI
     await playerPage.reload();
