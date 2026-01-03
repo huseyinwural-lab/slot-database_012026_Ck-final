@@ -3633,26 +3633,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run P0 backend regression test suite"""
-    print("🎯 P0 Backend Regression Test Suite Runner")
+    """Main test runner - Run Payout Status Polling Stability Test Suite"""
+    print("🎯 Payout Status Polling Stability Test Suite Runner")
     print("=" * 80)
     
-    # Run P0 regression test suite (primary focus for this review request)
-    p0_regression_suite = P0RegressionTestSuite()
-    p0_regression_success = await p0_regression_suite.run_all_tests()
+    # Run payout status polling test suite (primary focus for this review request)
+    payout_polling_suite = PayoutStatusPollingTestSuite()
+    payout_polling_success = await payout_polling_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if p0_regression_success else "❌ FAIL"
-    print(f"{status}: P0 Backend Regression Tests")
+    status = "✅ PASS" if payout_polling_success else "❌ FAIL"
+    print(f"{status}: Payout Status Polling Stability Tests")
     
-    if p0_regression_success:
-        print("🎉 P0 backend regression test suite PASSED!")
+    if payout_polling_success:
+        print("🎉 Payout status polling stability test suite PASSED!")
         return True
     else:
-        print("⚠️  P0 backend regression test suite failed.")
+        print("⚠️  Payout status polling stability test suite failed.")
         return False
 
 
