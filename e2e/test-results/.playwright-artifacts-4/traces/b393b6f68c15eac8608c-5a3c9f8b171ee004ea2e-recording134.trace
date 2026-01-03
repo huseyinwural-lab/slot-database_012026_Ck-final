@@ -1,43 +1,43 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415220900,"monotonicTime":266896.116,"sdkLanguage":"javascript","contextId":"request-context@b803f6eabe0d46c0c69af4548984b402","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
-{"type":"before","callId":"call@832","startTime":266896.926,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"e2e_webhook_1767415220899@test.local\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@57","beforeSnapshot":"before@call@832"}
-{"type":"log","callId":"call@832","time":266897.259,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
-{"type":"log","callId":"call@832","time":266897.268,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@832","time":266897.272,"message":"  accept: */*"}
-{"type":"log","callId":"call@832","time":266897.275,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@832","time":266897.278,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@832","time":266897.281,"message":"  content-length: 101"}
-{"type":"log","callId":"call@832","time":266900.752,"message":"← 401 Unauthorized"}
-{"type":"log","callId":"call@832","time":266900.764,"message":"  date: Sat, 03 Jan 2026 04:40:20 GMT"}
-{"type":"log","callId":"call@832","time":266900.768,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@832","time":266900.771,"message":"  content-length: 32"}
-{"type":"log","callId":"call@832","time":266900.774,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@832","time":266900.777,"message":"  x-request-id: 10e5fce0-000d-4977-8c8e-787ef007cd2d"}
-{"type":"after","callId":"call@832","endTime":266941.477,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":401,"statusText":"Unauthorized","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:40:20 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"32"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"10e5fce0-000d-4977-8c8e-787ef007cd2d"}],"fetchUid":"ad7ba0324a69cb2272e66fa2aaf438d3"}},"afterSnapshot":"after@call@832"}
-{"type":"before","callId":"call@834","startTime":266942.556,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/register","method":"POST","jsonData":"{\"email\":\"e2e_webhook_1767415220899@test.local\",\"password\":\"Player123!\",\"username\":\"e2e_webhook_1767415220899\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@58","beforeSnapshot":"before@call@834"}
-{"type":"log","callId":"call@834","time":266942.84,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/register"}
-{"type":"log","callId":"call@834","time":266942.848,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@834","time":266942.852,"message":"  accept: */*"}
-{"type":"log","callId":"call@834","time":266942.855,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@834","time":266942.858,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@834","time":266942.861,"message":"  content-length: 140"}
-{"type":"log","callId":"call@834","time":267198.365,"message":"← 200 OK"}
-{"type":"log","callId":"call@834","time":267198.388,"message":"  date: Sat, 03 Jan 2026 04:40:20 GMT"}
-{"type":"log","callId":"call@834","time":267198.393,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@834","time":267198.399,"message":"  content-length: 75"}
-{"type":"log","callId":"call@834","time":267198.403,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@834","time":267198.406,"message":"  x-request-id: 502fe36b-de48-42aa-8a7e-f8e5d5ba4b55"}
-{"type":"after","callId":"call@834","endTime":267239.479,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/register","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:40:20 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"75"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"502fe36b-de48-42aa-8a7e-f8e5d5ba4b55"}],"fetchUid":"18165da076309dbdaf6b0211a0768c72"}},"afterSnapshot":"after@call@834"}
-{"type":"before","callId":"call@837","startTime":267240.898,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"e2e_webhook_1767415220899@test.local\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@59","beforeSnapshot":"before@call@837"}
-{"type":"log","callId":"call@837","time":267241.173,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
-{"type":"log","callId":"call@837","time":267241.181,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@837","time":267241.185,"message":"  accept: */*"}
-{"type":"log","callId":"call@837","time":267241.188,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@837","time":267241.191,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@837","time":267241.194,"message":"  content-length: 101"}
-{"type":"log","callId":"call@837","time":267487.593,"message":"← 200 OK"}
-{"type":"log","callId":"call@837","time":267487.616,"message":"  date: Sat, 03 Jan 2026 04:40:20 GMT"}
-{"type":"log","callId":"call@837","time":267487.62,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@837","time":267487.624,"message":"  content-length: 384"}
-{"type":"log","callId":"call@837","time":267487.627,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@837","time":267487.63,"message":"  x-request-id: ab181c15-a9ab-4967-9adc-d857057dbec6"}
-{"type":"after","callId":"call@837","endTime":267528.461,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:40:20 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"384"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"ab181c15-a9ab-4967-9adc-d857057dbec6"}],"fetchUid":"fe72efdf52ebc97ff0763ba423a2ff4f"}},"afterSnapshot":"after@call@837"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415530709,"monotonicTime":267299.601,"sdkLanguage":"javascript","contextId":"request-context@dfb9dd16393ef0c2b18fe381d193c82c","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
+{"type":"before","callId":"call@832","startTime":267300.362,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"e2e_webhook_1767415530708@test.local\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@57","beforeSnapshot":"before@call@832"}
+{"type":"log","callId":"call@832","time":267300.686,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
+{"type":"log","callId":"call@832","time":267300.693,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@832","time":267300.697,"message":"  accept: */*"}
+{"type":"log","callId":"call@832","time":267300.7,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@832","time":267300.703,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@832","time":267300.705,"message":"  content-length: 101"}
+{"type":"log","callId":"call@832","time":267304.331,"message":"← 401 Unauthorized"}
+{"type":"log","callId":"call@832","time":267304.342,"message":"  date: Sat, 03 Jan 2026 04:45:30 GMT"}
+{"type":"log","callId":"call@832","time":267304.345,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@832","time":267304.349,"message":"  content-length: 32"}
+{"type":"log","callId":"call@832","time":267304.351,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@832","time":267304.354,"message":"  x-request-id: 2d4f374b-5846-4c89-9181-281e0124f28b"}
+{"type":"after","callId":"call@832","endTime":267346.063,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":401,"statusText":"Unauthorized","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:45:30 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"32"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"2d4f374b-5846-4c89-9181-281e0124f28b"}],"fetchUid":"b6989340367a8348fa95bdd43c0d4d0b"}},"afterSnapshot":"after@call@832"}
+{"type":"before","callId":"call@834","startTime":267347.053,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/register","method":"POST","jsonData":"{\"email\":\"e2e_webhook_1767415530708@test.local\",\"password\":\"Player123!\",\"username\":\"e2e_webhook_1767415530708\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@58","beforeSnapshot":"before@call@834"}
+{"type":"log","callId":"call@834","time":267347.33,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/register"}
+{"type":"log","callId":"call@834","time":267347.338,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@834","time":267347.343,"message":"  accept: */*"}
+{"type":"log","callId":"call@834","time":267347.347,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@834","time":267347.35,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@834","time":267347.353,"message":"  content-length: 140"}
+{"type":"log","callId":"call@834","time":267602.192,"message":"← 200 OK"}
+{"type":"log","callId":"call@834","time":267602.214,"message":"  date: Sat, 03 Jan 2026 04:45:30 GMT"}
+{"type":"log","callId":"call@834","time":267602.218,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@834","time":267602.222,"message":"  content-length: 75"}
+{"type":"log","callId":"call@834","time":267602.225,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@834","time":267602.228,"message":"  x-request-id: 495ac6ea-3dec-4fd7-aac2-953cbaa05c59"}
+{"type":"after","callId":"call@834","endTime":267643,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/register","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:45:30 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"75"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"495ac6ea-3dec-4fd7-aac2-953cbaa05c59"}],"fetchUid":"b3e5b1739c4edb1d6e5b39ec2453407a"}},"afterSnapshot":"after@call@834"}
+{"type":"before","callId":"call@837","startTime":267644.405,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"e2e_webhook_1767415530708@test.local\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@59","beforeSnapshot":"before@call@837"}
+{"type":"log","callId":"call@837","time":267644.696,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
+{"type":"log","callId":"call@837","time":267644.704,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@837","time":267644.708,"message":"  accept: */*"}
+{"type":"log","callId":"call@837","time":267644.711,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@837","time":267644.714,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@837","time":267644.717,"message":"  content-length: 101"}
+{"type":"log","callId":"call@837","time":267891.568,"message":"← 200 OK"}
+{"type":"log","callId":"call@837","time":267891.589,"message":"  date: Sat, 03 Jan 2026 04:45:30 GMT"}
+{"type":"log","callId":"call@837","time":267891.594,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@837","time":267891.597,"message":"  content-length: 384"}
+{"type":"log","callId":"call@837","time":267891.6,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@837","time":267891.603,"message":"  x-request-id: e7e7d1e2-f8dd-4722-9a06-50457008f553"}
+{"type":"after","callId":"call@837","endTime":267932.11,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:45:30 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"384"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"e7e7d1e2-f8dd-4722-9a06-50457008f553"}],"fetchUid":"3431bffffdbf37939db247568c2a593e"}},"afterSnapshot":"after@call@837"}

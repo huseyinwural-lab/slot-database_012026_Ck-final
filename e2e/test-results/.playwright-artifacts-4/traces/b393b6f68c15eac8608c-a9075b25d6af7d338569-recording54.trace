@@ -1,16 +1,16 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415216180,"monotonicTime":262175.955,"sdkLanguage":"javascript","contextId":"request-context@0d28f4406ea8fa533237982f7d9d5c77","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
-{"type":"before","callId":"call@350","startTime":262176.725,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/kyc/documents/44f62674-8329-42a6-8b91-ac7fc90cf542/review","method":"POST","jsonData":"{\"status\":\"approved\"}","timeout":0},"stepId":"pw:api@37","beforeSnapshot":"before@call@350"}
-{"type":"log","callId":"call@350","time":262177.08,"message":"→ POST http://127.0.0.1:8001/api/v1/kyc/documents/44f62674-8329-42a6-8b91-ac7fc90cf542/review"}
-{"type":"log","callId":"call@350","time":262177.089,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@350","time":262177.092,"message":"  accept: */*"}
-{"type":"log","callId":"call@350","time":262177.095,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@350","time":262177.099,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMTYxNX0.s-A2IbXa8-ugmLCnJrn9WDpBVUSw6hPtP1JoV6BBFfo"}
-{"type":"log","callId":"call@350","time":262177.102,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@350","time":262177.105,"message":"  content-length: 21"}
-{"type":"log","callId":"call@350","time":262183.159,"message":"← 200 OK"}
-{"type":"log","callId":"call@350","time":262183.174,"message":"  date: Sat, 03 Jan 2026 04:40:15 GMT"}
-{"type":"log","callId":"call@350","time":262183.178,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@350","time":262183.18,"message":"  content-length: 56"}
-{"type":"log","callId":"call@350","time":262183.183,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@350","time":262183.185,"message":"  x-request-id: 236a376a-15d5-493e-b94c-5f5c95421725"}
-{"type":"after","callId":"call@350","endTime":262224.636,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/kyc/documents/44f62674-8329-42a6-8b91-ac7fc90cf542/review","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:40:15 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"56"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"236a376a-15d5-493e-b94c-5f5c95421725"}],"fetchUid":"e5b0bb2f76ce8469be9ab0dd9a6c2409"}},"afterSnapshot":"after@call@350"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415526013,"monotonicTime":262603.888,"sdkLanguage":"javascript","contextId":"request-context@c7a57fd6aab540b9d92e92cceb9eaebf","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
+{"type":"before","callId":"call@350","startTime":262604.673,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/kyc/documents/44f62674-8329-42a6-8b91-ac7fc90cf542/review","method":"POST","jsonData":"{\"status\":\"approved\"}","timeout":0},"stepId":"pw:api@37","beforeSnapshot":"before@call@350"}
+{"type":"log","callId":"call@350","time":262605.053,"message":"→ POST http://127.0.0.1:8001/api/v1/kyc/documents/44f62674-8329-42a6-8b91-ac7fc90cf542/review"}
+{"type":"log","callId":"call@350","time":262605.06,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@350","time":262605.064,"message":"  accept: */*"}
+{"type":"log","callId":"call@350","time":262605.067,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@350","time":262605.069,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMTkyNX0.8AfVt2xF7aIjZJCDfLLmgBOi0oHSIEA8m2FjkHGSGL8"}
+{"type":"log","callId":"call@350","time":262605.073,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@350","time":262605.075,"message":"  content-length: 21"}
+{"type":"log","callId":"call@350","time":262612.246,"message":"← 200 OK"}
+{"type":"log","callId":"call@350","time":262612.267,"message":"  date: Sat, 03 Jan 2026 04:45:25 GMT"}
+{"type":"log","callId":"call@350","time":262612.271,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@350","time":262612.274,"message":"  content-length: 56"}
+{"type":"log","callId":"call@350","time":262612.276,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@350","time":262612.279,"message":"  x-request-id: 2b56124d-0795-4785-ad91-18e55d5ee0a6"}
+{"type":"after","callId":"call@350","endTime":262654.588,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/kyc/documents/44f62674-8329-42a6-8b91-ac7fc90cf542/review","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:45:25 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"56"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"2b56124d-0795-4785-ad91-18e55d5ee0a6"}],"fetchUid":"546fad83fcd9e0e0306c2addd1fa49fc"}},"afterSnapshot":"after@call@350"}

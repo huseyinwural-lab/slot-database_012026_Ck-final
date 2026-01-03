@@ -1,1 +1,0 @@
-{"transaction":{"id":"642e8dec-bd26-47ce-a1c9-72ce100240e4","type":"deposit","amount":100.0,"currency":"USD","state":"completed","status":"completed","idempotency_key":"dep-1767415230764","provider":null,"provider_event_id":null,"metadata":{"request_hash":"b275767096feefb9d95a857adaa977ac318e95a8a18c6e463c59a1fb6be5a289","method":"test"}}}
