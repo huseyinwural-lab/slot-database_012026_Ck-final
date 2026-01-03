@@ -1,18 +1,18 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415531668,"monotonicTime":268258.35,"sdkLanguage":"javascript","contextId":"request-context@a8597df5078dc93ce7f087371b9653b6","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
-{"type":"before","callId":"call@885","startTime":268259.118,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/finance/withdrawals/payout/webhook","method":"POST","jsonData":"{\"withdraw_tx_id\":\"16f337ec-f237-47e2-a302-f815546fcd5e\",\"provider\":\"mockpsp\",\"provider_event_id\":\"e2e-webhook-1767415531597\",\"status\":\"paid\"}","timeout":0},"stepId":"pw:api@72","beforeSnapshot":"before@call@885"}
-{"type":"log","callId":"call@885","time":268259.424,"message":"→ POST http://127.0.0.1:8001/api/v1/finance/withdrawals/payout/webhook"}
-{"type":"log","callId":"call@885","time":268259.431,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@885","time":268259.446,"message":"  accept: */*"}
-{"type":"log","callId":"call@885","time":268259.45,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@885","time":268259.453,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMTY2NH0.V0EDklLzxCIgk349RC2kkLSz4RHXLq8gJjlKI-mE_a4"}
-{"type":"log","callId":"call@885","time":268259.457,"message":"  X-Webhook-Timestamp: 1767415531"}
-{"type":"log","callId":"call@885","time":268259.46,"message":"  X-Webhook-Signature: 0336bf811ec687d380d6718f67a043d7f5b6aa061e132c4f6f6ff328682e7891"}
-{"type":"log","callId":"call@885","time":268259.463,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@885","time":268259.466,"message":"  content-length: 142"}
-{"type":"log","callId":"call@885","time":268271.542,"message":"← 200 OK"}
-{"type":"log","callId":"call@885","time":268271.562,"message":"  date: Sat, 03 Jan 2026 04:45:30 GMT"}
-{"type":"log","callId":"call@885","time":268271.567,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@885","time":268271.57,"message":"  content-length: 29"}
-{"type":"log","callId":"call@885","time":268271.573,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@885","time":268271.577,"message":"  x-request-id: 07592a71-986b-4530-b3e6-14474760fce0"}
-{"type":"after","callId":"call@885","endTime":268312.027,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/finance/withdrawals/payout/webhook","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:45:30 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"29"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"07592a71-986b-4530-b3e6-14474760fce0"}],"fetchUid":"03e9d72c9cc396bb4b7f24278ffb6dbe"}},"afterSnapshot":"after@call@885"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415840651,"monotonicTime":268463.511,"sdkLanguage":"javascript","contextId":"request-context@736a9585abf8b6ef2ae381bf5409faad","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
+{"type":"before","callId":"call@885","startTime":268464.262,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/finance/withdrawals/payout/webhook","method":"POST","jsonData":"{\"withdraw_tx_id\":\"5100a44f-5c13-424e-93a9-769cc56ecc8f\",\"provider\":\"mockpsp\",\"provider_event_id\":\"e2e-webhook-1767415840584\",\"status\":\"paid\"}","timeout":0},"stepId":"pw:api@72","beforeSnapshot":"before@call@885"}
+{"type":"log","callId":"call@885","time":268464.585,"message":"→ POST http://127.0.0.1:8001/api/v1/finance/withdrawals/payout/webhook"}
+{"type":"log","callId":"call@885","time":268464.594,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@885","time":268464.598,"message":"  accept: */*"}
+{"type":"log","callId":"call@885","time":268464.601,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@885","time":268464.605,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMTk3M30.kfXhHqxkKSBOVvQkD3faUUlOo7D16Br9pXyAXOr81qg"}
+{"type":"log","callId":"call@885","time":268464.609,"message":"  X-Webhook-Timestamp: 1767415840"}
+{"type":"log","callId":"call@885","time":268464.612,"message":"  X-Webhook-Signature: f01f7ef5c02e2b69a846580e7c44eee46a99656b5258af586dd0dd35b4b94e53"}
+{"type":"log","callId":"call@885","time":268464.615,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@885","time":268464.618,"message":"  content-length: 142"}
+{"type":"log","callId":"call@885","time":268481.896,"message":"← 200 OK"}
+{"type":"log","callId":"call@885","time":268481.919,"message":"  date: Sat, 03 Jan 2026 04:50:40 GMT"}
+{"type":"log","callId":"call@885","time":268481.924,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@885","time":268481.927,"message":"  content-length: 29"}
+{"type":"log","callId":"call@885","time":268481.93,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@885","time":268481.934,"message":"  x-request-id: 002a6e40-df58-4ee7-a3e7-5d895e6f215e"}
+{"type":"after","callId":"call@885","endTime":268523.956,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/finance/withdrawals/payout/webhook","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:50:40 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"29"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"002a6e40-df58-4ee7-a3e7-5d895e6f215e"}],"fetchUid":"4c4f68f8fb10d74cf5bd7a0dcc336c0c"}},"afterSnapshot":"after@call@885"}

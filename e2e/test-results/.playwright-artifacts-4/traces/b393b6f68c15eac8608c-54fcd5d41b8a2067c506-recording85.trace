@@ -1,17 +1,17 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415528983,"monotonicTime":265573.381,"sdkLanguage":"javascript","contextId":"request-context@ae20487e2d313c04a9a5d8201df93af5","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}
-{"type":"before","callId":"call@542","startTime":265574.148,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/withdraw","method":"POST","jsonData":"{\"amount\":30,\"method\":\"test_bank\",\"address\":\"e2e-test-bank\"}","timeout":0},"stepId":"pw:api@43","beforeSnapshot":"before@call@542"}
-{"type":"log","callId":"call@542","time":265574.467,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/withdraw"}
-{"type":"log","callId":"call@542","time":265574.475,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@542","time":265574.479,"message":"  accept: */*"}
-{"type":"log","callId":"call@542","time":265574.481,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@542","time":265574.484,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZjA0ZWVkYi00NTIyLTQxODMtOWYzZC1jOGNjNGQzM2U5ZTQiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMjAzMjh9.QSCXn02SpjUU4ChGvyJIqAEZO-5adDZ6NkUZXniXxpw"}
-{"type":"log","callId":"call@542","time":265574.488,"message":"  Idempotency-Key: e2e-withdraw-1767415528981-73eb2923e26a"}
-{"type":"log","callId":"call@542","time":265574.49,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@542","time":265574.493,"message":"  content-length: 60"}
-{"type":"log","callId":"call@542","time":265604.667,"message":"← 200 OK"}
-{"type":"log","callId":"call@542","time":265604.686,"message":"  date: Sat, 03 Jan 2026 04:45:27 GMT"}
-{"type":"log","callId":"call@542","time":265604.69,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@542","time":265604.693,"message":"  content-length: 734"}
-{"type":"log","callId":"call@542","time":265604.696,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@542","time":265604.698,"message":"  x-request-id: 6c817901-8421-4de7-b1e2-ad00246ca550"}
-{"type":"after","callId":"call@542","endTime":265645.059,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/withdraw","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:45:27 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"734"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"6c817901-8421-4de7-b1e2-ad00246ca550"}],"fetchUid":"ae898de3affcbf2652b9786f1545ca60"}},"afterSnapshot":"after@call@542"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415837904,"monotonicTime":265716.293,"sdkLanguage":"javascript","contextId":"request-context@7aab1b1820d66f1261f4a55f2170025e","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}
+{"type":"before","callId":"call@542","startTime":265717.069,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/withdraw","method":"POST","jsonData":"{\"amount\":30,\"method\":\"test_bank\",\"address\":\"e2e-test-bank\"}","timeout":0},"stepId":"pw:api@43","beforeSnapshot":"before@call@542"}
+{"type":"log","callId":"call@542","time":265717.377,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/withdraw"}
+{"type":"log","callId":"call@542","time":265717.385,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@542","time":265717.389,"message":"  accept: */*"}
+{"type":"log","callId":"call@542","time":265717.392,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@542","time":265717.394,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3ZjEzMTE1OC05YTZmLTQyZDMtOTJhYy03MTk3ODZlYzI2MjAiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMjA2Mzd9.n1RmBS6Wnb_SwQ57-Ff3GPDg3KJ-tQbftuPUJeuojzM"}
+{"type":"log","callId":"call@542","time":265717.398,"message":"  Idempotency-Key: e2e-withdraw-1767415837902-2bf4cb15ea99"}
+{"type":"log","callId":"call@542","time":265717.401,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@542","time":265717.403,"message":"  content-length: 60"}
+{"type":"log","callId":"call@542","time":265744.358,"message":"← 200 OK"}
+{"type":"log","callId":"call@542","time":265744.379,"message":"  date: Sat, 03 Jan 2026 04:50:37 GMT"}
+{"type":"log","callId":"call@542","time":265744.384,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@542","time":265744.387,"message":"  content-length: 734"}
+{"type":"log","callId":"call@542","time":265744.389,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@542","time":265744.392,"message":"  x-request-id: b6bdf50a-7599-4e72-9b7d-b7c7dd1c6413"}
+{"type":"after","callId":"call@542","endTime":265784.958,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/withdraw","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:50:37 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"734"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"b6bdf50a-7599-4e72-9b7d-b7c7dd1c6413"}],"fetchUid":"cac62b321feae2cc6d17acab01d02bed"}},"afterSnapshot":"after@call@542"}
