@@ -1,0 +1,46 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767416287698,"monotonicTime":5950.784,"sdkLanguage":"javascript","contextId":"request-context@4ed621485d555d65940521709015a4df","title":"tenant-policy.spec.ts:79 › Tenant Policy Limits (E2E-POLICY-001) › Deposit limit exceeded enforcement"}
+{"type":"before","callId":"call@13","startTime":5952.242,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"policy-test-player-1767416287392@example.com\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@32","beforeSnapshot":"before@call@13"}
+{"type":"log","callId":"call@13","time":5953.126,"message":"→ POST http://localhost:8001/api/v1/auth/player/login"}
+{"type":"log","callId":"call@13","time":5953.14,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@13","time":5953.147,"message":"  accept: */*"}
+{"type":"log","callId":"call@13","time":5953.152,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@13","time":5953.157,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":5953.161,"message":"  content-length: 109"}
+{"type":"log","callId":"call@13","time":5953.165,"message":"  cookie: ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog=%7B%22%24device_id%22%3A%22019b8238-40e1-7746-8cf6-dca1cf3d5424%22%2C%22distinct_id%22%3A%22019b8238-40e1-7746-8cf6-dca1cf3d5424%22%2C%22%24sesid%22%3A%5B1767416286128%2C%22019b8238-417f-7b11-b61a-581c6e6dedc5%22%2C1767416283519%5D%7D"}
+{"type":"log","callId":"call@13","time":5956.436,"message":"← 401 Unauthorized"}
+{"type":"log","callId":"call@13","time":5956.449,"message":"  date: Sat, 03 Jan 2026 04:58:06 GMT"}
+{"type":"log","callId":"call@13","time":5956.454,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@13","time":5956.459,"message":"  content-length: 32"}
+{"type":"log","callId":"call@13","time":5956.463,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":5956.468,"message":"  x-request-id: 6d443724-2eea-4015-a733-cf3c6a643527"}
+{"type":"after","callId":"call@13","endTime":5997.447,"result":{"response":{"url":"http://localhost:8001/api/v1/auth/player/login","status":401,"statusText":"Unauthorized","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:58:06 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"32"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"6d443724-2eea-4015-a733-cf3c6a643527"}],"fetchUid":"1da3a673c85ce14b2c6c62d6f716a42c"}},"afterSnapshot":"after@call@13"}
+{"type":"before","callId":"call@15","startTime":5999.054,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/register","method":"POST","jsonData":"{\"email\":\"policy-test-player-1767416287392@example.com\",\"password\":\"Player123!\",\"username\":\"policy-test-player-1767416287392\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@33","beforeSnapshot":"before@call@15"}
+{"type":"log","callId":"call@15","time":5999.619,"message":"→ POST http://localhost:8001/api/v1/auth/player/register"}
+{"type":"log","callId":"call@15","time":5999.632,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@15","time":5999.659,"message":"  accept: */*"}
+{"type":"log","callId":"call@15","time":5999.665,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@15","time":5999.669,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@15","time":5999.674,"message":"  content-length: 155"}
+{"type":"log","callId":"call@15","time":5999.678,"message":"  cookie: ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog=%7B%22%24device_id%22%3A%22019b8238-40e1-7746-8cf6-dca1cf3d5424%22%2C%22distinct_id%22%3A%22019b8238-40e1-7746-8cf6-dca1cf3d5424%22%2C%22%24sesid%22%3A%5B1767416286128%2C%22019b8238-417f-7b11-b61a-581c6e6dedc5%22%2C1767416283519%5D%7D"}
+{"type":"log","callId":"call@15","time":6246.818,"message":"← 200 OK"}
+{"type":"log","callId":"call@15","time":6246.842,"message":"  date: Sat, 03 Jan 2026 04:58:06 GMT"}
+{"type":"log","callId":"call@15","time":6246.848,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@15","time":6246.853,"message":"  content-length: 75"}
+{"type":"log","callId":"call@15","time":6246.857,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@15","time":6246.861,"message":"  x-request-id: 82f149a0-a372-4203-9180-ae43cb3f3be1"}
+{"type":"after","callId":"call@15","endTime":6287.464,"result":{"response":{"url":"http://localhost:8001/api/v1/auth/player/register","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:58:06 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"75"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"82f149a0-a372-4203-9180-ae43cb3f3be1"}],"fetchUid":"9f04d7f4f070eb53bfddc5936b9ba765"}},"afterSnapshot":"after@call@15"}
+{"type":"before","callId":"call@17","startTime":6289.044,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"policy-test-player-1767416287392@example.com\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@34","beforeSnapshot":"before@call@17"}
+{"type":"log","callId":"call@17","time":6289.623,"message":"→ POST http://localhost:8001/api/v1/auth/player/login"}
+{"type":"log","callId":"call@17","time":6289.648,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@17","time":6289.656,"message":"  accept: */*"}
+{"type":"log","callId":"call@17","time":6289.662,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@17","time":6289.667,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@17","time":6289.672,"message":"  content-length: 109"}
+{"type":"log","callId":"call@17","time":6289.676,"message":"  cookie: ph_phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE_posthog=%7B%22%24device_id%22%3A%22019b8238-40e1-7746-8cf6-dca1cf3d5424%22%2C%22distinct_id%22%3A%22019b8238-40e1-7746-8cf6-dca1cf3d5424%22%2C%22%24sesid%22%3A%5B1767416286128%2C%22019b8238-417f-7b11-b61a-581c6e6dedc5%22%2C1767416283519%5D%7D"}
+{"type":"log","callId":"call@17","time":6532.039,"message":"← 200 OK"}
+{"type":"log","callId":"call@17","time":6532.069,"message":"  date: Sat, 03 Jan 2026 04:58:07 GMT"}
+{"type":"log","callId":"call@17","time":6532.075,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@17","time":6532.079,"message":"  content-length: 391"}
+{"type":"log","callId":"call@17","time":6532.083,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@17","time":6532.087,"message":"  x-request-id: 573d7c4c-824c-4646-8669-284ef8ff4301"}
+{"type":"after","callId":"call@17","endTime":6572.276,"result":{"response":{"url":"http://localhost:8001/api/v1/auth/player/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:58:07 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"391"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"573d7c4c-824c-4646-8669-284ef8ff4301"}],"fetchUid":"6a4032ef23e06d0a22bf2ad22110b74a"}},"afterSnapshot":"after@call@17"}
