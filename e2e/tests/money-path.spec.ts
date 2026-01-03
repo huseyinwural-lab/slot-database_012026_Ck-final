@@ -362,7 +362,7 @@ async function robustLogin(page) {
   await page.getByLabel('Email').fill(OWNER_EMAIL);
   await page.getByLabel('Password').fill(OWNER_PASSWORD);
 
-  const loginResponsePromise = page.waitForResponse((response: any) =>
+  const loginResponsePromise = page.waitForResponse((response) =>
     response.url().includes('/auth/login') && response.request().method() === 'POST',
   );
 
