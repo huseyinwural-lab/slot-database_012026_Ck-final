@@ -32,8 +32,11 @@ def _get_secret() -> bytes:
 
     env = (settings.env or "dev").lower()
     if env in {"ci", "test", "dev", "local"}:
-        if settings.webhook_test_secret:
-            return settings.webhook_test_secret.encode("utf-8")
+        # CI drift-safe deterministic fallback.
+        # If WEBHOOK_TEST_SECRET is not explicitly set, we still enable signed webhooks
+        # using a known test secret. Prod/staging still hard-fails.
+        test_secret = settings.webhook_test_secret or "ci_webhook_test_secret"
+        return test_secret.encode("utf-8")
 
     raise HTTPException(status_code=500, detail={"error_code": "WEBHOOK_SECRET_MISSING"})
 

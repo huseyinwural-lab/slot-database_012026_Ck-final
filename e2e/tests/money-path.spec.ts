@@ -23,7 +23,7 @@ function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
 
-const WEBHOOK_TEST_SECRET = process.env.WEBHOOK_TEST_SECRET || process.env.WEBHOOK_SECRET || '';
+const WEBHOOK_TEST_SECRET = process.env.WEBHOOK_TEST_SECRET || process.env.WEBHOOK_SECRET || 'ci_webhook_test_secret';
 
 function webhookSigHeadersForJsonPayload(payload: any) {
   if (!WEBHOOK_TEST_SECRET) return {};
