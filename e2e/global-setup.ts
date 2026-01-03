@@ -1,4 +1,6 @@
 import { request as pwRequest, chromium } from '@playwright/test';
+/* eslint-disable no-empty */
+
 
 const OWNER_EMAIL = process.env.E2E_OWNER_EMAIL || process.env.OWNER_EMAIL || 'admin@casino.com';
 const OWNER_PASSWORD = process.env.E2E_OWNER_PASSWORD || process.env.OWNER_PASSWORD || 'Admin123!';
