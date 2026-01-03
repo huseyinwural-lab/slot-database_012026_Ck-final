@@ -64,9 +64,7 @@ async function apiLoginAdmin(apiBaseUrl, email, password) {
 
 // Player auth via real endpoints
 
-type PlayerAuth = { token: string; playerId: string };
-
-async function apiRegisterOrLoginPlayer(apiBaseUrl: string, email: string, password: string): Promise<PlayerAuth> {
+async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
   const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
 
   const extractToken = (json: any): string | null =>
