@@ -1,15 +1,15 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767415834288,"monotonicTime":262100.264,"sdkLanguage":"javascript","contextId":"request-context@1bda545b8b64e7dde345a02a7c32cfd1","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
-{"type":"before","callId":"call@334","startTime":262101.071,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/login","method":"POST","jsonData":"{\"email\":\"admin@casino.com\",\"password\":\"Admin123!\"}","timeout":0},"stepId":"pw:api@33","beforeSnapshot":"before@call@334"}
-{"type":"log","callId":"call@334","time":262101.843,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/login"}
-{"type":"log","callId":"call@334","time":262101.855,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@334","time":262101.86,"message":"  accept: */*"}
-{"type":"log","callId":"call@334","time":262101.864,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@334","time":262101.868,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@334","time":262101.871,"message":"  content-length: 51"}
-{"type":"log","callId":"call@334","time":262380.172,"message":"← 200 OK"}
-{"type":"log","callId":"call@334","time":262380.195,"message":"  date: Sat, 03 Jan 2026 04:50:34 GMT"}
-{"type":"log","callId":"call@334","time":262380.201,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@334","time":262380.205,"message":"  content-length: 707"}
-{"type":"log","callId":"call@334","time":262380.209,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@334","time":262380.212,"message":"  x-request-id: ed5f59a8-4b66-4292-a477-bc06b768a072"}
-{"type":"after","callId":"call@334","endTime":262380.756,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:50:34 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"707"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"ed5f59a8-4b66-4292-a477-bc06b768a072"}],"fetchUid":"b1f19ab00d4bb474a35f94defc3c2ed9"}},"afterSnapshot":"after@call@334"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767416167799,"monotonicTime":260955.619,"sdkLanguage":"javascript","contextId":"request-context@a0c83a5bbaff3eef9c45ba01327e208e","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
+{"type":"before","callId":"call@334","startTime":260956.487,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/login","method":"POST","jsonData":"{\"email\":\"admin@casino.com\",\"password\":\"Admin123!\"}","timeout":0},"stepId":"pw:api@33","beforeSnapshot":"before@call@334"}
+{"type":"log","callId":"call@334","time":260957.242,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/login"}
+{"type":"log","callId":"call@334","time":260957.301,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@334","time":260957.308,"message":"  accept: */*"}
+{"type":"log","callId":"call@334","time":260957.312,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@334","time":260957.317,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@334","time":260957.32,"message":"  content-length: 51"}
+{"type":"log","callId":"call@334","time":261208.211,"message":"← 200 OK"}
+{"type":"log","callId":"call@334","time":261208.233,"message":"  date: Sat, 03 Jan 2026 04:56:07 GMT"}
+{"type":"log","callId":"call@334","time":261208.237,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@334","time":261208.24,"message":"  content-length: 707"}
+{"type":"log","callId":"call@334","time":261208.243,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@334","time":261208.246,"message":"  x-request-id: 1cf898e1-d580-4c94-84e2-5c758bbd0e4d"}
+{"type":"after","callId":"call@334","endTime":261208.831,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:56:07 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"707"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"1cf898e1-d580-4c94-84e2-5c758bbd0e4d"}],"fetchUid":"21cdcae9215a3776a22b4489b6c3a84d"}},"afterSnapshot":"after@call@334"}
