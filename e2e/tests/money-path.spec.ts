@@ -59,7 +59,7 @@ async function apiLoginAdmin(apiBaseUrl, email, password) {
     throw new Error(`admin login response missing token: ${JSON.stringify(json)}`);
   }
 
-  return token as string;
+  return token;
 }
 
 // Player auth via real endpoints
