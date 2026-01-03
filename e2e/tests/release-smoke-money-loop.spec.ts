@@ -73,7 +73,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     // Trigger Deposit (Adyen)
     await page.click('button:has-text("Adyen (All Methods)")', { force: true });
     await page.fill('input[placeholder="Min $10.00"]', '100');
-    await page.click('button:has-text("Pay with Adyen")');
+    await page.click('button:has-text("Pay with Adyen")', { force: true });
     
     // Wait for redirect to happen and capture URL
     // This avoids "Protocol error" when trying to read response body of a request 
