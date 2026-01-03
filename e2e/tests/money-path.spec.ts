@@ -96,7 +96,7 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
       throw new Error(`player register failed ${reg.status()} body=${body}`);
     }
 
-    const regJson: any = await reg.json().catch(async () => ({ raw: await reg.text() }));
+    const regJson = await reg.json().catch(async () => ({ raw: await reg.text() }));
     playerId = extractPlayerId(regJson) || regJson?.player_id || null;
 
     res = await ctx.post('/api/v1/auth/player/login', {
