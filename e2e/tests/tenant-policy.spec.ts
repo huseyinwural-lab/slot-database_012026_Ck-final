@@ -44,7 +44,7 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
   if (!res.ok()) throw new Error(`Player auth failed: ${res.status()}`);
   const json = await res.json();
   const token = json.access_token || json.token;
-  const playerId = json.player_id || json.user?.id;
+  const playerId = json.user?.id;
   return { token, playerId };
 }
 
