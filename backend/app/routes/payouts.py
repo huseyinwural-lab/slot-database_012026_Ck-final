@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/payouts", tags=["payouts"])
 
+# NOTE: This endpoint is called by the player app. We require player auth.
+
 # Dependency
 def get_adyen_service():
     return AdyenPSP(
