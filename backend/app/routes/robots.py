@@ -112,11 +112,18 @@ async def clone_robot(
     if not original:
         raise HTTPException(404, "Robot not found")
         
+    # Clone should be usable for immediate binding in E2E:
+    # preserve the full config so slot math assets remain resolvable.
+    robot_config = original.config or {}
+    robot_hash = original.config_hash
+    if not robot_hash:
+        robot_hash = hashlib.sha256(json.dumps(robot_config, sort_keys=True).encode()).hexdigest()
+
     new_robot = RobotDefinition(
         name=f"{original.name}{name_suffix}",
-        config=original.config,
-        config_hash=original.config_hash,
-        is_active=False # Default to inactive
+        config=robot_config,
+        config_hash=robot_hash,
+        is_active=False  # Default to inactive
     )
     
     session.add(new_robot)
