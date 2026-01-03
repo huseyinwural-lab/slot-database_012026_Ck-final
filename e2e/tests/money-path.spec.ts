@@ -70,7 +70,7 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
   const extractToken = (json) =>
     json?.access_token || json?.token || json?.data?.access_token || json?.data?.token || null;
 
-  const extractPlayerId = (json: any): string | null =>
+  const extractPlayerId = (json) =>
     json?.player_id || json?.user?.id || json?.data?.player_id || json?.data?.user?.id || null;
 
   // Try login first
