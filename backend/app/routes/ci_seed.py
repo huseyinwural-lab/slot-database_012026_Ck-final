@@ -139,11 +139,19 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
 
     await session.flush()
 
-    # Ensure binding exists and enabled
+    # Ensure the CI robot is the active binding (disable any older enabled bindings that may have been created by other tests)
+    stmt = select(GameRobotBinding).where(
+        GameRobotBinding.game_id == game.id,
+        GameRobotBinding.is_enabled,
+    )
+    enabled_bindings = (await session.execute(stmt)).scalars().all()
+    for b in enabled_bindings:
+        if b.robot_id != robot.id:
+            b.is_enabled = False
+
     stmt = select(GameRobotBinding).where(
         GameRobotBinding.game_id == game.id,
         GameRobotBinding.robot_id == robot.id,
-        GameRobotBinding.is_enabled,
     )
     binding = (await session.execute(stmt)).scalars().first()
     if not binding:
@@ -154,6 +162,8 @@ async def ci_seed(session: AsyncSession = Depends(get_session)):
             is_enabled=True,
         )
         session.add(binding)
+    else:
+        binding.is_enabled = True
 
     await session.commit()
 
