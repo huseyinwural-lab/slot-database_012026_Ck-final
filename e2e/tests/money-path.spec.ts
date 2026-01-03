@@ -299,11 +299,11 @@ async function adminListWithdrawals(apiBaseUrl, token, params) {
 }
 
 async function adminStartPayout(
-  apiBaseUrl: string,
-  adminToken: string,
-  txId: string,
-  idemKey: string,
-  outcome: 'success' | 'fail',
+  apiBaseUrl,
+  adminToken,
+  txId,
+  idemKey,
+  outcome,
 ) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
