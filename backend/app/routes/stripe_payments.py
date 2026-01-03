@@ -151,6 +151,21 @@ async def get_checkout_status(
     Poll status of a session and update DB if changed.
     """
     if not STRIPE_API_KEY:
+        # CI/dev/test deterministic mock: allow polling without real Stripe keys.
+        if settings.env.lower() in {"ci", "test", "dev"} or settings.stripe_mock:
+            stmt = select(Transaction).where(
+                Transaction.provider_event_id == session_id,
+                Transaction.provider == "stripe",
+            )
+            tx = (await session.execute(stmt)).scalars().first()
+            if not tx:
+                raise HTTPException(status_code=404, detail="Transaction not found")
+
+            if tx.status == "completed":
+                return {"status": "complete", "payment_status": "paid"}
+
+            return {"status": "open", "payment_status": "unpaid"}
+
         raise HTTPException(status_code=500, detail="Stripe configuration missing")
 
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="") 
