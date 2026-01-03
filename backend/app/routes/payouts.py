@@ -50,6 +50,19 @@ async def initiate_payout(
     # Ensure player cannot request withdrawals for other players
     if request.player_id != current_player.id:
         raise HTTPException(status_code=403, detail={"error_code": "UNAUTHORIZED"})
+
+    # Enforce per-tenant daily withdraw limits
+    from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
+
+    await ensure_within_tenant_daily_limits(
+        session,
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        action="withdraw",
+        amount=float(amount_major),
+        currency=request.currency,
+    )
+
     amount_major = request.amount / 100.0
 
     bank_acc_adyen = {
