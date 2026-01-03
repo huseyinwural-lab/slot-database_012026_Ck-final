@@ -163,7 +163,7 @@ const WalletPage = () => {
        }
     } catch (err) {
        console.error(err);
-       setMessage({ type: 'error', text: err.response?.data?.detail || 'Failed to initiate payment' });
+       setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
        setProcessing(false);
     }
   };

@@ -27,12 +27,10 @@ const GameRoom = () => {
           const res = await api.post('/mock-provider/spin', {
               session_id: sessionId,
               amount: bet,
-              is_win: isWin,
-              win_amount: winAmount,
               currency: "USD"
           });
-          
-          setBalance(res.data.final_balance);
+
+          setBalance(res.data.balance);
           setLastWin(res.data.win);
       } catch (err) {
           alert(err.response?.data?.detail || "Spin failed");

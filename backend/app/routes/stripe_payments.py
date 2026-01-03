@@ -42,6 +42,19 @@ async def create_checkout_session(
     """
     Create a Stripe Checkout Session for a deposit.
     """
+
+    # Enforce tenant policy limits at payment initiation time (covers Stripe + CI mock).
+    from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
+
+    await ensure_within_tenant_daily_limits(
+        session,
+        tenant_id=current_player.tenant_id,
+        player_id=current_player.id,
+        action="deposit",
+        amount=body.amount,
+        currency=body.currency,
+    )
+
     if not STRIPE_API_KEY:
         # CI/dev/test deterministic mock: allow simulated checkout without real Stripe keys.
         if settings.env.lower() in {"ci", "test", "dev"} or settings.stripe_mock:
