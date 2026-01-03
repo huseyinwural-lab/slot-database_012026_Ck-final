@@ -136,18 +136,13 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
 
     // === ADMIN PAYOUT ===
     const adminContext = await browser.newContext();
-    const adminPage = await adminContext.newPage();
-    await adminPage.goto(`${ADMIN_APP_URL}/login`);
-    if (adminPage.url().includes('404')) await adminPage.goto(`${ADMIN_APP_URL}/admin/login`);
-    
-    // Login with robust selectors (id based)
-    await adminPage.fill('#email', 'admin@casino.com');
-    await adminPage.fill('#password', 'Admin123!');
-    await adminPage.click('button[type="submit"]');
-    // Login redirects to /, which is the Dashboard
-    await expect(adminPage).toHaveURL(`${ADMIN_APP_URL}/`, { timeout: 15000 });
 
-    // Navigate to Withdrawals directly
+    // Avoid flaky UI login (dev overlay iframe can intercept clicks). Inject token directly.
+    await adminContext.addInitScript(({ token }) => {
+      localStorage.setItem('admin_token', token);
+    }, { token: adminToken });
+
+    const adminPage = await adminContext.newPage();
     await adminPage.goto(`${ADMIN_APP_URL}/finance/withdrawals`);
     await expect(adminPage).toHaveURL(/\/finance\/withdrawals/, { timeout: 15000 });
     
