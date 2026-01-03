@@ -487,7 +487,7 @@ test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ pa
   expect(afterFailPayout.held_real).toBeCloseTo(afterRequested.held_real, 6);
 
   const listFailed = await adminListWithdrawals(BACKEND_URL, adminToken, { state: 'payout_failed', limit: 50, offset: 0 });
-  const wFailed = (listFailed.items || []).find((w: any) => w.tx_id === txId || w.id === txId);
+  const wFailed = (listFailed.items || []).find((w) => w.tx_id === txId || w.id === txId);
   expect(wFailed, 'payout_failed withdrawal must appear').toBeTruthy();
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/05-payout-failed.png`, fullPage: false });
