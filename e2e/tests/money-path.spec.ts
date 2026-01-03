@@ -157,7 +157,7 @@ async function getBalanceNoCache(request, apiBaseUrl, playerToken) {
   if (!res.ok()) {
     throw new Error(`getBalanceNoCache failed ${res.status()} body=${text}`);
   }
-  return json as { available_real: number; held_real: number; total_real: number };
+  return json;
 }
 
 async function pollUntil<T>(
@@ -195,7 +195,7 @@ async function playerBalance(apiBaseUrl, playerToken) {
   if (!res.ok()) {
     throw new Error(`balance failed ${res.status()} body=${JSON.stringify(json)}`);
   }
-  return json as { available_real: number; held_real: number; total_real: number };
+  return json;
 }
 
 async function playerDeposit(
