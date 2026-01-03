@@ -19,7 +19,7 @@
           - /url: /promotions
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: rcuser1767412267876
+          - generic [ref=e17]: rcuser1767412327351
           - generic [ref=e18]: $0.00
         - button [ref=e19] [cursor=pointer]:
           - img [ref=e20]
@@ -59,7 +59,7 @@
           - generic [ref=e67]:
             - generic [ref=e68]:
               - heading "Withdrawal Status" [level=3] [ref=e69]
-              - paragraph [ref=e70]: "ID: d63386e1-90c2-4a22-8716-dd3d44fbf10c"
+              - paragraph [ref=e70]: "ID: 4d835dfc-119a-4a67-aef2-d2135d18eb25"
               - generic [ref=e71]:
                 - img [ref=e72]
                 - generic [ref=e75]: Pending
@@ -86,7 +86,7 @@
                 - columnheader "Date" [ref=e100]
                 - columnheader "ID" [ref=e101]
             - rowgroup [ref=e102]:
-              - row "withdrawal -$50.00 requested 1/3/2026, 3:51:10 AM d63386e1..." [ref=e103]:
+              - row "withdrawal -$50.00 requested 1/3/2026, 3:52:09 AM 4d835dfc..." [ref=e103]:
                 - cell "withdrawal" [ref=e104]:
                   - generic [ref=e105]:
                     - img [ref=e106]
@@ -94,12 +94,12 @@
                 - cell "-$50.00" [ref=e110]
                 - cell "requested" [ref=e111]:
                   - generic [ref=e112]: requested
-                - cell "1/3/2026, 3:51:10 AM" [ref=e113]
-                - cell "d63386e1..." [ref=e114]:
-                  - button "d63386e1..." [ref=e115] [cursor=pointer]:
-                    - text: d63386e1...
+                - cell "1/3/2026, 3:52:09 AM" [ref=e113]
+                - cell "4d835dfc..." [ref=e114]:
+                  - button "4d835dfc..." [ref=e115] [cursor=pointer]:
+                    - text: 4d835dfc...
                     - img [ref=e116]
-              - row "deposit +$100.00 completed 1/3/2026, 3:51:09 AM 2a34f3f1..." [ref=e119]:
+              - row "deposit +$100.00 completed 1/3/2026, 3:52:09 AM 835a5c7f..." [ref=e119]:
                 - cell "deposit" [ref=e120]:
                   - generic [ref=e121]:
                     - img [ref=e122]
@@ -107,10 +107,10 @@
                 - cell "+$100.00" [ref=e126]
                 - cell "completed" [ref=e127]:
                   - generic [ref=e128]: completed
-                - cell "1/3/2026, 3:51:09 AM" [ref=e129]
-                - cell "2a34f3f1..." [ref=e130]:
-                  - button "2a34f3f1..." [ref=e131] [cursor=pointer]:
-                    - text: 2a34f3f1...
+                - cell "1/3/2026, 3:52:09 AM" [ref=e129]
+                - cell "835a5c7f..." [ref=e130]:
+                  - button "835a5c7f..." [ref=e131] [cursor=pointer]:
+                    - text: 835a5c7f...
                     - img [ref=e132]
           - generic [ref=e135]:
             - button "Previous Page" [disabled] [ref=e136]:
