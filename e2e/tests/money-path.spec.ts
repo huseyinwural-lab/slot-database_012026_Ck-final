@@ -1,3 +1,5 @@
+/* eslint-disable no-empty */
+
 import { test, expect, request as pwRequest } from '@playwright/test';
 import crypto from 'crypto';
 
