@@ -379,7 +379,7 @@ async function robustLogin(page) {
 }
 
 async function setTenantContext(page, tenantId) {
-  await page.evaluate((tid: string) => {
+  await page.evaluate((tid) => {
     localStorage.setItem('impersonate_tenant_id', tid);
   }, tenantId);
   await page.reload();
