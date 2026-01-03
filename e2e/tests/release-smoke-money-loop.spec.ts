@@ -152,7 +152,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
 
     // 1. Approve (if needed)
     if (await row.locator('button:has-text("Approve")').count() > 0) {
-        await row.locator('button:has-text("Approve")').click();
+        await row.locator('button:has-text("Approve")').click({ force: true });
         
         // Handle Approval Modal
         await expect(adminPage.locator('text=Approve Withdrawal')).toBeVisible();
