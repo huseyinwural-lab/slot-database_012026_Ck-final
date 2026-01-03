@@ -67,13 +67,25 @@ const WalletPage = () => {
       const resultCode = query.get('resultCode');
       
       if (provider === 'adyen') {
+          const txId = query.get('tx_id');
+
           if (resultCode === 'Authorised') {
                setMessage({ type: 'success', text: 'Adyen Payment Authorised! Balance will update shortly.' });
-               window.history.replaceState({}, document.title, window.location.pathname);
+
+               // Clean noisy params but preserve tx_id for deterministic wallet contract.
+               const url = new URL(window.location.href);
+               url.search = '';
+               if (txId) url.searchParams.set('tx_id', txId);
+               window.history.replaceState({}, document.title, url.toString());
+
                fetchWalletData(1);
           } else if (resultCode) {
                setMessage({ type: 'error', text: `Adyen Payment Result: ${resultCode}` });
-               window.history.replaceState({}, document.title, window.location.pathname);
+
+               const url = new URL(window.location.href);
+               url.search = '';
+               if (txId) url.searchParams.set('tx_id', txId);
+               window.history.replaceState({}, document.title, url.toString());
           }
       }
   };
@@ -83,14 +95,20 @@ const WalletPage = () => {
       const sessionId = query.get('session_id');
       const status = query.get('status');
 
+      const txId = query.get('tx_id');
+
       if (sessionId && status === 'success') {
           setMessage({ type: 'info', text: 'Verifying payment...' });
           setProcessing(true); // Show processing state
           pollPaymentStatus(sessionId);
       } else if (status === 'cancel') {
           setMessage({ type: 'error', text: 'Payment cancelled.' });
-          // Clean URL
-          window.history.replaceState({}, document.title, window.location.pathname);
+
+          // Clean URL but preserve tx_id
+          const url = new URL(window.location.href);
+          url.search = '';
+          if (txId) url.searchParams.set('tx_id', txId);
+          window.history.replaceState({}, document.title, url.toString());
       }
   };
 
@@ -156,12 +174,15 @@ const WalletPage = () => {
        );
 
        const txId = res.data?.tx_id;
-       if (txId) {
-         // Contract: write tx_id into URL immediately (provider-agnostic) for E2E determinism.
-         const url = new URL(window.location.href);
-         url.searchParams.set('tx_id', txId);
-         window.history.replaceState(null, '', url.toString());
+       if (!txId) {
+         // Fail-early: tx_id is mandatory contract for wallet deposit flows.
+         throw new Error('Deposit checkout response missing tx_id');
        }
+
+       // Contract: write tx_id into URL immediately (provider-agnostic) for E2E determinism.
+       const url = new URL(window.location.href);
+       url.searchParams.set('tx_id', txId);
+       window.history.replaceState(null, '', url.toString());
 
        if (res.data.url) {
            // Redirect

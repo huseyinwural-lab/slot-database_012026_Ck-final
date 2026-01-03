@@ -32,7 +32,11 @@ class StripeDepositRequest(BaseModel):
     currency: str = Field("USD", description="Currency code")
     metadata: Optional[Dict[str, str]] = Field(default_factory=dict)
 
-@router.post("/checkout/session", response_model=CheckoutSessionResponse)
+class CheckoutSessionResponseWithTxId(CheckoutSessionResponse):
+    tx_id: str
+
+
+@router.post("/checkout/session", response_model=CheckoutSessionResponseWithTxId)
 async def create_checkout_session(
     request: Request,
     body: StripeDepositRequest,
@@ -117,8 +121,9 @@ async def create_checkout_session(
             settings.get_cors_origins()[0] if settings.get_cors_origins() else "http://localhost:3001"
         )
 
-    success_url = f"{origin}/wallet?session_id={{CHECKOUT_SESSION_ID}}&status=success"
-    cancel_url = f"{origin}/wallet?status=cancel"
+    # Wallet contract requires tx_id in return URLs
+    success_url = f"{origin}/wallet?session_id={{CHECKOUT_SESSION_ID}}&status=success&tx_id={tx_id}"
+    cancel_url = f"{origin}/wallet?status=cancel&tx_id={tx_id}"
 
     full_webhook_url = f"{host_url}{webhook_url}"
     
