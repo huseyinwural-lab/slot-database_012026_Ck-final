@@ -55,22 +55,22 @@
         - generic [ref=e62]:
           - generic [ref=e63]:
             - button "Deposit" [ref=e64] [cursor=pointer]
-            - button "Withdraw" [active] [ref=e65] [cursor=pointer]
+            - button "Withdraw" [ref=e65] [cursor=pointer]
           - generic [ref=e67]:
             - heading "Request Withdrawal" [level=3] [ref=e68]
             - generic [ref=e69]:
               - generic [ref=e70]:
                 - generic [ref=e71]: Withdrawal Amount
-                - spinbutton [ref=e72]
+                - spinbutton [ref=e72]: "20"
               - generic [ref=e73]:
                 - heading "Bank Account Details" [level=4] [ref=e74]
                 - generic [ref=e75]:
                   - generic [ref=e76]:
                     - generic [ref=e77]: Account Holder Name
-                    - textbox "John Doe" [ref=e78]
+                    - textbox "John Doe" [active] [ref=e78]
                   - generic [ref=e79]:
                     - generic [ref=e80]: Account Number
-                    - textbox "123456789" [ref=e81]
+                    - textbox "123456789" [ref=e81]: test-iban
                   - generic [ref=e82]:
                     - generic [ref=e83]:
                       - generic [ref=e84]: Bank Code
@@ -101,7 +101,7 @@
                 - columnheader "Date" [ref=e113]
                 - columnheader "ID" [ref=e114]
             - rowgroup [ref=e115]:
-              - row "deposit +$100.00 completed 1/3/2026, 1:32:28 AM d801c8a9..." [ref=e116]:
+              - row "deposit +$100.00 completed 1/3/2026, 1:34:27 AM 8f7f0820..." [ref=e116]:
                 - cell "deposit" [ref=e117]:
                   - generic [ref=e118]:
                     - img [ref=e119]
@@ -109,10 +109,10 @@
                 - cell "+$100.00" [ref=e123]
                 - cell "completed" [ref=e124]:
                   - generic [ref=e125]: completed
-                - cell "1/3/2026, 1:32:28 AM" [ref=e126]
-                - cell "d801c8a9..." [ref=e127]:
-                  - button "d801c8a9..." [ref=e128] [cursor=pointer]:
-                    - text: d801c8a9...
+                - cell "1/3/2026, 1:34:27 AM" [ref=e126]
+                - cell "8f7f0820..." [ref=e127]:
+                  - button "8f7f0820..." [ref=e128] [cursor=pointer]:
+                    - text: 8f7f0820...
                     - img [ref=e129]
           - generic [ref=e132]:
             - button "Previous Page" [disabled] [ref=e133]:
