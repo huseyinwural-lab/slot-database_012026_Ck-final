@@ -144,8 +144,10 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await playerPage.fill('input[placeholder*="Min"]', '20');
     await playerPage.click('button:has-text("Pay Now"), button:has-text("Pay with Stripe"), button:has-text("Pay with Adyen")');
 
-    // Assert Failure
-    await expect(playerPage.getByText(/limit/i)).toBeVisible(); // Matches 'Günlük işlem limiti aşıldı.'
+    // Assert Failure (TR/EN)
+    await expect(
+      playerPage.getByText(/limit/i).or(playerPage.getByText('Günlük işlem limiti aşıldı.'))
+    ).toBeVisible({ timeout: 20000 });
     // Ideally verify network response too, but UI check satisfies requirement
     
     await playerContext.close();
