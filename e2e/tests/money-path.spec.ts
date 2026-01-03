@@ -160,11 +160,11 @@ async function getBalanceNoCache(request, apiBaseUrl, playerToken) {
   return json;
 }
 
-async function pollUntil<T>(
-  fn: () => Promise<T>,
-  predicate: (value: T) => boolean,
+async function pollUntil(
+  fn,
+  predicate,
   opts = {},
-): Promise<T> {
+) {
   const { timeoutMs = 15000, intervalMs = 250, label = 'poll' } = opts;
   const start = Date.now();
   let last: T | undefined;
