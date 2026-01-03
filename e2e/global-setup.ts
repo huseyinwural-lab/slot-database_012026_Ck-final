@@ -121,12 +121,10 @@ export default async function globalSetup() {
   // Wait for any potential rate limiting to clear
   await page.waitForTimeout(2000);
   
-  await page.click('button:has-text("Sign In")', { force: true });
+  // Submit login using keyboard to avoid dev-server overlay iframe intercepting clicks
+  await page.locator('#password').press('Enter');
 
-  // Wait a bit for the login to process and any redirects
-  await page.waitForTimeout(8000);
-
-  // Wait for token to be present. Navigation may stay on /login if the app uses client-side redirects.
+  // Wait for token to be present.
   await page.waitForFunction(() => !!localStorage.getItem('admin_token'), { timeout: 45000 });
 
   // Persist storageState for all tests
