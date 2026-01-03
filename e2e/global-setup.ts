@@ -82,6 +82,18 @@ export default async function globalSetup(config: FullConfig) {
     fs.mkdirSync(authDir, { recursive: true });
   }
 
+  // Seed CI/E2E deterministic data BEFORE running tests.
+  // Hard-fail if seeding fails to avoid cascading timeouts.
+  {
+    const seedCtx = await pwRequest.newContext({ baseURL: API_BASE });
+    const seedRes = await seedCtx.post('/api/v1/ci/seed', { data: {} });
+    const seedText = await seedRes.text();
+    if (!seedRes.ok()) {
+      throw new Error(`[global-setup] ci seed failed ${seedRes.status()} body=${seedText}`);
+    }
+    console.log(`[global-setup] ci seed OK: ${seedText}`);
+  }
+
   const adminToken = await loginWithRetry(API_BASE, OWNER_EMAIL, OWNER_PASSWORD);
 
   // Persist token for API-based tests

@@ -21,9 +21,9 @@ test.describe('Casino E2E with Security', () => {
     });
     const token = (await loginRes.json()).access_token;
     
-    // Deposit 100
+    // Deposit 100 (deposit endpoint requires Idempotency-Key)
     await apiContext.post('/api/v1/player/wallet/deposit', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 'Authorization': `Bearer ${token}`, 'Idempotency-Key': `e2e-dep-${uniqueId}` },
         data: { amount: 100, method: 'test' }
     });
 

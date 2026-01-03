@@ -9,7 +9,8 @@ import { Palette, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ThemeSettings = ({ brands }) => {
-  const [selectedBrand, setSelectedBrand] = useState(brands[0]?.id || '');
+  const safeBrands = Array.isArray(brands) ? brands : [];
+  const [selectedBrand, setSelectedBrand] = useState(safeBrands[0]?.id || '');
   const [theme, setTheme] = useState({
     brand_id: '',
     logo_url: '',
@@ -17,6 +18,11 @@ const ThemeSettings = ({ brands }) => {
   });
 
   useEffect(() => {
+    // Keep selection valid when brands list changes
+    if (!selectedBrand && safeBrands.length) {
+      setSelectedBrand(safeBrands[0].id);
+    }
+
     const fetchTheme = async (brandId) => {
       try {
         const res = await api.get(`/v1/settings/theme/${brandId}`);
@@ -28,7 +34,7 @@ const ThemeSettings = ({ brands }) => {
     };
 
     if (selectedBrand) fetchTheme(selectedBrand);
-  }, [selectedBrand]);
+  }, [selectedBrand, safeBrands.length]);
 
   const handleSave = async () => {
     try {
@@ -49,7 +55,7 @@ const ThemeSettings = ({ brands }) => {
           <Select value={selectedBrand} onValueChange={setSelectedBrand}>
             <SelectTrigger><SelectValue placeholder="Marka Seç" /></SelectTrigger>
             <SelectContent>
-              {brands.map(b => <SelectItem key={b.id} value={b.id}>{b.brand_name}</SelectItem>)}
+              {safeBrands.map(b => <SelectItem key={b.id} value={b.id}>{b.brand_name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

@@ -12,6 +12,7 @@ import { Edit, Download, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BrandSettings = ({ brands, onRefresh }) => {
+  const safeBrands = Array.isArray(brands) ? brands : [];
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const [newBrand, setNewBrand] = useState({
     brand_name: '',
@@ -76,7 +77,7 @@ const BrandSettings = ({ brands, onRefresh }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {brands.map(brand => (
+            {safeBrands.map(brand => (
               <TableRow key={brand.id}>
                 <TableCell className="font-medium">{brand.brand_name}</TableCell>
                 <TableCell><Badge variant={brand.status === 'active' ? 'default' : 'secondary'}>{brand.status}</Badge></TableCell>
@@ -94,7 +95,7 @@ const BrandSettings = ({ brands, onRefresh }) => {
             ))}
           </TableBody>
         </Table>
-        {brands.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz marka yok</p>}
+        {safeBrands.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz marka yok</p>}
       </CardContent>
     </Card>
   );
