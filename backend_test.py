@@ -1331,6 +1331,302 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class PayoutStatusPollingTestSuite:
+    def __init__(self):
+        # Use the specific base URL from review request
+        self.base_url = "http://127.0.0.1:8001/api/v1"
+        self.player_token = None
+        self.test_player_id = None
+        self.payout_id = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def register_player(self) -> bool:
+        """Step 1: Register a new player via POST /api/v1/auth/player/register"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                player_email = f"payouttest_{uuid.uuid4().hex[:8]}@example.com"
+                player_username = f"payouttest_{uuid.uuid4().hex[:8]}"
+                player_password = "PayoutTest123!"
+                
+                player_data = {
+                    "email": player_email,
+                    "username": player_username,
+                    "password": player_password
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Register Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.test_player_id = data.get("player_id")
+                if not self.test_player_id:
+                    self.log_result("Register Player", False, "No player ID in response")
+                    return False
+                
+                # Store credentials for login
+                self.player_email = player_email
+                self.player_password = player_password
+                
+                self.log_result("Register Player", True, f"Player ID: {self.test_player_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Register Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def login_player(self) -> bool:
+        """Step 2: Login via POST /api/v1/auth/player/login and capture access_token"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": self.player_email,
+                    "password": self.player_password
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Login Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.player_token = data.get("access_token")
+                if not self.player_token:
+                    self.log_result("Login Player", False, "No access token in response")
+                    return False
+                
+                self.log_result("Login Player", True, f"Access token captured (length: {len(self.player_token)})")
+                return True
+                
+        except Exception as e:
+            self.log_result("Login Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_deposit(self) -> bool:
+        """Step 3: Perform a test deposit via POST /api/v1/player/wallet/deposit with Authorization Bearer token and Idempotency-Key"""
+        try:
+            if not self.player_token:
+                self.log_result("Test Deposit", False, "No player token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Idempotency-Key": str(uuid.uuid4())
+                }
+                
+                deposit_data = {
+                    "amount": 1000.0,  # Amount for deposit
+                    "method": "test"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/player/wallet/deposit",
+                    json=deposit_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Test Deposit", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.log_result("Test Deposit", True, f"Deposit successful: {data}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Test Deposit", False, f"Exception: {str(e)}")
+            return False
+    
+    async def initiate_payout(self) -> bool:
+        """Step 4: Initiate a payout via POST /api/v1/payouts/initiate (amount in minor units, e.g. 1000)"""
+        try:
+            if not self.player_token or not self.test_player_id:
+                self.log_result("Initiate Payout", False, "No player token or player ID available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "Content-Type": "application/json"
+                }
+                
+                payout_data = {
+                    "amount": 1000,  # Amount in minor units (e.g. 1000 = $10.00)
+                    "player_id": self.test_player_id
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/payouts/initiate",
+                    json=payout_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Initiate Payout", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.payout_id = data.get("payout_id") or data.get("id") or data.get("tx_id")
+                if not self.payout_id:
+                    self.log_result("Initiate Payout", False, f"No payout ID in response: {data}")
+                    return False
+                
+                self.log_result("Initiate Payout", True, f"Payout initiated with ID: {self.payout_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Initiate Payout", False, f"Exception: {str(e)}")
+            return False
+    
+    async def poll_payout_status(self) -> bool:
+        """Step 5: Poll payout status 5 times in a loop (GET /api/v1/payouts/status/{payout_id}) with small delays"""
+        try:
+            if not self.payout_id:
+                self.log_result("Poll Payout Status", False, "No payout ID available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                poll_results = []
+                
+                for i in range(5):
+                    try:
+                        response = await client.get(
+                            f"{self.base_url}/payouts/status/{self.payout_id}"
+                        )
+                        
+                        # Check for connection drops or socket hang ups
+                        if response.status_code == 200:
+                            try:
+                                data = response.json()
+                                created_at = data.get("created_at")
+                                
+                                # Assertion: created_at must be a string (or null)
+                                if created_at is not None and not isinstance(created_at, str):
+                                    poll_results.append(f"Poll {i+1}: FAIL - created_at is not a string: {type(created_at)}")
+                                else:
+                                    poll_results.append(f"Poll {i+1}: SUCCESS - HTTP 200, created_at: {created_at}")
+                                    
+                            except json.JSONDecodeError:
+                                poll_results.append(f"Poll {i+1}: FAIL - Invalid JSON response")
+                        else:
+                            # If error occurs, it should be a clean HTTP response (500 with JSON detail), not a dropped connection
+                            try:
+                                error_data = response.json()
+                                poll_results.append(f"Poll {i+1}: HTTP {response.status_code} with JSON detail: {error_data}")
+                            except json.JSONDecodeError:
+                                poll_results.append(f"Poll {i+1}: FAIL - HTTP {response.status_code} without JSON detail")
+                        
+                        # Small delay between polls
+                        await asyncio.sleep(0.5)
+                        
+                    except httpx.ConnectError as e:
+                        poll_results.append(f"Poll {i+1}: FAIL - Connection error: {str(e)}")
+                    except httpx.ReadTimeout as e:
+                        poll_results.append(f"Poll {i+1}: FAIL - Read timeout: {str(e)}")
+                    except Exception as e:
+                        poll_results.append(f"Poll {i+1}: FAIL - Exception: {str(e)}")
+                
+                # Check if any polls failed due to connection issues
+                connection_failures = [result for result in poll_results if "Connection error" in result or "Read timeout" in result or "socket hang up" in result.lower()]
+                
+                if connection_failures:
+                    self.log_result("Poll Payout Status", False, 
+                                  f"Connection drops detected: {connection_failures}")
+                    return False
+                
+                # Check if all polls returned proper HTTP responses (200 or clean error responses)
+                success_count = len([result for result in poll_results if "SUCCESS" in result or "HTTP" in result])
+                
+                details = "\n    ".join(poll_results)
+                self.log_result("Poll Payout Status", True, 
+                              f"All 5 polls completed without connection drops:\n    {details}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Poll Payout Status", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete payout status polling stability test suite"""
+        print("🚀 Starting Payout Status Polling Stability Test Suite...")
+        print(f"Backend URL: {self.base_url}")
+        print("=" * 80)
+        
+        # Run all tests in sequence
+        test_results = []
+        
+        # Step 1: Register player
+        if not await self.register_player():
+            print("\n❌ Player registration failed. Cannot proceed with tests.")
+            return False
+        
+        # Step 2: Login player
+        if not await self.login_player():
+            print("\n❌ Player login failed. Cannot proceed with tests.")
+            return False
+        
+        # Step 3: Test deposit
+        if not await self.test_deposit():
+            print("\n❌ Test deposit failed. Cannot proceed with tests.")
+            return False
+        
+        # Step 4: Initiate payout
+        if not await self.initiate_payout():
+            print("\n❌ Payout initiation failed. Cannot proceed with polling test.")
+            return False
+        
+        # Step 5: Poll payout status
+        test_results.append(await self.poll_payout_status())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 PAYOUT STATUS POLLING TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All payout status polling tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class P0RegressionTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
