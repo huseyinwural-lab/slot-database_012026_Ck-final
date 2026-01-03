@@ -211,7 +211,10 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     }, { key: LS_PLAYER_TOKEN_KEY, token: playerToken, playerId, playerEmail: PLAYER_EMAIL });
 
     await playerPage.goto(`${PLAYER_URL}/wallet`);
-    
+
+    // Debug: assert player auth is wired in the UI
+    await expect(playerPage.getByText(PLAYER_EMAIL)).toBeVisible({ timeout: 15000 });
+
     // Switch to Withdraw tab
     await playerPage.click('button:has-text("Withdraw")');
     
