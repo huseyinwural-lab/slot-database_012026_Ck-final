@@ -1,0 +1,15 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414268196,"monotonicTime":253389.029,"sdkLanguage":"javascript","contextId":"request-context@1d9b075182e4a0f997823342de2be8b3","title":"finance-withdrawals-smoke.spec.ts:217 › Finance Withdrawals Smoke › player withdraw -> admin approve -> admin mark-paid (state + invariants)"}
+{"type":"before","callId":"call@13","startTime":253391.096,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/login","method":"POST","jsonData":"{\"email\":\"admin@casino.com\",\"password\":\"Admin123!\"}","timeout":0},"stepId":"pw:api@38","beforeSnapshot":"before@call@13"}
+{"type":"log","callId":"call@13","time":253394.832,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/login"}
+{"type":"log","callId":"call@13","time":253394.869,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@13","time":253394.881,"message":"  accept: */*"}
+{"type":"log","callId":"call@13","time":253394.896,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@13","time":253394.999,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":253395.011,"message":"  content-length: 51"}
+{"type":"log","callId":"call@13","time":253650.229,"message":"← 200 OK"}
+{"type":"log","callId":"call@13","time":253650.258,"message":"  date: Sat, 03 Jan 2026 04:24:27 GMT"}
+{"type":"log","callId":"call@13","time":253650.269,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@13","time":253650.284,"message":"  content-length: 707"}
+{"type":"log","callId":"call@13","time":253650.297,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":253650.302,"message":"  x-request-id: 38143d20-be23-4e3e-83df-9aaad39b6f46"}
+{"type":"after","callId":"call@13","endTime":253651.905,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:27 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"707"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"38143d20-be23-4e3e-83df-9aaad39b6f46"}],"fetchUid":"b3e18936fb894fa154c621aaf6895deb"}},"afterSnapshot":"after@call@13"}

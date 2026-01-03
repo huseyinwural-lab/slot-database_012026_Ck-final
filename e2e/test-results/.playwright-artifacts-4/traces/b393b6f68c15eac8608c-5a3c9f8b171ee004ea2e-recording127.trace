@@ -1,0 +1,17 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414279260,"monotonicTime":264453.187,"sdkLanguage":"javascript","contextId":"request-context@5cf6c9005cdf1a6e7b2800c2cce68d0a","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
+{"type":"before","callId":"call@776","startTime":264453.925,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/withdraw","method":"POST","jsonData":"{\"amount\":20,\"method\":\"test_bank\",\"address\":\"e2e-test-bank\"}","timeout":0},"stepId":"pw:api@39","beforeSnapshot":"before@call@776"}
+{"type":"log","callId":"call@776","time":264454.225,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/withdraw"}
+{"type":"log","callId":"call@776","time":264454.233,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@776","time":264454.237,"message":"  accept: */*"}
+{"type":"log","callId":"call@776","time":264454.239,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@776","time":264454.242,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NGY2MjY3NC04MzI5LTQyYTYtOGI5MS1hYzdmYzkwY2Y1NDIiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTkwNzl9.UDOWbk58w3ggEB4cOFc50ch6uVmarH3565CvwHw_71k"}
+{"type":"log","callId":"call@776","time":264454.246,"message":"  Idempotency-Key: e2e-withdraw-1767414279258-bf78c9b0dd59"}
+{"type":"log","callId":"call@776","time":264454.249,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@776","time":264454.252,"message":"  content-length: 60"}
+{"type":"log","callId":"call@776","time":264475.616,"message":"← 200 OK"}
+{"type":"log","callId":"call@776","time":264475.639,"message":"  date: Sat, 03 Jan 2026 04:24:38 GMT"}
+{"type":"log","callId":"call@776","time":264475.643,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@776","time":264475.646,"message":"  content-length: 737"}
+{"type":"log","callId":"call@776","time":264475.649,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@776","time":264475.653,"message":"  x-request-id: f482f532-ac70-44bd-a698-83cbc3fe495d"}
+{"type":"after","callId":"call@776","endTime":264516.978,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/withdraw","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:38 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"737"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"f482f532-ac70-44bd-a698-83cbc3fe495d"}],"fetchUid":"994646834799140f02de267edcda50a0"}},"afterSnapshot":"after@call@776"}

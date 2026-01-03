@@ -1,0 +1,17 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414269836,"monotonicTime":255029.694,"sdkLanguage":"javascript","contextId":"request-context@d4aa204547326eb5cc978bfe36eb85fd","title":"finance-withdrawals-smoke.spec.ts:217 › Finance Withdrawals Smoke › player withdraw -> admin approve -> admin mark-paid (state + invariants)"}
+{"type":"before","callId":"call@43","startTime":255030.637,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","jsonData":"{\"amount\":15,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@47","beforeSnapshot":"before@call@43"}
+{"type":"log","callId":"call@43","time":255031.053,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
+{"type":"log","callId":"call@43","time":255031.062,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@43","time":255031.066,"message":"  accept: */*"}
+{"type":"log","callId":"call@43","time":255031.069,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@43","time":255031.072,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YTdiYzU4My03MmM3LTQ4MjctODU0Yy0xMjVkODE4YTg3MDkiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTkwNjh9.KDHsocg6BOb9u8_DlehZuYzLAZoSJrr0-t9ozyULrdI"}
+{"type":"log","callId":"call@43","time":255031.076,"message":"  Idempotency-Key: e2e-deposit-1767414269832-c8603185e4fd"}
+{"type":"log","callId":"call@43","time":255031.079,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@43","time":255031.082,"message":"  content-length: 29"}
+{"type":"log","callId":"call@43","time":255113.245,"message":"← 200 OK"}
+{"type":"log","callId":"call@43","time":255113.26,"message":"  date: Sat, 03 Jan 2026 04:24:28 GMT"}
+{"type":"log","callId":"call@43","time":255113.264,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@43","time":255113.268,"message":"  content-length: 361"}
+{"type":"log","callId":"call@43","time":255113.271,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@43","time":255113.274,"message":"  x-request-id: 6ab23b94-dd3b-4a7a-bef2-7b3d62068cd2"}
+{"type":"after","callId":"call@43","endTime":255113.726,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:28 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"361"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"6ab23b94-dd3b-4a7a-bef2-7b3d62068cd2"}],"fetchUid":"443e0d813040bca051d5855f761947fd"}},"afterSnapshot":"after@call@43"}

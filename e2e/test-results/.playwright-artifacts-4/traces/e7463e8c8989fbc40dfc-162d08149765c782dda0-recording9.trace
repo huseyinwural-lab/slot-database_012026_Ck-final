@@ -1,0 +1,14 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414270196,"monotonicTime":255389.342,"sdkLanguage":"javascript","contextId":"request-context@c04568162733c4f84053f071f149ddde","title":"finance-withdrawals-smoke.spec.ts:217 › Finance Withdrawals Smoke › player withdraw -> admin approve -> admin mark-paid (state + invariants)"}
+{"type":"before","callId":"call@82","startTime":255390.349,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/finance/withdrawals/2f79f728-e269-4874-83d9-447969826d91/mark-paid","method":"POST","timeout":0},"stepId":"pw:api@62","beforeSnapshot":"before@call@82"}
+{"type":"log","callId":"call@82","time":255390.801,"message":"→ POST http://127.0.0.1:8001/api/v1/finance/withdrawals/2f79f728-e269-4874-83d9-447969826d91/mark-paid"}
+{"type":"log","callId":"call@82","time":255390.81,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@82","time":255390.814,"message":"  accept: */*"}
+{"type":"log","callId":"call@82","time":255390.817,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@82","time":255390.819,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMDY2OH0.YucdQXFmKyjtkXBj4Mnu25crWxQ838BNMeBB5qEmm5E"}
+{"type":"log","callId":"call@82","time":255410.316,"message":"← 200 OK"}
+{"type":"log","callId":"call@82","time":255410.338,"message":"  date: Sat, 03 Jan 2026 04:24:29 GMT"}
+{"type":"log","callId":"call@82","time":255410.342,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@82","time":255410.345,"message":"  content-length: 741"}
+{"type":"log","callId":"call@82","time":255410.348,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@82","time":255410.352,"message":"  x-request-id: 50671f5e-e6a0-4e8f-8af8-ca74df74b1cc"}
+{"type":"after","callId":"call@82","endTime":255451.274,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/finance/withdrawals/2f79f728-e269-4874-83d9-447969826d91/mark-paid","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:29 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"741"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"50671f5e-e6a0-4e8f-8af8-ca74df74b1cc"}],"fetchUid":"baa2a904ee0d76a0ff1556678e695489"}},"afterSnapshot":"after@call@82"}

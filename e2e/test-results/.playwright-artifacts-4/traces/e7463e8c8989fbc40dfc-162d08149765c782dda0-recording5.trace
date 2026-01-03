@@ -1,0 +1,17 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414269925,"monotonicTime":255118.821,"sdkLanguage":"javascript","contextId":"request-context@320d3b8703db48a5b69f633a712a6f4e","title":"finance-withdrawals-smoke.spec.ts:217 › Finance Withdrawals Smoke › player withdraw -> admin approve -> admin mark-paid (state + invariants)"}
+{"type":"before","callId":"call@51","startTime":255120.22,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/withdraw","method":"POST","headers":[{"name":"Idempotency-Key","value":"e2e-withdraw-1767414269926-0.34505252110704454"}],"jsonData":"{\"amount\":10,\"method\":\"test_bank\",\"address\":\"e2e-test-bank\"}","timeout":0},"stepId":"pw:api@49","beforeSnapshot":"before@call@51"}
+{"type":"log","callId":"call@51","time":255121.199,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/withdraw"}
+{"type":"log","callId":"call@51","time":255121.212,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@51","time":255121.219,"message":"  accept: */*"}
+{"type":"log","callId":"call@51","time":255121.224,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@51","time":255121.228,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YTdiYzU4My03MmM3LTQ4MjctODU0Yy0xMjVkODE4YTg3MDkiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTkwNjh9.KDHsocg6BOb9u8_DlehZuYzLAZoSJrr0-t9ozyULrdI"}
+{"type":"log","callId":"call@51","time":255121.233,"message":"  Idempotency-Key: e2e-withdraw-1767414269926-0.34505252110704454"}
+{"type":"log","callId":"call@51","time":255121.237,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@51","time":255121.242,"message":"  content-length: 60"}
+{"type":"log","callId":"call@51","time":255157.589,"message":"← 200 OK"}
+{"type":"log","callId":"call@51","time":255157.614,"message":"  date: Sat, 03 Jan 2026 04:24:29 GMT"}
+{"type":"log","callId":"call@51","time":255157.62,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@51","time":255157.626,"message":"  content-length: 743"}
+{"type":"log","callId":"call@51","time":255157.629,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@51","time":255157.635,"message":"  x-request-id: 30d2cf07-5e20-426c-9d4a-c56c1f6b99ef"}
+{"type":"after","callId":"call@51","endTime":255209.733,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/withdraw","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:24:29 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"743"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"30d2cf07-5e20-426c-9d4a-c56c1f6b99ef"}],"fetchUid":"82bedbb644b090dc28b66c3e2b528c50"}},"afterSnapshot":"after@call@51"}
