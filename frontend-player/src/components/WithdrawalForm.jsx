@@ -54,8 +54,16 @@ export function WithdrawalForm({ playerId, playerEmail, onSuccess }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Withdrawal submission failed');
+        let msg = 'Withdrawal submission failed';
+        try {
+          const errorData = await response.json();
+          msg = (typeof errorData?.detail === 'string')
+            ? errorData.detail
+            : (errorData?.detail?.error_code || msg);
+        } catch {
+          // ignore
+        }
+        throw new Error(msg);
       }
 
       const data = await response.json();
