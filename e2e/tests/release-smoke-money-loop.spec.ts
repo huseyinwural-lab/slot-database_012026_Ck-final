@@ -21,7 +21,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     });
     expect(regRes.ok(), "Registration failed").toBeTruthy();
     const playerData = await regRes.json();
-    const playerId = playerData.player_id || playerData.id;
+    const playerId = playerData.user?.id;
 
     // Login for Token
     const loginRes = await apiContext.post('/api/v1/auth/player/login', {
