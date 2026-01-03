@@ -51,6 +51,8 @@ async def initiate_payout(
     if request.player_id != current_player.id:
         raise HTTPException(status_code=403, detail={"error_code": "UNAUTHORIZED"})
 
+    amount_major = request.amount / 100.0
+
     # Enforce per-tenant daily withdraw limits
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
@@ -62,8 +64,6 @@ async def initiate_payout(
         amount=float(amount_major),
         currency=request.currency,
     )
-
-    amount_major = request.amount / 100.0
 
     bank_acc_adyen = {
         "accountHolderName": request.bank_account.account_holder_name,
