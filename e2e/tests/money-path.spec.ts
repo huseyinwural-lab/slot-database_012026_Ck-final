@@ -78,7 +78,7 @@ async function apiRegisterOrLoginPlayer(apiBaseUrl, email, password) {
     data: { email, password, tenant_id: 'default_casino' },
   });
 
-  let playerId: string | null = null;
+  let playerId = null;
 
   if (res.status() === 401) {
     // Register then login
