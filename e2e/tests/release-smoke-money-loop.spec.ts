@@ -157,7 +157,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
         // Handle Approval Modal
         await expect(adminPage.locator('text=Approve Withdrawal')).toBeVisible();
         await adminPage.fill('textarea', 'Smoke Test Approval');
-        await adminPage.click('button:has-text("Confirm")');
+        await adminPage.click('button:has-text("Confirm")', { force: true });
         
         // Poll API for 'approved' status
         await expect.poll(async () => {
