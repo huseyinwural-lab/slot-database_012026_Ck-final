@@ -30,9 +30,7 @@ export function WithdrawalForm({ playerId, playerEmail, onSuccess }) {
 
     try {
       const amountInMinorUnits = Math.round(parseFloat(formData.amount) * 100);
-      const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
-
-      const response = await fetch(`${API_BASE}/api/v1/payouts/initiate`, {
+      const response = await fetch(`/api/v1/payouts/initiate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
