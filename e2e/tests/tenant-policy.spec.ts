@@ -122,9 +122,10 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // 2. Player: Deposit 40 (Success) via UI
     const playerContext = await browser.newContext();
     const playerPage = await playerContext.newPage();
-    await playerPage.addInitScript(({ key, token }) => {
+    await playerPage.addInitScript(({ key, token, playerId, playerEmail }) => {
       localStorage.setItem(key, token);
-    }, { key: LS_PLAYER_TOKEN_KEY, token: playerToken });
+      localStorage.setItem('player_user', JSON.stringify({ id: playerId, email: playerEmail }));
+    }, { key: LS_PLAYER_TOKEN_KEY, token: playerToken, playerId, playerEmail: PLAYER_EMAIL });
 
     await playerPage.goto(`${PLAYER_URL}/wallet`);
     
@@ -204,9 +205,10 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // 3. Player: Withdraw 20 (Success) via UI
     const playerContext = await browser.newContext();
     const playerPage = await playerContext.newPage();
-    await playerPage.addInitScript(({ key, token }) => {
+    await playerPage.addInitScript(({ key, token, playerId, playerEmail }) => {
       localStorage.setItem(key, token);
-    }, { key: LS_PLAYER_TOKEN_KEY, token: playerToken });
+      localStorage.setItem('player_user', JSON.stringify({ id: playerId, email: playerEmail }));
+    }, { key: LS_PLAYER_TOKEN_KEY, token: playerToken, playerId, playerEmail: PLAYER_EMAIL });
 
     await playerPage.goto(`${PLAYER_URL}/wallet`);
     
