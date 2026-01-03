@@ -192,11 +192,26 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
 
     // === FINAL VERIFY ===
     // Backend Status -> 'paid' or 'completed'
-    await expect.poll(async () => {
-        const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
-        const st = (await res.json()).status;
-        return st;
-    }, { timeout: 15000, message: "Final status is not 'paid' or 'completed'" }).toMatch(/paid|completed/);
+    // NOTE: CI can exhibit transient connection drops on direct-to-backend calls.
+    // We treat those as retryable within the poll window.
+    await expect
+      .poll(
+        async () => {
+          try {
+            const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
+            const st = (await res.json()).status;
+            return st;
+          } catch (e: any) {
+            const msg = String(e?.message || e);
+            if (msg.toLowerCase().includes('socket hang up')) {
+              return '__retry__';
+            }
+            throw e;
+          }
+        },
+        { timeout: 15000, message: "Final status is not 'paid' or 'completed'" },
+      )
+      .toMatch(/paid|completed/);
 
     // Ledger Invariant -> Held should be 0
     await expect.poll(async () => {
