@@ -52,7 +52,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     await page.goto(`${PLAYER_APP_URL}/login`);
     await page.fill('input[type="email"]', email);
     await page.fill('input[type="password"]', password);
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]', { force: true });
     
     // Explicit wait for navigation
     await expect.poll(() => page.url(), { timeout: 15000 }).not.toContain('/login');
