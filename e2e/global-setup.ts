@@ -6,6 +6,7 @@ const API_BASE = process.env.E2E_API_BASE || process.env.BACKEND_URL || 'http://
 const FRONTEND_URL = process.env.E2E_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
 
 async function loginWithRetry(apiBaseUrl, email, password) {
+  /** @type {import('@playwright/test').APIRequestContext} */
   const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
 
   let attempt = 0;
