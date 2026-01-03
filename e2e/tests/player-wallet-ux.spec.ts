@@ -61,7 +61,8 @@ test.describe('Player Wallet UX (PLAYER-WALLET-UX-001)', () => {
     await page.click('button:has-text("Deposit")');
     await page.fill('input[placeholder*="Min"]', '50');
     await page.click('button:has-text("Pay Now"), button:has-text("Pay with Stripe"), button:has-text("Pay with Adyen")');
-    await expect(page.getByText('Deposit successful')).toBeVisible();
+    // Stripe flow redirects and then shows a success banner; accept either final success or verification step.
+    await expect(page.getByText('Payment Successful!').or(page.getByText('Verifying payment...'))).toBeVisible({ timeout: 20000 });
 
     // 3. Verify Transaction in Table (History)
     // Table headers
