@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from app.core.security import get_current_player
 from app.models.sql_models import PayoutAttempt
 from app.services.adyen_psp import AdyenPSP
 from app.core.database import get_session
