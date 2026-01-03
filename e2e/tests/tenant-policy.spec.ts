@@ -218,6 +218,9 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // Input 20 and submit
     await playerPage.locator('input[name="amount"]').fill('20');
     await playerPage.locator('input[name="accountNumber"]').fill('test-iban');
+    await playerPage.locator('input[name="accountHolderName"]').fill('John Doe');
+    await playerPage.locator('input[name="bankCode"]').fill('021000021');
+    await playerPage.locator('input[name="branchCode"]').fill('001');
 
     const [payoutResp] = await Promise.all([
       playerPage.waitForResponse((r) => r.url().includes('/api/v1/payouts/initiate'), { timeout: 20000 }),
