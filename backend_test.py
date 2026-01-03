@@ -1541,8 +1541,19 @@ class PayoutStatusPollingTestSuite:
                 }
                 
                 payout_data = {
+                    "player_id": self.test_player_id,
                     "amount": 1000,  # Amount in minor units (e.g. 1000 = $10.00)
-                    "player_id": self.test_player_id
+                    "currency": "EUR",
+                    "player_email": self.player_email,
+                    "bank_account": {
+                        "account_holder_name": "Test Player",
+                        "account_number": "1234567890",
+                        "bank_code": "TESTBANK",
+                        "branch_code": "001",
+                        "country_code": "NL",
+                        "currency_code": "EUR"
+                    },
+                    "description": "Test payout for polling stability"
                 }
                 
                 response = await client.post(
