@@ -60,7 +60,7 @@ test.describe('Player Wallet UX (PLAYER-WALLET-UX-001)', () => {
     // 2. Perform Deposit
     await page.click('button:has-text("Deposit")');
     await page.fill('input[placeholder*="Min"]', '50');
-    await page.click('button:has-text("Pay Now")');
+    await page.click('button:has-text("Pay Now"), button:has-text("Pay with Stripe"), button:has-text("Pay with Adyen")');
     await expect(page.getByText('Deposit successful')).toBeVisible();
 
     // 3. Verify Transaction in Table (History)
