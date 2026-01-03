@@ -155,6 +155,8 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
   });
 
   test('Withdraw limit exceeded enforcement', async ({ browser }) => {
+    // Ensure tenant policies are reset between tests
+    await pCtx.post('/api/v1/ci/seed', { data: {} });
     // 1. Admin: Set daily_withdraw_limit = 30 via UI
     const adminContext = await browser.newContext();
     const adminPage = await adminContext.newPage();
