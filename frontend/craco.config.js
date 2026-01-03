@@ -80,9 +80,39 @@ if (config.enableVisualEdits) {
   };
 }
 
-// Setup dev server with visual edits and/or health check
-if (config.enableVisualEdits || config.enableHealthCheck) {
+// Setup dev server customizations (visual edits / health check / hot reload control)
+const shouldCustomizeDevServer =
+  config.enableVisualEdits ||
+  config.enableHealthCheck ||
+  config.disableHotReload ||
+  process.env.WDS_SOCKET_PORT ||
+  process.env.WDS_SOCKET_HOST ||
+  process.env.WDS_SOCKET_PATH;
+
+if (shouldCustomizeDevServer) {
   webpackConfig.devServer = (devServerConfig) => {
+    // In preview/prod-like reverse-proxy setups, CRA dev-server WebSocket
+    // may try to connect to :3000 which is not reachable externally.
+    // Force auto-detected host/port so it uses the browser origin instead.
+    if (!config.disableHotReload) {
+      devServerConfig.client = devServerConfig.client || {};
+      devServerConfig.client.webSocketURL = {
+        hostname: '0.0.0.0',
+        port: 0,
+        pathname: process.env.WDS_SOCKET_PATH || '/ws',
+        protocol: 'auto',
+      };
+    }
+
+    // If disabled, do not init dev-server WebSocket client/server.
+    // This prevents "Network Error" toasts caused by WS failures in preview.
+    if (config.disableHotReload) {
+      devServerConfig.client = false;
+      devServerConfig.webSocketServer = false;
+      devServerConfig.hot = false;
+      devServerConfig.liveReload = false;
+    }
+
     // Apply visual edits dev server setup if enabled
     if (config.enableVisualEdits && setupDevServer) {
       devServerConfig = setupDevServer(devServerConfig);
