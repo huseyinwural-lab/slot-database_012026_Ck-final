@@ -329,9 +329,9 @@ async function adminStartPayout(
 }
 
 async function callPayoutWebhook(
-  apiBaseUrl: string,
-  adminToken: string,
-  payload: { withdraw_tx_id: string; provider: string; provider_event_id: string; status: 'paid' | 'failed'; provider_ref?: string; error_code?: string },
+  apiBaseUrl,
+  adminToken,
+  payload,
 ) {
   const ctx = await pwRequest.newContext({
     baseURL: apiBaseUrl,
