@@ -356,7 +356,7 @@ async function callPayoutWebhook(
 
 // UI helpers -----------------------------------------------------------
 
-async function robustLogin(page: any) {
+async function robustLogin(page) {
   await page.goto('/login');
 
   await page.getByLabel('Email').fill(OWNER_EMAIL);
