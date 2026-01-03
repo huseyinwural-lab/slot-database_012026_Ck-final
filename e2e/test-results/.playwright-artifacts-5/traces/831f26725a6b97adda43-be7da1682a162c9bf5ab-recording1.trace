@@ -1,0 +1,15 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767399071586,"monotonicTime":299127.438,"sdkLanguage":"javascript","contextId":"request-context@9f05836fbd39c196989b8ec6758ba137","title":"stripe-deposit.spec.ts:4 › Stripe Deposit Flow (Simulated) › User can initiate deposit and see balance update after simulated webhook"}
+{"type":"before","callId":"call@14","startTime":299131.076,"class":"APIRequestContext","method":"fetch","params":{"url":"http://127.0.0.1:8001/api/v1/auth/player/register","method":"POST","jsonData":"{\"username\":\"user1767399071587\",\"email\":\"stripe_e2e_1767399071587@example.com\",\"password\":\"password123\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@39","beforeSnapshot":"before@call@14"}
+{"type":"log","callId":"call@14","time":299134.655,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/register"}
+{"type":"log","callId":"call@14","time":299134.681,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@14","time":299134.693,"message":"  accept: */*"}
+{"type":"log","callId":"call@14","time":299134.796,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@14","time":299134.817,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@14","time":299134.829,"message":"  content-length: 133"}
+{"type":"log","callId":"call@14","time":299384.599,"message":"← 200 OK"}
+{"type":"log","callId":"call@14","time":299384.629,"message":"  date: Sat, 03 Jan 2026 00:11:11 GMT"}
+{"type":"log","callId":"call@14","time":299384.637,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@14","time":299384.655,"message":"  content-length: 75"}
+{"type":"log","callId":"call@14","time":299384.665,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@14","time":299384.672,"message":"  x-request-id: 5cef8f79-6d30-4998-a16a-2a1856a4eed2"}
+{"type":"after","callId":"call@14","endTime":299386.316,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/register","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 00:11:11 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"75"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"5cef8f79-6d30-4998-a16a-2a1856a4eed2"}],"fetchUid":"f476121fd8ce2470ba8011b9da4e24d5"}},"afterSnapshot":"after@call@14"}
