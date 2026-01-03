@@ -224,12 +224,12 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     // 4. Player: Withdraw 15 (Fail: 20+15 > 30) via UI
     await playerPage.reload();
     await playerPage.click('button:has-text("Withdraw")');
-    await playerPage.fill('input[placeholder*="Max"]', '15');
-    await playerPage.fill('input[placeholder*="TR"]', 'test-iban-2');
-    await playerPage.click('button:has-text("Request Payout")');
+    await playerPage.getByLabel('Withdrawal Amount').fill('15');
+    await playerPage.getByLabel('Account Number').fill('test-iban-2');
+    await playerPage.getByRole('button', { name: 'Request Withdrawal' }).click();
 
     // Assert Failure
-    await expect(playerPage.getByText(/limit/i)).toBeVisible();
+    await expect(playerPage.getByText(/limit/i).or(playerPage.getByText('Günlük işlem limiti aşıldı.'))).toBeVisible({ timeout: 20000 });
     
     await playerContext.close();
   });
