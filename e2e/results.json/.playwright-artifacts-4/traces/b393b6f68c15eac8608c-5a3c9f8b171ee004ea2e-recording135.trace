@@ -1,0 +1,16 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767416784387,"monotonicTime":266158.935,"sdkLanguage":"javascript","contextId":"request-context@599ff344c22819782dcd0574dff3e8ae","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
+{"type":"before","callId":"call@845","startTime":266159.714,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/kyc/documents/c26155cc-7293-4225-bdba-fd8a07f370e9/review","method":"POST","jsonData":"{\"status\":\"approved\"}","timeout":0},"stepId":"pw:api@61","beforeSnapshot":"before@call@845"}
+{"type":"log","callId":"call@845","time":266160.019,"message":"→ POST http://127.0.0.1:8001/api/v1/kyc/documents/c26155cc-7293-4225-bdba-fd8a07f370e9/review"}
+{"type":"log","callId":"call@845","time":266160.027,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@845","time":266160.031,"message":"  accept: */*"}
+{"type":"log","callId":"call@845","time":266160.034,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@845","time":266160.037,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMjkxOX0.thWB8s-sYDVb1c0MXUmMoB4QtlPyESRplx5MaMWpYPo"}
+{"type":"log","callId":"call@845","time":266160.04,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@845","time":266160.043,"message":"  content-length: 21"}
+{"type":"log","callId":"call@845","time":266168.967,"message":"← 200 OK"}
+{"type":"log","callId":"call@845","time":266168.982,"message":"  date: Sat, 03 Jan 2026 05:06:23 GMT"}
+{"type":"log","callId":"call@845","time":266168.987,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@845","time":266168.99,"message":"  content-length: 56"}
+{"type":"log","callId":"call@845","time":266168.993,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@845","time":266168.996,"message":"  x-request-id: 6120bee7-c053-44e8-890f-e8c852ae99fd"}
+{"type":"after","callId":"call@845","endTime":266209.679,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/kyc/documents/c26155cc-7293-4225-bdba-fd8a07f370e9/review","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 05:06:23 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"56"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"6120bee7-c053-44e8-890f-e8c852ae99fd"}],"fetchUid":"46117b5b96a27efdf7c1bf5f637e25f8"}},"afterSnapshot":"after@call@845"}

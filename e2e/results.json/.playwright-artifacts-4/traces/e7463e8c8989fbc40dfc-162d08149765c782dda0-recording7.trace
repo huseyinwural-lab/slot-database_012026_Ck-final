@@ -1,0 +1,16 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767416773864,"monotonicTime":255636.349,"sdkLanguage":"javascript","contextId":"request-context@a12962215a4ac73e9bf04072e4b02aac","title":"finance-withdrawals-smoke.spec.ts:217 › Finance Withdrawals Smoke › player withdraw -> admin approve -> admin mark-paid (state + invariants)"}
+{"type":"before","callId":"call@67","startTime":255637.97,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/finance/withdrawals/04d3fcc1-1d2f-4635-88d0-8f92ad5e9834/review","method":"POST","jsonData":"{\"action\":\"approve\"}","timeout":0},"stepId":"pw:api@55","beforeSnapshot":"before@call@67"}
+{"type":"log","callId":"call@67","time":255638.369,"message":"→ POST http://127.0.0.1:8001/api/v1/finance/withdrawals/04d3fcc1-1d2f-4635-88d0-8f92ad5e9834/review"}
+{"type":"log","callId":"call@67","time":255638.379,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@67","time":255638.384,"message":"  accept: */*"}
+{"type":"log","callId":"call@67","time":255638.387,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@67","time":255638.391,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMzE3MX0.hQXruwOFB58xuvA7fbWVj5Af4OPfrJUlO7C7as6Ke9M"}
+{"type":"log","callId":"call@67","time":255638.394,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@67","time":255638.398,"message":"  content-length: 20"}
+{"type":"log","callId":"call@67","time":255669.778,"message":"← 200 OK"}
+{"type":"log","callId":"call@67","time":255669.798,"message":"  date: Sat, 03 Jan 2026 05:06:13 GMT"}
+{"type":"log","callId":"call@67","time":255669.802,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@67","time":255669.805,"message":"  content-length: 744"}
+{"type":"log","callId":"call@67","time":255669.808,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@67","time":255669.81,"message":"  x-request-id: c140a54a-2c5b-4744-bdce-60d81ccee427"}
+{"type":"after","callId":"call@67","endTime":255711.76,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/finance/withdrawals/04d3fcc1-1d2f-4635-88d0-8f92ad5e9834/review","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 05:06:13 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"744"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"c140a54a-2c5b-4744-bdce-60d81ccee427"}],"fetchUid":"8368ee4c2c5b6f273569f130fd84fdc5"}},"afterSnapshot":"after@call@67"}

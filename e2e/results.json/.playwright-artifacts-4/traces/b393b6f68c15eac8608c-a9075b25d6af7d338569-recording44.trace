@@ -1,0 +1,1 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767416778628,"monotonicTime":260400.304,"sdkLanguage":"javascript","contextId":"request-context@a12962215a4ac73e9bf04072e4b02aac","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
