@@ -50,7 +50,7 @@ async function loginWithRetry(apiBaseUrl, email, password) {
       throw new Error(`[global-setup] admin login response missing token: ${JSON.stringify(json)}`);
     }
 
-    return token as string;
+    return token;
   }
 
   throw new Error('[global-setup] admin login failed after max retries due to rate limiting');
