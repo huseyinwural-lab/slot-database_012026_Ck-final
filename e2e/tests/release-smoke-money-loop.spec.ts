@@ -125,7 +125,9 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     const txRes = await apiContext.get(`/api/v1/payouts/player/${playerId}/history`);
     const txData = await txRes.json();
     const withdrawTxId = txData.payouts?.[0]?._id;
-    expect(withdrawTxId).toBeTruthy();
+    if (!withdrawTxId) {
+      throw new Error(`No withdrawal in payout history for playerId=${playerId}. body=${JSON.stringify(txData)}`);
+    }
     console.log(`Tracking Withdrawal TX: ${withdrawTxId}`);
 
     // === ADMIN PAYOUT ===
