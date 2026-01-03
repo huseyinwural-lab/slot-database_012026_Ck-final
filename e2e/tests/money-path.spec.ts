@@ -217,7 +217,7 @@ async function playerDeposit(
     extraHTTPHeaders: headers,
   });
 
-  const res: APIResponse = await ctx.post('/api/v1/player/wallet/deposit', {
+  const res = await ctx.post('/api/v1/player/wallet/deposit', {
     data: {
       amount,
       method: 'test',
