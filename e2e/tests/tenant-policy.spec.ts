@@ -220,7 +220,12 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
 
     // Assert success: request should create a withdrawal history entry
     // Backend-side verification: withdrawal transaction created
-    const txRes = await pCtx.get('/api/v1/player/wallet/transactions');
+    // (use a dedicated player-auth context; pCtx uses admin auth)
+    const pTxCtx = await pwRequest.newContext({
+      baseURL: BACKEND_URL,
+      extraHTTPHeaders: { Authorization: `Bearer ${playerToken}` },
+    });
+    const txRes = await pTxCtx.get('/api/v1/player/wallet/transactions');
     expect(txRes.ok()).toBeTruthy();
     const txJson = await txRes.json();
     const txItems = txJson.items || txJson.data?.items || [];
