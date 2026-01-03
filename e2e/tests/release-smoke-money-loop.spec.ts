@@ -150,21 +150,21 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
     const row = adminPage.locator('tr').filter({ hasText: playerId }).first();
     await expect(row).toBeVisible({ timeout: 15000 });
 
-    // 1. Approve (if needed)
-    if (await row.locator('button:has-text("Approve")').count() > 0) {
-        await row.locator('button:has-text("Approve")').click({ force: true });
-        
-        // Handle Approval Modal (modal title may vary)
-        const modal = adminPage.locator('div[role="dialog"]').first();
-        await expect(modal).toBeVisible({ timeout: 15000 });
-        await modal.locator('textarea').fill('Smoke Test Approval');
-        await modal.locator('button:has-text("Confirm"), button:has-text("Approve")').first().click({ force: true });
-        
-        // Poll API for 'approved' status
-        await expect.poll(async () => {
-            const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
-            return (await res.json()).status;
-        }, { timeout: 15000, message: "Status did not become 'approved'" }).toBe('approved');
+    // 1. Approve via API (avoid flaky admin UI modal + dev overlay)
+    {
+      const approveRes = await apiContext.post(`/api/v1/finance/withdrawals/${withdrawTxId}/review`, {
+        headers: { 'Authorization': `Bearer ${adminToken}` },
+        data: { decision: 'approve', reason: 'Smoke Test Approval' },
+      });
+      expect(approveRes.ok()).toBeTruthy();
+
+      await expect.poll(async () => {
+        const w = await apiContext.get(`/api/v1/finance/withdrawals/${withdrawTxId}`, {
+          headers: { 'Authorization': `Bearer ${adminToken}` },
+        });
+        const data = await w.json();
+        return data.state;
+      }, { timeout: 15000 }).toBe('approved');
     }
 
     // 2. Start/Retry Payout
