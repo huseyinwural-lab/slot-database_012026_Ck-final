@@ -295,7 +295,7 @@ async function adminListWithdrawals(apiBaseUrl, token, params) {
   const body = await res.json().catch(async () => ({ raw: await res.text() }));
   if (!res.ok()) throw new Error(`list withdrawals failed ${res.status()} body=${JSON.stringify(body)}`);
 
-  return body as { items: any[]; meta: any };
+  return body;
 }
 
 async function adminStartPayout(
