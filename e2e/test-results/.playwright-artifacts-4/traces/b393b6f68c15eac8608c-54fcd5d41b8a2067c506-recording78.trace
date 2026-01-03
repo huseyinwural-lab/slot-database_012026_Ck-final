@@ -1,1 +1,0 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767417456533,"monotonicTime":263747.35,"sdkLanguage":"javascript","contextId":"request-context@136678babbf8e4cc2279152d3717969a","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}

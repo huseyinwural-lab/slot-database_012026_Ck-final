@@ -1,1 +1,0 @@
-{"detail":{"error_code":"ILLEGAL_TRANSACTION_STATE_TRANSITION","from_state":"paid","to_state":"approved","tx_type":"withdrawal"}}
