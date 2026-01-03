@@ -1,0 +1,16 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767411972634,"monotonicTime":281641.292,"sdkLanguage":"javascript","contextId":"request-context@67be4b16133117d16777f3c9b71dbf44","title":"tenant-policy.spec.ts:79 › Tenant Policy Limits (E2E-POLICY-001) › Deposit limit exceeded enforcement"}
+{"type":"before","callId":"call@213","startTime":281642.177,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/kyc/documents/cd18f6aa-0701-4635-ad49-6e7535cd29f7/review","method":"POST","jsonData":"{\"status\":\"approved\"}","timeout":0},"stepId":"pw:api@33","beforeSnapshot":"before@call@213"}
+{"type":"log","callId":"call@213","time":281642.493,"message":"→ POST http://127.0.0.1:8001/api/v1/kyc/documents/cd18f6aa-0701-4635-ad49-6e7535cd29f7/review"}
+{"type":"log","callId":"call@213","time":281642.501,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@213","time":281642.504,"message":"  accept: */*"}
+{"type":"log","callId":"call@213","time":281642.506,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@213","time":281642.508,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM3Mn0.mCcWS9jRa9UxVefHLnGIB7tNrn7qAcPqnJL9F8HcIEY"}
+{"type":"log","callId":"call@213","time":281642.511,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@213","time":281642.513,"message":"  content-length: 21"}
+{"type":"log","callId":"call@213","time":281651.49,"message":"← 200 OK"}
+{"type":"log","callId":"call@213","time":281651.507,"message":"  date: Sat, 03 Jan 2026 03:46:11 GMT"}
+{"type":"log","callId":"call@213","time":281651.511,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@213","time":281651.513,"message":"  content-length: 56"}
+{"type":"log","callId":"call@213","time":281651.515,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@213","time":281651.517,"message":"  x-request-id: 0ebef627-d095-4e22-b1f0-851fd51e44ac"}
+{"type":"after","callId":"call@213","endTime":281692.518,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/kyc/documents/cd18f6aa-0701-4635-ad49-6e7535cd29f7/review","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 03:46:11 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"56"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"0ebef627-d095-4e22-b1f0-851fd51e44ac"}],"fetchUid":"42025ca96ecd14a2376f772609af6fc7"}},"afterSnapshot":"after@call@213"}

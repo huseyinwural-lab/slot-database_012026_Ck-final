@@ -1,0 +1,98 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767411964698,"monotonicTime":273704.451,"sdkLanguage":"javascript","contextId":"request-context@27434891390b01f550babcfd05b828f3","title":"robot-admin-ops.spec.ts:6 › Robot Admin Ops › Admin Clone -> Bind -> Player Spin Verify"}
+{"type":"before","callId":"call@13","startTime":273706.627,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/login","method":"POST","jsonData":"{\"email\":\"admin@casino.com\",\"password\":\"Admin123!\"}","timeout":0},"stepId":"pw:api@38","beforeSnapshot":"before@call@13"}
+{"type":"log","callId":"call@13","time":273710.328,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/login"}
+{"type":"log","callId":"call@13","time":273710.356,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@13","time":273710.366,"message":"  accept: */*"}
+{"type":"log","callId":"call@13","time":273710.376,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@13","time":273710.477,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":273710.492,"message":"  content-length: 51"}
+{"type":"log","callId":"call@13","time":273967.241,"message":"← 200 OK"}
+{"type":"log","callId":"call@13","time":273967.27,"message":"  date: Sat, 03 Jan 2026 03:46:03 GMT"}
+{"type":"log","callId":"call@13","time":273967.282,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@13","time":273967.304,"message":"  content-length: 707"}
+{"type":"log","callId":"call@13","time":273967.317,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@13","time":273967.328,"message":"  x-request-id: 7da13ef0-637c-45d4-ac36-9d36d6486b27"}
+{"type":"after","callId":"call@13","endTime":273968.946,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 03:46:03 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"707"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"7da13ef0-637c-45d4-ac36-9d36d6486b27"}],"fetchUid":"357dfa1b332387000236b4c6e4bc8d0d"}},"afterSnapshot":"after@call@13"}
+{"type":"before","callId":"call@16","startTime":273973.421,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/robots","method":"GET","headers":[{"name":"Authorization","value":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}],"timeout":0},"stepId":"pw:api@40","beforeSnapshot":"before@call@16"}
+{"type":"log","callId":"call@16","time":273974.073,"message":"→ GET http://127.0.0.1:8001/api/v1/robots"}
+{"type":"log","callId":"call@16","time":273974.087,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@16","time":273974.094,"message":"  accept: */*"}
+{"type":"log","callId":"call@16","time":273974.1,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@16","time":273974.106,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}
+{"type":"log","callId":"call@16","time":273977.192,"message":"← 307 Temporary Redirect"}
+{"type":"log","callId":"call@16","time":273977.21,"message":"  date: Sat, 03 Jan 2026 03:46:03 GMT"}
+{"type":"log","callId":"call@16","time":273977.218,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@16","time":273977.223,"message":"  content-length: 0"}
+{"type":"log","callId":"call@16","time":273977.23,"message":"  location: http://127.0.0.1:8001/api/v1/robots/"}
+{"type":"log","callId":"call@16","time":273977.234,"message":"  x-request-id: f4c52671-503c-41ce-96a1-83173ba6f1b2"}
+{"type":"log","callId":"call@16","time":273977.636,"message":"→ GET http://127.0.0.1:8001/api/v1/robots/"}
+{"type":"log","callId":"call@16","time":273977.647,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@16","time":273977.653,"message":"  accept: */*"}
+{"type":"log","callId":"call@16","time":273977.661,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@16","time":273977.665,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}
+{"type":"log","callId":"call@16","time":273984.043,"message":"← 200 OK"}
+{"type":"log","callId":"call@16","time":273984.063,"message":"  date: Sat, 03 Jan 2026 03:46:03 GMT"}
+{"type":"log","callId":"call@16","time":273984.069,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@16","time":273984.073,"message":"  content-length: 7283"}
+{"type":"log","callId":"call@16","time":273984.079,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@16","time":273984.084,"message":"  x-request-id: 177fc090-dc58-4e80-a7da-c8f5a0a52701"}
+{"type":"after","callId":"call@16","endTime":273984.628,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/robots/","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 03:46:03 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"7283"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"177fc090-dc58-4e80-a7da-c8f5a0a52701"}],"fetchUid":"bdc45e64fb13853c4289717a03371b5e"}},"afterSnapshot":"after@call@16"}
+{"type":"before","callId":"call@19","startTime":273987.384,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/robots/0c5b7513-caec-4ad4-ba32-93ec5977c0ed/clone","method":"POST","headers":[{"name":"Authorization","value":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"},{"name":"X-Reason","value":"E2E Test Clone"}],"jsonData":"{\"name_suffix\":\" (E2E Test)\"}","timeout":0},"stepId":"pw:api@42","beforeSnapshot":"before@call@19"}
+{"type":"log","callId":"call@19","time":273987.942,"message":"→ POST http://127.0.0.1:8001/api/v1/robots/0c5b7513-caec-4ad4-ba32-93ec5977c0ed/clone"}
+{"type":"log","callId":"call@19","time":273987.956,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@19","time":273987.962,"message":"  accept: */*"}
+{"type":"log","callId":"call@19","time":273987.968,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@19","time":273987.972,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}
+{"type":"log","callId":"call@19","time":273987.978,"message":"  X-Reason: E2E Test Clone"}
+{"type":"log","callId":"call@19","time":273987.984,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@19","time":273987.987,"message":"  content-length: 29"}
+{"type":"log","callId":"call@19","time":274000.999,"message":"← 200 OK"}
+{"type":"log","callId":"call@19","time":274001.022,"message":"  date: Sat, 03 Jan 2026 03:46:03 GMT"}
+{"type":"log","callId":"call@19","time":274001.028,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@19","time":274001.032,"message":"  content-length: 491"}
+{"type":"log","callId":"call@19","time":274001.037,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@19","time":274001.041,"message":"  x-request-id: 371ddf3c-3bc8-4e27-bc6c-a9b23069fca6"}
+{"type":"after","callId":"call@19","endTime":274041.811,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/robots/0c5b7513-caec-4ad4-ba32-93ec5977c0ed/clone","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 03:46:03 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"491"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"371ddf3c-3bc8-4e27-bc6c-a9b23069fca6"}],"fetchUid":"5a3593a0e71382eae329c5dec31885ef"}},"afterSnapshot":"after@call@19"}
+{"type":"before","callId":"call@22","startTime":274044.697,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/robots/81fa050c-c440-4899-8275-6f05dd6e3137/toggle","method":"POST","headers":[{"name":"Authorization","value":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"},{"name":"X-Reason","value":"E2E Test Toggle"}],"timeout":0},"stepId":"pw:api@44","beforeSnapshot":"before@call@22"}
+{"type":"log","callId":"call@22","time":274045.227,"message":"→ POST http://127.0.0.1:8001/api/v1/robots/81fa050c-c440-4899-8275-6f05dd6e3137/toggle"}
+{"type":"log","callId":"call@22","time":274045.241,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@22","time":274045.246,"message":"  accept: */*"}
+{"type":"log","callId":"call@22","time":274045.251,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@22","time":274045.255,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}
+{"type":"log","callId":"call@22","time":274045.261,"message":"  X-Reason: E2E Test Toggle"}
+{"type":"log","callId":"call@22","time":274057.846,"message":"← 200 OK"}
+{"type":"log","callId":"call@22","time":274057.867,"message":"  date: Sat, 03 Jan 2026 03:46:03 GMT"}
+{"type":"log","callId":"call@22","time":274057.873,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@22","time":274057.877,"message":"  content-length: 490"}
+{"type":"log","callId":"call@22","time":274057.896,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@22","time":274057.9,"message":"  x-request-id: e353d9aa-9699-408e-a2a3-f006453acda1"}
+{"type":"after","callId":"call@22","endTime":274098.827,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/robots/81fa050c-c440-4899-8275-6f05dd6e3137/toggle","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 03:46:03 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"490"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"e353d9aa-9699-408e-a2a3-f006453acda1"}],"fetchUid":"41d712b75d0f66cee3a32ee4be9ee0d6"}},"afterSnapshot":"after@call@22"}
+{"type":"before","callId":"call@24","startTime":274100.385,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/games","method":"GET","headers":[{"name":"Authorization","value":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}],"timeout":0},"stepId":"pw:api@45","beforeSnapshot":"before@call@24"}
+{"type":"log","callId":"call@24","time":274100.761,"message":"→ GET http://127.0.0.1:8001/api/v1/games"}
+{"type":"log","callId":"call@24","time":274100.773,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@24","time":274100.78,"message":"  accept: */*"}
+{"type":"log","callId":"call@24","time":274100.784,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@24","time":274100.789,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}
+{"type":"log","callId":"call@24","time":274107.299,"message":"← 200 OK"}
+{"type":"log","callId":"call@24","time":274107.32,"message":"  date: Sat, 03 Jan 2026 03:46:05 GMT"}
+{"type":"log","callId":"call@24","time":274107.326,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@24","time":274107.331,"message":"  content-length: 393"}
+{"type":"log","callId":"call@24","time":274107.335,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@24","time":274107.339,"message":"  x-request-id: 5ab7935d-e53d-4e1e-b777-1de5f8c46c5c"}
+{"type":"after","callId":"call@24","endTime":274148.622,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/games","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 03:46:05 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"393"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"5ab7935d-e53d-4e1e-b777-1de5f8c46c5c"}],"fetchUid":"77ba351fac6169982d8bf92a3ef9f4ec"}},"afterSnapshot":"after@call@24"}
+{"type":"before","callId":"call@27","startTime":274152.933,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/games/59c2e316-a938-412e-a6b9-b749441ba33b/robot","method":"POST","headers":[{"name":"Authorization","value":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"},{"name":"X-Reason","value":"E2E Test Bind"}],"jsonData":"{\"robot_id\":\"81fa050c-c440-4899-8275-6f05dd6e3137\"}","timeout":0},"stepId":"pw:api@47","beforeSnapshot":"before@call@27"}
+{"type":"log","callId":"call@27","time":274153.36,"message":"→ POST http://127.0.0.1:8001/api/v1/games/59c2e316-a938-412e-a6b9-b749441ba33b/robot"}
+{"type":"log","callId":"call@27","time":274153.379,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@27","time":274153.384,"message":"  accept: */*"}
+{"type":"log","callId":"call@27","time":274153.39,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@27","time":274153.393,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzQ5ODM2NH0.1tLbTZlWn9elmpbFJmQtPMfYPXN0HoWijnNiWNgH1kQ"}
+{"type":"log","callId":"call@27","time":274153.399,"message":"  X-Reason: E2E Test Bind"}
+{"type":"log","callId":"call@27","time":274153.402,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@27","time":274153.407,"message":"  content-length: 51"}
+{"type":"log","callId":"call@27","time":274168.195,"message":"← 200 OK"}
+{"type":"log","callId":"call@27","time":274168.219,"message":"  date: Sat, 03 Jan 2026 03:46:05 GMT"}
+{"type":"log","callId":"call@27","time":274168.224,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@27","time":274168.229,"message":"  content-length: 90"}
+{"type":"log","callId":"call@27","time":274168.232,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@27","time":274168.236,"message":"  x-request-id: 1a820b0f-d951-4335-9b46-f8dd9e2a3fc7"}
+{"type":"after","callId":"call@27","endTime":274208.55,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/games/59c2e316-a938-412e-a6b9-b749441ba33b/robot","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 03:46:05 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"90"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"1a820b0f-d951-4335-9b46-f8dd9e2a3fc7"}],"fetchUid":"917a6966adba3336c551ae1cd3ce74c2"}},"afterSnapshot":"after@call@27"}
