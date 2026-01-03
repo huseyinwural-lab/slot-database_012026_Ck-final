@@ -92,8 +92,8 @@ async def ensure_within_tenant_daily_limits(
             Transaction.tenant_id == tenant_id,
             Transaction.player_id == player_id,
             Transaction.type == "deposit",
-            # Only completed deposits consume the day limit
-            Transaction.state == "completed",
+            # Any initiated deposit consumes the day limit (prevents bypass by leaving payments incomplete)
+            Transaction.state.in_(["created", "pending_provider_webhook", "pending_provider", "completed"]),
             Transaction.created_at >= day_start,
             Transaction.created_at < day_end,
         )
