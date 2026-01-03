@@ -201,7 +201,7 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
             const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
             const st = (await res.json()).status;
             return st;
-          } catch (e: any) {
+          } catch (e) {
             const msg = String(e?.message || e);
             if (msg.toLowerCase().includes('socket hang up')) {
               return '__retry__';
