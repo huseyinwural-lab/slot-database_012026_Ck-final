@@ -202,6 +202,13 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     const pCtx = await pwRequest.newContext({ baseURL: BACKEND_URL, extraHTTPHeaders: { Authorization: `Bearer ${playerToken}` } });
     await pCtx.post('/api/v1/player/wallet/deposit', { data: { amount: 100, method: 'test' }, headers: { 'Idempotency-Key': `setup-${Date.now()}` } });
 
+    // Wait until balance reflects the deposit (avoids race -> Insufficient funds)
+    await expect.poll(async () => {
+      const balRes = await pCtx.get('/api/v1/player/wallet/balance');
+      const bal = await balRes.json();
+      return bal.available_real || bal.balance_real_available || 0;
+    }, { timeout: 20000 }).toBeGreaterThanOrEqual(100);
+
     // 3. Player: Withdraw 20 (Success) via UI
     const playerContext = await browser.newContext();
     const playerPage = await playerContext.newPage();
