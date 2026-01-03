@@ -474,7 +474,7 @@ test('P06-203: Withdraw -> approve -> payout fail -> retry success', async ({ pa
   await adminApproveWithdraw(BACKEND_URL, adminToken, txId);
 
   const listApproved = await adminListWithdrawals(BACKEND_URL, adminToken, { state: 'approved', limit: 50, offset: 0 });
-  const wApproved = (listApproved.items || []).find((w: any) => w.tx_id === txId || w.id === txId);
+  const wApproved = (listApproved.items || []).find((w) => w.tx_id === txId || w.id === txId);
   expect(wApproved, 'approved withdrawal must appear').toBeTruthy();
 
   // 3) Start payout fail
