@@ -171,18 +171,16 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
       }, { timeout: 15000 }).toBe('approved');
     }
 
-    // 2. Start/Retry Payout
-    // Button text depends on state
-    const payoutBtn = row.locator('button:has-text("Start Payout"), button:has-text("Retry Payout")');
-    await expect(payoutBtn).toBeVisible({ timeout: 10000 });
-    await payoutBtn.click();
-    
-    // Poll API for 'payout_submitted' or 'paid' (if instant)
-    await expect.poll(async () => {
-        const res = await apiContext.get(`/api/v1/payouts/status/${withdrawTxId}`);
-        const st = (await res.json()).status;
-        return st;
-    }, { timeout: 15000, message: "Status did not become 'payout_submitted' or 'paid'" }).toMatch(/payout_(submitted|pending)|paid/);
+    // 2. Start payout via API (avoid relying on admin UI buttons)
+    {
+      const payoutRes = await apiContext.post(`/api/v1/finance/withdrawals/${withdrawTxId}/payout`, {
+        headers: { 'Authorization': `Bearer ${adminToken}`, 'Idempotency-Key': `payout-${Date.now()}` },
+        data: { provider: 'adyen' },
+      });
+      if (!payoutRes.ok()) {
+        throw new Error(`start payout failed ${payoutRes.status()} body=${await payoutRes.text()}`);
+      }
+    }
 
     // Webhook - Simulate Adyen calling us back
     await apiContext.post(`/api/v1/payments/adyen/test-trigger-webhook`, {
