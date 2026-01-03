@@ -5,8 +5,16 @@ import { setLastError } from './supportDiagnostics';
 // Local dev (CRA) can override backend to avoid CORS issues when REACT_APP_BACKEND_URL
 // points to an external preview domain.
 const LOCAL_DEV_API_URL = process.env.REACT_APP_BACKEND_URL_LOCAL;
+
+// Some preview environments run the app in NODE_ENV=development but are served over HTTPS
+// on a non-localhost domain. In that case, using REACT_APP_BACKEND_URL_LOCAL (localhost)
+// causes deterministic failures (ERR_SSL_PROTOCOL_ERROR / mixed-content).
+const isLocalBrowser =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
 const RAW =
-  (process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL)
+  process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL && isLocalBrowser
     ? LOCAL_DEV_API_URL
     : (process.env.REACT_APP_BACKEND_URL || '');
 
