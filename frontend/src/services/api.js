@@ -18,9 +18,13 @@ const RAW =
     ? LOCAL_DEV_API_URL
     : (process.env.REACT_APP_BACKEND_URL || '');
 
-// If no explicit backend is provided, default to same-origin proxy.
-// This is the most reliable option in previews and avoids mixed-content/CORS pitfalls.
-const API_BASE = RAW ? RAW.replace(/\/$/, '') : '';
+const isHttpsPage = typeof window !== 'undefined' && window.location?.protocol === 'https:';
+const isHttpBackend = Boolean(RAW) && RAW.startsWith('http://');
+
+// If the app is served over HTTPS but the configured backend is HTTP,
+// do not attempt to "upgrade" to https://... (it will fail deterministically).
+// Fall back to same-origin proxy instead.
+const API_BASE = (isHttpsPage && isHttpBackend) ? '' : (RAW ? RAW.replace(/\/$/, '') : '');
 
 const api = axios.create({
   baseURL: API_BASE ? (API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`) : '/api',
