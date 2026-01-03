@@ -1,0 +1,15 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767417458215,"monotonicTime":265428.884,"sdkLanguage":"javascript","contextId":"request-context@5d40ef5854fc7f2f44c2b65b22a68302","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
+{"type":"before","callId":"call@752","startTime":265429.861,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/auth/player/login","method":"POST","jsonData":"{\"email\":\"e2e-money-path-player@example.com\",\"password\":\"Player123!\",\"tenant_id\":\"default_casino\"}","timeout":0},"stepId":"pw:api@33","beforeSnapshot":"before@call@752"}
+{"type":"log","callId":"call@752","time":265430.183,"message":"→ POST http://127.0.0.1:8001/api/v1/auth/player/login"}
+{"type":"log","callId":"call@752","time":265430.192,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@752","time":265430.196,"message":"  accept: */*"}
+{"type":"log","callId":"call@752","time":265430.199,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@752","time":265430.202,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@752","time":265430.205,"message":"  content-length: 98"}
+{"type":"log","callId":"call@752","time":265673.431,"message":"← 200 OK"}
+{"type":"log","callId":"call@752","time":265673.452,"message":"  date: Sat, 03 Jan 2026 05:17:37 GMT"}
+{"type":"log","callId":"call@752","time":265673.456,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@752","time":265673.459,"message":"  content-length: 380"}
+{"type":"log","callId":"call@752","time":265673.462,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@752","time":265673.465,"message":"  x-request-id: db209ceb-0253-4614-8838-7db9f7204a28"}
+{"type":"after","callId":"call@752","endTime":265673.845,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/auth/player/login","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 05:17:37 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"380"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"db209ceb-0253-4614-8838-7db9f7204a28"}],"fetchUid":"829403d040eb12573975012aa00a665d"}},"afterSnapshot":"after@call@752"}

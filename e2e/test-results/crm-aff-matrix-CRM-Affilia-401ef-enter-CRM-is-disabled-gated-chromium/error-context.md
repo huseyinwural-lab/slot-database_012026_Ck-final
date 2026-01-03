@@ -1,0 +1,217 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - heading "Platform Admin" [level=1] [ref=e6]
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: Core
+          - list [ref=e12]:
+            - listitem [ref=e13]:
+              - link "Dashboard" [ref=e14] [cursor=pointer]:
+                - /url: /
+                - img [ref=e15]
+                - generic [ref=e20]: Dashboard
+            - listitem [ref=e21]:
+              - link "Players" [ref=e22] [cursor=pointer]:
+                - /url: /players
+                - img [ref=e23]
+                - generic [ref=e28]: Players
+            - listitem [ref=e29]:
+              - link "Finance" [ref=e30] [cursor=pointer]:
+                - /url: /finance
+                - img [ref=e31]
+                - generic [ref=e33]: Finance
+            - listitem [ref=e34]:
+              - link "Withdrawals" [ref=e35] [cursor=pointer]:
+                - /url: /finance/withdrawals
+                - img [ref=e36]
+                - generic [ref=e38]: Withdrawals
+            - listitem [ref=e39]:
+              - link "All Revenue" [ref=e40] [cursor=pointer]:
+                - /url: /revenue/all-tenants
+                - img [ref=e41]
+                - generic [ref=e44]: All Revenue
+            - listitem [ref=e45]:
+              - link "Games" [ref=e46] [cursor=pointer]:
+                - /url: /games
+                - img [ref=e47]
+                - generic [ref=e49]: Games
+            - listitem [ref=e50]:
+              - link "VIP Games" [ref=e51] [cursor=pointer]:
+                - /url: /vip-games
+                - img [ref=e52]
+                - generic [ref=e54]: VIP Games
+        - generic [ref=e55]:
+          - generic [ref=e56]: Operations
+          - list [ref=e57]:
+            - listitem [ref=e58]:
+              - link "KYC Verification" [ref=e59] [cursor=pointer]:
+                - /url: /kyc
+                - img [ref=e60]
+                - generic [ref=e63]: KYC Verification
+            - listitem [ref=e64]:
+              - link "CRM & Comms" [ref=e65] [cursor=pointer]:
+                - /url: /crm
+                - img [ref=e66]
+                - generic [ref=e69]: CRM & Comms
+            - listitem [ref=e70]:
+              - link "Bonuses" [ref=e71] [cursor=pointer]:
+                - /url: /bonuses
+                - img [ref=e72]
+                - generic [ref=e76]: Bonuses
+            - listitem [ref=e77]:
+              - link "Affiliates" [ref=e78] [cursor=pointer]:
+                - /url: /affiliates
+                - img [ref=e79]
+                - generic [ref=e84]: Affiliates
+            - listitem [ref=e85]:
+              - link "Kill Switch" [ref=e86] [cursor=pointer]:
+                - /url: /kill-switch
+                - img [ref=e87]
+                - generic [ref=e89]: Kill Switch
+            - listitem [ref=e90]:
+              - link "Support" [ref=e91] [cursor=pointer]:
+                - /url: /support
+                - img [ref=e92]
+                - generic [ref=e94]: Support
+        - generic [ref=e95]:
+          - generic [ref=e96]: Risk & Compliance
+          - list [ref=e97]:
+            - listitem [ref=e98]:
+              - link "Risk Rules" [ref=e99] [cursor=pointer]:
+                - /url: /risk
+                - img [ref=e100]
+                - generic [ref=e102]: Risk Rules
+            - listitem [ref=e103]:
+              - link "Fraud Check" [ref=e104] [cursor=pointer]:
+                - /url: /fraud
+                - img [ref=e105]
+                - generic [ref=e107]: Fraud Check
+            - listitem [ref=e108]:
+              - link "Approval Queue" [ref=e109] [cursor=pointer]:
+                - /url: /approvals
+                - img [ref=e110]
+                - generic [ref=e113]: Approval Queue
+            - listitem [ref=e114]:
+              - link "Responsible Gaming" [ref=e115] [cursor=pointer]:
+                - /url: /rg
+                - img [ref=e116]
+                - generic [ref=e120]: Responsible Gaming
+        - generic [ref=e121]:
+          - generic [ref=e122]: Game Engine
+          - list [ref=e123]:
+            - listitem [ref=e124]:
+              - link "Robots" [ref=e125] [cursor=pointer]:
+                - /url: /robots
+                - img [ref=e126]
+                - generic [ref=e129]: Robots
+            - listitem [ref=e130]:
+              - link "Math Assets" [ref=e131] [cursor=pointer]:
+                - /url: /math-assets
+                - img [ref=e132]
+                - generic [ref=e137]: Math Assets
+        - generic [ref=e138]:
+          - generic [ref=e139]: System
+          - list [ref=e140]:
+            - listitem [ref=e141]:
+              - link "CMS" [ref=e142] [cursor=pointer]:
+                - /url: /cms
+                - img [ref=e143]
+                - generic [ref=e146]: CMS
+            - listitem [ref=e147]:
+              - link "Reports" [ref=e148] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e149]
+                - generic [ref=e151]: Reports
+            - listitem [ref=e152]:
+              - link "Logs" [ref=e153] [cursor=pointer]:
+                - /url: /logs
+                - img [ref=e154]
+                - generic [ref=e157]: Logs
+            - listitem [ref=e158]:
+              - link "Audit Log" [ref=e159] [cursor=pointer]:
+                - /url: /audit
+                - img [ref=e160]
+                - generic [ref=e163]: Audit Log
+            - listitem [ref=e164]:
+              - link "Admin Users" [ref=e165] [cursor=pointer]:
+                - /url: /admins
+                - img [ref=e166]
+                - generic [ref=e178]: Admin Users
+            - listitem [ref=e179]:
+              - link "Tenants" [ref=e180] [cursor=pointer]:
+                - /url: /tenants
+                - img [ref=e181]
+                - generic [ref=e184]: Tenants
+            - listitem [ref=e185]:
+              - link "API Keys" [ref=e186] [cursor=pointer]:
+                - /url: /keys
+                - img [ref=e187]
+                - generic [ref=e190]: API Keys
+            - listitem [ref=e191]:
+              - link "Feature Flags" [ref=e192] [cursor=pointer]:
+                - /url: /features
+                - img [ref=e193]
+                - generic [ref=e196]: Feature Flags
+            - listitem [ref=e197]:
+              - link "Simulator" [ref=e198] [cursor=pointer]:
+                - /url: /simulator
+                - img [ref=e199]
+                - generic [ref=e201]: Simulator
+            - listitem [ref=e202]:
+              - link "Settings" [ref=e203] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e204]
+                - generic [ref=e207]: Settings
+      - button "Logout" [ref=e209] [cursor=pointer]:
+        - img [ref=e210]
+        - text: Logout
+    - main [ref=e213]:
+      - generic [ref=e214]:
+        - generic [ref=e216]:
+          - img [ref=e217]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e220]
+        - generic [ref=e221]:
+          - generic [ref=e222]:
+            - img [ref=e223]
+            - combobox [ref=e226] [cursor=pointer]:
+              - generic: Global Context
+              - img [ref=e227]
+          - generic [ref=e229]:
+            - paragraph [ref=e230]: Super Owner
+            - paragraph [ref=e231]: admin@casino.com
+          - generic [ref=e232]: SO
+      - generic [ref=e233]:
+        - generic [ref=e235]:
+          - generic [ref=e236]:
+            - img [ref=e239]
+            - generic [ref=e241]: Admin Login
+            - generic [ref=e242]: Enter your credentials to access the CasinoAdmin control panel.
+          - generic [ref=e244]:
+            - generic [ref=e245]:
+              - text: Email
+              - textbox "Email" [ref=e246]: admin@casino.com
+            - generic [ref=e247]:
+              - text: Password
+              - generic [ref=e248]:
+                - textbox "Password" [active] [ref=e249]: Admin123!
+                - button [ref=e250] [cursor=pointer]:
+                  - img [ref=e251]
+            - button "Sign In" [ref=e254] [cursor=pointer]
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e255] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e256]:
+      - img [ref=e257]
+      - paragraph [ref=e258]: Made with Emergent
+  - iframe [ref=e259]:
+    - generic [ref=f1e2]:
+      - generic [ref=f1e3]: "Compiled with problems:"
+      - button "Dismiss" [ref=f1e4] [cursor=pointer]: ×
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]: ERROR
+        - generic [ref=f1e8]: "[eslint] src/App.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ErrorBoundary.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/Layout.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/RequireAuth.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/RequireFeature.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/TenantSwitcher.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/BonusPerformanceCard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/CriticalAlertsPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/FTDCard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/FinancialSummary.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/FinancialTrendChart.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/LiveBetsTicker.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/LossLeadersTable.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/dashboard/RetentionCard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/finance/ChargebackList.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/finance/ReconciliationPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/finance/TransactionDetailModal.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/ConfigDiffPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameAssetsTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameBlackjackRulesTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameClientTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameConfigPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameCrashMathTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameDiceMathTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameEngineTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GamePaytableTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GamePokerRulesTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameReelStripsTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameRobotTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/games/GameSlotAdvancedTab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/ApiKeySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/BrandSettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/CountrySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/CurrencySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/settings/PaymentsPolicySettings.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/BonusSimulator.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/GameMathSimulator.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/SimulationArchive.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/simulation/SimulationOverview.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/alert.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/badge.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/button.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/card.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/checkbox.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/collapsible.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/command.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/dialog.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/dropdown-menu.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/input.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/label.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/pagination.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/popover.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/progress.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/scroll-area.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/select.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/separator.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/sheet.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/switch.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/table.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/tabs.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/textarea.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/components/ui/tooltip.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/config/menu.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/context/CapabilitiesContext.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/lib/utils.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/APIKeysPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AcceptInvite.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AdminManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AffiliateManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/ApprovalQueue.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/AuditLog.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/BonusManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/CMSManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/CRM.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Dashboard.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/FeatureFlags.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Finance.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/FinanceWithdrawals.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/FraudCheck.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/GameManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/KYCManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/KillSwitchPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Login.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/MathAssetsPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/ModuleDisabled.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/OpsStatus.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/OwnerRevenue.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/PlayerDetail.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/PlayerList.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/PlayerWallet.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Reports.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/ResponsibleGaming.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/RiskManagement.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/RobotsPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/SettingsPanel.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/SimulationLab.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/Support.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/SystemLogs.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/TenantRevenue.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/TenantsPage.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/pages/VipGames.jsx Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/api.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/moneyActions.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/moneyPathErrors.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect src/services/supportDiagnostics.js Line 1:1: Definition for rule 'react-hooks/set-state-in-effect' was not found react-hooks/set-state-in-effect Search for the keywords to learn more about each error."
+```

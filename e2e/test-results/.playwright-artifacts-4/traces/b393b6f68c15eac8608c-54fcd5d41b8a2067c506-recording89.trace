@@ -1,0 +1,14 @@
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767417457763,"monotonicTime":264976.807,"sdkLanguage":"javascript","contextId":"request-context@bbf5e8b60d2b5dcd2a9fc80ddc7d08a7","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}
+{"type":"before","callId":"call@580","startTime":264977.801,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/finance/withdrawals","params":[{"name":"state","value":"payout_failed"},{"name":"limit","value":"50"},{"name":"offset","value":"0"}],"method":"GET","timeout":0},"stepId":"pw:api@58","beforeSnapshot":"before@call@580"}
+{"type":"log","callId":"call@580","time":264978.093,"message":"→ GET http://127.0.0.1:8001/api/v1/finance/withdrawals?state=payout_failed&limit=50&offset=0"}
+{"type":"log","callId":"call@580","time":264978.101,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@580","time":264978.105,"message":"  accept: */*"}
+{"type":"log","callId":"call@580","time":264978.107,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@580","time":264978.11,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMzU5M30.Z1z6PrjnPgj9oTrr7D0mT59Q40RL5EmrmmP-agvGYVY"}
+{"type":"log","callId":"call@580","time":264984.16,"message":"← 200 OK"}
+{"type":"log","callId":"call@580","time":264984.177,"message":"  date: Sat, 03 Jan 2026 05:17:36 GMT"}
+{"type":"log","callId":"call@580","time":264984.182,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@580","time":264984.184,"message":"  content-length: 385"}
+{"type":"log","callId":"call@580","time":264984.187,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@580","time":264984.19,"message":"  x-request-id: fab0b202-aa55-41d0-98e0-6e17fbccf996"}
+{"type":"after","callId":"call@580","endTime":265024.838,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/finance/withdrawals?state=payout_failed&limit=50&offset=0","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 05:17:36 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"385"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"fab0b202-aa55-41d0-98e0-6e17fbccf996"}],"fetchUid":"3810b14ae477422b8c08bca032fd9ff2"}},"afterSnapshot":"after@call@580"}
