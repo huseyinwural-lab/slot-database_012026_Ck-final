@@ -212,20 +212,24 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
 
     await playerPage.goto(`${PLAYER_URL}/wallet`);
 
-    // Debug: assert player auth is wired in the UI
-    await expect(playerPage.getByText(PLAYER_EMAIL)).toBeVisible({ timeout: 15000 });
-
     // Switch to Withdraw tab
     await playerPage.click('button:has-text("Withdraw")');
-    
-    // Input 20
+
+    // Input 20 and submit
     await playerPage.locator('input[name="amount"]').fill('20');
     await playerPage.locator('input[name="accountNumber"]').fill('test-iban');
-    await playerPage.getByRole('button', { name: 'Request Withdrawal' }).click();
 
-    // Assert success: request should create a withdrawal history entry
+    const [payoutResp] = await Promise.all([
+      playerPage.waitForResponse((r) => r.url().includes('/api/v1/payouts/initiate')),
+      playerPage.getByRole('button', { name: 'Request Withdrawal' }).click(),
+    ]);
+
+    const payoutText = await payoutResp.text();
+    if (!payoutResp.ok()) {
+      throw new Error(`withdraw initiate failed ${payoutResp.status()} body=${payoutText}`);
+    }
+
     // Backend-side verification: withdrawal transaction created
-    // (use a dedicated player-auth context; pCtx uses admin auth)
     const pTxCtx = await pwRequest.newContext({
       baseURL: BACKEND_URL,
       extraHTTPHeaders: { Authorization: `Bearer ${playerToken}` },
