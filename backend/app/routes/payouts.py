@@ -44,11 +44,10 @@ async def initiate_payout(
     request: PayoutRequest,
     session = Depends(get_session),
     current_player=Depends(get_current_player),
+):
     # Ensure player cannot request withdrawals for other players
     if request.player_id != current_player.id:
         raise HTTPException(status_code=403, detail={"error_code": "UNAUTHORIZED"})
-
-):
     # Use AdyenPSP service which handles Mocking in Dev
     merchant_reference = f"PAYOUT-{request.player_id}-{uuid.uuid4().hex[:8]}"
     
