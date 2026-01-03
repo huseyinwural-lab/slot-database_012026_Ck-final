@@ -230,7 +230,9 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     const txJson = await txRes.json();
     const txItems = txJson.items || txJson.data?.items || [];
     const w = txItems.find((t) => t.type === 'withdrawal' && (t.amount === 20 || t.amount === 20.0));
-    expect(w).toBeTruthy();
+    if (!w) {
+      throw new Error(`Expected withdrawal tx not found. items=${JSON.stringify(txItems.slice(0, 5))}`);
+    }
 
     // 4. Player: Withdraw 15 (Fail: 20+15 > 30) via UI
     await playerPage.reload();
