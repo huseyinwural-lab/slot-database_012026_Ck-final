@@ -197,17 +197,16 @@ test.describe('Tenant Policy Limits (E2E-POLICY-001)', () => {
     await expect(adminPage.getByText('Payments policy kaydedildi')).toBeVisible();
     await adminContext.close();
 
-    // 2. Player: Deposit 100 (Success) to fund wallet
-    // We can do this via API to speed up
+    // 2. Player: Deposit funds (keep below daily deposit limit which may be set by the previous test)
     const pCtx = await pwRequest.newContext({ baseURL: BACKEND_URL, extraHTTPHeaders: { Authorization: `Bearer ${playerToken}` } });
-    await pCtx.post('/api/v1/player/wallet/deposit', { data: { amount: 100, method: 'test' }, headers: { 'Idempotency-Key': `setup-${Date.now()}` } });
+    await pCtx.post('/api/v1/player/wallet/deposit', { data: { amount: 30, method: 'test' }, headers: { 'Idempotency-Key': `setup-${Date.now()}` } });
 
     // Wait until balance reflects the deposit (avoids race -> Insufficient funds)
     await expect.poll(async () => {
       const balRes = await pCtx.get('/api/v1/player/wallet/balance');
       const bal = await balRes.json();
       return bal.available_real || bal.balance_real_available || 0;
-    }, { timeout: 20000 }).toBeGreaterThanOrEqual(100);
+    }, { timeout: 20000 }).toBeGreaterThanOrEqual(30);
 
     // 3. Player: Withdraw 20 (Success) via UI
     const playerContext = await browser.newContext();
