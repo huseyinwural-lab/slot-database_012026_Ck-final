@@ -1643,8 +1643,10 @@ class PayoutStatusPollingTestSuite:
         print(f"Backend URL: {self.base_url}")
         print("=" * 80)
         
-        # Run all tests in sequence
-        test_results = []
+        # Setup admin authentication first
+        if not await self.setup_admin_auth():
+            print("\n❌ Admin authentication setup failed. Cannot proceed with tests.")
+            return False
         
         # Step 1: Register player
         if not await self.register_player():
@@ -1654,6 +1656,11 @@ class PayoutStatusPollingTestSuite:
         # Step 2: Login player
         if not await self.login_player():
             print("\n❌ Player login failed. Cannot proceed with tests.")
+            return False
+        
+        # Step 2.5: Approve player KYC
+        if not await self.approve_player_kyc():
+            print("\n❌ Player KYC approval failed. Cannot proceed with tests.")
             return False
         
         # Step 3: Test deposit
@@ -1667,6 +1674,7 @@ class PayoutStatusPollingTestSuite:
             return False
         
         # Step 5: Poll payout status
+        test_results = []
         test_results.append(await self.poll_payout_status())
         
         # Summary
