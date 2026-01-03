@@ -161,11 +161,13 @@ test.describe('Release Smoke Money Loop (Deterministic)', () => {
       }
 
       await expect.poll(async () => {
-        const w = await apiContext.get(`/api/v1/finance/withdrawals/${withdrawTxId}`, {
+        const w = await apiContext.get(`/api/v1/finance/withdrawals`, {
           headers: { 'Authorization': `Bearer ${adminToken}` },
         });
         const data = await w.json();
-        return data.state;
+        const items = data.items || [];
+        const row = items.find((x) => x.tx_id === withdrawTxId || x.id === withdrawTxId);
+        return row?.state;
       }, { timeout: 15000 }).toBe('approved');
     }
 
