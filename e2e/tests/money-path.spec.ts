@@ -167,7 +167,7 @@ async function pollUntil(
 ) {
   const { timeoutMs = 15000, intervalMs = 250, label = 'poll' } = opts;
   const start = Date.now();
-  let last: T | undefined;
+  let last;
   // eslint-disable-next-line no-constant-condition
   while (true) {
     last = await fn();
