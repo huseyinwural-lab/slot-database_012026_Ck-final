@@ -28,6 +28,7 @@ const API_BASE = (isHttpsPage && isHttpBackend) ? '' : (RAW ? RAW.replace(/\/$/,
 
 const api = axios.create({
   baseURL: API_BASE ? (API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`) : '/api',
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
