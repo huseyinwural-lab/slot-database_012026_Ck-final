@@ -42,7 +42,7 @@ function webhookSigHeadersForJsonPayload(payload) {
   };
 }
 
-async function apiLoginAdmin(apiBaseUrl: string, email: string, password: string) {
+async function apiLoginAdmin(apiBaseUrl, email, password) {
   const ctx = await pwRequest.newContext({ baseURL: apiBaseUrl });
   const res = await ctx.post('/api/v1/auth/login', {
     data: { email, password },
