@@ -1,14 +1,14 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414589502,"monotonicTime":265261.449,"sdkLanguage":"javascript","contextId":"request-context@cdaa5d077171f57798d4745bcd3f1179","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}
-{"type":"before","callId":"call@601","startTime":265262.136,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/finance/withdrawals","params":[{"name":"state","value":"paid"},{"name":"limit","value":"50"},{"name":"offset","value":"0"}],"method":"GET","timeout":0},"stepId":"pw:api@67","beforeSnapshot":"before@call@601"}
-{"type":"log","callId":"call@601","time":265262.419,"message":"→ GET http://127.0.0.1:8001/api/v1/finance/withdrawals?state=paid&limit=50&offset=0"}
-{"type":"log","callId":"call@601","time":265262.426,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@601","time":265262.43,"message":"  accept: */*"}
-{"type":"log","callId":"call@601","time":265262.434,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@601","time":265262.437,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMDcyNX0.NJH_ZstW2lggsU_7s4bxgFNZKupQJvtP7uGWZ39A4UE"}
-{"type":"log","callId":"call@601","time":265277.769,"message":"← 200 OK"}
-{"type":"log","callId":"call@601","time":265277.79,"message":"  date: Sat, 03 Jan 2026 04:29:49 GMT"}
-{"type":"log","callId":"call@601","time":265277.794,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@601","time":265277.797,"message":"  content-length: 16247"}
-{"type":"log","callId":"call@601","time":265277.8,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@601","time":265277.803,"message":"  x-request-id: e732bed4-48db-4bcf-9f96-e79d6db1e40d"}
-{"type":"after","callId":"call@601","endTime":265319.393,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/finance/withdrawals?state=paid&limit=50&offset=0","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:29:49 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"16247"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"e732bed4-48db-4bcf-9f96-e79d6db1e40d"}],"fetchUid":"604ac2eafd0fa263c4a89b516d29c5ed"}},"afterSnapshot":"after@call@601"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414909544,"monotonicTime":265862.808,"sdkLanguage":"javascript","contextId":"request-context@6eb4424f843533ef84180acd8bcab532","title":"money-path.spec.ts:445 › P06-203: Withdraw -> approve -> payout fail -> retry success"}
+{"type":"before","callId":"call@601","startTime":265863.588,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/finance/withdrawals","params":[{"name":"state","value":"paid"},{"name":"limit","value":"50"},{"name":"offset","value":"0"}],"method":"GET","timeout":0},"stepId":"pw:api@67","beforeSnapshot":"before@call@601"}
+{"type":"log","callId":"call@601","time":265863.876,"message":"→ GET http://127.0.0.1:8001/api/v1/finance/withdrawals?state=paid&limit=50&offset=0"}
+{"type":"log","callId":"call@601","time":265863.885,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@601","time":265863.889,"message":"  accept: */*"}
+{"type":"log","callId":"call@601","time":265863.892,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@601","time":265863.894,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjM1MjA0Ni1lYmM0LTQ2NzUtYmJmMi0yZWViYmU0M2U0NTMiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NzUwMTA0NH0.2eDVoqptFbhwCR5FubfCaTYdup5F-HgIZEPOSBpsHRw"}
+{"type":"log","callId":"call@601","time":265875.569,"message":"← 200 OK"}
+{"type":"log","callId":"call@601","time":265875.588,"message":"  date: Sat, 03 Jan 2026 04:35:08 GMT"}
+{"type":"log","callId":"call@601","time":265875.592,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@601","time":265875.595,"message":"  content-length: 16248"}
+{"type":"log","callId":"call@601","time":265875.598,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@601","time":265875.601,"message":"  x-request-id: 035b25ac-a9ab-4832-b200-49496bc04aeb"}
+{"type":"after","callId":"call@601","endTime":265914.931,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/finance/withdrawals?state=paid&limit=50&offset=0","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:35:08 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"16248"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"035b25ac-a9ab-4832-b200-49496bc04aeb"}],"fetchUid":"58804beda5deed75473793552202120c"}},"afterSnapshot":"after@call@601"}

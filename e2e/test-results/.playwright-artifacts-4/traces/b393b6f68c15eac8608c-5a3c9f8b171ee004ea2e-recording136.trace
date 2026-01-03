@@ -1,18 +1,18 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414591434,"monotonicTime":267193.488,"sdkLanguage":"javascript","contextId":"request-context@22390a80af012164640ae39255059a41","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
-{"type":"before","callId":"call@853","startTime":267194.232,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","jsonData":"{\"amount\":15,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@63","beforeSnapshot":"before@call@853"}
-{"type":"log","callId":"call@853","time":267194.516,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
-{"type":"log","callId":"call@853","time":267194.524,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@853","time":267194.528,"message":"  accept: */*"}
-{"type":"log","callId":"call@853","time":267194.531,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@853","time":267194.534,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNThkMzM5Yi02ZjI2LTQ1NWQtYjgyYS1lMjlkZGQ2OGY1NDMiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTkzOTF9.3YeITSdYgmpBduEstFaY3JB7Z1ESbKAWmQpPYlsjDdA"}
-{"type":"log","callId":"call@853","time":267194.537,"message":"  Idempotency-Key: e2e-deposit-1767414591432-809ca4e70ee3"}
-{"type":"log","callId":"call@853","time":267194.542,"message":"  X-Mock-Outcome: success"}
-{"type":"log","callId":"call@853","time":267194.545,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@853","time":267194.548,"message":"  content-length: 29"}
-{"type":"log","callId":"call@853","time":267224.274,"message":"← 200 OK"}
-{"type":"log","callId":"call@853","time":267224.295,"message":"  date: Sat, 03 Jan 2026 04:29:50 GMT"}
-{"type":"log","callId":"call@853","time":267224.299,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@853","time":267224.303,"message":"  content-length: 361"}
-{"type":"log","callId":"call@853","time":267224.306,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@853","time":267224.309,"message":"  x-request-id: 3dcfd3ea-8254-4801-900f-c41d9dccf11a"}
-{"type":"after","callId":"call@853","endTime":267264.332,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:29:50 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"361"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"3dcfd3ea-8254-4801-900f-c41d9dccf11a"}],"fetchUid":"4d270937078dd974c453f66726400e39"}},"afterSnapshot":"after@call@853"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414911373,"monotonicTime":267692.311,"sdkLanguage":"javascript","contextId":"request-context@5e315e946ff86192484e9313db803186","title":"money-path.spec.ts:522 › P06-204: Replay / dedupe for payout and webhook"}
+{"type":"before","callId":"call@853","startTime":267693.077,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","jsonData":"{\"amount\":15,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@63","beforeSnapshot":"before@call@853"}
+{"type":"log","callId":"call@853","time":267693.399,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
+{"type":"log","callId":"call@853","time":267693.407,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@853","time":267693.411,"message":"  accept: */*"}
+{"type":"log","callId":"call@853","time":267693.415,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@853","time":267693.418,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhMTllYTFmYS0zYjZiLTQ4YWEtOTRhZC04NzQxN2E1NmRjODYiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTk3MTF9.o_UsWuKL-6GofG5gHWyJowKixccMPNSwB49OY5AxkEE"}
+{"type":"log","callId":"call@853","time":267693.422,"message":"  Idempotency-Key: e2e-deposit-1767414911371-b546526e344d"}
+{"type":"log","callId":"call@853","time":267693.425,"message":"  X-Mock-Outcome: success"}
+{"type":"log","callId":"call@853","time":267693.427,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@853","time":267693.43,"message":"  content-length: 29"}
+{"type":"log","callId":"call@853","time":267719.985,"message":"← 200 OK"}
+{"type":"log","callId":"call@853","time":267720.006,"message":"  date: Sat, 03 Jan 2026 04:35:10 GMT"}
+{"type":"log","callId":"call@853","time":267720.011,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@853","time":267720.015,"message":"  content-length: 361"}
+{"type":"log","callId":"call@853","time":267720.018,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@853","time":267720.021,"message":"  x-request-id: 73a65917-649a-49b8-b5f2-e3a4c4339dfd"}
+{"type":"after","callId":"call@853","endTime":267760.852,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:35:10 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"361"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"73a65917-649a-49b8-b5f2-e3a4c4339dfd"}],"fetchUid":"2187a070e7038792fa1622848407b5a2"}},"afterSnapshot":"after@call@853"}

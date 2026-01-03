@@ -1,1 +1,0 @@
-{"error_code":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred.","details":{"error":"player.balance_real_held went negative: -50.0"},"timestamp":"2026-01-03T04:29:58.391125"}

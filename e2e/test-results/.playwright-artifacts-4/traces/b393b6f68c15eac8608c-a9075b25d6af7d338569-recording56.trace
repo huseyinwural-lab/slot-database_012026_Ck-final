@@ -1,18 +1,18 @@
-{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414585923,"monotonicTime":261682.801,"sdkLanguage":"javascript","contextId":"request-context@3cbeec320a8a035e5d5e4c0b9ad421ae","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
-{"type":"before","callId":"call@366","startTime":261683.569,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","jsonData":"{\"amount\":25,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@41","beforeSnapshot":"before@call@366"}
-{"type":"log","callId":"call@366","time":261683.934,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
-{"type":"log","callId":"call@366","time":261683.943,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
-{"type":"log","callId":"call@366","time":261683.947,"message":"  accept: */*"}
-{"type":"log","callId":"call@366","time":261683.949,"message":"  accept-encoding: gzip,deflate,br"}
-{"type":"log","callId":"call@366","time":261683.952,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NGY2MjY3NC04MzI5LTQyYTYtOGI5MS1hYzdmYzkwY2Y1NDIiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTkzODV9.TRe5VLIAQeKP_8stYXNOORV5L80VWlG50OedPZWAskg"}
-{"type":"log","callId":"call@366","time":261683.955,"message":"  Idempotency-Key: e2e-deposit-1767414585921-06bb84070804"}
-{"type":"log","callId":"call@366","time":261683.958,"message":"  X-Mock-Outcome: success"}
-{"type":"log","callId":"call@366","time":261683.96,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@366","time":261683.962,"message":"  content-length: 29"}
-{"type":"log","callId":"call@366","time":261708.255,"message":"← 200 OK"}
-{"type":"log","callId":"call@366","time":261708.277,"message":"  date: Sat, 03 Jan 2026 04:29:45 GMT"}
-{"type":"log","callId":"call@366","time":261708.281,"message":"  server: uvicorn"}
-{"type":"log","callId":"call@366","time":261708.284,"message":"  content-length: 361"}
-{"type":"log","callId":"call@366","time":261708.287,"message":"  content-type: application/json"}
-{"type":"log","callId":"call@366","time":261708.29,"message":"  x-request-id: 030a913a-ea04-40ba-9e21-4c5df884c99f"}
-{"type":"after","callId":"call@366","endTime":261749.381,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:29:45 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"361"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"030a913a-ea04-40ba-9e21-4c5df884c99f"}],"fetchUid":"f424348f99e0b04fc808d43a204b225c"}},"afterSnapshot":"after@call@366"}
+{"version":8,"type":"context-options","origin":"library","browserName":"","playwrightVersion":"1.57.0","options":{},"platform":"linux","wallTime":1767414906225,"monotonicTime":262544.534,"sdkLanguage":"javascript","contextId":"request-context@c60ee6c197e8ab4ee4eb9d2390881184","title":"money-path.spec.ts:411 › P06-202: Deposit success increases balance, fail is net-zero"}
+{"type":"before","callId":"call@366","startTime":262545.342,"class":"APIRequestContext","method":"fetch","params":{"url":"/api/v1/player/wallet/deposit","method":"POST","jsonData":"{\"amount\":25,\"method\":\"test\"}","timeout":0},"stepId":"pw:api@41","beforeSnapshot":"before@call@366"}
+{"type":"log","callId":"call@366","time":262545.693,"message":"→ POST http://127.0.0.1:8001/api/v1/player/wallet/deposit"}
+{"type":"log","callId":"call@366","time":262545.701,"message":"  user-agent: Playwright/1.57.0 (arm64; debian 12) node/20.19"}
+{"type":"log","callId":"call@366","time":262545.705,"message":"  accept: */*"}
+{"type":"log","callId":"call@366","time":262545.708,"message":"  accept-encoding: gzip,deflate,br"}
+{"type":"log","callId":"call@366","time":262545.71,"message":"  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NGY2MjY3NC04MzI5LTQyYTYtOGI5MS1hYzdmYzkwY2Y1NDIiLCJyb2xlIjoicGxheWVyIiwidGVuYW50X2lkIjoiZGVmYXVsdF9jYXNpbm8iLCJleHAiOjE3NjgwMTk3MDZ9.qHHOBuriW5C1j1h7DL9F-6SAEl9nf8kuOYulZPz50oA"}
+{"type":"log","callId":"call@366","time":262545.714,"message":"  Idempotency-Key: e2e-deposit-1767414906224-58b0e1af56bd"}
+{"type":"log","callId":"call@366","time":262545.716,"message":"  X-Mock-Outcome: success"}
+{"type":"log","callId":"call@366","time":262545.719,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@366","time":262545.721,"message":"  content-length: 29"}
+{"type":"log","callId":"call@366","time":262569.952,"message":"← 200 OK"}
+{"type":"log","callId":"call@366","time":262569.974,"message":"  date: Sat, 03 Jan 2026 04:35:05 GMT"}
+{"type":"log","callId":"call@366","time":262569.978,"message":"  server: uvicorn"}
+{"type":"log","callId":"call@366","time":262569.98,"message":"  content-length: 361"}
+{"type":"log","callId":"call@366","time":262569.983,"message":"  content-type: application/json"}
+{"type":"log","callId":"call@366","time":262569.986,"message":"  x-request-id: f531a4f2-9c8a-42c6-b86b-c315b809d422"}
+{"type":"after","callId":"call@366","endTime":262610.931,"result":{"response":{"url":"http://127.0.0.1:8001/api/v1/player/wallet/deposit","status":200,"statusText":"OK","headers":[{"name":"date","value":"Sat, 03 Jan 2026 04:35:05 GMT"},{"name":"server","value":"uvicorn"},{"name":"content-length","value":"361"},{"name":"content-type","value":"application/json"},{"name":"x-request-id","value":"f531a4f2-9c8a-42c6-b86b-c315b809d422"}],"fetchUid":"e4aba8bbca48f75e638bb9a10c9986c0"}},"afterSnapshot":"after@call@366"}
