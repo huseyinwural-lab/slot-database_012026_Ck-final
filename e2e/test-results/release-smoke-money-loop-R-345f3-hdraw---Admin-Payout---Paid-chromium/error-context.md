@@ -19,7 +19,7 @@
           - /url: /promotions
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: rcuser1767413146607
+          - generic [ref=e17]: rcuser1767413196027
           - generic [ref=e18]: $0.00
         - button [ref=e19] [cursor=pointer]:
           - img [ref=e20]
@@ -56,76 +56,72 @@
           - generic [ref=e63]:
             - button "Deposit" [ref=e64] [cursor=pointer]
             - button "Withdraw" [ref=e65] [cursor=pointer]
-          - generic [ref=e66]:
-            - generic [ref=e67]:
-              - img [ref=e68]
-              - text: Adyen Payment Authorised! Balance will update shortly.
-            - generic [ref=e70]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - heading "Withdrawal Status" [level=3] [ref=e69]
+              - paragraph [ref=e70]: "ID: 98ac2ad2-28c4-49f5-a7a3-775737a624ab"
               - generic [ref=e71]:
-                - heading "Withdrawal Status" [level=3] [ref=e72]
-                - paragraph [ref=e73]: "ID: 78e22469-b33f-4c94-9e5d-192f88fba7e4"
-                - generic [ref=e74]:
-                  - img [ref=e75]
-                  - generic [ref=e78]: Pending
-                - generic [ref=e79]:
-                  - generic [ref=e80]:
-                    - paragraph [ref=e81]: Amount
-                    - paragraph [ref=e82]: 50.00 USD
-                  - generic [ref=e83]:
-                    - paragraph [ref=e84]: PSP Ref
-                    - paragraph [ref=e85]: "-"
-              - button "Start New Withdrawal" [ref=e86] [cursor=pointer]
-        - generic [ref=e87]:
-          - generic [ref=e88]:
-            - heading "Transaction History" [level=3] [ref=e89]:
-              - img [ref=e90]
+                - img [ref=e72]
+                - generic [ref=e75]: Pending
+              - generic [ref=e76]:
+                - generic [ref=e77]:
+                  - paragraph [ref=e78]: Amount
+                  - paragraph [ref=e79]: 50.00 USD
+                - generic [ref=e80]:
+                  - paragraph [ref=e81]: PSP Ref
+                  - paragraph [ref=e82]: "-"
+            - button "Start New Withdrawal" [ref=e83] [cursor=pointer]
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - heading "Transaction History" [level=3] [ref=e86]:
+              - img [ref=e87]
               - text: Transaction History
-            - generic [ref=e94]: Showing 2 records
-          - table [ref=e97]:
-            - rowgroup [ref=e98]:
-              - row "Type Amount State Date ID" [ref=e99]:
-                - columnheader "Type" [ref=e100]
-                - columnheader "Amount" [ref=e101]
-                - columnheader "State" [ref=e102]
-                - columnheader "Date" [ref=e103]
-                - columnheader "ID" [ref=e104]
-            - rowgroup [ref=e105]:
-              - row "withdrawal -$50.00 requested 1/3/2026, 4:05:49 AM 78e22469..." [ref=e106]:
-                - cell "withdrawal" [ref=e107]:
-                  - generic [ref=e108]:
-                    - img [ref=e109]
-                    - generic [ref=e112]: withdrawal
-                - cell "-$50.00" [ref=e113]
-                - cell "requested" [ref=e114]:
-                  - generic [ref=e115]: requested
-                - cell "1/3/2026, 4:05:49 AM" [ref=e116]
-                - cell "78e22469..." [ref=e117]:
-                  - button "78e22469..." [ref=e118] [cursor=pointer]:
-                    - text: 78e22469...
-                    - img [ref=e119]
-              - row "deposit +$100.00 completed 1/3/2026, 4:05:48 AM 8654753c..." [ref=e122]:
-                - cell "deposit" [ref=e123]:
-                  - generic [ref=e124]:
-                    - img [ref=e125]
-                    - generic [ref=e128]: deposit
-                - cell "+$100.00" [ref=e129]
-                - cell "completed" [ref=e130]:
-                  - generic [ref=e131]: completed
-                - cell "1/3/2026, 4:05:48 AM" [ref=e132]
-                - cell "8654753c..." [ref=e133]:
-                  - button "8654753c..." [ref=e134] [cursor=pointer]:
-                    - text: 8654753c...
-                    - img [ref=e135]
-          - generic [ref=e138]:
-            - button "Previous Page" [disabled] [ref=e139]:
-              - img [ref=e140]
+            - generic [ref=e91]: Showing 2 records
+          - table [ref=e94]:
+            - rowgroup [ref=e95]:
+              - row "Type Amount State Date ID" [ref=e96]:
+                - columnheader "Type" [ref=e97]
+                - columnheader "Amount" [ref=e98]
+                - columnheader "State" [ref=e99]
+                - columnheader "Date" [ref=e100]
+                - columnheader "ID" [ref=e101]
+            - rowgroup [ref=e102]:
+              - row "withdrawal -$50.00 requested 1/3/2026, 4:06:38 AM 98ac2ad2..." [ref=e103]:
+                - cell "withdrawal" [ref=e104]:
+                  - generic [ref=e105]:
+                    - img [ref=e106]
+                    - generic [ref=e109]: withdrawal
+                - cell "-$50.00" [ref=e110]
+                - cell "requested" [ref=e111]:
+                  - generic [ref=e112]: requested
+                - cell "1/3/2026, 4:06:38 AM" [ref=e113]
+                - cell "98ac2ad2..." [ref=e114]:
+                  - button "98ac2ad2..." [ref=e115] [cursor=pointer]:
+                    - text: 98ac2ad2...
+                    - img [ref=e116]
+              - row "deposit +$100.00 completed 1/3/2026, 4:06:37 AM 30bfb9b7..." [ref=e119]:
+                - cell "deposit" [ref=e120]:
+                  - generic [ref=e121]:
+                    - img [ref=e122]
+                    - generic [ref=e125]: deposit
+                - cell "+$100.00" [ref=e126]
+                - cell "completed" [ref=e127]:
+                  - generic [ref=e128]: completed
+                - cell "1/3/2026, 4:06:37 AM" [ref=e129]
+                - cell "30bfb9b7..." [ref=e130]:
+                  - button "30bfb9b7..." [ref=e131] [cursor=pointer]:
+                    - text: 30bfb9b7...
+                    - img [ref=e132]
+          - generic [ref=e135]:
+            - button "Previous Page" [disabled] [ref=e136]:
+              - img [ref=e137]
               - text: Previous
-            - generic [ref=e142]: Page 1 of 1
-            - button "Next Page" [disabled] [ref=e143]:
+            - generic [ref=e139]: Page 1 of 1
+            - button "Next Page" [disabled] [ref=e140]:
               - text: Next
-              - img [ref=e144]
-  - contentinfo [ref=e146]:
-    - generic [ref=e147]:
-      - paragraph [ref=e148]: © 2025 CasinoLobby. All rights reserved.
-      - paragraph [ref=e149]: Responsible Gaming | 18+
+              - img [ref=e141]
+  - contentinfo [ref=e143]:
+    - generic [ref=e144]:
+      - paragraph [ref=e145]: © 2025 CasinoLobby. All rights reserved.
+      - paragraph [ref=e146]: Responsible Gaming | 18+
 ```
