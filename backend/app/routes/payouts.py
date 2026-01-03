@@ -41,8 +41,8 @@ class PayoutRequest(BaseModel):
 @router.post("/initiate")
 async def initiate_payout(
     request: PayoutRequest,
-    adyen: AdyenPSP = Depends(get_adyen_service),
-    session = Depends(get_session)
+    session = Depends(get_session),
+    current_player=Depends(lambda: None),
 ):
     # Use AdyenPSP service which handles Mocking in Dev
     merchant_reference = f"PAYOUT-{request.player_id}-{uuid.uuid4().hex[:8]}"
