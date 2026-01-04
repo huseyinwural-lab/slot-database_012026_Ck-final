@@ -89,10 +89,21 @@ while IFS= read -r file; do
 done <<< "$MD_FILES"
 
 # 6) Lightweight command validations (no side effects)
+# Keep these checks portable: CI runners will have them, but local environments may not.
 info "Checking tooling availability (non-heavy)"
 python3 --version >/dev/null 2>&1 || fail "python3 missing"
 yarn --version >/dev/null 2>&1 || fail "yarn missing"
-docker --version >/dev/null 2>&1 || fail "docker missing"
-docker-compose version >/dev/null 2>&1 || docker compose version >/dev/null 2>&1 || fail "docker compose missing"
+
+if command -v docker >/dev/null 2>&1; then
+  docker --version >/dev/null 2>&1 || fail "docker present but not working"
+else
+  info "docker not found (skipping)"
+fi
+
+if command -v docker-compose >/dev/null 2>&1 || command -v docker >/dev/null 2>&1; then
+  (docker-compose version >/dev/null 2>&1 || docker compose version >/dev/null 2>&1) || info "docker compose not available (skipping)"
+else
+  info "docker compose not found (skipping)"
+fi
 
 info "Docs smoke checks passed"
