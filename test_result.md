@@ -33,6 +33,17 @@ Do not delete sections unless instructed.
       - `/docs/new/tr/admin/risk-compliance/fraud-check.md`
       - `/docs/new/tr/admin/risk-compliance/approval-queue.md`
       - `/docs/new/tr/admin/risk-compliance/responsible-gaming.md`
+    - Operations module pages:
+      - `/docs/new/en/admin/operations/kyc-verification.md`
+      - `/docs/new/en/admin/operations/crm-comms.md`
+      - `/docs/new/en/admin/operations/bonuses.md`
+      - `/docs/new/en/admin/operations/affiliates.md`
+      - `/docs/new/en/admin/operations/support.md`
+      - `/docs/new/tr/admin/operations/kyc-verification.md`
+      - `/docs/new/tr/admin/operations/crm-comms.md`
+      - `/docs/new/tr/admin/operations/bonuses.md`
+      - `/docs/new/tr/admin/operations/affiliates.md`
+      - `/docs/new/tr/admin/operations/support.md`
 
 ## Previous history
 
