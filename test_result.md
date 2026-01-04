@@ -7,17 +7,19 @@ Do not delete sections unless instructed.
 
 ## Latest iteration
 
-### 2026-01-04 (Docs-only)  Documentation smoke checks
+### 2026-01-04 (Docs-only) — Documentation smoke checks
 - Ran: `./scripts/docs_smoke.sh`
 - Result: PASS
 - Scope:
   - EN/TR parity
   - broken link scan
   - TODO/PLACEHOLDER ban
-  - NEW admin manual quality gates (min 8 errors + validation keywords)
-  - Added new docs:
-    - `/docs/new/en(runbooks)/backend-gap-register.md`
-    - `/docs/new/tr(runbooks)/backend-gap-register.md`
+  - Admin manual quality gates:
+    - min ≥8 error scenarios
+    - keyword patterns (case-insensitive + minimal variations)
+  - Added/updated docs:
+    - `/docs/new/en/runbooks/backend-gap-register.md` (+ migrated fields: First Seen / Environment / Status)
+    - `/docs/new/tr/runbooks/backend-gap-register.md` (+ migrated fields: First Seen / Environment / Status)
     - `/docs/new/en/admin/system/settings.md`
     - `/docs/new/tr/admin/system/settings.md`
     - `/docs/new/en/admin/system/cms.md`
