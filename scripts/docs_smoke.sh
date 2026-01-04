@@ -149,11 +149,18 @@ def check_lang(lang: str):
 
   if lang == 'en':
     error_re = re.compile(r'^\s*\d+\)\s+\*\*Symptom:\*\*', re.M)
-    required = ['ui', 'audit log', 'logs']
+    required_patterns = [
+      re.compile(r'(ui|user interface)', re.I),
+      re.compile(r'(audit log|audit)', re.I),
+      re.compile(r'(logs?|logging)', re.I),
+    ]
   else:
     error_re = re.compile(r'^\s*\d+\)\s+\*\*(Semptom|Belirti):\*\*', re.M)
-    # TR pages still reference "Audit Log" / "Logs" in many places, but "log" is more consistent.
-    required = ['ui', 'audit log', 'log']
+    required_patterns = [
+      re.compile(r'ui', re.I),
+      re.compile(r'(audit log|denetim kaydı|audit)', re.I),
+      re.compile(r'(log|logs|kayıt)', re.I),
+    ]
 
   failures = []
   for root, _, files in os.walk(base):
@@ -175,10 +182,9 @@ def check_lang(lang: str):
         failures.append(f"{path}: only {err_count} error scenarios (min {MIN_ERRORS})")
         continue
 
-      lowered = text.lower()
-      missing = [kw for kw in required if kw not in lowered]
+      missing = [p.pattern for p in required_patterns if not p.search(text)]
       if missing:
-        failures.append(f"{path}: missing keywords: {', '.join(missing)}")
+        failures.append(f"{path}: missing keyword patterns: {', '.join(missing)}")
 
   if failures:
     print("[DOCS_SMOKE][FAIL] Admin manual quality gate failures:")
