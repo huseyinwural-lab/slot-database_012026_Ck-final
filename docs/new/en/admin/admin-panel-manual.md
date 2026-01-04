@@ -52,6 +52,7 @@ This is the **hub** for the Admin Panel manual.
 
 ### Core
 - Dashboard → `./core/dashboard.md`
+- My Revenue (tenant-only) → (see Reports / Revenue menus if enabled)
 - Players → `./core/players.md`
 - Finance (owner-only) → `./core/finance.md`
 - Withdrawals (owner-only) → `./core/withdrawals.md`
