@@ -24,6 +24,15 @@ Do not delete sections unless instructed.
     - `/docs/new/tr/admin/system/settings.md`
     - `/docs/new/en/admin/system/cms.md`
     - `/docs/new/tr/admin/system/cms.md`
+    - Risk & Compliance module pages:
+      - `/docs/new/en/admin/risk-compliance/risk-rules.md`
+      - `/docs/new/en/admin/risk-compliance/fraud-check.md`
+      - `/docs/new/en/admin/risk-compliance/approval-queue.md`
+      - `/docs/new/en/admin/risk-compliance/responsible-gaming.md`
+      - `/docs/new/tr/admin/risk-compliance/risk-rules.md`
+      - `/docs/new/tr/admin/risk-compliance/fraud-check.md`
+      - `/docs/new/tr/admin/risk-compliance/approval-queue.md`
+      - `/docs/new/tr/admin/risk-compliance/responsible-gaming.md`
 
 ## Previous history
 
