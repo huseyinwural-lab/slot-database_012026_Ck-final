@@ -6,22 +6,39 @@
 Bu doküman, Admin Panel için **menü bazlı ve ops-dayanıklı** bir kullanım kılavuzudur.
 Amaç:
 - her menünün ne işe yaradığını açıklamak
-- sık yapılan işlemleri (oyun yükleme/import, rapor export, simülasyon) adım adım tarif etmek
+- sık yapılan işlemleri (oyun yükleme/içe aktarma, rapor export, simülasyon) adım adım tarif etmek
 - olası arızalarda deterministik kontrol listesi ile çözüm sunmak
 
-> EN ana kaynaktır. TR mirror: `/docs/new/tr/guides/admin-panel-manual.md`.
-> Menüleri UI’da hızlı bulabilmeniz için başlıklarda Türkçe + parantez içinde UI label kullanılır.
+> EN ana kaynaktır. TR dokümanı, menüyü UI’da bulabilmeniz için Türkçe başlık + parantez içinde UI label içerir.
 
 ---
 
-## Bu kılavuzun yapısı
+## Global arıza giderme kuralları (her yerde geçerli)
 
-Her menü için standart şablon:
-1) Ne işe yarar?
-2) Alt başlıklar (alt menü / sekme)
-3) Sık yapılan işlemler (adım adım)
-4) Olası hatalar & çözümler
-5) Yetki/görünürlük notları
+Bir şey fail olduğunda önce **3 bilgiyi** mutlaka al:
+1) Fail olan request URL (DevTools → Network)
+2) Status code (0/401/403/404/409/429/500)
+3) Response body / error mesajı (1–2 satır)
+
+Sonra:
+- **write aksiyonu** ise (toggle/onay/import/create/update): **System → Audit Log**’a bak.
+- **runtime error** ise (timeout/500): **System → Logs → Error Logs**’a bak.
+
+En iyi arama anahtarları:
+- `request_id` (varsa)
+- domain ID’ler: `player_id`, `tx_id`, `job_id`, `tenant_id`, `campaign_id`
+
+---
+
+## Yetki / görünürlük (menüler neden görünür veya görünmez)
+
+Menüler şu nedenle görünmeyebilir:
+- owner-only / tenant-only
+- capability flag’leri (feature gate)
+
+Referans:
+- `frontend/src/config/menu.js`
+- `frontend/src/components/Layout.jsx`
 
 ---
 
@@ -32,11 +49,12 @@ Her menü için standart şablon:
 **Ne işe yarar?**
 Kritik metriklerin ve son aktivitelerin operasyonel özetini verir.
 
-**Sık yapılan işlemler**
-- Aktif tenant bağlamının doğru olduğunu kontrol et (tenant switcher).
+**İlgili API endpoint’leri (UI’ın kullandıkları)**
+- `GET /api/v1/dashboard/comprehensive-stats`
 
-**Olası hatalar & çözümler**
-- Widget’lar boş / veri yok → tenant bağlamını ve API erişimini kontrol et.
+**Log / Audit nerede aranır?**
+- Widget boşsa: System → Logs → Error Logs
+- 401 ise: tekrar login; Admin Users → Sessions kontrol
 
 ---
 
@@ -45,7 +63,7 @@ Kritik metriklerin ve son aktivitelerin operasyonel özetini verir.
 **Ne işe yarar?**
 Oyuncu hesaplarını arama, inceleme ve yönetme.
 
-**Ekranlar / Alt başlıklar**
+**Alt başlıklar (ekran/sekme)**
 - Oyuncu Listesi (`/players`)
 - Oyuncu Detayı (`/players/:id`) sekmeleri:
   - Profil (Profile)
@@ -55,29 +73,38 @@ Oyuncu hesaplarını arama, inceleme ve yönetme.
   - Loglar (Logs)
   - Notlar (Notes)
 
-**Sık yapılan işlemler**
-1) Oyuncu bulma
-- Oyuncular listesinden filtre/arama kullan.
-- Gerekirse üst bardaki Global Search (Ctrl+K) kullan.
+**İlgili API endpoint’leri (UI’ın kullandıkları)**
+- Liste/arama:
+  - `GET /api/v1/players`
+- Oyuncu detayı:
+  - `GET /api/v1/players/{player_id}`
+  - `PUT /api/v1/players/{player_id}`
+- Oyuncu finans:
+  - `GET /api/v1/players/{player_id}/transactions`
+  - `POST /api/v1/players/{player_id}/balance`
+- Oyuncu KYC:
+  - `GET /api/v1/players/{player_id}/kyc`
+  - `POST /api/v1/kyc/{doc_id}/review`
+- Oyuncu logları:
+  - `GET /api/v1/players/{player_id}/logs`
 
-2) Oyuncu KYC inceleme
-- Oyuncu Detayı → KYC sekmesi.
-
-3) Oyuncu bakiyesi ayarlama (aktifse)
-- Oyuncu Detayı → Finans sekmesi (aksiyonlar yetkiye bağlıdır).
+**Log / Audit nerede aranır?**
+- Sayfa load fail: System → Logs → Error Logs
+- Oyuncu edit/balance: System → Audit Log (`resource_type=player` veya zaman aralığı)
 
 **Olası hatalar & çözümler**
 | Belirti | Olası neden | Çözüm |
 |---|---|---|
-| Oyuncu sayfası açılmıyor | API hata / auth | `/api/v1/players/{id}` isteğini ve login durumunu kontrol et |
-| KYC sekmesi boş | KYC kapalı veya doküman yok | feature flag/capability ve oyuncu KYC durumunu kontrol et |
+| Oyuncu sayfası açılmıyor | API hata / auth | Fail request + login durumunu kontrol et |
+| KYC sekmesi boş | KYC kapalı veya doküman yok | capability + oyuncu state kontrol |
+| Balance fail | permission/policy | Audit Log + response body kontrol |
 
 ---
 
 ## Finans (Finance) (sadece owner)
 
 **Ne işe yarar?**
-Finansal operasyonlar: işlemler, uzlaştırma, chargeback, raporlar.
+İşlemler, uzlaştırma, chargeback ve raporlar.
 
 **Alt başlıklar (sekme)**
 - İşlemler (Transactions)
@@ -85,8 +112,13 @@ Finansal operasyonlar: işlemler, uzlaştırma, chargeback, raporlar.
 - Uzlaştırma (Reconciliation)
 - Chargebacks
 
-**Olası hatalar & çözümler**
-- 403 forbidden → platform owner değilsin (owner-only).
+**İlgili API endpoint’leri (UI’ın kullandıkları)**
+- `GET /api/v1/finance/transactions`
+- `GET /api/v1/finance/reports`
+
+**Log / Audit nerede aranır?**
+- 500/timeout: System → Logs → Error Logs
+- manuel state değişimi: System → Audit Log
 
 ---
 
@@ -95,41 +127,50 @@ Finansal operasyonlar: işlemler, uzlaştırma, chargeback, raporlar.
 **Ne işe yarar?**
 Para çekme taleplerini inceleme ve işleme.
 
-**Uygulama notu**
-Bu akış UI’da `FinanceWithdrawals.jsx` üzerinden yönetilir ve aksiyonlar şunları içerebilir:
-- payout
-- recheck
-- review (approve/reject)
-- mark paid
-
-**Sık yapılan işlemler (üst seviye)**
-1) Para Çekimler ekranını aç
-2) Bekleyenleri filtrele
-3) Seçili işlem için:
+**İş akışı aksiyonları**
+- Liste
 - Recheck
-- Review
+- Review (approve/reject)
 - Payout
 - Mark Paid
 
-**Olası hatalar & çözümler**
-| Belirti | Olası neden | Çözüm |
-|---|---|---|
-| Payout fail | provider/webhook state uyumsuz | backend log + payout status kontrol; webhooks doğrula |
-| UI “Network Error” | proxy/baseURL | istek `/api/...` gidiyor mu kontrol et |
+**İlgili API endpoint’leri (UI’ın kullandıkları)**
+- `GET /api/v1/finance/withdrawals`
+- `POST /api/v1/finance/withdrawals/{tx_id}/recheck`
+- `POST /api/v1/finance/withdrawals/{tx_id}/review`
+- `POST /api/v1/finance/withdrawals/{tx_id}/payout`
+- `POST /api/v1/finance/withdrawals/{tx_id}/mark-paid`
+
+**Log / Audit nerede aranır?**
+- payout/review/mark-paid: System → Audit Log (tx_id/time window)
+- provider/webhook: System → Logs → Error Logs + webhook runbook
 
 ---
 
 ## Tüm Gelirler (All Revenue) (sadece owner)
 
 **Ne işe yarar?**
-Platform owner için tenant’lar arası toplam gelir analizi.
+Tenant’lar arası gelir analizi.
+
+**İlgili API endpoint’leri**
+- `GET /api/v1/reports/revenue/all-tenants`
+
+---
+
+## Benim Gelirim (My Revenue) (tenant-only)
+
+**Ne işe yarar?**
+Aktif tenant için gelir analizi.
+
+**İlgili API endpoint’leri**
+- `GET /api/v1/reports/revenue/my-tenant`
 
 ---
 
 ## Oyunlar (Games)
 
 **Ne işe yarar?**
-Oyun kataloğunu yönetme ve yeni oyun bundle’larını upload/import ile sisteme ekleme.
+Oyun kataloğunu yönetme ve yeni oyun bundle’larını import ile ekleme.
 
 **Alt başlıklar (sekme)**
 - Slotlar ve Oyunlar (Slots & Games)
@@ -138,64 +179,48 @@ Oyun kataloğunu yönetme ve yeni oyun bundle’larını upload/import ile siste
 
 ### Slotlar ve Oyunlar (Slots & Games)
 
-**Ne işe yarar?**
-- katalog listesini görüntüleme
-- oyun enable/disable (toggle)
+**İlgili API endpoint’leri**
+- `GET /api/v1/games`
+- `POST /api/v1/games/{game_id}/toggle`
 
-**Sık yapılan işlem: oyun enable/disable**
-1) Oyunlar → Slotlar ve Oyunlar
-2) Oyunu bul
-3) Toggle ile aktif/pasif yap (arka planda `/api/v1/games/{gameId}/toggle`)
-
-**Olası hatalar & çözümler**
-- Toggle fail → API response/permission/validation kontrol et.
+**Log / Audit**
+- Toggle: System → Audit Log (`resource_type=game`)
 
 ### Canlı Masalar (Live Tables)
 
-**Ne işe yarar?**
-- provider tabanlı live table listelerini yönetme
+**İlgili API endpoint’leri**
+- `GET /api/v1/tables`
+- `POST /api/v1/tables`
 
-**Olası hatalar & çözümler**
-- Liste boş → provider entegrasyonu/tenant payment policy eksik olabilir.
+### Yükleme ve İçe Aktarma (Upload & Import)
 
-### Yükleme ve İçe Aktarma (Upload & Import) (Game Import Wizard)
-
-**Ne işe yarar?**
-HTML5 veya Unity WebGL bundle upload edip analiz → preview → import akışı ile oyunu sisteme ekler.
-
-**Adım adım: upload/import**
+**Adım adım: oyun yükleme/içe aktarma**
 1) Oyunlar → Yükleme ve İçe Aktarma
-2) Import tipi seç:
-   - Upload HTML5 Game Bundle
-   - Upload Unity WebGL Bundle
-3) Client type seç (HTML5/Unity)
-4) Dosya seç (bundle)
-5) **Upload & Analyze** tıkla
-6) "Manual Import Preview" sonuçlarını incele:
-   - errors / warnings
-7) Hata yoksa **Import This Game** tıkla
+2) Tip seç (HTML5 / Unity)
+3) Dosya seç
+4) Upload & Analyze
+5) Preview incele
+6) Import This Game
 
-**Ops için arka plan notu**
-- Analyze bir job oluşturur ve preview item’ları üretir.
-- Import job’u finalize eder.
-
-Kullanılan API’ler:
+**İlgili API endpoint’leri**
+- `POST /api/v1/game-import/manual/upload`
 - `GET /api/v1/game-import/jobs/{job_id}`
 - `POST /api/v1/game-import/jobs/{job_id}/import`
 
-**Olası hatalar & çözümler**
-| Belirti | Olası neden | Çözüm |
-|---|---|---|
-| Upload anında fail | dosya büyük / proxy limit | daha küçük bundle veya upload limitlerini infra tarafında artır |
-| Preview validation error | manifest/assets hatalı | bundle yapısını düzeltip yeniden yükle |
-| Import butonu kapalı | validation error var | önce hataları çöz; import bloklanır |
+**Log / Audit**
+- job fail: System → Logs → Error Logs (job_id ile ara)
+- catalog mutation: Audit Log
 
 ---
 
 ## VIP Oyunlar (VIP Games)
 
 **Ne işe yarar?**
-Oyunları VIP olarak işaretleme ve VIP görünürlük/ayarları.
+VIP oyun işaretleme/ayarlar.
+
+**İlgili API endpoint’leri**
+- `GET /api/v1/games`
+- `PUT /api/v1/games/{game_id}/details`
 
 ---
 
@@ -203,74 +228,75 @@ Oyunları VIP olarak işaretleme ve VIP görünürlük/ayarları.
 
 ## KYC Doğrulama (KYC Verification)
 
-**Ne işe yarar?**
-Oyuncu KYC dokümanlarını inceleme ve doğrulama.
+**İlgili API endpoint’leri**
+- `GET /api/v1/kyc/dashboard`
+- `GET /api/v1/kyc/queue`
+- `POST /api/v1/kyc/documents/{doc_id}/review`
 
-**Alt başlıklar (sekme)**
-- Dashboard
-- Verification Queue
-- Rules & Levels
-
-**Sık yapılan işlem: doküman onay/red**
-1) KYC Doğrulama → Verification Queue
-2) Dokümanı aç
-3) Approve/Reject (arka planda `/api/v1/kyc/.../review`)
+**Log / Audit**
+- review: Audit Log (resource_type=kyc)
 
 ---
 
 ## CRM ve İletişim (CRM & Comms)
 
-**Ne işe yarar?**
-Kampanya oluşturma ve gönderim.
-
-**Alt başlıklar**
-- Campaigns
-- Templates
-- Segments
-- Channels
+**İlgili API endpoint’leri**
+- `GET /api/v1/crm/campaigns`
+- `GET /api/v1/crm/templates`
+- `GET /api/v1/crm/segments`
+- `GET /api/v1/crm/channels`
+- `POST /api/v1/crm/campaigns`
+- `POST /api/v1/crm/campaigns/{campaign_id}/send`
 
 ---
 
 ## Bonuslar (Bonuses)
 
-**Ne işe yarar?**
-Bonus kampanyalarını yönetme.
+**İlgili API endpoint’leri**
+- `GET /api/v1/bonuses/campaigns`
+- `POST /api/v1/bonuses/campaigns`
+- `POST /api/v1/bonuses/campaigns/{id}/status`
 
 ---
 
 ## Affiliate’ler (Affiliates)
 
-**Ne işe yarar?**
-Affiliate partner, offer, payout ve rapor yönetimi.
-
-**Alt başlıklar (sekme)**
-- Partners
-- Offers
-- Tracking
-- Payouts
-- Creatives
-- Reports
+**İlgili API endpoint’leri**
+- `GET /api/v1/affiliates`
+- `GET /api/v1/affiliates/offers`
+- `GET /api/v1/affiliates/links`
+- `GET /api/v1/affiliates/payouts`
+- `GET /api/v1/affiliates/creatives`
+- `POST /api/v1/affiliates`
+- `POST /api/v1/affiliates/offers`
+- `POST /api/v1/affiliates/links`
+- `POST /api/v1/affiliates/payouts`
+- `POST /api/v1/affiliates/creatives`
+- `PUT /api/v1/affiliates/{id}/status`
 
 ---
 
 ## Acil Durdurma (Kill Switch) (sadece owner)
 
-**Ne işe yarar?**
-Yüksek riskli operasyonlar için acil durdurma.
+**İlgili API endpoint’leri**
+- `GET /api/v1/tenants/`
+- `POST /api/v1/kill-switch/tenant`
+
+**Log / Audit**
+- Kill switch değişiklikleri: Audit Log
 
 ---
 
 ## Destek (Support)
 
-**Ne işe yarar?**
-Ticket ve müşteri destek araçları.
-
-**Alt başlıklar (sekme)**
-- Overview
-- Inbox
-- Live Chat
-- Help Center
-- Config
+**İlgili API endpoint’leri**
+- `GET /api/v1/support/dashboard`
+- `GET /api/v1/support/tickets`
+- `GET /api/v1/support/chats`
+- `GET /api/v1/support/kb`
+- `GET /api/v1/support/canned`
+- `POST /api/v1/support/tickets/{ticket_id}/message`
+- `POST /api/v1/support/canned`
 
 ---
 
@@ -278,36 +304,43 @@ Ticket ve müşteri destek araçları.
 
 ## Risk Kuralları (Risk Rules) (sadece owner)
 
-**Ne işe yarar?**
-Risk kuralları oluşturma ve toggle.
+**İlgili API endpoint’leri**
+- `GET /api/v1/risk/dashboard`
+- `GET /api/v1/risk/rules`
+- `POST /api/v1/risk/rules`
+- `POST /api/v1/risk/rules/{id}/toggle`
+- `GET /api/v1/risk/velocity`
+- `GET /api/v1/risk/blacklist`
+- `POST /api/v1/risk/blacklist`
+- `GET /api/v1/risk/cases`
+- `PUT /api/v1/risk/cases/{case_id}/status`
+- `GET /api/v1/risk/alerts`
+- `GET /api/v1/risk/evidence`
+- `POST /api/v1/risk/evidence`
 
 ---
 
 ## Fraud Kontrolü (Fraud Check) (sadece owner)
 
-**Ne işe yarar?**
-Fraud analizi ve vaka inceleme.
+**İlgili API endpoint’leri**
+- `POST /api/v1/fraud/analyze`
 
 ---
 
 ## Onay Kuyruğu (Approval Queue) (sadece owner)
 
-**Ne işe yarar?**
-Onay akışlarını yönetme.
-
-**Alt başlıklar (sekme)**
-- Pending
-- Approved
-- Rejected
-- Policies
-- Delegations
+**İlgili API endpoint’leri**
+- `GET /api/v1/approvals/requests?status=...`
+- `GET /api/v1/approvals/rules`
+- `GET /api/v1/approvals/delegations`
+- `POST /api/v1/approvals/requests/{request_id}/action`
 
 ---
 
 ## Sorumlu Oyun (Responsible Gaming) (sadece owner)
 
-**Ne işe yarar?**
-Sorumlu oyun kontrolleri ve admin override.
+**İlgili API endpoint’leri**
+- `POST /api/v1/rg/admin/override/{player_id}`
 
 ---
 
@@ -315,15 +348,18 @@ Sorumlu oyun kontrolleri ve admin override.
 
 ## Robotlar (Robots)
 
-**Ne işe yarar?**
-Game robot’ları yönetme (toggle/clone).
+**İlgili API endpoint’leri**
+- `GET /api/v1/robots`
+- `POST /api/v1/robots/{robot_id}/toggle`
+- `POST /api/v1/robots/{robot_id}/clone`
 
 ---
 
 ## Matematik Varlıkları (Math Assets)
 
-**Ne işe yarar?**
-Game math/model asset yönetimi.
+**İlgili API endpoint’leri**
+- `GET /api/v1/math-assets`
+- `POST /api/v1/math-assets`
 
 ---
 
@@ -331,177 +367,142 @@ Game math/model asset yönetimi.
 
 ## CMS (sadece owner)
 
-**Ne işe yarar?**
-Sayfa/banner/media/legal/i18n gibi içerik yönetimi.
-
-**Alt başlıklar (sekme)**
-- Overview
-- Pages
-- Homepage
-- Banners
-- Collections
-- Popups
-- Media
-- i18n
-- Legal
-- A/B Test
-- System
-- Audit
+**İlgili API endpoint’leri**
+- `GET /api/v1/cms/dashboard`
+- `GET /api/v1/cms/pages`
+- `POST /api/v1/cms/pages`
+- `GET /api/v1/cms/banners`
+- `GET /api/v1/cms/collections`
+- `GET /api/v1/cms/popups`
+- `GET /api/v1/cms/translations`
+- `GET /api/v1/cms/media`
+- `GET /api/v1/cms/legal`
+- `GET /api/v1/cms/experiments`
+- `GET /api/v1/cms/audit`
 
 ---
 
 ## Raporlar (Reports)
 
-**Ne işe yarar?**
-Rapor üretimi ve export.
+**İlgili API endpoint’leri**
+- `GET /api/v1/reports/overview`
+- `GET /api/v1/reports/financial`
+- `GET /api/v1/reports/players/ltv`
+- `GET /api/v1/reports/games`
+- `GET /api/v1/reports/providers`
+- `GET /api/v1/reports/bonuses`
+- `GET /api/v1/reports/affiliates`
+- `GET /api/v1/reports/risk`
+- `GET /api/v1/reports/rg`
+- `GET /api/v1/reports/kyc`
+- `GET /api/v1/reports/crm`
+- `GET /api/v1/reports/cms`
+- `GET /api/v1/reports/operational`
+- `GET /api/v1/reports/schedules`
+- `GET /api/v1/reports/exports`
+- `POST /api/v1/reports/exports`
 
-**Alt başlıklar**
-- Export Center
-- diğer rapor grupları: financial, players, games, providers, bonuses, affiliates, crm, cms, scheduled
-
-**Sık yapılan işlem: rapor export**
-1) System → Reports
-2) **Export Center** aç
-3) Export tipini seç
-4) Export iste (arka planda `POST /api/v1/reports/exports`)
+**Log / Audit**
+- Export fail: Logs → Error Logs
 
 ---
 
 ## Loglar (Logs) (sadece owner)
 
-**Ne işe yarar?**
-Sistem loglarını inceleme.
+**İlgili API endpoint’leri**
+- `GET /api/v1/logs/events`
+- `GET /api/v1/logs/cron`
+- `POST /api/v1/logs/cron/run`
+- `GET /api/v1/logs/health`
+- `GET /api/v1/logs/deployments`
+- `GET /api/v1/logs/config`
+- `GET /api/v1/logs/errors`
+- `GET /api/v1/logs/queues`
+- `GET /api/v1/logs/db`
+- `GET /api/v1/logs/cache`
+- `GET /api/v1/logs/archive`
 
 ---
 
 ## Denetim Kaydı (Audit Log) (sadece owner)
 
-**Ne işe yarar?**
-Değişiklikleri audit üzerinden görüntüleme.
-
-**Alt başlıklar (sekme)**
-- Changes (Diff)
-- Before/After
-- Metadata & Context
-- Raw JSON
+**İlgili API endpoint’leri**
+- `GET /api/v1/audit/events`
+- `GET /api/v1/audit/export`
 
 ---
 
 ## Admin Kullanıcıları (Admin Users)
 
-**Ne işe yarar?**
-Admin kullanıcı/rol/oturum/invite/security yönetimi.
-
-**Alt başlıklar (sekme)**
-- Admin Users
-- Roles
-- Teams
-- Activity Log
-- Permission Matrix
-- IP & Devices
-- Login History
-- Security
-- Sessions
-- Invites
-- API Keys
-- Risk Score
-- Delegation
-
-**Sık yapılan işlem: admin invite**
-1) Admin Users → Invites
-2) Invite oluştur
-3) Invite linkini kopyala
+**İlgili API endpoint’leri**
+- `GET /api/v1/tenants/`
+- `GET /api/v1/admin/users`
+- `POST /api/v1/admin/users`
+- `GET /api/v1/admin/roles`
+- `GET /api/v1/admin/teams`
+- `GET /api/v1/admin/sessions`
+- `GET /api/v1/admin/invites`
+- `GET /api/v1/admin/keys`
+- `GET /api/v1/admin/security`
+- `GET /api/v1/admin/activity-log?...`
+- `GET /api/v1/admin/login-history?...`
+- `GET /api/v1/admin/permission-matrix`
+- `GET /api/v1/admin/ip-restrictions`
+- `POST /api/v1/admin/ip-restrictions`
+- `GET /api/v1/admin/device-restrictions`
+- `PUT /api/v1/admin/device-restrictions/{device_id}/approve`
 
 ---
 
 ## Tenant’lar (Tenants) (sadece owner)
 
-**Ne işe yarar?**
-Tenant oluşturma/yönetme.
+**İlgili API endpoint’leri**
+- `GET /api/v1/tenants/`
+- `POST /api/v1/tenants/`
+- `PATCH /api/v1/tenants/{tenant_id}`
 
 ---
 
 ## API Anahtarları (API Keys) (sadece owner)
 
-**Ne işe yarar?**
-Platform API key yönetimi.
+**İlgili API endpoint’leri**
+- `GET /api/v1/api-keys/`
+- `GET /api/v1/api-keys/scopes`
+- `POST /api/v1/api-keys/`
+- `PATCH /api/v1/api-keys/{id}`
 
 ---
 
 ## Özellik Bayrakları (Feature Flags) (sadece owner)
 
-**Ne işe yarar?**
-Feature flag ve experiment yönetimi.
-
-**Alt başlıklar (sekme)**
-- Feature Flags
-- Experiments
-- Segments
-- Analytics
-- Results
-- Audit Log
-- Env Compare
-- Groups
+**İlgili API endpoint’leri**
+- `GET /api/v1/flags/`
+- `GET /api/v1/flags/experiments`
+- `GET /api/v1/flags/segments`
+- `GET /api/v1/flags/audit-log`
+- `GET /api/v1/flags/environment-comparison`
+- `GET /api/v1/flags/groups`
+- `POST /api/v1/flags/{flag_id}/toggle`
+- `POST /api/v1/flags/kill-switch`
+- `POST /api/v1/flags/`
+- `POST /api/v1/flags/experiments/{exp_id}/start`
+- `POST /api/v1/flags/experiments/{exp_id}/pause`
 
 ---
 
 ## Simülatör (Simulator)
 
-**Ne işe yarar?**
-Simulation Lab: math/portfolio/bonus/risk modüllerinde senaryo çalıştırma.
-
-**Alt başlıklar (sekme)**
-- Overview
-- Game Math
-- Portfolio
-- Bonus
-- Cohort/LTV
-- Risk
-- RG
-- A/B Sandbox
-- Scenario Builder
-- Archive
-
-**Sık yapılan işlem: simülasyon çalıştırma**
-1) System → Simulator
-2) Bir modül seç (örn Risk)
-3) Parametreleri gir
-4) Run (varsa)
-5) Sonuçları Archive altında incele
+**İlgili API endpoint’leri**
+- `GET /api/v1/simulation-lab/runs`
 
 ---
 
 ## Ayarlar (Settings) (sadece owner)
 
-**Ne işe yarar?**
-Platform ayar ve politikaları.
-
-**Alt başlıklar (sekme)**
-- Brands
-- Domains
-- Currencies
-- Payment Providers
-- Payments Policy
-- Countries
-- Games
-- Communication
-- Regulatory
-- Defaults
-- API Keys
-- Theme
-- Maintenance
-- Versions
-- Audit
-
----
-
-## Menülerin görünürlüğü (özet)
-
-Menüler şu nedenlerle görünmeyebilir:
-- owner-only / tenant-only
-- feature capability flag’leri
-- backend capabilities
-
-Referans:
-- `frontend/src/config/menu.js`
-- `frontend/src/components/Layout.jsx`
+**İlgili API endpoint’leri**
+- `GET /api/v1/settings/brands`
+- `GET /api/v1/settings/currencies`
+- `GET /api/v1/settings/country-rules`
+- `GET /api/v1/settings/platform-defaults`
+- `GET /api/v1/settings/api-keys`
+- `GET /api/version`
