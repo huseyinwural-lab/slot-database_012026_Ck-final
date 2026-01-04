@@ -7,6 +7,7 @@ API özeti ve detaylı spesifikasyonlara referanslar.
 - `auth.md`
 - `tenants.md`
 - `payments.md`
+- `payouts.md`
 - `admin.md`
 
 Ayrıca:
