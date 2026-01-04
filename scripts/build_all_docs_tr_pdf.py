@@ -203,10 +203,15 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
             story.append(Spacer(1, 0.3 * cm))
             return
 
+        # Some markdown files embed HTML line breaks inside tables (e.g. <br>). Convert them to newlines.
+        paragraph = (
+            paragraph.replace("<br/>", "\n")
+            .replace("<br />", "\n")
+            .replace("<br>", "\n")
+        )
+
         paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        # reportlab's paraparser is strict; ensure any raw <br> becomes <br/> then render newlines.
-        paragraph = paragraph.replace("&lt;br&gt;", "&lt;br/&gt;")
-        paragraph = paragraph.replace("\n", "<br/>" )
+        paragraph = paragraph.replace("\n", "<br/>")
         story.append(Paragraph(paragraph, normal))
         story.append(Spacer(1, 0.2 * cm))
 
