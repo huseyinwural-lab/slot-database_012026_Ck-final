@@ -16,6 +16,11 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 ### 1.1 System → Logs → Kategori endpoint’leri boş liste dönüyor
 
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/logs.md`
 - **Belirti:** Çoğu tab `[]` dönüyor / “No logs found” gösteriyor (bilinen incident sırasında bile).
 - **Muhtemel neden:** `backend/app/routes/logs.py` içinde `/events` var; ancak birçok kategori endpoint’i stub veya boş liste dönüyor.
@@ -34,6 +39,11 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 ### 1.2 System → Admin Users → Users dışındaki tab’lar görünüyor ama endpoint’ler eksik olabilir
 
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/admin-users.md`
 - **Belirti:** UI’da Roles/Teams/Sessions/Invites/Security sekmeleri var, ama istekler **404 Not Found** dönüyor.
 - **Muhtemel neden:** UI `/api/v1/admin/roles`, `/api/v1/admin/sessions`, `/api/v1/admin/invites` gibi endpoint’leri çağırıyor; backend bu route’ları sağlamıyor.
@@ -49,6 +59,11 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 ---
 
 ### 1.3 System → Feature Flags → Safe stub (persistence yok)
+
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/feature-flags.md`
 - **Belirti:** Flag listesi boş; toggle OK döner ama state persist etmez.
@@ -71,6 +86,7 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - Yeni bir gap tespit edince şunları ekleyin:
   - modül / menü
   - tam endpoint
-  - screenshot veya request/response snippet (ticket’te; doc’ta değil)
+  - evidence link/ref (opsiyonel)
   - etki seviyesi (P0/P1/P2)
+  - customer impact (opsiyonel)
 - Register kısa ve aksiyon odaklı olmalı; derin analiz engineering ticket’larında yapılmalı.

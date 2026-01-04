@@ -16,6 +16,11 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 ### 1.1 System → Logs → Category endpoints return empty lists
 
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+
 - **Source page:** `/docs/new/en/admin/system/logs.md`
 - **Symptom:** Most tabs return `[]` / show “No logs found” even during known incidents.
 - **Likely Cause:** `backend/app/routes/logs.py` implements `/events` but many category endpoints are stubbed or return empty arrays.
@@ -34,6 +39,11 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 ### 1.2 System → Admin Users → Non-Users tabs appear but endpoints may be missing
 
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+
 - **Source page:** `/docs/new/en/admin/system/admin-users.md`
 - **Symptom:** UI shows Roles/Teams/Sessions/Invites/Security tabs, but requests return **404 Not Found**.
 - **Likely Cause:** UI calls endpoints like `/api/v1/admin/roles`, `/api/v1/admin/sessions`, `/api/v1/admin/invites` which are not implemented.
@@ -49,6 +59,11 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 ---
 
 ### 1.3 System → Feature Flags → Safe stubs (no persistence)
+
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
 
 - **Source page:** `/docs/new/en/admin/system/feature-flags.md`
 - **Symptom:** Flags always return empty lists / toggles return OK but do not persist.
@@ -71,6 +86,7 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - When you identify a new gap, add:
   - menu/module
   - exact endpoint
-  - screenshot or request/response snippet (attach in ticket, not in docs)
+  - evidence link/ref (optional)
   - impact severity (P0/P1/P2)
+  - customer impact (optional)
 - Keep the register short and actionable; deep analysis belongs in engineering tickets.
