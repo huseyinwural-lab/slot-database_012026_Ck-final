@@ -72,6 +72,9 @@ Bu doküman, Admin Panel kullanım kılavuzunun **hub** sayfasıdır.
 - Support → `./operations/support.md`
 
 ### Risk & Compliance
+
+**Durum:** TAMAMLANDI (Risk Rules + Fraud Check + Approval Queue + Responsible Gaming)
+
 - Risk Rules (sadece owner) → `./risk-compliance/risk-rules.md`
 - Fraud Check (sadece owner) → `./risk-compliance/fraud-check.md`
 - Approval Queue (sadece owner) → `./risk-compliance/approval-queue.md`
