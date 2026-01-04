@@ -51,6 +51,9 @@ Bu doküman, Admin Panel kullanım kılavuzunun **hub** sayfasıdır.
 > Menü kaynağı: `frontend/src/config/menu.js`
 
 ### Core
+
+**Durum:** TAMAMLANDI (Dashboard + Players + Finance + Withdrawals + All Revenue + Games + VIP Games)
+
 - Dashboard → `./core/dashboard.md`
 - My Revenue (sadece tenant) → (aktifse Reports / Revenue menülerine bakın)
 - Players → `./core/players.md`
