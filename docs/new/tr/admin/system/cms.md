@@ -8,9 +8,9 @@
 
 ## Ops Checklist (read first)
 
-- CMS platform gibi görünse de tenant contexti doğrula (bazı içerikler tenant-scope olabilir).
+- CMS “platform-global” gibi görünse de tenant context’i doğrula (bazı içerikler tenant-scope olabilir).
 - Publish/unpublish gibi akışlar varsa: kanıtı **Audit Log** + **Logs** ile topla (varsa).
-- CMSi kontrollü içerik güncellemesi için kullan; destek kanalı gibi kullanma.
+- CMS’i kontrollü içerik güncellemesi için kullan; destek kanalı gibi kullanma.
 
 ---
 
@@ -84,7 +84,7 @@ CMS sayfasında:
 
 - Legal sayfalar için (Terms/Privacy) sıkı review + onay süreci kullan.
 - Küçük ve geri alınabilir değişiklikleri tercih et.
-- Audit yoksa, harici bir change log tut.
+- Audit yoksa, harici bir change log tut.
 
 ---
 
@@ -103,7 +103,7 @@ CMS sayfasında:
 3) **Belirti:** CMS list fetch 403.
    - **Muhtemel neden:** rol yetkisiz.
    - **Çözüm:** platform owner ile dene; role entitlements tanımla.
-   - **Doğrulama:** rol CMSe erişebilir.
+   - **Doğrulama:** rol CMS’e erişebilir.
 
 4) **Belirti:** Create 409 / slug conflict.
    - **Muhtemel neden:** slug unique olmalı.
@@ -125,14 +125,14 @@ CMS sayfasında:
    - **Çözüm:** listeyi refresh et; retry.
    - **Doğrulama:** listeden kaybolur.
 
-8) **Belirti:** Admin UIda içerik var ama player siteta bozuk.
-   - **Muhtemel neden:** player site routeları CMS içeriğine bağlı değil.
+8) **Belirti:** Admin UI’da içerik var ama player site’ta bozuk.
+   - **Muhtemel neden:** player site route’ları CMS içeriğine bağlı değil.
    - **Çözüm:** public CMS consumption endpoint/SSR logic doğrula.
    - **Doğrulama:** player site içerik gösterir.
 
 9) **Belirti:** CMS değişiklikleri için audit kanıtı yok.
-   - **Muhtemel neden:** CMS routeları audited değil.
-   - **Çözüm:** audit ekle veya change ticketlarıyla kanıt tut.
+   - **Muhtemel neden:** CMS route’ları audited değil.
+   - **Çözüm:** audit ekle veya change ticket’larıyla kanıt tut.
    - **Doğrulama:** Audit Log `cms.page.created/updated/deleted` gösterir.
 
 ---
@@ -147,13 +147,13 @@ CMS sayfasında:
    - **Resolution owner:** Product/Backend
    - **Doğrulama:** publish status + audit trail var.
 
-2) **Belirti:** CMS endpointleri var ama tenant-scope değil.
-   - **Muhtemel neden:** cms_page modelinde tenant_id yok.
+2) **Belirti:** CMS endpoint’leri var ama tenant-scope değil.
+   - **Muhtemel neden:** cms_page model’inde tenant_id yok.
    - **Etki:** cross-tenant içerik sızıntısı.
-   - **Admin workaround:** CMSi platform-global kabul et.
-   - **Escalation paketi:** data model requirementlarını netleştir.
+   - **Admin workaround:** CMS’i platform-global kabul et.
+   - **Escalation paketi:** data model requirement’larını netleştir.
    - **Resolution owner:** Backend
-   - **Doğrulama:** sayfalar tenant contexte göre filtrelenir.
+   - **Doğrulama:** sayfalar tenant context’e göre filtrelenir.
 
 ---
 
@@ -164,7 +164,7 @@ CMS sayfasında:
 - Create/update/delete stale state olmadan görünür.
 
 ### 8.2 System → Logs
-- cms endpointlerinde 4xx/5xx yok.
+- cms endpoint’lerinde 4xx/5xx yok.
 
 ### 8.3 System → Audit Log
 - CMS değişiklikleri audit event üretir (varsa).

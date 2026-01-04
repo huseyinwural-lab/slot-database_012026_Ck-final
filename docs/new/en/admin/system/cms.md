@@ -8,7 +8,7 @@
 
 ## Ops Checklist (read first)
 
-- Confirm tenant context even if CMS is platform-like. Some CMS items may be tenant-scoped.
+- Confirm tenant context even if CMS looks platform-global. Some CMS items may be tenant-scoped.
 - For publish/unpublish flows: keep evidence in **Audit Log** + **Logs** (if implemented).
 - Use CMS for controlled content updates; do not treat it as a support channel.
 
@@ -84,7 +84,7 @@ CMS page includes:
 
 - Use strict review and approvals for player-facing legal pages.
 - Prefer small, reversible changes.
-- Maintain a change log externally if Audit Log is not implemented for CMS.
+- Maintain a change log externally if Audit Log is not implemented for CMS.
 
 ---
 
@@ -125,8 +125,8 @@ CMS page includes:
    - **Fix:** refresh list; retry.
    - **Verification:** list reflects deletion.
 
-8) **Symptom:** CMS page renders in UI but broken on player site.
-   - **Likely cause:** player site routes not wired to CMS content.
+8) **Symptom:** CMS page renders in admin UI but broken on player site.
+   - **Likely cause:** player site routes are not wired to CMS content.
    - **Fix:** verify public CMS consumption endpoints/SSR logic.
    - **Verification:** player site displays content.
 
