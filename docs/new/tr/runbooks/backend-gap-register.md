@@ -24,6 +24,7 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Impact:** Medium
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/logs.md`
 - **Belirti:** Çoğu tab `[]` dönüyor / “No logs found” gösteriyor (bilinen incident sırasında bile).
