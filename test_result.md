@@ -49,6 +49,9 @@ Do not delete sections unless instructed.
       - `/docs/new/en/admin/game-engine/math-assets.md`
       - `/docs/new/tr/admin/game-engine/robots.md`
       - `/docs/new/tr/admin/game-engine/math-assets.md`
+    - Guides:
+      - `/docs/new/en/guides/common-errors.md`
+      - `/docs/new/tr/guides/common-errors.md`
 
 ## Previous history
 
