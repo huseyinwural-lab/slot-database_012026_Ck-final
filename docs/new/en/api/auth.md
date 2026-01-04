@@ -29,4 +29,4 @@ Important:
 - Production should use an email delivery provider.
 
 See:
-- `/docs/new/en/admin/password-reset.md`
+- `/docs/new/en/runbooks/password-reset.md`

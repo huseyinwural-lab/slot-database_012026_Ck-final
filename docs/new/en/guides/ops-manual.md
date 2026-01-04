@@ -92,7 +92,8 @@ Key guarantees:
 ## 8) Break-glass
 
 See:
-- `/docs/new/en/admin/password-reset.md`
+- `/docs/new/en/runbooks/password-reset.md`
+- `/docs/new/en/runbooks/break-glass.md`
 - `/docs/new/en/architecture/audit-logging.md`
 
 Policy:

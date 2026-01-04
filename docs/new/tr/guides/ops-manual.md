@@ -92,7 +92,8 @@ Garantiler:
 ## 8) Break-glass
 
 Bkz:
-- `/docs/new/tr/admin/password-reset.md`
+- `/docs/new/tr/runbooks/password-reset.md`
+- `/docs/new/tr/runbooks/break-glass.md`
 - `/docs/new/tr/architecture/audit-logging.md`
 
 Politika:

@@ -29,4 +29,4 @@ Rate limit:
 - Prod’da email delivery provider kullanılmalıdır.
 
 Bkz:
-- `/docs/new/tr/admin/password-reset.md`
+- `/docs/new/tr/runbooks/password-reset.md`
