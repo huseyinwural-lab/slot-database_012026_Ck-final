@@ -32,23 +32,73 @@ async def list_tenants(
 @router.post("/", response_model=Tenant)
 async def create_tenant(
     request: Request,
-    tenant_data: Tenant, 
+    payload: TenantCreateRequest,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    require_owner(current_admin)
-    
+    from app.services.audit import audit
+
+    # Audit attempt (success/failed/denied must be visible)
+    await audit.log(
+        admin=current_admin,
+        action="tenant.create.attempt",
+        module="tenants",
+        target_id=None,
+        details={"name": payload.name, "type": payload.type},
+        session=session,
+        request_id=getattr(request.state, "request_id", None),
+        tenant_id=getattr(current_admin, "tenant_id", None),
+        resource_type="tenant",
+        result="success",  # attempt itself is successful; outcome is recorded below
+    )
+
+    # Hard stop: only platform owner can create tenants
+    try:
+        require_owner(current_admin)
+    except Exception:
+        await audit.log(
+            admin=current_admin,
+            action="tenant.create.attempt",
+            module="tenants",
+            target_id=None,
+            details={"name": payload.name, "type": payload.type, "denied": True},
+            session=session,
+            request_id=getattr(request.state, "request_id", None),
+            tenant_id=getattr(current_admin, "tenant_id", None),
+            resource_type="tenant",
+            result="blocked",
+        )
+        raise
+
+    # Create (server-side ignore/forbid unknown fields such as is_system)
+    tenant_data = Tenant(
+        name=payload.name,
+        type=payload.type,
+        features=payload.features or {},
+    )
+
     # Check exists
     stmt = select(Tenant).where(Tenant.name == tenant_data.name)
     result = await session.execute(stmt)
     existing = result.scalars().first()
     if existing:
+        await audit.log(
+            admin=current_admin,
+            action="tenant.create.attempt",
+            module="tenants",
+            target_id=None,
+            details={"name": payload.name, "type": payload.type, "error": "TENANT_EXISTS"},
+            session=session,
+            request_id=getattr(request.state, "request_id", None),
+            tenant_id=getattr(current_admin, "tenant_id", None),
+            resource_type="tenant",
+            result="failed",
+        )
         raise AppError(error_code="TENANT_EXISTS", message="Tenant exists", status_code=400)
-    
+
     session.add(tenant_data)
 
-    # Audit (owner-only)
-    from app.services.audit import audit
+    # Audit: created
     await audit.log(
         admin=current_admin,
         action="tenant.created",
@@ -64,7 +114,7 @@ async def create_tenant(
 
     await session.commit()
     await session.refresh(tenant_data)
-    
+
     return tenant_data
 
 @router.get("/capabilities")
