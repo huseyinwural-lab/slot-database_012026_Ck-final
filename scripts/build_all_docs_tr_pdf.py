@@ -204,32 +204,18 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
             return
 
         # Some markdown files embed HTML line breaks inside tables (e.g. <br>). Convert them to newlines.
-        # Normalize any inline HTML breaks so reportlab doesn't choke on <br> (non-self-closing).
+        # Render body text safely without reportlab's HTML parser.
+        # Some docs include markdown tables and raw HTML fragments (e.g. <br>) which can break Paragraph().
+        from reportlab.platypus import XPreformatted
+
         paragraph = (
-            paragraph.replace("<br/>", "__BR__")
-            .replace("<br />", "__BR__")
-            .replace("<br>", "__BR__")
+            paragraph.replace("<br/>", "\n")
+            .replace("<br />", "\n")
+            .replace("<br>", "\n")
         )
 
-        # Escape all HTML, then re-insert ONLY our safe <br/> tags.
-        paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        paragraph = paragraph.replace("__BR__", "<br/>")
-        paragraph = paragraph.replace("\n", "<br/>")
-
-        # reportlab can't handle certain constructs in Paragraph (esp. markdown tables). Fallback safely.
-        try:
-            story.append(Paragraph(paragraph, normal))
-            story.append(Spacer(1, 0.2 * cm))
-        except Exception:
-            from reportlab.platypus import Preformatted
-            safe = (
-                paragraph.replace("<br/>", "\n")
-                .replace("&lt;br&gt;", "\n")
-                .replace("&lt;br/&gt;", "\n")
-                .replace("&lt;br /&gt;", "\n")
-            )
-            story.append(Preformatted(safe, code_style))
-            story.append(Spacer(1, 0.2 * cm))
+        story.append(XPreformatted(paragraph, normal))
+        story.append(Spacer(1, 0.2 * cm))
 
     for ln in lines:
         if ln.strip().startswith("```"):
