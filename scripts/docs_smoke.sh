@@ -125,6 +125,73 @@ if rg -n "TODO|PLACEHOLDER" docs/new >/dev/null 2>&1; then
   fail "Found TODO/PLACEHOLDER in documentation"
 fi
 
+# 5c) Admin manual quality gates (menu pages)
+info "Checking admin manual quality gates (min error scenarios + validation keywords)"
+python3 - <<'PY'
+import os, re, sys
+
+MIN_ERRORS = 8
+
+SKIP_FILES = {
+  'README.md',
+  '_template-menu-page.md',
+  'admin-panel-manual.md',
+  'roles-permissions.md',
+}
+
+def is_menu_page(text: str) -> bool:
+  return ('**Menu path (UI):**' in text) or ('**Menü yolu (UI):**' in text)
+
+def check_lang(lang: str):
+  base = f'docs/new/{lang}/admin'
+  if not os.path.isdir(base):
+    return
+
+  if lang == 'en':
+    error_re = re.compile(r'^\s*\d+\)\s+\*\*Symptom:\*\*', re.M)
+    required = ['ui', 'audit log', 'logs']
+  else:
+    error_re = re.compile(r'^\s*\d+\)\s+\*\*(Semptom|Belirti):\*\*', re.M)
+    # TR pages still reference "Audit Log" / "Logs" in many places, but "log" is more consistent.
+    required = ['ui', 'audit log', 'log']
+
+  failures = []
+  for root, _, files in os.walk(base):
+    for f in files:
+      if not f.endswith('.md'):
+        continue
+      if f in SKIP_FILES:
+        continue
+
+      path = os.path.join(root, f)
+      with open(path, 'r', encoding='utf-8') as fh:
+        text = fh.read()
+
+      if not is_menu_page(text):
+        continue
+
+      err_count = len(error_re.findall(text))
+      if err_count < MIN_ERRORS:
+        failures.append(f"{path}: only {err_count} error scenarios (min {MIN_ERRORS})")
+        continue
+
+      lowered = text.lower()
+      missing = [kw for kw in required if kw not in lowered]
+      if missing:
+        failures.append(f"{path}: missing keywords: {', '.join(missing)}")
+
+  if failures:
+    print("[DOCS_SMOKE][FAIL] Admin manual quality gate failures:")
+    for f in failures:
+      print(f" - {f}")
+    sys.exit(1)
+
+check_lang('en')
+check_lang('tr')
+print('[DOCS_SMOKE] Admin manual quality gates passed')
+PY
+
+
 # 6) Lightweight command validations (no side effects)
 # Keep these checks portable: CI runners will have them, but local environments may not.
 info "Checking tooling availability (non-heavy)"

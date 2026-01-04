@@ -78,6 +78,18 @@ Typical sections:
 4) **Symptom:** Slow load / timeouts
    - Likely cause: large time window or heavy aggregation.
 
+5) **Symptom:** 401 Unauthorized on dashboard stats endpoints
+   - Likely cause: admin session expired or token invalid.
+
+6) **Symptom:** 403 Forbidden when opening Dashboard
+   - Likely cause: tenant/menu entitlements removed or owner-only enforcement misapplied.
+
+7) **Symptom:** Numbers jump unexpectedly after switching tenant context
+   - Likely cause: tenant context not applied consistently; cached responses.
+
+8) **Symptom:** Dashboard looks stale after refresh
+   - Likely cause: cached aggregation, delayed pipeline, or browser caching.
+
 ---
 
 ## 7) Resolution steps (step-by-step)
@@ -99,7 +111,7 @@ Typical sections:
 - Search by endpoint path and timeframe.
 - If available, correlate by `x-request-id`.
 
-### 8.3 Audit log
+### 8.3 Audit Log
 - Dashboard is typically read-only; no audit event expected.
 
 ### 8.4 Database verification (if applicable)

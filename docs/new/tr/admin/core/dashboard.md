@@ -78,6 +78,18 @@ Tipik bölümler:
 4) **Semptom:** Yavaş açılıyor / timeout
    - Muhtemel neden: çok geniş zaman aralığı veya ağır aggregation.
 
+5) **Semptom:** Dashboard endpoint’lerinde 401 Unauthorized
+   - Muhtemel neden: admin session süresi doldu veya token geçersiz.
+
+6) **Semptom:** Dashboard açılırken 403 Forbidden
+   - Muhtemel neden: tenant/menu entitlement kaldırıldı veya owner-only enforcement yanlış çalışıyor.
+
+7) **Semptom:** Tenant context değişince metrikler “zıplıyor”
+   - Muhtemel neden: tenant context tutarlı uygulanmıyor; cache etkisi.
+
+8) **Semptom:** Refresh sonrası dashboard hâlâ eski görünüyor
+   - Muhtemel neden: cached aggregation, geciken pipeline veya browser cache.
+
 ---
 
 ## 7) Çözüm adımları (adım adım)
@@ -99,7 +111,7 @@ Tipik bölümler:
 - Endpoint path ve timeframe ile ara.
 - Varsa `x-request-id` ile korelasyon yap.
 
-### 8.3 Audit log
+### 8.3 Audit Log
 - Dashboard genelde read-only; audit event beklenmez.
 
 ### 8.4 Database doğrulama (gerekiyorsa)
