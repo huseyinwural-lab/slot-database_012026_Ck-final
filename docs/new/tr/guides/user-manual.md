@@ -148,6 +148,9 @@ Temel prensipler:
 
 Bkz:
 - `/docs/new/tr/runbooks/ci.md`
+- `/docs/new/tr/runbooks/release.md`
+- `/docs/new/tr/runbooks/ops.md`
+- `/docs/new/tr/runbooks/incident.md`
 
 ---
 
