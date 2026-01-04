@@ -8,4 +8,4 @@ Operasyon prosedürleri ve deterministik runbook’lar.
 - `ops.md` — operasyon rutinleri, backup/restore
 - `incident.md` — incident response ve eskalasyon
 
-> TODO: Legacy `/docs/ops/*` ve `/docs/CI_*` içeriği buraya konsolide edilecek.
+> Not: Legacy `/docs/ops/*` ve `/docs/CI_*` içeriği zamanla buraya taşınmalıdır.

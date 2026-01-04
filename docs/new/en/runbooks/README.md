@@ -8,4 +8,4 @@ Operational procedures and deterministic runbooks.
 - `ops.md` — ops routines, backup/restore
 - `incident.md` — incident response and escalation
 
-> TODO: Consolidate content from legacy `/docs/ops/*` and `/docs/CI_*` into these files.
+> Note: Legacy `/docs/ops/*` and `/docs/CI_*` content should be migrated here over time.
