@@ -72,6 +72,9 @@ This is the **hub** for the Admin Panel manual.
 - Support → `./operations/support.md`
 
 ### Risk & Compliance
+
+**Status:** COMPLETE (Risk Rules + Fraud Check + Approval Queue + Responsible Gaming)
+
 - Risk Rules (owner-only) → `./risk-compliance/risk-rules.md`
 - Fraud Check (owner-only) → `./risk-compliance/fraud-check.md`
 - Approval Queue (owner-only) → `./risk-compliance/approval-queue.md`
