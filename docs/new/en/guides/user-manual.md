@@ -257,6 +257,7 @@ See:
 
 See also:
 - `/docs/new/en/api/overview.md`
+- `/docs/new/en/api/payments.md`
 
 ### 13.1 Rate limits
 
