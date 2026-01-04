@@ -3,7 +3,7 @@
 **Last reviewed:** 2026-01-04  
 **Owner:** Platform Engineering / Ops  
 
-This register centralizes **UI  Backend mismatches** discovered while writing the Admin Panel Manual.
+This register centralizes **UI ↔ Backend mismatches** discovered while writing the Admin Panel Manual.
 
 **How to use:**
 - Each entry should be **actionable** (symptom + impact + workaround + escalation evidence).
@@ -17,7 +17,7 @@ This register centralizes **UI  Backend mismatches** discovered while writing 
 ### 1.1 System → Logs → Category endpoints return empty lists
 
 - **Source page:** `/docs/new/en/admin/system/logs.md`
-- **Symptom:** Most tabs return `[]` / show No logs found even during known incidents.
+- **Symptom:** Most tabs return `[]` / show “No logs found” even during known incidents.
 - **Likely Cause:** `backend/app/routes/logs.py` implements `/events` but many category endpoints are stubbed or return empty arrays.
 - **Impact:** Ops cannot rely on the Logs UI for evidence; must pivot to container logs.
 - **Admin Workaround:**

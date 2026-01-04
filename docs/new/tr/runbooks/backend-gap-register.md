@@ -1,76 +1,76 @@
 # Backend Gap Register (TR)
 
-**Son gden geirme:** 2026-01-04  
+**Son gözden geçirme:** 2026-01-04  
 **Sorumlu:** Platform Engineering / Ops  
 
-Bu register, Admin Panel dokmanasyon srecinde tespit edilen **UI  Backend uyumsuzluklar**n tek yerde toplar.
+Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Backend uyumsuzluklarını** tek bir yerde toplar.
 
-**Nas kullan
-- Her kay tket
-
-> EN dokman tek do
+**Nasıl kullanılır?**
+- Her kayıt **aksiyon alınabilir** olmalıdır (belirti + etki + workaround + escalation kanıtı).
+- Bu dosyayı backend gap backlog’u için tek kaynak olarak düşünün.
+- EN/TR dosyaları birebir mirrored tutulmalıdır (bkz: `/docs/new/en/runbooks/backend-gap-register.md`).
 
 ---
 
-## 1) A (mod bazl)
+## 1) Açık gap’ler (modül bazlı)
 
-### 1.1 System → Logs → Kategori endpointleri bo liste dndyor
+### 1.1 System → Logs → Kategori endpoint’leri boş liste dönüyor
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/logs.md`
-- **Belirti:**  tablar `[]` dndyor /  "No logs found" gsteriyor.
-- **Muhtemel neden:** `backend/app/routes/logs.py` iinde `/events` var, ama birok kategori endpoint stub / bo dner.
-- **Etki:** Ops Logs UIna kan olamaz; container loglarna pivot gerekir.
+- **Belirti:** Çoğu tab `[]` dönüyor / “No logs found” gösteriyor (bilinen incident sırasında bile).
+- **Muhtemel neden:** `backend/app/routes/logs.py` içinde `/events` var; ancak birçok kategori endpoint’i stub veya boş liste dönüyor.
+- **Etki:** Ops Logs UI’dan kanıt toplayamaz; container log’a pivot etmek gerekir.
 - **Admin workaround:**
-  - Birincil: **System Events** tab.
-  - cron/deployments/db/cache i infra monitoring + container log.
+  - Birincil: **System Events** tab’ı.
+  - cron/deployments/db/cache için: container log / infra monitoring.
 - **Escalation paketi:**
   - `GET /api/v1/logs/<category>` (cron/health/deployments/config/errors/queues/db/cache/archive)
-  - Beklenen vs gerek: event listesi vs `[]`
+  - Beklenen vs gerçek: anlamlı event listesi vs `[]`
   - Anahtar kelimeler: `logs/<category>`
 - **Resolution owner:** Backend
-- **Do (fix sonras):** Event varsa her kategori endpoint non-empty dner; UI tablar dol.
+- **Doğrulama (fix sonrası):** Event varsa her kategori endpoint’i non-empty döner; UI tab’lar dolar.
 
 ---
 
-### 1.2 System → Admin Users → Users d tablar gsteriliyor ama endpointler eksik olabilir
+### 1.2 System → Admin Users → Users dışındaki tab’lar görünüyor ama endpoint’ler eksik olabilir
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/admin-users.md`
-- **Belirti:** UIda Roles/Teams/Sessions/Invites/Security sekmeleri var, ama istekler **404 Not Found** dndyor.
-- **Muhtemel neden:** UI `/api/v1/admin/roles`, `/api/v1/admin/sessions`, `/api/v1/admin/invites` gibi endpointleri 
-- **Etki:** Sadece Users tab ; ileri admin/security ilevleri blok.
+- **Belirti:** UI’da Roles/Teams/Sessions/Invites/Security sekmeleri var, ama istekler **404 Not Found** dönüyor.
+- **Muhtemel neden:** UI `/api/v1/admin/roles`, `/api/v1/admin/sessions`, `/api/v1/admin/invites` gibi endpoint’leri çağırıyor; backend bu route’ları sağlamıyor.
+- **Etki:** Sadece Users tab’ı çalışır; ileri admin/security operasyonları bloklanır.
 - **Admin workaround:** Yok.
 - **Escalation paketi:**
-  - DevTools Network
-  - Beklenen vs gerek: 200 vs 404
-  - Anahtar kelime: `admin/roles`, `admin/sessions`, `admin/invites`
+  - DevTools Network’ten fail eden path’leri yakalayın
+  - Beklenen vs gerçek: 200 vs 404
+  - Anahtar kelimeler: `admin/roles`, `admin/sessions`, `admin/invites`
 - **Resolution owner:** Backend
-- **Do (fix sonras):** Endpointler 200 dner ve UI tablar dol.
+- **Doğrulama (fix sonrası):** Endpoint’ler 200 döner ve UI tab’lar veri gösterir.
 
 ---
 
-### 1.3 System → Feature Flags → Safe stub (kal
+### 1.3 System → Feature Flags → Safe stub (persistence yok)
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/feature-flags.md`
-- **Belirti:** Flag listesi bo; toggle OK dner ama state persist etmez.
-- **Muhtemel neden:** `/api/v1/flags/*` routeleri bu buildda safe stub (return `[]` / return OK).
-- **Etki:** Feature Flags prod rollout i i.
+- **Belirti:** Flag listesi boş; toggle OK döner ama state persist etmez.
+- **Muhtemel neden:** `/api/v1/flags/*` route’ları bu build’de safe stub (return `[]` / return OK).
+- **Etki:** Feature Flags prod rollout mekanizması olarak kullanılamaz.
 - **Admin workaround:**
-  - Incident gating i: **Operations → Kill Switch** kullan.
-  - Persistence gelene kadar Feature Flags: .
+  - Incident gating için **Operations → Kill Switch** kullanın.
+  - Persistence gelene kadar Feature Flags’ı “bilgilendirme” olarak düşünün.
 - **Escalation paketi:**
   - `GET /api/v1/flags/`, `POST /api/v1/flags/`, `POST /api/v1/flags/{id}/toggle`
-  - Beklenen vs gerek: persisted state vs no persistence / empty
+  - Beklenen vs gerçek: persisted state vs no persistence / empty
   - Anahtar kelimeler: `flags`, `toggle`
 - **Resolution owner:** Backend
-- **Do (fix sonras):** Toggle refresh sonras bile persist eder; liste yeni state.
+- **Doğrulama (fix sonrası):** Toggle refresh sonrası da persist eder; liste yeni state’i gösterir.
 
 ---
 
-## 2) Notlar / s
+## 2) Notlar / süreç
 
-- Yeni bir gap tespit edince  ekleyin:
-  - mod / men
+- Yeni bir gap tespit edince şunları ekleyin:
+  - modül / menü
   - tam endpoint
-  - screenshot veya request/response snippet (ticket)
+  - screenshot veya request/response snippet (ticket’te; doc’ta değil)
   - etki seviyesi (P0/P1/P2)
-- Register: ksa ve aksiyon odakl olsun; derin analiz engineering ticketlarlarda olmal.
+- Register kısa ve aksiyon odaklı olmalı; derin analiz engineering ticket’larında yapılmalı.
