@@ -45,11 +45,18 @@ Backend enforcement is also owner-only:
 
 ## 4) Core workflows
 
-### 4.1 Create a new tenant
+### 4.1 Create a new tenant (Platform Owner only)
 1) Open System → Tenants.
 2) Fill **Tenant name** and **type**.
 3) Select default **features** (can_use_game_robot, can_edit_configs, can_manage_bonus, can_view_reports).
 4) Submit.
+
+**Hard-stop permission rule (backend):**
+- If `current_admin.is_platform_owner != true` → **403 Forbidden**.
+
+**Audit (mandatory):**
+- `tenant.create.attempt` is written for **all attempts** (success, failed, denied).
+- `tenant.created` is written for successful creations.
 
 **API calls (observed from frontend):**
 - Create: `POST /api/v1/tenants/`

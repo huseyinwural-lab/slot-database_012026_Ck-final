@@ -45,11 +45,18 @@ Backend enforce da owner-only:
 
 ## 4) Temel akışlar
 
-### 4.1 Yeni tenant oluşturma
+### 4.1 Yeni tenant oluşturma (sadece Platform Owner)
 1) System → Tenants aç.
 2) **Tenant name** ve **type** gir.
 3) Default **features** seç (can_use_game_robot, can_edit_configs, can_manage_bonus, can_view_reports).
 4) Submit.
+
+**Hard-stop yetki kuralı (backend):**
+- `current_admin.is_platform_owner != true` ise → **403 Forbidden**.
+
+**Audit (zorunlu):**
+- `tenant.create.attempt` tüm denemelerde yazılır (success/failed/denied).
+- Başarılı create için ayrıca `tenant.created` yazılır.
 
 **API çağrıları (frontend’den gözlemlendi):**
 - Create: `POST /api/v1/tenants/`
