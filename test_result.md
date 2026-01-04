@@ -44,6 +44,11 @@ Do not delete sections unless instructed.
       - `/docs/new/tr/admin/operations/bonuses.md`
       - `/docs/new/tr/admin/operations/affiliates.md`
       - `/docs/new/tr/admin/operations/support.md`
+    - Game Engine module pages:
+      - `/docs/new/en/admin/game-engine/robots.md`
+      - `/docs/new/en/admin/game-engine/math-assets.md`
+      - `/docs/new/tr/admin/game-engine/robots.md`
+      - `/docs/new/tr/admin/game-engine/math-assets.md`
 
 ## Previous history
 
