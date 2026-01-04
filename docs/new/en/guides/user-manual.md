@@ -242,7 +242,8 @@ Audit should include (at least):
 ## 11) Password Reset & Break-Glass
 
 See:
-- `/docs/new/en/admin/password-reset.md`
+- `/docs/new/en/runbooks/password-reset.md`
+- `/docs/new/en/runbooks/break-glass.md`
 
 ---
 
