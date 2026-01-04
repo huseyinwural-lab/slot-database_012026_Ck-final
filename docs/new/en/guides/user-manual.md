@@ -158,6 +158,9 @@ At minimum, document:
 
 See:
 - `/docs/new/en/runbooks/ci.md`
+- `/docs/new/en/runbooks/release.md`
+- `/docs/new/en/runbooks/ops.md`
+- `/docs/new/en/runbooks/incident.md`
 
 ---
 
