@@ -6,6 +6,15 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- Apply öncesi tenant + module scope doğrula.
+- Reason + blast radius + rollback koşullarını kaydet.
+- 503 davranışı ve **Audit Log** kanıtını doğrula.
+- Güvenli olur olmaz rollback: Enabled yap ve endpoint recovery kontrol.
+
+---
+
 ## 1) Amaç ve kapsam
 
 Kill Switch, belirli bir tenant için belirli modülleri (ve deploy’a göre global seviyeyi) acil durumda devre dışı bırakmaya yarar. Fraud dalgası, provider outage veya runaway maliyetlerde hızlı mitigasyon için kullanılır.

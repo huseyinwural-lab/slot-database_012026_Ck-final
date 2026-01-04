@@ -6,6 +6,15 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- Confirm tenant + module scope before applying.
+- Record reason + expected blast radius + rollback conditions.
+- Verify blocked behavior (503) and collect evidence in **Audit Log**.
+- Rollback as soon as safe: switch back to Enabled and verify endpoints recover.
+
+---
+
 ## 1) Purpose and scope
 
 Kill Switch provides an emergency control to disable specific modules per tenant (and optionally globally, depending on implementation). It is used to mitigate incidents (fraud waves, integration outages, runaway costs) by quickly blocking traffic.

@@ -6,6 +6,15 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- Save öncesi **tenant id + name** doğrula.
+- Yıkıcı aksiyonlarda rollback yolu: (**disable geri alınabilir**, purge genelde alınamaz).
+- Değişikliği UI’da ve **System → Audit Log**’da doğrula.
+- Incident için request path + status code + `request_id` (varsa) topla.
+
+---
+
 ## 1) Amaç ve kapsam
 
 Tenants menüsü, platform owner’ın tenant lifecycle yönetim alanıdır: tenant oluşturma, tenant listesini görüntüleme, tenant feature flag’lerini ve menü görünürlük flag’lerini güncelleme.

@@ -6,6 +6,15 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- Treat API keys as secrets: copy once, store in secret manager, never share.
+- For incidents: revoke/disable if possible; if not possible, rotate (new key → cutover → retire old).
+- Verify via **System → Audit Log** and backend auth failure logs.
+- Always confirm environment boundaries (staging vs prod).
+
+---
+
 ## 1) Purpose and scope
 
 The API Keys menu manages scope-based API keys used for external integrations and internal automation (e.g., Game Robot). Keys are **security-critical** secrets.

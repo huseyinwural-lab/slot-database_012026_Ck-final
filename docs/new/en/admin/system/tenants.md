@@ -6,6 +6,15 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- Confirm **tenant id + name** before any save.
+- Any destructive operation: confirm rollback path (**disable reversible**, purge usually not).
+- Verify changes in UI and in **System → Audit Log**.
+- For incidents: capture request path + status code + `request_id` (if present).
+
+---
+
 ## 1) Purpose and scope
 
 The Tenants menu is the platform owner’s control surface for managing tenant lifecycle: creating tenants, viewing existing tenants, and updating tenant feature flags and menu visibility flags.

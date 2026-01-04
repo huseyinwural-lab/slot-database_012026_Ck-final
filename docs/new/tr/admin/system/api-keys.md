@@ -6,6 +6,15 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- API key’leri secret kabul et: bir kez kopyala, secret manager’a koy, paylaşma.
+- Incident’te: mümkünse revoke/disable; değilse rotate (yeni key → cutover → eskiyi emekli et).
+- **System → Audit Log** ve auth failure log’larıyla doğrula.
+- Environment sınırlarını (staging/prod) doğrula.
+
+---
+
 ## 1) Amaç ve kapsam
 
 API Keys menüsü, external entegrasyonlar ve internal otomasyonlar (örn. Game Robot) için scope-based API key yönetimini sağlar. Key’ler **kritik güvenlik secret**’larıdır.
