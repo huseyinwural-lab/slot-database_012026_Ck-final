@@ -48,6 +48,7 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Impact:** High
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/admin-users.md`
 - **Belirti:** UI’da Roles/Teams/Sessions/Invites/Security sekmeleri var, ama istekler **404 Not Found** dönüyor.
