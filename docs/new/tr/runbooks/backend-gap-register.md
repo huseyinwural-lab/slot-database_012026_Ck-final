@@ -12,6 +12,10 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 ---
 
+
+> Bu register, menü sayfalarındaki “Backend/Integration Gap’leri” bölümlerini tamamlar.
+> Bir gap doğrulandığında, aksiyon takibi için buraya ekleyin.
+
 ## 1) Açık gap’ler (modül bazlı)
 
 ### 1.1 System → Logs → Kategori endpoint’leri boş liste dönüyor
