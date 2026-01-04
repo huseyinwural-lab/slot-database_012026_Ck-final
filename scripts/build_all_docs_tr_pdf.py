@@ -192,8 +192,12 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
         if not paragraph:
             return
         if paragraph.startswith("#"):
-            level = len(paragraph) - len(paragraph.lstrip("#"))
+            # Render headings safely: reportlab Paragraph parser can choke on embedded HTML like <br>
             title = paragraph.lstrip("#").strip()
+            title = title.replace("<br/>", " ").replace("<br />", " ").replace("<br>", " ")
+            title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+            level = len(paragraph) - len(paragraph.lstrip("#"))
             style = styles["Heading1"] if level == 1 else styles["Heading2"] if level == 2 else styles["Heading3"]
             story.append(Paragraph(title, style))
             story.append(Spacer(1, 0.2 * cm))
