@@ -52,6 +52,7 @@ Bu doküman, Admin Panel kullanım kılavuzunun **hub** sayfasıdır.
 
 ### Core
 - Dashboard → `./core/dashboard.md`
+- My Revenue (sadece tenant) → (aktifse Reports / Revenue menülerine bakın)
 - Players → `./core/players.md`
 - Finance (sadece owner) → `./core/finance.md`
 - Withdrawals (sadece owner) → `./core/withdrawals.md`
