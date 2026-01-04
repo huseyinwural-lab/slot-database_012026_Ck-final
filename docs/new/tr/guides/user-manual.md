@@ -32,6 +32,9 @@ Bu doküman, **uzun ömürlü ve ops-dayanıklı** olacak şekilde, yeni gelen b
 
 Bkz:
 - `/docs/new/tr/guides/install.md`
+- `/docs/new/tr/guides/secrets.md`
+- `/docs/new/tr/guides/migrations.md`
+- `/docs/new/tr/guides/performance-guardrails.md`
 
 ---
 
@@ -82,6 +85,9 @@ Referans:
 
 Bkz:
 - `/docs/new/tr/admin/tenant-lifecycle.md`
+- `/docs/new/tr/architecture/tenancy.md`
+- `/docs/new/tr/architecture/data-lifecycle.md`
+- `/docs/new/tr/architecture/audit-logging.md`
 
 Tenant scope davranışı:
 - `X-Tenant-ID` header sadece platform owner impersonation için serbest.

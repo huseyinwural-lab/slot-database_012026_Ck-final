@@ -32,6 +32,9 @@ This is the **operations-grade, long-lived** manual intended to be enough for a 
 
 See:
 - `/docs/new/en/guides/install.md`
+- `/docs/new/en/guides/secrets.md`
+- `/docs/new/en/guides/migrations.md`
+- `/docs/new/en/guides/performance-guardrails.md`
 
 ---
 
@@ -82,6 +85,9 @@ Relevant implementation references:
 
 See:
 - `/docs/new/en/admin/tenant-lifecycle.md`
+- `/docs/new/en/architecture/tenancy.md`
+- `/docs/new/en/architecture/data-lifecycle.md`
+- `/docs/new/en/architecture/audit-logging.md`
 
 Also important tenant-scope behavior:
 - `X-Tenant-ID` header is allowed **only** for platform owner impersonation.
