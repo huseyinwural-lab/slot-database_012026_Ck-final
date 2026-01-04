@@ -24,6 +24,7 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Impact:** Medium
 
 - **Source page:** `/docs/new/en/admin/system/logs.md`
 - **Symptom:** Most tabs return `[]` / show “No logs found” even during known incidents.
