@@ -259,6 +259,7 @@ See also:
 - `/docs/new/en/api/overview.md`
 - `/docs/new/en/api/admin.md`
 - `/docs/new/en/api/payments.md`
+- `/docs/new/en/api/payouts.md`
 
 ### 13.1 Rate limits
 
