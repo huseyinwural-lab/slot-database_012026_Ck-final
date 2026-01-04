@@ -17,6 +17,8 @@ Do not delete sections unless instructed.
   - Admin manual quality gates:
     - min ≥8 error scenarios
     - keyword patterns (case-insensitive + minimal variations)
+  - Docs: common errors guide (18 platform-wide error types)
+  - Code: tenant creation permission hard-stop + audit requirements
   - Added/updated docs:
     - `/docs/new/en/runbooks/backend-gap-register.md` (+ migrated fields: First Seen / Environment / Status)
     - `/docs/new/tr/runbooks/backend-gap-register.md` (+ migrated fields: First Seen / Environment / Status)
