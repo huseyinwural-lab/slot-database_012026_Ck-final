@@ -1,4 +1,4 @@
-# Webhook’lar (TR)
+# Webhooklar (TR)
 
 **Son gözden geçirme:** 2026-01-04  
 **Sorumlu:** Payments Engineering / Ops  

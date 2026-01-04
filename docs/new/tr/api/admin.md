@@ -1,4 +1,4 @@
-# Admin API (TR)
+# Yönetici (Admin) API (TR)
 
 **Son gözden geçirme:** 2026-01-04  
 **Sorumlu:** Backend Engineering  

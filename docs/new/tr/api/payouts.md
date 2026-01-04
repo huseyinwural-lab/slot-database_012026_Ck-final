@@ -1,4 +1,4 @@
-# Payouts API (TR)
+# Çekimler (Payouts) API (TR)
 
 **Son gözden geçirme:** 2026-01-04  
 **Sorumlu:** Payments Engineering  
