@@ -19,7 +19,7 @@ All backend endpoints are mounted under:
 - Auth: `/api/v1/auth/*`
 - Tenants: `/api/v1/tenants/*`
 - Admin (tenant admin management, etc.): `/api/v1/admin/*`
-- Payments: `/api/v1/payments/*`
+- Payments: `/api/v1/payments/*` (see `payments.md`)
 
 ---
 

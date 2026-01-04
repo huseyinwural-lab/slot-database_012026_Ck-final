@@ -6,6 +6,7 @@ API özeti ve detaylı spesifikasyonlara referanslar.
 - `overview.md`
 - `auth.md`
 - `tenants.md`
+- `payments.md`
 
 Ayrıca:
 - `/docs/new/tr/guides/user-manual.md`
