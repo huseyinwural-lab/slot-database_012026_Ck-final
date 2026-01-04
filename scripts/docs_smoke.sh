@@ -21,6 +21,8 @@ REQ_FILES=(
   "docs/new/tr/guides/quickstart.md"
   "docs/new/en/guides/ops-manual.md"
   "docs/new/tr/guides/ops-manual.md"
+  "docs/new/en/guides/admin-panel-manual.md"
+  "docs/new/tr/guides/admin-panel-manual.md"
   "docs/new/en/guides/user-manual.md"
   "docs/new/tr/guides/user-manual.md"
 )
