@@ -6,6 +6,13 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- Tenant context + time range doğrula.
+- KPI şüpheliyse: kaynağı menüden çapraz kontrol et (Finance/Players/Games).
+
+---
+
 ## 1) Amaç ve kapsam
 
 Dashboard, platform/tenant performansına üst seviye bakış sunar: KPI’lar, trend grafikleri ve (varsa) son aktivite özetleri. Amaç hızlı durum farkındalığı sağlamak ve operatörün hangi menüde derinleşeceğine karar vermesidir.
