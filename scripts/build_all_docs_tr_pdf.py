@@ -204,14 +204,16 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
             return
 
         # Some markdown files embed HTML line breaks inside tables (e.g. <br>). Convert them to newlines.
+        # Normalize any inline HTML breaks so reportlab doesn't choke on <br> (non-self-closing).
         paragraph = (
-            paragraph.replace("<br/>", "\n")
-            .replace("<br />", "\n")
-            .replace("<br>", "\n")
+            paragraph.replace("<br/>", "__BR__")
+            .replace("<br />", "__BR__")
+            .replace("<br>", "__BR__")
         )
 
-        # Always escape HTML. We'll only introduce <br/> ourselves from newlines.
+        # Escape all HTML, then re-insert ONLY our safe <br/> tags.
         paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        paragraph = paragraph.replace("__BR__", "<br/>")
         paragraph = paragraph.replace("\n", "<br/>")
 
         # reportlab can't handle certain constructs in Paragraph (esp. markdown tables). Fallback safely.
