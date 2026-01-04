@@ -22,6 +22,13 @@ Do not delete sections unless instructed.
   - Added/updated docs:
     - `/docs/new/en/runbooks/backend-gap-register.md` (+ migrated fields: First Seen / Environment / Status)
     - `/docs/new/tr/runbooks/backend-gap-register.md` (+ migrated fields: First Seen / Environment / Status)
+    - Backend hardening:
+      - Tenant creation restricted to platform owner (`is_platform_owner == true`) at backend endpoint (`POST /api/v1/tenants/`)
+      - Audit events for tenant creation attempts and successes:
+        - `tenant.create.attempt` (attempt + blocked + failed)
+        - `tenant.created` (success)
+      - Create payload forbids unknown fields (prevents `is_system`/system-tenant smuggling)
+
     - `/docs/new/en/admin/system/settings.md`
     - `/docs/new/tr/admin/system/settings.md`
     - `/docs/new/en/admin/system/cms.md`
