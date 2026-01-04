@@ -68,6 +68,7 @@ async def create_tenant(
             resource_type="tenant",
             result="blocked",
         )
+        await session.commit()
         raise
 
     # Create (server-side ignore/forbid unknown fields such as is_system)
