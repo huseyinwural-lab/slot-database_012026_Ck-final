@@ -85,6 +85,10 @@ This is the **hub** for the Admin Panel manual.
 - Responsible Gaming (owner-only) → `./risk-compliance/responsible-gaming.md`
 
 ### Game Engine
+
+
+**Status:** COMPLETE (Robots + Math Assets)
+
 - Robots → `./game-engine/robots.md`
 - Math Assets → `./game-engine/math-assets.md`
 

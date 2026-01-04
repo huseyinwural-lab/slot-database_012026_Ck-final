@@ -85,6 +85,10 @@ Bu doküman, Admin Panel kullanım kılavuzunun **hub** sayfasıdır.
 - Responsible Gaming (sadece owner) → `./risk-compliance/responsible-gaming.md`
 
 ### Game Engine
+
+
+**Durum:** TAMAMLANDI (Robots + Math Assets)
+
 - Robots → `./game-engine/robots.md`
 - Math Assets → `./game-engine/math-assets.md`
 
