@@ -7,6 +7,7 @@ API overview and pointers to more detailed specs.
 - `auth.md`
 - `tenants.md`
 - `payments.md`
+- `admin.md`
 
 See also:
 - `/docs/new/en/guides/user-manual.md`

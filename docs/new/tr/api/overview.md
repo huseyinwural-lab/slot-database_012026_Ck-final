@@ -18,7 +18,7 @@ Tüm backend endpoint’leri şuradan yayınlanır:
 
 - Auth: `/api/v1/auth/*`
 - Tenants: `/api/v1/tenants/*`
-- Admin: `/api/v1/admin/*`
+- Admin: `/api/v1/admin/*` (bkz `admin.md`)
 - Payments: `/api/v1/payments/*` (bkz `payments.md`)
 
 ---
