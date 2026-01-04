@@ -138,7 +138,29 @@ Mevcut UI’da disable işlemi Active/Inactive toggle ile yapılır.
 
 ---
 
-## 7) Çözüm adımları (adım adım)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Active/Inactive toggle 404 Not Found dönüyor.
+   - **Likely Cause:** UI `PATCH /api/v1/api-keys/{id}` çağırıyor; bu backend build’de key status update için PATCH route yok.
+   - **Impact:** Admin UI üzerinden key disable/revoke edemez (güvenlik/incident response etkisi). Rotation “yeni key yarat + cutover” şeklinde yapılır.
+   - **Admin Workaround:**
+     - Doğru scope’larla yeni key oluştur.
+     - Entegrasyon config’ini yeni key’e geçir.
+     - Eski key’leri backend status update gelene kadar UI’dan disable edilemez kabul et.
+   - **Escalation Package:**
+     - HTTP method + path: `PATCH /api/v1/api-keys/{id}`
+     - Request sample: `{ "active": false }`
+     - Expected vs actual: expected 200; actual 404
+     - Log keyword’leri:
+       - `api-keys`
+       - `PATCH`
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** Fix sonrası toggle 200 döner; key status değişimi refresh sonrası kalıcı.
+
+---
+
+## 8) Doğrulama (UI + Log + Audit + DB)
 
 1) Hata veren endpoint’i ve error code’u (401/403/5xx) tespit et.
 2) Hangi key’in kullanıldığını (prefix varsa) doğrula.

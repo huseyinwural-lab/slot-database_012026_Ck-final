@@ -146,7 +146,31 @@ Observed endpoints selected by tab:
 
 ---
 
-## 7) Resolution steps (step-by-step)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Most report tabs return 404 Not Found.
+   - **Likely Cause:** UI calls endpoints under `/api/v1/reports/*` (overview/financial/...) but backend `routes/reports.py` is currently a stub.
+   - **Impact:** Reporting is partially or fully blocked (operational monitoring and evidence generation impact). Commonly affects preview/staging; can affect prod if the same backend build is deployed.
+   - **Admin Workaround:** Use the source menus as temporary alternatives:
+     - Finance (transactions/withdrawals)
+     - Players
+     - Games
+     - Revenue pages (if available)
+     If export endpoints are missing: no admin-side export workaround.
+   - **Escalation Package:**
+     - HTTP method + path: `GET /api/v1/reports/<tab>` (capture exact path from DevTools)
+     - Request sample: query params used by the UI
+     - Expected vs actual: expected 200; actual 404
+     - Logs keywords:
+       - `reports`
+       - the exact endpoint path
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** Each report tab endpoint returns 200 and the UI table/cards populate.
+
+---
+
+## 8) Resolution steps (step-by-step)
 
 1) Capture failing endpoint + status code.
 2) Confirm tenant context and entitlements.

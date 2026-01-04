@@ -139,7 +139,31 @@ The UI supports a “manual upload + preview + confirm import” flow.
 
 ---
 
-## 7) Resolution steps (step-by-step)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Upload & Import returns 404 Not Found.
+   - **Likely Cause:** UI calls endpoints under `/api/v1/game-import/manual/*` but backend does not expose these routes in this build.
+   - **Impact:** Catalog manual upload/import is blocked in this environment (typically affects preview/staging first; can affect prod if deployed similarly).
+   - **Admin Workaround:** No admin-side workaround. Use supported catalog ingestion path (if any) or defer until backend supports manual import endpoints.
+   - **Escalation Package:**
+     - HTTP method + path:
+       - `POST /api/v1/game-import/manual/upload`
+       - `GET /api/v1/game-import/jobs/{job_id}`
+       - `POST /api/v1/game-import/jobs/{job_id}/import`
+     - Request sample (upload): multipart form-data (export exact request as cURL from DevTools)
+     - Expected vs actual:
+       - Expected 200 + `{ job_id }` (upload) / 200 (job) / 200 (import)
+       - Actual 404 Not Found
+     - Logs keywords:
+       - `game-import`
+       - `manual/upload`
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** After backend fix, upload returns 200 and job/import endpoints succeed; UI import flow completes.
+
+---
+
+## 8) Resolution steps (step-by-step)
 
 1) Capture evidence in DevTools (Network): failing request path + status + payload.
 2) Confirm tenant context.

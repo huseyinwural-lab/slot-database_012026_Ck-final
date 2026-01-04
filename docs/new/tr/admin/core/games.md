@@ -139,7 +139,31 @@ UI, “manual upload + preview + import confirm” akışını destekler.
 
 ---
 
-## 7) Çözüm adımları (adım adım)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Upload & Import 404 Not Found.
+   - **Likely Cause:** UI `/api/v1/game-import/manual/*` endpoint’lerini çağırıyor; backend bu build’de bu route’ları expose etmiyor.
+   - **Impact:** Manuel katalog upload/import bu environment’ta bloklanır (genelde preview/staging’de önce görülür; aynı build prod’a giderse prod’u da etkiler).
+   - **Admin Workaround:** No admin-side workaround. Desteklenen katalog ingest yolu varsa onu kullanın; yoksa backend desteği gelene kadar erteleyin.
+   - **Escalation Package:**
+     - HTTP method + path:
+       - `POST /api/v1/game-import/manual/upload`
+       - `GET /api/v1/game-import/jobs/{job_id}`
+       - `POST /api/v1/game-import/jobs/{job_id}/import`
+     - Request sample (upload): multipart form-data (DevTools’tan cURL export)
+     - Expected vs actual:
+       - Expected 200 + `{ job_id }` (upload) / 200 (job) / 200 (import)
+       - Actual 404 Not Found
+     - Log keyword’leri:
+       - `game-import`
+       - `manual/upload`
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** Backend fix sonrası upload 200 döner; job/import endpoint’leri başarılı; UI import akışı tamamlanır.
+
+---
+
+## 8) Çözüm adımları (adım adım)
 
 1) DevTools (Network) ile kanıt topla: failing path + status + payload.
 2) Tenant context doğrula.

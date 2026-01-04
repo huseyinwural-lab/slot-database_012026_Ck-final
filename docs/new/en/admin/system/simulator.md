@@ -131,7 +131,26 @@ Observed data endpoint:
 
 ---
 
-## 7) Resolution steps (step-by-step)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Runs list (or run actions) return 404 Not Found.
+   - **Likely Cause:** UI calls `GET /api/v1/simulation-lab/runs` but backend `routes/simulation_lab.py` is currently a stub.
+   - **Impact:** Simulator is blocked (no ability to run/view simulations). Primarily affects preview/staging; can affect prod if the same build is deployed.
+   - **Admin Workaround:** No admin-side workaround.
+   - **Escalation Package:**
+     - HTTP method + path: `GET /api/v1/simulation-lab/runs`
+     - Request sample: none (simple GET)
+     - Expected vs actual: expected 200; actual 404
+     - Logs keywords:
+       - `simulation-lab`
+       - `runs`
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** Endpoint returns 200 with an array of runs; UI renders Overview/Archive.
+
+---
+
+## 8) Verification (UI + Logs + Audit + DB)
 
 1) Confirm user/tenant has `can_use_game_robot`.
 2) Capture failing endpoint + status.

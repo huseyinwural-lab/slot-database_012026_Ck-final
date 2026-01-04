@@ -131,7 +131,26 @@ Gözlemlenen data endpoint’i:
 
 ---
 
-## 7) Çözüm adımları (adım adım)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Runs listesi (veya run aksiyonları) 404 Not Found dönüyor.
+   - **Likely Cause:** UI `GET /api/v1/simulation-lab/runs` çağırıyor; backend’de `routes/simulation_lab.py` stub durumda.
+   - **Impact:** Simulator bloklanır (simülasyon run/view yapılamaz). Genelde preview/staging’de görülür; aynı build prod’a giderse prod’u da etkiler.
+   - **Admin Workaround:** No admin-side workaround.
+   - **Escalation Package:**
+     - HTTP method + path: `GET /api/v1/simulation-lab/runs`
+     - Request sample: yok (simple GET)
+     - Expected vs actual: expected 200; actual 404
+     - Log keyword’leri:
+       - `simulation-lab`
+       - `runs`
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** Endpoint 200 döner ve runs array verir; UI Overview/Archive render eder.
+
+---
+
+## 8) Doğrulama (UI + Log + Audit + DB)
 
 1) Kullanıcı/tenant `can_use_game_robot` sahip mi doğrula.
 2) Fail eden endpoint + status al.

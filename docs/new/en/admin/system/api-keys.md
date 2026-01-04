@@ -138,7 +138,29 @@ In the current UI, disabling is performed via an “Active/Inactive” toggle.
 
 ---
 
-## 7) Resolution steps (step-by-step)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Toggling a key Active/Inactive returns 404 Not Found.
+   - **Likely Cause:** UI calls `PATCH /api/v1/api-keys/{id}` but this backend build does not expose a PATCH route for updating key status.
+   - **Impact:** Admin cannot disable/revoke keys via UI toggle (security/incident response impact). Rotation must be handled as create-new + cutover.
+   - **Admin Workaround:**
+     - Create a new key with correct scopes.
+     - Update integration config to use the new key.
+     - Treat old keys as “cannot be disabled via UI” until backend supports status updates.
+   - **Escalation Package:**
+     - HTTP method + path: `PATCH /api/v1/api-keys/{id}`
+     - Request sample: `{ "active": false }`
+     - Expected vs actual: expected 200; actual 404
+     - Logs keywords:
+       - `api-keys`
+       - `PATCH`
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** After fix, toggling Active/Inactive returns 200 and key status changes persist after refresh.
+
+---
+
+## 8) Verification (UI + Logs + Audit + DB)
 
 1) Identify the failing integration endpoint and capture the error (401/403/5xx).
 2) Confirm which key is in use (prefix if available).

@@ -147,7 +147,31 @@ Tab’a göre seçilen endpoint’ler:
 
 ---
 
-## 7) Çözüm adımları (adım adım)
+## 7) Backend/Integration Gaps (Release Note)
+
+1) **Symptom:** Rapor sekmelerinin çoğu 404 Not Found dönüyor.
+   - **Likely Cause:** UI `/api/v1/reports/*` (overview/financial/...) endpoint’lerini çağırıyor; backend’de `routes/reports.py` stub durumda.
+   - **Impact:** Reporting kısmen veya tamamen bloklanır (operasyonel izleme + kanıt üretimi etkilenir). Genelde preview/staging’de görülür; aynı build prod’a giderse prod’u da etkiler.
+   - **Admin Workaround:** Geçici alternatif olarak kaynak menüleri kullan:
+     - Finance (transactions/withdrawals)
+     - Players
+     - Games
+     - Revenue sayfaları (varsa)
+     Export endpoint yoksa: admin-side export workaround yok.
+   - **Escalation Package:**
+     - HTTP method + path: `GET /api/v1/reports/<tab>` (DevTools’tan net path alın)
+     - Request sample: UI’ın gönderdiği query params
+     - Expected vs actual: expected 200; actual 404
+     - Log keyword’leri:
+       - `reports`
+       - endpoint path
+       - `404`
+   - **Resolution Owner:** Backend
+   - **Verification:** Her sekmenin endpoint’i 200 döner ve UI tablo/kartlar dolu.
+
+---
+
+## 8) Çözüm adımları (adım adım)
 
 1) Fail eden endpoint + status code al.
 2) Tenant context ve entitlement doğrula.
