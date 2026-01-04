@@ -9,7 +9,7 @@
 ## Ops Checklist (read first)
 
 - Mutlaka **tenant context**i önce doğrula. Ayarlar değişiklikleri real-money akışlarını etkileyebilir.
-- Her değişiklikte: request path + status code + response body al (DevTools  Network).
+- Her değişiklikte: request path + status code + response body al (DevTools → Network).
 - Write aksiyonlarında (create/update/delete): mümkünse **Audit Log** ile kanıt topla.
 - Yakında / placeholder tablara prodda güvenme.
 
