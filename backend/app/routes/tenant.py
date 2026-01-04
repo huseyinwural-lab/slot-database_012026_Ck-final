@@ -8,6 +8,7 @@ from app.models.sql_models import Tenant, AdminUser
 from app.core.errors import AppError
 from app.utils.auth import get_current_admin
 from app.utils.permissions import require_owner
+from app.schemas.tenant import TenantCreateRequest
 from app.utils.tenant import get_current_tenant_id
 
 router = APIRouter(prefix="/api/v1/tenants", tags=["tenants"])
