@@ -10,6 +10,9 @@ Bu klasör, projenin **yetkili (authoritative)** dokümantasyon setidir.
 - `architecture/` — üst seviye mimari
 - `adr/` — Mimari Karar Kayıtları (ADR)
 
+## Ana giriş noktası
+- `/docs/new/tr/guides/user-manual.md` (ops-dayanıklı kılavuz)
+
 ## Hızlı Linkler
 - Operasyon dokümanları (legacy, zamanla buraya taşınacak): `/docs/ops/`
 - Ödeme dokümanları (legacy, zamanla buraya taşınacak): `/docs/payments/`

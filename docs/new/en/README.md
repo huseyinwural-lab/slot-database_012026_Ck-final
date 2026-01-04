@@ -10,6 +10,9 @@ This folder is the **authoritative** documentation set for the project.
 - `architecture/` — high-level architecture
 - `adr/` — Architecture Decision Records
 
+## Primary entry point
+- `/docs/new/en/guides/user-manual.md` (operations-ready manual)
+
 ## Quick Links
 - Operations runbooks (legacy, will be consolidated here): `/docs/ops/`
 - Payments docs (legacy, will be consolidated here): `/docs/payments/`
