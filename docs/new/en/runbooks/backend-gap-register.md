@@ -70,6 +70,7 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Impact:** Medium
 
 - **Source page:** `/docs/new/en/admin/system/feature-flags.md`
 - **Symptom:** Flags always return empty lists / toggles return OK but do not persist.
