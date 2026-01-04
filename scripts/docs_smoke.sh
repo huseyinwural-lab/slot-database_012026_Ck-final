@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+fail() {
+  echo "[DOCS_SMOKE][FAIL] $1" >&2
+  exit 1
+}
+
+info() {
+  echo "[DOCS_SMOKE] $1"
+}
+
+info "Starting docs smoke checks"
+
+# 1) Required files
+REQ_FILES=(
+  "docs/new/en/guides/quickstart.md"
+  "docs/new/tr/guides/quickstart.md"
+  "docs/new/en/guides/ops-manual.md"
+  "docs/new/tr/guides/ops-manual.md"
+  "docs/new/en/guides/user-manual.md"
+  "docs/new/tr/guides/user-manual.md"
+)
+
+for f in "${REQ_FILES[@]}"; do
+  [[ -f "$f" ]] || fail "Missing required doc: $f"
+done
+
+# 2) EN/TR parallel set (by relative path)
+info "Checking EN/TR mirrored file set"
+EN_LIST=$(find docs/new/en -type f -name '*.md' | sed 's#^docs/new/en/##' | sort)
+TR_LIST=$(find docs/new/tr -type f -name '*.md' | sed 's#^docs/new/tr/##' | sort)
+
+if [[ "$EN_LIST" != "$TR_LIST" ]]; then
+  echo "--- EN only ---" >&2
+  comm -23 <(printf "%s\n" "$EN_LIST") <(printf "%s\n" "$TR_LIST") >&2 || true
+  echo "--- TR only ---" >&2
+  comm -13 <(printf "%s\n" "$EN_LIST") <(printf "%s\n" "$TR_LIST") >&2 || true
+  fail "EN/TR docs are not mirrored"
+fi
+
+# 3) Required headings in Quickstart/Ops Manual
+info "Checking required headings"
+for lang in en tr; do
+  QS="docs/new/$lang/guides/quickstart.md"
+  OM="docs/new/$lang/guides/ops-manual.md"
+
+  grep -q "^# Quickstart" "$QS" || grep -q "^# Quickstart" "$QS" || fail "$QS missing title"
+  grep -q "## 1" "$QS" || fail "$QS missing numbered sections"
+
+  grep -q "^# Operations Manual" "$OM" || grep -q "^# Operasyonel Rehber" "$OM" || fail "$OM missing title"
+  grep -q "## 1" "$OM" || fail "$OM missing numbered sections"
+done
+
+# 4) Env example existence check
+info "Checking .env.example references"
+[[ -f ".env.example" ]] || fail "Missing root .env.example"
+[[ -f "backend/.env.example" ]] || fail "Missing backend/.env.example"
+[[ -f "frontend/.env.example" ]] || fail "Missing frontend/.env.example"
+[[ -f "frontend-player/.env.example" ]] || fail "Missing frontend-player/.env.example"
+
+# 5) Relative link check (repo-internal only)
+# We only validate markdown links that are relative and point to .md files.
+info "Checking relative markdown links"
+MD_FILES=$(find docs/new -type f -name '*.md' | sort)
+
+while IFS= read -r file; do
+  dir=$(dirname "$file")
+  # Extract links: [text](path)
+  # Keep only relative links not starting with http(s), /, #
+  while IFS= read -r link; do
+    path=$(echo "$link" | sed -E 's/.*\(([^)]+)\).*/\1/' | cut -d'#' -f1)
+    [[ -z "$path" ]] && continue
+    [[ "$path" =~ ^https?:// ]] && continue
+    [[ "$path" =~ ^/ ]] && continue
+    [[ "$path" =~ ^# ]] && continue
+
+    # only validate markdown/doc targets
+    if [[ "$path" == *.md ]]; then
+      target="$dir/$path"
+      target=$(python3 -c "import os; print(os.path.normpath('$target'))")
+      [[ -f "$target" ]] || fail "Broken link in $file -> $path (resolved: $target)"
+    fi
+  done < <(grep -oE '\[[^\]]+\]\([^)]+\)' "$file" || true)
+
+done <<< "$MD_FILES"
+
+# 6) Lightweight command validations (no side effects)
+info "Checking tooling availability (non-heavy)"
+python3 --version >/dev/null 2>&1 || fail "python3 missing"
+yarn --version >/dev/null 2>&1 || fail "yarn missing"
+docker --version >/dev/null 2>&1 || fail "docker missing"
+docker-compose version >/dev/null 2>&1 || docker compose version >/dev/null 2>&1 || fail "docker compose missing"
+
+info "Docs smoke checks passed"
