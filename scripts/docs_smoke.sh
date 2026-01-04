@@ -103,6 +103,11 @@ while IFS= read -r file; do
     [[ "$path" =~ ^/ ]] && continue
     [[ "$path" =~ ^# ]] && continue
 
+    # Fail placeholders (release gate)
+    if [[ "$path" =~ TODO|PLACEHOLDER ]]; then
+      fail "Placeholder link in $file -> $path"
+    fi
+
     # only validate markdown/doc targets
     if [[ "$path" == *.md ]]; then
       target="$dir/$path"
@@ -112,6 +117,13 @@ while IFS= read -r file; do
   done < <(grep -oE '\[[^\]]+\]\([^)]+\)' "$file" || true)
 
 done <<< "$MD_FILES"
+
+# 5b) Fail TODO/PLACEHOLDER tokens anywhere in docs/new (release gate)
+info "Checking for TODO/PLACEHOLDER tokens"
+if rg -n "TODO|PLACEHOLDER" docs/new >/dev/null 2>&1; then
+  rg -n "TODO|PLACEHOLDER" docs/new >&2 || true
+  fail "Found TODO/PLACEHOLDER in documentation"
+fi
 
 # 6) Lightweight command validations (no side effects)
 # Keep these checks portable: CI runners will have them, but local environments may not.
