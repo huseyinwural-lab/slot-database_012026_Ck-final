@@ -210,15 +210,22 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
             .replace("<br>", "\n")
         )
 
+        # Always escape HTML. We'll only introduce <br/> ourselves from newlines.
         paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         paragraph = paragraph.replace("\n", "<br/>")
+
+        # reportlab can't handle certain constructs in Paragraph (esp. markdown tables). Fallback safely.
         try:
             story.append(Paragraph(paragraph, normal))
             story.append(Spacer(1, 0.2 * cm))
         except Exception:
-            # Fallback: treat as plain preformatted text (safe for markdown tables / odd HTML)
             from reportlab.platypus import Preformatted
-            safe = paragraph.replace("<br/>", "\n")
+            safe = (
+                paragraph.replace("<br/>", "\n")
+                .replace("&lt;br&gt;", "\n")
+                .replace("&lt;br/&gt;", "\n")
+                .replace("&lt;br /&gt;", "\n")
+            )
             story.append(Preformatted(safe, code_style))
             story.append(Spacer(1, 0.2 * cm))
 
