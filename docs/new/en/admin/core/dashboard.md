@@ -6,6 +6,13 @@
 
 ---
 
+## Ops Checklist (read first)
+
+- Confirm tenant context + time range.
+- If KPI looks off: immediately cross-check the source menu (Finance/Players/Games).
+
+---
+
 ## 1) Purpose and scope
 
 The Dashboard provides a top-level snapshot of platform/tenant performance: KPIs, time-series trends, and recent activity. It is intended for quick situational awareness and to help operators decide which deep-dive menu to open next.
