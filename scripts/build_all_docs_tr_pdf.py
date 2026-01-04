@@ -214,7 +214,9 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
             .replace("<br>", "\n")
         )
 
-        story.append(XPreformatted(paragraph, normal))
+        # Escape < and > so reportlab won't parse HTML tags
+        safe = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        story.append(XPreformatted(safe, normal))
         story.append(Spacer(1, 0.2 * cm))
 
     for ln in lines:
