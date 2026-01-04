@@ -64,6 +64,10 @@ Bu doküman, Admin Panel kullanım kılavuzunun **hub** sayfasıdır.
 - VIP Games → `./core/vip-games.md`
 
 ### Operations
+
+
+**Durum:** TAMAMLANDI (KYC Verification + CRM & Comms + Bonuses + Affiliates + Kill Switch + Support)
+
 - KYC Verification → `./operations/kyc-verification.md`
 - CRM & Comms → `./operations/crm-comms.md`
 - Bonuses → `./operations/bonuses.md`

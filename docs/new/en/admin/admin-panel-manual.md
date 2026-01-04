@@ -64,6 +64,10 @@ This is the **hub** for the Admin Panel manual.
 - VIP Games → `./core/vip-games.md`
 
 ### Operations
+
+
+**Status:** COMPLETE (KYC Verification + CRM & Comms + Bonuses + Affiliates + Kill Switch + Support)
+
 - KYC Verification → `./operations/kyc-verification.md`
 - CRM & Comms → `./operations/crm-comms.md`
 - Bonuses → `./operations/bonuses.md`
