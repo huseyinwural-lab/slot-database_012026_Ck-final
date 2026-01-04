@@ -2,6 +2,7 @@ import asyncio
 import glob
 import os
 import re
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -9,6 +10,10 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 
 FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
+
+
+def log(msg: str) -> None:
+    print(msg, flush=True)
 
 
 def _split_preserving_fences(md: str):
@@ -25,7 +30,8 @@ def _split_preserving_fences(md: str):
     return parts
 
 
-def _chunk_text(text: str, max_chars: int = 9000):
+def _chunk_text(text: str, max_chars: int = 7000):
+    """Chunk plain markdown text (outside code fences) into safe sized blocks."""
     text = text.strip("\n")
     if not text:
         return []
@@ -51,18 +57,38 @@ def _chunk_text(text: str, max_chars: int = 9000):
     return chunks
 
 
-async def translate_markdown(md: str, chat: LlmChat) -> str:
+async def _translate_chunk(chat: LlmChat, text: str, max_attempts: int = 4) -> str:
+    for attempt in range(1, max_attempts + 1):
+        try:
+            msg = UserMessage(
+                text=(
+                    "Translate the following markdown text to Turkish. "
+                    "Preserve markdown formatting. Output ONLY the translated markdown.\n\n" + text
+                )
+            )
+            resp = await chat.send_message(msg)
+            return resp.strip()
+        except Exception as exc:
+            if attempt >= max_attempts:
+                raise
+            sleep_s = 2 * attempt
+            log(f"WARN: translate attempt {attempt} failed: {type(exc).__name__}. Retrying in {sleep_s}s")
+            time.sleep(sleep_s)
+    raise RuntimeError("unreachable")
+
+
+async def translate_markdown(md: str, api_key: str, session_id: str) -> str:
     parts = _split_preserving_fences(md)
     out = []
 
     system_rules = (
         "You are a professional technical translator. Translate English to Turkish. "
-        "Preserve markdown structure. Do NOT translate fenced code blocks, shell commands, URLs, "
-        "file paths, JSON/YAML keys. Keep headings and bullet formatting."
+        "Preserve markdown structure. Do NOT translate fenced code blocks. "
+        "Do NOT translate shell commands, URLs, file paths, JSON/YAML keys. "
+        "Keep headings and bullet formatting."
     )
 
-    # Make a dedicated chat per file for better consistency
-    chat = LlmChat(api_key=chat.api_key, session_id=chat.session_id + "-file", system_message=system_rules).with_model("openai", "gpt-5.2")
+    chat = LlmChat(api_key=api_key, session_id=session_id, system_message=system_rules).with_model("openai", "gpt-5.2")
 
     for is_fence, content in parts:
         if is_fence:
@@ -75,15 +101,10 @@ async def translate_markdown(md: str, chat: LlmChat) -> str:
             continue
 
         translated_chunks = []
-        for c in chunks:
-            msg = UserMessage(
-                text=(
-                    "Translate the following markdown text to Turkish. "
-                    "Do not add commentary. Output ONLY the translated markdown.\n\n" + c
-                )
-            )
-            resp = await chat.send_message(msg)
-            translated_chunks.append(resp.strip())
+        for i, c in enumerate(chunks, start=1):
+            translated = await _translate_chunk(chat, c)
+            translated_chunks.append(translated)
+            log(f"  chunk {i}/{len(chunks)} done")
 
         out.append("\n\n".join(translated_chunks))
 
@@ -101,12 +122,35 @@ def find_md_files(repo_root: str):
     return sorted(set(filtered))
 
 
+def _ensure_parent(path: str) -> None:
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+
+
+def _looks_english(text: str) -> bool:
+    # lightweight heuristic: many English stopwords and not many Turkish chars
+    if not text.strip():
+        return False
+    has_tr_chars = bool(re.search(r"[çğıöşüİÇĞÖŞÜ]", text))
+    has_en_words = bool(re.search(r"\b(the|and|with|deploy|installation|setup|usage|runbook|troubleshoot)\b", text, re.IGNORECASE))
+    return has_en_words and (not has_tr_chars)
+
+
 def md_to_pdf_simple(md_path: str, pdf_path: str):
-    """Simple markdown->PDF via reportlab Paragraphs; keeps it robust and dependency-light."""
+    """Simple markdown->PDF via reportlab Paragraphs; dependency-light.
+
+    Registers DejaVuSans so Turkish characters render correctly.
+    """
+
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import getSampleStyleSheet
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Preformatted
     from reportlab.lib.units import cm
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    if os.path.exists(font_path):
+        pdfmetrics.registerFont(TTFont("DejaVuSans", font_path))
 
     text = Path(md_path).read_text(encoding="utf-8")
 
@@ -114,11 +158,26 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
     normal = styles["BodyText"]
     code_style = styles["Code"]
 
-    doc = SimpleDocTemplate(pdf_path, pagesize=A4, leftMargin=2 * cm, rightMargin=2 * cm, topMargin=2 * cm, bottomMargin=2 * cm)
+    # Apply font if available
+    if "DejaVuSans" in pdfmetrics.getRegisteredFontNames():
+        for st in styles.byName.values():
+            try:
+                st.fontName = "DejaVuSans"
+            except Exception:
+                pass
+        code_style.fontName = "DejaVuSans"
+
+    doc = SimpleDocTemplate(
+        pdf_path,
+        pagesize=A4,
+        leftMargin=2 * cm,
+        rightMargin=2 * cm,
+        topMargin=2 * cm,
+        bottomMargin=2 * cm,
+    )
 
     story = []
 
-    # Very lightweight renderer: headings + paragraphs + code fences.
     lines = text.splitlines()
     buf = []
     in_code = False
@@ -132,21 +191,22 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
         buf = []
         if not paragraph:
             return
-        # crude heading detection
         if paragraph.startswith("#"):
             level = len(paragraph) - len(paragraph.lstrip("#"))
             title = paragraph.lstrip("#").strip()
             style = styles["Heading1"] if level == 1 else styles["Heading2"] if level == 2 else styles["Heading3"]
             story.append(Paragraph(title, style))
             story.append(Spacer(1, 0.2 * cm))
-        elif paragraph.strip() == "---":
+            return
+
+        if paragraph.strip() == "---":
             story.append(Spacer(1, 0.3 * cm))
-        else:
-            # escape minimal xml
-            paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            paragraph = paragraph.replace("\n", "<br/>")
-            story.append(Paragraph(paragraph, normal))
-            story.append(Spacer(1, 0.2 * cm))
+            return
+
+        paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        paragraph = paragraph.replace("\n", "<br/>")
+        story.append(Paragraph(paragraph, normal))
+        story.append(Spacer(1, 0.2 * cm))
 
     for ln in lines:
         if ln.strip().startswith("```"):
@@ -170,7 +230,6 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
             flush_paragraph()
             continue
 
-        # page break marker
         if ln.strip() == "[[PAGEBREAK]]":
             flush_paragraph()
             story.append(PageBreak())
@@ -191,24 +250,35 @@ async def main():
     repo_root = "/app"
     md_files = find_md_files(repo_root)
 
-    chat = LlmChat(api_key=key, session_id="docs-tr", system_message="You are a helpful assistant.").with_model("openai", "gpt-5.2")
+    cache_root = "/app/tmp/docs_tr_cache"
+    Path(cache_root).mkdir(parents=True, exist_ok=True)
 
     merged = []
     merged.append("# Tüm Sistem Dokümantasyonu (Türkçe)\n")
     merged.append("Bu doküman repo içindeki tüm `.md` dosyalarının Türkçe birleşimidir.\n")
     merged.append("---\n")
 
-    for rp in md_files:
+    total = len(md_files)
+    log(f"Found {total} markdown files")
+
+    for idx, rp in enumerate(md_files, start=1):
         abs_path = os.path.join(repo_root, rp)
         raw = Path(abs_path).read_text(encoding="utf-8", errors="ignore")
 
-        # Heuristic: if contains many non-ascii Turkish already, skip translation
-        needs_translation = bool(re.search(r"\b(the|and|with|deploy|installation|setup|usage)\b", raw, re.IGNORECASE))
+        cache_path = os.path.join(cache_root, rp + ".tr.md")
+        _ensure_parent(cache_path)
 
-        if needs_translation:
-            translated = await translate_markdown(raw, chat)
+        if os.path.exists(cache_path):
+            translated = Path(cache_path).read_text(encoding="utf-8", errors="ignore")
+            log(f"[{idx}/{total}] cache hit: {rp}")
         else:
-            translated = raw
+            log(f"[{idx}/{total}] translating: {rp}")
+            if _looks_english(raw):
+                translated = await translate_markdown(raw, api_key=key, session_id=f"docs-tr-{idx}")
+            else:
+                translated = raw
+            Path(cache_path).write_text(translated, encoding="utf-8")
+            log(f"[{idx}/{total}] saved cache")
 
         merged.append(f"\n\n[[PAGEBREAK]]\n\n# Dosya: `{rp}`\n")
         merged.append(translated)
@@ -216,13 +286,11 @@ async def main():
 
     out_md = "/app/ALL_DOCS_TR.md"
     Path(out_md).write_text("\n".join(merged), encoding="utf-8")
+    log(f"Wrote {out_md}")
 
     out_pdf = "/app/ALL_DOCS_TR.pdf"
     md_to_pdf_simple(out_md, out_pdf)
-
-    print("OK")
-    print(out_md)
-    print(out_pdf)
+    log(f"Wrote {out_pdf}")
 
 
 if __name__ == "__main__":
