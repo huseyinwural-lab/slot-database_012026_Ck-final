@@ -3,6 +3,8 @@
 Kurulum, geliştirme ve deploy için nasıl-yapılır rehberleri.
 
 ## İçindekiler
+- `quickstart.md`
+- `ops-manual.md`
 - `install.md`
 - `deployment.md`
 - `secrets.md`
