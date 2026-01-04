@@ -14,7 +14,7 @@ Bu register, Admin Panel dokmanasyon srecinde tespit edilen **UI  Back
 
 ## 1) A (mod bazl)
 
-### 1.1 System  Logs  Kategori endpointleri bo liste dndyor
+### 1.1 System → Logs → Kategori endpointleri bo liste dndyor
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/logs.md`
 - **Belirti:**  tablar `[]` dndyor /  "No logs found" gsteriyor.
@@ -32,7 +32,7 @@ Bu register, Admin Panel dokmanasyon srecinde tespit edilen **UI  Back
 
 ---
 
-### 1.2 System  Admin Users  Users d tablar gsteriliyor ama endpointler eksik olabilir
+### 1.2 System → Admin Users → Users d tablar gsteriliyor ama endpointler eksik olabilir
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/admin-users.md`
 - **Belirti:** UIda Roles/Teams/Sessions/Invites/Security sekmeleri var, ama istekler **404 Not Found** dndyor.
@@ -48,14 +48,14 @@ Bu register, Admin Panel dokmanasyon srecinde tespit edilen **UI  Back
 
 ---
 
-### 1.3 System  Feature Flags  Safe stub (kal
+### 1.3 System → Feature Flags → Safe stub (kal
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/feature-flags.md`
 - **Belirti:** Flag listesi bo; toggle OK dner ama state persist etmez.
 - **Muhtemel neden:** `/api/v1/flags/*` routeleri bu buildda safe stub (return `[]` / return OK).
 - **Etki:** Feature Flags prod rollout i i.
 - **Admin workaround:**
-  - Incident gating i: **Operations  Kill Switch** kullan.
+  - Incident gating i: **Operations → Kill Switch** kullan.
   - Persistence gelene kadar Feature Flags: .
 - **Escalation paketi:**
   - `GET /api/v1/flags/`, `POST /api/v1/flags/`, `POST /api/v1/flags/{id}/toggle`

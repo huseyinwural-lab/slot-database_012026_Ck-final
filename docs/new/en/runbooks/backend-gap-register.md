@@ -14,7 +14,7 @@ This register centralizes **UI  Backend mismatches** discovered while writing 
 
 ## 1) Open gaps (by module)
 
-### 1.1 System  Logs  Category endpoints return empty lists
+### 1.1 System → Logs → Category endpoints return empty lists
 
 - **Source page:** `/docs/new/en/admin/system/logs.md`
 - **Symptom:** Most tabs return `[]` / show No logs found even during known incidents.
@@ -32,7 +32,7 @@ This register centralizes **UI  Backend mismatches** discovered while writing 
 
 ---
 
-### 1.2 System  Admin Users  Non-Users tabs appear but endpoints may be missing
+### 1.2 System → Admin Users → Non-Users tabs appear but endpoints may be missing
 
 - **Source page:** `/docs/new/en/admin/system/admin-users.md`
 - **Symptom:** UI shows Roles/Teams/Sessions/Invites/Security tabs, but requests return **404 Not Found**.
@@ -48,14 +48,14 @@ This register centralizes **UI  Backend mismatches** discovered while writing 
 
 ---
 
-### 1.3 System  Feature Flags  Safe stubs (no persistence)
+### 1.3 System → Feature Flags → Safe stubs (no persistence)
 
 - **Source page:** `/docs/new/en/admin/system/feature-flags.md`
 - **Symptom:** Flags always return empty lists / toggles return OK but do not persist.
 - **Likely Cause:** `/api/v1/flags/*` routes implemented as safe stubs (return `[]` / return OK) in this build.
 - **Impact:** Feature Flags cannot be used for production-grade rollouts.
 - **Admin Workaround:**
-  - Use **Operations  Kill Switch** for incident gating.
+  - Use **Operations → Kill Switch** for incident gating.
   - Treat Feature Flags as informational until persistence is implemented.
 - **Escalation Package:**
   - `GET /api/v1/flags/`, `POST /api/v1/flags/`, `POST /api/v1/flags/{id}/toggle`
