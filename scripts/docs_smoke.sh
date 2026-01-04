@@ -48,12 +48,35 @@ for lang in en tr; do
   QS="docs/new/$lang/guides/quickstart.md"
   OM="docs/new/$lang/guides/ops-manual.md"
 
-  grep -q "^# Quickstart" "$QS" || grep -q "^# Quickstart" "$QS" || fail "$QS missing title"
-  grep -q "## 1" "$QS" || fail "$QS missing numbered sections"
+  if [[ "$lang" == "en" ]]; then
+    grep -q "^# Quickstart" "$QS" || fail "$QS missing title"
+    grep -q "^# Operations Manual" "$OM" || fail "$OM missing title"
+  else
+    # TR titles (fully translated)
+    grep -q "^# Hızlı Başlangıç" "$QS" || fail "$QS missing TR title"
+    grep -q "^# Operasyonel Rehber" "$OM" || fail "$OM missing TR title"
+  fi
 
-  grep -q "^# Operations Manual" "$OM" || grep -q "^# Operasyonel Rehber" "$OM" || fail "$OM missing title"
+  grep -q "## 1" "$QS" || fail "$QS missing numbered sections"
   grep -q "## 1" "$OM" || fail "$OM missing numbered sections"
 done
+
+# 3b) Ensure EN/TR section skeleton for Quickstart/Ops Manual matches
+# We compare H2 headings only ("## "), ignoring the actual language.
+info "Checking EN/TR section skeleton (H2 headings)"
+extract_h2() {
+  # Normalize numbered headings by stripping non-numeric title part
+  # Example: "## 1) System requirements" -> "## 1)"
+  sed -n 's/^## \([0-9]\+\).*$/## \1)/p' "$1" | sed 's/## \([0-9]\+\))/## \1)/'
+}
+
+EN_QS_H2=$(extract_h2 docs/new/en/guides/quickstart.md)
+TR_QS_H2=$(extract_h2 docs/new/tr/guides/quickstart.md)
+[[ "$EN_QS_H2" == "$TR_QS_H2" ]] || fail "Quickstart EN/TR H2 skeleton mismatch"
+
+EN_OM_H2=$(extract_h2 docs/new/en/guides/ops-manual.md)
+TR_OM_H2=$(extract_h2 docs/new/tr/guides/ops-manual.md)
+[[ "$EN_OM_H2" == "$TR_OM_H2" ]] || fail "Ops-manual EN/TR H2 skeleton mismatch"
 
 # 4) Env example existence check
 info "Checking .env.example references"
