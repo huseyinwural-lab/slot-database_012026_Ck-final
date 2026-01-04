@@ -54,6 +54,7 @@ Admin kimlik modeli `AdminUser` etrafında şekillenir:
 Referans:
 - `backend/app/models/sql_models.py`
 - `backend/app/utils/permissions.py` (`require_owner`)
+- `/docs/new/tr/admin/roles-permissions.md` (rol matrisi + enforcement referansları)
 
 ### 3.2 Rol & yetki matrisi
 
@@ -241,6 +242,9 @@ Bkz:
 ---
 
 ## 13) Performans & Limitler (Guardrails)
+
+Ayrıca:
+- `/docs/new/tr/api/overview.md`
 
 ### 13.1 Rate limit
 

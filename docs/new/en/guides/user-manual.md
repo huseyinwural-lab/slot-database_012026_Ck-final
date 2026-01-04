@@ -54,6 +54,7 @@ The admin identity model is centered around `AdminUser`:
 Relevant implementation references:
 - `backend/app/models/sql_models.py` (fields)
 - `backend/app/utils/permissions.py` (`require_owner`)
+- `/docs/new/en/admin/roles-permissions.md` (role matrix + enforcement pointers)
 
 ### 3.2 Role & capability matrix
 
@@ -253,6 +254,9 @@ See:
 ---
 
 ## 13) Performance & Guardrails
+
+See also:
+- `/docs/new/en/api/overview.md`
 
 ### 13.1 Rate limits
 
