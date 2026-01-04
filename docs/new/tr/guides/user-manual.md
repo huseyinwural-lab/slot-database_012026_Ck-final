@@ -245,6 +245,7 @@ Bkz:
 
 Ayrıca:
 - `/docs/new/tr/api/overview.md`
+- `/docs/new/tr/api/admin.md`
 - `/docs/new/tr/api/payments.md`
 
 ### 13.1 Rate limit
