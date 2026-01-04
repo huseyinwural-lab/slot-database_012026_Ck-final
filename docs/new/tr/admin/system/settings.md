@@ -1,6 +1,6 @@
 # Ayarlar (Settings) (TR)
 
-**Menü yolu (UI):** System  Settings  
+**Menü yolu (UI):** System → Settings  
 **Frontend route:** `/settings`  
 **Sadece owner:** Evet (menu config). Bazı aksiyonlar tenant-scope olabilir.  
 
