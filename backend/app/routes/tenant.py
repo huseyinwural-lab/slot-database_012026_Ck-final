@@ -49,7 +49,7 @@ async def create_tenant(
         request_id=getattr(request.state, "request_id", None),
         tenant_id=getattr(current_admin, "tenant_id", None),
         resource_type="tenant",
-        result="success",  # attempt itself is successful; outcome is recorded below
+        result="attempt",
     )
 
     # Hard stop: only platform owner can create tenants
