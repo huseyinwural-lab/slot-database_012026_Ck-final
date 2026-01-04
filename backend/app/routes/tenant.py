@@ -95,6 +95,7 @@ async def create_tenant(
             resource_type="tenant",
             result="failed",
         )
+        await session.commit()
         raise AppError(error_code="TENANT_EXISTS", message="Tenant exists", status_code=400)
 
     session.add(tenant_data)
