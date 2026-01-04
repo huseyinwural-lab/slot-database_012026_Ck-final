@@ -5,6 +5,7 @@ How-to guides for installation, development and deployment.
 ## Index
 - `quickstart.md`
 - `ops-manual.md`
+- `admin-panel-manual.md`
 - `install.md`
 - `deployment.md`
 - `secrets.md`

@@ -32,6 +32,7 @@ This is the **operations-grade, long-lived** manual intended to be enough for a 
 
 - Quickstart (30 min): `/docs/new/en/guides/quickstart.md`
 - Operations manual: `/docs/new/en/guides/ops-manual.md`
+- Admin panel manual: `/docs/new/en/guides/admin-panel-manual.md`
 
 ---
 

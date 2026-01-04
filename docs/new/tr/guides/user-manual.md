@@ -32,6 +32,7 @@ Bu doküman, **uzun ömürlü ve ops-dayanıklı** olacak şekilde, yeni gelen b
 
 - Hızlı Başlangıç (30 dk): `/docs/new/tr/guides/quickstart.md`
 - Operasyonel rehber: `/docs/new/tr/guides/ops-manual.md`
+- Yönetim paneli kullanım kılavuzu: `/docs/new/tr/guides/admin-panel-manual.md`
 
 ---
 
