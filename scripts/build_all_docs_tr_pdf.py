@@ -116,7 +116,7 @@ def find_md_files(repo_root: str):
     filtered = []
     for p in paths:
         rp = os.path.relpath(p, repo_root)
-        if any(seg in rp.split(os.sep) for seg in ["node_modules", ".git", "__pycache__"]):
+        if any(seg in rp.split(os.sep) for seg in ["node_modules", ".git", "__pycache__", "tmp", "tmp/docs_tr_cache"]):
             continue
         filtered.append(rp)
     return sorted(set(filtered))
