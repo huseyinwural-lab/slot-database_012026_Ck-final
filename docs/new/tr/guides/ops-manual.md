@@ -34,7 +34,7 @@ Bkz:
 
 ---
 
-## 3) Observability (minimum)
+## 3) Gözlemlenebilirlik (minimum)
 
 ### 3.1 Loglar
 
@@ -45,7 +45,7 @@ Bkz:
 - `/docs/ops/log_schema.md`
 - `/docs/new/tr/architecture/audit-logging.md`
 
-### 3.2 Metrics/tracing
+### 3.2 Metrikler / izleme (tracing)
 
 Eğer tam implement değilse minimum:
 - 5xx hata oranı

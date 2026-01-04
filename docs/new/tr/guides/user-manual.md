@@ -30,7 +30,7 @@ Bu doküman, **uzun ömürlü ve ops-dayanıklı** olacak şekilde, yeni gelen b
 
 ## 0) Buradan başla
 
-- Quickstart (30 dk): `/docs/new/tr/guides/quickstart.md`
+- Hızlı Başlangıç (30 dk): `/docs/new/tr/guides/quickstart.md`
 - Operasyonel rehber: `/docs/new/tr/guides/ops-manual.md`
 
 ---

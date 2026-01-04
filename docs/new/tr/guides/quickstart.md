@@ -1,4 +1,4 @@
-# Quickstart (TR) — 30 dakikada ayağa kaldır
+# Hızlı Başlangıç (TR) — 30 dakikada ayağa kaldır
 
 **Son gözden geçirme:** 2026-01-04  
 **Sorumlu:** Platform Engineering  
@@ -118,6 +118,6 @@ alembic upgrade head
 
 ## 6) Sonraki adım
 
-Quickstart sonrası:
+Hızlı başlangıç sonrası:
 - `/docs/new/tr/guides/ops-manual.md` (gerçek hayat operasyon)
 - `/docs/new/tr/guides/user-manual.md` (hub)

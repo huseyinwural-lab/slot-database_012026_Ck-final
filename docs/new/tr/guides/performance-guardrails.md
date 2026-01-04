@@ -1,4 +1,4 @@
-# Performans & Guardrails (TR)
+# Performans & Koruma Önlemleri (TR)
 
 **Son gözden geçirme:** 2026-01-04  
 **Sorumlu:** Platform Engineering  
