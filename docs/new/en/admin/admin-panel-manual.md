@@ -51,6 +51,9 @@ This is the **hub** for the Admin Panel manual.
 > Source of truth for menu structure: `frontend/src/config/menu.js`
 
 ### Core
+
+**Status:** COMPLETE (Dashboard + Players + Finance + Withdrawals + All Revenue + Games + VIP Games)
+
 - Dashboard → `./core/dashboard.md`
 - My Revenue (tenant-only) → (see Reports / Revenue menus if enabled)
 - Players → `./core/players.md`
