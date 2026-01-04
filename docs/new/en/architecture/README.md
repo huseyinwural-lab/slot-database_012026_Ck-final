@@ -3,6 +3,9 @@
 High-level architecture documentation.
 
 ## Index
-- `overview.md`
 - `tenancy.md`
-- `payments-ledger.md`
+- `data-lifecycle.md`
+- `audit-logging.md`
+
+Note:
+- `overview.md` and `payments-ledger.md` are placeholders for future consolidation.

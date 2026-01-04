@@ -3,6 +3,9 @@
 Üst seviye mimari dokümantasyonu.
 
 ## İçindekiler
-- `overview.md`
 - `tenancy.md`
-- `payments-ledger.md`
+- `data-lifecycle.md`
+- `audit-logging.md`
+
+Not:
+- `overview.md` ve `payments-ledger.md` ileri konsolidasyon için placeholder’dır.
