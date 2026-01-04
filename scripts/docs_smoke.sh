@@ -65,9 +65,9 @@ done
 # We compare H2 headings only ("## "), ignoring the actual language.
 info "Checking EN/TR section skeleton (H2 headings)"
 extract_h2() {
-  # Normalize numbered headings by stripping non-numeric title part
+  # Normalize numbered headings by extracting only the section number.
   # Example: "## 1) System requirements" -> "## 1)"
-  sed -n 's/^## \([0-9]\+\).*$/## \1)/p' "$1" | sed 's/## \([0-9]\+\))/## \1)/'
+  sed -n 's/^## \([0-9]\+\).*$/## \1)/p' "$1"
 }
 
 EN_QS_H2=$(extract_h2 docs/new/en/guides/quickstart.md)
