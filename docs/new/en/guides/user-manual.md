@@ -28,6 +28,13 @@ This is the **operations-grade, long-lived** manual intended to be enough for a 
 
 ---
 
+## 0) Start here
+
+- Quickstart (30 min): `/docs/new/en/guides/quickstart.md`
+- Operations manual: `/docs/new/en/guides/ops-manual.md`
+
+---
+
 ## 1) Install
 
 See:
