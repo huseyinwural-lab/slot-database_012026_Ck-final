@@ -6,3 +6,6 @@ Admin panel kullanımı, roller, yetkiler ve tenant/platform owner akışları.
 - `roles-permissions.md`
 - `tenant-lifecycle.md`
 - `password-reset.md`
+
+Ayrıca:
+- `/docs/new/tr/guides/user-manual.md`

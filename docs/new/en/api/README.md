@@ -6,3 +6,6 @@ API overview and pointers to more detailed specs.
 - `overview.md`
 - `auth.md`
 - `tenants.md`
+
+See also:
+- `/docs/new/en/guides/user-manual.md`

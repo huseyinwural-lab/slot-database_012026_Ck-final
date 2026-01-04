@@ -6,3 +6,6 @@ Admin panel usage, roles, permissions, and tenant/platform owner flows.
 - `roles-permissions.md`
 - `tenant-lifecycle.md`
 - `password-reset.md`
+
+See also:
+- `/docs/new/en/guides/user-manual.md`
