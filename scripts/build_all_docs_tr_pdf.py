@@ -204,8 +204,9 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
             return
 
         paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        # reportlab's paraparser is strict; avoid <br> tags to prevent syntax errors
-        paragraph = paragraph.replace("\n", "<br />")
+        # reportlab's paraparser is strict; ensure any raw <br> becomes <br/> then render newlines.
+        paragraph = paragraph.replace("&lt;br&gt;", "&lt;br/&gt;")
+        paragraph = paragraph.replace("\n", "<br/>" )
         story.append(Paragraph(paragraph, normal))
         story.append(Spacer(1, 0.2 * cm))
 
