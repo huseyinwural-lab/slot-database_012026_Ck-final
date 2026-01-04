@@ -1,5 +1,8 @@
 # Operations Manual (EN)
 
+> For platform-wide first-response playbooks, see: `/docs/new/en/guides/common-errors.md`
+
+
 **Last reviewed:** 2026-01-04  
 **Owner:** Ops / Platform Engineering  
 

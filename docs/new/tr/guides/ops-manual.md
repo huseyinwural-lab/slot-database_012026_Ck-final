@@ -1,5 +1,8 @@
 # Operasyonel Rehber (TR)
 
+> Platform-geneli ilk müdahale playbook’ları için: `/docs/new/tr/guides/common-errors.md`
+
+
 **Son gözden geçirme:** 2026-01-04  
 **Sorumlu:** Ops / Platform Engineering  
 
