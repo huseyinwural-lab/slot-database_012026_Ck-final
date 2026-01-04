@@ -12,6 +12,10 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 ---
 
+
+> This register complements the per-menu “Backend/Integration Gaps” sections.
+> When a gap is confirmed, add it here as the actionable tracking item.
+
 ## 1) Open gaps (by module)
 
 ### 1.1 System → Logs → Category endpoints return empty lists
