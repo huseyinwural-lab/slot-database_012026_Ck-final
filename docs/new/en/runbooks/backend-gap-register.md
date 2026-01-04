@@ -48,6 +48,7 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Impact:** High
 
 - **Source page:** `/docs/new/en/admin/system/admin-users.md`
 - **Symptom:** UI shows Roles/Teams/Sessions/Invites/Security tabs, but requests return **404 Not Found**.
