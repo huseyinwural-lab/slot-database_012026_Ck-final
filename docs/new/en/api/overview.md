@@ -21,6 +21,7 @@ All backend endpoints are mounted under:
 - Admin (tenant admin management, etc.): `/api/v1/admin/*` (see `admin.md`)
 - Payments: `/api/v1/payments/*` (see `payments.md`)
 - Payouts: `/api/v1/payouts/*` (see `payouts.md`)
+- Webhooks: (see `webhooks.md`)
 
 ---
 

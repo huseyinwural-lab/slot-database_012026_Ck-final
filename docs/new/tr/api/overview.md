@@ -21,6 +21,7 @@ Tüm backend endpoint’leri şuradan yayınlanır:
 - Admin: `/api/v1/admin/*` (bkz `admin.md`)
 - Payments: `/api/v1/payments/*` (bkz `payments.md`)
 - Payouts: `/api/v1/payouts/*` (bkz `payouts.md`)
+- Webhook'lar: (bkz `webhooks.md`)
 
 ---
 
