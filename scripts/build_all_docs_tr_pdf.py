@@ -212,8 +212,15 @@ def md_to_pdf_simple(md_path: str, pdf_path: str):
 
         paragraph = paragraph.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         paragraph = paragraph.replace("\n", "<br/>")
-        story.append(Paragraph(paragraph, normal))
-        story.append(Spacer(1, 0.2 * cm))
+        try:
+            story.append(Paragraph(paragraph, normal))
+            story.append(Spacer(1, 0.2 * cm))
+        except Exception:
+            # Fallback: treat as plain preformatted text (safe for markdown tables / odd HTML)
+            from reportlab.platypus import Preformatted
+            safe = paragraph.replace("<br/>", "\n")
+            story.append(Preformatted(safe, code_style))
+            story.append(Spacer(1, 0.2 * cm))
 
     for ln in lines:
         if ln.strip().startswith("```"):
