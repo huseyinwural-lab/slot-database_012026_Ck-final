@@ -70,6 +70,7 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Impact:** Medium
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/feature-flags.md`
 - **Belirti:** Flag listesi boş; toggle OK döner ama state persist etmez.
