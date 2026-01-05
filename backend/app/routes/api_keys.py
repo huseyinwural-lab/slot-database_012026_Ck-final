@@ -92,6 +92,10 @@ async def create_api_key(
             "key_prefix": key_prefix,
             "scopes": scopes,
             "active": True,
+            "created_at": key.created_at,
+            "last_used_at": None,
+        },
+    }
 
 
 @router.patch("/{key_id}", response_model=APIKeyPublic)
