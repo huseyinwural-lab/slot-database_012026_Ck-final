@@ -118,6 +118,21 @@ Do not delete sections unless instructed.
 
 - **Overall Result:** ✅ ALL TESTS PASSED (6/6) - G-002 API Keys Toggle flow fully validated
 
+### 2026-01-05 (Backend) — G-003 Reports/SimulationLab endpoints implemented + tests
+- Implemented (no longer stub/404):
+  - `GET  /api/v1/reports/overview` (deterministic MVP metrics + DB counts where possible)
+  - `GET  /api/v1/reports/exports`
+  - `POST /api/v1/reports/exports` → `{ export_id, status }`
+  - `GET  /api/v1/simulation-lab/runs`
+  - `POST /api/v1/simulation-lab/runs` (idempotent create)
+  - `POST /api/v1/simulation-lab/game-math` (deterministic result for UI)
+- Added SQLModel tables:
+  - `report_export_job`
+  - `simulation_run`
+- Tenant isolation: all queries tenant-scoped (owner impersonation via existing X-Tenant-ID)
+- Audit events (best-effort): reports overview view + export create + simulation run create/execute
+- Tests: `pytest -q tests/test_reports_and_simulation_endpoints.py` ✅
+
 
 
   - EN/TR parity
