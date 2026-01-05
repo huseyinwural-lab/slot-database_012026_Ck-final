@@ -1331,6 +1331,409 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class BrandsSettingsTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.tenant2_admin_token = None
+        self.test_results = []
+        self.tenant2_id = None
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def setup_tenant2_admin(self) -> bool:
+        """Setup second tenant and admin for isolation testing"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Create second tenant using platform owner
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                tenant_data = {
+                    "name": f"Test Casino 2 {uuid.uuid4().hex[:8]}",
+                    "type": "renter",
+                    "features": {}
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/tenants/",
+                    json=tenant_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant 2", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                tenant2_data = response.json()
+                self.tenant2_id = tenant2_data.get("id")
+                
+                if not self.tenant2_id:
+                    self.log_result("Create Tenant 2", False, "No tenant ID in response")
+                    return False
+                
+                self.log_result("Create Tenant 2", True, f"Tenant 2 ID: {self.tenant2_id}")
+                
+                # Create admin for tenant 2
+                admin2_data = {
+                    "email": "admin2@testcasino2.com",
+                    "password": "Admin123!",
+                    "tenant_id": self.tenant2_id,
+                    "role": "admin"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/admin/users",
+                    json=admin2_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant 2 Admin", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login as tenant 2 admin
+                login_data = {
+                    "email": "admin2@testcasino2.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Tenant 2 Admin Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.tenant2_admin_token = data.get("access_token")
+                if not self.tenant2_admin_token:
+                    self.log_result("Tenant 2 Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Setup Tenant 2", True, "Tenant 2 and admin created successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Setup Tenant 2", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_get_brands_platform_owner(self) -> bool:
+        """Test 1: GET /api/v1/settings/brands as platform owner - should return 200 with array of brands"""
+        try:
+            if not self.admin_token:
+                self.log_result("GET Brands (Platform Owner)", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/settings/brands",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("GET Brands (Platform Owner)", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                # Verify it's an array
+                if not isinstance(data, list):
+                    self.log_result("GET Brands (Platform Owner)", False, 
+                                  f"Expected array, got {type(data)}: {data}")
+                    return False
+                
+                # Verify each brand has required fields
+                required_fields = ["id", "brand_name", "status", "default_currency", "default_language", "country_availability", "created_at"]
+                
+                for brand in data:
+                    for field in required_fields:
+                        if field not in brand:
+                            self.log_result("GET Brands (Platform Owner)", False, 
+                                          f"Missing required field '{field}' in brand: {brand}")
+                            return False
+                
+                # Platform owner should see multiple tenants (or at least not crash)
+                self.log_result("GET Brands (Platform Owner)", True, 
+                              f"Returned {len(data)} brands with all required fields")
+                return True
+                
+        except Exception as e:
+            self.log_result("GET Brands (Platform Owner)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_get_brands_tenant_isolation(self) -> bool:
+        """Test 2: GET /api/v1/settings/brands as non-owner - should only see own tenant"""
+        try:
+            if not self.tenant2_admin_token:
+                self.log_result("GET Brands (Tenant Isolation)", False, "No tenant 2 admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.tenant2_admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/settings/brands",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("GET Brands (Tenant Isolation)", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                # Verify it's an array
+                if not isinstance(data, list):
+                    self.log_result("GET Brands (Tenant Isolation)", False, 
+                                  f"Expected array, got {type(data)}: {data}")
+                    return False
+                
+                # Non-owner should only see their own tenant
+                if len(data) != 1:
+                    self.log_result("GET Brands (Tenant Isolation)", False, 
+                                  f"Expected 1 brand for non-owner, got {len(data)}: {data}")
+                    return False
+                
+                # Verify the returned brand is the correct tenant
+                brand = data[0]
+                if brand.get("id") != self.tenant2_id:
+                    self.log_result("GET Brands (Tenant Isolation)", False, 
+                                  f"Expected tenant ID {self.tenant2_id}, got {brand.get('id')}")
+                    return False
+                
+                self.log_result("GET Brands (Tenant Isolation)", True, 
+                              f"Non-owner correctly sees only their own tenant: {brand.get('brand_name')}")
+                return True
+                
+        except Exception as e:
+            self.log_result("GET Brands (Tenant Isolation)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_post_brands_platform_owner(self) -> bool:
+        """Test 3: POST /api/v1/settings/brands as platform owner - should return 200 with id"""
+        try:
+            if not self.admin_token:
+                self.log_result("POST Brands (Platform Owner)", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                brand_data = {
+                    "brand_name": f"Brand X {uuid.uuid4().hex[:8]}",
+                    "default_currency": "USD",
+                    "default_language": "en"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/settings/brands",
+                    json=brand_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("POST Brands (Platform Owner)", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                # Verify response has id
+                if "id" not in data:
+                    self.log_result("POST Brands (Platform Owner)", False, 
+                                  f"Missing 'id' in response: {data}")
+                    return False
+                
+                brand_id = data.get("id")
+                if not brand_id:
+                    self.log_result("POST Brands (Platform Owner)", False, 
+                                  f"Empty 'id' in response: {data}")
+                    return False
+                
+                self.log_result("POST Brands (Platform Owner)", True, 
+                              f"Successfully created brand with ID: {brand_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("POST Brands (Platform Owner)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_post_brands_non_owner_forbidden(self) -> bool:
+        """Test 4: POST /api/v1/settings/brands as non-owner - should return 403"""
+        try:
+            if not self.tenant2_admin_token:
+                self.log_result("POST Brands (Non-Owner Forbidden)", False, "No tenant 2 admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.tenant2_admin_token}"}
+                
+                brand_data = {
+                    "brand_name": f"Unauthorized Brand {uuid.uuid4().hex[:8]}",
+                    "default_currency": "USD",
+                    "default_language": "en"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/settings/brands",
+                    json=brand_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 403:
+                    self.log_result("POST Brands (Non-Owner Forbidden)", False, 
+                                  f"Expected 403, got {response.status_code}, Response: {response.text}")
+                    return False
+                
+                self.log_result("POST Brands (Non-Owner Forbidden)", True, 
+                              f"Correctly returned 403 for non-owner brand creation")
+                return True
+                
+        except Exception as e:
+            self.log_result("POST Brands (Non-Owner Forbidden)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_post_brands_validation(self) -> bool:
+        """Test 5: POST /api/v1/settings/brands with missing brand_name - should return 422"""
+        try:
+            if not self.admin_token:
+                self.log_result("POST Brands (Validation)", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Missing brand_name
+                brand_data = {
+                    "default_currency": "USD",
+                    "default_language": "en"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/settings/brands",
+                    json=brand_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 422:
+                    self.log_result("POST Brands (Validation)", False, 
+                                  f"Expected 422, got {response.status_code}, Response: {response.text}")
+                    return False
+                
+                self.log_result("POST Brands (Validation)", True, 
+                              f"Correctly returned 422 for missing brand_name")
+                return True
+                
+        except Exception as e:
+            self.log_result("POST Brands (Validation)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete Brands Settings test suite"""
+        print("🚀 Starting Brands Settings Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_admin_auth():
+            print("\n❌ Admin authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        if not await self.setup_tenant2_admin():
+            print("\n❌ Tenant 2 setup failed. Cannot proceed with isolation tests.")
+            return False
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: GET brands as platform owner
+        test_results.append(await self.test_get_brands_platform_owner())
+        
+        # Test 2: GET brands tenant isolation
+        test_results.append(await self.test_get_brands_tenant_isolation())
+        
+        # Test 3: POST brands as platform owner
+        test_results.append(await self.test_post_brands_platform_owner())
+        
+        # Test 4: POST brands as non-owner (should be forbidden)
+        test_results.append(await self.test_post_brands_non_owner_forbidden())
+        
+        # Test 5: POST brands validation
+        test_results.append(await self.test_post_brands_validation())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 BRANDS SETTINGS TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All Brands Settings tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class G003ReportsSimulationTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
