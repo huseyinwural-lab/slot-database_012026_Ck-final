@@ -16,7 +16,7 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 | ID | Alan | Gap | Öncelik | Owner | SLA | Target Version | Status | Workaround | Doğrulama |
 |---:|------|-----|---------|-------|-----|---------------|--------|------------|----------|
-| G-001 | Games | Import 404 dönüyor | P1 | Backend | 7d | TBD | Fixed | N/A | Endpoint 200 döner; UI import başarılı |
+| G-001 | Games | Import 404 dönüyor | P1 | Backend | 7d | TBD | Verified | N/A | Endpoint 200 döner; UI import başarılı |
 | G-002 | System → API Keys | Toggle/patch 404 dönüyor | P1 | Backend | 7d | TBD | Verified | N/A | Patch 200; UI toggle persist |
 | G-003 | Reports / Simulator | Reports endpoint’leri ve simulator koşuları stub/404 | P1 | Backend | 7d | TBD | Verified | N/A | Report endpoint’leri data döner; simulator run endpoint’leri var |
 
