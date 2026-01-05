@@ -200,8 +200,3 @@ async def toggle_api_key(
             details={"active_from": before_active, "active_to": desired_active},
         )
         raise AppError("API_KEY_TOGGLE_FAILED", "Failed to toggle API key", 500)
-
-            "created_at": key.created_at,
-            "last_used_at": None,
-        },
-    }
