@@ -109,3 +109,36 @@ def require_scope(ctx: AdminAPIKeyContext, scope: str):
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Insufficient scope: required {scope}"
         )
+
+
+
+# ------------------------------------------------------------
+# API key management helpers (used by /api/v1/api-keys endpoints)
+# ------------------------------------------------------------
+import secrets
+from app.constants.api_keys import API_KEY_SCOPES
+
+
+def validate_scopes(scopes: list) -> None:
+    if not isinstance(scopes, list) or any(not isinstance(s, str) for s in scopes):
+        raise HTTPException(status_code=422, detail="Invalid scopes")
+
+    invalid = [s for s in scopes if s not in API_KEY_SCOPES]
+    if invalid:
+        raise HTTPException(status_code=400, detail=f"Invalid scopes: {invalid}")
+
+
+def generate_api_key() -> tuple[str, str, str]:
+    """Generate a new API key.
+
+    Returns: (full_key, key_prefix, bcrypt_hash)
+
+    Notes:
+    - full_key must be returned ONLY once (create endpoint)
+    - we store only the hash in DB
+    """
+
+    full_key = "sk_" + secrets.token_urlsafe(32)
+    key_prefix = full_key[:12]
+    key_hash = get_password_hash(full_key)
+    return full_key, key_prefix, key_hash
