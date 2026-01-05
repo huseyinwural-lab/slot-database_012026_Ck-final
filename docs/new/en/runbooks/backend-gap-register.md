@@ -16,7 +16,7 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 | ID | Area | Gap | Priority | Owner | SLA | Target Version | Status | Workaround | Verification |
 |---:|------|-----|----------|-------|-----|---------------|--------|------------|-------------|
-| G-001 | Games | Import returns 404 | P1 | Backend | 7d | TBD | Fixed | N/A | Endpoint returns 200; UI import succeeds |
+| G-001 | Games | Import returns 404 | P1 | Backend | 7d | TBD | Verified | N/A | Endpoint returns 200; UI import succeeds |
 | G-002 | System → API Keys | Toggle/patch returns 404 | P1 | Backend | 7d | TBD | Verified | N/A | Patch returns 200; UI toggle persists |
 | G-003 | Reports / Simulator | Reports endpoints + simulator runs are stub/404 | P1 | Backend | 7d | TBD | Verified | N/A | Report endpoints return data; simulator run endpoints exist |
 
