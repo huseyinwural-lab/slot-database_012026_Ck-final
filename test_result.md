@@ -44,6 +44,14 @@ Do not delete sections unless instructed.
 - Ran: `./scripts/docs_smoke.sh`
 - Result: PASS
 
+### 2026-01-05 (Docs) — Backend Gap Register triage hardening
+- Updated: `/docs/new/en/runbooks/backend-gap-register.md` + `/docs/new/tr/runbooks/backend-gap-register.md`
+- Added: Triage Summary table (Ops view), standard fields (Owner/SLA/Target Version), status flow (Open→In Progress→Fixed→Verified)
+- Seeded top priorities: G-001 (Games Import 404), G-002 (API Keys toggle 404), G-003 (Reports/Simulator stub)
+- Ran: `./scripts/docs_smoke.sh`
+- Result: PASS
+
+
 
   - EN/TR parity
   - broken link scan
