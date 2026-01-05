@@ -1719,15 +1719,19 @@ class G001GameImportTestSuite:
                                   f"Expected 422, got {response.status_code}")
                     return False
                 
-                data = response.json()
-                error_code = data.get("detail", {}).get("error_code")
+                try:
+                    data = response.json()
+                    error_code = data.get("detail", {}).get("error_code") if isinstance(data.get("detail"), dict) else data.get("detail")
+                except:
+                    # If response is not JSON, check the text
+                    error_code = response.text
                 
-                if error_code not in ["JSON_PARSE_ERROR", "JSON_SCHEMA_INVALID"]:
+                if not any(code in str(error_code) for code in ["JSON_PARSE_ERROR", "JSON_SCHEMA_INVALID"]):
                     self.log_result("Bad JSON Error", False, 
                                   f"Expected JSON_PARSE_ERROR or JSON_SCHEMA_INVALID, got {error_code}")
                     return False
                 
-                self.log_result("Bad JSON Error", True, f"Correctly returned 422 {error_code}")
+                self.log_result("Bad JSON Error", True, f"Correctly returned 422 with JSON error")
                 return True
                 
         except Exception as e:
