@@ -68,6 +68,26 @@ Do not delete sections unless instructed.
 - Audit events (best-effort): upload/import attempt + success/fail
 - Tests: `pytest -q tests/test_game_import_endpoints.py` ✅
 
+### 2026-01-05 (Testing Agent) — G-001 Games Import Verification Contract Validation
+- **VALIDATION RESULTS:**
+  1. ✅ POST /api/v1/game-import/manual/upload: PASS (200 with job_id)
+  2. ✅ GET /api/v1/game-import/jobs/{job_id}: PASS (200 with job_id, status, total_items, total_errors)
+  3. ✅ POST /api/v1/game-import/jobs/{job_id}/import: PASS (200 with status=completed, imported_count>=1)
+  4. ✅ Tenant isolation: PASS (403 for cross-tenant access)
+  5. ✅ Missing file error: PASS (400 with missing file error)
+  6. ✅ Bad JSON error: PASS (422 with JSON error)
+  7. ✅ Job not ready error: PASS (409 with job not ready error)
+
+- **Test Details:**
+  - All endpoints return correct HTTP status codes
+  - Response shapes match verification contract requirements
+  - Tenant isolation properly enforced (403 Forbidden for cross-tenant access)
+  - Error handling works correctly for all specified error cases
+  - File upload accepts multipart/form-data with file field
+  - JSON payload processing works with valid game data structure
+
+- **Overall Result:** ✅ ALL TESTS PASSED (7/7) - G-001 Games Import flow fully validated
+
 
 
   - EN/TR parity
