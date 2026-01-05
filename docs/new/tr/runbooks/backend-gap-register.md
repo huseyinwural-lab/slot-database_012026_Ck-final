@@ -42,6 +42,28 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **Target Version:** TBD
 - **Impact:** High
 
+#### Verification contract
+
+**API contract (geçmeli):**
+1) `POST /api/v1/game-import/manual/upload`
+   - Request: UI’ın kullandığı şekilde `multipart/form-data` (file field)
+   - Beklenen: **200 OK**
+   - Response: `job_id` (string) içeren JSON
+
+2) `GET /api/v1/game-import/jobs/{job_id}`
+   - Beklenen: **200 OK**
+   - Response: en az `{ job_id, status }` (status ∈ `queued|running|ready|failed|completed` veya eşdeğeri)
+
+3) `POST /api/v1/game-import/jobs/{job_id}/import`
+   - Beklenen: **200 OK**
+   - Response: `imported_count` (number) + `status` (örn. `completed`)
+
+**UI doğrulama (geçmeli):**
+- Admin UI: Core → Games → Import akışı 404 olmadan tamamlanır ve success toast/state görünür.
+
+**“Verified” kanıtı:**
+- DevTools Network’te yukarıdaki 3 endpoint’in 200 döndüğünü gösteren ekran görüntüsü.
+
 - **Kaynak sayfa:** `/docs/new/tr/admin/core/games.md`
 - **Belirti:** Game manual upload / preview / confirm import akışı **404 Not Found** ile fail ediyor.
 - **UI endpoint’leri:**
@@ -70,6 +92,29 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **Target Version:** TBD
 - **Impact:** High
 
+#### Verification contract
+
+**API contract (geçmeli):**
+1) `GET /api/v1/api-keys/`
+   - Beklenen: **200 OK**
+   - Response: key listesi (array); her item en az `{ id, name, scopes, active }`
+
+2) `PATCH /api/v1/api-keys/{id}`
+   - Request body: `{ "active": true|false }`
+   - Beklenen: **200 OK**
+   - Response: güncellenmiş key objesi (`active` yeni state’i yansıtır)
+
+3) (Opsiyonel ama önerilir) `GET /api/v1/api-keys/scopes`
+   - Beklenen: **200 OK**
+   - Response: scope listesi (array)
+
+**UI doğrulama (geçmeli):**
+- Admin UI: System → API Keys (veya Settings → API Keys) toggle ile key aktif/pasif yapılır.
+- Sayfa refresh sonrası state korunur.
+
+**“Verified” kanıtı:**
+- DevTools Network’te `PATCH /api/v1/api-keys/{id}` = 200 ve ardından list refresh’te `active` alanının güncellendiği görülür.
+
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/api-keys.md`
 - **Belirti:** Key status toggle işlemi **404 Not Found** dönüyor.
 - **UI endpoint’i:** `PATCH /api/v1/api-keys/{id}` body `{ active: true|false }`
@@ -94,6 +139,28 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** Medium
+
+#### Verification contract
+
+**API contract (geçmeli, minimum):**
+1) Reports
+   - `GET /api/v1/reports/overview` → **200 OK** (UI render edebileceği non-empty JSON object/array)
+   - `POST /api/v1/reports/exports` body `{ type, requested_by }` → **200 OK** (export job referansı: `{ id }` veya `{ job_id }`)
+   - `GET /api/v1/reports/exports` → **200 OK** (yeni job’u içeren array)
+
+2) Simulator (Simulation Lab)
+   - `GET /api/v1/simulation-lab/runs` → **200 OK** (array; başlangıçta boş olabilir)
+
+**UI doğrulama (geçmeli):**
+- Reports (`/reports`): Overview 404 olmadan yüklenir ve içerik render eder.
+- Export: export job oluşturulur ve Export Center’da görünür.
+- Simulator (`/simulator`): runs listesi 404 olmadan yüklenir.
+
+**“Verified” kanıtı:**
+- DevTools Network:
+  - `GET /api/v1/reports/overview` = 200
+  - `POST /api/v1/reports/exports` = 200
+  - `GET /api/v1/simulation-lab/runs` = 200
 
 - **Kaynak sayfalar:**
   - `/docs/new/tr/admin/system/reports.md`
