@@ -1392,8 +1392,8 @@ class G003ReportsSimulationTestSuite:
                 
                 tenant_data = {
                     "name": "Test Casino 2",
-                    "domain": "testcasino2.com",
-                    "currency": "USD"
+                    "type": "renter",
+                    "features": {}
                 }
                 
                 response = await client.post(
