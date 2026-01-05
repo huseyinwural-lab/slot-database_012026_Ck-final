@@ -76,6 +76,7 @@ See:
 
 See:
 - `/docs/new/en/runbooks/release.md`
+- `/docs/new/en/runbooks/release-readiness-checklist.md`
 
 ---
 

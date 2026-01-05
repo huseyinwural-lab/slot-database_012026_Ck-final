@@ -76,6 +76,7 @@ Bkz:
 
 Bkz:
 - `/docs/new/tr/runbooks/release.md`
+- `/docs/new/tr/runbooks/release-readiness-checklist.md`
 
 ---
 
