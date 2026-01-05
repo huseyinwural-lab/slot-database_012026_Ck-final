@@ -35,12 +35,14 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **ID:** G-001
 - **First Seen:** 2026-01-04
 - **Environment:** all
-- **Status:** Open
+- **Status:** Verified / Closed
 - **Priority:** P1
 - **Owner:** Backend
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** High
+
+**Closure note:** G-001 (Games Import): MVP endpoints implemented, stub removed, tenant isolation enforced, tests PASS. Status: Verified / Closed.
 
 #### Verification contract
 
