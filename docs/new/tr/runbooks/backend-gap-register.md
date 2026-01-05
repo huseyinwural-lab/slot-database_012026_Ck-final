@@ -1,14 +1,26 @@
 # Backend Gap Register (TR)
 
-**Son gözden geçirme:** 2026-01-04  
+**Son gözden geçirme:** 2026-01-05  
 **Sorumlu:** Platform Engineering / Ops  
 
 Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Backend uyumsuzluklarını** tek bir yerde toplar.
 
 **Nasıl kullanılır?**
-- Her kayıt **aksiyon alınabilir** olmalıdır (belirti + etki + workaround + escalation kanıtı).
-- Bu dosyayı backend gap backlog’u için tek kaynak olarak düşünün.
+- Her kayıt **kapatılabilir** olmalıdır (owner + SLA + doğrulama).
 - EN/TR dosyaları birebir mirrored tutulmalıdır (bkz: `/docs/new/en/runbooks/backend-gap-register.md`).
+- Status akışı: **Open → In Progress → Fixed → Verified**.
+
+---
+
+## Triage Summary (Ops)
+
+| ID | Alan | Gap | Öncelik | Owner | SLA | Target Version | Status | Workaround | Doğrulama |
+|---:|------|-----|---------|-------|-----|---------------|--------|------------|----------|
+| G-001 | Games | Import 404 dönüyor | P1 | Backend | 7d | TBD | Open | Manuel config / import kullanma | Endpoint 200 döner; UI import başarılı |
+| G-002 | System → API Keys | Toggle/patch 404 dönüyor | P1 | Backend | 7d | TBD | Open | Güvenli workaround yok (key’leri sabit tut) | Patch 200; UI toggle persist |
+| G-003 | Reports / Simulator | Reports endpoint’leri ve simulator koşuları stub/404 | P1 | Backend | 7d | TBD | Open | Export-only / manuel analiz | Report endpoint’leri data döner; simulator run endpoint’leri var |
+
+> SLA default: P0=24h, P1=7d, P2=30d.
 
 ---
 
