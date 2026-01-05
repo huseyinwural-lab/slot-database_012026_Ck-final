@@ -2,91 +2,87 @@
 The user's primary objective is a large-scale, dual-language (English and Turkish) documentation overhaul for a full-stack casino platform. The initial problem of a failing CI/CD pipeline and an admin panel Network Error on preview deployments has been explicitly deprioritized by the user until the documentation is complete. However, with the documentation work now largely finished, the focus has shifted to fixing the CI/CD pipeline to unblock deployments and final verification.
 
 **PRODUCT REQUIREMENTS:**
-The user has provided a comprehensive, 40-point plan for the documentation effort, which has been the main focus. Now, the project is moving to the next phase of fixing core infrastructure blockers.
+The user has provided a comprehensive, 40-point plan for the documentation effort, which has been the main focus. Now, the project is moving to the next phase of fixing core infrastructure blockers and addressing backend gaps.
 
 1.  **Comprehensive Documentation (P0 - LARGELY COMPLETE):** Create a new, structured documentation suite in both English and Turkish under .
-    *   A Quickstart Guide. (DONE)
-    *   An Operational Manual. (DONE)
-    *   A detailed Admin Panel User Manual covering every single feature. (DONE)
-    *   Runbooks for critical procedures. (DONE)
-    *   A central guide for common platform errors. (DONE)
-2.  **Documentation-as-Code (P0 - IN PROGRESS):** Implement and progressively enhance a CI smoke test () to validate documentation quality. This has been completed and is actively used.
-3.  **Backend Gap Register (P1 - IN PROGRESS):** Create and maintain a central markdown file () to track discrepancies between frontend API calls and backend implementations. This is created and populated.
-4.  **CI/CD Pipeline Stability (P0 - IN PROGRESS):** The  workflow must pass. This is the current active task.
-5.  **Admin Panel Accessibility (P2 - BLOCKED):** The user must be able to log into the admin panel on preview deployments. This is blocked by the CI issue.
+2.  **Documentation-as-Code (P0 - IN PROGRESS):** Implement and progressively enhance a CI smoke test () to validate documentation quality.
+3.  **Backend Gap Register (P1 - IN PROGRESS):** Create and maintain a central markdown file () to track discrepancies between frontend API calls and backend implementations. This has now been hardened into an actionable work board.
+4.  **CI/CD Pipeline Stability (P0 - DONE):** The  workflow must pass.
+5.  **Admin Panel Accessibility (P2 - RESOLVED):** The user must be able to log into the admin panel on preview deployments. The issue resolved itself after the CI fix.
 6.  **Refactor Tenant Creation (P0 - DONE):** Restrict tenant creation to super admins only.
+7.  **Create Release Readiness Checklist (P1 - DONE):** A new operational document to ensure stable releases.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The project has a full-stack casino platform (React, FastAPI, PostgreSQL). A highly structured, dual-language documentation system is now in place at  and is validated by a CI smoke test (). The Admin Panel Manual is complete, covering all major sections (Core, System, Risk & Compliance, Operations, Game Engine). A central error guide and a backend gap register have also been created. The agent has also completed a significant backend hardening task by restricting tenant creation permissions with full backend enforcement and audit logging.
+The project is a full-stack casino platform (React, FastAPI, PostgreSQL). A significant amount of work in this session focused on stabilizing the development lifecycle and improving operational readiness.
+
+The critical CI/CD pipeline failure caused by a  drift has been diagnosed and fixed. The Network Error on the admin panel login has resolved itself post-fix and is no longer reproducible.
+
+Two major documentation artifacts were created:
+1.  A comprehensive, dual-language **Release Readiness Checklist** () to serve as a GO/NO-GO gate for deployments.
+2.  The existing **Backend Gap Register** has been enhanced into a Kapanabilir İş Panosu (Actionable Work Board) with a triage summary table, standardized fields (Owner, SLA, Status), and a clear status workflow ( →  →  → ).
+
+Finally, Verification Contracts (explicit acceptance criteria including API endpoints and UI steps) have been defined for the top 3 priority gaps (G-001, G-002, G-003) within the register.
 
 **Last working item**:
--   **Last item agent was working:** Fixing the  CI workflow, which fails due to a  file drift. The user provided a detailed runbook to diagnose and fix this. The agent has analyzed the environment (Node/Yarn versions), cleaned the cache, re-installed dependencies, and generated a diff of the  file to identify the discrepancy between the local workspace and the CI environment.
--   **Status:** IN PROGRESS
+-   **Last item agent was working:** The user has decided to proceed with implementing the fixes for the identified backend gaps, starting with G-001. The agent was asked to choose between two approaches: (A) Design the implementation for the development team or (B) Provide the checklist and acceptance criteria. The agent chose **A**. The immediate next task is to design the backend implementation for the  gap.
+-   **Status:** NOT STARTED
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Manual testing via bash. The next step is to run yarn install v1.22.22
-[1/4] Resolving packages...
-success Already up-to-date.
-Done in 0.08s. locally to replicate the CI failure, confirm the fix, and then prepare the  file for the user to commit.
+-   **Which testing method agent to use?** backend testing agent (Once the implementation is complete, to validate against the defined verification contract).
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:**  CI workflow fails due to  drift (P0 - HIGHEST)
--   **Issue 2:** User cannot log into the admin panel on the preview deployment (P2)
--   **Issue 3:** Backend/Integration Gaps (P1)
+-   **Issue 1:** G-001: Games Import returns 404 (P0 - HIGHEST)
+-   **Issue 2:** G-002: API Keys toggle returns 404 (P1)
+-   **Issue 3:** G-003: Reports / Simulator endpoints are stubs/404 (P1)
 -   **Issue 4:** Brands API returns 404 (P3)
 
 **Issues Detail:**
--   **Issue 1:**  CI workflow fails due to  drift
-    -   **Attempted fixes:** Following the user's runbook, the agent has confirmed no Node/Yarn version mismatch, performed a clean install (, yarn cache v1.22.22
-success Cleared cache.
-Done in 0.02s., yarn install v1.22.22
-[1/4] Resolving packages...
-[2/4] Fetching packages...
-[3/4] Linking dependencies...
-[4/4] Building fresh packages...
-Done in 2.22s.), and identified the exact diff in  that is causing the  check to fail in CI.
+-   **Issue 1:** G-001: Games Import returns 404
+    -   **Attempted fixes:** None. Work is about to begin.
     -   **Next debug checklist:**
-        1.  Finalize the canonical  file based on the clean installation.
-        2.  Run yarn install v1.22.22
-[1/4] Resolving packages...
-success Already up-to-date.
-Done in 0.04s. locally to confirm that the command now passes with the updated lockfile.
-        3.  Inform the user that the fix is ready and that the updated  file needs to be committed to the repository to resolve the CI issue.
-    -   **Why fix this issue and what will be achieved with the fix?** Unblocks all deployments, enables verification of the admin login fix (Issue 2), and restores the CI/CD pipeline's integrity.
-    -   **Status:** IN PROGRESS
+        1.  Design the backend implementation for the three required endpoints based on the Verification Contract in :
+            -   
+            -   
+            -   
+        2.  Present the design (pseudo-code, route definitions, necessary Pydantic models) to the user as per their request (A).
+    -   **Why fix this issue and what will be achieved with the fix?** Enables the manual import of games, a core operational function. It's the first step in clearing the backend gap backlog.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend. The primary success criteria is the  workflow passing in the CI environment.
-    -   **Blocked on other issue:** No.
+    -   **Should Test frontend/backend/both after fix?** Backend
+    -   **Blocked on other issue:** None.
 
--   **Issue 2:** User cannot log into the admin panel on the preview deployment
-    -   **Description:** A Network Error on login is believed to be caused by a frontend configuration issue. The fix exists in the code but cannot be deployed or verified until the CI pipeline is fixed.
-    -   **Status:** BLOCKED
+-   **Issue 2:** G-002: API Keys toggle returns 404
+    -   **Next debug checklist:** Implement  to allow toggling the  status of an API key.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend (screenshot tool or manual check on the preview URL, once available).
-    -   **Blocked on other issue:** Issue 1:  CI workflow fails
+    -   **Should Test frontend/backend/both after fix?** Backend
+    -   **Blocked on other issue:** G-001
 
--   **Issue 3:** Backend/Integration Gaps
-    -   **Description:** The agent has been identifying and documenting discrepancies between frontend API calls and backend implementations. A central register is now in place.
-    -   **Status:** IN PROGRESS (This is an ongoing documentation task).
+-   **Issue 3:** G-003: Reports / Simulator endpoints are stubs/404
+    -   **Next debug checklist:** Implement the minimum required endpoints to make the Reports and Simulator pages functional (e.g., , ).
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Backend testing agent (as gaps are addressed by development).
-    -   **Blocked on other issue:** No.
+    -   **Should Test frontend/backend/both after fix?** Backend
+    -   **Blocked on other issue:** G-002
 
 -   **Issue 4:** Brands API returns 404
     -   **Description:** A frontend call to  results in a 404 error. This has not been investigated.
     -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Backend.
+    -   **Should Test frontend/backend/both after fix?** Backend
 
 **In progress Task List**:
-There are no major features in progress; the work is focused on resolving the P0 CI blocker.
+-   There are no tasks currently in a partially completed state.
 
 **Upcoming and Future Tasks**
 
 **Upcoming Tasks:**
--   **(P2) Fix Admin Login Network Error:** After the CI is fixed, investigate and deploy the fix for the admin panel login issue.
+-   **(P0) Phase 1: Implement G-001 (Games Import):** Code the backend endpoints based on the approved design.
+-   **(P1) Phase 2: Implement G-002 (API Keys Toggle):** Code the backend endpoint for toggling API key status.
+-   **(P1) Phase 3: Implement G-003 (Reports/Simulator):** Code the backend endpoints to replace the stubs.
+-   **(P2) Address remaining gaps:** G-004, G-005, G-006 from the .
 
 **Future Tasks:**
 -   **(P2) Archive Legacy Docs:** Move content from the old  directory to .
@@ -97,15 +93,15 @@ There are no major features in progress; the work is focused on resolving the P0
 -   **(P3) Post-Go-Live Hardening.**
 
 **Completed work in this session**
--   **Tenant Creation Refactor:** Restricted tenant creation to  users via a backend hard-stop, added comprehensive audit logging for all attempts (success, failure, blocked), and prevented system tenant smuggling via request validation.
--   **Admin Panel Documentation (Complete):** Created and finalized documentation for all remaining sections:
-    -   **System:** , .
-    -   **Risk & Compliance:** , , , .
-    -   **Operations:** , , , , .
-    -   **Game Engine:** , .
--   **Central Error Guide:** Created  (EN/TR) detailing 18 common platform-wide errors.
--   **Documentation Quality Gates Enhanced:**
-    -   Updated [DOCS_SMOKE] Starting docs smoke checks
+-   **CI/CD Pipeline Fix (DONE):** Resolved the  workflow failure by diagnosing the  drift, generating a canonical lockfile, and validating the fix locally with yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.08s..
+-   **Admin Panel Network Error (RESOLVED):** The issue was no longer reproducible after the CI fix was prepared. The user deprioritized further investigation.
+-   **Release Readiness Checklist (DONE):** Created and integrated a comprehensive, dual-language (EN/TR) checklist in . This document is now linked from the operations manual and the runbooks index.
+-   **Backend Gap Register Hardening (DONE):** Transformed the  into an actionable work board by adding a Triage Summary Table, standardized fields (Owner, SLA, Status), and a clear workflow.
+-   **Verification-Driven Development Setup (DONE):** Defined explicit Verification Contracts (acceptance criteria) for the top 3 backend gaps (G-001, G-002, G-003), locking in the definition of done before starting implementation.
+-   **Documentation Integrity:** All documentation changes were validated using the [DOCS_SMOKE] Starting docs smoke checks
 [DOCS_SMOKE] Checking EN/TR mirrored file set
 [DOCS_SMOKE] Checking required headings
 [DOCS_SMOKE] Checking EN/TR section skeleton (H2 headings)
@@ -117,84 +113,79 @@ There are no major features in progress; the work is focused on resolving the P0
 [DOCS_SMOKE] Checking tooling availability (non-heavy)
 [DOCS_SMOKE] docker not found (skipping)
 [DOCS_SMOKE] docker compose not found (skipping)
-[DOCS_SMOKE] Docs smoke checks passed with case-insensitive, variation-aware keyword checks.
-    -   Enhanced  format with , , and  fields and migrated existing gaps.
--   **Testing:** All completed work was validated by passing the [DOCS_SMOKE] Starting docs smoke checks
-[DOCS_SMOKE] Checking EN/TR mirrored file set
-[DOCS_SMOKE] Checking required headings
-[DOCS_SMOKE] Checking EN/TR section skeleton (H2 headings)
-[DOCS_SMOKE] Checking .env.example references
-[DOCS_SMOKE] Checking relative markdown links
-[DOCS_SMOKE] Checking for TODO/PLACEHOLDER tokens
-[DOCS_SMOKE] Checking admin manual quality gates (min error scenarios + validation keywords)
-[DOCS_SMOKE] Admin manual quality gates passed
-[DOCS_SMOKE] Checking tooling availability (non-heavy)
-[DOCS_SMOKE] docker not found (skipping)
-[DOCS_SMOKE] docker compose not found (skipping)
-[DOCS_SMOKE] Docs smoke checks passed script and, for the tenant refactor, through direct  API tests.
+[DOCS_SMOKE] Docs smoke checks passed script to ensure EN/TR parity and check for broken links.
+-   **Workspace/GitHub Discrepancy (DIAGNOSED):** Successfully diagnosed and explained to the user why files created in the Emergent workspace (like ) were not visible on their GitHub repo, clarifying that changes require an explicit Save to GitHub action.
 
 **Earlier issues found/mentioned but not fixed**
--   The  error is the only known, unaddressed technical issue remaining from the initial list.
+-   The  error remains unaddressed and is not part of the current priority list. It is tracked as a low-priority item.
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork:** CI/CD pipeline fragility due to  drift.
 -   **Recurrence count:** High.
--   **Status:** IN PROGRESS (This is the current P0 task).
+-   **Status:** RESOLVED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Documentation-as-Code:** Building a comprehensive, CI-validated documentation suite within the codebase.
--   **Backend Hardening & Security:** Moving security checks from the UI to the backend API layer (e.g., tenant creation), ensuring they cannot be bypassed. This includes strict request validation and comprehensive audit logging.
--   **CI/CD Debugging:** Diagnosing and fixing pipeline failures, specifically related to dependency management and lockfile drift ().
+-   **Documentation-as-Code:** Continuing to manage and validate all platform documentation within the repository using CI scripts.
+-   **Operational Readiness:** A new focus on creating artifacts like the Release Readiness Checklist to ensure stable deployments.
+-   **Verification-Driven Development:** Defining explicit, testable API and UI contracts *before* writing implementation code to eliminate ambiguity in acceptance criteria.
+-   **CI/CD Debugging:** Diagnosing and fixing dependency lockfile drift ().
 
 **key DB schema**
--   **AdminUser:**  (The  field is now critical for authorization).
--   **AuditEvent:**  (Used to log all tenant creation attempts).
--   **Tenant:**  (The  field is now protected from being set via the API).
-
-**changes in tech stack**
--   None.
+-   No changes were made to the database schema in this session.
 
 **All files of reference**
--   : The CI workflow currently being fixed.
--   : The file causing the CI failure.
--   : The master script for validating all documentation work.
--   : Contains the new backend-enforced permissions for tenant creation.
--   : New Pydantic schema for validating tenant creation requests.
--   : The central tracker for backend issues.
--   : The central guide for platform-wide errors.
+-   : The central work board for backend fixes.
+-   : The new GO/NO-GO checklist for releases.
+-   : The file that was corrected to fix the CI pipeline.
+-   : The quality gate script for all documentation.
+-   : The operational guide, now linking to the new checklist.
 
 **Areas that need refactoring**:
--   The legacy  directory should be archived into  after all work is complete.
+-   The legacy  directory should eventually be archived into .
 
 **key api endpoints**
--   : Endpoint was hardened to only allow users with . All attempts (successful and failed) are now audited.
--   : Used to verify that the audit log events for tenant creation were being correctly recorded.
+The following endpoints have been identified and defined in the verification contracts. They **need to be implemented**:
+-   **G-001 (Games Import):**
+    -   
+    -   
+    -   
+-   **G-002 (API Keys Toggle):**
+    -   
+-   **G-003 (Reports/Simulator):**
+    -   
+    -   
+    -   
 
 **Critical Info for New Agent**
--   **Priority #1 is the CI fix:** Your immediate and only task is to resolve the  drift according to the user's runbook. The documentation phase is over; the project is now in a fix the foundation phase. Do not proceed to any other task until the  workflow is passing.
--   **Communicate the fix clearly:** Since you cannot commit code, your final step for the  issue will be to present the fixed  file and confirm with the user that it's ready for them to commit.
--   **User is highly technical:** The user provides detailed, runbook-style instructions. Follow them precisely and provide clear, evidence-based responses.
--   **The Plan is Set:** After the CI fix, the next priority is the admin login error. Do not start any other feature work or documentation updates unless explicitly instructed by the user.
+-   **Your immediate task is to design the backend implementation for the  gap.** The user selected option A, meaning you should produce pseudo-code, route definitions, and model structures before writing the actual code.
+-   **The Verification Contracts in  are the non-negotiable acceptance criteria.** All implementation work must satisfy these contracts.
+-   **The project has pivoted from fixing infrastructure (CI) to active development.** The priority is to clear the backend gaps, starting with G-001, G-002, and G-003 in that order.
+-   The user is highly technical and prefers clear, structured plans and evidence-based progress. Stick to the agreed-upon plan.
+-   Continue to respond in **Turkish**.
 
 **documents and test reports created in this job**
--   The entire documentation suite under .
--   The updated .
--   .
+-   
+-   
+-   Updates to  (and TR version)
+-   Updates to  logging all major completed tasks.
 
 **Last 10 User Messages and any pending HUMAN messages**
-The user's recent messages have been highly directive, providing explicit instructions and confirmations for the agent's work.
-1.  **PENDING:** Agent asked the user for the CI job log showing the drift error and the output of  to classify the issue. (User has not yet provided this).
-2.  **User approved:** Agent to pin Node/Yarn versions in the same PR as the  fix.
-3.  **User approved:** Starting the  drift fix and provided a detailed, multi-step runbook for diagnosis and resolution. (This is the current task).
-4.  **User approved:** Using  for the tenant creation restriction, and mandated backend enforcement, audit logging, and payload validation as acceptance criteria. (Task is DONE).
-5.  **User defined:** The exact number (18) and format for the  documentation. (Task is DONE).
-6.  **User clarified:** The naming convention for Turkish documentation is to use the exact UI labels, not literal translations, to ensure operational consistency. (This standard was applied to all subsequent work).
+1.  **USER (final message):** Chose option A, instructing the agent to design the implementation for the G-001 gap fix. (PENDING ACTION)
+2.  **AGENT:** Confirmed verification contracts were set and asked user to choose between A (agent designs implementation) or B (agent provides criteria for user's team).
+3.  **USER:** Confirmed the new Backend Gap Register format and verification contracts are correct and approved. Instructed agent to proceed with implementation, starting with G-001.
+4.  **AGENT:** Presented the updated Backend Gap Register with triage table and standardized fields for the top gaps.
+5.  **USER:** Approved the  and confirmed moving on to hardening the  with a default priority.
+6.  **AGENT:** Presented the completed , linked it as requested, and confirmed all quality checks passed.
+7.  **USER:** Approved the plan to create the , confirming the filename and where to link it from.
+8.  **AGENT:** Asked for confirmation on the plan to create the .
+9.  **USER:** Provided a full, detailed template for the  in both EN and TR.
+10. **USER:** Confirmed CI is green and the Network Error is gone. Set the new priority to enhance the .
 
 **Project Health Check:**
--   **Broken:** The  CI workflow is non-functional, which blocks all deployments and verification of any frontend or backend changes.
+-   **Broken:** None. The previously broken CI pipeline is now fixed.
 
 **3rd Party Integrations**
 -   Stripe
@@ -207,24 +198,12 @@ The user's recent messages have been highly directive, providing explicit instru
 -   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:**
-    -   [DOCS_SMOKE] Starting docs smoke checks
-[DOCS_SMOKE] Checking EN/TR mirrored file set
-[DOCS_SMOKE] Checking required headings
-[DOCS_SMOKE] Checking EN/TR section skeleton (H2 headings)
-[DOCS_SMOKE] Checking .env.example references
-[DOCS_SMOKE] Checking relative markdown links
-[DOCS_SMOKE] Checking for TODO/PLACEHOLDER tokens
-[DOCS_SMOKE] Checking admin manual quality gates (min error scenarios + validation keywords)
-[DOCS_SMOKE] Admin manual quality gates passed
-[DOCS_SMOKE] Checking tooling availability (non-heavy)
-[DOCS_SMOKE] docker not found (skipping)
-[DOCS_SMOKE] docker compose not found (skipping)
-[DOCS_SMOKE] Docs smoke checks passed
--   **Known regressions:**  CI workflow is broken.
+    -    (and TR version)
+-   **Known regressions:** None. The CI regression was fixed.
 
 **Credentials to test flow:**
--   Super Admin:  /  (Has )
--   Regular Admin:  /  (Used to verify tenant creation restriction)
+-   Super Admin:  / 
+-   Regular Admin:  / 
 
 **What agent forgot to execute**
--   The agent has been following the user's explicit plan and priorities meticulously. No tasks have been forgotten or overlooked. The agent correctly pivoted from documentation to fixing the core CI blocker as directed.</analysis>
+-   The agent meticulously followed the user's directives and priorities. No tasks were forgotten or overlooked. The agent correctly handled multiple user-driven pivots in priority.</analysis>
