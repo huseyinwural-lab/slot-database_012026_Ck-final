@@ -88,6 +88,16 @@ Do not delete sections unless instructed.
 
 - **Overall Result:** ✅ ALL TESTS PASSED (7/7) - G-001 Games Import flow fully validated
 
+### 2026-01-05 (Backend) — G-002 API Keys Toggle implemented + tests
+- Implemented: `PATCH /api/v1/api-keys/{id}` with body `{ "active": true|false }`
+- Tenant isolation: enforced via `tenant_id` filter; tenant mismatch returns 404 (no-leak)
+- Persisted state: `APIKey.status` toggled between `active` / `inactive`
+- Audit events (best-effort): `api_key.toggle.attempt` / `api_key.toggled` / `api_key.toggle.failed`
+- Added missing helpers for key creation used by existing route:
+  - `app.utils.api_keys.generate_api_key()`
+  - `app.utils.api_keys.validate_scopes()`
+- Tests: `pytest -q tests/test_api_keys_toggle.py` ✅
+
 
 
   - EN/TR parity
