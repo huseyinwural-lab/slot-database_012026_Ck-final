@@ -1394,7 +1394,7 @@ class G002APIKeysToggleTestSuite:
                 
                 payload = {
                     "name": "Test API Key for G-002",
-                    "scopes": ["read", "write"]
+                    "scopes": ["games.read", "reports.read"]
                 }
                 
                 response = await client.post(
