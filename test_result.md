@@ -52,6 +52,12 @@ Do not delete sections unless instructed.
 - Result: PASS
 
 
+### 2026-01-05 (Docs) — Verification-driven contracts for top gaps
+- Updated G-001/G-002/G-003 in backend gap register with explicit Verification contracts (endpoint + expected status/body + UI steps)
+- Ran: `./scripts/docs_smoke.sh`
+- Result: PASS
+
+
 
   - EN/TR parity
   - broken link scan
