@@ -1391,7 +1391,7 @@ class G003ReportsSimulationTestSuite:
                 headers = {"Authorization": f"Bearer {self.admin_token}"}
                 
                 tenant_data = {
-                    "name": "Test Casino 2",
+                    "name": f"Test Casino 2 {uuid.uuid4().hex[:8]}",
                     "type": "renter",
                     "features": {}
                 }
