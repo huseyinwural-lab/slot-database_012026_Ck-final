@@ -1331,6 +1331,589 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class G003ReportsSimulationTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.tenant2_admin_token = None
+        self.test_results = []
+        self.export_id = None
+        self.run_id = None
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def setup_tenant2_admin(self) -> bool:
+        """Setup second tenant and admin for isolation testing"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Create second tenant using platform owner
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                tenant_data = {
+                    "name": "Test Casino 2",
+                    "domain": "testcasino2.com",
+                    "currency": "USD"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/tenants/",
+                    json=tenant_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant 2", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                tenant2_data = response.json()
+                tenant2_id = tenant2_data.get("id")
+                
+                if not tenant2_id:
+                    self.log_result("Create Tenant 2", False, "No tenant ID in response")
+                    return False
+                
+                self.log_result("Create Tenant 2", True, f"Tenant 2 ID: {tenant2_id}")
+                
+                # Create admin for tenant 2
+                admin2_data = {
+                    "email": "admin2@testcasino2.com",
+                    "password": "Admin123!",
+                    "tenant_id": tenant2_id,
+                    "role": "admin"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/admin/create",
+                    json=admin2_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant 2 Admin", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login as tenant 2 admin
+                login_data = {
+                    "email": "admin2@testcasino2.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Tenant 2 Admin Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.tenant2_admin_token = data.get("access_token")
+                if not self.tenant2_admin_token:
+                    self.log_result("Tenant 2 Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Setup Tenant 2", True, "Tenant 2 and admin created successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Setup Tenant 2", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_reports_overview(self) -> bool:
+        """Test 1: GET /api/v1/reports/overview - should return 200 with required fields"""
+        try:
+            if not self.admin_token:
+                self.log_result("Reports Overview", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/reports/overview",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Reports Overview", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                # Check required fields
+                required_fields = ["ggr", "ngr", "active_players", "bonus_cost"]
+                missing_fields = []
+                
+                for field in required_fields:
+                    if field not in data:
+                        missing_fields.append(field)
+                
+                if missing_fields:
+                    self.log_result("Reports Overview", False, 
+                                  f"Missing required fields: {missing_fields}")
+                    return False
+                
+                self.log_result("Reports Overview", True, 
+                              f"All required fields present: ggr={data['ggr']}, ngr={data['ngr']}, active_players={data['active_players']}, bonus_cost={data['bonus_cost']}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Reports Overview", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_create_export(self) -> bool:
+        """Test 2: POST /api/v1/reports/exports - should return 200 with export_id and status"""
+        try:
+            if not self.admin_token:
+                self.log_result("Create Export", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                payload = {
+                    "type": "overview_report",
+                    "requested_by": "admin"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/reports/exports",
+                    json=payload,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Create Export", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                # Check required fields
+                if "export_id" not in data:
+                    self.log_result("Create Export", False, "Missing export_id in response")
+                    return False
+                
+                if "status" not in data:
+                    self.log_result("Create Export", False, "Missing status in response")
+                    return False
+                
+                self.export_id = data["export_id"]
+                expected_statuses = ["completed", "processing"]
+                
+                if data["status"] not in expected_statuses:
+                    self.log_result("Create Export", False, 
+                                  f"Unexpected status: {data['status']}, expected one of {expected_statuses}")
+                    return False
+                
+                self.log_result("Create Export", True, 
+                              f"Export created: ID={self.export_id}, Status={data['status']}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create Export", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_list_exports(self) -> bool:
+        """Test 3: GET /api/v1/reports/exports - should return 200 array including newly created export"""
+        try:
+            if not self.admin_token:
+                self.log_result("List Exports", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/reports/exports",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("List Exports", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                if not isinstance(data, list):
+                    self.log_result("List Exports", False, "Response is not an array")
+                    return False
+                
+                # Check if our created export is in the list
+                if self.export_id:
+                    found_export = None
+                    for export in data:
+                        if export.get("id") == self.export_id:
+                            found_export = export
+                            break
+                    
+                    if not found_export:
+                        self.log_result("List Exports", False, 
+                                      f"Created export {self.export_id} not found in list")
+                        return False
+                    
+                    self.log_result("List Exports", True, 
+                                  f"Found {len(data)} exports, including newly created export {self.export_id}")
+                else:
+                    self.log_result("List Exports", True, 
+                                  f"Returns array with {len(data)} exports")
+                
+                return True
+                
+        except Exception as e:
+            self.log_result("List Exports", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_list_simulation_runs(self) -> bool:
+        """Test 4: GET /api/v1/simulation-lab/runs - should return 200 array"""
+        try:
+            if not self.admin_token:
+                self.log_result("List Simulation Runs", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/simulation-lab/runs",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("List Simulation Runs", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                if not isinstance(data, list):
+                    self.log_result("List Simulation Runs", False, "Response is not an array")
+                    return False
+                
+                self.log_result("List Simulation Runs", True, 
+                              f"Returns array with {len(data)} simulation runs")
+                return True
+                
+        except Exception as e:
+            self.log_result("List Simulation Runs", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_create_simulation_run(self) -> bool:
+        """Test 5: POST /api/v1/simulation-lab/runs - should return 200 with same id"""
+        try:
+            if not self.admin_token:
+                self.log_result("Create Simulation Run", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                self.run_id = str(uuid.uuid4())
+                payload = {
+                    "id": self.run_id,
+                    "name": "G-003 Test Run",
+                    "simulation_type": "game_math",
+                    "status": "draft",
+                    "created_by": "admin"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/simulation-lab/runs",
+                    json=payload,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Create Simulation Run", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                if "id" not in data:
+                    self.log_result("Create Simulation Run", False, "Missing id in response")
+                    return False
+                
+                if data["id"] != self.run_id:
+                    self.log_result("Create Simulation Run", False, 
+                                  f"Expected id {self.run_id}, got {data['id']}")
+                    return False
+                
+                self.log_result("Create Simulation Run", True, 
+                              f"Simulation run created with ID: {data['id']}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create Simulation Run", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_game_math_simulation(self) -> bool:
+        """Test 6: POST /api/v1/simulation-lab/game-math - should return deterministic response with status=completed"""
+        try:
+            if not self.admin_token:
+                self.log_result("Game Math Simulation", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                payload = {
+                    "run_id": self.run_id or "test-run-id",
+                    "spins_to_simulate": 1000,
+                    "rtp_override": 96.5
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/simulation-lab/game-math",
+                    json=payload,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Game Math Simulation", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                # Check required fields
+                required_fields = ["run_id", "spins", "rtp", "expected_return", "status"]
+                missing_fields = []
+                
+                for field in required_fields:
+                    if field not in data:
+                        missing_fields.append(field)
+                
+                if missing_fields:
+                    self.log_result("Game Math Simulation", False, 
+                                  f"Missing required fields: {missing_fields}")
+                    return False
+                
+                if data["status"] != "completed":
+                    self.log_result("Game Math Simulation", False, 
+                                  f"Expected status 'completed', got '{data['status']}'")
+                    return False
+                
+                # Verify deterministic calculation
+                expected_return = 1000 * (96.5 / 100.0)
+                if abs(data["expected_return"] - expected_return) > 0.01:
+                    self.log_result("Game Math Simulation", False, 
+                                  f"Expected return calculation incorrect: expected {expected_return}, got {data['expected_return']}")
+                    return False
+                
+                self.log_result("Game Math Simulation", True, 
+                              f"Deterministic response: spins={data['spins']}, rtp={data['rtp']}, expected_return={data['expected_return']}, status={data['status']}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Game Math Simulation", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_tenant_isolation_exports(self) -> bool:
+        """Test 7: Tenant isolation for exports - tenant2 should not see tenant1 exports"""
+        try:
+            if not self.tenant2_admin_token:
+                self.log_result("Tenant Isolation Exports", False, "No tenant 2 admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Get exports as tenant 2 admin
+                headers = {"Authorization": f"Bearer {self.tenant2_admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/reports/exports",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Tenant Isolation Exports", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                if not isinstance(data, list):
+                    self.log_result("Tenant Isolation Exports", False, "Response is not an array")
+                    return False
+                
+                # Should be empty array or not contain tenant 1's exports
+                if self.export_id:
+                    for export in data:
+                        if export.get("id") == self.export_id:
+                            self.log_result("Tenant Isolation Exports", False, 
+                                          f"Tenant 2 can see tenant 1's export {self.export_id}")
+                            return False
+                
+                self.log_result("Tenant Isolation Exports", True, 
+                              f"Tenant 2 sees {len(data)} exports (correctly isolated from tenant 1)")
+                return True
+                
+        except Exception as e:
+            self.log_result("Tenant Isolation Exports", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_tenant_isolation_runs(self) -> bool:
+        """Test 8: Tenant isolation for simulation runs - tenant2 should not see tenant1 runs"""
+        try:
+            if not self.tenant2_admin_token:
+                self.log_result("Tenant Isolation Runs", False, "No tenant 2 admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Get simulation runs as tenant 2 admin
+                headers = {"Authorization": f"Bearer {self.tenant2_admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/simulation-lab/runs",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Tenant Isolation Runs", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                
+                if not isinstance(data, list):
+                    self.log_result("Tenant Isolation Runs", False, "Response is not an array")
+                    return False
+                
+                # Should be empty array or not contain tenant 1's runs
+                if self.run_id:
+                    for run in data:
+                        if run.get("id") == self.run_id:
+                            self.log_result("Tenant Isolation Runs", False, 
+                                          f"Tenant 2 can see tenant 1's run {self.run_id}")
+                            return False
+                
+                self.log_result("Tenant Isolation Runs", True, 
+                              f"Tenant 2 sees {len(data)} runs (correctly isolated from tenant 1)")
+                return True
+                
+        except Exception as e:
+            self.log_result("Tenant Isolation Runs", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete G-003 Reports + Simulation Lab test suite"""
+        print("🚀 Starting G-003 Reports + Simulation Lab Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_admin_auth():
+            print("\n❌ Admin authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        # Setup tenant 2 for isolation testing (optional)
+        await self.setup_tenant2_admin()
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: Reports overview
+        test_results.append(await self.test_reports_overview())
+        
+        # Test 2: Create export
+        test_results.append(await self.test_create_export())
+        
+        # Test 3: List exports
+        test_results.append(await self.test_list_exports())
+        
+        # Test 4: List simulation runs
+        test_results.append(await self.test_list_simulation_runs())
+        
+        # Test 5: Create simulation run
+        test_results.append(await self.test_create_simulation_run())
+        
+        # Test 6: Game math simulation
+        test_results.append(await self.test_game_math_simulation())
+        
+        # Test 7: Tenant isolation for exports
+        if self.tenant2_admin_token:
+            test_results.append(await self.test_tenant_isolation_exports())
+        else:
+            self.log_result("Tenant Isolation Exports", False, "Skipped - tenant 2 setup failed")
+            test_results.append(False)
+        
+        # Test 8: Tenant isolation for runs
+        if self.tenant2_admin_token:
+            test_results.append(await self.test_tenant_isolation_runs())
+        else:
+            self.log_result("Tenant Isolation Runs", False, "Skipped - tenant 2 setup failed")
+            test_results.append(False)
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 G-003 REPORTS + SIMULATION LAB TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All G-003 Reports + Simulation Lab tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class G002APIKeysToggleTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
