@@ -121,6 +121,11 @@ Do not delete sections unless instructed.
 - **Overall Result:** ✅ ALL TESTS PASSED (6/6) - G-002 API Keys Toggle flow fully validated
 
 ### 2026-01-05 (Backend) — G-003 Reports/SimulationLab endpoints implemented + tests (Verified/Closed)
+
+### 2026-01-05 (Backend) — Brands API 404 fixed (Settings Panel)
+- Fixed contract mismatch: `GET /api/v1/settings/brands` now returns an **array** matching the Settings Panel UI shape (`brand_name`, `default_currency`, etc.)
+- Implemented minimal `POST /api/v1/settings/brands` (creates a Tenant as brand) — **platform owner only**
+- Tests: `pytest -q tests/test_settings_brands.py` ✅
 - Implemented (no longer stub/404):
   - `GET  /api/v1/reports/overview` (deterministic MVP metrics + DB counts where possible)
   - `GET  /api/v1/reports/exports`
