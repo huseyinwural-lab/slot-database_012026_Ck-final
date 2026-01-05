@@ -32,10 +32,14 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 ### 1.1 System → Logs → Kategori endpoint’leri boş liste dönüyor
 
+- **ID:** G-004
 - **First Seen:** 2026-01-04
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
 - **Impact:** Medium
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/logs.md`
@@ -56,10 +60,14 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 ### 1.2 System → Admin Users → Users dışındaki tab’lar görünüyor ama endpoint’ler eksik olabilir
 
+- **ID:** G-005
 - **First Seen:** 2026-01-04
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
 - **Impact:** High
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/admin-users.md`
@@ -78,10 +86,14 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 ### 1.3 System → Feature Flags → Safe stub (persistence yok)
 
+- **ID:** G-006
 - **First Seen:** 2026-01-04
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
 - **Impact:** Medium
 
 - **Kaynak sayfa:** `/docs/new/tr/admin/system/feature-flags.md`
