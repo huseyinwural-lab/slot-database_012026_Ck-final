@@ -133,6 +133,30 @@ Do not delete sections unless instructed.
 - Audit events (best-effort): reports overview view + export create + simulation run create/execute
 - Tests: `pytest -q tests/test_reports_and_simulation_endpoints.py` ✅
 
+### 2026-01-05 (Testing Agent) — G-003 Reports/SimulationLab Verification Contract Validation
+- **VALIDATION RESULTS:**
+  1. ✅ GET /api/v1/reports/overview: PASS (200 with ggr, ngr, active_players, bonus_cost)
+  2. ✅ POST /api/v1/reports/exports: PASS (200 with export_id and status=completed)
+  3. ✅ GET /api/v1/reports/exports: PASS (200 array including newly created export)
+  4. ✅ GET /api/v1/simulation-lab/runs: PASS (200 array)
+  5. ✅ POST /api/v1/simulation-lab/runs: PASS (200 with same id as requested)
+  6. ✅ POST /api/v1/simulation-lab/game-math: PASS (deterministic response with status=completed)
+  7. ✅ Tenant isolation exports: PASS (tenant2 cannot see tenant1 exports)
+  8. ✅ Tenant isolation runs: PASS (tenant2 cannot see tenant1 simulation runs)
+
+- **Test Details:**
+  - All endpoints return correct HTTP status codes (200) per acceptance criteria
+  - Response shapes match verification contract requirements
+  - Reports overview returns required fields: ggr=125000, ngr=94000, active_players=415, bonus_cost=12000
+  - Export creation returns export_id and status (completed/processing)
+  - Export listing includes newly created exports in chronological order
+  - Simulation runs support idempotent creation with custom IDs
+  - Game math simulation returns deterministic calculations (1000 spins * 96.5% RTP = 965.0 expected return)
+  - Tenant isolation properly enforced for both exports and simulation runs
+  - All endpoints properly scoped to tenant context via X-Tenant-ID header
+
+- **Overall Result:** ✅ ALL TESTS PASSED (8/8) - G-003 Reports + Simulation Lab flow fully validated
+
 
 
   - EN/TR parity
