@@ -1437,7 +1437,7 @@ class BrandsSettingsTestSuite:
                 
                 # Login as tenant 2 admin
                 login_data = {
-                    "email": "admin2@testcasino2.com",
+                    "email": admin2_email,
                     "password": "Admin123!"
                 }
                 
@@ -1822,7 +1822,7 @@ class G003ReportsSimulationTestSuite:
                 
                 # Create admin for tenant 2
                 admin2_data = {
-                    "email": "admin2@testcasino2.com",
+                    "email": admin2_email,
                     "password": "Admin123!",
                     "tenant_id": tenant2_id,
                     "role": "admin"
@@ -1841,7 +1841,7 @@ class G003ReportsSimulationTestSuite:
                 
                 # Login as tenant 2 admin
                 login_data = {
-                    "email": "admin2@testcasino2.com",
+                    "email": admin2_email,
                     "password": "Admin123!"
                 }
                 
