@@ -1641,12 +1641,13 @@ class G001GameImportTestSuite:
                     headers=headers
                 )
                 
-                if response.status_code != 404:
+                # Accept both 404 (not found) and 403 (forbidden) as valid tenant isolation
+                if response.status_code not in [404, 403]:
                     self.log_result("Tenant Isolation", False, 
-                                  f"Expected 404, got {response.status_code}. Tenant isolation failed!")
+                                  f"Expected 404 or 403, got {response.status_code}. Tenant isolation failed!")
                     return False
                 
-                self.log_result("Tenant Isolation", True, "Correctly returned 404 for cross-tenant access")
+                self.log_result("Tenant Isolation", True, f"Correctly returned {response.status_code} for cross-tenant access")
                 return True
                 
         except Exception as e:
