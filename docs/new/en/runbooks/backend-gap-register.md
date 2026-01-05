@@ -42,6 +42,28 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **Target Version:** TBD
 - **Impact:** High
 
+#### Verification contract
+
+**API contract (must pass):**
+1) `POST /api/v1/game-import/manual/upload`
+   - Request: `multipart/form-data` with a file field (as used by UI)
+   - Expected: **200 OK**
+   - Response body: JSON containing `job_id` (string)
+
+2) `GET /api/v1/game-import/jobs/{job_id}`
+   - Expected: **200 OK**
+   - Response body: JSON containing at minimum `{ job_id, status }` (status ∈ `queued|running|ready|failed|completed` or equivalent)
+
+3) `POST /api/v1/game-import/jobs/{job_id}/import`
+   - Expected: **200 OK**
+   - Response body: JSON containing `imported_count` (number) and `status` (e.g. `completed`)
+
+**UI verification (must pass):**
+- Admin UI: Core → Games → Import flow completes without 404 and shows success toast/state.
+
+**Evidence for “Verified”:**
+- DevTools Network screenshots for the three endpoints above showing 200 responses.
+
 - **Source page:** `/docs/new/en/admin/core/games.md`
 - **Symptom:** Game manual upload / preview / confirm import flow fails with **404 Not Found**.
 - **UI endpoints:**
@@ -70,6 +92,29 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **Target Version:** TBD
 - **Impact:** High
 
+#### Verification contract
+
+**API contract (must pass):**
+1) `GET /api/v1/api-keys/`
+   - Expected: **200 OK**
+   - Response body: JSON array of keys; each item includes `{ id, name, scopes, active }`
+
+2) `PATCH /api/v1/api-keys/{id}`
+   - Request body: `{ "active": true|false }`
+   - Expected: **200 OK**
+   - Response body: updated key object with `active` reflecting the new state
+
+3) (Optional but recommended) `GET /api/v1/api-keys/scopes`
+   - Expected: **200 OK**
+   - Response body: JSON array of available scopes
+
+**UI verification (must pass):**
+- Admin UI: System → API Keys (or Settings → API Keys) toggle switches a key active/inactive without error.
+- Refresh page: toggled state is preserved.
+
+**Evidence for “Verified”:**
+- DevTools Network shows `PATCH /api/v1/api-keys/{id}` returning 200 and the subsequent list refresh reflecting updated `active`.
+
 - **Source page:** `/docs/new/en/admin/system/api-keys.md`
 - **Symptom:** Toggling key status fails with **404 Not Found**.
 - **UI endpoint:** `PATCH /api/v1/api-keys/{id}` body `{ active: true|false }`
@@ -94,6 +139,28 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** Medium
+
+#### Verification contract
+
+**API contract (must pass, minimum):**
+1) Reports
+   - `GET /api/v1/reports/overview` → **200 OK** with non-empty JSON object/array suitable for UI rendering.
+   - `POST /api/v1/reports/exports` body `{ type, requested_by }` → **200 OK** returning an export job reference (e.g. `{ id }` or `{ job_id }`).
+   - `GET /api/v1/reports/exports` → **200 OK** returning an array containing the newly created export job.
+
+2) Simulator (Simulation Lab)
+   - `GET /api/v1/simulation-lab/runs` → **200 OK** returning an array (may be empty initially).
+
+**UI verification (must pass):**
+- Reports page (`/reports`): Overview loads without 404 and renders content.
+- Export: creating an export job succeeds and appears in Export Center.
+- Simulator page (`/simulator`): runs list loads without 404.
+
+**Evidence for “Verified”:**
+- DevTools Network:
+  - `GET /api/v1/reports/overview` = 200
+  - `POST /api/v1/reports/exports` = 200
+  - `GET /api/v1/simulation-lab/runs` = 200
 
 - **Source pages:**
   - `/docs/new/en/admin/system/reports.md`
