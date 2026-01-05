@@ -98,6 +98,26 @@ Do not delete sections unless instructed.
   - `app.utils.api_keys.validate_scopes()`
 - Tests: `pytest -q tests/test_api_keys_toggle.py` ✅
 
+### 2026-01-05 (Testing Agent) — G-002 API Keys Toggle Verification Contract Validation
+- **VALIDATION RESULTS:**
+  1. ✅ GET /api/v1/api-keys/: PASS (200 with list, correct structure, no secrets exposed)
+  2. ✅ PATCH /api/v1/api-keys/{id} with {"active": false}: PASS (200 with updated record)
+  3. ✅ PATCH /api/v1/api-keys/{id} with {"active": true}: PASS (200 with updated record)
+  4. ✅ State persistence: PASS (GET after PATCH shows persisted state)
+  5. ✅ Tenant isolation: PASS (404 for non-existent/cross-tenant key)
+  6. ✅ Invalid body validation: PASS (422 for non-boolean active values)
+
+- **Test Details:**
+  - All endpoints return correct HTTP status codes per acceptance criteria
+  - Response shapes match verification contract requirements (same shape as list items)
+  - Tenant isolation properly enforced (404 for cross-tenant access, no information leakage)
+  - State persistence verified through GET after PATCH operations
+  - Raw API key secrets never returned except on create endpoint
+  - Invalid body handling works correctly (422 for non-boolean active field)
+  - API key creation and listing functionality working correctly
+
+- **Overall Result:** ✅ ALL TESTS PASSED (6/6) - G-002 API Keys Toggle flow fully validated
+
 
 
   - EN/TR parity
