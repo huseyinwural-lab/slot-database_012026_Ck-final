@@ -4273,26 +4273,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run Payout Status Polling Stability Test Suite"""
-    print("🎯 Payout Status Polling Stability Test Suite Runner")
+    """Main test runner - Run G-001 Games Import Test Suite"""
+    print("🎯 G-001 Games Import Test Suite Runner")
     print("=" * 80)
     
-    # Run payout status polling test suite (primary focus for this review request)
-    payout_polling_suite = PayoutStatusPollingTestSuite()
-    payout_polling_success = await payout_polling_suite.run_all_tests()
+    # Run G-001 Games Import test suite (primary focus for this review request)
+    games_import_suite = G001GameImportTestSuite()
+    games_import_success = await games_import_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if payout_polling_success else "❌ FAIL"
-    print(f"{status}: Payout Status Polling Stability Tests")
+    status = "✅ PASS" if games_import_success else "❌ FAIL"
+    print(f"{status}: G-001 Games Import Tests")
     
-    if payout_polling_success:
-        print("🎉 Payout status polling stability test suite PASSED!")
+    if games_import_success:
+        print("🎉 G-001 Games Import test suite PASSED!")
         return True
     else:
-        print("⚠️  Payout status polling stability test suite failed.")
+        print("⚠️  G-001 Games Import test suite failed.")
         return False
 
 
