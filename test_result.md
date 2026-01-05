@@ -57,7 +57,7 @@ Do not delete sections unless instructed.
 - Ran: `./scripts/docs_smoke.sh`
 - Result: PASS
 
-### 2026-01-05 (Backend) — G-001 Games Import endpoints implemented + tests
+### 2026-01-05 (Backend) — G-001 Games Import endpoints implemented + tests (Verified/Closed)
 - Implemented endpoints (sync MVP):
   - POST /api/v1/game-import/manual/upload (multipart: file|bundle|upload)
   - GET  /api/v1/game-import/jobs/{job_id}
@@ -67,6 +67,7 @@ Do not delete sections unless instructed.
 - Tenant isolation: enforced via tenant_id filter + owner impersonation handled by existing X-Tenant-ID resolver
 - Audit events (best-effort): upload/import attempt + success/fail
 - Tests: `pytest -q tests/test_game_import_endpoints.py` ✅
+- Closure note: MVP endpoints implemented, stub removed, tenant isolation enforced, tests PASS. Status: Verified / Closed.
 
 ### 2026-01-05 (Testing Agent) — G-001 Games Import Verification Contract Validation
 - **VALIDATION RESULTS:**
