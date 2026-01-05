@@ -1,14 +1,26 @@
 # Backend Gap Register (EN)
 
-**Last reviewed:** 2026-01-04  
+**Last reviewed:** 2026-01-05  
 **Owner:** Platform Engineering / Ops  
 
 This register centralizes **UI ↔ Backend mismatches** discovered while writing the Admin Panel Manual.
 
 **How to use:**
-- Each entry should be **actionable** (symptom + impact + workaround + escalation evidence).
-- Treat this file as the single backlog source for closing product gaps.
+- Each entry must be **closeable** (owner + SLA + verification).
 - Keep EN/TR files mirrored (see `/docs/new/tr/runbooks/backend-gap-register.md`).
+- Status flow: **Open → In Progress → Fixed → Verified**.
+
+---
+
+## Triage Summary (Ops)
+
+| ID | Area | Gap | Priority | Owner | SLA | Target Version | Status | Workaround | Verification |
+|---:|------|-----|----------|-------|-----|---------------|--------|------------|-------------|
+| G-001 | Games | Import returns 404 | P1 | Backend | 7d | TBD | Open | Use manual config / avoid import | Endpoint returns 200; UI import succeeds |
+| G-002 | System → API Keys | Toggle/patch returns 404 | P1 | Backend | 7d | TBD | Open | No safe workaround (keep keys static) | Patch returns 200; UI toggle persists |
+| G-003 | Reports / Simulator | Reports endpoints + simulator runs are stub/404 | P1 | Backend | 7d | TBD | Open | Export-only / manual analysis | Report endpoints return data; simulator run endpoints exist |
+
+> SLA default: P0=24h, P1=7d, P2=30d.
 
 ---
 
