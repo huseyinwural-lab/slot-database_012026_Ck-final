@@ -1,181 +1,200 @@
 <analysis>**original_problem_statement:**
-The user's primary objective is a large-scale, dual-language (English and Turkish) documentation overhaul for a full-stack casino platform. The initial problem of a failing CI/CD pipeline and an admin panel Network Error on preview deployments has been explicitly deprioritized by the user until the documentation is complete.
+The user's primary objective is a large-scale, dual-language (English and Turkish) documentation overhaul for a full-stack casino platform. The initial problem of a failing CI/CD pipeline and an admin panel Network Error on preview deployments has been explicitly deprioritized by the user until the documentation is complete. However, with the documentation work now largely finished, the focus has shifted to fixing the CI/CD pipeline to unblock deployments and final verification.
 
 **PRODUCT REQUIREMENTS:**
-The user has provided a comprehensive, 40-point plan for the documentation effort, which has become the sole focus of the project. The core goal is to create a production-grade Admin Operations Book that details every feature, flow, error, and validation point for the admin panel.
+The user has provided a comprehensive, 40-point plan for the documentation effort, which has been the main focus. Now, the project is moving to the next phase of fixing core infrastructure blockers.
 
-1.  **Comprehensive Documentation (P0 - IN PROGRESS):** Create a new, structured documentation suite in both English and Turkish under .
+1.  **Comprehensive Documentation (P0 - LARGELY COMPLETE):** Create a new, structured documentation suite in both English and Turkish under .
     *   A Quickstart Guide. (DONE)
     *   An Operational Manual. (DONE)
-    *   A detailed Admin Panel User Manual covering every single feature from the UI. (IN PROGRESS)
-    *   Runbooks for critical procedures like  and . (IN PROGRESS)
-    *   A central guide for common platform errors. (NOT STARTED)
-2.  **Documentation-as-Code (P0 - IN PROGRESS):** Implement and progressively enhance a CI smoke test () to validate documentation quality (link integrity, EN/TR file parity, placeholder checks, content standards).
-3.  **Backend Gap Register (P1 - NOT STARTED):** Create a central markdown file to track all identified discrepancies between frontend API calls and backend route implementations.
-4.  **CI/CD Pipeline Stability (P2 - BLOCKED):** The  workflow must pass. This is blocked until the documentation work is complete.
+    *   A detailed Admin Panel User Manual covering every single feature. (DONE)
+    *   Runbooks for critical procedures. (DONE)
+    *   A central guide for common platform errors. (DONE)
+2.  **Documentation-as-Code (P0 - IN PROGRESS):** Implement and progressively enhance a CI smoke test () to validate documentation quality. This has been completed and is actively used.
+3.  **Backend Gap Register (P1 - IN PROGRESS):** Create and maintain a central markdown file () to track discrepancies between frontend API calls and backend implementations. This is created and populated.
+4.  **CI/CD Pipeline Stability (P0 - IN PROGRESS):** The  workflow must pass. This is the current active task.
 5.  **Admin Panel Accessibility (P2 - BLOCKED):** The user must be able to log into the admin panel on preview deployments. This is blocked by the CI issue.
-6.  **Refactor Tenant Creation (P3 - NOT STARTED):** Restrict tenant creation to super admins only.
+6.  **Refactor Tenant Creation (P0 - DONE):** Restrict tenant creation to super admins only.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The project has a full-stack casino platform (React, FastAPI, PostgreSQL). A new, highly structured documentation system has been established at  with parallel  and  directories. This includes a  script and a  CI job to enforce quality.
-
-The agent has been methodically creating the detailed Admin Panel Manual by analyzing the frontend and backend code. The work is being done in batches, following a very specific, user-provided plan. The directory structure  is in place.
+The project has a full-stack casino platform (React, FastAPI, PostgreSQL). A highly structured, dual-language documentation system is now in place at  and is validated by a CI smoke test (). The Admin Panel Manual is complete, covering all major sections (Core, System, Risk & Compliance, Operations, Game Engine). A central error guide and a backend gap register have also been created. The agent has also completed a significant backend hardening task by restricting tenant creation permissions with full backend enforcement and audit logging.
 
 **Last working item**:
--   **Last item agent was working:** The agent just completed a significant batch of work:
-    1.  **Finished the  section** by creating the documentation for  ().
-    2.  **Completed ** by creating documentation for , , , and .
-    3.  **Implemented a new quality standard (Ops Checklist)** and retrospectively applied it to previously created critical documents (, , , ).
+-   **Last item agent was working:** Fixing the  CI workflow, which fails due to a  file drift. The user provided a detailed runbook to diagnose and fix this. The agent has analyzed the environment (Node/Yarn versions), cleaned the cache, re-installed dependencies, and generated a diff of the  file to identify the discrepancy between the local workspace and the CI environment.
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (The  script was run and passed after the latest batch of file creations and edits.)
--   **Which testing method agent to use?** NA (This is a documentation task. The quality gate is the  script.)
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Manual testing via bash. The next step is to run yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.08s. locally to replicate the CI failure, confirm the fix, and then prepare the  file for the user to commit.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:**  CI workflow fails due to  drift (P2 - DEPRIORITIZED by user)
--   **Issue 2:** User cannot log into the admin panel on the preview deployment (P2 - DEPRIORITIZED by user)
+-   **Issue 1:**  CI workflow fails due to  drift (P0 - HIGHEST)
+-   **Issue 2:** User cannot log into the admin panel on the preview deployment (P2)
 -   **Issue 3:** Backend/Integration Gaps (P1)
 -   **Issue 4:** Brands API returns 404 (P3)
 
 **Issues Detail:**
 -   **Issue 1:**  CI workflow fails due to  drift
-    -   **Description:** This critical issue blocks all deployments but has been deprioritized by the user in favor of the documentation task. The correct  file exists in the agent's workspace.
-    -   **Next debug checklist:** After documentation is complete, re-engage the user to push the correct  file to their repository.
-    -   **Why fix this issue and what will be achieved with the fix?** Unblocks all deployments and allows verification of other fixes (like the admin login error).
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend testing agent (to verify CI passes).
-    -   **Blocked on other issue:** User action (post-documentation).
-
--   **Issue 2:** User cannot log into the admin panel on the preview deployment
-    -   **Description:** A Network Error occurs on login due to a frontend config issue. The code fix exists but cannot be deployed.
-    -   **Status:** BLOCKED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend (screenshot tool on the preview URL).
-    -   **Blocked on other issue:** Issue 1
-
--   **Issue 3:** Backend/Integration Gaps
-    -   **Description:** The agent has been finding discrepancies where the frontend calls APIs that are missing, stubbed, or incomplete in the backend (e.g., for Logs, Admin Users sub-tabs, Feature Flags). The user has mandated a specific documentation format for these gaps.
-    -   **Attempted fixes:** The agent has documented these gaps within the individual manual pages.
+    -   **Attempted fixes:** Following the user's runbook, the agent has confirmed no Node/Yarn version mismatch, performed a clean install (, yarn cache v1.22.22
+success Cleared cache.
+Done in 0.02s., yarn install v1.22.22
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+Done in 2.22s.), and identified the exact diff in  that is causing the  check to fail in CI.
     -   **Next debug checklist:**
-        1.  Create the central register file:  (and its TR version).
-        2.  Populate it with the already-identified gaps from the , , and  documentation.
-        3.  Continue to identify and document new gaps while creating the remaining manual pages.
-    -   **Why fix this issue and what will be achieved with the fix?** Provides a clear, actionable list for the development team to fix backend inconsistencies, making the documentation a reliable operational tool.
+        1.  Finalize the canonical  file based on the clean installation.
+        2.  Run yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+Done in 0.04s. locally to confirm that the command now passes with the updated lockfile.
+        3.  Inform the user that the fix is ready and that the updated  file needs to be committed to the repository to resolve the CI issue.
+    -   **Why fix this issue and what will be achieved with the fix?** Unblocks all deployments, enables verification of the admin login fix (Issue 2), and restores the CI/CD pipeline's integrity.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Backend testing agent (once fixes are implemented).
+    -   **Should Test frontend/backend/both after fix?** Frontend. The primary success criteria is the  workflow passing in the CI environment.
+    -   **Blocked on other issue:** No.
+
+-   **Issue 2:** User cannot log into the admin panel on the preview deployment
+    -   **Description:** A Network Error on login is believed to be caused by a frontend configuration issue. The fix exists in the code but cannot be deployed or verified until the CI pipeline is fixed.
+    -   **Status:** BLOCKED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Frontend (screenshot tool or manual check on the preview URL, once available).
+    -   **Blocked on other issue:** Issue 1:  CI workflow fails
+
+-   **Issue 3:** Backend/Integration Gaps
+    -   **Description:** The agent has been identifying and documenting discrepancies between frontend API calls and backend implementations. A central register is now in place.
+    -   **Status:** IN PROGRESS (This is an ongoing documentation task).
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Backend testing agent (as gaps are addressed by development).
     -   **Blocked on other issue:** No.
 
 -   **Issue 4:** Brands API returns 404
-    -   **Description:** A frontend call to  results in a 404 error.
+    -   **Description:** A frontend call to  results in a 404 error. This has not been investigated.
     -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Backend.
 
 **In progress Task List**:
--   **Task 1:** Complete the Admin Panel User Manual (P0)
-    -   **Where to resume:** The user has approved the next steps without needing further confirmation. The agent must now:
-        1.  **Implement new  gates:** Update the script to enforce that every admin manual page has at least 8 error scenarios (Olası Hatalar) and includes all required validation keywords (UI, Audit Log, Logs, etc.).
-        2.  **Create the ** file and populate it.
-        3.  **Begin :** Create documentation for the  and  menus.
-    -   **What will be achieved with this?** A complete, production-grade operational manual for every feature in the admin panel, in both English and Turkish, with automated quality checks.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** NA (Test via  script)
-    -   **Blocked on something:** No
+There are no major features in progress; the work is focused on resolving the P0 CI blocker.
 
 **Upcoming and Future Tasks**
+
 **Upcoming Tasks:**
--   **(P0) Complete System Batch-2:** Create  and  documentation.
--   **(P1) Complete Risk & Compliance Docs:** Create pages for , , , and .
--   **(P1) Complete Operations Docs:** Create pages for , , , , and .
--   **(P1) Complete Game Engine Docs:** Create pages for  and .
--   **(P1) Create  Guide:** A centralized guide for platform-wide errors.
--   **(P1) Refactor Tenant Creation Permissions:** Implement the user's request to restrict tenant creation to super admins only.
+-   **(P2) Fix Admin Login Network Error:** After the CI is fixed, investigate and deploy the fix for the admin panel login issue.
 
 **Future Tasks:**
--   **(P2) Fix P0 Blockers:** Address the  CI issue and the Admin Login Network Error after documentation is complete.
 -   **(P2) Archive Legacy Docs:** Move content from the old  directory to .
 -   **(P3) Generate Single PDF from all MDs.**
+-   **(P3) Address  error.**
 -   **(P3) Growth & Monetization Track.**
 -   **(P3) Collusion v2.**
 -   **(P3) Post-Go-Live Hardening.**
 
 **Completed work in this session**
--   **Documentation Information Architecture:** Established a new, organized structure at  with , , , , and  subdirectories.
--   **Runbook Refactoring:** Moved  to  and created , updating all cross-references.
--   **Documentation Templates & Standards:** Created  and iteratively added quality standards like the Backend Gap format and the Ops Checklist.
--   **CI Quality Gate ():** Enhanced the script to check for EN/TR parity, broken links, and / text. The associated workflow was updated to trigger on doc changes.
--   **Admin Manual Content (Core Section - COMPLETE):**
-    -   , , , , , , .
--   **Admin Manual Content (System Section - PARTIAL):**
-    -   , , , , , , , .
--   **Admin Manual Content (Operations Section - PARTIAL):**
-    -   .
+-   **Tenant Creation Refactor:** Restricted tenant creation to  users via a backend hard-stop, added comprehensive audit logging for all attempts (success, failure, blocked), and prevented system tenant smuggling via request validation.
+-   **Admin Panel Documentation (Complete):** Created and finalized documentation for all remaining sections:
+    -   **System:** , .
+    -   **Risk & Compliance:** , , , .
+    -   **Operations:** , , , , .
+    -   **Game Engine:** , .
+-   **Central Error Guide:** Created  (EN/TR) detailing 18 common platform-wide errors.
+-   **Documentation Quality Gates Enhanced:**
+    -   Updated [DOCS_SMOKE] Starting docs smoke checks
+[DOCS_SMOKE] Checking EN/TR mirrored file set
+[DOCS_SMOKE] Checking required headings
+[DOCS_SMOKE] Checking EN/TR section skeleton (H2 headings)
+[DOCS_SMOKE] Checking .env.example references
+[DOCS_SMOKE] Checking relative markdown links
+[DOCS_SMOKE] Checking for TODO/PLACEHOLDER tokens
+[DOCS_SMOKE] Checking admin manual quality gates (min error scenarios + validation keywords)
+[DOCS_SMOKE] Admin manual quality gates passed
+[DOCS_SMOKE] Checking tooling availability (non-heavy)
+[DOCS_SMOKE] docker not found (skipping)
+[DOCS_SMOKE] docker compose not found (skipping)
+[DOCS_SMOKE] Docs smoke checks passed with case-insensitive, variation-aware keyword checks.
+    -   Enhanced  format with , , and  fields and migrated existing gaps.
+-   **Testing:** All completed work was validated by passing the [DOCS_SMOKE] Starting docs smoke checks
+[DOCS_SMOKE] Checking EN/TR mirrored file set
+[DOCS_SMOKE] Checking required headings
+[DOCS_SMOKE] Checking EN/TR section skeleton (H2 headings)
+[DOCS_SMOKE] Checking .env.example references
+[DOCS_SMOKE] Checking relative markdown links
+[DOCS_SMOKE] Checking for TODO/PLACEHOLDER tokens
+[DOCS_SMOKE] Checking admin manual quality gates (min error scenarios + validation keywords)
+[DOCS_SMOKE] Admin manual quality gates passed
+[DOCS_SMOKE] Checking tooling availability (non-heavy)
+[DOCS_SMOKE] docker not found (skipping)
+[DOCS_SMOKE] docker compose not found (skipping)
+[DOCS_SMOKE] Docs smoke checks passed script and, for the tenant refactor, through direct  API tests.
 
 **Earlier issues found/mentioned but not fixed**
--   The two original P0 issues ( drift and admin login error) remain unresolved by user's explicit direction.
--   The user request to refactor tenant creation permissions has been acknowledged but not started.
--   The  error has not been addressed.
+-   The  error is the only known, unaddressed technical issue remaining from the initial list.
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork:** CI/CD pipeline fragility due to  drift.
 -   **Recurrence count:** High.
--   **Status:** NOT STARTED (User has deprioritized this).
+-   **Status:** IN PROGRESS (This is the current P0 task).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Documentation-as-Code:** The core activity is building a comprehensive, version-controlled, and CI-validated documentation suite directly within the codebase.
--   **Iterative Content Generation & Quality Gates:** The workflow involves creating documentation in small, user-defined batches. After each batch, a  script is run to enforce quality standards (file parity, link integrity, no placeholders, content rules).
--   **Frontend/Backend Gap Analysis:** Proactively identifying and documenting discrepancies between frontend API expectations and actual backend implementations as part of the documentation process. This is a key part of making the documentation a true operations book.
+-   **Documentation-as-Code:** Building a comprehensive, CI-validated documentation suite within the codebase.
+-   **Backend Hardening & Security:** Moving security checks from the UI to the backend API layer (e.g., tenant creation), ensuring they cannot be bypassed. This includes strict request validation and comprehensive audit logging.
+-   **CI/CD Debugging:** Diagnosing and fixing pipeline failures, specifically related to dependency management and lockfile drift ().
 
 **key DB schema**
--   **tenant:** 
--   **adminuser:** 
+-   **AdminUser:**  (The  field is now critical for authorization).
+-   **AuditEvent:**  (Used to log all tenant creation attempts).
+-   **Tenant:**  (The  field is now protected from being set via the API).
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   **/docs/new/**: The entire new documentation directory is the primary workspace.
--   **/scripts/docs_smoke.sh**: The script for documentation quality control. Must be updated and run frequently.
--   **/.github/workflows/docs-smoke.yml**: The CI workflow for the smoke test.
--   **/frontend/src/config/menu.js**: The source of truth for the admin panel's structure, used to guide documentation creation.
--   **/frontend/src/pages/** and **/backend/app/routes/**: These directories are frequently inspected to reverse-engineer features for the documentation.
+-   : The CI workflow currently being fixed.
+-   : The file causing the CI failure.
+-   : The master script for validating all documentation work.
+-   : Contains the new backend-enforced permissions for tenant creation.
+-   : New Pydantic schema for validating tenant creation requests.
+-   : The central tracker for backend issues.
+-   : The central guide for platform-wide errors.
 
 **Areas that need refactoring**:
--   The legacy  directory should be archived.
+-   The legacy  directory should be archived into  after all work is complete.
 
 **key api endpoints**
--   The agent has identified and documented dozens of API endpoints within the newly created  files. There is no single source of truth other than the code and the documentation being created.
+-   : Endpoint was hardened to only allow users with . All attempts (successful and failed) are now audited.
+-   : Used to verify that the audit log events for tenant creation were being correctly recorded.
 
 **Critical Info for New Agent**
--   **The User's Plan is Law:** The user has provided an extremely detailed, multi-phase plan for the documentation. Follow it religiously. The current priority is to continue creating admin manual pages in the user-specified order. Do not work on the P0 CI/CD blockers until the user explicitly approves it after the documentation is finished.
--   **Adhere to Evolving Quality Standards:** The documentation has several quality gates that you must enforce:
-    -   **Backend Gap Format:** All UI/backend mismatches must be documented in a specific Symptom/Impact/Workaround/Escalation format.
-    -   **Ops Checklist:** Every admin page needs a quick checklist for operators.
-    -   **Content Gates:** The user has requested new  checks for a minimum error count (≥8) and presence of validation keywords. You must implement these next.
--   **Create the Gap Register:** The user requested a central register for all identified backend gaps. This file () must be created and populated with the issues already found.
+-   **Priority #1 is the CI fix:** Your immediate and only task is to resolve the  drift according to the user's runbook. The documentation phase is over; the project is now in a fix the foundation phase. Do not proceed to any other task until the  workflow is passing.
+-   **Communicate the fix clearly:** Since you cannot commit code, your final step for the  issue will be to present the fixed  file and confirm with the user that it's ready for them to commit.
+-   **User is highly technical:** The user provides detailed, runbook-style instructions. Follow them precisely and provide clear, evidence-based responses.
+-   **The Plan is Set:** After the CI fix, the next priority is the admin login error. Do not start any other feature work or documentation updates unless explicitly instructed by the user.
 
 **documents and test reports created in this job**
--   The entire  directory structure.
--   
--   
+-   The entire documentation suite under .
+-   The updated .
+-   .
 
 **Last 10 User Messages and any pending HUMAN messages**
-The user's recent messages have been a series of increasingly specific instructions for the documentation task.
--   **User:** Approved the agent's plan to continue production of docs without asking for confirmation at each step. (STATUS: COMPLETED)
--   **User:** Mandated a new, more detailed format for documenting UI/Backend gaps (Symptom, Impact, Workaround, Escalation). (STATUS: IMPLEMENTED)
--   **User:** Introduced a new Ops-Checklist quality gate to be added to all critical documentation pages. (STATUS: IMPLEMENTED)
--   **User:** Approved the plan to complete the  section with , then start . (STATUS: COMPLETED)
--   **User (Latest):** Acknowledged the agent's progress and provided the next set of tasks: 1) Enable the new  gates (error count, validation keywords). 2) Create the  file. 3) Proceed with  (, ). (STATUS: PENDING - This is the next action item).
+The user's recent messages have been highly directive, providing explicit instructions and confirmations for the agent's work.
+1.  **PENDING:** Agent asked the user for the CI job log showing the drift error and the output of  to classify the issue. (User has not yet provided this).
+2.  **User approved:** Agent to pin Node/Yarn versions in the same PR as the  fix.
+3.  **User approved:** Starting the  drift fix and provided a detailed, multi-step runbook for diagnosis and resolution. (This is the current task).
+4.  **User approved:** Using  for the tenant creation restriction, and mandated backend enforcement, audit logging, and payload validation as acceptance criteria. (Task is DONE).
+5.  **User defined:** The exact number (18) and format for the  documentation. (Task is DONE).
+6.  **User clarified:** The naming convention for Turkish documentation is to use the exact UI labels, not literal translations, to ensure operational consistency. (This standard was applied to all subsequent work).
 
 **Project Health Check:**
--   **Broken:** The CI/CD pipeline is non-functional due to the  drift. No new code or fixes can be deployed or verified.
+-   **Broken:** The  CI workflow is non-functional, which blocks all deployments and verification of any frontend or backend changes.
 
 **3rd Party Integrations**
 -   Stripe
@@ -195,14 +214,17 @@ The user's recent messages have been a series of increasingly specific instructi
 [DOCS_SMOKE] Checking .env.example references
 [DOCS_SMOKE] Checking relative markdown links
 [DOCS_SMOKE] Checking for TODO/PLACEHOLDER tokens
+[DOCS_SMOKE] Checking admin manual quality gates (min error scenarios + validation keywords)
+[DOCS_SMOKE] Admin manual quality gates passed
 [DOCS_SMOKE] Checking tooling availability (non-heavy)
 [DOCS_SMOKE] docker not found (skipping)
 [DOCS_SMOKE] docker compose not found (skipping)
 [DOCS_SMOKE] Docs smoke checks passed
--   **Known regressions:**  CI workflow is broken due to  drift.
+-   **Known regressions:**  CI workflow is broken.
 
 **Credentials to test flow:**
--   Admin:  / 
+-   Super Admin:  /  (Has )
+-   Regular Admin:  /  (Used to verify tenant creation restriction)
 
 **What agent forgot to execute**
--   The agent has not forgotten any tasks. It is correctly following the user's explicit prioritization of documentation over the critical CI/CD and deployment blockers.</analysis>
+-   The agent has been following the user's explicit plan and priorities meticulously. No tasks have been forgotten or overlooked. The agent correctly pivoted from documentation to fixing the core CI blocker as directed.</analysis>
