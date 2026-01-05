@@ -35,12 +35,14 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **ID:** G-001
 - **First Seen:** 2026-01-04
 - **Environment:** all
-- **Status:** Open
+- **Status:** Verified / Closed
 - **Priority:** P1
 - **Owner:** Backend
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** High
+
+**Kapanış notu:** G-001 (Games Import): MVP endpoint’ler implement edildi, stub kalktı, tenant isolation enforced, test PASS. Status: Verified / Closed.
 
 #### Verification contract
 
