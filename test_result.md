@@ -11,6 +11,21 @@ Do not delete sections unless instructed.
 - Ran: `./scripts/docs_smoke.sh`
 - Result: PASS
 - Scope:
+
+### 2026-01-05 (CI) — Frontend lint lockfile determinism
+- Goal: Replicate CI `yarn install --frozen-lockfile` behavior locally and stabilize dependency graph.
+- Environment:
+  - Node: v20.19.6
+  - Yarn: 1.22.22
+- Actions:
+  - Clean install: removed `frontend/node_modules`, ran `yarn cache clean --all`, then `yarn install`.
+  - Verified: `yarn install --frozen-lockfile` passes locally.
+  - Verified: `yarn lint` passes locally.
+- Change prepared:
+  - `frontend/yarn.lock` updated (lockfile drift fix) — expected to unblock `frontend-lint.yml` CI.
+  - `.github/workflows/frontend-lint.yml` pins Node to `20.19.6` (to match canonical environment).
+
+
   - EN/TR parity
   - broken link scan
   - TODO/PLACEHOLDER ban
