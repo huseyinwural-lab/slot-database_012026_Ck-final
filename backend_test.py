@@ -5305,26 +5305,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run G-002 API Keys Toggle Test Suite"""
-    print("🎯 G-002 API Keys Toggle Test Suite Runner")
+    """Main test runner - Run G-003 Reports + Simulation Lab Test Suite"""
+    print("🎯 G-003 Reports + Simulation Lab Test Suite Runner")
     print("=" * 80)
     
-    # Run G-002 API Keys Toggle test suite (primary focus for this review request)
-    api_keys_suite = G002APIKeysToggleTestSuite()
-    api_keys_success = await api_keys_suite.run_all_tests()
+    # Run G-003 Reports + Simulation Lab test suite (primary focus for this review request)
+    g003_suite = G003ReportsSimulationTestSuite()
+    g003_success = await g003_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if api_keys_success else "❌ FAIL"
-    print(f"{status}: G-002 API Keys Toggle Tests")
+    status = "✅ PASS" if g003_success else "❌ FAIL"
+    print(f"{status}: G-003 Reports + Simulation Lab Tests")
     
-    if api_keys_success:
-        print("🎉 G-002 API Keys Toggle test suite PASSED!")
+    if g003_success:
+        print("🎉 G-003 Reports + Simulation Lab test suite PASSED!")
         return True
     else:
-        print("⚠️  G-002 API Keys Toggle test suite failed.")
+        print("⚠️  G-003 Reports + Simulation Lab test suite failed.")
         return False
 
 
