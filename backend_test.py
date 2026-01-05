@@ -1425,7 +1425,7 @@ class G003ReportsSimulationTestSuite:
                 }
                 
                 response = await client.post(
-                    f"{self.base_url}/admin/create",
+                    f"{self.base_url}/admin/users",
                     json=admin2_data,
                     headers=headers
                 )
