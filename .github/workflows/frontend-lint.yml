@@ -31,6 +31,12 @@ jobs:
           cache: "yarn"
           cache-dependency-path: frontend/yarn.lock
 
+      - name: Pin Yarn (classic)
+        run: |
+          corepack disable || true
+          npm i -g yarn@1.22.22
+          yarn -v
+
       - name: Install (frozen)
         working-directory: frontend
         run: yarn install --frozen-lockfile
