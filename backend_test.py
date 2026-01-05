@@ -5708,26 +5708,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run G-003 Reports + Simulation Lab Test Suite"""
-    print("🎯 G-003 Reports + Simulation Lab Test Suite Runner")
+    """Main test runner - Run Brands Settings Test Suite"""
+    print("🎯 Brands Settings Test Suite Runner")
     print("=" * 80)
     
-    # Run G-003 Reports + Simulation Lab test suite (primary focus for this review request)
-    g003_suite = G003ReportsSimulationTestSuite()
-    g003_success = await g003_suite.run_all_tests()
+    # Run Brands Settings test suite (primary focus for this review request)
+    brands_suite = BrandsSettingsTestSuite()
+    brands_success = await brands_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if g003_success else "❌ FAIL"
-    print(f"{status}: G-003 Reports + Simulation Lab Tests")
+    status = "✅ PASS" if brands_success else "❌ FAIL"
+    print(f"{status}: Brands Settings Tests")
     
-    if g003_success:
-        print("🎉 G-003 Reports + Simulation Lab test suite PASSED!")
+    if brands_success:
+        print("🎉 Brands Settings test suite PASSED!")
         return True
     else:
-        print("⚠️  G-003 Reports + Simulation Lab test suite failed.")
+        print("⚠️  Brands Settings test suite failed.")
         return False
 
 
