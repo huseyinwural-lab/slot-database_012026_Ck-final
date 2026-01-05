@@ -57,6 +57,17 @@ Do not delete sections unless instructed.
 - Ran: `./scripts/docs_smoke.sh`
 - Result: PASS
 
+### 2026-01-05 (Backend) — G-001 Games Import endpoints implemented + tests
+- Implemented endpoints (sync MVP):
+  - POST /api/v1/game-import/manual/upload (multipart: file|bundle|upload)
+  - GET  /api/v1/game-import/jobs/{job_id}
+  - POST /api/v1/game-import/jobs/{job_id}/import
+- Added SQLModel tables: game_import_job, game_import_item (job + items)
+- Hardening: upload size limit (50MB), max items (10k), zip-slip path traversal guard
+- Tenant isolation: enforced via tenant_id filter + owner impersonation handled by existing X-Tenant-ID resolver
+- Audit events (best-effort): upload/import attempt + success/fail
+- Tests: `pytest -q tests/test_game_import_endpoints.py` ✅
+
 
 
   - EN/TR parity
