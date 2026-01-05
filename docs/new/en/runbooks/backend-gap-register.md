@@ -32,10 +32,14 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 ### 1.1 System → Logs → Category endpoints return empty lists
 
+- **ID:** G-004
 - **First Seen:** 2026-01-04
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
 - **Impact:** Medium
 
 - **Source page:** `/docs/new/en/admin/system/logs.md`
@@ -56,10 +60,14 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 ### 1.2 System → Admin Users → Non-Users tabs appear but endpoints may be missing
 
+- **ID:** G-005
 - **First Seen:** 2026-01-04
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
 - **Impact:** High
 
 - **Source page:** `/docs/new/en/admin/system/admin-users.md`
@@ -78,10 +86,14 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 ### 1.3 System → Feature Flags → Safe stubs (no persistence)
 
+- **ID:** G-006
 - **First Seen:** 2026-01-04
 - **Environment:** all
 - **Status:** Open
 - **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
 - **Impact:** Medium
 
 - **Source page:** `/docs/new/en/admin/system/feature-flags.md`
