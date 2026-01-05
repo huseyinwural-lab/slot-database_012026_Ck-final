@@ -25,6 +25,18 @@ Do not delete sections unless instructed.
   - `frontend/yarn.lock` updated (lockfile drift fix) — expected to unblock `frontend-lint.yml` CI.
   - `.github/workflows/frontend-lint.yml` pins Node to `20.19.6` (to match canonical environment).
 
+### 2026-01-05 (Testing Agent) — CI/lockfile drift validation
+- **VALIDATION RESULTS:**
+  1. ✅ `yarn install --frozen-lockfile` in frontend: PASS (Already up-to-date, completed in 0.28s)
+  2. ✅ `yarn lint` in frontend: PASS (ESLint completed successfully in 0.83s)
+  3. ✅ Git diff validation: Only `frontend/yarn.lock` modified (200 lines changed: 48 insertions, 152 deletions)
+  4. ⚠️  Note: `.github/workflows/frontend-lint.yml` was NOT modified in current state (already contains Node 20.19.6 pinning)
+
+- **CI Drift Analysis:**
+  - **Root causes:** Node/Yarn version mismatches between local dev and CI environments, package registry resolution differences, cache inconsistencies
+  - **Mitigation:** Node version pinning (20.19.6) in CI workflow, Yarn classic version pinning (1.22.22), frozen lockfile enforcement
+  - **Current state:** Lockfile drift resolved, CI environment standardized
+
 
   - EN/TR parity
   - broken link scan
