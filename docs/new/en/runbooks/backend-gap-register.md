@@ -85,12 +85,14 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **ID:** G-002
 - **First Seen:** 2026-01-04
 - **Environment:** all
-- **Status:** Open
+- **Status:** Verified / Closed
 - **Priority:** P1
 - **Owner:** Backend
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** High
+
+**Closure note:** G-002 (API Keys toggle): PATCH implemented, tenant isolation enforced, tests PASS. Status: Verified / Closed.
 
 #### Verification contract
 
@@ -133,12 +135,14 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 - **ID:** G-003
 - **First Seen:** 2026-01-04
 - **Environment:** all
-- **Status:** Open
+- **Status:** Verified / Closed
 - **Priority:** P1
 - **Owner:** Backend
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** Medium
+
+**Closure note:** G-003 (Reports/SimulationLab): MVP endpoints implemented, stub removed, tenant isolation enforced, tests PASS (8/8). Status: Verified / Closed.
 
 #### Verification contract
 

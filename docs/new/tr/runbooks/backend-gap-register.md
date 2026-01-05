@@ -85,12 +85,14 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **ID:** G-002
 - **First Seen:** 2026-01-04
 - **Environment:** all
-- **Status:** Open
+- **Status:** Verified / Closed
 - **Priority:** P1
 - **Owner:** Backend
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** High
+
+**Kapanış notu:** G-002 (API Keys toggle): PATCH implement edildi, tenant isolation enforced, test PASS. Status: Verified / Closed.
 
 #### Verification contract
 
@@ -133,12 +135,14 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 - **ID:** G-003
 - **First Seen:** 2026-01-04
 - **Environment:** all
-- **Status:** Open
+- **Status:** Verified / Closed
 - **Priority:** P1
 - **Owner:** Backend
 - **SLA:** 7d
 - **Target Version:** TBD
 - **Impact:** Medium
+
+**Kapanış notu:** G-003 (Reports/SimulationLab): MVP endpoint’ler implement edildi, stub kalktı, tenant isolation enforced, test PASS (8/8). Status: Verified / Closed.
 
 #### Verification contract
 
