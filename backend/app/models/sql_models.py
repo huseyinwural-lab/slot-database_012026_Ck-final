@@ -214,6 +214,7 @@ class AuditEvent(SQLModel, table=True):
 
 # Affiliate moved to growth_models.py
 from app.models.growth_models import Affiliate
+from app.models.game_import_sql import GameImportJob, GameImportItem
 
 
 class RiskRule(SQLModel, table=True):
