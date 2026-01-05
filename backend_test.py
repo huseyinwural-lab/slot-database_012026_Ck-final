@@ -1416,8 +1416,9 @@ class BrandsSettingsTestSuite:
                 self.log_result("Create Tenant 2", True, f"Tenant 2 ID: {self.tenant2_id}")
                 
                 # Create admin for tenant 2
+                admin2_email = f"admin2_{uuid.uuid4().hex[:8]}@testcasino2.com"
                 admin2_data = {
-                    "email": "admin2@testcasino2.com",
+                    "email": admin2_email,
                     "password": "Admin123!",
                     "tenant_id": self.tenant2_id,
                     "role": "admin"
