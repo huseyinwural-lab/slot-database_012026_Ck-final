@@ -30,6 +30,90 @@ This register centralizes **UI ↔ Backend mismatches** discovered while writing
 
 ## 1) Open gaps (by module)
 
+### 1.1 Core → Games → Manual import endpoints return 404
+
+- **ID:** G-001
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
+- **Impact:** High
+
+- **Source page:** `/docs/new/en/admin/core/games.md`
+- **Symptom:** Game manual upload / preview / confirm import flow fails with **404 Not Found**.
+- **UI endpoints:**
+  - `POST /api/v1/game-import/manual/upload`
+  - `GET /api/v1/game-import/jobs/{job_id}`
+  - `POST /api/v1/game-import/jobs/{job_id}/import`
+- **Impact:** Catalog ingestion is blocked in this environment.
+- **Admin Workaround:** No admin-side workaround; defer import until backend supports these routes.
+- **Escalation Package:**
+  - Capture 404 from DevTools Network for the above endpoints
+  - Expected vs actual: 200 + `{ job_id }` vs 404
+  - Keywords: `game-import`, `import`
+- **Verification (done when fixed):** Upload returns 200 with `job_id`; job fetch returns 200; confirm import returns 200; UI completes the import.
+
+---
+
+### 1.2 System → API Keys → Toggle endpoint returns 404
+
+- **ID:** G-002
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
+- **Impact:** High
+
+- **Source page:** `/docs/new/en/admin/system/api-keys.md`
+- **Symptom:** Toggling key status fails with **404 Not Found**.
+- **UI endpoint:** `PATCH /api/v1/api-keys/{id}` body `{ active: true|false }`
+- **Impact:** Keys cannot be disabled/reenabled safely; incident response and rotation procedures are weakened.
+- **Admin Workaround:** Treat keys as static; rotate by creating a new key and revoking via secret manager (if supported externally).
+- **Escalation Package:**
+  - Capture 404 from DevTools Network for `PATCH /api/v1/api-keys/{id}`
+  - Expected vs actual: 200 vs 404
+  - Keywords: `api-keys`, `PATCH`
+- **Verification (done when fixed):** Patch returns 200; UI shows visible toggle change; state persists after refresh.
+
+---
+
+### 1.3 System → Reports / Simulator → Endpoints are stubbed or missing
+
+- **ID:** G-003
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
+- **Impact:** Medium
+
+- **Source pages:**
+  - `/docs/new/en/admin/system/reports.md`
+  - `/docs/new/en/admin/system/simulator.md`
+- **Symptom:** Reports pages return empty/stub data or 404; simulator actions do not persist runs.
+- **Likely Cause:** `/api/v1/reports/*` and simulator run endpoints are not fully implemented in this build.
+- **UI endpoints (examples):**
+  - `GET /api/v1/reports/overview` (and other tabs)
+  - `POST /api/v1/reports/exports`
+  - (simulator) run endpoints vary by module
+- **Admin Workaround:** Use export-only if available; otherwise manual analysis from DB/logs.
+- **Escalation Package:**
+  - Capture the first failing path(s) from DevTools Network
+  - Expected vs actual: 200 with data vs 404/empty
+  - Keywords: `reports`, `exports`, `simulator`
+- **Verification (done when fixed):** Report endpoints return non-empty data where applicable; export job returns 200; simulator runs are created and listed.
+
+---
+
+
 ### 1.4 System → Logs → Category endpoints return empty lists
 
 - **ID:** G-004

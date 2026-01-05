@@ -30,6 +30,90 @@ Bu register, Admin Panel dokümantasyonu sırasında tespit edilen **UI ↔ Back
 
 ## 1) Açık gap’ler (modül bazlı)
 
+### 1.1 Core → Games → Manual import endpoint’leri 404 dönüyor
+
+- **ID:** G-001
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
+- **Impact:** High
+
+- **Kaynak sayfa:** `/docs/new/tr/admin/core/games.md`
+- **Belirti:** Game manual upload / preview / confirm import akışı **404 Not Found** ile fail ediyor.
+- **UI endpoint’leri:**
+  - `POST /api/v1/game-import/manual/upload`
+  - `GET /api/v1/game-import/jobs/{job_id}`
+  - `POST /api/v1/game-import/jobs/{job_id}/import`
+- **Etki:** Katalog ingestion/import bu ortamda bloklanır.
+- **Admin workaround:** Yok; backend bu route’ları destekleyene kadar import’u erteleyin.
+- **Escalation paketi:**
+  - Yukarıdaki endpoint’ler için DevTools Network’ten 404 kanıtı
+  - Beklenen vs gerçek: 200 + `{ job_id }` vs 404
+  - Anahtar kelimeler: `game-import`, `import`
+- **Doğrulama (fix sonrası):** Upload 200 + `job_id`; job fetch 200; confirm import 200; UI akışı tamamlar.
+
+---
+
+### 1.2 System → API Keys → Toggle endpoint’i 404 dönüyor
+
+- **ID:** G-002
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
+- **Impact:** High
+
+- **Kaynak sayfa:** `/docs/new/tr/admin/system/api-keys.md`
+- **Belirti:** Key status toggle işlemi **404 Not Found** dönüyor.
+- **UI endpoint’i:** `PATCH /api/v1/api-keys/{id}` body `{ active: true|false }`
+- **Etki:** Key disable/enable güvenli şekilde yapılamaz; incident response ve rotate prosedürü zayıflar.
+- **Admin workaround:** Key’leri statik kabul edin; yeni key üretip eskiyi secret manager tarafında revoke edin (varsa).
+- **Escalation paketi:**
+  - `PATCH /api/v1/api-keys/{id}` için DevTools Network 404 kanıtı
+  - Beklenen vs gerçek: 200 vs 404
+  - Anahtar kelimeler: `api-keys`, `PATCH`
+- **Doğrulama (fix sonrası):** Patch 200; UI toggle değişimi görünür; refresh sonrası state persist.
+
+---
+
+### 1.3 System → Reports / Simulator → Endpoint’ler stub veya eksik
+
+- **ID:** G-003
+- **First Seen:** 2026-01-04
+- **Environment:** all
+- **Status:** Open
+- **Priority:** P1
+- **Owner:** Backend
+- **SLA:** 7d
+- **Target Version:** TBD
+- **Impact:** Medium
+
+- **Kaynak sayfalar:**
+  - `/docs/new/tr/admin/system/reports.md`
+  - `/docs/new/tr/admin/system/simulator.md`
+- **Belirti:** Reports sayfaları empty/stub data veya 404 döner; simulator aksiyonları run oluşturmuyor.
+- **Muhtemel neden:** `/api/v1/reports/*` ve simulator run endpoint’leri bu build’de tam implement değil.
+- **UI endpoint’leri (örnek):**
+  - `GET /api/v1/reports/overview` (ve diğer tab’ler)
+  - `POST /api/v1/reports/exports`
+  - (simulator) run endpoint’leri modüle göre değişir
+- **Admin workaround:** Export-only varsa kullanın; yoksa DB/log üzerinden manuel analiz.
+- **Escalation paketi:**
+  - DevTools Network’ten ilk fail eden path(ler)
+  - Beklenen vs gerçek: 200 + data vs 404/empty
+  - Anahtar kelimeler: `reports`, `exports`, `simulator`
+- **Doğrulama (fix sonrası):** Report endpoint’leri anlamlı data döner; export job 200; simulator run’ları oluşturulur ve listelenir.
+
+---
+
+
 ### 1.4 System → Logs → Kategori endpoint’leri boş liste dönüyor
 
 - **ID:** G-004
