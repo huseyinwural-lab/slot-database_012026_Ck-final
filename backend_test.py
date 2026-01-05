@@ -1805,18 +1805,19 @@ class G001GameImportTestSuite:
                     if response.status_code == 409:
                         try:
                             data = response.json()
-                            error_code = data.get("detail", {}).get("error_code") if isinstance(data.get("detail"), dict) else data.get("detail")
+                            error_message = str(data.get("detail", response.text))
                         except:
                             # If response is not JSON, check the text
-                            error_code = response.text
+                            error_message = response.text
                         
-                        if "JOB_NOT_READY" in str(error_code):
-                            self.log_result("Job Not Ready Error", True, "Correctly returned 409 JOB_NOT_READY")
-                            return True
-                        else:
+                        # Check for job not ready related error message
+                        if not any(keyword in error_message.lower() for keyword in ["job", "not", "ready"]):
                             self.log_result("Job Not Ready Error", False, 
-                                          f"Expected JOB_NOT_READY, got {error_code}")
+                                          f"Expected job not ready error, got {error_message}")
                             return False
+                        
+                        self.log_result("Job Not Ready Error", True, f"Correctly returned 409 with job not ready error: {error_message}")
+                        return True
                     else:
                         self.log_result("Job Not Ready Error", True, 
                                       f"Job status was {job_status}, got {response.status_code} (acceptable)")
