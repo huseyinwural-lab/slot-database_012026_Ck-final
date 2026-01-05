@@ -165,6 +165,26 @@ Do not delete sections unless instructed.
 
 - **Overall Result:** ✅ ALL TESTS PASSED (8/8) - G-003 Reports + Simulation Lab flow fully validated
 
+### 2026-01-05 (Testing Agent) — Brands Settings Endpoints Validation
+- **VALIDATION RESULTS:**
+  1. ✅ GET /api/v1/settings/brands (Platform Owner): PASS (200 with array of 18 brands, all required fields present)
+  2. ✅ GET /api/v1/settings/brands (Tenant Isolation): PASS (non-owner sees only their own tenant)
+  3. ✅ POST /api/v1/settings/brands (Platform Owner): PASS (200 with brand ID returned)
+  4. ✅ POST /api/v1/settings/brands (Non-Owner): PASS (403 Forbidden as expected)
+  5. ✅ POST /api/v1/settings/brands (Validation): PASS (422 for missing brand_name)
+
+- **Test Details:**
+  - GET endpoint returns proper JSON array (not wrapped object) matching frontend expectations
+  - Each brand object contains all required fields: id, brand_name, status, default_currency, default_language, country_availability, created_at
+  - Platform owner can see multiple tenants (18 brands returned)
+  - Non-owner tenant isolation working correctly (only sees own tenant)
+  - POST endpoint properly restricted to platform owner only (403 for non-owners)
+  - Brand creation returns correct response shape with ID
+  - Validation working correctly for missing required fields
+  - All endpoints properly scoped to tenant context and authorization rules
+
+- **Overall Result:** ✅ ALL TESTS PASSED (5/5) - Brands Settings endpoints fully validated and working correctly
+
 
 
   - EN/TR parity
