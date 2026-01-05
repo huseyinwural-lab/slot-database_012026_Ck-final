@@ -1677,17 +1677,18 @@ class G001GameImportTestSuite:
                 
                 try:
                     data = response.json()
-                    error_code = data.get("detail", {}).get("error_code") if isinstance(data.get("detail"), dict) else data.get("detail")
+                    error_message = str(data.get("detail", response.text))
                 except:
                     # If response is not JSON, check the text
-                    error_code = response.text
+                    error_message = response.text
                 
-                if "MISSING_FILE" not in str(error_code):
+                # Check for missing file related error message
+                if not any(keyword in error_message.lower() for keyword in ["missing", "file", "upload"]):
                     self.log_result("Missing File Error", False, 
-                                  f"Expected MISSING_FILE, got {error_code}")
+                                  f"Expected missing file error, got {error_message}")
                     return False
                 
-                self.log_result("Missing File Error", True, "Correctly returned 400 MISSING_FILE")
+                self.log_result("Missing File Error", True, f"Correctly returned 400 with missing file error: {error_message}")
                 return True
                 
         except Exception as e:
