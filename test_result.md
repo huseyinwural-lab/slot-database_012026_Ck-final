@@ -38,6 +38,13 @@ Do not delete sections unless instructed.
   - **Current state:** Lockfile drift resolved, CI environment standardized
 
 
+### 2026-01-05 (Docs) — Release Readiness Checklist added
+- Added: `/docs/new/en/runbooks/release-readiness-checklist.md` and `/docs/new/tr/runbooks/release-readiness-checklist.md`
+- Linked from: `docs/new/*/guides/ops-manual.md` and `docs/new/*/runbooks/README.md`
+- Ran: `./scripts/docs_smoke.sh`
+- Result: PASS
+
+
   - EN/TR parity
   - broken link scan
   - TODO/PLACEHOLDER ban
