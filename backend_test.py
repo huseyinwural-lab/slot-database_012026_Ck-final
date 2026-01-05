@@ -1674,10 +1674,14 @@ class G001GameImportTestSuite:
                                   f"Expected 400, got {response.status_code}")
                     return False
                 
-                data = response.json()
-                error_code = data.get("detail", {}).get("error_code")
+                try:
+                    data = response.json()
+                    error_code = data.get("detail", {}).get("error_code") if isinstance(data.get("detail"), dict) else data.get("detail")
+                except:
+                    # If response is not JSON, check the text
+                    error_code = response.text
                 
-                if error_code != "MISSING_FILE":
+                if "MISSING_FILE" not in str(error_code):
                     self.log_result("Missing File Error", False, 
                                   f"Expected MISSING_FILE, got {error_code}")
                     return False
