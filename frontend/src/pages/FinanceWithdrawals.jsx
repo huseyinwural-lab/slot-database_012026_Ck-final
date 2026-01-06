@@ -372,41 +372,46 @@ const FinanceWithdrawals = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  items.map((tx) => (
-                    <TableRow key={tx.tx_id} className="cursor-pointer" onClick={() => handleOpenDetail(tx)}>
+                  items.map((w) => (
+                    <TableRow key={w.id} className="cursor-pointer" onClick={() => handleOpenDetail(w)}>
                       <TableCell className="font-mono text-xs" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-2">
-                          <span>{tx.tx_id}</span>
+                          <span>{w.id}</span>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCopyTxId(tx.tx_id);
+                              handleCopyTxId(w.id);
                             }}
                           >
                             <Copy className="w-3 h-3" />
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell className="font-mono text-xs">{tx.player_id}</TableCell>
-                      <TableCell>{formatAmount(tx.amount, tx.currency)}</TableCell>
-                      <TableCell>
-                        {renderStateBadge(tx.state)}
+                      <TableCell className="text-xs">
+                        <div className="font-mono">{w.player_id}</div>
+                        <div className="text-[10px] text-muted-foreground">{w.player_username || w.player_email || ''}</div>
                       </TableCell>
-                      <TableCell className="text-xs">{formatDateTime(tx.created_at)}</TableCell>
-                      <TableCell className="text-xs">{tx.reviewed_by || '-'}</TableCell>
-                      <TableCell className="text-xs">{formatDateTime(tx.reviewed_at)}</TableCell>
+                      <TableCell>{formatAmount(w.amount, w.currency)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="uppercase text-[10px]">
+                          {w.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">{formatDateTime(w.created_at)}</TableCell>
+                      <TableCell className="text-xs">{w.reviewed_by || '-'}</TableCell>
+                      <TableCell className="text-xs">{formatDateTime(w.reviewed_at)}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-end gap-2">
-                          {canApproveOrReject(tx) && (
+                        <div className="flex justify-end gap-2 flex-wrap">
+                          {canApproveOrReject(w) && (
                             <>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 disabled={actionLoading}
-                                onClick={() => openActionModal(tx, 'approve')}
+                                onClick={() => openActionModal(w, 'approve')}
                               >
                                 <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
                               </Button>
@@ -414,60 +419,44 @@ const FinanceWithdrawals = () => {
                                 size="sm"
                                 variant="destructive"
                                 disabled={actionLoading}
-                                onClick={() => openActionModal(tx, 'reject')}
+                                onClick={() => openActionModal(w, 'reject')}
                               >
                                 <XCircle className="w-4 h-4 mr-1" /> Reject
                               </Button>
                             </>
                           )}
-                          {canMarkPaid(tx) && (
+                          {canMarkPaid(w) && (
                             <Button
                               size="sm"
                               variant="default"
                               disabled={actionLoading}
-                              onClick={() => openActionModal(tx, 'mark_paid')}
+                              onClick={() => openActionModal(w, 'mark_paid')}
                             >
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Mark Paid
                             </Button>
                           )}
-                          {canStartOrRetryPayout(tx) && (
+                          {canMarkFailed(w) && (
                             <Button
                               size="sm"
                               variant="outline"
                               disabled={actionLoading}
-                              onClick={() => handleStartOrRetryPayout(tx)}
+                              onClick={() => openActionModal(w, 'mark_failed')}
                             >
-                              <CheckCircle2 className="w-4 h-4 mr-1" />
-                              {tx.state === 'payout_failed' ? 'Retry Payout' : 'Start Payout'}
-                            </Button>
-                          )}
-                          {canRecheck(tx) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={actionLoading}
-                              onClick={() => handleRecheck(tx)}
-                            >
-                              Recheck
+                              <XCircle className="w-4 h-4 mr-1" /> Mark Failed
                             </Button>
                           )}
                         </div>
-                        {/* Row-level inline status for money-path actions */}
                         <div className="mt-1 text-right text-[11px] text-muted-foreground min-h-[1rem]">
                           {(() => {
-                            const approveKey = makeRowKey(tx.tx_id, 'approve');
-                            const rejectKey = makeRowKey(tx.tx_id, 'reject');
-                            const markPaidKey = makeRowKey(tx.tx_id, 'mark_paid');
-                            const payoutStartKey = makeRowKey(tx.tx_id, 'payout_start');
-                            const payoutRetryKey = makeRowKey(tx.tx_id, 'payout_retry');
-                            const recheckKey = makeRowKey(tx.tx_id, 'recheck');
+                            const approveKey = makeRowKey(w.id, 'approve');
+                            const rejectKey = makeRowKey(w.id, 'reject');
+                            const markPaidKey = makeRowKey(w.id, 'mark_paid');
+                            const markFailedKey = makeRowKey(w.id, 'mark_failed');
                             const statusEntry =
                               rowStatus[approveKey] ||
                               rowStatus[rejectKey] ||
                               rowStatus[markPaidKey] ||
-                              rowStatus[payoutStartKey] ||
-                              rowStatus[payoutRetryKey] ||
-                              rowStatus[recheckKey];
+                              rowStatus[markFailedKey];
 
                             if (!statusEntry) return null;
                             if (statusEntry.status === 'in_flight') return 'İşlem yürütülüyor...';
