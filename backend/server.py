@@ -213,6 +213,11 @@ app.include_router(finance_reconciliation_config.router)
 from app.routes import withdrawals
 app.include_router(withdrawals.router)
 
+# Finance chargeback evidence upload (P0)
+from app.routes import finance_chargeback_evidence
+app.include_router(finance_chargeback_evidence.router)
+
+
 
 # Finance chargeback guidelines (P0)
 from app.routes import finance_guidelines
