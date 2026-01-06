@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '@/components/ui/textarea';
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from '@/components/ui/pagination';
 import { toast } from 'sonner';
-import { ArrowDownRight, CheckCircle2, XCircle, Copy } from 'lucide-react';
+import { ArrowDownRight, CheckCircle2, XCircle, Copy, Download } from 'lucide-react';
 
 
 const ADMIN_SCOPE = 'admin';
