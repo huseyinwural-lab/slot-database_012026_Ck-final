@@ -26,25 +26,25 @@ const FinancialSummary = ({ data, onNavigate, bonusesEnabled = true, jackpotsEna
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
+          <div {...clickable(true, 'cash_in_system')}>
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <Wallet className="h-3 w-3" /> Cash in System
             </div>
             <div className="text-xl font-bold">${data.cash_in_system.toLocaleString()}</div>
           </div>
-          <div className="space-y-1">
+          <div {...clickable(bonusesEnabled, 'bonus_liabilities', 'Coming soon')}>
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <Gift className="h-3 w-3" /> Bonus Liabilities
             </div>
             <div className="text-xl font-bold text-orange-600">${data.bonus_liabilities.toLocaleString()}</div>
           </div>
-          <div className="space-y-1">
+          <div {...clickable(jackpotsEnabled, 'jackpot_pools', 'Coming soon')}>
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <Trophy className="h-3 w-3" /> Jackpot Pools
             </div>
             <div className="text-xl font-bold text-purple-600">${data.jackpot_pools.toLocaleString()}</div>
           </div>
-          <div className="space-y-1">
+          <div {...clickable(true, 'pending_withdrawals')}>
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <ArrowRightLeft className="h-3 w-3" /> Pending Withdrawals
             </div>
