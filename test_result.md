@@ -319,6 +319,32 @@ Do not delete sections unless instructed.
 - **SECURITY:** Tenant isolation properly enforced, no cross-tenant data leakage
 - **STATUS:** ✅ ALL TESTS PASSED - Players XLSX export fully functional at API level
 
+### 2026-01-06 (Testing Agent) — Players XLSX Export Frontend Smoke Test
+- **TEST SCOPE:** Frontend smoke test for Players XLSX export functionality as requested
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
+  2. ✅ **Players Page Navigation:** Successfully navigated to Core -> Players (PlayerList)
+  3. ✅ **XLSX API Backend:** GET /api/v1/players/export.xlsx returns 200 with proper XLSX headers
+     - Content-Type: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` ✅
+     - Content-Disposition: `attachment; filename="players_*.xlsx"` ✅
+  4. ❌ **Frontend Implementation Gap:** Export button shows "Export CSV" instead of "Export Excel"
+  5. ❌ **Console Log Mismatch:** Console shows `export_csv_clicked` instead of `export_xlsx_clicked`
+  6. ❌ **API Call Mismatch:** Frontend calls `/api/v1/players/export` (CSV) instead of `/api/v1/players/export.xlsx`
+
+- **DETAILED FINDINGS:**
+  - **Backend XLSX Support:** ✅ XLSX endpoint fully implemented and working correctly
+  - **Frontend Code Gap:** ❌ Deployed frontend lacks XLSX export functionality
+    - Current button text: "Export CSV"
+    - Current console log: "export_csv_clicked"
+    - Current API call: "/api/v1/players/export" (CSV endpoint)
+    - Missing: handleExportXlsx function, export_xlsx_clicked log, .xlsx endpoint call
+  - **Session Management:** ✅ Authentication stable, localStorage admin_token persists correctly
+  - **File Download Trigger:** ✅ CSV export triggers proper file download (blob URL creation)
+
+- **ROOT CAUSE:** Frontend code mismatch - the deployed version has CSV export functionality but lacks the XLSX export implementation that exists in the source code
+- **IMPACT:** Users cannot access XLSX export from the UI, only CSV export is available
+- **STATUS:** ❌ FRONTEND IMPLEMENTATION MISSING - Backend XLSX support exists but frontend not deployed
+
 ## Previous history
 
 (legacy content retained below)
