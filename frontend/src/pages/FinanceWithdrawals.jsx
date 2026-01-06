@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
-import { callMoneyAction, buildIdempotencyKey } from '../services/moneyActions';
+import WithdrawalsDetailDrawer from '../components/WithdrawalsDetailDrawer';
+import { callMoneyAction } from '../services/moneyActions';
 import { moneyPathErrorMessage } from '../services/moneyPathErrors';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
