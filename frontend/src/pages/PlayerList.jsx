@@ -43,15 +43,15 @@ const PlayerList = () => {
 
   const handleFilter = () => fetchPlayers();
 
-  const handleExportCsv = async () => {
-    console.info('export_csv_clicked');
+  const handleExportXlsx = async () => {
+    console.info('export_xlsx_clicked');
     try {
       const params = { search };
       if (status !== "all") params.status = status;
       if (vipLevel !== "all") params.vip_level = vipLevel;
       if (riskScore !== "all") params.risk_score = riskScore;
 
-      const res = await api.get('/v1/players/export', {
+      const res = await api.get('/v1/players/export.xlsx', {
         params,
         responseType: 'blob',
       });
@@ -59,7 +59,7 @@ const PlayerList = () => {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `players_export_${new Date().toISOString()}.csv`);
+      link.setAttribute('download', `players_export_${new Date().toISOString()}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -72,7 +72,7 @@ const PlayerList = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Player Management</h2>
-        <Button onClick={handleExportCsv}>Export CSV</Button>
+        <Button onClick={handleExportXlsx}>Export Excel</Button>
       </div>
 
       <Card>
