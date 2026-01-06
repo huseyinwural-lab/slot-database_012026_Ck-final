@@ -66,6 +66,7 @@ const Finance = () => {
     currency: 'all',
     ip_address: '',
     range_days: ''
+  });
 
   // P1 Deep-link: /finance?tab=transactions&type=bet,deposit&range_days=30
   useEffect(() => {
