@@ -377,6 +377,37 @@ Do not delete sections unless instructed.
 - **IMPACT:** Users cannot access XLSX export functionality from the UI despite backend support being available
 - **STATUS:** ❌ DEPLOYMENT ISSUE - Frontend requires rebuild and redeployment to include XLSX export functionality
 
+### 2026-01-06 (Testing Agent) — Player Registration Flow End-to-End Validation
+- **TEST SCOPE:** Complete end-to-end validation of player registration flow on frontend-player app (http://localhost:3001/register)
+- **VALIDATION RESULTS:**
+  1. ✅ **Registration Page Access:** Successfully loaded /register page with proper form fields (Username, Email, Password)
+  2. ✅ **Fresh Email Registration:** POST /api/v1/auth/player/register returns 200 for new email
+     - Test email: ui_fresh_1767708508@hotmail.com / Test12345!
+     - Network: POST http://localhost:8001/api/v1/auth/player/register -> 200
+     - Redirect: Successfully redirected to /login page after registration
+  3. ✅ **Duplicate Email Registration:** POST /api/v1/auth/player/register returns 400 for existing email
+     - Same email: ui_fresh_1767708508@hotmail.com
+     - Network: POST http://localhost:8001/api/v1/auth/player/register -> 400
+     - Error message: "This email is already registered. Please log in instead." (exact match)
+  4. ✅ **API Endpoint Validation:** Confirmed /api/v1/auth/player/register endpoint working correctly
+     - Fresh registration: 200 status with success message
+     - Duplicate registration: 400 status with proper error response
+
+- **DETAILED TEST RESULTS:**
+  - **Frontend UI:** ✅ Registration form properly implemented with all required fields
+  - **API Integration:** ✅ Frontend correctly calls backend API with proper headers (X-Tenant-ID: default_casino)
+  - **Success Flow:** ✅ Successful registration redirects to /login page as expected
+  - **Error Handling:** ✅ Duplicate email shows correct user-friendly error message
+  - **Network Validation:** ✅ HTTP status codes match requirements (200 for success, 400 for duplicate)
+  - **User Experience:** ✅ Form validation, loading states, and error display working correctly
+
+- **BACKEND API VALIDATION:**
+  - Fresh email registration: Returns 200 with {"message":"Registered","player_id":"..."}
+  - Duplicate email registration: Returns 400 with {"detail":"Player exists"}
+  - Frontend properly transforms "Player exists" to user-friendly message
+
+- **STATUS:** ✅ ALL TESTS PASSED - Player registration flow fully functional and meeting all requirements
+
 ### 2026-01-06 (Testing Agent) — Players XLSX Export Frontend Smoke Test (Post-Restart)
 - **TEST SCOPE:** Re-run frontend smoke test for Players XLSX export functionality after frontend restart
 - **VALIDATION RESULTS:**
