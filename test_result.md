@@ -462,6 +462,21 @@ agent_communication:
     -message: "🎉 P1 DASHBOARD DISABLED CARDS VERIFICATION FULLY PASSED: Completed comprehensive re-verification of P1 Dashboard disabled cards on http://localhost:3000 as requested. ALL TESTS PASSED (3/3): ✅ Payment Gateway Status: opacity-50 styling, cursor-not-allowed, 'Coming soon' tooltip, navigation blocked ✅ Retention & Churn: opacity-50 styling, cursor-not-allowed, 'Coming soon' tooltip, navigation blocked ✅ Loss Leaders: opacity-50 styling, cursor-not-allowed, 'Coming soon' tooltip, navigation blocked ✅ No console errors detected. All three cards are NOW properly disabled with ComingSoonCard wrapper implementation. The previously identified issues have been FIXED - disabled sections now have proper styling, tooltips, and blocked navigation as required."
     -agent: "testing"
 
+### 2026-01-06 — P1 Dashboard “Drill-down or Disabled” Standard (Decision Matrix A) — FIXED + E2E PASS
+- **Standard:** Her kart ya (1) drill-down link ile çalışır, ya da (2) disabled + tooltip “Coming soon” olur. Dead-click yok.
+- **Dashboard güncellemeleri:** `frontend/src/pages/Dashboard.jsx`
+  - ✅ Deposits & Withdrawals Trend (Chart area) → `/finance?tab=transactions&type=deposit,withdrawal&range_days=30`
+  - ✅ FTD → `/finance?tab=transactions&type=deposit&ftd=1&range_days=30`
+  - ✅ Bonus Performance → feature flag varsa enabled (aksi halde disabled + tooltip)
+  - ✅ Payment Gateway Status → disabled + tooltip “Coming soon”
+  - ✅ Retention & Churn → disabled + tooltip “Coming soon”
+  - ✅ Loss Leaders → disabled + tooltip “Coming soon”
+  - ✅ Live Bets Feed → disabled + tooltip “Coming soon” (P2 gerçek veri hattına kaydırıldı)
+- **Finance deep-link desteği:** `frontend/src/pages/Finance.jsx`
+  - `/finance?tab=transactions&type=deposit,withdrawal&range_days=30` gibi URL’lerde tab seçimi ve type filtreleri otomatik uygulanıyor.
+- **E2E:** ✅ PASS (testing agent: navigasyonlar doğru + disabled kartlar navigate etmiyor + tooltip var + console error yok)
+
+
 ### 2026-01-06 — P1 Executive Dashboard Kart Navigasyonu (E1) — FIXED + E2E PASS
 - **Scope:** Sadece Executive Dashboard üzerindeki KPI/özet kartlarının tıklanabilir olması ve doğru sayfalara yönlendirmesi.
 - **Frontend değişiklikleri:**
