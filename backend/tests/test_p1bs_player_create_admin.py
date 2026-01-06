@@ -21,6 +21,9 @@ def _token(*, admin_id: str, email: str, tenant_id: str, role: str) -> str:
         "role": role,
         "exp": int(datetime.utcnow().timestamp() + 3600),
     }
+    now = datetime.now(timezone.utc)
+    payload["iat"] = int(now.timestamp())
+
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
