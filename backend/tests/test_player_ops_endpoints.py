@@ -10,13 +10,15 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     )
     assert create.status_code in (200, 400)
 
-    # Fetch players list to get id
+    # Fetch players list to get id (scoped to admin's tenant)
     res = await client.get(
         "/api/v1/players",
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert res.status_code == 200
-    pid = res.json()["items"][0]["id"]
+    items = res.json().get("items") or []
+    assert len(items) >= 1
+    pid = items[0]["id"]
 
     # credit
     r = await client.post(
