@@ -345,6 +345,11 @@ Do not delete sections unless instructed.
 - **IMPACT:** Users cannot access XLSX export from the UI, only CSV export is available
 - **STATUS:** ❌ FRONTEND IMPLEMENTATION MISSING - Backend XLSX support exists but frontend not deployed
 
+### 2026-01-06 (Backend+Frontend) — Players Export upgraded to XLSX (Excel)
+- Backend: added `GET /api/v1/players/export.xlsx` (openpyxl) with proper XLSX headers + tenant scope + filters; kept CSV endpoint for compatibility.
+- Frontend: Players export button now calls `/v1/players/export.xlsx` and downloads `players_export_*.xlsx`.
+- Pytest: `pytest -q tests/test_players_export_xlsx.py` ✅
+
 ## Previous history
 
 (legacy content retained below)
