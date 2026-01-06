@@ -240,7 +240,7 @@ async def approve_withdrawal(
     tx.status = "approved"
     tx.review_reason = reason
     tx.reviewed_by = str(current_admin.id)
-    tx.reviewed_at = datetime.utcnow()
+    tx.reviewed_at = datetime.now(timezone.utc)
     session.add(tx)
 
     request_id = getattr(request.state, "request_id", "unknown")
@@ -297,7 +297,7 @@ async def reject_withdrawal(
     tx.status = "rejected"
     tx.review_reason = reason
     tx.reviewed_by = str(current_admin.id)
-    tx.reviewed_at = datetime.utcnow()
+    tx.reviewed_at = datetime.now(timezone.utc)
 
     # Release hold back to available (pending withdrawal holds funds)
     await apply_wallet_delta_with_ledger(
@@ -366,7 +366,7 @@ async def mark_withdrawal_paid(
     tx.status = "paid"
     tx.review_reason = reason
     tx.reviewed_by = str(current_admin.id)
-    tx.reviewed_at = datetime.utcnow()
+    tx.reviewed_at = datetime.now(timezone.utc)
 
     # paid => held -= amount
     await apply_wallet_delta_with_ledger(
@@ -436,7 +436,7 @@ async def mark_withdrawal_failed(
     tx.status = "failed"
     tx.review_reason = reason
     tx.reviewed_by = str(current_admin.id)
-    tx.reviewed_at = datetime.utcnow()
+    tx.reviewed_at = datetime.now(timezone.utc)
     session.add(tx)
 
     request_id = getattr(request.state, "request_id", "unknown")
