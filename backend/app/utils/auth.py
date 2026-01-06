@@ -54,6 +54,10 @@ async def get_current_admin(
         raise credentials_exception
     return admin
 
+
+# Alias for older code that still imports token-based admin auth
+get_current_admin_from_token = get_current_admin
+
 async def get_admin_by_email(email: str, session: AsyncSession) -> AdminUser | None:
     statement = select(AdminUser).where(AdminUser.email == email)
     result = await session.execute(statement)
