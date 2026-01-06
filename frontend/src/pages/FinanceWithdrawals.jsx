@@ -84,7 +84,7 @@ const FinanceWithdrawals = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [selectedTx, setSelectedTx] = useState(null);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   const [actionModal, setActionModal] = useState({ open: false, type: null, tx: null });
