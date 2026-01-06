@@ -151,6 +151,7 @@ const FinanceWithdrawals = () => {
 
   const handleCloseDetail = () => {
     setIsDetailOpen(false);
+    setSelectedWithdrawal(null);
   };
 
   const handleActionError = async (err) => {
