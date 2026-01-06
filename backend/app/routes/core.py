@@ -324,10 +324,6 @@ async def update_player(
 
 
 
-@router.delete("/players/{player_id}")
-async def disable_player(
-
-
 @router.get("/players/export.xlsx")
 async def export_players_xlsx(
     request: Request,
