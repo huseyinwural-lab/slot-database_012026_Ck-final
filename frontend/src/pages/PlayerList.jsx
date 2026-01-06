@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Eye, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PlayerActionsDrawer from '../components/PlayerActionsDrawer';
 
 const PlayerList = () => {
   const navigate = useNavigate();
