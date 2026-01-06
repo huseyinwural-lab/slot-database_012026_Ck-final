@@ -485,6 +485,46 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED - Duplicate registration UX improvement fully functional and meeting all requirements
 
+### 2026-01-06 (Testing Agent) — Player Action Panel (Drawer) Frontend Smoke Test
+- **TEST SCOPE:** Frontend smoke test for new Player Action Panel (drawer) on admin UI as requested in review
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
+  2. ✅ **Players Page Navigation:** Successfully navigated to /players page
+  3. ✅ **Player List Display:** Players table loads correctly with 50+ players visible
+  4. ❌ **CRITICAL ISSUE - Eye Button Behavior:** Eye button navigates to player detail page instead of opening Player Actions Drawer
+     - Expected: Click Eye icon → Player Actions Drawer opens
+     - Actual: Click Eye icon → Navigates to /players/{id} page
+     - Result: Shows "Player not found" with "Failed to load player data" toast
+  5. ❌ **CRITICAL ISSUE - Backend Player Detail Endpoints Missing:** Multiple 404 errors for player-specific endpoints
+     - GET /api/v1/players/{id}/transactions → 404
+     - GET /api/v1/players/{id}/logs → 404  
+     - GET /api/v1/players/{id}/kyc → 404
+
+- **DETAILED FINDINGS:**
+  - **Frontend Code Analysis:** ✅ PlayerActionsDrawer component exists in source code with all required functionality:
+    - Dialog with "Player Actions" title
+    - Player username/email/id display
+    - Quick Actions tab with Credit, Debit, Grant Bonus, Suspend/Unsuspend, Force Logout buttons
+    - Notes/Audit tab with note entry and audit events list
+  - **Deployment Issue:** ❌ Eye button behavior differs from source code expectations
+    - Source code shows onClick handler should open drawer: `setOpsOpen(true); setOpsPlayer(player)`
+    - Deployed version navigates to player detail page instead
+  - **Backend Integration:** ❌ Player detail endpoints not implemented
+    - Player detail page expects /transactions, /logs, /kyc endpoints
+    - All return 404 errors preventing proper player detail display
+
+- **ROOT CAUSE ANALYSIS:**
+  - **Primary Issue:** Frontend deployment mismatch - Eye button behavior differs from source code
+  - **Secondary Issue:** Backend missing player detail endpoints required for player detail page functionality
+  - **Impact:** Player Actions Drawer functionality completely unavailable to users
+
+- **UNABLE TO TEST:**
+  - Credit 10 USD with reason "test" (drawer doesn't open)
+  - Debit huge amount for insufficient funds error (drawer doesn't open)
+  - Notes/Audit tab functionality (drawer doesn't open)
+
+- **STATUS:** ❌ CRITICAL FAILURES - Player Action Panel completely non-functional due to frontend deployment and backend endpoint issues
+
 ## Previous history
 
 (legacy content retained below)
