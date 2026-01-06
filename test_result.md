@@ -468,6 +468,33 @@ agent_communication:
 - **Standard:** Her kart ya (1) drill-down link ile çalışır, ya da (2) disabled + tooltip “Coming soon” olur. Dead-click yok.
 - **Dashboard güncellemeleri:** `frontend/src/pages/Dashboard.jsx`
   - ✅ Deposits & Withdrawals Trend (Chart area) → `/finance?tab=transactions&type=deposit,withdrawal&range_days=30`
+
+### 2026-01-06 — P1 Player Action Panel RBAC (E1) — Backend Enforce + UI Policy + Tests
+- **Policy (kilit):**
+  - Support: view-only (bonuses list/audit/notes ok)
+  - Ops: suspend/unsuspend + force-logout
+  - Admin: ops hakları + credit/debit + bonus
+  - Owner/SuperAdmin: her şey
+
+- **Backend enforce:** `backend/app/routes/player_ops.py`
+  - Credit/Debit/Grant Bonus → `require_admin()` → yetkisiz **403 {error_code: FORBIDDEN}**
+  - Suspend/Unsuspend/Force Logout → `require_ops()` → yetkisiz **403**
+  - Bonuses list + Notes → `require_support_view()`
+  - Not: State-guard 409’lar korunur (RBAC’tan bağımsız)
+
+- **Frontend UI hide/disable:** `frontend/src/components/PlayerActionsDrawer.jsx`
+  - Support kullanıcı: finansal + ops butonları gizli
+  - Ops kullanıcı: Suspend/Unsuspend/Force Logout görünür; Credit/Debit/Bonus gizli
+  - Admin/SuperAdmin: tüm butonlar görünür
+
+- **Backend tests (gate):** `backend/tests/test_player_ops_rbac.py`
+  - ✅ Support → credit/suspend/force-logout: 403; bonuses list: 200
+  - ✅ Ops → suspend/force-logout: 200; credit: 403
+  - ✅ Admin → credit + force-logout: 200
+
+- **Frontend E2E:** ✅ PASS (Super Admin ile tüm butonlar görünür; UI stabil; console error yok)
+- **STATUS:** ✅ PASS
+
   - ✅ FTD → `/finance?tab=transactions&type=deposit&ftd=1&range_days=30`
   - ✅ Bonus Performance → feature flag varsa enabled (aksi halde disabled + tooltip)
   - ✅ Payment Gateway Status → disabled + tooltip “Coming soon”
