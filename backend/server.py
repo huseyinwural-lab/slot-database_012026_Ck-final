@@ -194,6 +194,11 @@ from app.routes import finance_refunds
 app.include_router(finance_refunds.router)
 app.include_router(finance.router)
 
+
+# Finance CSV exports (P0)
+from app.routes import finance_exports
+app.include_router(finance_exports.router)
+
 # Finance reports (P0 stability)
 from app.routes import finance_reports
 app.include_router(finance_reports.router)
