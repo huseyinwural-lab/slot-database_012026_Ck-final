@@ -50,7 +50,6 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
         await session.commit()
 
     token = admin_token
-    tenant = t
     player = p
 
     # Support can view bonuses list
