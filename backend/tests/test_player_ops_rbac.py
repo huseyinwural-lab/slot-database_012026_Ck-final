@@ -107,7 +107,6 @@ async def test_player_ops_rbac_ops_only_ops_actions(client, session, admin_token
     await session.refresh(p)
 
     token = admin_token
-    tenant = None
     player = p
 
     # Ops can suspend
@@ -157,7 +156,6 @@ async def test_player_ops_rbac_admin_all_allowed(client, session, admin_token):
     await session.refresh(p)
 
     token = admin_token
-    tenant = None
     player = p
 
     r = await client.post(
