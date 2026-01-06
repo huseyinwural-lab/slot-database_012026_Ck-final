@@ -62,7 +62,8 @@ const formatAmount = (amount, currency) => {
     start_date: '',
     end_date: '',
     currency: 'all',
-    ip_address: ''
+    ip_address: '',
+    range_days: ''
   });
 
   // Column Visibility State
