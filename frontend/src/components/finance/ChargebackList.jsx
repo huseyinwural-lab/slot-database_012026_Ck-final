@@ -138,7 +138,20 @@ const ChargebackList = () => {
           <Button
             variant="outline"
             onClick={() => {
-              window.location.href = '/api/v1/finance/chargebacks/export';
+              api
+                .get('/v1/finance/chargebacks/export', { responseType: 'blob' })
+                .then((res) => {
+                  const url = window.URL.createObjectURL(new Blob([res.data]));
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', `finance_chargebacks_${new Date().toISOString()}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                })
+                .catch(() => {
+                  toast.error('Export failed');
+                });
             }}
           >
             Export CSV
