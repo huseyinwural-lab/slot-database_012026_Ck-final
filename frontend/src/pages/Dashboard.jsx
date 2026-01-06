@@ -219,7 +219,7 @@ const Dashboard = () => {
             <CriticalAlertsPanel alerts={stats.critical_alerts} />
         </div>
         <div className="col-span-12 md:col-span-8">
-            <FinancialSummary data={stats.financial_summary} />
+            <FinancialSummary data={stats.financial_summary} onNavigate={navigate} />
         </div>
       </div>
 
