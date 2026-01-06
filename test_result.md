@@ -668,6 +668,20 @@ agent_communication:
   1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
      - Login endpoint: POST /api/v1/auth/login -> 200 OK
      - JWT token received and valid
+
+### 2026-01-06 — P0 Finance Transactions Refresh (E1) – Deterministik Fix + E2E Verify
+- **Fix:** `Finance.jsx` Refresh butonu artık click event’i `fetchData(page)` argümanı olarak kaçırmıyor.
+  - `onClick={() => fetchData(txMeta?.page ?? 1)}`
+  - `fetchData(page)` içinde `page = Number(page) || 1` sanitize
+  - Response shape guard: `Array.isArray(res.data) ? res.data : (res.data.items ?? res.data.rows ?? [])`
+  - Toast artık status + error_code/detail basıyor
+- **E2E Verification (testing agent):**
+  - Request URL: `/api/v1/finance/transactions?page=1&page_size=50`
+  - Status: **200**
+  - Header: **X-Tenant-ID present**
+  - UI: "Failed to load transactions" görünmüyor
+- **STATUS:** ✅ PASS
+
   2. ✅ **Finance Hub Navigation:** Successfully navigated to /finance page
      - Finance Hub page loads correctly with "Finance Hub" title
      - Transactions tab is active by default
