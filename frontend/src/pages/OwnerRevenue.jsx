@@ -80,7 +80,7 @@ const OwnerRevenue = () => {
           <p className="text-muted-foreground">Platform-wide revenue analytics</p>
         </div>
         <div className="flex gap-4">
-          <Select value={dateRange} onValueChange={setDateRange}>
+          <Select value={String(rangeDays)} onValueChange={(v) => setRangeDays(Number(v) || 7)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue />
             </SelectTrigger>
@@ -88,7 +88,6 @@ const OwnerRevenue = () => {
               <SelectItem value="1">Last 24 Hours</SelectItem>
               <SelectItem value="7">Last 7 Days</SelectItem>
               <SelectItem value="30">Last 30 Days</SelectItem>
-              <SelectItem value="90">Last 90 Days</SelectItem>
             </SelectContent>
           </Select>
           
