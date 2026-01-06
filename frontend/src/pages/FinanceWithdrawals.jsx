@@ -222,13 +222,16 @@ const FinanceWithdrawals = () => {
           const headers = { 'Idempotency-Key': idemKey };
           
           if (type === 'approve') {
-             return api.post(`/v1/finance/withdrawals/${txId}/review`, { action: 'approve', reason: actionReason.trim() }, { headers });
+            return api.post(`/v1/withdrawals/${txId}/approve`, { reason: actionReason.trim() }, { headers });
           }
           if (type === 'reject') {
-             return api.post(`/v1/finance/withdrawals/${txId}/review`, { action: 'reject', reason: actionReason.trim() }, { headers });
+            return api.post(`/v1/withdrawals/${txId}/reject`, { reason: actionReason.trim() }, { headers });
           }
           if (type === 'mark_paid') {
-             return api.post(`/v1/finance/withdrawals/${txId}/mark-paid`, { reason: actionReason.trim() }, { headers });
+            return api.post(`/v1/withdrawals/${txId}/mark-paid`, { reason: actionReason.trim() }, { headers });
+          }
+          if (type === 'mark_failed') {
+            return api.post(`/v1/withdrawals/${txId}/mark-failed`, { reason: actionReason.trim() }, { headers });
           }
           throw new Error('Unknown action type');
         },
