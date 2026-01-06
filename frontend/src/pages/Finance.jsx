@@ -122,9 +122,25 @@ const formatAmount = (amount, currency) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      Object.keys(filters).forEach((key) => {
-        if (filters[key] && filters[key] !== 'all') params.append(key, filters[key]);
+
+      // type can be CSV list in deep-links: bet,deposit,withdrawal
+      const normalizedFilters = { ...filters };
+      if (normalizedFilters.type && normalizedFilters.type.includes(',')) {
+        normalizedFilters.type = parseCsvList(normalizedFilters.type);
+      }
+
+      Object.keys(normalizedFilters).forEach((key) => {
+        const value = normalizedFilters[key];
+        if (!value) return;
+        if (value === 'all') return;
+
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.append(key, value);
+        }
       });
+
       const effectivePageSize = pageSizeOverride || pageSize;
       params.append('page', String(safePage));
       params.append('page_size', String(effectivePageSize));
