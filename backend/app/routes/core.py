@@ -281,6 +281,92 @@ async def export_players_csv(
     )
 
 
+
+
+@router.get("/players/export.xlsx")
+async def export_players_xlsx(
+    request: Request,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    vip_level: Optional[str] = None,
+    risk_score: Optional[str] = None,
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    """Export players as XLSX (Excel).
+
+    Keeps CSV endpoint for backward compatibility.
+    Tenant scoped (owner impersonation via X-Tenant-ID).
+    """
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    query = select(Player).where(Player.tenant_id == tenant_id)
+
+    if status and status != "all":
+        query = query.where(Player.status == status)
+
+    if vip_level and vip_level != "all":
+        query = query.where(Player.vip_level == vip_level)
+
+    if risk_score and risk_score != "all":
+        query = query.where(Player.risk_score == risk_score)
+
+    if search:
+        query = query.where((Player.username.ilike(f"%{search}%")) | (Player.email.ilike(f"%{search}%")))
+
+    query = query.order_by(Player.registered_at.desc()).limit(5000)
+    result = await session.execute(query)
+    players = result.scalars().all()
+
+    rows = []
+    for p in players:
+        rows.append(
+            {
+                "id": p.id,
+                "username": p.username,
+                "email": p.email,
+                "status": p.status,
+                "kyc_status": p.kyc_status,
+                "vip_level": p.vip_level,
+                "risk_score": p.risk_score,
+                "balance_real": p.balance_real,
+                "balance_bonus": p.balance_bonus,
+                "registered_at": p.registered_at.isoformat() if getattr(p, "registered_at", None) else "",
+            }
+        )
+
+    from app.services.xlsx_export import dicts_to_xlsx_bytes
+
+    columns = [
+        "id",
+        "username",
+        "email",
+        "status",
+        "kyc_status",
+        "vip_level",
+        "risk_score",
+        "balance_real",
+        "balance_bonus",
+        "registered_at",
+    ]
+
+    xlsx_bytes = dicts_to_xlsx_bytes(rows, columns=columns)
+
+    filename = (
+        f"players_{tenant_id}_{request.state.request_id}.xlsx"
+        if getattr(request.state, "request_id", None)
+        else f"players_{tenant_id}.xlsx"
+    )
+
+    from fastapi.responses import Response
+
+    return Response(
+        content=xlsx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=\"{filename}\""},
+    )
+
 @router.get("/players/{player_id}", response_model=PlayerPublic)
 async def get_player_detail(
     player_id: str,
