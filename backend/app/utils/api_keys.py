@@ -26,6 +26,9 @@ def create_access_token(data: dict, expires_delta):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
+    now = datetime.now(timezone.utc)
+    to_encode["iat"] = int(now.timestamp())
+
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
     return encoded_jwt
 
