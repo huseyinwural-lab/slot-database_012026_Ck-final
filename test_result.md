@@ -408,7 +408,7 @@ Do not delete sections unless instructed.
 
 agent_communication:
     -agent: "testing"
-    -message: "CRITICAL DEPLOYMENT ISSUE FOUND: Players XLSX export frontend smoke test reveals deployment mismatch. Source code (PlayerList.jsx) contains correct XLSX implementation with 'Export Excel' button and handleExportXlsx function, but deployed version still shows 'Export CSV' button. Frontend requires rebuild and redeployment to include XLSX functionality. Backend XLSX endpoint exists but frontend cannot access it due to deployment gap."
+    -message: "✅ DEPLOYMENT ISSUE RESOLVED: Players XLSX export frontend smoke test completed successfully after frontend restart. All validation checks passed: Export Excel button present, console shows 'export_xlsx_clicked', network shows GET /api/v1/players/export.xlsx with 200 status and correct XLSX content-type, browser triggers .xlsx download. Frontend deployment now matches source code implementation. XLSX export functionality fully operational."
 
 ## Previous history
 
