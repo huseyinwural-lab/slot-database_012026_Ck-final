@@ -13,7 +13,7 @@ from app.models.player_ops_models import PlayerManualBonusGrant, PlayerSessionRe
 from app.models.sql_models import AdminUser, Player
 from app.services.audit import audit
 from app.services.wallet_ledger import WalletInvariantError, apply_wallet_delta_with_ledger
-from app.utils.auth import get_current_admin
+from app.utils.auth import get_current_admin, get_current_admin_from_token
 from app.utils.reason import require_reason
 from app.utils.tenant import get_current_tenant_id
 
