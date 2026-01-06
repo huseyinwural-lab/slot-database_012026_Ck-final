@@ -5,6 +5,7 @@ import pytest
 async def test_suspended_player_login_blocked(client, session):
     # create tenant + player
     from app.models.sql_models import Tenant, Player
+    from app.utils.auth import get_password_hash
 
     tenant = Tenant(id="t_enforce", name="Enforce Casino", type="owner", features={})
     session.add(tenant)
