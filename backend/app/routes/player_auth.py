@@ -77,7 +77,7 @@ async def login_player(payload: dict = Body(...), session: AsyncSession = Depend
         if bool(getattr(profile, "self_excluded_permanent", False)):
             raise HTTPException(status_code=403, detail="RG_SELF_EXCLUDED")
         until = getattr(profile, "self_excluded_until", None)
-        if until and until > datetime.utcnow():
+        if until and until > datetime.now(timezone.utc):
             raise HTTPException(status_code=403, detail="RG_SELF_EXCLUDED")
 
     token = create_access_token(
