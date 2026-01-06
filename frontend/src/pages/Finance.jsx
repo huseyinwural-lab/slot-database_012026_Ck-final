@@ -83,21 +83,43 @@ const formatAmount = (amount, currency) => {
   const [selectedRows, setSelectedRows] = useState([]);
 
   const fetchData = async (page = 1, pageSizeOverride) => {
+    const safePage = Number(page) || 1;
+
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      Object.keys(filters).forEach(key => {
+      Object.keys(filters).forEach((key) => {
         if (filters[key] && filters[key] !== 'all') params.append(key, filters[key]);
       });
       const effectivePageSize = pageSizeOverride || pageSize;
-      params.append('page', page);
-      params.append('page_size', effectivePageSize);
+      params.append('page', String(safePage));
+      params.append('page_size', String(effectivePageSize));
 
       const res = await api.get(`/v1/finance/transactions?${params.toString()}`);
-      setTransactions(res.data.items || []);
-      setTxMeta(res.data.meta || { page, page_size: effectivePageSize, total: null });
+
+      const items = Array.isArray(res.data)
+        ? res.data
+        : res.data.items ?? res.data.rows ?? [];
+
+      setTransactions(Array.isArray(items) ? items : []);
+      setTxMeta(res.data.meta || { page: safePage, page_size: effectivePageSize, total: null });
     } catch (err) {
-      toast.error('Failed to load transactions');
+      const status = err?.response?.status;
+      const detail = err?.response?.data?.detail;
+      const errorCode =
+        err?.response?.data?.error_code ||
+        err?.response?.data?.detail?.error_code ||
+        err?.code;
+
+      const detailText =
+        typeof detail === 'string' ? detail : (detail?.error_code || detail?.message);
+
+      toast.error(
+        `Failed to load transactions${status ? ` (${status})` : ''}${errorCode ? ` · ${errorCode}` : ''}`,
+        {
+          description: detailText || err?.message || 'Unknown error',
+        }
+      );
     } finally {
       setLoading(false);
     }
