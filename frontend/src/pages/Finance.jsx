@@ -37,18 +37,18 @@ const Finance = () => {
   const [transactions, setTransactions] = useState([]);
   const [txMeta, setTxMeta] = useState({ page: 1, page_size: 50, total: null });
   const [pageSize, setPageSize] = useState(50);
-const formatAmount = (amount, currency) => {
-  if (amount == null) return '-';
-  try {
-    const value = Number(amount);
-    const formatted = value.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    return `${formatted} ${currency || ''}`.trim();
   const [activeTab, setActiveTab] = useState('transactions');
 
-  } catch {
-    return `${amount} ${currency || ''}`.trim();
-  }
-};
+  const formatAmount = (amount, currency) => {
+    if (amount == null) return '-';
+    try {
+      const value = Number(amount);
+      const formatted = value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+      return `${formatted} ${currency || ''}`.trim();
+    } catch {
+      return `${amount} ${currency || ''}`.trim();
+    }
+  };
 
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
