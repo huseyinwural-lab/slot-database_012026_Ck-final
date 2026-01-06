@@ -288,7 +288,7 @@ Do not delete sections unless instructed.
 
 - **ROOT CAUSE:** Authentication session management issues prevent stable testing
 - **RECOMMENDATION:** Fix JWT token expiration/refresh mechanism before retesting
-- **STATUS:** ❌ BLOCKED - Authentication session timeout issues
+- **STATUS:** ⚠️ PARTIAL - Frontend smoke was blocked by session timeout; API-level export fully validated
 
 ### 2026-01-06 (Testing Agent) — Players XLSX Export End-to-End API Validation
 - **TEST SCOPE:** Complete end-to-end validation of Players XLSX export functionality at API level
