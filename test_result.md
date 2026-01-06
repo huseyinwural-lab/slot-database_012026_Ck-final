@@ -797,6 +797,52 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED (15/15) - P1 Executive Dashboard card navigation fully functional and meeting all requirements
 
+### 2026-01-06 (Testing Agent) — P1 Dashboard Drill-Down/Disabled Standard Verification
+- **TEST SCOPE:** P1 Dashboard drill-down/disabled standard verification on http://localhost:3000 as requested in review
+- **CREDENTIALS:** admin@casino.com / Admin123!
+- **VALIDATION RESULTS (Decision Matrix A):**
+  1. ✅ **Deposits & Withdrawals Trend (Main Chart Area):** PASS
+     - Click navigates correctly to `/finance?tab=transactions&type=deposit,withdrawal&range_days=30` ✅
+     - Chart area is properly clickable with role="button" ✅
+  2. ❌ **Payment Gateway Status:** PARTIAL FAIL
+     - Section found but NOT properly disabled ❌
+     - Missing opacity-50/cursor-not-allowed styling ❌
+     - Should be disabled with tooltip 'Coming soon' ❌
+  3. ✅ **Bonus Performance:** PASS (Feature Enabled)
+     - Feature flag enabled for admin user ✅
+     - Section appears enabled (not disabled) ✅
+     - Would navigate to `/bonuses?tab=performance&range_days=30` if clicked ✅
+  4. ✅ **First Time Deposits (FTD):** PASS
+     - Click navigates correctly to `/finance?tab=transactions&type=deposit&ftd=1&range_days=30` ✅
+     - StatCard with proper onClick handler ✅
+  5. ❌ **Retention & Churn:** PARTIAL FAIL
+     - Section found but NOT properly disabled ❌
+     - Missing opacity-50/cursor-not-allowed styling ❌
+     - Should be disabled with tooltip 'Coming soon' ❌
+  6. ❌ **Loss Leaders:** PARTIAL FAIL
+     - Section found but NOT properly disabled ❌
+     - Missing opacity-50/cursor-not-allowed styling ❌
+     - Should be disabled with tooltip 'Coming soon' ❌
+  7. ✅ **Deep-link Target Verification:** PASS
+     - `/finance?tab=transactions&type=deposit,withdrawal&range_days=30` loads correctly ✅
+     - Finance page opens without crash ✅
+     - Transactions tab is selected ✅
+     - Shows both deposit and withdrawal transactions ✅
+
+- **CRITICAL ISSUES IDENTIFIED:**
+  - **ComingSoonCard Implementation:** Payment Gateway Status, Retention & Churn, and Loss Leaders sections are not properly wrapped with disabled styling
+  - **Missing Tooltips:** Disabled sections should show 'Coming soon' tooltip on hover
+  - **Dead Clicks:** Some sections may be clickable when they should be disabled
+
+- **WORKING CORRECTLY:**
+  - Main chart navigation (Deposits & Withdrawals Trend) ✅
+  - FTD navigation ✅
+  - Deep-link target functionality ✅
+  - Bonus Performance (enabled due to feature flag) ✅
+  - No console errors detected ✅
+
+- **STATUS:** ❌ PARTIAL FAIL (4/7 PASS) - Core navigation working but disabled sections need proper ComingSoonCard implementation
+
 ## Previous history
 
 (legacy content retained below)
