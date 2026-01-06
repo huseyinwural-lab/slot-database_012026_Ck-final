@@ -280,11 +280,11 @@ Do not delete sections unless instructed.
   - Limits export to 5000 records for performance
 
 - **FRONTEND ANALYSIS:**
-  - Export CSV button present in PlayerList component (line 75)
-  - Console log 'export_csv_clicked' implemented (line 47)
-  - Proper API call to `/v1/players/export` with blob response type (line 54-57)
-  - File download trigger with timestamp filename pattern (line 62)
-  - Filter parameters correctly passed to export endpoint (lines 49-52)
+  - Export button present in PlayerList component
+  - Console log `export_xlsx_clicked` implemented
+  - API call now targets `/v1/players/export.xlsx` with blob response type
+  - File download trigger with `.xlsx` filename pattern
+  - Filter parameters passed through (status/search/vip_level/risk_score)
 
 - **ROOT CAUSE:** Authentication session management issues prevent stable testing
 - **RECOMMENDATION:** Fix JWT token expiration/refresh mechanism before retesting
