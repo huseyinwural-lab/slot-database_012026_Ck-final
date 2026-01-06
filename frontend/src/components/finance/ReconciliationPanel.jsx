@@ -161,6 +161,14 @@ const ReconciliationPanel = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={() => {
+            window.location.href = `/api/v1/finance/reconciliation/export?provider=${encodeURIComponent(provider)}`;
+          }}
+        >
+          Export CSV
+        </Button>
         <Button variant="outline" onClick={handleOpenSettings}>
           <Settings className="w-4 h-4 mr-2" /> Auto-Scheduler
         </Button>
