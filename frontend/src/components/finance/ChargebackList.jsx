@@ -248,6 +248,36 @@ const ChargebackList = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+
+      {/* Guidelines Modal (P0) */}
+      <Dialog open={guidelinesOpen} onOpenChange={setGuidelinesOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{guidelines?.title || 'Represent Guidelines'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {guidelinesLoading ? (
+              <div className="text-sm text-muted-foreground">Loading...</div>
+            ) : guidelines?.sections?.length ? (
+              guidelines.sections.map((s, idx) => (
+                <div key={idx} className="space-y-1">
+                  <div className="text-sm font-semibold">{s.heading}</div>
+                  <div className="text-sm text-muted-foreground whitespace-pre-line">{s.body}</div>
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-muted-foreground">No content.</div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGuidelinesOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };
