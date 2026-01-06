@@ -377,6 +377,12 @@ Do not delete sections unless instructed.
 - **IMPACT:** Users cannot access XLSX export functionality from the UI despite backend support being available
 - **STATUS:** ❌ DEPLOYMENT ISSUE - Frontend requires rebuild and redeployment to include XLSX export functionality
 
+## Agent Communication
+
+agent_communication:
+    -agent: "testing"
+    -message: "CRITICAL DEPLOYMENT ISSUE FOUND: Players XLSX export frontend smoke test reveals deployment mismatch. Source code (PlayerList.jsx) contains correct XLSX implementation with 'Export Excel' button and handleExportXlsx function, but deployed version still shows 'Export CSV' button. Frontend requires rebuild and redeployment to include XLSX functionality. Backend XLSX endpoint exists but frontend cannot access it due to deployment gap."
+
 ## Previous history
 
 (legacy content retained below)
