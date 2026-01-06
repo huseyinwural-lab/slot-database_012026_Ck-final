@@ -218,6 +218,25 @@ This guide standardizes **platform-wide** errors that appear across multiple adm
 
 ## 9) Stale cache / propagation delay (visibility/flags/games)
 
+---
+
+## 10) Export CSV no-op (no request / no download)
+
+- **Symptoms (UI):** Click “Export CSV” and nothing happens; no download.
+- **Likely Causes:**
+  - FE: button has no `onClick` or handler throws and gets swallowed
+  - FE: missing `responseType: 'blob'` so browser can’t download
+  - BE: export endpoint missing (404) or wrong path (`/v1` vs `/api/v1`)
+- **Fix Steps:**
+  1) DevTools → Network (All) with “Preserve log”: click export.
+     - If **no request**: FE handler wiring issue.
+     - If request **404/5xx**: backend route gap.
+  2) FE: call export with `responseType: 'blob'` and trigger download via `URL.createObjectURL(blob)` + `<a download>`.
+  3) BE: return `text/csv; charset=utf-8` and `Content-Disposition: attachment; filename="..."`.
+- **Verification:**
+  - Network shows 200 on export endpoint.
+  - Browser downloads a `.csv` file.
+
 - **Symptoms (UI):** change saved but UI still old; list not updated.
 - **Likely Causes:**
   - cache TTL
