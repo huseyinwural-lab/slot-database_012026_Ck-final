@@ -560,6 +560,41 @@ agent_communication:
 
 - **STATUS:** Backend smoke passed for P0 scope. (E2E UI testing pending via frontend testing agent)
 
+### 2026-01-06 (Testing Agent) — P0 Withdrawals + Finance Hub E2E Frontend Smoke Test
+- **TEST SCOPE:** Complete end-to-end validation of Withdrawals + Finance Hub functionality as requested in review
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
+  2. ✅ **Withdrawals Page Navigation:** Successfully navigated to /finance/withdrawals
+  3. ✅ **Withdrawals Page Load:** Page loaded without error toasts, title "Withdrawals" displayed correctly
+  4. ❌ **Withdrawals Export CSV:** Export CSV button not found on withdrawals page
+  5. ✅ **Finance Hub Navigation:** Successfully navigated to /finance page
+  6. ✅ **Finance Hub Load:** Page loaded successfully with "Finance Hub" title
+  7. ✅ **Transactions Tab:** Loaded without "Failed to load transactions" error, Refresh button functional
+  8. ❌ **Transactions Export CSV:** Export CSV button present but did not trigger expected network request
+  9. ✅ **Reports Tab:** Loaded without "Failed to load reports" error
+  10. ❌ **Reports Export CSV:** Export CSV button present but did not trigger expected network request
+  11. ✅ **Reconciliation Tab:** Loaded with history table (even empty is acceptable)
+  12. ✅ **Auto-Scheduler:** Modal opened successfully, toggle/save functionality working with success toast
+  13. ✅ **Run Auto-Match Now:** Succeeded with success toast, report functionality working
+  14. ❌ **Reconciliation Export CSV:** Export CSV button present but did not trigger expected network request
+  15. ✅ **Chargebacks Tab:** Loaded successfully with chargeback cases table
+  16. ❌ **Represent Guidelines:** Modal did not open when button clicked
+  17. ❌ **Chargebacks Export CSV:** Export CSV button present but did not trigger expected network request
+
+- **CRITICAL ISSUES IDENTIFIED:**
+  - **Session Management:** Frontend sessions expire quickly during testing, causing redirects to login page
+  - **Export CSV Functionality:** All Export CSV buttons are present in UI but do not trigger expected network requests to backend endpoints
+  - **Represent Guidelines Modal:** Button exists but modal does not open when clicked
+
+- **BACKEND VALIDATION:** Backend logs confirm all API endpoints are working correctly (200 OK responses for all finance endpoints)
+
+- **ROOT CAUSE ANALYSIS:**
+  - Export CSV buttons likely have JavaScript issues preventing proper API calls
+  - Represent Guidelines modal may have event handler or modal rendering issues
+  - Session timeout issues suggest JWT token expiration or refresh mechanism problems
+
+- **STATUS:** ⚠️ PARTIAL SUCCESS - Core functionality loads correctly, but Export CSV and Represent Guidelines features have frontend implementation issues
+
 ## Previous history
 
 (legacy content retained below)
