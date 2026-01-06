@@ -16,6 +16,23 @@ import RetentionCard from '../components/dashboard/RetentionCard';
 import FTDCard from '../components/dashboard/FTDCard';
 import CriticalAlertsPanel from '../components/dashboard/CriticalAlertsPanel';
 import FinancialSummary from '../components/dashboard/FinancialSummary';
+
+const ComingSoonCard = ({ children, enabled, tooltip }) => {
+  if (enabled) return children;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="opacity-50 cursor-not-allowed">{children}</div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltip || 'Coming soon'}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
 import LossLeadersTable from '../components/dashboard/LossLeadersTable';
 import LiveBetsTicker from '../components/dashboard/LiveBetsTicker';
 import BonusPerformanceCard from '../components/dashboard/BonusPerformanceCard';
