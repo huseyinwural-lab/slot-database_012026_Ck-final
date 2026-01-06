@@ -75,6 +75,10 @@ const ChargebackList = () => {
   const [selectedCase, setSelectedCase] = useState(null);
   const [evidenceUrl, setEvidenceUrl] = useState('');
 
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+  const [guidelines, setGuidelines] = useState(null);
+  const [guidelinesLoading, setGuidelinesLoading] = useState(false);
+
   const fetchCases = async () => {
     setLoading(true);
     try {
