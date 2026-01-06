@@ -63,7 +63,11 @@ async def login_player(payload: dict = Body(...), session: AsyncSession = Depend
     player = res.scalars().first()
     
     if not player or not verify_password(payload.get("password"), player.password_hash):
-        raise HTTPException(401, "Invalid credentials")
+        raise HTTPException(status_code=401, detail={"error_code": "INVALID_CREDENTIALS"})
+
+    # P1-E1: suspended players cannot login
+    if getattr(player, "status", None) == "suspended":
+        raise HTTPException(status_code=403, detail={"error_code": "PLAYER_SUSPENDED"})
 
     # RG self-exclusion enforcement (deterministic): block login if player is self-excluded.
     stmt_rg = select(PlayerRGProfile).where(PlayerRGProfile.player_id == player.id)
