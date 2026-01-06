@@ -61,7 +61,7 @@ async def get_current_player(
     rev = (await session.execute(stmt)).scalars().first()
     if rev and rev.revoked_at:
         try:
-            token_iat = datetime.fromtimestamp(int(iat), tz=timezone.utc)
+            token_iat = datetime.fromtimestamp(int(iat), tz=timezone.utc).replace(tzinfo=None)
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
