@@ -190,6 +190,11 @@ app.include_router(engine.router)
 app.include_router(robots.router)
 app.include_router(math_assets.router)
 app.include_router(revenue.router)
+
+# Revenue v2 (P1: deterministic range_days)
+from app.routes import revenue_v2
+app.include_router(revenue_v2.router)
+
 from app.routes import finance_refunds
 app.include_router(finance_refunds.router)
 app.include_router(finance.router)
