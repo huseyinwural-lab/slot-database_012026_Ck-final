@@ -108,6 +108,22 @@ const ChargebackList = () => {
       toast.success('Evidence uploaded');
       setDialogOpen(false);
       await fetchCases();
+
+  const openGuidelines = async () => {
+    setGuidelinesOpen(true);
+    if (guidelines) return;
+
+    setGuidelinesLoading(true);
+    try {
+      const res = await api.get('/v1/finance/chargebacks/guidelines');
+      setGuidelines(res.data);
+    } catch (err) {
+      toast.error('Failed to load guidelines');
+    } finally {
+      setGuidelinesLoading(false);
+    }
+  };
+
     } catch (err) {
       toast.error('Failed to upload evidence');
     }
