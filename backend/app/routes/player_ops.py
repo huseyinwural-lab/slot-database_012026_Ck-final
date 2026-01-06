@@ -555,6 +555,11 @@ async def add_internal_note(
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     player = await _get_player_or_404(session, tenant_id=tenant_id, player_id=player_id)
 
+    # Accept either X-Reason header (preferred) or JSON body reason (UI convenience)
+    body_reason = (payload.get("reason") or "").strip()
+    if body_reason and body_reason != reason:
+        reason = body_reason
+
     note = (payload.get("note") or "").strip()
     if not note:
         raise HTTPException(status_code=400, detail={"error_code": "NOTE_REQUIRED"})
