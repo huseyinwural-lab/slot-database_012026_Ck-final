@@ -113,6 +113,6 @@ async def test_player_ops_requires_reason(client, session, admin_token):
     r = await client.post(
         f"/api/v1/players/{pid}/credit",
         json={"amount": 10, "currency": "USD"},
-        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
+        headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert r.status_code == 400
