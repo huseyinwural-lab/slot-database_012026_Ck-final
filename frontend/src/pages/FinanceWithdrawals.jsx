@@ -291,7 +291,23 @@ const FinanceWithdrawals = () => {
             variant="default"
             onClick={() => {
               const qs = exportQueryString ? `?${exportQueryString}` : '';
-              window.location.href = `/api/v1/withdrawals/export${qs}`;
+              api
+                .get('/v1/withdrawals/export', {
+                  params: Object.fromEntries(new URLSearchParams(exportQueryString).entries()),
+                  responseType: 'blob',
+                })
+                .then((res) => {
+                  const url = window.URL.createObjectURL(new Blob([res.data]));
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', `withdrawals_${new Date().toISOString()}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                })
+                .catch(() => {
+                  toast.error('Export failed');
+                });
             }}
           >
             <Download className="w-4 h-4 mr-2" /> Export CSV
