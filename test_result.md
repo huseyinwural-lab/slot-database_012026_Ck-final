@@ -238,6 +238,32 @@ Do not delete sections unless instructed.
       - `/docs/new/en/guides/common-errors.md`
       - `/docs/new/tr/guides/common-errors.md`
 
+### 2026-01-06 (Testing Agent) — Players CSV Export Smoke Test
+- **TEST SCOPE:** Frontend smoke test for Players CSV export functionality
+- **VALIDATION RESULTS:**
+  1. ❌ **Authentication Session Issues:** Browser sessions expire quickly, preventing navigation to Players page
+  2. ✅ **Backend Implementation:** Export endpoint `/api/v1/players/export` exists and properly implemented
+  3. ✅ **Frontend Implementation:** PlayerList component has Export CSV button and proper functionality
+  4. ❌ **Unable to Complete Test:** Session timeout prevents testing actual CSV export flow
+
+- **BACKEND ANALYSIS:**
+  - Export endpoint returns CSV with proper Content-Type: `text/csv; charset=utf-8`
+  - Includes Content-Disposition header for file download: `attachment; filename="players_*.csv"`
+  - Tenant isolation implemented correctly
+  - Supports filtering by status and search parameters
+  - Limits export to 5000 records for performance
+
+- **FRONTEND ANALYSIS:**
+  - Export CSV button present in PlayerList component (line 75)
+  - Console log 'export_csv_clicked' implemented (line 47)
+  - Proper API call to `/v1/players/export` with blob response type (line 54-57)
+  - File download trigger with timestamp filename pattern (line 62)
+  - Filter parameters correctly passed to export endpoint (lines 49-52)
+
+- **ROOT CAUSE:** Authentication session management issues prevent stable testing
+- **RECOMMENDATION:** Fix JWT token expiration/refresh mechanism before retesting
+- **STATUS:** ❌ BLOCKED - Authentication session timeout issues
+
 ## Previous history
 
 (legacy content retained below)
