@@ -92,6 +92,15 @@ const FinanceWithdrawals = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [rowStatus, setRowStatus] = useState({}); // key -> { status, message }
 
+  const exportQueryString = useMemo(() => {
+    const params = new URLSearchParams();
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+    if (filters.q) params.set('q', filters.q);
+    if (filters.provider_ref) params.set('provider_ref', filters.provider_ref);
+    params.set('sort', 'created_at_desc');
+    return params.toString();
+  }, [filters]);
+
   const handleCopyTxId = async (txId) => {
     try {
       await navigator.clipboard.writeText(txId);
