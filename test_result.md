@@ -628,6 +628,36 @@ agent_communication:
 
 - **STATUS:** ❌ ALL FAILING PARTS STILL FAILING - No fixes have been applied to the frontend Export CSV and Represent Guidelines functionality
 
+### 2026-01-06 (Testing Agent) — Finance Hub + Withdrawals Export CSV Verification (Post-Restart)
+- **TEST SCOPE:** Complete verification of Finance Hub and Withdrawals Export CSV functionality after frontend restart as requested in review
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
+  2. ✅ **Finance Hub Transactions Export CSV:** Export CSV button clicked successfully
+     - Network request: GET /api/v1/finance/transactions/export -> 200 OK ✅
+     - Correct endpoint called as requested ✅
+  3. ✅ **Finance Hub Chargebacks Represent Guidelines:** Button clicked successfully
+     - Network request: GET /api/v1/finance/chargebacks/guidelines -> 200 OK ✅
+     - Modal opened successfully (visible in UI) ✅
+     - Correct endpoint called as requested ✅
+  4. ✅ **Withdrawals Export CSV:** Export CSV button clicked successfully
+     - Network request: GET /api/v1/withdrawals/export -> 200 OK ✅
+     - Correct endpoint called as requested ✅
+
+- **DETAILED TEST RESULTS:**
+  - **Frontend Deployment:** ✅ All Export CSV and Represent Guidelines functionality now working correctly
+  - **Backend Integration:** ✅ All API endpoints returning 200 status codes
+  - **Network Validation:** ✅ All expected network requests triggered with correct endpoints
+  - **UI Functionality:** ✅ All buttons clickable and functional
+  - **Modal Functionality:** ✅ Represent Guidelines modal opens and displays content correctly
+  - **Session Management:** ✅ Authentication stable throughout testing
+
+- **ENDPOINT VALIDATION:**
+  - `/api/v1/finance/transactions/export` ✅ (200 OK)
+  - `/api/v1/finance/chargebacks/guidelines` ✅ (200 OK)  
+  - `/api/v1/withdrawals/export` ✅ (200 OK)
+
+- **STATUS:** ✅ ALL TESTS PASSED - Finance Hub and Withdrawals Export CSV functionality fully operational after restart
+
 ## Previous history
 
 (legacy content retained below)
