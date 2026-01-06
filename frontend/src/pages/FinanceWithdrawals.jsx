@@ -501,45 +501,15 @@ const FinanceWithdrawals = () => {
         </CardContent>
       </Card>
 
-      {/* Detail Modal */}
-      <Dialog open={isDetailOpen && !!selectedTx} onOpenChange={(open) => !open && handleCloseDetail()}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Withdrawal Detail</DialogTitle>
-            <DialogDescription>
-              Transaction ID: <span className="font-mono text-xs">{selectedTx?.tx_id}</span>
-            </DialogDescription>
-          </DialogHeader>
-          {selectedTx && (
-            <div className="space-y-3 text-sm">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="font-semibold">Player ID:</span> {selectedTx.player_id}
-                </div>
-                <div>
-                  <span className="font-semibold">Amount:</span> {formatAmount(selectedTx.amount, selectedTx.currency)}
-                </div>
-                <div>
-                  <span className="font-semibold">State:</span> {selectedTx.state}
-                </div>
-                <div>
-                  <span className="font-semibold">Created At:</span> {formatDateTime(selectedTx.created_at)}
-                </div>
-                <div>
-                  <span className="font-semibold">Reviewed By:</span> {selectedTx.reviewed_by || '-'}
-                </div>
-                <div>
-                  <span className="font-semibold">Reviewed At:</span> {formatDateTime(selectedTx.reviewed_at)}
-                </div>
-              </div>
-              <div>
-                <span className="font-semibold">Balance snapshot after tx:</span>{' '}
-                {selectedTx.balance_after != null ? selectedTx.balance_after : '-'}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Detail Drawer */}
+      <WithdrawalsDetailDrawer
+        open={isDetailOpen && !!selectedWithdrawal}
+        onOpenChange={(open) => {
+          if (!open) handleCloseDetail();
+          else setIsDetailOpen(true);
+        }}
+        withdrawal={selectedWithdrawal}
+      />
 
       {/* Action Modal */}
       <Dialog open={actionModal.open} onOpenChange={(open) => !open && setActionModal(prev => ({ ...prev, open: false }))}>
