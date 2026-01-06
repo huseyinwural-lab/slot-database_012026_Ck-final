@@ -325,9 +325,13 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                   <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Required" />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button disabled={loading || !canSuspendForce} onClick={doSuspend} variant="destructive">Suspend</Button>
-                  <Button disabled={loading || !canSuspendForce} onClick={doUnsuspend} variant="secondary">Unsuspend</Button>
-                  <Button disabled={loading || !canSuspendForce} onClick={doForceLogout} variant="outline">Force Logout</Button>
+                  {canSuspendForce ? (
+                    <>
+                      <Button disabled={loading} onClick={doSuspend} variant="destructive">Suspend</Button>
+                      <Button disabled={loading} onClick={doUnsuspend} variant="secondary">Unsuspend</Button>
+                      <Button disabled={loading} onClick={doForceLogout} variant="outline">Force Logout</Button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
