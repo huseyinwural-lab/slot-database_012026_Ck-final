@@ -88,7 +88,7 @@ async def manual_credit(
     payload: dict = Body(...),
     reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Admin+
     _require_any_role(current_admin, {"Admin"})
@@ -178,7 +178,7 @@ async def manual_debit(
     payload: dict = Body(...),
     reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Admin+
     _require_any_role(current_admin, {"Admin"})
@@ -255,7 +255,7 @@ async def list_manual_bonuses(
     player_id: str,
     request: Request,
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     _require_any_role(current_admin, {"Support", "Ops", "Admin"})
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
@@ -293,7 +293,7 @@ async def grant_manual_bonus(
     payload: dict = Body(...),
     reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Admin+
     _require_any_role(current_admin, {"Admin"})
@@ -390,7 +390,7 @@ async def suspend_player(
     payload: dict = Body(default={}),
     reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Ops+
     _require_any_role(current_admin, {"Ops", "Admin"})
@@ -431,7 +431,7 @@ async def unsuspend_player(
     payload: dict = Body(default={}),
     reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     _require_any_role(current_admin, {"Ops", "Admin"})
 
@@ -473,7 +473,7 @@ async def force_logout(
     payload: dict = Body(default={}),
     reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     _require_any_role(current_admin, {"Ops", "Admin"})
 
@@ -514,7 +514,7 @@ async def add_internal_note(
     payload: dict = Body(...),
     reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
-    current_admin: AdminUser = Depends(get_current_admin),
+    current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     _require_any_role(current_admin, {"Support", "Ops", "Admin"})
 
