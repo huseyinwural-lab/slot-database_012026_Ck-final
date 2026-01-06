@@ -108,6 +108,10 @@ const ChargebackList = () => {
       toast.success('Evidence uploaded');
       setDialogOpen(false);
       await fetchCases();
+    } catch (err) {
+      toast.error('Failed to upload evidence');
+    }
+  };
 
   const openGuidelines = async () => {
     setGuidelinesOpen(true);
@@ -121,11 +125,6 @@ const ChargebackList = () => {
       toast.error('Failed to load guidelines');
     } finally {
       setGuidelinesLoading(false);
-    }
-  };
-
-    } catch (err) {
-      toast.error('Failed to upload evidence');
     }
   };
 
