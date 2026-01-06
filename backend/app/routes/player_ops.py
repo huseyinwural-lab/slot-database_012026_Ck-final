@@ -261,7 +261,7 @@ async def list_manual_bonuses(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
-    _require_any_role(current_admin, {"Support", "Ops", "Admin"})
+    _require_any_role(current_admin, {"Support", "Ops", "Admin", "Super Admin"})
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
 
     # tenant boundary
@@ -520,7 +520,7 @@ async def add_internal_note(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
-    _require_any_role(current_admin, {"Support", "Ops", "Admin"})
+    _require_any_role(current_admin, {"Support", "Ops", "Admin", "Super Admin"})
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     player = await _get_player_or_404(session, tenant_id=tenant_id, player_id=player_id)
