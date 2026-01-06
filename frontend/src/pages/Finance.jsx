@@ -90,8 +90,6 @@ const Finance = () => {
     }
   }, []);
 
-  });
-
   // Column Visibility State
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
