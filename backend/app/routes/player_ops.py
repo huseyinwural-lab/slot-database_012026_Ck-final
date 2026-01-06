@@ -439,7 +439,7 @@ async def suspend_player(
     ).scalars().first()
 
     if existing:
-        existing.revoked_at = datetime.now(timezone.utc)
+        existing.revoked_at = datetime.now(timezone.utc).replace(tzinfo=None)
         existing.revoked_by_admin_id = str(current_admin.id)
         existing.reason = reason
         session.add(existing)
@@ -551,7 +551,7 @@ async def force_logout(
     ).scalars().first()
 
     if existing:
-        existing.revoked_at = datetime.now(timezone.utc)
+        existing.revoked_at = datetime.now(timezone.utc).replace(tzinfo=None)
         existing.revoked_by_admin_id = str(current_admin.id)
         existing.reason = reason
         session.add(existing)
