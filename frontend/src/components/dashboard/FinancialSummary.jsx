@@ -2,7 +2,23 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wallet, Gift, Trophy, ArrowRightLeft } from 'lucide-react';
 
-const FinancialSummary = ({ data }) => {
+const FinancialSummary = ({ data, onNavigate, bonusesEnabled = true, jackpotsEnabled = true }) => {
+  const itemClass = (enabled) =>
+    `space-y-1 transition-all ${enabled ? 'cursor-pointer hover:opacity-90' : 'opacity-50 cursor-not-allowed'}`;
+
+  const clickable = (enabled, key, label) => ({
+    className: itemClass(enabled),
+    role: enabled ? 'button' : undefined,
+    tabIndex: enabled ? 0 : -1,
+    onClick: enabled ? () => onNavigate?.({ key }) : undefined,
+    onKeyDown: enabled
+      ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') onNavigate?.({ key });
+        }
+      : undefined,
+    title: enabled ? 'View details' : (label || 'Coming soon'),
+  });
+
   return (
     <Card className="col-span-2">
       <CardHeader>
