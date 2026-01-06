@@ -45,4 +45,35 @@ async def get_current_player(
     if player is None:
         raise credentials_exception
         
+
+    # P1-E3: suspended players cannot access protected endpoints
+    if getattr(player, "status", None) == "suspended":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error_code": "PLAYER_SUSPENDED"},
+        )
+
+    # P1-E2: session revocation enforcement
+    stmt = select(PlayerSessionRevocation).where(
+        PlayerSessionRevocation.tenant_id == tenant_id,
+        PlayerSessionRevocation.player_id == player_id,
+    )
+    rev = (await session.execute(stmt)).scalars().first()
+    if rev and rev.revoked_at:
+        try:
+            token_iat = datetime.fromtimestamp(int(iat), tz=timezone.utc)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={"error_code": "TOKEN_REVOKED"},
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        if token_iat < rev.revoked_at:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={"error_code": "TOKEN_REVOKED"},
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
     return player
