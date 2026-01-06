@@ -135,7 +135,7 @@ const ChargebackList = () => {
         <h3 className="text-xl font-bold flex items-center gap-2">
           <ShieldAlert className="w-5 h-5 text-red-500" /> Chargeback Cases
         </h3>
-        <Button variant="outline">
+        <Button variant="outline" onClick={openGuidelines}>
           <Gavel className="w-4 h-4 mr-2" /> Represent Guidelines
         </Button>
       </div>
