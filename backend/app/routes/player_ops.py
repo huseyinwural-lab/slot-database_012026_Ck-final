@@ -15,8 +15,6 @@ from app.services.audit import audit
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from fastapi import Header
 
-from fastapi import Header
-
 from app.utils.auth import get_current_admin, get_current_admin_from_token
 from app.utils.tenant import get_current_tenant_id
 
