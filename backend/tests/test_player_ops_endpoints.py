@@ -87,7 +87,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
 
 
 @pytest.mark.asyncio
-async def test_player_ops_requires_reason(client, admin_token):
+async def test_player_ops_requires_reason(client, session, admin_token):
     # Seed a player under the SAME tenant as admin_token
     from app.models.sql_models import Tenant, Player
     from sqlmodel import select
