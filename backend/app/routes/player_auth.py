@@ -37,7 +37,7 @@ async def register_player(payload: dict = Body(...), session: AsyncSession = Dep
         username=payload.get("username"),
         tenant_id=tenant_id,
         password_hash=hashed_password,
-        registered_at=datetime.utcnow()
+        registered_at=datetime.now(timezone.utc)
     )
     
     session.add(player)
