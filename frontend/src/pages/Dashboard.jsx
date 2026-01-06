@@ -36,8 +36,6 @@ const ComingSoonCard = ({ children, enabled, tooltip }) => {
   );
 };
 
-import LiveBetsTicker from '../components/dashboard/LiveBetsTicker';
-import BonusPerformanceCard from '../components/dashboard/BonusPerformanceCard';
 
 const StatCard = ({
   title,
