@@ -56,7 +56,7 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
     # Support can view bonuses list
     r = await async_client.get(
         f"/api/v1/players/{player.id}/bonuses",
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id},
+        headers={"Authorization": f"Bearer {token}"},
     )
     assert r.status_code == 200
 
