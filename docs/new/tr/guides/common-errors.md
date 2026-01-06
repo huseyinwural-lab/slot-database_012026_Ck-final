@@ -218,6 +218,25 @@ Bu rehber, birden fazla admin menüsünde tekrar eden **platform-geneli** hatala
 
 ## 9) Stale cache / propagation delay (visibility/flags/games)
 
+---
+
+## 10) Export CSV no-op (request yok / download yok)
+
+- **Belirtiler (UI):** “Export CSV” tıklanır, hiçbir şey olmaz; download başlamaz.
+- **Muhtemel Nedenler:**
+  - FE: butonda `onClick` yok veya handler hata alıp sessizce yutuluyor
+  - FE: `responseType: 'blob'` yok; tarayıcı download tetikleyemiyor
+  - BE: export endpoint yok (404) veya path yanlış (`/v1` vs `/api/v1`)
+- **Çözüm Adımları:**
+  1) DevTools → Network (All) + “Preserve log”: export’a tıkla.
+     - **Request yoksa**: FE handler bağlama sorunu.
+     - Request **404/5xx** ise: backend route gap.
+  2) FE: export çağrısını `responseType: 'blob'` ile yap; `URL.createObjectURL(blob)` + `<a download>` ile indirmeyi tetikle.
+  3) BE: `Content-Type: text/csv; charset=utf-8` ve `Content-Disposition: attachment; filename="..."` döndür.
+- **Doğrulama:**
+  - Network’te export endpoint 200.
+  - Tarayıcı `.csv` dosyasını indirir.
+
 - **Belirtiler (UI):** save oldu ama UI eski; görünürlük güncellenmez.
 - **Muhtemel Nedenler:**
   - cache TTL
