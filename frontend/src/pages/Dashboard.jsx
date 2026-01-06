@@ -331,30 +331,37 @@ const Dashboard = () => {
                 </CardContent>
             </Card>
 
-            {/* Payment Health */}
-            <Card>
+            {/* Payment Health (P1: drill-down or disabled) */}
+            <ComingSoonCard enabled={false} tooltip="Coming soon">
+              <Card className="opacity-100">
                 <CardHeader className="py-3">
-                    <CardTitle className="text-sm font-medium flex items-center justify-between">
-                        <span>Payment Gateway Status</span>
-                    </CardTitle>
+                  <CardTitle className="text-sm font-medium flex items-center justify-between">
+                    <span>Payment Gateway Status</span>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="py-2">
-                    <div className="space-y-3">
-                        {stats.payment_health.map((p, i) => (
-                            <div key={i} className="flex justify-between items-center text-sm border-b border-dashed pb-2 last:border-0 last:pb-0">
-                                <div>
-                                    <div className="font-medium">{p.name}</div>
-                                    <div className="text-xs text-muted-foreground">{p.latency} • {p.last_error}</div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <HealthBadge status={p.status} />
-                                    <Button variant="ghost" size="icon" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                  <div className="space-y-3">
+                    {stats.payment_health.map((p, i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between items-center text-sm border-b border-dashed pb-2 last:border-0 last:pb-0"
+                      >
+                        <div>
+                          <div className="font-medium">{p.name}</div>
+                          <div className="text-xs text-muted-foreground">{p.latency} • {p.last_error}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <HealthBadge status={p.status} />
+                          <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Info className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
-            </Card>
+              </Card>
+            </ComingSoonCard>
         </div>
       </div>
     </div>
