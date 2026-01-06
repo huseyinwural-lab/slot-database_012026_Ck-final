@@ -124,10 +124,10 @@ async def test_force_logout_revokes_old_token(client, session):
     token2 = r2.json()["access_token"]
 
     r_ok2 = await client.get(
-        "/api/v1/payouts/methods",
+        "/api/v1/player/wallet/balance",
         headers={"Authorization": f"Bearer {token2}"},
     )
-    assert r_ok2.status_code in {200, 404}
+    assert r_ok2.status_code == 200
 
 
 @pytest.mark.asyncio
