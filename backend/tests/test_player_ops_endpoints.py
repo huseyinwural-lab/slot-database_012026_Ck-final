@@ -88,14 +88,27 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
 
 @pytest.mark.asyncio
 async def test_player_ops_requires_reason(client, admin_token):
-    # get a player id
-    res = await client.get(
-        "/api/v1/players",
-        headers={"Authorization": f"Bearer {admin_token}"},
-    )
-    items = res.json().get("items") or []
-    assert len(items) >= 1
-    pid = items[0]["id"]
+    # Seed a player under the SAME tenant as admin_token
+    from app.models.sql_models import Tenant, Player
+    from sqlmodel import select
+    from jose import jwt
+    from config import settings
+
+    payload = jwt.decode(admin_token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    tenant_id = payload["tenant_id"]
+
+    t = (await session.execute(select(Tenant).where(Tenant.id == tenant_id))).scalars().first()
+    if not t:
+        t = Tenant(id=tenant_id, name="Test Casino", type="owner", features={})
+        session.add(t)
+        await session.commit()
+
+    p = Player(tenant_id=tenant_id, username="opsplayer2", email="ops_player2@test.com", password_hash="noop_hash")
+    session.add(p)
+    await session.commit()
+    await session.refresh(p)
+
+    pid = p.id
 
     r = await client.post(
         f"/api/v1/players/{pid}/credit",
