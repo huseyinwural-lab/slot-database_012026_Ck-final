@@ -194,6 +194,11 @@ from app.routes import finance_refunds
 app.include_router(finance_refunds.router)
 app.include_router(finance.router)
 
+# Finance reports (P0 stability)
+from app.routes import finance_reports
+app.include_router(finance_reports.router)
+
+
 # Withdrawals (Ops approval flow)
 from app.routes import withdrawals
 app.include_router(withdrawals.router)
