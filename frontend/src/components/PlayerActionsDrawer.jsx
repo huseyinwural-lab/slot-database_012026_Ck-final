@@ -32,7 +32,7 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
     try {
       const u = JSON.parse(localStorage.getItem('admin_user') || 'null');
       const role = u?.role;
-      return role === 'Admin';
+      return role === 'Admin' || role === 'Super Admin';
     } catch {
       return false;
     }
