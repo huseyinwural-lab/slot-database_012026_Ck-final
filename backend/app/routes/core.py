@@ -332,20 +332,6 @@ async def export_players_csv(
     )
 
 
-    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
-
-    stmt = select(Player).where(Player.id == player_id, Player.tenant_id == tenant_id)
-    res = await session.execute(stmt)
-    player = res.scalars().first()
-    if not player:
-        raise HTTPException(status_code=404, detail="Player not found")
-
-    player.status = "disabled"
-    session.add(player)
-    await session.commit()
-
-    return {"message": "Player disabled"}
-
 # --- FINANCE ---
 @router.get("/finance/transactions", response_model=dict)
 async def get_transactions(
