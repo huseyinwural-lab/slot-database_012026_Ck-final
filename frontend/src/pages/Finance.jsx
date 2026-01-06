@@ -66,6 +66,30 @@ const formatAmount = (amount, currency) => {
     currency: 'all',
     ip_address: '',
     range_days: ''
+
+  // P1 Deep-link: /finance?tab=transactions&type=bet,deposit&range_days=30
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      const typeParam = params.get('type');
+      const rangeDays = params.get('range_days');
+
+      if (tab && ['transactions', 'reports', 'reconciliation', 'chargebacks'].includes(tab)) {
+        setActiveTab(tab);
+      }
+
+      setFilters((prev) => {
+        const next = { ...prev };
+        if (typeParam) next.type = typeParam; // supports CSV list like bet,withdrawal
+        if (rangeDays) next.range_days = rangeDays;
+        return next;
+      });
+    } catch {
+      // ignore
+    }
+  }, []);
+
   });
 
   // Column Visibility State
