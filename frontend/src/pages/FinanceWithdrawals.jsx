@@ -289,10 +289,12 @@ const FinanceWithdrawals = () => {
 
   const totalPages = meta.limit ? Math.max(1, Math.ceil((meta.total || 0) / meta.limit)) : 1;
 
-  const canApproveOrReject = (tx) => tx.state === 'requested';
-  const canMarkPaid = (tx) => tx.state === 'approved';
-  const canStartOrRetryPayout = (tx) => tx.state === 'approved' || tx.state === 'payout_failed';
-  const canRecheck = (tx) => tx.state === 'payout_pending';
+  const canApproveOrReject = (w) => (w?.status || '').toLowerCase() === 'pending';
+  const canMarkPaid = (w) => {
+    const s = (w?.status || '').toLowerCase();
+    return s === 'approved' || s === 'processing';
+  };
+  const canMarkFailed = (w) => (w?.status || '').toLowerCase() === 'processing';
 
   return (
     <div className="space-y-6">
