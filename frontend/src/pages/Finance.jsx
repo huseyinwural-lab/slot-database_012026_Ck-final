@@ -43,6 +43,8 @@ const formatAmount = (amount, currency) => {
     const value = Number(amount);
     const formatted = value.toLocaleString(undefined, { maximumFractionDigits: 2 });
     return `${formatted} ${currency || ''}`.trim();
+  const [activeTab, setActiveTab] = useState('transactions');
+
   } catch {
     return `${amount} ${currency || ''}`.trim();
   }
