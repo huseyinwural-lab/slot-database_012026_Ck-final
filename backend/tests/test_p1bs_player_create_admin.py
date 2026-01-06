@@ -12,7 +12,7 @@ def _token(*, admin_id: str, email: str, tenant_id: str, role: str) -> str:
     # IMPORTANT: app-side auth uses config.settings (root config.py), not backend.config.
     # Use the same settings to generate tokens deterministically.
     from config import settings
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     payload = {
         "sub": admin_id,
