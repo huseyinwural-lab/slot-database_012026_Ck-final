@@ -100,8 +100,6 @@ async def manual_credit(
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     player = await _get_player_or_404(session, tenant_id=tenant_id, player_id=player_id)
 
-    # Accept either X-Reason header (preferred) or JSON body reason (UI convenience)
-    body_reason = (payload.get("reason") or "").strip()
     try:
         amount = float(payload.get("amount") or 0)
     except Exception:
