@@ -6322,7 +6322,7 @@ class PlayersExportXLSXTestSuite:
                 
                 if response2.status_code != 200:
                     self.log_result("XLSX Tenant Isolation", False, 
-                                  f"Tenant impersonation export failed - Status: {response2.status_code}")
+                                  f"Tenant impersonation export failed - Status: {response2.status_code}, Response: {response2.text}")
                     return False
                 
                 # Both should return valid XLSX files
