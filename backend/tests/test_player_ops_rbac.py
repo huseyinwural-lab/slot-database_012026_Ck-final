@@ -86,8 +86,30 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
 
 
 @pytest.mark.asyncio
-async def test_player_ops_rbac_ops_only_ops_actions(async_client, seed_tenant_player_and_admin_token):
-    tenant, player, token = seed_tenant_player_and_admin_token(role="Ops")
+async def test_player_ops_rbac_ops_only_ops_actions(client, session, admin_token):
+    from app.models.sql_models import AdminUser
+    from sqlmodel import select
+    from jose import jwt
+    from config import settings
+
+    payload = jwt.decode(admin_token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    admin = (await session.execute(select(AdminUser).where(AdminUser.email == payload["email"]))).scalars().first()
+    if admin:
+        admin.role = "Ops"
+        admin.tenant_role = "operations"
+        session.add(admin)
+        await session.commit()
+
+    # create player under same tenant
+    from app.models.sql_models import Player
+    p = Player(tenant_id=payload["tenant_id"], username="rbacplayer2", email="rbac_player2@test.com", password_hash="noop_hash")
+    session.add(p)
+    await session.commit()
+    await session.refresh(p)
+
+    token = admin_token
+    tenant = None
+    player = p
 
     # Ops can suspend
     r = await async_client.post(
