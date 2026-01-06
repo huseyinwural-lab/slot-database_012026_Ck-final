@@ -199,6 +199,9 @@ def _make_player_token(player_id: str, tenant_id: str) -> str:
         "role": "player",
         "exp": datetime.now(timezone.utc) + timedelta(days=1),
     }
+    now = datetime.now(timezone.utc)
+    payload["iat"] = int(now.timestamp())
+
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
