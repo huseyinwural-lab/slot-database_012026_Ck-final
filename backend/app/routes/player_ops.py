@@ -102,9 +102,6 @@ async def manual_credit(
 
     # Accept either X-Reason header (preferred) or JSON body reason (UI convenience)
     body_reason = (payload.get("reason") or "").strip()
-    if body_reason and body_reason != reason:
-        reason = body_reason
-
     try:
         amount = float(payload.get("amount") or 0)
     except Exception:
@@ -200,9 +197,6 @@ async def manual_debit(
 
     # Accept either X-Reason header (preferred) or JSON body reason (UI convenience)
     body_reason = (payload.get("reason") or "").strip()
-    if body_reason and body_reason != reason:
-        reason = body_reason
-
     try:
         amount = float(payload.get("amount") or 0)
     except Exception:
