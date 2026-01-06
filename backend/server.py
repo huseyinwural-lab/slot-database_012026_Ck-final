@@ -193,6 +193,11 @@ app.include_router(revenue.router)
 from app.routes import finance_refunds
 app.include_router(finance_refunds.router)
 app.include_router(finance.router)
+
+# Withdrawals (Ops approval flow)
+from app.routes import withdrawals
+app.include_router(withdrawals.router)
+
 from app.routes import finance_chargebacks
 from app.routes import rg_player
 from app.routes import games_integration
