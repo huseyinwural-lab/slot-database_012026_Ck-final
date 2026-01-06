@@ -377,6 +377,33 @@ Do not delete sections unless instructed.
 - **IMPACT:** Users cannot access XLSX export functionality from the UI despite backend support being available
 - **STATUS:** ❌ DEPLOYMENT ISSUE - Frontend requires rebuild and redeployment to include XLSX export functionality
 
+### 2026-01-06 (Testing Agent) — Players XLSX Export Frontend Smoke Test (Post-Restart)
+- **TEST SCOPE:** Re-run frontend smoke test for Players XLSX export functionality after frontend restart
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123! with "Sign In" button
+  2. ✅ **Players Page Navigation:** Successfully navigated to /players page (https://casino-bridge.preview.emergentagent.com/players)
+  3. ✅ **Export Button Label:** Button correctly shows "Export Excel" (1 found, 0 CSV buttons found)
+  4. ✅ **Console Log Validation:** Console shows 'export_xlsx_clicked' when button clicked
+  5. ✅ **Network Request Validation:** GET /api/v1/players/export.xlsx request sent successfully
+  6. ✅ **Response Validation:** 200 status with correct XLSX content-type (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
+  7. ✅ **File Download Validation:** Browser triggered .xlsx download (players_export_2026-01-06T13_38_07.514Z.xlsx)
+
+- **DETAILED FINDINGS:**
+  - **Frontend Deployment:** ✅ XLSX functionality now properly deployed and working
+    - Button text correctly shows "Export Excel"
+    - handleExportXlsx function working correctly
+    - API call to '/v1/players/export.xlsx' with blob response type
+    - File download with proper .xlsx filename pattern
+  - **Backend Integration:** ✅ XLSX endpoint fully functional
+    - Correct Content-Type header: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    - Proper Content-Disposition header for file download
+    - 200 status response
+  - **User Experience:** ✅ Complete end-to-end flow working
+    - Click Export Excel → Console log → Network request → File download
+
+- **ROOT CAUSE RESOLVED:** Frontend restart successfully deployed the XLSX implementation
+- **STATUS:** ✅ ALL TESTS PASSED - Players XLSX export fully functional in frontend after restart
+
 ## Agent Communication
 
 agent_communication:
