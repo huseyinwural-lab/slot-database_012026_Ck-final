@@ -184,7 +184,7 @@ const formatAmount = (amount, currency) => {
     }
   };
 
-  useEffect(() => { fetchData(1); }, [filters]);
+  useEffect(() => { fetchData(1); }, [filters, activeTab]);
 
   const handleViewDetails = (tx) => {
     setSelectedTx(tx);
