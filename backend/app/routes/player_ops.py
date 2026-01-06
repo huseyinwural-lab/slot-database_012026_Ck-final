@@ -95,7 +95,7 @@ async def manual_credit(
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Admin+
-    _require_any_role(current_admin, {"Admin"})
+    _require_any_role(current_admin, {"Admin", "Super Admin"})
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     player = await _get_player_or_404(session, tenant_id=tenant_id, player_id=player_id)
@@ -185,7 +185,7 @@ async def manual_debit(
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Admin+
-    _require_any_role(current_admin, {"Admin"})
+    _require_any_role(current_admin, {"Admin", "Super Admin"})
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     player = await _get_player_or_404(session, tenant_id=tenant_id, player_id=player_id)
@@ -300,7 +300,7 @@ async def grant_manual_bonus(
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Admin+
-    _require_any_role(current_admin, {"Admin"})
+    _require_any_role(current_admin, {"Admin", "Super Admin"})
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     player = await _get_player_or_404(session, tenant_id=tenant_id, player_id=player_id)
