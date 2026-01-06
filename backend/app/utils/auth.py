@@ -24,8 +24,12 @@ def get_password_hash(password):
 def create_access_token(data: dict, expires_delta):
     from datetime import datetime, timezone
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
+    now = datetime.now(timezone.utc)
+    expire = now + expires_delta
+
+    # P1-E2: iat required for session revocation checks
+    to_encode.update({"iat": int(now.timestamp()), "exp": expire})
+
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
     return encoded_jwt
 
