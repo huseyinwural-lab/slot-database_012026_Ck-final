@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
+from datetime import datetime, timezone
 
 from app.core.database import get_session
 from app.models.sql_models import Player, PlayerSessionRevocation
