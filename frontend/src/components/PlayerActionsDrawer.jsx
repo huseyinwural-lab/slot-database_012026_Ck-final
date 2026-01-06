@@ -273,7 +273,9 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                   <Label>Reason</Label>
                   <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Required" />
                 </div>
-                <Button disabled={loading || !canCreditDebitBonus} onClick={doDebit}>Debit</Button>
+                {canCreditDebitBonus ? (
+                  <Button disabled={loading} onClick={doDebit}>Debit</Button>
+                ) : null}
               </div>
 
               <div className="space-y-3">
