@@ -74,10 +74,9 @@ const formatAmount = (amount, currency) => {
 
 const FinanceWithdrawals = () => {
   const [filters, setFilters] = useState({
-    state: 'all',
-    player_id: '',
-    date_from: '',
-    date_to: '',
+    status: 'all',
+    q: '',
+    provider_ref: '',
   });
 
   const [items, setItems] = useState([]);
