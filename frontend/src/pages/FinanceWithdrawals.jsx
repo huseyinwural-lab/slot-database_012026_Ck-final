@@ -187,50 +187,13 @@ const FinanceWithdrawals = () => {
     }));
   };
 
-  const handleStartOrRetryPayout = async (tx) => {
-    const logicalAction = tx.state === 'payout_failed' ? 'payout_retry' : 'payout_start';
-    setActionLoading(true);
-    updateRowStatus(tx.tx_id, logicalAction, 'in_flight');
+  // P0 scope: Withdrawals page is the source of truth and supports
+  // approve/reject + manual mark paid/failed.
+  // No PSP / payout-start workflow in P0 here.
 
-    try {
-      await callMoneyAction({
-        scope: ADMIN_SCOPE,
-        id: tx.tx_id,
-        action: logicalAction,
-        requestFn: (idemKey) =>
-          api.post(`/v1/finance/withdrawals/${tx.tx_id}/payout`, null, {
-            headers: {
-              'Idempotency-Key': idemKey,
-            },
-          }),
-        onStatus: (status) => {
-          updateRowStatus(tx.tx_id, logicalAction, status.status || status, status.message);
-        },
-      });
-      toast.success(logicalAction === 'payout_retry' ? 'Payout retried' : 'Payout started');
-      await fetchWithdrawals(page);
-    } catch (err) {
-      await handleActionError(err);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRecheck = async (tx) => {
-    setActionLoading(true);
-    try {
-      await api.post(`/v1/finance/withdrawals/${tx.tx_id}/recheck`, null, {
-        headers: {
-          'Idempotency-Key': buildIdempotencyKey(ADMIN_SCOPE, tx.tx_id, 'recheck'),
-        },
-      });
-      toast.success('Recheck requested');
-      await fetchWithdrawals(page);
-    } catch (err) {
-      await handleActionError(err);
-    } finally {
-      setActionLoading(false);
-    }
+  const openActionModal = (tx, type) => {
+    setActionModal({ open: true, type, tx });
+    setActionReason('');
   };
 
   const openActionModal = (tx, type) => {
