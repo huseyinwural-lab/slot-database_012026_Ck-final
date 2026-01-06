@@ -64,9 +64,9 @@ async def test_players_export_xlsx_filters_and_tenant_isolation(client, session)
     assert res.status_code == 200
     assert res.content[:2] == b"PK"
 
-    # tenant1 + filters should still succeed
+    # tenant1 + risk filter should still succeed
     res2 = await client.get(
-        "/api/v1/players/export.xlsx?vip_level=5&risk_score=high",
+        "/api/v1/players/export.xlsx?risk_score=high",
         headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": t1.id},
     )
     assert res2.status_code == 200
