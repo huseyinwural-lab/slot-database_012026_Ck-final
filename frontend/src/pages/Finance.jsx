@@ -173,7 +173,17 @@ const formatAmount = (amount, currency) => {
           <Button onClick={fetchData} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 mr-2" /> Refresh
           </Button>
-          <Button variant="default" size="sm">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => {
+              const params = new URLSearchParams();
+              Object.keys(filters).forEach((key) => {
+                if (filters[key] && filters[key] !== 'all') params.append(key, filters[key]);
+              });
+              window.location.href = `/api/v1/finance/transactions/export?${params.toString()}`;
+            }}
+          >
             <Download className="w-4 h-4 mr-2" /> Export CSV
           </Button>
         </div>
