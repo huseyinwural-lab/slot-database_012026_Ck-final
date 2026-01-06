@@ -46,14 +46,7 @@ async def get_current_player(
         raise credentials_exception
         
 
-    # P1-E3: suspended players cannot access protected endpoints
-    if getattr(player, "status", None) == "suspended":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"error_code": "PLAYER_SUSPENDED"},
-        )
-
-    # P1-E2: session revocation enforcement
+    # P1-E2: session revocation enforcement (check before status so old tokens get 401 TOKEN_REVOKED)
     stmt = select(PlayerSessionRevocation).where(
         PlayerSessionRevocation.tenant_id == tenant_id,
         PlayerSessionRevocation.player_id == player_id,
@@ -61,7 +54,7 @@ async def get_current_player(
     rev = (await session.execute(stmt)).scalars().first()
     if rev and rev.revoked_at:
         try:
-            token_iat = datetime.fromtimestamp(int(iat), tz=timezone.utc).replace(tzinfo=None)
+            token_iat = datetime.fromtimestamp(int(iat), tz=timezone.utc).replace(tzinfo=None, microsecond=0)
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -69,11 +62,23 @@ async def get_current_player(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        if token_iat < rev.revoked_at:
+        rev_at = rev.revoked_at
+        if getattr(rev_at, "tzinfo", None) is not None:
+            rev_at = rev_at.astimezone(timezone.utc).replace(tzinfo=None)
+        rev_at = rev_at.replace(microsecond=0)
+
+        if token_iat < rev_at:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"error_code": "TOKEN_REVOKED"},
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+    # P1-E3: suspended players cannot access protected endpoints
+    if getattr(player, "status", None) == "suspended":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error_code": "PLAYER_SUSPENDED"},
+        )
 
     return player

@@ -31,6 +31,9 @@ class PlayerSessionRevocation(SQLModel, table=True):
     tenant_id: str = Field(index=True)
     player_id: str = Field(index=True)
 
-    revoked_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None), index=True)
+    revoked_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0),
+        index=True,
+    )
     revoked_by_admin_id: str
     reason: str
