@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TrendingUp, DollarSign, Users, Activity } from 'lucide-react';
@@ -9,36 +9,54 @@ const OwnerRevenue = () => {
   const [loading, setLoading] = useState(true);
   const [revenueData, setRevenueData] = useState(null);
   const [selectedTenant, setSelectedTenant] = useState('all');
-  const [dateRange, setDateRange] = useState('7'); // days
 
-  useEffect(() => {
-    fetchRevenue();
-  }, [selectedTenant, dateRange]);
+  // P1-1: single deterministic range source
+  const [rangeDays, setRangeDays] = useState(7);
 
-  const fetchRevenue = async () => {
+  const tenantScope = useMemo(() => (selectedTenant === 'all' ? 'all' : selectedTenant), [selectedTenant]);
+
+  const loadRevenue = async (nextRangeDays) => {
+    const safeRange = Number(nextRangeDays) || 7;
+
     setLoading(true);
     try {
-      const fromDate = new Date();
-      fromDate.setDate(fromDate.getDate() - parseInt(dateRange));
-      
       const params = {
-        from_date: fromDate.toISOString(),
-        to_date: new Date().toISOString()
+        range_days: safeRange,
       };
-      
+
       if (selectedTenant !== 'all') {
         params.tenant_id = selectedTenant;
       }
-      
-      const response = await api.get('/v1/reports/revenue/all-tenants', { params });
-      setRevenueData(response.data);
+
+      const response = await api.get('/v1/revenue/all-tenants', { params });
+
+      // P1-1: response guard
+      const data = response?.data || {};
+      const tenants = Array.isArray(data) ? data : (data.items ?? data.rows ?? data.tenants ?? []);
+
+      setRevenueData({
+        ...data,
+        tenants: Array.isArray(tenants) ? tenants : [],
+        meta: data.meta || { range_days: safeRange, period_start: data.period_start, period_end: data.period_end },
+      });
     } catch (error) {
-      console.error('Failed to fetch revenue:', error);
-      toast.error('Failed to load revenue data');
+      const status = error?.response?.status;
+      const detail = error?.response?.data?.detail;
+      const errorCode = error?.response?.data?.error_code || detail?.error_code;
+      const detailText = typeof detail === 'string' ? detail : (detail?.message || detail?.error_code);
+
+      toast.error(
+        `Failed to load revenue data${status ? ` (${status})` : ''}${errorCode ? ` · ${errorCode}` : ''}`,
+        { description: detailText || error?.message || 'Unknown error' }
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadRevenue(rangeDays);
+  }, [rangeDays, tenantScope]);
 
   if (loading) {
     return (
