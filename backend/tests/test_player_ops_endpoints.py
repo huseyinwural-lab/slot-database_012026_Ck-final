@@ -30,7 +30,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     r = await client.post(
         f"/api/v1/players/{pid}/credit",
         json={"amount": 10, "currency": "USD", "reason": "manual credit"},
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r.status_code == 200
 
@@ -38,7 +38,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     r2 = await client.post(
         f"/api/v1/players/{pid}/debit",
         json={"amount": 999999, "currency": "USD", "reason": "manual debit"},
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r2.status_code == 409
 
@@ -46,7 +46,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     r3 = await client.post(
         f"/api/v1/players/{pid}/suspend",
         json={"reason": "fraud"},
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r3.status_code == 200
     assert r3.json()["status"] == "suspended"
@@ -55,7 +55,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     r4 = await client.post(
         f"/api/v1/players/{pid}/unsuspend",
         json={"reason": "resolved"},
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r4.status_code == 200
     assert r4.json()["status"] == "active"
@@ -64,7 +64,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     r5 = await client.post(
         f"/api/v1/players/{pid}/bonuses",
         json={"bonus_type": "cash", "amount": 5, "reason": "promo"},
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r5.status_code == 200
     grant_id = r5.json()["id"]
@@ -72,7 +72,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     # list bonuses
     r6 = await client.get(
         f"/api/v1/players/{pid}/bonuses",
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r6.status_code == 200
     assert any(b["id"] == grant_id for b in r6.json())
@@ -81,7 +81,7 @@ async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, sessio
     r7 = await client.post(
         f"/api/v1/players/{pid}/force-logout",
         json={"reason": "ops"},
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r7.status_code == 200
 
@@ -113,6 +113,6 @@ async def test_player_ops_requires_reason(client, admin_token):
     r = await client.post(
         f"/api/v1/players/{pid}/credit",
         json={"amount": 10, "currency": "USD"},
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin_token}", "X-Reason": "manual credit"},
     )
     assert r.status_code == 400
