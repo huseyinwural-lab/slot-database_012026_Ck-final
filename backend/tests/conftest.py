@@ -132,8 +132,12 @@ def override_get_current_player_factory():
 async def client(async_session_factory):
     # Override DB session provider
     app.dependency_overrides[get_session] = make_override_get_session(async_session_factory)
-    # Override auth so it loads Player via SAME AsyncSession
-    app.dependency_overrides[get_current_player] = override_get_current_player_factory()
+    # Use REAL player auth dependency to include revocation + suspension enforcement
+    if get_current_player in app.dependency_overrides:
+        app.dependency_overrides.pop(get_current_player)
+
+    # Ensure auth_player module uses the same get_session dependency
+    auth_player_module.get_session = get_session
 
     from httpx import ASGITransport
 
