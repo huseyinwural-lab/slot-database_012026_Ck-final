@@ -457,6 +457,28 @@ agent_communication:
     -agent: "testing"
     -message: "🎉 P1 REVENUE RANGE FILTER BUG FIX FULLY VERIFIED: Completed comprehensive E2E validation of P1 Revenue range filter bug fix on http://localhost:3000 as requested. ALL TESTS PASSED (3/3): ✅ Admin authentication successful via API ✅ All Revenue page navigation working ✅ Range dropdown functional ✅ Last 24 Hours: API call with range_days=1, 200 OK, correct meta response ✅ Last 7 Days: API call with range_days=7, 200 OK, correct meta response ✅ Last 30 Days: API call with range_days=30, 200 OK, correct meta response ✅ All network requests include proper range_days parameter ✅ All responses contain accurate meta.range_days, period_start, period_end ✅ UI updates correctly after each range change ✅ No console errors detected. P1 Revenue Range Filter Bug Fix is working correctly and ready for production!"
     -agent: "testing"
+
+### 2026-01-06 — P1 Executive Dashboard Kart Navigasyonu (E1) — FIXED + E2E PASS
+- **Scope:** Sadece Executive Dashboard üzerindeki KPI/özet kartlarının tıklanabilir olması ve doğru sayfalara yönlendirmesi.
+- **Frontend değişiklikleri:**
+  - `frontend/src/pages/Dashboard.jsx`
+    - KPI kartları (GGR/NGR/Active Players/Total Bets) artık clickable.
+    - Dashboard timeRange → `rangeDays` (1/7/30) map edilip hedef URL’lere `range_days` olarak taşınıyor.
+    - Owner-only kartlar (GGR/NGR) owner değilse disabled + tooltip.
+  - `frontend/src/components/dashboard/FinancialSummary.jsx`
+    - Cash in System / Pending Withdrawals / Bonus Liabilities / Jackpot Pools alanları tıklanabilir.
+    - Jackpot Pools route olmadığı için disabled + tooltip “Coming soon”.
+- **Hedef eşlemeleri (kilit):**
+  - GGR → `/revenue/all-tenants?metric=ggr&range_days={rangeDays}` (owner-only)
+  - NGR → `/revenue/all-tenants?metric=ngr&range_days={rangeDays}` (owner-only)
+  - Active Players → `/players?status=active`
+  - Total Bets → `/finance?tab=transactions&type=bet&range_days={rangeDays}`
+  - Cash in System → `/finance?tab=transactions`
+  - Pending Withdrawals → `/finance/withdrawals?status=pending`
+  - Bonus Liabilities → `/bonuses?view=liabilities` (feature flag varsa), yoksa disabled
+  - Jackpot Pools → disabled “Coming soon”
+- **E2E Test:** ✅ PASS (testing agent: 15/15)
+
     -message: "🎉 P1 EXECUTIVE DASHBOARD CARD NAVIGATION E2E FULLY VERIFIED: Completed comprehensive end-to-end validation of Executive Dashboard card navigation functionality on http://localhost:3000 as requested. ALL TESTS PASSED (15/15): ✅ Admin authentication successful ✅ Dashboard page loaded with all components ✅ KPI Cards Navigation: GGR→/revenue/all-tenants?metric=ggr&range_days=30, NGR→/revenue/all-tenants?metric=ngr&range_days=30, Active Players→/players?status=active, Total Bets→/finance?tab=transactions&type=bet&range_days=30 ✅ Time Range Integration: Dashboard 'Last 7 Days' selection correctly updates Total Bets to range_days=7 ✅ Financial Summary Panel: Cash in System→/finance?tab=transactions, Pending Withdrawals→/finance/withdrawals?status=pending, Bonus Liabilities→/bonuses?view=liabilities (enabled), Jackpot Pools correctly disabled ✅ UI/UX: Proper cursor states, hover effects, no console errors. P1 Executive Dashboard card navigation fully operational and meeting all requirements!"
 
 
