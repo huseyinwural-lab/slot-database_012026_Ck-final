@@ -43,11 +43,36 @@ const PlayerList = () => {
 
   const handleFilter = () => fetchPlayers();
 
+  const handleExportCsv = async () => {
+    console.info('export_csv_clicked');
+    try {
+      const params = { search };
+      if (status !== "all") params.status = status;
+      if (vipLevel !== "all") params.vip_level = vipLevel;
+      if (riskScore !== "all") params.risk_score = riskScore;
+
+      const res = await api.get('/v1/players/export', {
+        params,
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `players_export_${new Date().toISOString()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Player Management</h2>
-        <Button>Export CSV</Button>
+        <Button onClick={handleExportCsv}>Export CSV</Button>
       </div>
 
       <Card>
