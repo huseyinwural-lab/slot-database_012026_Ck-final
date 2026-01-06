@@ -111,7 +111,7 @@ async def manual_credit(
         amount = 0
     currency = (payload.get("currency") or "USD").strip() or "USD"
     if amount <= 0:
-        raise HTTPException(status_code=400, detail={"error_code": "AMOUNT_INVALID"})
+        raise HTTPException(status_code=400, detail={"error_code": "AMOUNT_INVALID", "message": "amount must be > 0"})
 
     before = {
         "balance_real_available": float(player.balance_real_available or 0.0),
@@ -209,7 +209,7 @@ async def manual_debit(
         amount = 0
     currency = (payload.get("currency") or "USD").strip() or "USD"
     if amount <= 0:
-        raise HTTPException(status_code=400, detail={"error_code": "AMOUNT_INVALID"})
+        raise HTTPException(status_code=400, detail={"error_code": "AMOUNT_INVALID", "message": "amount must be > 0"})
 
     available = float(player.balance_real_available or 0.0)
     if available < amount:
