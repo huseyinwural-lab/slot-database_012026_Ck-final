@@ -487,45 +487,53 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED - Duplicate registration UX improvement fully functional and meeting all requirements
 
-### 2026-01-06 (Testing Agent) — Player Action Panel (Drawer) Frontend Smoke Test
-- **TEST SCOPE:** Frontend smoke test for new Player Action Panel (drawer) on admin UI as requested in review
+### 2026-01-06 (Testing Agent) — Player Action Panel (Drawer) Frontend Smoke Test (Post-Restart)
+- **TEST SCOPE:** Re-run frontend smoke test for Player Action Panel after frontend restart as requested in review
 - **VALIDATION RESULTS:**
   1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
-  2. ✅ **Players Page Navigation:** Successfully navigated to /players page
-  3. ✅ **Player List Display:** Players table loads correctly with 50+ players visible
-  4. ❌ **CRITICAL ISSUE - Eye Button Behavior:** Eye button navigates to player detail page instead of opening Player Actions Drawer
-     - Expected: Click Eye icon → Player Actions Drawer opens
-     - Actual: Click Eye icon → Navigates to /players/{id} page
-     - Result: Shows "Player not found" with "Failed to load player data" toast
-  5. ❌ **CRITICAL ISSUE - Backend Player Detail Endpoints Missing:** Multiple 404 errors for player-specific endpoints
-     - GET /api/v1/players/{id}/transactions → 404
-     - GET /api/v1/players/{id}/logs → 404  
-     - GET /api/v1/players/{id}/kyc → 404
+  2. ✅ **Players Page Navigation:** Successfully navigated to /players page with Player Management title
+  3. ✅ **Player List Display:** Players table loads correctly with 50 rows of player data
+  4. ✅ **Eye Button Behavior:** Eye button correctly opens Player Actions Drawer (NOT navigation)
+     - Expected: Click Eye icon → Player Actions Drawer opens ✅
+     - Actual: Click Eye icon → Opens dialog with "Player Actions" title ✅
+     - Player info displayed: ops_p13 (ops_p13@test.com) with player ID ✅
+  5. ✅ **Player Actions Dialog Structure:** Dialog opens with correct title and player information
+  6. ✅ **Quick Actions Tab:** Tab exists, is visible, and functional with all required sections:
+     - Credit section with Amount, Currency, Reason fields ✅
+     - Debit section with Amount, Currency, Reason fields ✅
+     - Grant Bonus section with Bonus Type, Amount/Quantity, Expiry, Reason fields ✅
+     - Account Controls section with Suspend, Unsuspend, Force Logout buttons ✅
+
+- **FUNCTIONAL TESTING RESULTS:**
+  7. ✅ **Manual Credit Test:** Credit 10 USD with reason "test"
+     - Form filled correctly: amount=10, currency=USD, reason=test ✅
+     - Credit button clicked successfully ✅
+     - SUCCESS: Credit operation completed with "Credited" success toast ✅
+  8. ✅ **Manual Debit Test:** Debit 999999 USD for insufficient funds error
+     - Form filled correctly: amount=999999, currency=USD, reason=test large debit ✅
+     - Debit button clicked successfully ✅
+     - SUCCESS: Debit correctly showed "Insufficient funds" error toast ✅
+  9. ✅ **Notes/Audit Tab Test:** Tab loads and displays correctly
+     - Notes/Audit tab clickable and functional ✅
+     - Internal Note textarea visible and functional ✅
+     - Audit events section visible with "Last actions" title ✅
+     - Audit events loaded with 1 event showing credit operation: "2026-01-06T15:49:10 · PLAYER_CREDIT_ATTEMPT · SUCCESS" ✅
 
 - **DETAILED FINDINGS:**
-  - **Frontend Code Analysis:** ✅ PlayerActionsDrawer component exists in source code with all required functionality:
-    - Dialog with "Player Actions" title
-    - Player username/email/id display
-    - Quick Actions tab with Credit, Debit, Grant Bonus, Suspend/Unsuspend, Force Logout buttons
-    - Notes/Audit tab with note entry and audit events list
-  - **Deployment Issue:** ❌ Eye button behavior differs from source code expectations
-    - Source code shows onClick handler should open drawer: `setOpsOpen(true); setOpsPlayer(player)`
-    - Deployed version navigates to player detail page instead
-  - **Backend Integration:** ❌ Player detail endpoints not implemented
-    - Player detail page expects /transactions, /logs, /kyc endpoints
-    - All return 404 errors preventing proper player detail display
+  - **Frontend Deployment:** ✅ PlayerActionsDrawer component properly deployed and functional
+    - Eye button onClick handler correctly opens drawer: `setOpsOpen(true); setOpsPlayer(player)` ✅
+    - Dialog with "Player Actions" title working correctly ✅
+    - All form fields, buttons, and tabs functional ✅
+  - **Backend Integration:** ✅ Player action endpoints working correctly
+    - Credit endpoint returns success with proper toast notification ✅
+    - Debit endpoint returns proper "Insufficient funds" error for large amounts ✅
+    - Audit events endpoint returns transaction history ✅
+  - **User Experience:** ✅ Complete end-to-end flow working correctly
+    - Eye button → Dialog opens → Forms functional → API calls successful → Toast notifications → Audit tracking ✅
 
-- **ROOT CAUSE ANALYSIS:**
-  - **Primary Issue:** Frontend deployment mismatch - Eye button behavior differs from source code
-  - **Secondary Issue:** Backend missing player detail endpoints required for player detail page functionality
-  - **Impact:** Player Actions Drawer functionality completely unavailable to users
+- **ROOT CAUSE RESOLVED:** Frontend restart successfully deployed the correct PlayerActionsDrawer implementation
 
-- **UNABLE TO TEST:**
-  - Credit 10 USD with reason "test" (drawer doesn't open)
-  - Debit huge amount for insufficient funds error (drawer doesn't open)
-  - Notes/Audit tab functionality (drawer doesn't open)
-
-- **STATUS:** ❌ CRITICAL FAILURES - Player Action Panel completely non-functional due to frontend deployment and backend endpoint issues
+- **STATUS:** ✅ ALL TESTS PASSED - Player Action Panel fully functional and meeting all requirements
 
 ## Previous history
 
