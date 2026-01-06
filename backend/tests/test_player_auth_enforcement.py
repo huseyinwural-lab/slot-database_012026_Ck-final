@@ -86,10 +86,10 @@ async def test_force_logout_revokes_old_token(client, session):
     # Call a protected player endpoint (use /api/v1/players/me if exists; fallback to payouts list)
     # In this codebase, payouts endpoints use get_current_player
     r_ok = await client.get(
-        "/api/v1/payouts/methods",
+        "/api/v1/player/wallet/balance",
         headers={"Authorization": f"Bearer {token1}"},
     )
-    assert r_ok.status_code in {200, 404}
+    assert r_ok.status_code == 200
 
     # Admin token
     from app.utils.auth import create_access_token
