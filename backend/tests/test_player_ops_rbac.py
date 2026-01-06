@@ -64,7 +64,7 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
     r = await async_client.post(
         f"/api/v1/players/{player.id}/credit",
         json={"amount": 10, "currency": "USD", "reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 403
 
@@ -72,7 +72,7 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
     r = await async_client.post(
         f"/api/v1/players/{player.id}/suspend",
         json={"reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 403
 
@@ -80,7 +80,7 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
     r = await async_client.post(
         f"/api/v1/players/{player.id}/force-logout",
         json={"reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 403
 
@@ -93,7 +93,7 @@ async def test_player_ops_rbac_ops_only_ops_actions(async_client, seed_tenant_pl
     r = await async_client.post(
         f"/api/v1/players/{player.id}/suspend",
         json={"reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 200
 
@@ -101,7 +101,7 @@ async def test_player_ops_rbac_ops_only_ops_actions(async_client, seed_tenant_pl
     r = await async_client.post(
         f"/api/v1/players/{player.id}/force-logout",
         json={"reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 200
 
@@ -109,7 +109,7 @@ async def test_player_ops_rbac_ops_only_ops_actions(async_client, seed_tenant_pl
     r = await async_client.post(
         f"/api/v1/players/{player.id}/credit",
         json={"amount": 10, "currency": "USD", "reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 403
 
@@ -121,13 +121,13 @@ async def test_player_ops_rbac_admin_all_allowed(async_client, seed_tenant_playe
     r = await async_client.post(
         f"/api/v1/players/{player.id}/credit",
         json={"amount": 10, "currency": "USD", "reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 200
 
     r = await async_client.post(
         f"/api/v1/players/{player.id}/force-logout",
         json={"reason": "test"},
-        headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant.id, "X-Reason": "test"},
+        headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 200
