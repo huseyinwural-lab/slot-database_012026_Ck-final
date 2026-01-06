@@ -3,22 +3,28 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_player_ops_credit_debit_bonus_suspend_force_logout(client, session, admin_token):
-    # Create a player under default tenant by using existing endpoint
-    create = await client.post(
-        "/api/v1/auth/player/register",
-        json={"email": "ops_player@test.com", "username": "opsplayer", "password": "Test12345!"},
-    )
-    assert create.status_code in (200, 400)
+    # Seed a player under the SAME tenant as admin_token
+    from app.models.sql_models import Tenant, Player
+    from sqlmodel import select
+    from jose import jwt
+    from config import settings
 
-    # Fetch players list to get id (scoped to admin's tenant)
-    res = await client.get(
-        "/api/v1/players",
-        headers={"Authorization": f"Bearer {admin_token}"},
-    )
-    assert res.status_code == 200
-    items = res.json().get("items") or []
-    assert len(items) >= 1
-    pid = items[0]["id"]
+    payload = jwt.decode(admin_token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    tenant_id = payload["tenant_id"]
+
+    # ensure tenant exists in DB
+    t = (await session.execute(select(Tenant).where(Tenant.id == tenant_id))).scalars().first()
+    if not t:
+        t = Tenant(id=tenant_id, name="Test Casino", type="owner", features={})
+        session.add(t)
+        await session.commit()
+
+    p = Player(tenant_id=tenant_id, username="opsplayer", email="ops_player@test.com", password_hash="noop_hash")
+    session.add(p)
+    await session.commit()
+    await session.refresh(p)
+
+    pid = p.id
 
     # credit
     r = await client.post(
