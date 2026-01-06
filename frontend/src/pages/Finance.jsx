@@ -192,7 +192,7 @@ const formatAmount = (amount, currency) => {
           <p className="text-muted-foreground">Comprehensive financial monitoring and operations center.</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={fetchData} variant="outline" size="sm">
+          <Button onClick={() => fetchData(txMeta?.page ?? 1)} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 mr-2" /> Refresh
           </Button>
           <Button
