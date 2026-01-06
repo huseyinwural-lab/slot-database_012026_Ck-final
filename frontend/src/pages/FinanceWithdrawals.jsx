@@ -121,7 +121,8 @@ const FinanceWithdrawals = () => {
       // Backend defaults to created_at DESC; make it explicit for contract clarity.
       params.sort = 'created_at_desc';
 
-      const res = await api.get('/v1/finance/withdrawals', { params });
+      // P0 decision: Withdrawal approvals live under /withdrawals (source of truth)
+      const res = await api.get('/v1/withdrawals', { params });
       setItems(res.data.items || []);
       setMeta(res.data.meta || { total: 0, limit, offset });
       setPage(nextPage);
