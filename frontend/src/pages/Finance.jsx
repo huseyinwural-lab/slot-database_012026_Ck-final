@@ -26,6 +26,13 @@ import TransactionDetailModal from '../components/finance/TransactionDetailModal
 
 import ReconciliationPanel from '../components/finance/ReconciliationPanel';
 import ChargebackList from '../components/finance/ChargebackList';
+
+const parseCsvList = (v) =>
+  String(v || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const Finance = () => {
   const [transactions, setTransactions] = useState([]);
   const [txMeta, setTxMeta] = useState({ page: 1, page_size: 50, total: null });
