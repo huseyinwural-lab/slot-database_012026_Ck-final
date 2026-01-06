@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUpRight, ArrowDownRight, Users, Activity, Wallet, Server, DollarSign, Trophy, Filter, Info } from 'lucide-react';
@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useNavigate } from 'react-router-dom';
+import { useCapabilities } from '../context/CapabilitiesContext';
+
 
 // Import New Components
 import FinancialTrendChart from '../components/dashboard/FinancialTrendChart';
@@ -17,26 +20,77 @@ import LossLeadersTable from '../components/dashboard/LossLeadersTable';
 import LiveBetsTicker from '../components/dashboard/LiveBetsTicker';
 import BonusPerformanceCard from '../components/dashboard/BonusPerformanceCard';
 
-const StatCard = ({ title, value, icon: Icon, trend, trendValue, color, subtext }) => (
-  <Card className="border-l-4 shadow-sm" style={{borderLeftColor: color}}>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      <Icon className="h-4 w-4 text-muted-foreground" />
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="flex items-center text-xs mt-1">
-        {trend && (
-            <span className={`flex items-center ${trend === 'up' ? 'text-green-500' : 'text-red-500'} mr-2`}>
-                {trend === 'up' ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
-                {trendValue}%
+const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  trendValue,
+  color,
+  subtext,
+  onClick,
+  disabled,
+  tooltip,
+}) => {
+  const card = (
+    <Card
+      className={`border-l-4 shadow-sm transition-all ${
+        disabled
+          ? 'opacity-50 cursor-not-allowed'
+          : 'cursor-pointer hover:shadow-md hover:border-primary/40'
+      }`}
+      style={{ borderLeftColor: color }}
+      role={disabled ? undefined : 'button'}
+      tabIndex={disabled ? -1 : 0}
+      onClick={disabled ? undefined : onClick}
+      onKeyDown={
+        disabled
+          ? undefined
+          : (e) => {
+              if (e.key === 'Enter' || e.key === ' ') onClick?.();
+            }
+      }
+    >
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <div className="flex items-center text-xs mt-1">
+          {trend && (
+            <span
+              className={`flex items-center ${
+                trend === 'up' ? 'text-green-500' : 'text-red-500'
+              } mr-2`}
+            >
+              {trend === 'up' ? (
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+              ) : (
+                <ArrowDownRight className="h-3 w-3 mr-1" />
+              )}
+              {trendValue}%
             </span>
-        )}
-        <span className="text-muted-foreground">{subtext || "vs yesterday"}</span>
-      </div>
-    </CardContent>
-  </Card>
-);
+          )}
+          <span className="text-muted-foreground">{subtext || 'vs yesterday'}</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (!tooltip) return card;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{card}</TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 const HealthBadge = ({ status }) => {
     const colors = { UP: 'bg-green-500', DOWN: 'bg-red-500', WARNING: 'bg-yellow-500', Unstable: 'bg-orange-500' };
