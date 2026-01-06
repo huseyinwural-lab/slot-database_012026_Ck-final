@@ -159,15 +159,7 @@ async def list_withdrawals(
         stmt = stmt.order_by(Transaction.created_at.desc())
 
     # Count
-    count_stmt = select(func.count()).select_from(
-        select(Transaction.id)
-        .join(Player, Player.id == Transaction.player_id)
-        .where(Transaction.tenant_id == tenant_id, Transaction.type == "withdrawal")
-        .subquery()
-    )
-
-    # Apply same filters to count (without ordering/limit)
-    # For simplicity and correctness in P0, re-run a count over the filtered ids.
+    # For simplicity and correctness in P0, run a count over the filtered ids.
     filtered_ids_stmt = select(Transaction.id).join(Player, Player.id == Transaction.player_id).where(
         Transaction.tenant_id == tenant_id,
         Transaction.type == "withdrawal",
