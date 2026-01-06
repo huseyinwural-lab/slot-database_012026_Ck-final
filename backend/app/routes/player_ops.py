@@ -108,6 +108,10 @@ async def manual_credit(
     except Exception:
         amount = 0
     currency = (payload.get("currency") or "USD").strip() or "USD"
+    # Allow reason via header; enforce required
+    if not reason or not str(reason).strip():
+        raise HTTPException(status_code=400, detail={"error_code": "REASON_REQUIRED"})
+
     if amount <= 0:
         raise HTTPException(status_code=400, detail={"error_code": "AMOUNT_INVALID", "message": "amount must be > 0"})
 
@@ -201,6 +205,10 @@ async def manual_debit(
     except Exception:
         amount = 0
     currency = (payload.get("currency") or "USD").strip() or "USD"
+    # Allow reason via header; enforce required
+    if not reason or not str(reason).strip():
+        raise HTTPException(status_code=400, detail={"error_code": "REASON_REQUIRED"})
+
     if amount <= 0:
         raise HTTPException(status_code=400, detail={"error_code": "AMOUNT_INVALID", "message": "amount must be > 0"})
 
