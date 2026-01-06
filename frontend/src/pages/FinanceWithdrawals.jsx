@@ -244,6 +244,7 @@ const FinanceWithdrawals = () => {
         approve: 'Withdrawal approved',
         reject: 'Withdrawal rejected',
         mark_paid: 'Withdrawal marked as paid',
+        mark_failed: 'Withdrawal marked as failed',
       };
       toast.success(successMsgs[type] || 'Action completed');
       
