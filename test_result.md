@@ -443,6 +443,10 @@ agent_communication:
     -agent: "testing"
     -message: "✅ PLAYER REGISTRATION FLOW FULLY VALIDATED: Completed comprehensive end-to-end testing of player registration flow on frontend-player app (http://localhost:3001/register). ALL REQUIREMENTS MET: ✅ Fresh email registration (200 status) redirects to /login ✅ Duplicate email registration (400 status) shows correct error message 'This email is already registered. Please log in instead.' ✅ API endpoints working correctly ✅ Frontend UI and error handling working properly. Player registration functionality is fully operational and ready for production use."
 
+### 2026-01-06 (Frontend-Player) — Register hata mesajı iyileştirildi
+- Register ekranında "Registration failed" generic mesajı yerine, backend `Player exists` döndüğünde kullanıcıya aksiyon alınabilir mesaj gösteriliyor: "This email is already registered. Please log in instead."
+- Test: frontend testing agent E2E ✅ (fresh register 200 + duplicate 400 + doğru UI mesajı)
+
 ## Previous history
 
 (legacy content retained below)
