@@ -445,9 +445,11 @@ agent_communication:
     -agent: "testing"
     -message: "✅ DUPLICATE REGISTRATION UX IMPROVEMENT FULLY VALIDATED: Completed comprehensive end-to-end testing of duplicate registration UX improvement on frontend-player app (http://localhost:3001/register). ALL REQUIREMENTS MET: ✅ Fresh email registration redirects to /login ✅ Duplicate email shows exact message 'This email is already registered. Please log in instead.' ✅ 'Go to Log In' button is visible and functional ✅ Button click navigates to /login page ✅ Complete user experience flow working correctly. Duplicate registration UX improvement is fully operational and provides excellent user guidance."
 
-### 2026-01-06 (Frontend-Player) — Register hata mesajı iyileştirildi
-- Register ekranında "Registration failed" generic mesajı yerine, backend `Player exists` döndüğünde kullanıcıya aksiyon alınabilir mesaj gösteriliyor: "This email is already registered. Please log in instead."
-- Test: frontend testing agent E2E ✅ (fresh register 200 + duplicate 400 + doğru UI mesajı)
+### 2026-01-06 (Frontend-Player) — Register UX iyileştirildi (duplicate email)
+- Backend `Player exists` hatası artık generic “Registration failed” yerine kullanıcıya aksiyon alınabilir mesaj gösteriyor:
+  - "This email is already registered. Please log in instead."
+- Bu hata çıktığında ayrıca **Go to Log In** butonu görünür ve /login’e yönlendirir.
+- Test: frontend testing agent E2E ✅ (fresh register 200 + duplicate 400 + doğru UI mesajı + button navigation)
 
 ### 2026-01-06 (Testing Agent) — Duplicate Registration UX Improvement Comprehensive Validation
 - **TEST SCOPE:** Complete end-to-end validation of duplicate registration UX improvement on frontend-player app (http://localhost:3001/register)
