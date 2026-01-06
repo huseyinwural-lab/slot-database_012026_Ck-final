@@ -208,6 +208,11 @@ app.include_router(finance_reconciliation_config.router)
 from app.routes import withdrawals
 app.include_router(withdrawals.router)
 
+
+# Finance chargeback guidelines (P0)
+from app.routes import finance_guidelines
+app.include_router(finance_guidelines.router)
+
 from app.routes import finance_chargebacks
 from app.routes import rg_player
 from app.routes import games_integration
