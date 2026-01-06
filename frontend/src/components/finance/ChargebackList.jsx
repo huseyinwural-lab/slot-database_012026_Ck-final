@@ -134,9 +134,19 @@ const ChargebackList = () => {
         <h3 className="text-xl font-bold flex items-center gap-2">
           <ShieldAlert className="w-5 h-5 text-red-500" /> Chargeback Cases
         </h3>
-        <Button variant="outline" onClick={openGuidelines}>
-          <Gavel className="w-4 h-4 mr-2" /> Represent Guidelines
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              window.location.href = '/api/v1/finance/chargebacks/export';
+            }}
+          >
+            Export CSV
+          </Button>
+          <Button variant="outline" onClick={openGuidelines}>
+            <Gavel className="w-4 h-4 mr-2" /> Represent Guidelines
+          </Button>
+        </div>
       </div>
 
       <Card>
