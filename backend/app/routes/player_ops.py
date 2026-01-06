@@ -428,6 +428,34 @@ async def suspend_player(
     session.add(player)
     await session.commit()
 
+    # P1-E3: suspend also revokes sessions immediately
+    existing = (
+        await session.execute(
+            select(PlayerSessionRevocation).where(
+                PlayerSessionRevocation.tenant_id == tenant_id,
+                PlayerSessionRevocation.player_id == player.id,
+            )
+        )
+    ).scalars().first()
+
+    if existing:
+        existing.revoked_at = datetime.now(timezone.utc)
+        existing.revoked_by_admin_id = str(current_admin.id)
+        existing.reason = reason
+        session.add(existing)
+        await session.commit()
+        await session.refresh(existing)
+    else:
+        rev = PlayerSessionRevocation(
+            tenant_id=tenant_id,
+            player_id=player.id,
+            revoked_at=datetime.now(timezone.utc),
+            revoked_by_admin_id=str(current_admin.id),
+            reason=reason,
+        )
+        session.add(rev)
+        await session.commit()
+
     await _audit_event(
         session=session,
         request=request,
