@@ -274,7 +274,9 @@ const Dashboard = () => {
           </ComingSoonCard>
         </div>
         <div className="col-span-12 md:col-span-4">
+          <ComingSoonCard enabled={false} tooltip="Coming soon">
             <LiveBetsTicker bets={stats.live_bets} />
+          </ComingSoonCard>
         </div>
       </div>
 
