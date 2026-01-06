@@ -87,7 +87,9 @@ async def test_player_ops_requires_reason(client, admin_token):
         "/api/v1/players",
         headers={"Authorization": f"Bearer {admin_token}"},
     )
-    pid = res.json()["items"][0]["id"]
+    items = res.json().get("items") or []
+    assert len(items) >= 1
+    pid = items[0]["id"]
 
     r = await client.post(
         f"/api/v1/players/{pid}/credit",
