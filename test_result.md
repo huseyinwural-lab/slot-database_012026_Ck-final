@@ -739,6 +739,40 @@ agent_communication:
 
 - **STATUS:** ✅ P0 TRANSACTIONS REFRESH FIX VERIFIED - Backend API working correctly, no 'Failed to load transactions' errors, proper data structure and tenant isolation confirmed
 
+### 2026-01-06 (Testing Agent) — P1 Executive Dashboard Card Navigation E2E Comprehensive Validation
+- **TEST SCOPE:** Complete end-to-end validation of Executive Dashboard card navigation functionality on http://localhost:3000 as requested in review
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
+  2. ✅ **Dashboard Page Load:** Executive Dashboard loaded successfully with all components
+  3. ✅ **KPI Cards Navigation (All PASS):**
+     - GGR card → `/revenue/all-tenants?metric=ggr&range_days=30` ✅
+     - NGR card → `/revenue/all-tenants?metric=ngr&range_days=30` ✅
+     - Active Players → `/players?status=active` ✅
+     - Total Bets → `/finance?tab=transactions&type=bet&range_days=30` ✅
+  4. ✅ **Time Range Change Test:** Dashboard time range changed to 'Last 7 Days' successfully
+     - Total Bets re-click → `/finance?tab=transactions&type=bet&range_days=7` ✅
+     - Correct range_days parameter passed based on dashboard selection ✅
+  5. ✅ **Financial Summary Panel Navigation (All PASS):**
+     - Cash in System → `/finance?tab=transactions` ✅
+     - Pending Withdrawals → `/finance/withdrawals?status=pending` ✅
+     - Bonus Liabilities → `/bonuses?view=liabilities` ✅ (enabled with can_manage_bonus feature)
+     - Jackpot Pools → Correctly disabled with opacity=0.5 and cursor=not-allowed ✅
+  6. ✅ **UI/UX Validation:**
+     - All enabled cards show pointer cursor on hover ✅
+     - Disabled Jackpot Pools shows not-allowed cursor and reduced opacity ✅
+     - No console errors detected ✅
+     - All navigation routes match exact requirements ✅
+
+- **DETAILED TEST RESULTS:**
+  - **KPI Cards:** All 4 cards navigate correctly with proper URL parameters including range_days
+  - **Time Range Integration:** Dashboard time range selector properly updates range_days parameter in subsequent card clicks
+  - **Financial Summary:** All 4 items behave correctly - 3 enabled with proper navigation, 1 disabled as expected
+  - **Feature Flags:** Bonus Liabilities correctly enabled for admin with can_manage_bonus feature
+  - **Accessibility:** Proper cursor states, hover effects, and disabled states implemented correctly
+  - **URL Parameters:** All navigation includes correct query parameters as specified in requirements
+
+- **STATUS:** ✅ ALL TESTS PASSED (15/15) - P1 Executive Dashboard card navigation fully functional and meeting all requirements
+
 ## Previous history
 
 (legacy content retained below)
