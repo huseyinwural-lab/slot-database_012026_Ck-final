@@ -144,8 +144,8 @@ const FinanceWithdrawals = () => {
     fetchWithdrawals(1);
   };
 
-  const handleOpenDetail = (tx) => {
-    setSelectedTx(tx);
+  const handleOpenDetail = (w) => {
+    setSelectedWithdrawal(w);
     setIsDetailOpen(true);
   };
 
