@@ -14,6 +14,8 @@ const PlayerList = () => {
   const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [opsOpen, setOpsOpen] = useState(false);
+  const [opsPlayer, setOpsPlayer] = useState(null);
   
   // Filters
   const [search, setSearch] = useState("");
