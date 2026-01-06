@@ -38,7 +38,20 @@ const Register = () => {
         <h1 className="text-3xl font-bold text-center mb-2">Create Account</h1>
         <p className="text-center text-muted-foreground mb-8">Join the action today</p>
 
-        {error && <div className="bg-red-500/20 text-red-400 p-3 rounded-lg text-sm mb-4">{error}</div>}
+        {error && (
+          <div className="bg-red-500/20 text-red-400 p-3 rounded-lg text-sm mb-4">
+            <div>{error}</div>
+            {error === 'This email is already registered. Please log in instead.' && (
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="mt-2 inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90"
+              >
+                Go to Log In
+              </button>
+            )}
+          </div>
+        )}
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
