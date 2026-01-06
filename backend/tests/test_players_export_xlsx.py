@@ -47,7 +47,7 @@ async def test_players_export_xlsx_filters_and_tenant_isolation(client, session)
     await session.refresh(owner)
 
     # player under tenant1
-    p1 = Player(tenant_id=t1.id, username="vipuser", email="vip@test.com", password_hash="x", vip_level="5", risk_score="high")
+    p1 = Player(tenant_id=t1.id, username="vipuser", email="vip@test.com", password_hash="x", risk_score="high")
     session.add(p1)
     await session.commit()
 
