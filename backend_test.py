@@ -1331,6 +1331,439 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class PlayersExportCSVTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.tenant1_id = None
+        self.tenant2_id = None
+        self.tenant2_admin_token = None
+        self.test_player_id = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def create_test_player(self) -> bool:
+        """Create a test player with 'rcuser' in username for search testing"""
+        try:
+            if not self.admin_token:
+                self.log_result("Create Test Player", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Create a player with 'rcuser' in the username for search testing
+                player_data = {
+                    "username": f"rcuser_{uuid.uuid4().hex[:8]}",
+                    "email": f"rcuser_{uuid.uuid4().hex[:8]}@testcasino.com",
+                    "password": "TestPlayer123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/players",
+                    json=player_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Test Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.test_player_id = data.get("player_id")
+                
+                if not self.test_player_id:
+                    self.log_result("Create Test Player", False, "No player ID in response")
+                    return False
+                
+                self.log_result("Create Test Player", True, f"Test player created with ID: {self.test_player_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create Test Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def setup_tenant_isolation_test(self) -> bool:
+        """Setup two tenants and admin for tenant isolation testing"""
+        try:
+            if not self.admin_token:
+                self.log_result("Setup Tenant Isolation", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Create tenant 1
+                tenant1_data = {
+                    "name": f"Test Casino 1 {uuid.uuid4().hex[:8]}",
+                    "type": "renter",
+                    "features": {}
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/tenants/",
+                    json=tenant1_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant 1", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                tenant1_response = response.json()
+                self.tenant1_id = tenant1_response.get("id")
+                
+                # Create tenant 2
+                tenant2_data = {
+                    "name": f"Test Casino 2 {uuid.uuid4().hex[:8]}",
+                    "type": "renter",
+                    "features": {}
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/tenants/",
+                    json=tenant2_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant 2", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                tenant2_response = response.json()
+                self.tenant2_id = tenant2_response.get("id")
+                
+                # Create admin for tenant 2
+                admin2_email = f"admin2_{uuid.uuid4().hex[:8]}@testcasino2.com"
+                admin2_data = {
+                    "email": admin2_email,
+                    "password": "Admin123!",
+                    "tenant_id": self.tenant2_id,
+                    "role": "admin"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/admin/users",
+                    json=admin2_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant 2 Admin", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login as tenant 2 admin
+                login_data = {
+                    "email": admin2_email,
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Tenant 2 Admin Login", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.tenant2_admin_token = data.get("access_token")
+                
+                if not self.tenant2_admin_token:
+                    self.log_result("Tenant 2 Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Setup Tenant Isolation", True, 
+                              f"Created tenants {self.tenant1_id} and {self.tenant2_id} with admin")
+                return True
+                
+        except Exception as e:
+            self.log_result("Setup Tenant Isolation", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_basic_export_csv(self) -> bool:
+        """Test 1: Basic CSV export - expect 200 with proper headers and CSV content"""
+        try:
+            if not self.admin_token:
+                self.log_result("Basic CSV Export", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/players/export",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Basic CSV Export", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Check Content-Type header
+                content_type = response.headers.get("content-type", "")
+                if not content_type.startswith("text/csv"):
+                    self.log_result("Basic CSV Export", False, 
+                                  f"Expected Content-Type to start with 'text/csv', got: {content_type}")
+                    return False
+                
+                # Check Content-Disposition header
+                content_disposition = response.headers.get("content-disposition", "")
+                if "attachment" not in content_disposition or "filename=" not in content_disposition:
+                    self.log_result("Basic CSV Export", False, 
+                                  f"Content-Disposition missing attachment or filename: {content_disposition}")
+                    return False
+                
+                # Check CSV content
+                csv_content = response.text
+                lines = csv_content.splitlines()
+                
+                if not lines:
+                    self.log_result("Basic CSV Export", False, "CSV content is empty")
+                    return False
+                
+                # Check header row
+                header_row = lines[0]
+                required_headers = ["id", "username", "email"]
+                
+                for header in required_headers:
+                    if header not in header_row:
+                        self.log_result("Basic CSV Export", False, 
+                                      f"Required header '{header}' not found in: {header_row}")
+                        return False
+                
+                self.log_result("Basic CSV Export", True, 
+                              f"CSV export successful - Content-Type: {content_type}, Headers: {header_row}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Basic CSV Export", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_search_filter_export(self) -> bool:
+        """Test 2: CSV export with search filter - expect 200 with filtered results"""
+        try:
+            if not self.admin_token:
+                self.log_result("Search Filter Export", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Export with search filter for 'rcuser'
+                response = await client.get(
+                    f"{self.base_url}/players/export?search=rcuser",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Search Filter Export", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Check Content-Type header
+                content_type = response.headers.get("content-type", "")
+                if not content_type.startswith("text/csv"):
+                    self.log_result("Search Filter Export", False, 
+                                  f"Expected Content-Type to start with 'text/csv', got: {content_type}")
+                    return False
+                
+                # Check CSV content
+                csv_content = response.text
+                lines = csv_content.splitlines()
+                
+                if not lines:
+                    self.log_result("Search Filter Export", False, "CSV content is empty")
+                    return False
+                
+                # If we have data rows (beyond header), check if they contain 'rcuser'
+                if len(lines) > 1:
+                    # Check that filtered results contain 'rcuser' in username or email
+                    data_found = False
+                    for line in lines[1:]:  # Skip header
+                        if 'rcuser' in line.lower():
+                            data_found = True
+                            break
+                    
+                    if not data_found:
+                        self.log_result("Search Filter Export", False, 
+                                      "Search filter didn't return expected 'rcuser' data")
+                        return False
+                
+                self.log_result("Search Filter Export", True, 
+                              f"Search filter export successful - {len(lines)-1} data rows returned")
+                return True
+                
+        except Exception as e:
+            self.log_result("Search Filter Export", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_tenant_isolation_export(self) -> bool:
+        """Test 3: Tenant isolation - ensure tenant2 admin cannot see tenant1 players"""
+        try:
+            if not self.admin_token or not self.tenant2_admin_token or not self.tenant1_id or not self.tenant2_id:
+                self.log_result("Tenant Isolation Export", False, "Missing required tokens or tenant IDs")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # First, create a player in tenant1 using platform owner impersonation
+                headers = {"Authorization": f"Bearer {self.admin_token}", "X-Tenant-ID": self.tenant1_id}
+                
+                tenant1_player_data = {
+                    "username": f"tenant1player_{uuid.uuid4().hex[:8]}",
+                    "email": f"tenant1player_{uuid.uuid4().hex[:8]}@tenant1.com",
+                    "password": "TestPlayer123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/players",
+                    json=tenant1_player_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create Tenant1 Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                tenant1_player_email = tenant1_player_data["email"]
+                
+                # Now try to export players as tenant2 admin with impersonation to tenant2
+                headers = {"Authorization": f"Bearer {self.admin_token}", "X-Tenant-ID": self.tenant2_id}
+                
+                response = await client.get(
+                    f"{self.base_url}/players/export",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Tenant Isolation Export", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Check that tenant1 player is NOT in the CSV
+                csv_content = response.text
+                
+                if tenant1_player_email in csv_content:
+                    self.log_result("Tenant Isolation Export", False, 
+                                  f"Tenant isolation failed - tenant1 player {tenant1_player_email} found in tenant2 export")
+                    return False
+                
+                self.log_result("Tenant Isolation Export", True, 
+                              f"Tenant isolation working - tenant1 player not found in tenant2 export")
+                return True
+                
+        except Exception as e:
+            self.log_result("Tenant Isolation Export", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete Players Export CSV test suite"""
+        print("🚀 Starting Players Export CSV Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_admin_auth():
+            print("\n❌ Admin authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        if not await self.create_test_player():
+            print("\n❌ Test player creation failed. Some tests may not work properly.")
+            # Continue anyway as basic export should still work
+        
+        if not await self.setup_tenant_isolation_test():
+            print("\n❌ Tenant isolation setup failed. Tenant isolation test will be skipped.")
+            # Continue with other tests
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: Basic CSV export
+        test_results.append(await self.test_basic_export_csv())
+        
+        # Test 2: Search filter export
+        test_results.append(await self.test_search_filter_export())
+        
+        # Test 3: Tenant isolation export
+        if self.tenant1_id and self.tenant2_id:
+            test_results.append(await self.test_tenant_isolation_export())
+        else:
+            self.log_result("Tenant Isolation Export", False, "Skipped - tenant setup failed")
+            test_results.append(False)
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 PLAYERS EXPORT CSV TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All Players Export CSV tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class BrandsSettingsTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
