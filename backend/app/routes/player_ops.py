@@ -23,6 +23,10 @@ router = APIRouter(prefix="/api/v1/players", tags=["player_ops"])
 
 def _require_any_role(current_admin: AdminUser, allowed: set[str]) -> None:
     role = (getattr(current_admin, "role", None) or "").strip()
+    # treat Super Admin as all-allowed
+    if role == "Super Admin":
+        return
+
     if role not in allowed:
         raise HTTPException(status_code=403, detail={"error_code": "FORBIDDEN"})
 
