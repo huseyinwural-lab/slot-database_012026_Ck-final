@@ -20,7 +20,7 @@ import { ArrowDownRight, CheckCircle2, XCircle, Copy } from 'lucide-react';
 
 const ADMIN_SCOPE = 'admin';
 
-const makeRowKey = (txId, action) => `${ADMIN_SCOPE}:${txId}:${action}`;
+const makeRowKey = (id, action) => `${ADMIN_SCOPE}:${id}:${action}`;
 
 const STATUS_LABELS = {
   pending: 'Pending',
