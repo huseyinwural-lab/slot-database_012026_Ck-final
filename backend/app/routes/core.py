@@ -328,7 +328,7 @@ async def export_players_xlsx(
                 "email": p.email,
                 "status": p.status,
                 "kyc_status": p.kyc_status,
-                "vip_level": p.vip_level,
+                "vip_level": "",
                 "risk_score": p.risk_score,
                 "balance_real": p.balance_real,
                 "balance_bonus": p.balance_bonus,
