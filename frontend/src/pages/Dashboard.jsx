@@ -257,7 +257,21 @@ const Dashboard = () => {
       {/* 3. Main Chart & Live Ticker */}
       <div className="grid gap-4 md:grid-cols-12">
         <div className="col-span-12 md:col-span-8">
-            <FinancialTrendChart data={stats.financial_trend} />
+          <ComingSoonCard enabled={true} tooltip="View details">
+            <div
+              role="button"
+              tabIndex={0}
+              className="cursor-pointer"
+              onClick={() => go(`/finance?tab=transactions&type=deposit,withdrawal&range_days=${rangeDays}`)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  go(`/finance?tab=transactions&type=deposit,withdrawal&range_days=${rangeDays}`);
+                }
+              }}
+            >
+              <FinancialTrendChart data={stats.financial_trend} />
+            </div>
+          </ComingSoonCard>
         </div>
         <div className="col-span-12 md:col-span-4">
             <LiveBetsTicker bets={stats.live_bets} />
