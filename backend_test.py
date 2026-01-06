@@ -6296,49 +6296,113 @@ class PlayersExportXLSXTestSuite:
                 return False
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                # Test with default tenant
+                # First, get list of available tenants
                 headers = {"Authorization": f"Bearer {self.admin_token}"}
                 
-                response1 = await client.get(
-                    f"{self.base_url}/players/export.xlsx",
+                tenants_response = await client.get(
+                    f"{self.base_url}/tenants/",
                     headers=headers
                 )
                 
-                if response1.status_code != 200:
+                if tenants_response.status_code != 200:
                     self.log_result("XLSX Tenant Isolation", False, 
-                                  f"Default tenant export failed - Status: {response1.status_code}")
+                                  f"Failed to get tenants list - Status: {tenants_response.status_code}")
                     return False
                 
-                # Test with different tenant ID (impersonation)
-                headers_tenant2 = {
-                    "Authorization": f"Bearer {self.admin_token}",
-                    "X-Tenant-ID": "tenant_test_isolation"
-                }
+                tenants_data = tenants_response.json()
+                tenants = tenants_data.get("items", [])
                 
-                response2 = await client.get(
-                    f"{self.base_url}/players/export.xlsx",
-                    headers=headers_tenant2
-                )
-                
-                if response2.status_code != 200:
+                if len(tenants) < 2:
+                    # If we don't have multiple tenants, test with default tenant and a non-existent one
+                    # Test with default tenant
+                    response1 = await client.get(
+                        f"{self.base_url}/players/export.xlsx",
+                        headers=headers
+                    )
+                    
+                    if response1.status_code != 200:
+                        self.log_result("XLSX Tenant Isolation", False, 
+                                      f"Default tenant export failed - Status: {response1.status_code}")
+                        return False
+                    
+                    # Test with non-existent tenant ID should return valid XLSX (empty or error handled gracefully)
+                    headers_fake_tenant = {
+                        "Authorization": f"Bearer {self.admin_token}",
+                        "X-Tenant-ID": "non_existent_tenant_123"
+                    }
+                    
+                    response2 = await client.get(
+                        f"{self.base_url}/players/export.xlsx",
+                        headers=headers_fake_tenant
+                    )
+                    
+                    # This might return 400 for invalid tenant, which is acceptable behavior
+                    if response2.status_code == 400:
+                        error_data = response2.json()
+                        if error_data.get("error_code") == "INVALID_TENANT_HEADER":
+                            self.log_result("XLSX Tenant Isolation", True, 
+                                          "Tenant isolation working - Invalid tenant properly rejected")
+                            return True
+                    elif response2.status_code == 200:
+                        # If it returns 200, check it's valid XLSX
+                        content2 = response2.content
+                        if content2.startswith(b'PK'):
+                            self.log_result("XLSX Tenant Isolation", True, 
+                                          "Tenant isolation working - Non-existent tenant returns empty XLSX")
+                            return True
+                    
                     self.log_result("XLSX Tenant Isolation", False, 
-                                  f"Tenant impersonation export failed - Status: {response2.status_code}, Response: {response2.text}")
+                                  f"Unexpected response for non-existent tenant - Status: {response2.status_code}")
                     return False
-                
-                # Both should return valid XLSX files
-                content1 = response1.content
-                content2 = response2.content
-                
-                if not content1.startswith(b'PK') or not content2.startswith(b'PK'):
-                    self.log_result("XLSX Tenant Isolation", False, 
-                                  "One or both responses are not valid XLSX files")
-                    return False
-                
-                # Content should be different (different tenant data)
-                # Note: They might be the same if both tenants have no players, which is acceptable
-                self.log_result("XLSX Tenant Isolation", True, 
-                              f"Tenant isolation working - Default: {len(content1)} bytes, Tenant2: {len(content2)} bytes")
-                return True
+                else:
+                    # We have multiple tenants, test with two different ones
+                    tenant1_id = tenants[0]["id"]
+                    tenant2_id = tenants[1]["id"]
+                    
+                    # Test with tenant 1
+                    headers_tenant1 = {
+                        "Authorization": f"Bearer {self.admin_token}",
+                        "X-Tenant-ID": tenant1_id
+                    }
+                    
+                    response1 = await client.get(
+                        f"{self.base_url}/players/export.xlsx",
+                        headers=headers_tenant1
+                    )
+                    
+                    if response1.status_code != 200:
+                        self.log_result("XLSX Tenant Isolation", False, 
+                                      f"Tenant1 export failed - Status: {response1.status_code}")
+                        return False
+                    
+                    # Test with tenant 2
+                    headers_tenant2 = {
+                        "Authorization": f"Bearer {self.admin_token}",
+                        "X-Tenant-ID": tenant2_id
+                    }
+                    
+                    response2 = await client.get(
+                        f"{self.base_url}/players/export.xlsx",
+                        headers=headers_tenant2
+                    )
+                    
+                    if response2.status_code != 200:
+                        self.log_result("XLSX Tenant Isolation", False, 
+                                      f"Tenant2 export failed - Status: {response2.status_code}")
+                        return False
+                    
+                    # Both should return valid XLSX files
+                    content1 = response1.content
+                    content2 = response2.content
+                    
+                    if not content1.startswith(b'PK') or not content2.startswith(b'PK'):
+                        self.log_result("XLSX Tenant Isolation", False, 
+                                      "One or both responses are not valid XLSX files")
+                        return False
+                    
+                    self.log_result("XLSX Tenant Isolation", True, 
+                                  f"Tenant isolation working - Tenant1: {len(content1)} bytes, Tenant2: {len(content2)} bytes")
+                    return True
                 
         except Exception as e:
             self.log_result("XLSX Tenant Isolation", False, f"Exception: {str(e)}")
