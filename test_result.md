@@ -457,6 +457,27 @@ agent_communication:
     -agent: "testing"
     -message: "🎉 P1 REVENUE RANGE FILTER BUG FIX FULLY VERIFIED: Completed comprehensive E2E validation of P1 Revenue range filter bug fix on http://localhost:3000 as requested. ALL TESTS PASSED (3/3): ✅ Admin authentication successful via API ✅ All Revenue page navigation working ✅ Range dropdown functional ✅ Last 24 Hours: API call with range_days=1, 200 OK, correct meta response ✅ Last 7 Days: API call with range_days=7, 200 OK, correct meta response ✅ Last 30 Days: API call with range_days=30, 200 OK, correct meta response ✅ All network requests include proper range_days parameter ✅ All responses contain accurate meta.range_days, period_start, period_end ✅ UI updates correctly after each range change ✅ No console errors detected. P1 Revenue Range Filter Bug Fix is working correctly and ready for production!"
 
+
+### 2026-01-06 — P1 Revenue (/revenue/all-tenants) Range Filter 1/7/30 (E1) — FIXED + E2E PASS
+- **Bug:** 1/7/30 seçimi değişiyor ama data değişmiyordu (owner All Tenants Revenue)
+- **Root cause:** Frontend `/v1/reports/revenue/all-tenants` endpoint’ine `from_date/to_date` gönderiyordu; backend tarafında analytics cache / endpoint varyasyonu nedeniyle range paramı deterministik şekilde farklılaşmıyordu.
+- **Fix (Frontend):** `OwnerRevenue.jsx`
+  - Tek state: `rangeDays` (default 7)
+  - Tek fonksiyon: `loadRevenue(rangeDays)` + `safeRange = Number(rangeDays) || 7`
+  - `useEffect` deps: `[rangeDays, tenantScope]`
+  - Request standardı: `GET /api/v1/revenue/all-tenants?range_days={1|7|30}`
+  - Response guard + zengin toast (status + error_code + detail)
+- **Fix (Backend):** `GET /api/v1/revenue/all-tenants` (NEW v2 router)
+  - Owner-only (`403 OWNER_ONLY`)
+  - range_days sadece 1/7/30 (diğerleri 400 `INVALID_RANGE_DAYS`)
+  - Deterministik schema: `{ items, totals, meta{range_days, period_start, period_end} }` (+ legacy fields: tenants/total_ggr/period_start/period_end)
+  - Query filter: `created_at BETWEEN start AND end`
+- **Backend smoke (curl):**
+  - range_days=1 → meta.range_days=1, period_start/period_end farklı
+  - range_days=7 → meta.range_days=7, period_start/period_end farklı
+  - range_days=30 → meta.range_days=30, period_start/period_end farklı
+- **Frontend E2E:** ✅ PASS (testing agent: network URL’de range_days değişiyor + 200 OK + UI re-render)
+
 ### 2026-01-06 (Frontend-Player) — Register UX iyileştirildi (duplicate email)
 - Backend `Player exists` hatası artık generic “Registration failed” yerine kullanıcıya aksiyon alınabilir mesaj gösteriyor:
   - "This email is already registered. Please log in instead."
