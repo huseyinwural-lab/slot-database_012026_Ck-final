@@ -14,7 +14,7 @@ async def test_suspended_player_login_blocked(client, session):
         tenant_id=tenant.id,
         email="suspended_player@test.com",
         username="suspended_player",
-        password_hash="noop_hash",
+        password_hash=get_password_hash("whatever"),
         status="suspended",
     )
     session.add(player)
