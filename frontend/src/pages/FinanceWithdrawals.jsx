@@ -279,6 +279,24 @@ const FinanceWithdrawals = () => {
             Review, approve or reject player withdrawal requests and track payout status.
           </p>
         </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => fetchWithdrawals(1)}
+            disabled={loading}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="default"
+            onClick={() => {
+              const qs = exportQueryString ? `?${exportQueryString}` : '';
+              window.location.href = `/api/v1/withdrawals/export${qs}`;
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+        </div>
       </div>
 
       <Card>
