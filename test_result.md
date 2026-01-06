@@ -535,6 +535,31 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED - Player Action Panel fully functional and meeting all requirements
 
+
+### 2026-01-06 — P0 Withdrawals + Finance Hub (E1) – Backend API Smoke
+- **WITHDRAWALS (source of truth):**
+  - ✅ `GET /api/v1/withdrawals?status=pending` returns items+meta
+  - ✅ Approve happy path: `POST /api/v1/withdrawals/{id}/approve` (pending → approved)
+  - ✅ **State-guard:** approve non-pending returns **409** with `INVALID_STATE_TRANSITION`
+  - ✅ Mark paid: `POST /api/v1/withdrawals/{id}/mark-paid` (approved → paid)
+  - ✅ Export applies filters: `GET /api/v1/withdrawals/export?status=paid` returns CSV
+
+- **FINANCE HUB:**
+  - ✅ Transactions load: `GET /api/v1/finance/transactions` returns items+meta
+  - ✅ Reports load: `GET /api/v1/finance/reports` returns expected report shape
+  - ✅ Reconciliation scheduler endpoints (P0 deterministic):
+    - `GET /api/v1/finance/reconciliation/config` (array)
+    - `POST /api/v1/finance/reconciliation/config` (save)
+    - `POST /api/v1/finance/reconciliation/run-auto` (deterministic report)
+  - ✅ Chargebacks guidelines: `GET /api/v1/finance/chargebacks/guidelines` returns modal content
+  - ✅ Exports:
+    - `GET /api/v1/finance/transactions/export`
+    - `GET /api/v1/finance/reports/export`
+    - `GET /api/v1/finance/reconciliation/export`
+    - `GET /api/v1/finance/chargebacks/export`
+
+- **STATUS:** Backend smoke passed for P0 scope. (E2E UI testing pending via frontend testing agent)
+
 ## Previous history
 
 (legacy content retained below)
