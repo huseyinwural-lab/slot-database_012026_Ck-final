@@ -305,7 +305,9 @@ const Dashboard = () => {
       {/* 5. Loss Leaders & System Health */}
       <div className="grid gap-4 md:grid-cols-12">
         <div className="col-span-12 md:col-span-8">
+          <ComingSoonCard enabled={false} tooltip="Coming soon">
             <LossLeadersTable data={stats.negative_performing_games} />
+          </ComingSoonCard>
         </div>
         <div className="col-span-12 md:col-span-4 space-y-4">
             {/* Provider Health */}
