@@ -210,7 +210,7 @@ const FinanceWithdrawals = () => {
     const { type, tx } = actionModal;
     if (!tx || !actionReason.trim()) return;
     
-    const txId = tx.tx_id;
+    const txId = tx.id;
     setActionLoading(true);
     updateRowStatus(txId, type, 'in_flight');
 
