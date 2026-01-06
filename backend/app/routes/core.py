@@ -306,8 +306,8 @@ async def export_players_xlsx(
     if status and status != "all":
         query = query.where(Player.status == status)
 
-    if vip_level and vip_level != "all":
-        query = query.where(Player.vip_level == vip_level)
+    # vip_level is not currently stored on Player model in this repo.
+    # Keep param accepted for UI compatibility but do not filter.
 
     if risk_score and risk_score != "all":
         query = query.where(Player.risk_score == risk_score)
