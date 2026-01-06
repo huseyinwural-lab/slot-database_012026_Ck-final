@@ -449,7 +449,7 @@ async def suspend_player(
         rev = PlayerSessionRevocation(
             tenant_id=tenant_id,
             player_id=player.id,
-            revoked_at=datetime.now(timezone.utc),
+            revoked_at=datetime.now(timezone.utc).replace(tzinfo=None),
             revoked_by_admin_id=str(current_admin.id),
             reason=reason,
         )
@@ -562,7 +562,7 @@ async def force_logout(
         rev = PlayerSessionRevocation(
             tenant_id=tenant_id,
             player_id=player.id,
-            revoked_at=datetime.now(timezone.utc),
+            revoked_at=datetime.now(timezone.utc).replace(tzinfo=None),
             revoked_by_admin_id=str(current_admin.id),
             reason=reason,
         )
