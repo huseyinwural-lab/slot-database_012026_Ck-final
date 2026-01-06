@@ -279,62 +279,49 @@ const FinanceWithdrawals = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-4 items-end">
-            <div className="w-40">
-              <Label htmlFor="state">State</Label>
-              <Select
-                value={filters.state}
-                onValueChange={(v) => setFilters((f) => ({ ...f, state: v }))}
-              >
-                <SelectTrigger id="state">
+            <div className="w-44">
+              <Label htmlFor="status">Status</Label>
+              <Select value={filters.status} onValueChange={(v) => setFilters((f) => ({ ...f, status: v }))}>
+                <SelectTrigger id="status">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="requested">Requested</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="payout_pending">Payout Pending</SelectItem>
-                  <SelectItem value="payout_failed">Payout Failed</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+            <div className="w-72">
+              <Label htmlFor="q">Search</Label>
+              <Input
+                id="q"
+                placeholder="player / request id / provider ref"
+                value={filters.q}
+                onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+              />
+            </div>
+
             <div className="w-56">
-              <Label htmlFor="player_id">Player ID</Label>
+              <Label htmlFor="provider_ref">Provider Ref</Label>
               <Input
-                id="player_id"
-                placeholder="Player ID (optional)"
-                value={filters.player_id}
-                onChange={(e) => setFilters((f) => ({ ...f, player_id: e.target.value }))}
+                id="provider_ref"
+                placeholder="(optional)"
+                value={filters.provider_ref}
+                onChange={(e) => setFilters((f) => ({ ...f, provider_ref: e.target.value }))}
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="date_from">Date from</Label>
-              <Input
-                id="date_from"
-                type="date"
-                value={filters.date_from}
-                onChange={(e) => setFilters((f) => ({ ...f, date_from: e.target.value }))}
-                className="w-40"
-              />
+            <div className="flex gap-2 ml-auto">
+              <Button onClick={applyFilters} disabled={loading}>
+                Apply
+              </Button>
             </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="date_to">Date to</Label>
-              <Input
-                id="date_to"
-                type="date"
-                value={filters.date_to}
-                onChange={(e) => setFilters((f) => ({ ...f, date_to: e.target.value }))}
-                className="w-40"
-              />
-            </div>
-
-            <Button onClick={applyFilters} disabled={loading} className="ml-auto">
-              Apply
-            </Button>
           </div>
         </CardContent>
       </Card>
