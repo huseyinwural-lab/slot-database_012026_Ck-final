@@ -189,7 +189,13 @@ const formatAmount = (amount, currency) => {
         </div>
       </div>
 
-      <Tabs defaultValue="transactions" className="w-full" onValueChange={(v) => v === 'reports' && fetchReports()}>
+      <Tabs
+        defaultValue="transactions"
+        className="w-full"
+        onValueChange={(v) => {
+          if (v === 'reports') fetchReports();
+        }}
+      >
         <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
