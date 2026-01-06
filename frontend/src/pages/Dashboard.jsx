@@ -98,9 +98,29 @@ const HealthBadge = ({ status }) => {
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { isOwner, hasFeature } = useCapabilities();
+
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30d');
+
+  const rangeDays = useMemo(() => {
+    if (timeRange === '7d') return 7;
+    if (timeRange === '30d') return 30;
+    if (timeRange === 'today') return 1;
+    if (timeRange === 'yesterday') return 1;
+    return 30;
+  }, [timeRange]);
+
+  const go = (path) => navigate(path);
+
+  const ownerRevenueDisabled = !isOwner;
+
+  const jackpotRouteExists = false; // P1 scope: do not add placeholder routes
+  const liveBetsRouteExists = false; // P1 scope: do not add placeholder routes
+  const bonusesRouteEnabled = hasFeature?.('can_manage_bonus') === true;
+
 
   const fetchStats = async () => {
     try {
