@@ -199,6 +199,11 @@ from app.routes import finance_reports
 app.include_router(finance_reports.router)
 
 
+# Finance reconciliation scheduler (P0 UI stability)
+from app.routes import finance_reconciliation_config
+app.include_router(finance_reconciliation_config.router)
+
+
 # Withdrawals (Ops approval flow)
 from app.routes import withdrawals
 app.include_router(withdrawals.router)
