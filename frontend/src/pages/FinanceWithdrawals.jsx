@@ -22,27 +22,28 @@ const ADMIN_SCOPE = 'admin';
 
 const makeRowKey = (txId, action) => `${ADMIN_SCOPE}:${txId}:${action}`;
 
-const STATE_LABELS = {
-  requested: 'Requested',
+const STATUS_LABELS = {
+  pending: 'Pending',
   approved: 'Approved',
-  payout_pending: 'Payout Pending',
-  payout_failed: 'Payout Failed',
+  processing: 'Processing',
   paid: 'Paid',
+  failed: 'Failed',
   rejected: 'Rejected',
 };
 
-const STATE_CLASSES = {
-  requested: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+const STATUS_CLASSES = {
+  pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   approved: 'bg-blue-100 text-blue-800 border-blue-200',
-  payout_pending: 'bg-amber-100 text-amber-800 border-amber-200',
-  payout_failed: 'bg-red-100 text-red-800 border-red-200',
+  processing: 'bg-amber-100 text-amber-800 border-amber-200',
   paid: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  failed: 'bg-red-100 text-red-800 border-red-200',
   rejected: 'bg-slate-100 text-slate-800 border-slate-200',
 };
 
-const renderStateBadge = (state) => {
-  const label = STATE_LABELS[state] || state;
-  const extra = STATE_CLASSES[state] || '';
+const renderStatusBadge = (status) => {
+  const s = (status || '').toLowerCase();
+  const label = STATUS_LABELS[s] || status;
+  const extra = STATUS_CLASSES[s] || '';
   return (
     <Badge variant="outline" className={`uppercase text-[10px] ${extra}`}>
       {label}
