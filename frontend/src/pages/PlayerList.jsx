@@ -164,8 +164,15 @@ const PlayerList = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/players/${player.id}`)}>
-                        <Eye className="w-4 h-4" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setOpsPlayer(player);
+                        setOpsOpen(true);
+                      }}
+                    >
+                      <Eye className="w-4 h-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
