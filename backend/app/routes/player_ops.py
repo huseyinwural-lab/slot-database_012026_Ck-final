@@ -203,7 +203,10 @@ async def manual_debit(
     if body_reason and body_reason != reason:
         reason = body_reason
 
-    amount = float(payload.get("amount") or 0)
+    try:
+        amount = float(payload.get("amount") or 0)
+    except Exception:
+        amount = 0
     currency = (payload.get("currency") or "USD").strip() or "USD"
     if amount <= 0:
         raise HTTPException(status_code=400, detail={"error_code": "AMOUNT_INVALID"})
