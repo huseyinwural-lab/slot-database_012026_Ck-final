@@ -20,7 +20,13 @@ const Register = () => {
       navigate('/login');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+      const msg = err.response?.data?.detail || err.response?.data?.message || 'Registration failed. Please try again.';
+      // Make 'Player exists' actionable for users.
+      if (msg === 'Player exists') {
+        setError('This email is already registered. Please log in instead.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
