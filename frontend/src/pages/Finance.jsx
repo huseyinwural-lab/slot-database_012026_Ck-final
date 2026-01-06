@@ -519,6 +519,22 @@ const formatAmount = (amount, currency) => {
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-6">
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  Object.keys(filters).forEach((key) => {
+                    if (filters[key] && filters[key] !== 'all') params.append(key, filters[key]);
+                  });
+                  window.location.href = `/api/v1/finance/reports/export?${params.toString()}`;
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" /> Export CSV
+              </Button>
+            </div>
+
             {!reportData ? (
                 <div className="text-center p-10">Loading Reports...</div>
             ) : (
