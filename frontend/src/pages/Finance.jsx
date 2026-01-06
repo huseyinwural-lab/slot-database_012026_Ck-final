@@ -181,7 +181,23 @@ const formatAmount = (amount, currency) => {
               Object.keys(filters).forEach((key) => {
                 if (filters[key] && filters[key] !== 'all') params.append(key, filters[key]);
               });
-              window.location.href = `/api/v1/finance/transactions/export?${params.toString()}`;
+              api
+                .get('/v1/finance/transactions/export', {
+                  params: Object.fromEntries(params.entries()),
+                  responseType: 'blob',
+                })
+                .then((res) => {
+                  const url = window.URL.createObjectURL(new Blob([res.data]));
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', `finance_transactions_${new Date().toISOString()}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                })
+                .catch(() => {
+                  toast.error('Export failed');
+                });
             }}
           >
             <Download className="w-4 h-4 mr-2" /> Export CSV
