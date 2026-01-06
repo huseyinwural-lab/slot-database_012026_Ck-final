@@ -447,6 +447,40 @@ agent_communication:
 - Register ekranında "Registration failed" generic mesajı yerine, backend `Player exists` döndüğünde kullanıcıya aksiyon alınabilir mesaj gösteriliyor: "This email is already registered. Please log in instead."
 - Test: frontend testing agent E2E ✅ (fresh register 200 + duplicate 400 + doğru UI mesajı)
 
+### 2026-01-06 (Testing Agent) — Duplicate Registration UX Improvement Comprehensive Validation
+- **TEST SCOPE:** Complete end-to-end validation of duplicate registration UX improvement on frontend-player app (http://localhost:3001/register)
+- **VALIDATION RESULTS:**
+  1. ✅ **Fresh Email Registration:** POST /api/v1/auth/player/register returns 200 for new email
+     - Test email: test_user_1767708966@example.com / TestPassword123!
+     - Network: POST http://localhost:8001/api/v1/auth/player/register -> 200
+     - Redirect: Successfully redirected to /login page after registration
+  2. ✅ **Duplicate Email Registration:** POST /api/v1/auth/player/register returns 400 for existing email
+     - Same email: test_user_1767708966@example.com
+     - Network: POST http://localhost:8001/api/v1/auth/player/register -> 400
+     - Error message: "This email is already registered. Please log in instead." (exact match)
+  3. ✅ **"Go to Log In" Button:** Button is visible and functional
+     - Button appears when duplicate email error is shown
+     - Clicking button successfully navigates to /login page
+  4. ✅ **UI/UX Validation:** All user experience requirements met
+     - Error message is user-friendly and actionable
+     - Button styling matches design requirements
+     - Navigation flow works correctly
+
+- **DETAILED TEST RESULTS:**
+  - **Frontend Implementation:** ✅ Register.jsx properly handles duplicate email scenario
+  - **Error Message Transformation:** ✅ Backend "Player exists" transformed to user-friendly message
+  - **Conditional Button Display:** ✅ "Go to Log In" button only shows for duplicate email error
+  - **Navigation Flow:** ✅ Button click navigates to /login page correctly
+  - **API Integration:** ✅ Frontend correctly calls backend API with proper error handling
+  - **User Experience:** ✅ Complete flow provides clear guidance to users
+
+- **BACKEND API VALIDATION:**
+  - Fresh email registration: Returns 200 with success response
+  - Duplicate email registration: Returns 400 with {"detail":"Player exists"}
+  - Frontend properly transforms backend error to user-friendly message
+
+- **STATUS:** ✅ ALL TESTS PASSED - Duplicate registration UX improvement fully functional and meeting all requirements
+
 ## Previous history
 
 (legacy content retained below)
