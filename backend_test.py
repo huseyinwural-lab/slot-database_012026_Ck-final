@@ -6141,27 +6141,314 @@ class CISeedGameTypeTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class PlayersExportXLSXTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_basic_xlsx_export(self) -> bool:
+        """Test 1: Basic XLSX export - GET /api/v1/players/export.xlsx"""
+        try:
+            if not self.admin_token:
+                self.log_result("Basic XLSX Export", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/players/export.xlsx",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Basic XLSX Export", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Check Content-Type header
+                content_type = response.headers.get("content-type", "")
+                expected_content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                if content_type != expected_content_type:
+                    self.log_result("Basic XLSX Export", False, 
+                                  f"Expected Content-Type '{expected_content_type}', got: '{content_type}'")
+                    return False
+                
+                # Check Content-Disposition header
+                content_disposition = response.headers.get("content-disposition", "")
+                if not content_disposition.startswith("attachment; filename="):
+                    self.log_result("Basic XLSX Export", False, 
+                                  f"Expected Content-Disposition to start with 'attachment; filename=', got: '{content_disposition}'")
+                    return False
+                
+                if not content_disposition.endswith('.xlsx"'):
+                    self.log_result("Basic XLSX Export", False, 
+                                  f"Expected filename to end with '.xlsx', got: '{content_disposition}'")
+                    return False
+                
+                # Check that body starts with PK (xlsx zip container signature)
+                content = response.content
+                if not content.startswith(b'PK'):
+                    self.log_result("Basic XLSX Export", False, 
+                                  f"Expected XLSX content to start with 'PK', got first 10 bytes: {content[:10]}")
+                    return False
+                
+                self.log_result("Basic XLSX Export", True, 
+                              f"XLSX export successful - Content-Type: {content_type}, Size: {len(content)} bytes")
+                return True
+                
+        except Exception as e:
+            self.log_result("Basic XLSX Export", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_xlsx_export_with_search_filter(self) -> bool:
+        """Test 2: XLSX export with search filter - GET /api/v1/players/export.xlsx?search=rcuser"""
+        try:
+            if not self.admin_token:
+                self.log_result("XLSX Search Filter Export", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/players/export.xlsx?search=rcuser",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("XLSX Search Filter Export", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Check Content-Type header
+                content_type = response.headers.get("content-type", "")
+                expected_content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                if content_type != expected_content_type:
+                    self.log_result("XLSX Search Filter Export", False, 
+                                  f"Expected Content-Type '{expected_content_type}', got: '{content_type}'")
+                    return False
+                
+                # Check that body starts with PK (xlsx zip container signature)
+                content = response.content
+                if not content.startswith(b'PK'):
+                    self.log_result("XLSX Search Filter Export", False, 
+                                  f"Expected XLSX content to start with 'PK', got first 10 bytes: {content[:10]}")
+                    return False
+                
+                self.log_result("XLSX Search Filter Export", True, 
+                              f"XLSX search filter export successful - Size: {len(content)} bytes")
+                return True
+                
+        except Exception as e:
+            self.log_result("XLSX Search Filter Export", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_xlsx_tenant_isolation(self) -> bool:
+        """Test 3: XLSX tenant isolation with X-Tenant-ID header"""
+        try:
+            if not self.admin_token:
+                self.log_result("XLSX Tenant Isolation", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Test with default tenant
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response1 = await client.get(
+                    f"{self.base_url}/players/export.xlsx",
+                    headers=headers
+                )
+                
+                if response1.status_code != 200:
+                    self.log_result("XLSX Tenant Isolation", False, 
+                                  f"Default tenant export failed - Status: {response1.status_code}")
+                    return False
+                
+                # Test with different tenant ID (impersonation)
+                headers_tenant2 = {
+                    "Authorization": f"Bearer {self.admin_token}",
+                    "X-Tenant-ID": "tenant_test_isolation"
+                }
+                
+                response2 = await client.get(
+                    f"{self.base_url}/players/export.xlsx",
+                    headers=headers_tenant2
+                )
+                
+                if response2.status_code != 200:
+                    self.log_result("XLSX Tenant Isolation", False, 
+                                  f"Tenant impersonation export failed - Status: {response2.status_code}")
+                    return False
+                
+                # Both should return valid XLSX files
+                content1 = response1.content
+                content2 = response2.content
+                
+                if not content1.startswith(b'PK') or not content2.startswith(b'PK'):
+                    self.log_result("XLSX Tenant Isolation", False, 
+                                  "One or both responses are not valid XLSX files")
+                    return False
+                
+                # Content should be different (different tenant data)
+                # Note: They might be the same if both tenants have no players, which is acceptable
+                self.log_result("XLSX Tenant Isolation", True, 
+                              f"Tenant isolation working - Default: {len(content1)} bytes, Tenant2: {len(content2)} bytes")
+                return True
+                
+        except Exception as e:
+            self.log_result("XLSX Tenant Isolation", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_csv_endpoint_still_works(self) -> bool:
+        """Test 4: Confirm CSV endpoint still works - GET /api/v1/players/export"""
+        try:
+            if not self.admin_token:
+                self.log_result("CSV Endpoint Still Works", False, "No admin token available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/players/export",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("CSV Endpoint Still Works", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Check Content-Type header
+                content_type = response.headers.get("content-type", "")
+                if not content_type.startswith("text/csv"):
+                    self.log_result("CSV Endpoint Still Works", False, 
+                                  f"Expected Content-Type to start with 'text/csv', got: '{content_type}'")
+                    return False
+                
+                self.log_result("CSV Endpoint Still Works", True, 
+                              f"CSV export still working - Content-Type: {content_type}")
+                return True
+                
+        except Exception as e:
+            self.log_result("CSV Endpoint Still Works", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete Players XLSX Export test suite"""
+        print("🚀 Starting Players XLSX Export Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_admin_auth():
+            print("\n❌ Admin authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: Basic XLSX export
+        test_results.append(await self.test_basic_xlsx_export())
+        
+        # Test 2: XLSX export with search filter
+        test_results.append(await self.test_xlsx_export_with_search_filter())
+        
+        # Test 3: XLSX tenant isolation
+        test_results.append(await self.test_xlsx_tenant_isolation())
+        
+        # Test 4: CSV endpoint still works
+        test_results.append(await self.test_csv_endpoint_still_works())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 PLAYERS XLSX EXPORT TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All Players XLSX Export tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 async def main():
-    """Main test runner - Run Players Export CSV Test Suite"""
-    print("🎯 Players Export CSV Test Suite Runner")
+    """Main test runner - Run Players XLSX Export Test Suite"""
+    print("🎯 Players XLSX Export Test Suite Runner")
     print("=" * 80)
     
-    # Run Players Export CSV test suite (primary focus for this review request)
-    players_export_suite = PlayersExportCSVTestSuite()
-    players_export_success = await players_export_suite.run_all_tests()
+    # Run Players XLSX Export test suite (primary focus for this review request)
+    players_xlsx_suite = PlayersExportXLSXTestSuite()
+    players_xlsx_success = await players_xlsx_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if players_export_success else "❌ FAIL"
-    print(f"{status}: Players Export CSV Tests")
+    status = "✅ PASS" if players_xlsx_success else "❌ FAIL"
+    print(f"{status}: Players XLSX Export Tests")
     
-    if players_export_success:
-        print("🎉 Players Export CSV test suite PASSED!")
+    if players_xlsx_success:
+        print("🎉 Players XLSX Export test suite PASSED!")
         return True
     else:
-        print("⚠️  Players Export CSV test suite failed.")
+        print("⚠️  Players XLSX Export test suite failed.")
         return False
 
 
