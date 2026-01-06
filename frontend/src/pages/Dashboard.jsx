@@ -181,12 +181,18 @@ const Dashboard = () => {
           value={`$154,200`} 
           icon={DollarSign} 
           trend="up" trendValue="12.5" color="#3b82f6"
+          disabled={ownerRevenueDisabled}
+          tooltip={ownerRevenueDisabled ? 'Owner only' : 'View details'}
+          onClick={() => go(`/revenue/all-tenants?metric=ggr&range_days=${rangeDays}`)}
         />
         <StatCard 
           title="NGR (Net Revenue)" 
           value={`$128,500`} 
           icon={Wallet} 
           trend="up" trendValue="10.2" color="#10b981"
+          disabled={ownerRevenueDisabled}
+          tooltip={ownerRevenueDisabled ? 'Owner only' : 'View details'}
+          onClick={() => go(`/revenue/all-tenants?metric=ngr&range_days=${rangeDays}`)}
         />
         <StatCard 
           title="Active Players" 
@@ -194,12 +200,16 @@ const Dashboard = () => {
           icon={Users} 
           trend="up" trendValue="5.4" color="#8b5cf6"
           subtext="online now"
+          tooltip="View details"
+          onClick={() => go('/players?status=active')}
         />
         <StatCard 
           title="Total Bets" 
           value="45,230" 
           icon={Activity} 
           trend="down" trendValue="2.1" color="#f59e0b"
+          tooltip="View details"
+          onClick={() => go(`/finance?tab=transactions&type=bet&range_days=${rangeDays}`)}
         />
       </div>
 
