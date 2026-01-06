@@ -409,17 +409,6 @@ async def export_players_xlsx(
         headers={"Content-Disposition": f"attachment; filename=\"{filename}\""},
     )
 
-    player_id: str,
-    request: Request,
-    current_admin: AdminUser = Depends(get_current_admin),
-    session: AsyncSession = Depends(get_session),
-):
-    """Soft delete a player (disable).
-
-    Tenant boundary: wrong tenant -> 404.
-    """
-
-
 # --- FINANCE ---
 @router.get("/finance/transactions", response_model=dict)
 async def get_transactions(
