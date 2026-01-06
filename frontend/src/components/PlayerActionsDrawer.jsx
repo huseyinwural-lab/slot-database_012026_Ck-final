@@ -28,25 +28,28 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
 
   const playerId = player?.id;
 
-  const canCreditDebitBonus = useMemo(() => {
+  const permissions = useMemo(() => {
     try {
       const u = JSON.parse(localStorage.getItem('admin_user') || 'null');
       const role = u?.role;
-      return role === 'Admin' || role === 'Super Admin';
+
+      const canView = !!role;
+      const canOps = role === 'Ops' || role === 'Admin' || role === 'Super Admin';
+      const canAdmin = role === 'Admin' || role === 'Super Admin';
+
+      return {
+        role,
+        canView,
+        canOps,
+        canAdmin,
+      };
     } catch {
-      return false;
+      return { role: null, canView: false, canOps: false, canAdmin: false };
     }
   }, []);
 
-  const canSuspendForce = useMemo(() => {
-    try {
-      const u = JSON.parse(localStorage.getItem('admin_user') || 'null');
-      const role = u?.role;
-      return role === 'Ops' || role === 'Admin' || role === 'Super Admin';
-    } catch {
-      return false;
-    }
-  }, []);
+  const canCreditDebitBonus = permissions.canAdmin;
+  const canSuspendForce = permissions.canOps;
 
   const refreshAudit = async () => {
     if (!playerId) return;
