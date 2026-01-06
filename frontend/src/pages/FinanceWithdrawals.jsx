@@ -205,11 +205,6 @@ const FinanceWithdrawals = () => {
     setActionReason('');
   };
 
-  const openActionModal = (tx, type) => {
-    setActionModal({ open: true, type, tx });
-    setActionReason('');
-  };
-
   const handleActionConfirm = async () => {
     const { type, tx } = actionModal;
     if (!tx || !actionReason.trim()) return;
