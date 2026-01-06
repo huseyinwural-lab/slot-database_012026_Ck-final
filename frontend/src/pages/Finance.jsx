@@ -238,9 +238,10 @@ const formatAmount = (amount, currency) => {
       </div>
 
       <Tabs
-        defaultValue="transactions"
+        value={activeTab}
         className="w-full"
         onValueChange={(v) => {
+          setActiveTab(v);
           if (v === 'reports') fetchReports();
         }}
       >
