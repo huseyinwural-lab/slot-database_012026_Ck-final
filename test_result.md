@@ -845,6 +845,37 @@ agent_communication:
 
 - **STATUS:** ❌ PARTIAL FAIL (4/7 PASS) - Core navigation working but disabled sections need proper ComingSoonCard implementation
 
+### 2026-01-06 (Testing Agent) — P1 Dashboard Disabled Cards Re-Verification (FIXED)
+- **TEST SCOPE:** Re-run P1 Dashboard disabled cards verification on http://localhost:3000 to confirm fixes as requested in review
+- **CREDENTIALS:** admin@casino.com / Admin123!
+- **VALIDATION RESULTS:**
+  1. ✅ **Payment Gateway Status Card:** PASS
+     - Found with opacity-50 styling (reduced opacity) ✅
+     - cursor-not-allowed styling present ✅
+     - Shows 'Coming soon' tooltip on hover ✅
+     - Click navigation properly blocked (no navigation occurs) ✅
+  2. ✅ **Retention & Churn Card:** PASS
+     - Found with opacity-50 styling (reduced opacity) ✅
+     - cursor-not-allowed styling present ✅
+     - Shows 'Coming soon' tooltip on hover ✅
+     - Click navigation properly blocked (no navigation occurs) ✅
+  3. ✅ **Loss Leaders Table Card:** PASS
+     - Found with opacity-50 styling (reduced opacity) ✅
+     - cursor-not-allowed styling present ✅
+     - Shows 'Coming soon' tooltip on hover ✅
+     - Click navigation properly blocked (no navigation occurs) ✅
+  4. ✅ **Console Errors Check:** PASS
+     - No console errors detected ✅
+
+- **TECHNICAL VALIDATION:**
+  - All three cards properly wrapped in ComingSoonCard component with enabled={false}
+  - ComingSoonCard applies correct disabled styling: opacity-50 cursor-not-allowed
+  - Tooltip functionality working correctly with 'Coming soon' message
+  - Click event handlers properly disabled (no navigation on click)
+  - Dashboard layout and functionality intact
+
+- **STATUS:** ✅ ALL TESTS PASSED (3/3) - Payment Gateway Status, Retention & Churn, and Loss Leaders cards are NOW properly disabled with correct styling, tooltips, and blocked navigation
+
 ## Previous history
 
 (legacy content retained below)
