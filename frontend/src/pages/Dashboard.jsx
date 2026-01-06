@@ -16,6 +16,9 @@ import RetentionCard from '../components/dashboard/RetentionCard';
 import FTDCard from '../components/dashboard/FTDCard';
 import CriticalAlertsPanel from '../components/dashboard/CriticalAlertsPanel';
 import FinancialSummary from '../components/dashboard/FinancialSummary';
+import LossLeadersTable from '../components/dashboard/LossLeadersTable';
+import LiveBetsTicker from '../components/dashboard/LiveBetsTicker';
+import BonusPerformanceCard from '../components/dashboard/BonusPerformanceCard';
 
 const ComingSoonCard = ({ children, enabled, tooltip }) => {
   if (enabled) return children;
@@ -33,7 +36,6 @@ const ComingSoonCard = ({ children, enabled, tooltip }) => {
   );
 };
 
-import LossLeadersTable from '../components/dashboard/LossLeadersTable';
 import LiveBetsTicker from '../components/dashboard/LiveBetsTicker';
 import BonusPerformanceCard from '../components/dashboard/BonusPerformanceCard';
 
