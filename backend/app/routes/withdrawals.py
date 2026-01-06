@@ -542,7 +542,7 @@ async def export_withdrawals_csv(
     ]
 
     content = dicts_to_csv_bytes(out_rows, fieldnames=fieldnames)
-    filename = f"withdrawals_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+    filename = f"withdrawals_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
 
     return StreamingResponse(
         iter([content]),
