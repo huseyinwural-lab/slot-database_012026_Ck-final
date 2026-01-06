@@ -266,9 +266,24 @@ const Dashboard = () => {
 
       {/* 4. Advanced Metrics Row (Retention, FTD, Bonus) */}
       <div className="grid gap-4 md:grid-cols-3">
-        <RetentionCard data={stats.retention_metrics} />
-        <FTDCard data={stats.ftd_metrics} />
-        <BonusPerformanceCard data={stats.bonus_performance} />
+        <ComingSoonCard enabled={false} tooltip="Coming soon">
+          <RetentionCard data={stats.retention_metrics} />
+        </ComingSoonCard>
+
+        <StatCard
+          title="💼 First Time Deposits (FTD)"
+          value={stats?.ftd_metrics?.ftd_month?.toLocaleString?.() ?? '-'}
+          icon={Activity}
+          trend={null}
+          trendValue={null}
+          color="#22c55e"
+          tooltip="View details"
+          onClick={() => go(`/finance?tab=transactions&type=deposit&ftd=1&range_days=${rangeDays}`)}
+        />
+
+        <ComingSoonCard enabled={bonusesRouteEnabled} tooltip={bonusesRouteEnabled ? 'View details' : 'Coming soon'}>
+          <BonusPerformanceCard data={stats.bonus_performance} />
+        </ComingSoonCard>
       </div>
 
       {/* 5. Loss Leaders & System Health */}
