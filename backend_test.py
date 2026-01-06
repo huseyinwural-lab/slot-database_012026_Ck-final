@@ -6142,26 +6142,26 @@ class CISeedGameTypeTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run Brands Settings Test Suite"""
-    print("🎯 Brands Settings Test Suite Runner")
+    """Main test runner - Run Players Export CSV Test Suite"""
+    print("🎯 Players Export CSV Test Suite Runner")
     print("=" * 80)
     
-    # Run Brands Settings test suite (primary focus for this review request)
-    brands_suite = BrandsSettingsTestSuite()
-    brands_success = await brands_suite.run_all_tests()
+    # Run Players Export CSV test suite (primary focus for this review request)
+    players_export_suite = PlayersExportCSVTestSuite()
+    players_export_success = await players_export_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if brands_success else "❌ FAIL"
-    print(f"{status}: Brands Settings Tests")
+    status = "✅ PASS" if players_export_success else "❌ FAIL"
+    print(f"{status}: Players Export CSV Tests")
     
-    if brands_success:
-        print("🎉 Brands Settings test suite PASSED!")
+    if players_export_success:
+        print("🎉 Players Export CSV test suite PASSED!")
         return True
     else:
-        print("⚠️  Brands Settings test suite failed.")
+        print("⚠️  Players Export CSV test suite failed.")
         return False
 
 
