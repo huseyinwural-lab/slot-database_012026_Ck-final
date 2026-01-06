@@ -181,6 +181,20 @@ const PlayerList = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <PlayerActionsDrawer
+        open={opsOpen}
+        onOpenChange={setOpsOpen}
+        player={opsPlayer}
+        onPlayerUpdated={(patch) => {
+          if (!patch || !opsPlayer) return;
+          // Minimal in-place update for status/wallet changes
+          setPlayers((prev) =>
+            prev.map((p) => (p.id === opsPlayer.id ? { ...p, ...patch } : p))
+          );
+          setOpsPlayer((p) => (p ? { ...p, ...patch } : p));
+        }}
+      />
     </div>
   );
 };
