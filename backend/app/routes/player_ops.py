@@ -410,7 +410,7 @@ async def suspend_player(
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
     # RBAC: Ops+
-    _require_any_role(current_admin, {"Ops", "Admin", "Super Admin"})
+    require_ops(current_admin)
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     player = await _get_player_or_404(session, tenant_id=tenant_id, player_id=player_id)
