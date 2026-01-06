@@ -91,7 +91,7 @@ async def manual_credit(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str = Depends(require_reason),
+    reason: str | None = Header(default=None, alias="X-Reason"),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -184,7 +184,7 @@ async def manual_debit(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str = Depends(require_reason),
+    reason: str | None = Header(default=None, alias="X-Reason"),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -302,7 +302,7 @@ async def grant_manual_bonus(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str = Depends(require_reason),
+    reason: str | None = Header(default=None, alias="X-Reason"),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -404,7 +404,7 @@ async def suspend_player(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str = Depends(require_reason),
+    reason: str | None = Header(default=None, alias="X-Reason"),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -450,7 +450,7 @@ async def unsuspend_player(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str = Depends(require_reason),
+    reason: str | None = Header(default=None, alias="X-Reason"),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -497,7 +497,7 @@ async def force_logout(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str = Depends(require_reason),
+    reason: str | None = Header(default=None, alias="X-Reason"),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -543,7 +543,7 @@ async def add_internal_note(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str = Depends(require_reason),
+    reason: str | None = Header(default=None, alias="X-Reason"),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
