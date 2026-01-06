@@ -350,6 +350,33 @@ Do not delete sections unless instructed.
 - Frontend: Players export button now calls `/v1/players/export.xlsx` and downloads `players_export_*.xlsx`.
 - Pytest: `pytest -q tests/test_players_export_xlsx.py` ✅
 
+### 2026-01-06 (Testing Agent) — Players XLSX Export Frontend Deployment Verification
+- **TEST SCOPE:** Frontend smoke test for Players XLSX export functionality as requested in review
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123! with "Sign In" button
+  2. ✅ **Players Page Navigation:** Successfully navigated to /players page without redirects
+  3. ✅ **Session Management:** localStorage admin_token persists correctly, no session timeout issues
+  4. ❌ **CRITICAL DEPLOYMENT ISSUE:** Frontend shows "Export CSV" instead of "Export Excel"
+     - Current deployed button text: "Export CSV" 
+     - Expected button text: "Export Excel"
+     - Source code verification: PlayerList.jsx contains correct XLSX implementation with handleExportXlsx function
+     - Deployment gap: Source code has XLSX functionality but deployed version still has CSV-only implementation
+
+- **DETAILED FINDINGS:**
+  - **Source Code Analysis:** ✅ PlayerList.jsx contains proper XLSX export implementation:
+    - handleExportXlsx function with console.log('export_xlsx_clicked')
+    - API call to '/v1/players/export.xlsx' with responseType: 'blob'
+    - Button text: "Export Excel"
+    - File download with .xlsx extension
+  - **Deployed Version Analysis:** ❌ Production deployment missing XLSX functionality:
+    - Only "Export CSV" button visible in UI
+    - No "Export Excel" button found
+    - Frontend check confirms no XLSX functions in deployed JavaScript
+
+- **ROOT CAUSE:** Frontend deployment mismatch - source code contains XLSX implementation but production deployment has not been updated
+- **IMPACT:** Users cannot access XLSX export functionality from the UI despite backend support being available
+- **STATUS:** ❌ DEPLOYMENT ISSUE - Frontend requires rebuild and redeployment to include XLSX export functionality
+
 ## Previous history
 
 (legacy content retained below)
