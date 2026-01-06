@@ -109,7 +109,7 @@ async def test_force_logout_revokes_old_token(client, session):
 
     # Old token should now be revoked
     r_rev = await client.get(
-        "/api/v1/payouts/methods",
+        "/api/v1/player/wallet/balance",
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r_rev.status_code == 401
@@ -188,7 +188,7 @@ async def test_suspend_revokes_old_token(client, session):
 
     # Old token should now be revoked
     r_rev = await client.get(
-        "/api/v1/payouts/methods",
+        "/api/v1/player/wallet/balance",
         headers={"Authorization": f"Bearer {token1}"},
     )
     assert r_rev.status_code == 401
