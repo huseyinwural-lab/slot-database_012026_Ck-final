@@ -22,14 +22,7 @@ from app.utils.tenant import get_current_tenant_id
 router = APIRouter(prefix="/api/v1/players", tags=["player_ops"])
 
 
-def _require_any_role(current_admin: AdminUser, allowed: set[str]) -> None:
-    role = (getattr(current_admin, "role", None) or "").strip()
-    # treat Super Admin as all-allowed
-    if role == "Super Admin":
-        return
-
-    if role not in allowed:
-        raise HTTPException(status_code=403, detail={"error_code": "FORBIDDEN"})
+from app.services.rbac import require_admin, require_ops, require_support_view
 
 
 async def _get_player_or_404(session: AsyncSession, *, tenant_id: str, player_id: str) -> Player:
