@@ -61,7 +61,7 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
     assert r.status_code == 200
 
     # Credit forbidden
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/credit",
         json={"amount": 10, "currency": "USD", "reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
@@ -69,7 +69,7 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
     assert r.status_code == 403
 
     # Suspend forbidden
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/suspend",
         json={"reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
@@ -77,7 +77,7 @@ async def test_player_ops_rbac_support_forbidden_for_mutations(client, session, 
     assert r.status_code == 403
 
     # Force logout forbidden
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/force-logout",
         json={"reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
@@ -112,7 +112,7 @@ async def test_player_ops_rbac_ops_only_ops_actions(client, session, admin_token
     player = p
 
     # Ops can suspend
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/suspend",
         json={"reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
@@ -120,7 +120,7 @@ async def test_player_ops_rbac_ops_only_ops_actions(client, session, admin_token
     assert r.status_code == 200
 
     # Ops can force-logout
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/force-logout",
         json={"reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
@@ -128,7 +128,7 @@ async def test_player_ops_rbac_ops_only_ops_actions(client, session, admin_token
     assert r.status_code == 200
 
     # Ops cannot credit
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/credit",
         json={"amount": 10, "currency": "USD", "reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
@@ -161,14 +161,14 @@ async def test_player_ops_rbac_admin_all_allowed(client, session, admin_token):
     tenant = None
     player = p
 
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/credit",
         json={"amount": 10, "currency": "USD", "reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
     )
     assert r.status_code == 200
 
-    r = await async_client.post(
+    r = await client.post(
         f"/api/v1/players/{player.id}/force-logout",
         json={"reason": "test"},
         headers={"Authorization": f"Bearer {token}", "X-Reason": "test"},
