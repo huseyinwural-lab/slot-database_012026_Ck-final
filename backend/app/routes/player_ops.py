@@ -512,16 +512,35 @@ async def force_logout(
     if body_reason and body_reason != reason:
         reason = body_reason
 
-    rev = PlayerSessionRevocation(
-        tenant_id=tenant_id,
-        player_id=player.id,
-        revoked_at=datetime.now(timezone.utc),
-        revoked_by_admin_id=str(current_admin.id),
-        reason=reason,
-    )
-    session.add(rev)
-    await session.commit()
-    await session.refresh(rev)
+    # Upsert (unique per tenant_id+player_id) so we keep the latest revoked_at
+    existing = (
+        await session.execute(
+            select(PlayerSessionRevocation).where(
+                PlayerSessionRevocation.tenant_id == tenant_id,
+                PlayerSessionRevocation.player_id == player.id,
+            )
+        )
+    ).scalars().first()
+
+    if existing:
+        existing.revoked_at = datetime.now(timezone.utc)
+        existing.revoked_by_admin_id = str(current_admin.id)
+        existing.reason = reason
+        session.add(existing)
+        await session.commit()
+        await session.refresh(existing)
+        rev = existing
+    else:
+        rev = PlayerSessionRevocation(
+            tenant_id=tenant_id,
+            player_id=player.id,
+            revoked_at=datetime.now(timezone.utc),
+            revoked_by_admin_id=str(current_admin.id),
+            reason=reason,
+        )
+        session.add(rev)
+        await session.commit()
+        await session.refresh(rev)
 
     await _audit_event(
         session=session,
