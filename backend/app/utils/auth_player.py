@@ -56,12 +56,10 @@ async def get_current_player(
         try:
             # iat can be seconds (int) or ms (int). Detect by magnitude.
             iat_int = int(iat)
-            token_iat = (
-                datetime.fromtimestamp(
-                    (iat_int / 1000.0) if iat_int > 10_000_000_000 else iat_int,
-                    tz=timezone.utc,
-                )
-                .replace(tzinfo=None)
+            # keep conversion here for debugging/trace purposes if needed
+            _ = datetime.fromtimestamp(
+                (iat_int / 1000.0) if iat_int > 10_000_000_000 else iat_int,
+                tz=timezone.utc,
             )
         except Exception:
             raise HTTPException(
