@@ -84,8 +84,7 @@ async def get_current_player(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        # DEBUG note: If we reach here, token was issued after revocation.
-        # (No-op)
+        # Token issued after revocation -> allow request to proceed.
 
     # P1-E3: suspended players cannot access protected endpoints
     if getattr(player, "status", None) == "suspended":
