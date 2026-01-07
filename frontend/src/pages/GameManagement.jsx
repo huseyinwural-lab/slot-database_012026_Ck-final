@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { LayoutGrid, Table as TableIcon, Upload, Activity, Plus, Settings2, Server, Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,15 +19,7 @@ import api from '../services/api';
 import GameConfigPanel from '../components/games/GameConfigPanel';
 
 const GameManagement = () => {
-  const { hasFeature } = useCapabilities();
-
-  const featureFlags = useMemo(() => {
-    // P1-GO-FLAG-01: default=false if flags not present
-    return {
-      gamesConfigEnabled: hasFeature?.('GAMES_CONFIG_ENABLED') === true,
-      gamesAnalyticsEnabled: hasFeature?.('GAMES_ANALYTICS_ENABLED') === true,
-    };
-  }, [hasFeature]);
+  const { featureFlags } = useCapabilities();
 
   const [games, setGames] = useState([]);
   const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });
@@ -86,17 +78,35 @@ const GameManagement = () => {
       fetchAll();
     } catch (err) {
       const status = err?.response?.status;
+      const code = err?.standardized?.code;
+
+      // P1-GO-ERR-01: Toggle error mapping (404/501/403 ayrımı)
       if (status === 403) {
+        if (code === 'FEATURE_DISABLED') {
+          toast.error('Feature disabled for this tenant');
+          return;
+        }
         toast.error("You don't have permission");
         return;
       }
-      if (status === 404 || status === 501) {
-        toast.error('Feature not enabled');
+
+      if (status === 404) {
+        toast.info('Toggle unavailable', {
+          description: 'Not implemented in this environment (or game not found).',
+        });
         return;
       }
+
+      if (status === 501) {
+        toast.info('Not implemented', {
+          description: 'This operation is not implemented yet.',
+        });
+        return;
+      }
+
       toast.error(
         `Failed${status ? ` (${status})` : ''}`,
-        { description: err?.response?.data?.detail?.error_code || err?.message }
+        { description: err?.standardized?.message || err?.message }
       );
     }
   };

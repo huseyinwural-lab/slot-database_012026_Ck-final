@@ -73,6 +73,13 @@ export const CapabilitiesProvider = ({ children }) => {
     return capabilitiesObject[featureKey] === true;
   };
 
+  // Centralized feature flag resolver (single source of truth for UI capability checks)
+  // Defaults to false when a key is missing.
+  const featureFlags = {
+    gamesConfigEnabled: hasFeature('GAMES_CONFIG_ENABLED') === true,
+    gamesAnalyticsEnabled: hasFeature('GAMES_ANALYTICS_ENABLED') === true,
+  };
+
   return (
     <CapabilitiesContext.Provider
       value={{
@@ -84,6 +91,7 @@ export const CapabilitiesProvider = ({ children }) => {
         tenantRole,
         tenantName,
         hasFeature,
+        featureFlags,
         refetch: fetchCapabilities
       }}
     >
