@@ -70,14 +70,17 @@ async def get_current_player(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        rev_at = rev.revoked_at
-        if getattr(rev_at, "tzinfo", None) is not None:
-            rev_at = rev_at.astimezone(timezone.utc).replace(tzinfo=None)
-        rev_at = rev_at.replace(microsecond=0)
+        # Compare using millisecond precision to avoid same-second edge cases.
+        revoked_at = rev.revoked_at
+        if getattr(revoked_at, "tzinfo", None) is None:
+            revoked_at = revoked_at.replace(tzinfo=timezone.utc)
+        revoked_ms = int(revoked_at.timestamp() * 1000)
 
-        # Treat tokens issued at or before revocation moment as revoked (iat has second precision)
-        # If token was issued at/before revoked_at, treat as revoked.
-        if token_iat <= rev_at:
+        # iat can be seconds or ms; we normalize to ms here.
+        iat_int = int(iat)
+        token_iat_ms = iat_int if iat_int > 10_000_000_000 else (iat_int * 1000)
+
+        if token_iat_ms <= revoked_ms:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"error_code": "TOKEN_REVOKED"},
