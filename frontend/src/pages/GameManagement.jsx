@@ -371,20 +371,16 @@ const GameManagement = () => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="inline-flex">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => openConfig(game)}
-                                >
-                                  <Settings2 className="w-4 h-4 mr-1" /> Config
-                                </Button>
-                              </span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openConfig(game)}
+                              >
+                                <Settings2 className="w-4 h-4 mr-1" /> Config
+                              </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>
-                                View config (read-only)
-                              </p>
+                              <p>View config (read-only)</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
