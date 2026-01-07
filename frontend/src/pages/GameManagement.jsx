@@ -351,9 +351,30 @@ const GameManagement = () => {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                        <Button size="sm" variant="outline" onClick={() => openConfig(game)}>
-                          <Settings2 className="w-4 h-4 mr-1" /> Config
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openConfig(game)}
+                                  disabled={!featureFlags.gamesConfigEnabled}
+                                  className={!featureFlags.gamesConfigEnabled ? 'cursor-not-allowed opacity-50' : ''}
+                                >
+                                  <Settings2 className="w-4 h-4 mr-1" /> Config
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {featureFlags.gamesConfigEnabled
+                                  ? 'View config'
+                                  : 'Game configuration is not enabled'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         <Switch
                           checked={game.business_status === 'active'}
                           onCheckedChange={() => handleToggleGame(game.id)}
