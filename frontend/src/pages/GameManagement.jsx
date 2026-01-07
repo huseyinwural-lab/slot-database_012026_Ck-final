@@ -11,11 +11,24 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCapabilities } from '../context/CapabilitiesContext';
+
 import { toast } from 'sonner';
 import api from '../services/api';
 import GameConfigPanel from '../components/games/GameConfigPanel';
 
 const GameManagement = () => {
+  const { hasFeature } = useCapabilities();
+
+  const featureFlags = useMemo(() => {
+    // P1-GO-FLAG-01: default=false if flags not present
+    return {
+      gamesConfigEnabled: hasFeature?.('GAMES_CONFIG_ENABLED') === true,
+      gamesAnalyticsEnabled: hasFeature?.('GAMES_ANALYTICS_ENABLED') === true,
+    };
+  }, [hasFeature]);
+
   const [games, setGames] = useState([]);
   const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });
   const [gamesPageSize, setGamesPageSize] = useState(50);
