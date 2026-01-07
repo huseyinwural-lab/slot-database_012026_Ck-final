@@ -168,7 +168,7 @@ async def bind_game_robot(
         raise HTTPException(409, "Robot is not active")
         
     # Disable old binding
-    stmt = select(GameRobotBinding).where(GameRobotBinding.game_id == game_id, GameRobotBinding.is_enabled == True)
+    stmt = select(GameRobotBinding).where(GameRobotBinding.game_id == game_id, GameRobotBinding.is_enabled.is_(True))
     old_binding = (await session.execute(stmt)).scalars().first()
     old_robot_id = old_binding.robot_id if old_binding else None
     
