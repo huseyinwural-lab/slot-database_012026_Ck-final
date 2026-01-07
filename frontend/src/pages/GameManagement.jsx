@@ -328,13 +328,29 @@ const GameManagement = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => toast.info('Analytics Coming Soon')}
-                        >
-                          <Activity className="w-4 h-4 text-blue-500" />
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  disabled={!featureFlags.gamesAnalyticsEnabled}
+                                  className={!featureFlags.gamesAnalyticsEnabled ? 'cursor-not-allowed opacity-50' : ''}
+                                >
+                                  <Activity className="w-4 h-4 text-blue-500" />
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {featureFlags.gamesAnalyticsEnabled
+                                  ? 'View analytics'
+                                  : 'Analytics not available in this environment'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         <Button size="sm" variant="outline" onClick={() => openConfig(game)}>
                           <Settings2 className="w-4 h-4 mr-1" /> Config
                         </Button>
