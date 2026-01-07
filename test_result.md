@@ -478,6 +478,35 @@ agent_communication:
 
 - **Backend enforce:** `backend/app/routes/player_ops.py`
   - Credit/Debit/Grant Bonus → `require_admin()` → yetkisiz **403 {error_code: FORBIDDEN}**
+
+### 2026-01-07 — P1 Suspended Login Block + Force-Logout JWT Revocation (E1) — PASS
+- **Behavior rules (E0):**
+  - Suspended player: login blocked (403 PLAYER_SUSPENDED)
+  - Force logout / suspend: existing tokens invalidated → next protected request 401 TOKEN_REVOKED
+
+- **Auth changes:**
+  - `backend/app/utils/auth.py`
+    - JWT now includes `iat` (ms precision): `iat = int(now.timestamp() * 1000)`
+  - `backend/app/utils/auth_player.py`
+    - Protected endpoints enforce:
+      - Revocation check via `player_session_revocation` (401 TOKEN_REVOKED)
+      - Suspended status check (403 PLAYER_SUSPENDED)
+    - Revocation comparison uses millisecond timestamps to avoid same-second edge cases.
+
+- **Login guard (E1):** `backend/app/routes/player_auth.py`
+  - Suspended player login → 403 `{error_code: PLAYER_SUSPENDED}`
+
+- **Force logout + Suspend integration (E2/E3):** `backend/app/routes/player_ops.py`
+  - Force-logout upserts `PlayerSessionRevocation` per (tenant_id, player_id)
+  - Suspend sets `player.status='suspended'` AND upserts revocation (immediate kick)
+
+- **Tests (E5):** `backend/tests/test_player_auth_enforcement.py`
+  1) Suspended player login → 403 PLAYER_SUSPENDED ✅
+  2) Force logout → old token on protected endpoint → 401 TOKEN_REVOKED ✅
+  3) Suspend → old token on protected endpoint → 401 TOKEN_REVOKED ✅
+
+- **STATUS:** ✅ PASS
+
   - Suspend/Unsuspend/Force Logout → `require_ops()` → yetkisiz **403**
   - Bonuses list + Notes → `require_support_view()`
   - Not: State-guard 409’lar korunur (RBAC’tan bağımsız)
