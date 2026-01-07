@@ -16,7 +16,7 @@ import { useCapabilities } from '../context/CapabilitiesContext';
 
 import { toast } from 'sonner';
 import api from '../services/api';
-import GameConfigPanel from '../components/games/GameConfigPanel';
+import GameConfigReadOnlyPanel from '../components/games/GameConfigReadOnlyPanel';
 
 const GameManagement = () => {
   const { featureFlags } = useCapabilities();
@@ -801,14 +801,12 @@ const GameManagement = () => {
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Game Settings: {selectedGame?.name}</DialogTitle>
-            <CardDescription>Full configuration, RTP, bets, features and logs.</CardDescription>
+            <CardDescription>Read-only configuration snapshot (provider config may be unavailable).</CardDescription>
           </DialogHeader>
 
           {selectedGame && (
-            <GameConfigPanel
+            <GameConfigReadOnlyPanel
               game={selectedGame}
-              onClose={() => setIsConfigOpen(false)}
-              onSaved={fetchAll}
             />
           )}
 

@@ -23,6 +23,15 @@ async def get_game_config(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    """P2-GO-BE-01: Read-only Game Config snapshot.
+
+    Goal: Allow the Config modal to open deterministically without failing even when
+    provider config is not available.
+
+    IMPORTANT: This endpoint is intentionally **read-only**. UI should disable save
+    actions when `is_read_only=true`.
+    """
+
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
 
     stmt = select(Game).where(Game.id == game_id, Game.tenant_id == tenant_id)
@@ -30,7 +39,22 @@ async def get_game_config(
     game = res.scalars().first()
     if not game:
         raise HTTPException(404, "Game not found")
-    return game.configuration
+
+    cfg = game.configuration if isinstance(game.configuration, dict) else {}
+
+    # Minimal + safe payload: nulls are intentional when config is not available.
+    return {
+        "game_id": game.id,
+        "name": game.name,
+        "provider": getattr(game, "provider_id", None) or game.provider,
+        "category": game.category,
+        "status": game.status or ("active" if getattr(game, "is_active", False) else "inactive"),
+        "rtp": cfg.get("rtp") if isinstance(cfg.get("rtp"), (int, float)) else None,
+        "volatility": cfg.get("volatility") if isinstance(cfg.get("volatility"), (str, int, float)) else None,
+        "limits": cfg.get("limits") if isinstance(cfg.get("limits"), dict) else None,
+        "features": cfg.get("features") if isinstance(cfg.get("features"), list) else [],
+        "is_read_only": True,
+    }
 
 @router.put("/{game_id}/config")
 async def update_game_config(
