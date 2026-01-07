@@ -67,7 +67,8 @@ async def get_current_player(
             rev_at = rev_at.astimezone(timezone.utc).replace(tzinfo=None)
         rev_at = rev_at.replace(microsecond=0)
 
-        if token_iat < rev_at:
+        # Treat tokens issued at or before revocation moment as revoked (iat has second precision)
+        if token_iat <= rev_at:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"error_code": "TOKEN_REVOKED"},
