@@ -107,6 +107,21 @@ async def test_force_logout_revokes_old_token(client, session):
     )
     assert r_fl.status_code == 200
 
+    # Sanity: revocation row exists
+    from app.models.player_ops_models import PlayerSessionRevocation
+    from sqlmodel import select
+
+    rev = (
+        await session.execute(
+            select(PlayerSessionRevocation).where(
+                PlayerSessionRevocation.tenant_id == tenant.id,
+                PlayerSessionRevocation.player_id == player.id,
+            )
+        )
+    ).scalars().first()
+    assert rev is not None
+    assert rev.revoked_at is not None
+
     # Old token should now be revoked
     r_rev = await client.get(
         "/api/v1/player/wallet/balance",
