@@ -332,6 +332,11 @@ const GameManagement = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right flex justify-end gap-2">
+
+                      {/* Analytics icon is intentionally disabled in this environment (P1-GO-UX-01).
+                          We also prevent pointer events so no click/toast can ever fire.
+                      */}
+
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
