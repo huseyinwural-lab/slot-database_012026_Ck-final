@@ -95,7 +95,7 @@ async def test_force_logout_revokes_old_token(client, session):
     from app.utils.auth import create_access_token
 
     admin_token = create_access_token(
-        data={"email": admin.email},
+        data={"email": admin.email, "sub": str(admin.id), "tenant_id": tenant.id, "role": admin.role},
         expires_delta=timedelta(days=1),
     )
 
@@ -175,7 +175,7 @@ async def test_suspend_revokes_old_token(client, session):
 
     # Suspend via ops
     admin_token = create_access_token(
-        data={"email": admin.email},
+        data={"email": admin.email, "sub": str(admin.id), "tenant_id": tenant.id, "role": admin.role},
         expires_delta=timedelta(days=1),
     )
 
