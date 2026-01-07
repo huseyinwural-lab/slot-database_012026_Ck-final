@@ -31,6 +31,13 @@ const GameManagement = () => {
   const [isTableOpen, setIsTableOpen] = useState(false);
   const [tableForm, setTableForm] = useState({ name: '', provider: '', min_bet: 1, max_bet: 100 });
 
+  // Non-visual state marker to help E2E validate controlled dialogs.
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.body.dataset.configOpen = isConfigOpen ? '1' : '0';
+    }
+  }, [isConfigOpen]);
+
   const [uploadForm, setUploadForm] = useState({
     method: 'fetch_api',
     provider: 'Pragmatic Play',
