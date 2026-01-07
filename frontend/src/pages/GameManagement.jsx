@@ -84,8 +84,20 @@ const GameManagement = () => {
     try {
       await api.post(`/v1/games/${gameId}/toggle`);
       fetchAll();
-    } catch {
-      toast.error('Failed');
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 403) {
+        toast.error("You don't have permission");
+        return;
+      }
+      if (status === 404 || status === 501) {
+        toast.error('Feature not enabled');
+        return;
+      }
+      toast.error(
+        `Failed${status ? ` (${status})` : ''}`,
+        { description: err?.response?.data?.detail?.error_code || err?.message }
+      );
     }
   };
 
