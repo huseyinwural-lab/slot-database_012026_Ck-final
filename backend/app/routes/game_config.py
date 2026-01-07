@@ -124,7 +124,7 @@ async def get_game_robot(
 ):
     stmt = select(GameRobotBinding, RobotDefinition).join(RobotDefinition).where(GameRobotBinding.game_id == game_id)
     # We want the ACTIVE binding
-    stmt = stmt.where(GameRobotBinding.is_enabled == True)
+    stmt = stmt.where(GameRobotBinding.is_enabled.is_(True))
     res = await session.execute(stmt)
     row = res.first()
     
