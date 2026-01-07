@@ -112,10 +112,8 @@ const GameManagement = () => {
   };
 
   const openConfig = (game) => {
-    if (!featureFlags.gamesConfigEnabled) {
-      toast.info('Game configuration is not enabled');
-      return;
-    }
+    // P2-GO-BE-01 alignment: Config modal should always be able to open.
+    // Any unavailable/provider-missing fields are handled as read-only in the panel.
     setSelectedGame(game);
     setIsConfigOpen(true);
   };
@@ -378,8 +376,6 @@ const GameManagement = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => openConfig(game)}
-                                  disabled={!featureFlags.gamesConfigEnabled}
-                                  className={!featureFlags.gamesConfigEnabled ? 'cursor-not-allowed opacity-50' : ''}
                                 >
                                   <Settings2 className="w-4 h-4 mr-1" /> Config
                                 </Button>
@@ -387,9 +383,7 @@ const GameManagement = () => {
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>
-                                {featureFlags.gamesConfigEnabled
-                                  ? 'View config'
-                                  : 'Game configuration is not enabled'}
+                                View config (read-only)
                               </p>
                             </TooltipContent>
                           </Tooltip>

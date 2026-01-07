@@ -59,8 +59,12 @@ async def test_game_import_flow_json(client, session, admin_token):
 @pytest.mark.asyncio
 async def test_game_import_tenant_isolation_owner_header_scope(client, session):
     # Create two tenants and an owner admin
-    t1 = Tenant(name="T1", type="owner", features={})
-    t2 = Tenant(name="T2", type="renter", features={})
+    import uuid
+
+    # Use unique names to avoid UNIQUE constraint collisions across test runs.
+    suffix = uuid.uuid4().hex[:8]
+    t1 = Tenant(name=f"T1_{suffix}", type="owner", features={})
+    t2 = Tenant(name=f"T2_{suffix}", type="renter", features={})
     session.add(t1)
     session.add(t2)
     await session.commit()
