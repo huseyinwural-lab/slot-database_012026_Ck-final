@@ -345,7 +345,7 @@ const GameManagement = () => {
                                   size="sm"
                                   variant="ghost"
                                   disabled={!featureFlags.gamesAnalyticsEnabled}
-                                  className={!featureFlags.gamesAnalyticsEnabled ? 'cursor-not-allowed opacity-50' : ''}
+                                  className={!featureFlags.gamesAnalyticsEnabled ? 'cursor-not-allowed opacity-50 pointer-events-none' : ''}
                                 >
                                   <Activity className="w-4 h-4 text-blue-500" />
                                 </Button>
