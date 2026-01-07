@@ -1048,7 +1048,14 @@ agent_communication:
   - No generic "Failed" toasts produced for expected error codes
   - Feature flags properly control button disabled states
 
-- **STATUS:** ✅ MOSTLY PASS (5/6 automated tests passed) - Core functionality working correctly, tooltip validation requires manual verification due to element interception issues
+- **STATUS:** ✅ MOSTLY PASS (5/6 automated tests passed) - Core UX/Backend alignment OK. Tooltip ve Analytics ikon selector’ları automation’da flaky olduğu için manuel doğrulama gerekebilir.
+
+### 2026-01-07 (E1) — P1 Game Ops Follow-up (After Centralization)
+- **EXPECTATION:**
+  - /games: Analytics ikon disabled + tooltip
+  - /games: Config button disabled + tooltip
+  - Toggle click: 404/501/403 hataları doğru toast mesajlarına map edilmeli; generic "Failed" toast çıkmamalı
+- **STATUS:** Pending E2E re-run (frontend testing agent)
 
 ## Agent Communication
 
