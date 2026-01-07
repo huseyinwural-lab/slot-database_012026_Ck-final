@@ -382,14 +382,12 @@ const GameManagement = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => openConfig(game)}
-                                disabled={!featureFlags.gamesConfigEnabled}
-                                className={!featureFlags.gamesConfigEnabled ? 'cursor-not-allowed opacity-50' : ''}
                               >
                                 <Settings2 className="w-4 h-4 mr-1" /> Config
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>View config (read-only)</p>
+                              <p>View config (read-only snapshot)</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
