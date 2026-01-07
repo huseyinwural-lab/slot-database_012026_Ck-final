@@ -86,11 +86,6 @@ async def get_current_player(
 
         # DEBUG note: If we reach here, token was issued after revocation.
         # (No-op)
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={"error_code": "TOKEN_REVOKED"},
-                headers={"WWW-Authenticate": "Bearer"},
-            )
 
     # P1-E3: suspended players cannot access protected endpoints
     if getattr(player, "status", None) == "suspended":
