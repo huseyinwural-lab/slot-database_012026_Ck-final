@@ -27,8 +27,8 @@ def create_access_token(data: dict, expires_delta):
     now = datetime.now(timezone.utc)
     expire = now + expires_delta
 
-    # P1-E2: iat required for session revocation checks
-    to_encode.update({"iat": int(now.timestamp()), "exp": expire})
+    # P1-E2: iat must strictly increase across logins to allow re-login after force-logout
+    to_encode.update({"iat": int((now.timestamp() * 1000)), "exp": expire})
 
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
     return encoded_jwt
