@@ -996,6 +996,16 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED (3/3) - Payment Gateway Status, Retention & Churn, and Loss Leaders cards are NOW properly disabled with correct styling, tooltips, and blocked navigation
 
+### 2026-01-07 (E1) — P1 Game Ops: Toggle Error Mapping + Feature Flag Resolver (Centralized)
+- Frontend: `CapabilitiesContext` artık `featureFlags` (tek merkez) sağlıyor.
+- Frontend: `GameManagement.jsx` artık `featureFlags`'ı context’ten alıyor (local resolver kaldırıldı).
+- Frontend: Toggle hata haritalama iyileştirildi:
+  - 403 + FEATURE_DISABLED → "Feature disabled for this tenant"
+  - 404 → "Toggle unavailable" (implement edilmemiş / bulunamadı)
+  - 501 → "Not implemented"
+  - Beklenen durumlarda generic "Failed" toast yok.
+- Testing: (Pending) Aşağıdaki Testing Agent koşusu ile E2E doğrulanacak.
+
 ### 2026-01-07 (Testing Agent) — P1 Game Operations UX/Backend Alignment Verification
 - **TEST SCOPE:** P1 Game Operations UX/Backend alignment verification on http://localhost:3000 as requested in review
 - **CREDENTIALS:** admin@casino.com / Admin123!
