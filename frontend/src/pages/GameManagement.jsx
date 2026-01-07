@@ -102,6 +102,10 @@ const GameManagement = () => {
   };
 
   const openConfig = (game) => {
+    if (!featureFlags.gamesConfigEnabled) {
+      toast.info('Game configuration is not enabled');
+      return;
+    }
     setSelectedGame(game);
     setIsConfigOpen(true);
   };
