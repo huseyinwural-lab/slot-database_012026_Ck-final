@@ -6,9 +6,15 @@ async def test_game_config_readonly_endpoint_returns_min_payload(client, session
     from app.models.game_models import Game
     from sqlmodel import select
 
-    # Seed a game (SQLModel table)
+    # Seed a game under the same tenant as the admin token
+    from jose import jwt
+    from config import settings
+
+    payload = jwt.decode(admin_token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    tenant_id = payload["tenant_id"]
+
     g = Game(
-        tenant_id="default_casino",
+        tenant_id=tenant_id,
         provider_id="mock",
         external_id="g-readonly",
         name="Game 1",
