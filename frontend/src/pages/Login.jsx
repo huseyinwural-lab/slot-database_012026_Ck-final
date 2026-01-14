@@ -35,7 +35,8 @@ const Login = () => {
         }
       }
       toast.success('Sign in successful');
-      // Reload to trigger CapabilitiesContext
+      // Deterministic capabilities refresh: force a hard reload.
+      // (P3-FE-CAP-01) The CapabilitiesProvider now uses TTL cache + tenant-aware invalidation.
       window.location.href = from === '/login' ? '/' : from;
     } catch (err) {
       console.error(err);
