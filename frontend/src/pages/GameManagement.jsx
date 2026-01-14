@@ -262,6 +262,14 @@ const GameManagement = () => {
     }
   };
 
+  if (capabilitiesLoading) {
+    return (
+      <div className="p-6">
+        <div className="text-sm text-muted-foreground">Loading capabilities…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mt-2">
