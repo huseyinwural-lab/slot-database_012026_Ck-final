@@ -107,6 +107,16 @@ app.add_middleware(MetricsMiddleware)
 
 # Exception Handlers
 app.add_exception_handler(AppError, app_exception_handler)
+
+# Games domain error standardization (P2-GO-BE-02)
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.exceptions import RequestValidationError
+from app.core.games_errors import games_http_exception_handler, games_validation_exception_handler
+
+app.add_exception_handler(StarletteHTTPException, games_http_exception_handler)
+app.add_exception_handler(RequestValidationError, games_validation_exception_handler)
+
+# Keep generic handler last
 app.add_exception_handler(Exception, generic_exception_handler)
 
 # --- ROUTER INCLUSION (SQL ONLY) ---

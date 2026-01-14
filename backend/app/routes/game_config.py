@@ -38,7 +38,12 @@ async def get_game_config(
     res = await session.execute(stmt)
     game = res.scalars().first()
     if not game:
-        raise HTTPException(404, "Game not found")
+        raise AppError(
+            error_code="GAME_CONFIG_NOT_FOUND",
+            message="Game config not found",
+            status_code=404,
+            details={"game_id": game_id},
+        )
 
     cfg = game.configuration if isinstance(game.configuration, dict) else {}
 
@@ -77,7 +82,12 @@ async def update_game_config(
     res = await session.execute(stmt)
     game = res.scalars().first()
     if not game:
-        raise HTTPException(404, "Game not found")
+        raise AppError(
+            error_code="GAME_CONFIG_NOT_FOUND",
+            message="Game config not found",
+            status_code=404,
+            details={"game_id": game_id},
+        )
 
     old_config = game.configuration
 
