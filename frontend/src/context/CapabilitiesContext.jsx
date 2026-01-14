@@ -64,8 +64,10 @@ export const CapabilitiesProvider = ({ children }) => {
       return;
     }
 
+    // Mark loading at the start so consumers can gate UI.
+    setLoading(true);
+
     try {
-      setLoading(true);
       const response = await api.get('/v1/tenants/capabilities');
       const data = response.data;
       cacheRef.current = { data, at: now, tenantKey };
