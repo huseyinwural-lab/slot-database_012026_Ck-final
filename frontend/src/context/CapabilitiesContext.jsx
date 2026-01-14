@@ -11,62 +11,90 @@ export const CapabilitiesProvider = ({ children }) => {
   const [tenantName, setTenantName] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is logged in (token exists)
-    const token = localStorage.getItem('admin_token');
-    console.log('🔑 Token check:', token ? 'EXISTS' : 'MISSING');
-    
-    if (token) {
-      console.log('🔄 Fetching capabilities...');
-      fetchCapabilities();
-    } else {
-      console.log('❌ No token, skipping capabilities fetch');
+  // In-memory cache (P3-FE-CAP-01)
+  const cacheRef = useRef({
+    data: null,
+    at: 0,
+    tenantKey: null,
+  });
+
+  const TTL_MS = 60_000;
+
+  const getTenantKey = () => {
+    if (typeof window === 'undefined') return 'ssr';
+    return localStorage.getItem('impersonate_tenant_id') || 'default';
+  };
+
+  const applyCapabilities = useCallback((data) => {
+    const featuresObj = data.features || {};
+    setCapabilitiesObject(featuresObj);
+    setCapabilitiesList(Object.keys(featuresObj));
+    setIsOwner(data.is_owner || false);
+    setTenantRole(data.tenant_role || null);
+    setTenantName(data.tenant_name || 'Casino');
+  }, []);
+
+  const invalidateCapabilities = useCallback(() => {
+    cacheRef.current = { data: null, at: 0, tenantKey: null };
+  }, []);
+
+  const refreshCapabilities = useCallback(async ({ force = false } = {}) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    if (!token) {
       setCapabilitiesObject({});
       setCapabilitiesList([]);
       setIsOwner(false);
       setLoading(false);
+      return;
     }
-  }, []);
-  
-  // Refetch when window gets focus (for login flow)
-  useEffect(() => {
-    const handleFocus = () => {
-      const token = localStorage.getItem('admin_token');
-      if (token && !capabilitiesObject) {
-        console.log('🔄 Window focused, refetching capabilities');
-        fetchCapabilities();
-      }
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [capabilitiesObject]);
 
-  const fetchCapabilities = async () => {
+    const tenantKey = getTenantKey();
+    const cached = cacheRef.current;
+    const now = Date.now();
+
+    const canUseCache =
+      !force &&
+      cached.data &&
+      cached.tenantKey === tenantKey &&
+      now - cached.at < TTL_MS;
+
+    if (canUseCache) {
+      applyCapabilities(cached.data);
+      setLoading(false);
+      return;
+    }
+
     try {
+      setLoading(true);
       const response = await api.get('/v1/tenants/capabilities');
       const data = response.data;
-
-      console.log('✅ Capabilities fetched:', data);
-      const featuresObj = data.features || {};
-      setCapabilitiesObject(featuresObj);
-      // Always keep an array available for `.map(...)` usage across UI.
-      setCapabilitiesList(Object.keys(featuresObj));
-      setIsOwner(data.is_owner || false);
-      setTenantRole(data.tenant_role || null);
-      setTenantName(data.tenant_name || 'Casino');
-      console.log('✅ isOwner set to:', data.is_owner);
+      cacheRef.current = { data, at: now, tenantKey };
+      applyCapabilities(data);
     } catch (error) {
       console.error('Failed to fetch capabilities:', error);
-      // If token exists but capabilities fail (e.g., 403/503 due to tenant context),
-      // keep the user authenticated; just mark capabilities as empty.
+      // keep authenticated; capabilities empty
       setCapabilitiesObject({});
       setCapabilitiesList([]);
       setIsOwner(false);
     } finally {
       setLoading(false);
     }
-  };
+  }, [applyCapabilities]);
+
+  // Initial load
+  useEffect(() => {
+    refreshCapabilities({ force: false });
+  }, [refreshCapabilities]);
+
+  // Refetch when window gets focus (login flow) — only if cache empty or TTL passed
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshCapabilities({ force: false });
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [refreshCapabilities]);
 
   const hasFeature = (featureKey) => {
     if (!capabilitiesObject) return false;
