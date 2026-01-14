@@ -120,7 +120,10 @@ export const CapabilitiesProvider = ({ children }) => {
         tenantName,
         hasFeature,
         featureFlags,
-        refetch: fetchCapabilities
+        // P3-FE-CAP-01
+        refreshCapabilities,
+        invalidateCapabilities,
+        refetch: refreshCapabilities
       }}
     >
       {children}
