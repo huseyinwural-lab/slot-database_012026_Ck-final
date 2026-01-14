@@ -31,7 +31,7 @@ const Layout = ({ children }) => {
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
-  const { isOwner, tenantName, hasFeature, capabilities } = useCapabilities();
+  const { isOwner, tenantName, hasFeature, capabilities, loading: capabilitiesLoading } = useCapabilities();
   
   const menuFlags = useMemo(
     () => capabilities?.menu_flags || {},
