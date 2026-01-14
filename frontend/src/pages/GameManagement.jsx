@@ -19,7 +19,7 @@ import api from '../services/api';
 import GameConfigReadOnlyPanel from '../components/games/GameConfigReadOnlyPanel';
 
 const GameManagement = () => {
-  const { featureFlags } = useCapabilities();
+  const { featureFlags, loading: capabilitiesLoading } = useCapabilities();
 
   const [games, setGames] = useState([]);
   const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });

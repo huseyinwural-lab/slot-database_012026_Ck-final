@@ -6,7 +6,7 @@ import { Building } from 'lucide-react';
 // Mock Impersonation Switcher for Owner
 // In production, this would set a "X-Impersonate-Tenant" header or similar context
 const TenantSwitcher = () => {
-  const { isOwner, refetch } = useCapabilities();
+  const { isOwner, invalidateCapabilities, refreshCapabilities } = useCapabilities();
   const [impersonating, setImpersonating] = useState(
     typeof window !== 'undefined' ? (localStorage.getItem('impersonate_tenant_id') || 'default') : 'default'
   );
