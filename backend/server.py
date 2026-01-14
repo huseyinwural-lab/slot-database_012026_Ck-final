@@ -106,13 +106,18 @@ from app.middleware.metrics_middleware import MetricsMiddleware
 app.add_middleware(MetricsMiddleware)
 
 # Exception Handlers
-app.add_exception_handler(AppError, app_exception_handler)
+# Base AppError handler is preserved for non-games domains.
 
 # Games domain error standardization (P2-GO-BE-02)
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
-from app.core.games_errors import games_http_exception_handler, games_validation_exception_handler
+from app.core.games_errors import (
+    games_http_exception_handler,
+    games_validation_exception_handler,
+    games_app_error_handler,
+)
 
+app.add_exception_handler(AppError, games_app_error_handler)
 app.add_exception_handler(StarletteHTTPException, games_http_exception_handler)
 app.add_exception_handler(RequestValidationError, games_validation_exception_handler)
 

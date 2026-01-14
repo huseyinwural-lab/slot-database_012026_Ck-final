@@ -5,7 +5,10 @@ from typing import Any, Dict, Optional
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from app.core.errors import AppError, app_exception_handler
 
 
 GAMES_PREFIX = "/api/v1/games"
@@ -38,8 +41,8 @@ async def games_http_exception_handler(request: Request, exc: StarletteHTTPExcep
     when it looks like a missing route (e.g., /api/v1/games/{id}/toggle).
     """
     if not _is_games_path(request):
-        # Let FastAPI default handler run by re-raising
-        raise exc
+        # Non-negotiable: do not touch other domains.
+        return await http_exception_handler(request, exc)
 
     status = exc.status_code
 
@@ -61,7 +64,7 @@ async def games_http_exception_handler(request: Request, exc: StarletteHTTPExcep
 
 async def games_validation_exception_handler(request: Request, exc: RequestValidationError):
     if not _is_games_path(request):
-        raise exc
+        return await request_validation_exception_handler(request, exc)
 
     return _wrap(
         "VALIDATION_FAILED",
@@ -69,3 +72,11 @@ async def games_validation_exception_handler(request: Request, exc: RequestValid
         422,
         details={"errors": exc.errors()},
     )
+
+
+async def games_app_error_handler(request: Request, exc: AppError):
+    """Wrap AppError ONLY for /api/v1/games.* to match the domain contract."""
+    if not _is_games_path(request):
+        return await app_exception_handler(request, exc)
+
+    return _wrap(exc.error_code, exc.message, exc.status_code, details=exc.details)
