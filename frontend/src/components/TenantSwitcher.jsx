@@ -27,7 +27,8 @@ const TenantSwitcher = () => {
                   localStorage.setItem('impersonate_tenant_id', val);
                 }
               }
-              refetch?.();
+              invalidateCapabilities?.();
+              refreshCapabilities?.({ force: true });
             }}
         >
             <SelectTrigger className="w-[180px] h-8 text-xs border-dashed">
