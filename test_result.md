@@ -1036,15 +1036,28 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED (3/3) - Payment Gateway Status, Retention & Churn, and Loss Leaders cards are NOW properly disabled with correct styling, tooltips, and blocked navigation
 
+### 2026-01-14 (E1) — P2-GO-BE-02 Standard Error Codes (Games domain)
+- **Scope (non-negotiable):** Error wrapping yalnızca `/api/v1/games*` için uygulanır. Diğer domain’ler değişmez.
+- **Sözleşme:** `{ "error_code": "...", "message": "...", "details": {...} }`
+- **Minimum mapping:**
+  - 501 → `FEATURE_NOT_IMPLEMENTED`
+  - 404 (framework-level missing route, games prefix) → `FEATURE_NOT_IMPLEMENTED` (status 501’e normalize edilir, `details.original_status=404`)
+  - GET `/api/v1/games/{id}/config` game yoksa → `GAME_CONFIG_NOT_FOUND` (404)
+  - 403 → `FORBIDDEN`
+  - 401 → `UNAUTHORIZED`
+  - 422 → `VALIDATION_FAILED`
+- **Frontend:** Toggle error mapping artık önce `err.standardized.code` ile deterministik çalışır (status fallback).
+- **Tests:**
+  - `pytest -q backend/tests/test_games_error_contract.py` ✅ PASS (includes non-games regression guard)
+  - UI smoke (screenshot_tool): /games toggle → toast "Not implemented" ✅
+
 ### 2026-01-07 (E1) — P1 Game Ops: Toggle Error Mapping + Feature Flag Resolver (Centralized)
 - Frontend: `CapabilitiesContext` artık `featureFlags` (tek merkez) sağlıyor.
 - Frontend: `GameManagement.jsx` artık `featureFlags`'ı context’ten alıyor (local resolver kaldırıldı).
 - Frontend: Toggle hata haritalama iyileştirildi:
-  - 403 + FEATURE_DISABLED → "Feature disabled for this tenant"
-  - 404 → "Toggle unavailable" (implement edilmemiş / bulunamadı)
-  - 501 → "Not implemented"
+  - 403 → "You don't have permission" (code: FORBIDDEN)
+  - 501 → "Not implemented" (code: FEATURE_NOT_IMPLEMENTED)
   - Beklenen durumlarda generic "Failed" toast yok.
-- Testing: (Pending) Aşağıdaki Testing Agent koşusu ile E2E doğrulanacak.
 
 ### 2026-01-07 (Testing Agent) — P1 Game Operations UX/Backend Alignment Verification
 - **TEST SCOPE:** P1 Game Operations UX/Backend alignment verification on http://localhost:3000 as requested in review
