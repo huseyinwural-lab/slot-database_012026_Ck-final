@@ -87,26 +87,30 @@ const GameManagement = () => {
       const status = err?.response?.status;
       const code = err?.standardized?.code;
 
-      // P1-GO-ERR-01: Toggle error mapping (404/501/403 ayrımı)
-      if (status === 403) {
-        if (code === 'FEATURE_DISABLED') {
-          toast.error('Feature disabled for this tenant');
-          return;
-        }
+      // P2-GO-BE-02: Prefer error_code, fallback to status.
+      if (code === 'FORBIDDEN' || status === 403) {
         toast.error("You don't have permission");
         return;
       }
 
+      if (code === 'FEATURE_NOT_IMPLEMENTED' || status === 501) {
+        toast.info('Not implemented', {
+          description: 'This operation is not implemented yet.',
+        });
+        return;
+      }
+
       if (status === 404) {
+        // Should be rare for toggle after backend normalization, but keep safe fallback.
         toast.info('Toggle unavailable', {
           description: 'Not implemented in this environment (or game not found).',
         });
         return;
       }
 
-      if (status === 501) {
-        toast.info('Not implemented', {
-          description: 'This operation is not implemented yet.',
+      if (code === 'UNAUTHORIZED' || status === 401) {
+        toast.warning('Unauthorized', {
+          description: 'Session invalid. Please sign in again.',
         });
         return;
       }
