@@ -89,7 +89,8 @@ const AffiliateManagement = () => {
     try { await api.post('/v1/affiliates/offers', payload); setIsOfferOpen(false); fetchData(); toast.success("Offer Created"); } catch { toast.error("Failed"); }
   };
   const handleCreateLink = async () => {
-    try { await api.post('/v1/affiliates/links', newLink); setIsLinkOpen(false); fetchData(); toast.success("Link Generated"); } catch { toast.error("Failed"); }
+    // Backend does not support global link creation; it requires /affiliates/{affiliate_id}/links with a unique `code`.
+    toast.message('Not available in this environment');
   };
   const handleCreatePayout = async () => {
     const payload = { ...newPayout, period_start: new Date().toISOString(), period_end: new Date().toISOString() };
