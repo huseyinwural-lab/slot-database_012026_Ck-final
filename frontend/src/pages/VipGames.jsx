@@ -78,6 +78,9 @@ const VipGames = () => {
       ? 'No games match your search.'
       : 'All games are already VIP.';
 
+  const noCandidates = !loading && filteredCandidates.length === 0;
+  const dialogEmptyMessage = noCandidates ? emptyMessage : null;
+
   return (
     <div className="space-y-6">
         <div className="flex justify-between items-center">
