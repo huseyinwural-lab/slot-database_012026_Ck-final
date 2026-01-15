@@ -158,25 +158,15 @@ const KYCManagement = () => {
                                                                       onClick={async () => {
                                                                         if (!isAvailable) return;
                                                                         try {
-                                                                          const isAbsolute = /^https?:\/\//i.test(downloadUrl);
-                                                                          if (isAbsolute) {
-                                                                            const w = window.open(downloadUrl, '_blank', 'noopener,noreferrer');
-                                                                            if (!w) throw new Error('Popup blocked');
-                                                                            return;
-                                                                          }
-
-                                                                          // downloadUrl can be either /v1/... or /api/v1/...; api client will prefix /api.
-                                                                          // Strip leading /api to prevent double '/api/api'.
-                                                                          const relative = downloadUrl.startsWith('/api') ? downloadUrl.slice(4) : downloadUrl;
-                                                                          const res = await api.get(relative, { responseType: 'blob' });
-                                                                          const blobUrl = window.URL.createObjectURL(res.data);
+                                                                          // Minimal, robust approach:
+                                                                          // Use native anchor navigation to trigger attachment download.
                                                                           const a = document.createElement('a');
-                                                                          a.href = blobUrl;
-                                                                          a.download = `kyc_document_${doc.id || 'file'}`;
+                                                                          a.href = downloadUrl;
+                                                                          a.target = '_blank';
+                                                                          a.rel = 'noopener noreferrer';
                                                                           document.body.appendChild(a);
                                                                           a.click();
                                                                           a.remove();
-                                                                          window.URL.revokeObjectURL(blobUrl);
                                                                         } catch (e) {
                                                                           const status = e?.response?.status;
                                                                           toast.error(
