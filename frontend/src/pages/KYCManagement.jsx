@@ -146,6 +146,8 @@ const KYCManagement = () => {
                                                                     String(previewUrl || '').includes('via.placeholder.com') ||
                                                                     String(previewUrl || '').includes('placehold.co');
 
+                                                                  const isAvailable = !isPlaceholder;
+
                                                                   if (isPlaceholder) {
                                                                     return (
                                                                       <Button
