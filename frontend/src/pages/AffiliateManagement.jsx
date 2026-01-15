@@ -190,7 +190,11 @@ const AffiliateManagement = () => {
             <TabsContent value="links" className="mt-4">
                 <div className="flex justify-end mb-4">
                     <Dialog open={isLinkOpen} onOpenChange={setIsLinkOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Generate Link</Button></DialogTrigger>
+                        <DialogTrigger asChild>
+                              <Button disabled title="Not available in this environment">
+                                <Plus className="w-4 h-4 mr-2" /> Generate Link
+                              </Button>
+                            </DialogTrigger>
                         <DialogContent>
                             <DialogHeader><DialogTitle>Tracking Link</DialogTitle></DialogHeader>
                             <div className="space-y-4 py-4">
