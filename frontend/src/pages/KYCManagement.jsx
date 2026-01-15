@@ -159,15 +159,30 @@ const KYCManagement = () => {
                                                                       onClick={async () => {
                                                                         if (!isAvailable) return;
                                                                         try {
-                                                                          // Programmatic download so we can surface failures with a toast
-                                                                          // Use a native navigation (new tab) so browser handles Content-Disposition download.
+                                                                          // Programmatic download so we can surface failures with a toast.
+                                                                          // Avoid popup blockers: fetch as blob and trigger a download.
                                                                           const absolute = downloadUrl.startsWith('http')
                                                                             ? downloadUrl
                                                                             : `${window.location.origin}${downloadUrl}`;
-                                                                          const w = window.open(absolute, '_blank', 'noopener,noreferrer');
-                                                                          if (!w) throw new Error('Popup blocked');
+
+                                                                          const res = await fetch(absolute, {
+                                                                            credentials: 'include',
+                                                                          });
+                                                                          if (!res.ok) throw new Error(`HTTP_${res.status}`);
+
+                                                                          const blob = await res.blob();
+                                                                          const url = window.URL.createObjectURL(blob);
+                                                                          const a = document.createElement('a');
+                                                                          a.href = url;
+                                                                          a.download = `kyc_${doc.id}.txt`;
+                                                                          document.body.appendChild(a);
+                                                                          a.click();
+                                                                          a.remove();
+                                                                          window.URL.revokeObjectURL(url);
                                                                         } catch (e) {
-                                                                          const status = e?.response?.status;
+                                                                          const msg = String(e?.message || 'unknown');
+                                                                          const match = msg.match(/HTTP_(\d+)/);
+                                                                          const status = match ? match[1] : undefined;
                                                                           toast.error(
                                                                             `Document download failed${status ? ` (${status})` : ''}`
                                                                           );
