@@ -58,6 +58,14 @@ const VipGames = () => {
 
       // Re-sync to be safe
       fetchData();
+
+  const hasNonVip = allGames.some(g => !(g.tags || []).includes('VIP'));
+  const emptyMessage = !hasNonVip
+    ? 'All games are already VIP.'
+    : search
+      ? 'No games match your search.'
+      : 'No games found.';
+
       setIsAddOpen(false);
     } catch (err) {
       toast.error('Failed to update status');
@@ -99,7 +107,7 @@ const VipGames = () => {
                     <div className="space-y-2 mt-2">
                         {loading && <div className="text-center py-4 text-muted-foreground">Loading…</div>}
                         {!loading && filteredCandidates.length === 0 && (
-                          <div className="text-center py-4 text-muted-foreground">No games found.</div>
+                          <div className="text-center py-4 text-muted-foreground">{emptyMessage}</div>
                         )}
                         {!loading && filteredCandidates.map(g => (
                             <div key={g.id} className="flex justify-between items-center p-3 border rounded hover:bg-secondary/50">
