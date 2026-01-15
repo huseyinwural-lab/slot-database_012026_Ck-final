@@ -490,11 +490,21 @@ async def get_games(
     
     items = []
     for g in games:
-        # Provide UI-friendly derived fields for admin pages
+        active = bool(getattr(g, "is_active", False))
         items.append(
             {
                 **g.model_dump(),
-                "business_status": "active" if getattr(g, "is_active", False) else "inactive",
+                "business_status": "active" if active else "inactive",
+                "runtime_status": "online" if active else "offline",
+            }
+        )
+
+    return {
+        "items": items,
+        "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
+    }
+
+
 @router.post("/games/{game_id}/toggle", response_model=dict)
 async def toggle_game_active(
     game_id: str,
@@ -532,13 +542,4 @@ async def toggle_game_active(
         "is_active": game.is_active,
         "business_status": "active" if game.is_active else "inactive",
         "runtime_status": "online" if game.is_active else "offline",
-    }
-
-                "runtime_status": "online" if getattr(g, "is_active", False) else "offline",
-            }
-        )
-
-    return {
-        "items": items,
-        "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
     }
