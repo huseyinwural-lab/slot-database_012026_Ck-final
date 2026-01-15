@@ -28,6 +28,16 @@ Do not delete sections unless instructed.
 ### 2026-01-05 (Testing Agent) — CI/lockfile drift validation
 - **VALIDATION RESULTS:**
   1. ✅ `yarn install --frozen-lockfile` in frontend: PASS (Already up-to-date, completed in 0.28s)
+
+### 2026-01-15 — KYC Document Download dead-click fix (Operations Sweep)
+- Scope: `/kyc` → Verification Queue → Document Review modal → Download link/button
+- Result: ✅ PASS (local)
+- Notes:
+  - Frontend: Download button is **enabled** when `doc.download_url` is present; preview can remain placeholder.
+  - Download action: uses `fetch(download_url)` → blob → programmatic file download (avoids popup blockers).
+  - Backend: `GET /api/v1/kyc/documents/{doc_id}/download?token=...` returns attachment (MOCK txt) with Content-Disposition.
+  - Verified via Playwright screenshot flow on `http://localhost:3000` after frontend restart.
+
   2. ✅ `yarn lint` in frontend: PASS (ESLint completed successfully in 0.83s)
   3. ✅ Git diff validation: Only `frontend/yarn.lock` modified (200 lines changed: 48 insertions, 152 deletions)
   4. ⚠️  Note: `.github/workflows/frontend-lint.yml` was NOT modified in current state (already contains Node 20.19.6 pinning)
