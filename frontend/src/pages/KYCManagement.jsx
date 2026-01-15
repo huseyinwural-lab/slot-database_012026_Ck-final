@@ -138,10 +138,13 @@ const KYCManagement = () => {
                                                                 <p>Preview: {doc.file_url}</p>
                                                                 {(() => {
                                                                   const downloadUrl = doc.download_url;
+                                                                  const previewUrl = doc.file_url;
                                                                   const isPlaceholder =
                                                                     !downloadUrl ||
                                                                     String(downloadUrl).includes('via.placeholder.com') ||
-                                                                    String(downloadUrl).includes('placehold.co');
+                                                                    String(downloadUrl).includes('placehold.co') ||
+                                                                    String(previewUrl || '').includes('via.placeholder.com') ||
+                                                                    String(previewUrl || '').includes('placehold.co');
 
                                                                   if (isPlaceholder) {
                                                                     return (
