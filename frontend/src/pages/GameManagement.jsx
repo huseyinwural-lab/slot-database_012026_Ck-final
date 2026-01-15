@@ -404,7 +404,7 @@ const GameManagement = () => {
                           </Tooltip>
                         </TooltipProvider>
                         <Switch
-                          checked={game.business_status === 'active'}
+                          checked={!!game.is_active}
                           onCheckedChange={() => handleToggleGame(game.id)}
                         />
                       </TableCell>

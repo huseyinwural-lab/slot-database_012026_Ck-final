@@ -488,9 +488,57 @@ async def get_games(
     # Let's return the standard { items: [], meta: {} } 
     # AND I will patch VipGames.jsx to read .items if it exists.
     
+    items = []
+    for g in games:
+        # Provide UI-friendly derived fields for admin pages
+        items.append(
+            {
+                **g.model_dump(),
+                "business_status": "active" if getattr(g, "is_active", False) else "inactive",
+@router.post("/games/{game_id}/toggle", response_model=dict)
+async def toggle_game_active(
+    game_id: str,
+    request: Request,
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    """Toggle game active state.
+
+    Semantics:
+    - `is_active=true` => active/online
+    - `is_active=false` => inactive/offline
+    """
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    stmt = select(Game).where(Game.id == game_id, Game.tenant_id == tenant_id)
+    res = await session.execute(stmt)
+    game = res.scalars().first()
+    if not game:
+        raise AppError(
+            error_code="GAME_NOT_FOUND",
+            message="Game not found",
+            status_code=404,
+            details={"game_id": game_id},
+        )
+
+    game.is_active = not bool(getattr(game, "is_active", False))
+    session.add(game)
+    await session.commit()
+    await session.refresh(game)
+
     return {
-        "items": games,
+        "id": game.id,
+        "is_active": game.is_active,
+        "business_status": "active" if game.is_active else "inactive",
+        "runtime_status": "online" if game.is_active else "offline",
+    }
+
+                "runtime_status": "online" if getattr(g, "is_active", False) else "offline",
+            }
+        )
+
+    return {
+        "items": items,
         "meta": PaginationMeta(total=total, page=pagination.page, page_size=pagination.page_size),
-        # Fallback for simple array access (might not work if they map directly)
-        # We will fix Frontend VipGames.jsx
     }
