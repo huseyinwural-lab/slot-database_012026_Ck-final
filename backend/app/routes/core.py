@@ -493,9 +493,11 @@ async def get_games(
     items = []
     for g in games:
         active = bool(getattr(g, "is_active", False))
+        cfg = g.configuration if isinstance(getattr(g, "configuration", None), dict) else {}
         items.append(
             {
                 **g.model_dump(),
+                "tags": cfg.get("tags", []),
                 "business_status": "active" if active else "inactive",
                 "runtime_status": "online" if active else "offline",
             }
@@ -545,3 +547,54 @@ async def toggle_game_active(
         "business_status": "active" if game.is_active else "inactive",
         "runtime_status": "online" if game.is_active else "offline",
     }
+
+
+@router.put("/games/{game_id}/details", response_model=dict)
+async def update_game_details(
+    game_id: str,
+    payload: Dict[str, Any] = Body(...),
+    request: Request = None,
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+):
+    """Update game metadata used by admin UIs.
+
+    Currently supported fields:
+    - tags: List[str]
+
+    Notes:
+    - We store tags inside `Game.configuration["tags"]` to avoid DB migrations.
+    """
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+    stmt = select(Game).where(Game.id == game_id, Game.tenant_id == tenant_id)
+    res = await session.execute(stmt)
+    game = res.scalars().first()
+    if not game:
+        raise AppError(
+            error_code="GAME_NOT_FOUND",
+            message="Game not found",
+            status_code=404,
+            details={"game_id": game_id},
+        )
+
+    tags = payload.get("tags")
+    if tags is None:
+        raise HTTPException(status_code=422, detail={"error_code": "VALIDATION_FAILED", "message": "tags required"})
+    if not isinstance(tags, list) or not all(isinstance(t, str) for t in tags):
+        raise HTTPException(status_code=422, detail={"error_code": "VALIDATION_FAILED", "message": "tags must be list[str]"})
+
+    cfg = game.configuration if isinstance(game.configuration, dict) else {}
+    cfg["tags"] = tags
+    game.configuration = cfg
+
+    session.add(game)
+    await session.commit()
+    await session.refresh(game)
+
+    return {
+        "id": game.id,
+        "tags": tags,
+    }
+
