@@ -161,19 +161,12 @@ const KYCManagement = () => {
                                                                         if (!isAvailable) return;
                                                                         try {
                                                                           // Programmatic download so we can surface failures with a toast
-                                                                          const relative = downloadUrl.startsWith('/api')
-                                                                            ? downloadUrl.slice(4)
-                                                                            : downloadUrl;
-
-                                                                          const res = await api.get(relative, { responseType: 'blob' });
-                                                                          const blobUrl = window.URL.createObjectURL(res.data);
-                                                                          const a = document.createElement('a');
-                                                                          a.href = blobUrl;
-                                                                          a.download = `kyc_document_${doc.id || 'file'}`;
-                                                                          document.body.appendChild(a);
-                                                                          a.click();
-                                                                          a.remove();
-                                                                          window.URL.revokeObjectURL(blobUrl);
+                                                                          // Use a native navigation (new tab) so browser handles Content-Disposition download.
+                                                                          const absolute = downloadUrl.startsWith('http')
+                                                                            ? downloadUrl
+                                                                            : `${window.location.origin}${downloadUrl}`;
+                                                                          const w = window.open(absolute, '_blank', 'noopener,noreferrer');
+                                                                          if (!w) throw new Error('Popup blocked');
                                                                         } catch (e) {
                                                                           const status = e?.response?.status;
                                                                           toast.error(
