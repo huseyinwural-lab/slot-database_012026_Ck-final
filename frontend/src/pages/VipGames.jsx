@@ -18,7 +18,8 @@ const VipGames = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await api.get('/v1/games');
+      setLoading(true);
+      const res = await api.get('/v1/games', { params: { page: 1, page_size: 500 } });
       // Handle both Array and Paginated Response
       const all = Array.isArray(res.data) ? res.data : (res.data.items || []);
       setAllGames(all);
