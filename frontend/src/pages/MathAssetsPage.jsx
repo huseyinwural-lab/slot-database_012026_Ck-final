@@ -51,7 +51,8 @@ const MathAssetsPage = () => {
       await api.post('/v1/math-assets', {
         ref_key: form.ref_key,
         type: form.type,
-        content: content
+        content: content,
+        reason: 'Admin UI math asset upload'
       });
       
       setUploadOpen(false);
@@ -59,7 +60,7 @@ const MathAssetsPage = () => {
       fetchAssets();
       toast.success('Asset Uploaded');
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Upload failed');
+      toast.error(e?.response?.data?.detail?.message || e?.response?.data?.detail || 'Upload failed');
     }
   };
 

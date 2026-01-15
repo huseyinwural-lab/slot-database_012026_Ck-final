@@ -34,7 +34,11 @@ const RobotsPage = () => {
 
   const handleToggle = async (id) => {
     try {
-      await api.post(`/v1/robots/${id}/toggle`);
+      await api.post(
+        `/v1/robots/${id}/toggle`,
+        {},
+        { headers: { 'X-Reason': 'Admin UI toggle robot active state' } }
+      );
       fetchRobots();
       toast.success('Updated status');
     } catch {
@@ -44,7 +48,11 @@ const RobotsPage = () => {
 
   const handleClone = async (id) => {
     try {
-      await api.post(`/v1/robots/${id}/clone`);
+      await api.post(
+        `/v1/robots/${id}/clone`,
+        {},
+        { headers: { 'X-Reason': 'Admin UI clone robot' } }
+      );
       fetchRobots();
       toast.success('Cloned successfully');
     } catch {
