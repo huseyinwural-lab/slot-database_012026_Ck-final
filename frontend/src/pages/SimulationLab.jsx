@@ -30,7 +30,11 @@ const SimulationLab = () => {
     }
   };
 
-  useEffect(() => { fetchRuns(); }, []);
+  useEffect(() => {
+    // initial fetch
+    fetchRuns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getStatusBadge = (status) => {
     const variants = {
