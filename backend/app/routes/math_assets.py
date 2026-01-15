@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/v1/math-assets", tags=["math_assets"])
 # Avoid 307 redirect on trailing slashes (prevents frontend 'Failed' toasts)
 router.redirect_slashes = False
 
-@router.get("/", response_model=Dict)
+@router.get("", response_model=Dict)
 async def list_assets(
     page: int = 1,
     limit: int = 20,
@@ -48,7 +48,7 @@ async def list_assets(
         "meta": {"total": total, "page": page, "page_size": limit}
     }
 
-@router.post("/")
+@router.post("")
 async def create_asset(
     request: Request,
     asset_data: Dict[str, Any] = Body(...),
