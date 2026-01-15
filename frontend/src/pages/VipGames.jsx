@@ -37,20 +37,31 @@ const VipGames = () => {
 
   const toggleVipStatus = async (game, isVip) => {
     try {
-        const currentTags = game.tags || [];
-        let newTags;
-        if (isVip) {
-            if (currentTags.includes('VIP')) return;
-            newTags = [...currentTags, 'VIP'];
-        } else {
-            newTags = currentTags.filter(t => t !== 'VIP');
-        }
-        
-        await api.put(`/v1/games/${game.id}/details`, { tags: newTags });
-        toast.success(isVip ? "Added to VIP" : "Removed from VIP");
-        fetchData();
+      const currentTags = game.tags || [];
+      let newTags;
+      if (isVip) {
+        if (currentTags.includes('VIP')) return;
+        newTags = [...currentTags, 'VIP'];
+      } else {
+        newTags = currentTags.filter(t => t !== 'VIP');
+      }
+
+      // Optimistic UI update to avoid stale "No games found" flicker
+      setAllGames(prev => prev.map(g => (g.id === game.id ? { ...g, tags: newTags } : g)));
+      setVipGames(prev => {
+        if (isVip) return [...prev, { ...game, tags: newTags }];
+        return prev.filter(g => g.id !== game.id);
+      });
+
+      await api.put(`/v1/games/${game.id}/details`, { tags: newTags });
+      toast.success(isVip ? 'Added to VIP' : 'Removed from VIP');
+
+      // Re-sync to be safe
+      fetchData();
+      setIsAddOpen(false);
     } catch (err) {
-        toast.error("Failed to update status");
+      toast.error('Failed to update status');
+      fetchData();
     }
   };
 
