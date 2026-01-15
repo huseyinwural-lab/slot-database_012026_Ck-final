@@ -107,9 +107,15 @@ const SimulationLab = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex gap-2">
-                  <Button variant="outline"><Download className="w-4 h-4 mr-2" /> Import from Live Data</Button>
-                  <Button variant="outline"><Folder className="w-4 h-4 mr-2" /> Load Saved Scenario</Button>
-                  <Button><Play className="w-4 h-4 mr-2" /> Run Portfolio Simulation</Button>
+                  <Button variant="outline" disabled title="Not implemented yet">
+                    <Download className="w-4 h-4 mr-2" /> Import from Live Data
+                  </Button>
+                  <Button variant="outline" disabled title="Not implemented yet">
+                    <Folder className="w-4 h-4 mr-2" /> Load Saved Scenario
+                  </Button>
+                  <Button disabled title="Not implemented yet">
+                    <Play className="w-4 h-4 mr-2" /> Run Portfolio Simulation
+                  </Button>
                 </div>
                 <p className="text-muted-foreground">Portfolio simülasyon arayüzü yakında eklenecek</p>
               </div>
