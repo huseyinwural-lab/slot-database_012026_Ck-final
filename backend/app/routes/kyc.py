@@ -84,9 +84,24 @@ async def get_kyc_queue(
             "risk_score": p.risk_score,
             "type": "identity_document", # Mock
             "file_url": "https://via.placeholder.com/400x300.png?text=Passport",
+            # P1-KYC-DL-01: provide a real usable download URL (smallest viable solution).
+            # In real systems this would be a signed S3 URL; here we serve a tiny text file.
+            "download_url": f"/api/v1/kyc/documents/doc_{p.id}_1/download",
             "documents": [
-                {"id": f"doc_{p.id}_1", "type": "passport", "status": "pending", "url": "https://via.placeholder.com/400x300.png?text=Passport"},
-                {"id": f"doc_{p.id}_2", "type": "utility_bill", "status": "pending", "url": "https://via.placeholder.com/400x300.png?text=Bill"}
+                {
+                    "id": f"doc_{p.id}_1",
+                    "type": "passport",
+                    "status": "pending",
+                    "url": "https://via.placeholder.com/400x300.png?text=Passport",
+                    "download_url": f"/api/v1/kyc/documents/doc_{p.id}_1/download",
+                },
+                {
+                    "id": f"doc_{p.id}_2",
+                    "type": "utility_bill",
+                    "status": "pending",
+                    "url": "https://via.placeholder.com/400x300.png?text=Bill",
+                    "download_url": f"/api/v1/kyc/documents/doc_{p.id}_2/download",
+                }
             ]
         })
         
