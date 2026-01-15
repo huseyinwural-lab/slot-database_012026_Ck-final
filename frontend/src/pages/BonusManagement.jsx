@@ -55,11 +55,12 @@ const BonusManagement = () => {
           wagering_mult: Number(newCampaign.wagering_mult),
           min_deposit: Number(newCampaign.min_deposit)
         },
-        reason: reason
       };
-      await api.post('/v1/bonuses/campaigns', payload);
+      // Backend expects multiple body params (payload + reason) => must be embedded.
+      await api.post('/v1/bonuses/campaigns', { payload, reason });
       toast.success('Campaign created');
       setIsOpen(false);
+      setReason('');
       fetchCampaigns();
     } catch (e) {
       toast.error('Creation failed');
