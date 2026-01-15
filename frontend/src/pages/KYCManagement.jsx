@@ -141,7 +141,9 @@ const KYCManagement = () => {
                                                                   const isPlaceholder =
                                                                     !downloadUrl ||
                                                                     String(downloadUrl).includes('via.placeholder.com') ||
-                                                                    String(downloadUrl).includes('placehold.co');
+                                                                    String(downloadUrl).includes('placehold.co') ||
+                                                                    String(doc.file_url || '').includes('via.placeholder.com') ||
+                                                                    String(doc.file_url || '').includes('placehold.co');
 
                                                                   const isAvailable = !isPlaceholder;
 
