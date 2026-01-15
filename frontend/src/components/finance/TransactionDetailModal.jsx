@@ -46,17 +46,7 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
   };
 
   const handleAnalyzeRisk = async () => {
-    setIsAnalyzing(true);
-    try {
-      const res = await api.post(`/v1/finance/transactions/${transaction.id}/analyze-risk`);
-      setAiAnalysis(res.data);
-      toast.success("AI Analysis Complete");
-      onRefresh(); 
-    } catch (err) {
-      toast.error('AI Analysis failed');
-    } finally {
-      setIsAnalyzing(false);
-    }
+    toast.message('Not available in this environment');
   };
 
   const isWithdrawal = transaction.type === 'withdrawal';
@@ -176,14 +166,28 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                                    </Select>
                                  </div>
                                )}
-                               <Button className="w-full bg-green-600 hover:bg-green-700 h-10" onClick={() => handleAction('approve')}>
+                               <Button
+                                 className="w-full bg-green-600 hover:bg-green-700 h-10"
+                                 disabled
+                                 title="Use Withdrawals page for approvals"
+                               >
                                    <CheckCircle className="w-4 h-4 mr-2" /> 
                                    {isWithdrawal ? 'Approve Payout' : 'Approve Deposit'}
                                </Button>
-                               <Button variant="destructive" className="w-full h-10" onClick={() => handleAction('reject')}>
+                               <Button
+                                 variant="destructive"
+                                 className="w-full h-10"
+                                 disabled
+                                 title="Use Withdrawals page for approvals"
+                               >
                                    <XCircle className="w-4 h-4 mr-2" /> Reject
                                </Button>
-                               <Button variant="secondary" className="w-full h-10" onClick={() => handleAction('pending_review')}>
+                               <Button
+                                 variant="secondary"
+                                 className="w-full h-10"
+                                 disabled
+                                 title="Not available in this environment"
+                               >
                                    <ShieldAlert className="w-4 h-4 mr-2" /> Send to Review
                                </Button>
                            </>
