@@ -72,12 +72,11 @@ const VipGames = () => {
   );
 
 
-  const hasNonVip = allGames.some(g => !(g.tags || []).includes('VIP'));
-  const emptyMessage = !hasNonVip
-    ? 'All games are already VIP.'
+  const emptyMessage = !allGames.length
+    ? 'No games found.'
     : search
       ? 'No games match your search.'
-      : 'No games found.';
+      : 'All games are already VIP.';
 
   return (
     <div className="space-y-6">
