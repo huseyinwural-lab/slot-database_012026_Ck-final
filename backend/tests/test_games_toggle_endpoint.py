@@ -5,8 +5,15 @@ import pytest
 async def test_games_toggle_endpoint_flips_is_active(client, session, admin_token):
     from app.models.game_models import Game
 
+    # Seed game under same tenant as admin token
+    from jose import jwt
+    from config import settings
+
+    payload = jwt.decode(admin_token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    tenant_id = payload["tenant_id"]
+
     g = Game(
-        tenant_id="default_casino",
+        tenant_id=tenant_id,
         provider_id="mock",
         external_id="toggle-1",
         name="Toggle Game",
