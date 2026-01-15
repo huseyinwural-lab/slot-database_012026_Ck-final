@@ -36,8 +36,7 @@ const RobotsPage = () => {
     try {
       await api.post(
         `/v1/robots/${id}/toggle`,
-        {},
-        { headers: { 'X-Reason': 'Admin UI toggle robot active state' } }
+        { reason: 'Admin UI toggle robot active state' }
       );
       fetchRobots();
       toast.success('Updated status');
@@ -50,8 +49,7 @@ const RobotsPage = () => {
     try {
       await api.post(
         `/v1/robots/${id}/clone`,
-        {},
-        { headers: { 'X-Reason': 'Admin UI clone robot' } }
+        { reason: 'Admin UI clone robot' }
       );
       fetchRobots();
       toast.success('Cloned successfully');
