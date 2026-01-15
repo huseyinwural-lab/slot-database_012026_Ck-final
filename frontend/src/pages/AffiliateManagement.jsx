@@ -153,7 +153,11 @@ const AffiliateManagement = () => {
             <TabsContent value="offers" className="mt-4">
                 <div className="flex justify-end mb-4">
                     <Dialog open={isOfferOpen} onOpenChange={setIsOfferOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> New Offer</Button></DialogTrigger>
+                        <DialogTrigger asChild>
+                          <Button disabled title="Not available in this environment">
+                            <Plus className="w-4 h-4 mr-2" /> New Offer
+                          </Button>
+                        </DialogTrigger>
                         <DialogContent>
                             <DialogHeader><DialogTitle>Create Offer</DialogTitle></DialogHeader>
                             <div className="space-y-4 py-4">
@@ -236,7 +240,11 @@ const AffiliateManagement = () => {
             <TabsContent value="payouts" className="mt-4">
                 <div className="flex justify-end mb-4">
                     <Dialog open={isPayoutOpen} onOpenChange={setIsPayoutOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Record Payout</Button></DialogTrigger>
+                        <DialogTrigger asChild>
+                          <Button disabled title="Not available in this environment">
+                            <Plus className="w-4 h-4 mr-2" /> Record Payout
+                          </Button>
+                        </DialogTrigger>
                         <DialogContent>
                             <DialogHeader><DialogTitle>Issue Payout</DialogTitle></DialogHeader>
                             <div className="space-y-4 py-4">
@@ -271,7 +279,11 @@ const AffiliateManagement = () => {
             <TabsContent value="creatives" className="mt-4">
                 <div className="flex justify-end mb-4">
                     <Dialog open={isCreativeOpen} onOpenChange={setIsCreativeOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Creative</Button></DialogTrigger>
+                        <DialogTrigger asChild>
+                          <Button disabled title="Not available in this environment">
+                            <Plus className="w-4 h-4 mr-2" /> Add Creative
+                          </Button>
+                        </DialogTrigger>
                         <DialogContent>
                             <DialogHeader><DialogTitle>Upload Asset</DialogTitle></DialogHeader>
                             <div className="space-y-4 py-4">

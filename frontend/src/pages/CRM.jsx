@@ -93,7 +93,11 @@ const CRM = () => {
             <TabsContent value="campaigns" className="mt-4">
                 <div className="flex justify-end mb-4">
                     <Dialog open={isCampOpen} onOpenChange={setIsCampOpen}>
-                        <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> New Campaign</Button></DialogTrigger>
+                        <DialogTrigger asChild>
+                          <Button disabled title="Not available in this environment">
+                            <Plus className="w-4 h-4 mr-2" /> New Campaign
+                          </Button>
+                        </DialogTrigger>
                         <DialogContent>
                             <DialogHeader><DialogTitle>Create Campaign</DialogTitle></DialogHeader>
                             <div className="space-y-4 py-4">
@@ -106,7 +110,7 @@ const CRM = () => {
                                 </div>
                                 <div className="space-y-2"><Label>Segment (Mock ID)</Label><Input value={newCampaign.segment_id} onChange={e=>setNewCampaign({...newCampaign, segment_id: e.target.value})} placeholder="Segment ID" /></div>
                                 <div className="space-y-2"><Label>Template (Mock ID)</Label><Input value={newCampaign.template_id} onChange={e=>setNewCampaign({...newCampaign, template_id: e.target.value})} placeholder="Template ID" /></div>
-                                <Button onClick={handleCreateCampaign} className="w-full">Create Draft</Button>
+                                <Button disabled title="Not available in this environment" className="w-full">Create Draft</Button>
                             </div>
                         </DialogContent>
                     </Dialog>
@@ -123,7 +127,11 @@ const CRM = () => {
                                         <TableCell><Badge variant={c.status==='completed'?'default':'secondary'}>{c.status}</Badge></TableCell>
                                         <TableCell>{c.stats?.sent || 0}</TableCell>
                                         <TableCell className="text-right">
-                                            {c.status === 'draft' && <Button size="sm" onClick={() => handleSendCampaign(c.id)}><Send className="w-4 h-4 mr-1" /> Send</Button>}
+                                            {c.status === 'draft' && (
+                                              <Button size="sm" disabled title="Not available in this environment">
+                                                <Send className="w-4 h-4 mr-1" /> Send
+                                              </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
