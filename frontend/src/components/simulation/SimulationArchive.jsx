@@ -38,9 +38,9 @@ const SimulationArchive = ({ runs, getTypeBadge, getStatusBadge }) => {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
-                    <Button size="sm" variant="ghost"><RefreshCw className="w-4 h-4" /></Button>
-                    <Button size="sm" variant="ghost"><Download className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" disabled title="Not implemented yet"><Eye className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" disabled title="Not implemented yet"><RefreshCw className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" disabled title="Not implemented yet"><Download className="w-4 h-4" /></Button>
                   </div>
                 </TableCell>
               </TableRow>

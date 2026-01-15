@@ -12,7 +12,7 @@ const SimulationOverview = ({ runs, getTypeBadge, getStatusBadge }) => {
           <CardTitle>Lab Genel Durum</CardTitle>
           <CardDescription>Son simülasyonlar ve özet</CardDescription>
         </div>
-        <Button><Plus className="w-4 h-4 mr-2" /> Yeni Simülasyon</Button>
+        <Button disabled title="Not implemented yet"><Plus className="w-4 h-4 mr-2" /> Yeni Simülasyon</Button>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-4 gap-4 mb-6">
@@ -66,8 +66,8 @@ const SimulationOverview = ({ runs, getTypeBadge, getStatusBadge }) => {
                 <TableCell className="text-xs">{run.duration_seconds ? `${run.duration_seconds}s` : '-'}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button size="sm" variant="ghost"><Eye className="w-4 h-4" /></Button>
-                    <Button size="sm" variant="ghost"><Download className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" disabled title="Not implemented yet"><Eye className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" disabled title="Not implemented yet"><Download className="w-4 h-4" /></Button>
                   </div>
                 </TableCell>
               </TableRow>

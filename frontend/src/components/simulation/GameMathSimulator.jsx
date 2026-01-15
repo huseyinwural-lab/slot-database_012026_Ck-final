@@ -175,8 +175,8 @@ const GameMathSimulator = ({ onRunComplete }) => {
             </Table>
             
             <div className="flex gap-2 mt-4">
-              <Button variant="outline"><BarChart3 className="w-4 h-4 mr-2" /> Show Graphs</Button>
-              <Button variant="outline"><Download className="w-4 h-4 mr-2" /> Export CSV</Button>
+              <Button variant="outline" disabled title="Not implemented yet"><BarChart3 className="w-4 h-4 mr-2" /> Show Graphs</Button>
+              <Button variant="outline" disabled title="Not implemented yet"><Download className="w-4 h-4 mr-2" /> Export CSV</Button>
             </div>
           </CardContent>
         </Card>
