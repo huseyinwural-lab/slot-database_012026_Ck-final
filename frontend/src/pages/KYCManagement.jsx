@@ -136,7 +136,49 @@ const KYCManagement = () => {
                                                             <div className="text-center">
                                                                 <FileText className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
                                                                 <p>Preview: {doc.file_url}</p>
-                                                                <Button variant="link" size="sm"><Download className="w-4 h-4 mr-1" /> Download</Button>
+                                                                {(() => {
+                                                                  const downloadUrl = doc.download_url;
+                                                                  const isPlaceholder =
+                                                                    !downloadUrl ||
+                                                                    String(downloadUrl).includes('via.placeholder.com') ||
+                                                                    String(downloadUrl).includes('placehold.co');
+
+                                                                  if (isPlaceholder) {
+                                                                    return (
+                                                                      <Button
+                                                                        variant="link"
+                                                                        size="sm"
+                                                                        disabled
+                                                                        title="Document file not available"
+                                                                      >
+                                                                        <Download className="w-4 h-4 mr-1" /> Download
+                                                                      </Button>
+                                                                    );
+                                                                  }
+
+                                                                  return (
+                                                                    <a
+                                                                      href={downloadUrl}
+                                                                      target="_blank"
+                                                                      rel="noopener noreferrer"
+                                                                      className="inline-flex items-center text-sm text-primary underline-offset-4 hover:underline"
+                                                                      onClick={(e) => {
+                                                                        // If popup blockers prevent opening, we still want a clear message.
+                                                                        try {
+                                                                          const w = window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+                                                                          if (!w) {
+                                                                            throw new Error('Popup blocked');
+                                                                          }
+                                                                          e.preventDefault();
+                                                                        } catch {
+                                                                          // Fallback: let the browser navigate
+                                                                        }
+                                                                      }}
+                                                                    >
+                                                                      <Download className="w-4 h-4 mr-1" /> Download
+                                                                    </a>
+                                                                  );
+                                                                })()}
                                                             </div>
                                                         </div>
                                                         <div className="space-y-4">
