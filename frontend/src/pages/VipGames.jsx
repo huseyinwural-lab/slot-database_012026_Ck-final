@@ -59,13 +59,6 @@ const VipGames = () => {
       // Re-sync to be safe
       fetchData();
 
-  const hasNonVip = allGames.some(g => !(g.tags || []).includes('VIP'));
-  const emptyMessage = !hasNonVip
-    ? 'All games are already VIP.'
-    : search
-      ? 'No games match your search.'
-      : 'No games found.';
-
       setIsAddOpen(false);
     } catch (err) {
       toast.error('Failed to update status');
