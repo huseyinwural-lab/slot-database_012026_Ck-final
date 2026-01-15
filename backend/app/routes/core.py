@@ -586,8 +586,8 @@ async def update_game_details(
         raise HTTPException(status_code=422, detail={"error_code": "VALIDATION_FAILED", "message": "tags must be list[str]"})
 
     cfg = game.configuration if isinstance(game.configuration, dict) else {}
-    cfg["tags"] = tags
-    game.configuration = cfg
+    # Important: assign a NEW dict so JSON change is persisted (JSON column is not mutable-tracked).
+    game.configuration = {**cfg, "tags": tags}
 
     session.add(game)
     await session.commit()

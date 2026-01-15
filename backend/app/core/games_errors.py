@@ -55,6 +55,8 @@ async def games_http_exception_handler(request: Request, exc: StarletteHTTPExcep
         # - Our real "resource missing" cases should raise AppError with GAME_CONFIG_NOT_FOUND.
         # - If we're here, it is likely a framework-level 404 (route not found).
         return _wrap("FEATURE_NOT_IMPLEMENTED", "Feature not implemented", 501, details={"original_status": 404})
+    if status == 422:
+        return _wrap("VALIDATION_FAILED", "Validation failed", 422)
     if status == 501:
         return _wrap("FEATURE_NOT_IMPLEMENTED", "Feature not implemented", 501)
 
