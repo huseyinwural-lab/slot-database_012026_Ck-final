@@ -78,6 +78,14 @@ const VipGames = () => {
     g.name.toLowerCase().includes(search.toLowerCase())
   );
 
+
+  const hasNonVip = allGames.some(g => !(g.tags || []).includes('VIP'));
+  const emptyMessage = !hasNonVip
+    ? 'All games are already VIP.'
+    : search
+      ? 'No games match your search.'
+      : 'No games found.';
+
   return (
     <div className="space-y-6">
         <div className="flex justify-between items-center">
