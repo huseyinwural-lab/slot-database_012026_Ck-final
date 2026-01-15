@@ -107,6 +107,37 @@ async def get_kyc_queue(
         
     return queue
 
+
+
+@router.get("/documents/{doc_id}/download")
+async def download_kyc_document(
+    doc_id: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    _ = Depends(feature_required("can_manage_kyc")),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """P1-KYC-DL-01: Provide a real download response.
+
+    In production this would redirect to a signed URL.
+    For now we return a small attachment payload to make the UI functional.
+    """
+    _kyc_mock_guard()
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    _ = tenant_id
+
+    content = f"KYC document mock download for {doc_id}\n"
+
+    headers = {
+        "Content-Disposition": f"attachment; filename=kyc_{doc_id}.txt",
+        "Content-Type": "text/plain; charset=utf-8",
+    }
+
+    from fastapi.responses import Response
+
+    return Response(content=content, media_type="text/plain", headers=headers)
+
 @router.post("/documents/{doc_id}/review")
 async def review_document(
     doc_id: str,
