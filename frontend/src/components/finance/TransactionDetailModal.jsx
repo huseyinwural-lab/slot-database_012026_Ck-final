@@ -46,7 +46,7 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
   };
 
   const handleAnalyzeRisk = async () => {
-    toast.message('Not available in this environment');
+    // Not available in this environment
   };
 
   const isWithdrawal = transaction.type === 'withdrawal';
@@ -246,8 +246,8 @@ const TransactionDetailModal = ({ transaction, open, onOpenChange, onRefresh }) 
                                 variant="outline" 
                                 size="sm" 
                                 className="border-orange-200 text-orange-700 hover:bg-orange-100"
-                                onClick={handleAnalyzeRisk}
-                                disabled={isAnalyzing}
+                                disabled
+                                title="Not available in this environment"
                             >
                                 {isAnalyzing ? <RefreshCw className="w-3 h-3 animate-spin mr-1"/> : <BrainCircuit className="w-3 h-3 mr-1"/>}
                                 {isAnalyzing ? "Analyzing..." : "Analyze Risk (AI)"}

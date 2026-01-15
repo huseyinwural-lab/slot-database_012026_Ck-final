@@ -496,16 +496,18 @@ const Finance = () => {
                         <TableCell className="font-mono text-xs text-muted-foreground">{tx.id.substring(0, 8)}...</TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span
-                              className="font-medium text-blue-600 cursor-pointer hover:underline"
+                            <button
+                              type="button"
+                              className="text-left font-medium text-blue-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={!tx.player_id}
                               onClick={() => {
                                 if (!tx.player_id) return;
                                 navigate(`/players/${tx.player_id}`);
                               }}
-                              title={tx.player_id ? 'View player' : undefined}
+                              title={tx.player_id ? 'View player' : 'Player unavailable'}
                             >
-                              {tx.player_username}
-                            </span>
+                              {tx.player_username || (tx.player_id ? `${tx.player_id.substring(0, 8)}...` : '—')}
+                            </button>
                             {tx.country && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Globe className="w-3 h-3"/> {tx.country}</span>}
                           </div>
                         </TableCell>
