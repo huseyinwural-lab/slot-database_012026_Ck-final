@@ -97,8 +97,11 @@ const VipGames = () => {
                         </div>
                     </DialogHeader>
                     <div className="space-y-2 mt-2">
-                        {filteredCandidates.length === 0 && <div className="text-center py-4 text-muted-foreground">No games found.</div>}
-                        {filteredCandidates.map(g => (
+                        {loading && <div className="text-center py-4 text-muted-foreground">Loading…</div>}
+                        {!loading && filteredCandidates.length === 0 && (
+                          <div className="text-center py-4 text-muted-foreground">No games found.</div>
+                        )}
+                        {!loading && filteredCandidates.map(g => (
                             <div key={g.id} className="flex justify-between items-center p-3 border rounded hover:bg-secondary/50">
                                 <div>
                                     <div className="font-medium">{g.name}</div>
