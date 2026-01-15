@@ -138,48 +138,52 @@ const KYCManagement = () => {
                                                                 <p>Preview: {doc.file_url}</p>
                                                                 {(() => {
                                                                   const downloadUrl = doc.download_url;
-                                                                  const previewUrl = doc.file_url;
                                                                   const isPlaceholder =
                                                                     !downloadUrl ||
                                                                     String(downloadUrl).includes('via.placeholder.com') ||
-                                                                    String(downloadUrl).includes('placehold.co') ||
-                                                                    String(previewUrl || '').includes('via.placeholder.com') ||
-                                                                    String(previewUrl || '').includes('placehold.co');
+                                                                    String(downloadUrl).includes('placehold.co');
 
                                                                   const isAvailable = !isPlaceholder;
 
-                                                                  if (!isAvailable) {
-                                                                    return (
-                                                                      <Button
-                                                                        variant="link"
-                                                                        size="sm"
-                                                                        disabled
-                                                                        title="Document file not available"
-                                                                      >
-                                                                        <Download className="w-4 h-4 mr-1" /> Download
-                                                                      </Button>
-                                                                    );
-                                                                  }
-
                                                                   return (
-                                                                    <a
-                                                                      href={downloadUrl}
-                                                                      target="_blank"
-                                                                      rel="noopener noreferrer"
-                                                                      className="inline-flex items-center text-sm text-primary underline-offset-4 hover:underline"
-                                                                      onClick={(e) => {
-                                                                        // Try opening a new tab (download/open). If blocked, fall back to navigation.
+                                                                    <Button
+                                                                      variant="link"
+                                                                      size="sm"
+                                                                      disabled={!isAvailable}
+                                                                      title={
+                                                                        !isAvailable
+                                                                          ? 'Document file not available'
+                                                                          : 'Download'
+                                                                      }
+                                                                      onClick={async () => {
+                                                                        if (!isAvailable) return;
                                                                         try {
-                                                                          const w = window.open(downloadUrl, '_blank', 'noopener,noreferrer');
-                                                                          if (!w) throw new Error('Popup blocked');
-                                                                          e.preventDefault();
-                                                                        } catch {
-                                                                          // Let browser navigate
+                                                                          const isAbsolute = /^https?:\/\//i.test(downloadUrl);
+                                                                          if (isAbsolute) {
+                                                                            const w = window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+                                                                            if (!w) throw new Error('Popup blocked');
+                                                                            return;
+                                                                          }
+
+                                                                          const res = await api.get(downloadUrl, { responseType: 'blob' });
+                                                                          const blobUrl = window.URL.createObjectURL(res.data);
+                                                                          const a = document.createElement('a');
+                                                                          a.href = blobUrl;
+                                                                          a.download = `kyc_document_${doc.id || 'file'}`;
+                                                                          document.body.appendChild(a);
+                                                                          a.click();
+                                                                          a.remove();
+                                                                          window.URL.revokeObjectURL(blobUrl);
+                                                                        } catch (e) {
+                                                                          const status = e?.response?.status;
+                                                                          toast.error(
+                                                                            `Document download failed${status ? ` (${status})` : ''}`
+                                                                          );
                                                                         }
                                                                       }}
                                                                     >
                                                                       <Download className="w-4 h-4 mr-1" /> Download
-                                                                    </a>
+                                                                    </Button>
                                                                   );
                                                                 })()}
                                                             </div>
