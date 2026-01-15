@@ -165,7 +165,10 @@ const KYCManagement = () => {
                                                                             return;
                                                                           }
 
-                                                                          const res = await api.get(downloadUrl, { responseType: 'blob' });
+                                                                          // downloadUrl can be either /v1/... or /api/v1/...; api client will prefix /api.
+                                                                          // Strip leading /api to prevent double '/api/api'.
+                                                                          const relative = downloadUrl.startsWith('/api') ? downloadUrl.slice(4) : downloadUrl;
+                                                                          const res = await api.get(relative, { responseType: 'blob' });
                                                                           const blobUrl = window.URL.createObjectURL(res.data);
                                                                           const a = document.createElement('a');
                                                                           a.href = blobUrl;
