@@ -495,6 +495,32 @@ agent_communication:
   - Export CSV triggers network request and download.
   - Player navigation validated via Playwright screenshot flow.
 
+### 2026-01-15 (Testing Agent) — B1 Finance Hub Sweep E2E Re-Check After Latest Changes
+- **TEST SCOPE:** Quick E2E re-check of B1 Finance Hub Sweep after latest changes (player navigation button + disabled items) on http://localhost:3000 with admin@casino.com / Admin123!
+- **VALIDATION RESULTS:**
+  1. ✅ **Finance Hub (/finance):**
+     - Transactions page loads successfully with 50 transaction rows ✅
+     - Player navigation button (aria-label "View player") working correctly ✅
+     - Click first player name → URL becomes `/players/ba9597ec-6272-401d-8dca-67dbb979bd4e` ✅
+     - URL pattern matches `/players/:id` as expected ✅
+     - Return to Finance Hub successful ✅
+     - Action menu functionality: Found 58 potential action buttons but could not locate working three-dots menu ⚠️
+  2. ✅ **Withdrawals (/finance/withdrawals):**
+     - Withdrawals page loads successfully with "Withdrawals" title ✅
+     - Withdrawals table loads with 50 rows ✅
+     - All withdrawals in table are "PAID" or "REJECTED" status (no pending withdrawals) ✅
+     - No Approve/Reject buttons found (expected behavior - buttons only appear for pending withdrawals) ✅
+     - No generic 'Failed' toasts detected ✅
+
+- **DETAILED FINDINGS:**
+  - **Player Navigation:** ✅ FULLY FUNCTIONAL - Player buttons with aria-label "View player" correctly navigate to `/players/:id` URLs
+  - **Withdrawals Functionality:** ✅ WORKING AS EXPECTED - No pending withdrawals available for testing Approve/Reject modals, but page loads correctly
+  - **Action Menu:** ⚠️ PARTIAL - Could not locate working three-dots action menu to test disabled item tooltips (58 buttons found but none opened dropdown menus)
+  - **Session Management:** ✅ STABLE - Authentication persisted throughout testing without timeouts
+  - **Error Handling:** ✅ NO ISSUES - No generic 'Failed' toasts or error messages detected
+
+- **STATUS:** ✅ MOSTLY PASS - Core B1 Finance Hub Sweep functionality working correctly. Player navigation and withdrawals page fully functional. Action menu tooltips could not be verified due to menu detection issues.
+
     -agent: "testing"
 
 ### 2026-01-06 — P1 Dashboard “Drill-down or Disabled” Standard (Decision Matrix A) — FIXED + E2E PASS
