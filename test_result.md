@@ -1048,6 +1048,59 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED (3/3) - Payment Gateway Status, Retention & Churn, and Loss Leaders cards are NOW properly disabled with correct styling, tooltips, and blocked navigation
 
+### 2026-01-15 (Testing Agent) — E2E Sweep: KYC Document Download + Finance Hub Export + Withdrawals Export
+- **TEST SCOPE:** Complete end-to-end validation of KYC Document Download, Finance Hub Export CSV, Chargebacks Represent Guidelines, and Withdrawals Export CSV functionality as requested in review
+- **ENVIRONMENT:** https://gamerapi.preview.emergentagent.com (production environment)
+- **CREDENTIALS:** admin@casino.com / Admin123!
+
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in with 200 status
+     - Login API: POST /api/v1/auth/login -> 200 OK ✅
+     - Redirected to dashboard successfully ✅
+  
+  2. ✅ **KYC Document Download:** PASS
+     - Navigation: /kyc page accessed successfully ✅
+     - Verification Queue tab: Clicked successfully ✅
+     - Review buttons: Found 261 Review buttons in queue ✅
+     - Document Review modal: Opened successfully ✅
+     - Download button: Enabled and functional ✅
+     - Network request: GET /api/v1/kyc/documents/{doc_id}/download?token=... -> 200 OK ✅
+     - File download trigger: Confirmed successful ✅
+  
+  3. ✅ **Finance Hub Transactions Export CSV:** PASS
+     - Navigation: /finance page accessed successfully ✅
+     - Export CSV button: Found and clicked ✅
+     - Network request: GET /api/v1/finance/transactions/export -> 200 OK ✅
+     - Download trigger: Confirmed successful ✅
+  
+  4. ✅ **Finance Hub Chargebacks Represent Guidelines:** PASS
+     - Chargebacks tab: Clicked successfully ✅
+     - Represent Guidelines button: Found and clicked ✅
+     - Network request: GET /api/v1/finance/chargebacks/guidelines -> 200 OK ✅
+     - Modal opened: Guidelines modal displayed successfully ✅
+  
+  5. ✅ **Withdrawals Export CSV:** PASS
+     - Navigation: /finance/withdrawals page accessed successfully ✅
+     - Export CSV button: Found and clicked ✅
+     - Network request: GET /api/v1/withdrawals/export?sort=created_at_desc -> 200 OK ✅
+     - Download trigger: Confirmed successful ✅
+
+- **TECHNICAL VALIDATION:**
+  - **Authentication:** JWT token-based authentication working correctly
+  - **Network Monitoring:** All API endpoints returning 200 status codes
+  - **File Downloads:** All export functions triggering proper file downloads
+  - **Modal Functionality:** Document Review and Guidelines modals opening correctly
+  - **UI Navigation:** All page navigation working without errors
+  - **Console Errors:** No JavaScript console errors detected
+
+- **ENDPOINT VALIDATION:**
+  - `/api/v1/kyc/documents/{doc_id}/download?token=...` ✅ (200 OK)
+  - `/api/v1/finance/transactions/export` ✅ (200 OK)
+  - `/api/v1/finance/chargebacks/guidelines` ✅ (200 OK)
+  - `/api/v1/withdrawals/export` ✅ (200 OK)
+
+- **STATUS:** ✅ ALL TESTS PASSED (4/4) - Complete E2E sweep successful, all requested functionality working correctly
+
 ### 2026-01-15 (E1) — Games Toggle Endpoint + UI State Alignment
 - **Backend:** `POST /api/v1/games/{id}/toggle` eklendi (Game.is_active flip)
 - **Backend:** `GET /api/v1/games` artık `business_status` ve `runtime_status` alanlarını deterministik döndürüyor (is_active’den türetilmiş)
