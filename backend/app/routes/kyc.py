@@ -86,7 +86,7 @@ async def get_kyc_queue(
             "file_url": "https://via.placeholder.com/400x300.png?text=Passport",
             # P1-KYC-DL-01: provide a real usable download URL (smallest viable solution).
             # In real systems this would be a signed S3 URL; here we serve a tiny text file.
-            "download_url": f"/api/v1/kyc/documents/doc_{p.id}_1/download",
+            "download_url": f"/v1/kyc/documents/doc_{p.id}_1/download",
             "documents": [
                 {
                     "id": f"doc_{p.id}_1",
