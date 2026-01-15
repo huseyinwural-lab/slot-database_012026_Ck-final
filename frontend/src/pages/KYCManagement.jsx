@@ -148,7 +148,7 @@ const KYCManagement = () => {
 
                                                                   const isAvailable = !isPlaceholder;
 
-                                                                  if (isPlaceholder) {
+                                                                  if (!isAvailable) {
                                                                     return (
                                                                       <Button
                                                                         variant="link"
@@ -168,15 +168,13 @@ const KYCManagement = () => {
                                                                       rel="noopener noreferrer"
                                                                       className="inline-flex items-center text-sm text-primary underline-offset-4 hover:underline"
                                                                       onClick={(e) => {
-                                                                        // If popup blockers prevent opening, we still want a clear message.
+                                                                        // Try opening a new tab (download/open). If blocked, fall back to navigation.
                                                                         try {
                                                                           const w = window.open(downloadUrl, '_blank', 'noopener,noreferrer');
-                                                                          if (!w) {
-                                                                            throw new Error('Popup blocked');
-                                                                          }
+                                                                          if (!w) throw new Error('Popup blocked');
                                                                           e.preventDefault();
                                                                         } catch {
-                                                                          // Fallback: let the browser navigate
+                                                                          // Let browser navigate
                                                                         }
                                                                       }}
                                                                     >
