@@ -15,6 +15,9 @@ from app.services.audit import audit
 
 router = APIRouter(prefix="/api/v1/math-assets", tags=["math_assets"])
 
+# Avoid 307 redirect on trailing slashes (prevents frontend 'Failed' toasts)
+router.redirect_slashes = False
+
 @router.get("/", response_model=Dict)
 async def list_assets(
     page: int = 1,
