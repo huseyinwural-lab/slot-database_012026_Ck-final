@@ -141,9 +141,7 @@ const KYCManagement = () => {
                                                                   const isPlaceholder =
                                                                     !downloadUrl ||
                                                                     String(downloadUrl).includes('via.placeholder.com') ||
-                                                                    String(downloadUrl).includes('placehold.co') ||
-                                                                    String(doc.file_url || '').includes('via.placeholder.com') ||
-                                                                    String(doc.file_url || '').includes('placehold.co');
+                                                                    String(downloadUrl).includes('placehold.co');
 
                                                                   const isAvailable = !isPlaceholder;
 
@@ -160,15 +158,20 @@ const KYCManagement = () => {
                                                                       onClick={async () => {
                                                                         if (!isAvailable) return;
                                                                         try {
-                                                                          // Minimal, robust approach:
-                                                                          // Use native anchor navigation to trigger attachment download.
+                                                                          // Programmatic download so we can surface failures with a toast
+                                                                          const relative = downloadUrl.startsWith('/api')
+                                                                            ? downloadUrl.slice(4)
+                                                                            : downloadUrl;
+
+                                                                          const res = await api.get(relative, { responseType: 'blob' });
+                                                                          const blobUrl = window.URL.createObjectURL(res.data);
                                                                           const a = document.createElement('a');
-                                                                          a.href = downloadUrl;
-                                                                          a.target = '_blank';
-                                                                          a.rel = 'noopener noreferrer';
+                                                                          a.href = blobUrl;
+                                                                          a.download = `kyc_document_${doc.id || 'file'}`;
                                                                           document.body.appendChild(a);
                                                                           a.click();
                                                                           a.remove();
+                                                                          window.URL.revokeObjectURL(blobUrl);
                                                                         } catch (e) {
                                                                           const status = e?.response?.status;
                                                                           toast.error(
