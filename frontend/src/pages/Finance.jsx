@@ -500,6 +500,7 @@ const Finance = () => {
                               type="button"
                               className="text-left font-medium text-blue-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={!tx.player_id}
+                              aria-label="View player"
                               onClick={() => {
                                 if (!tx.player_id) return;
                                 navigate(`/players/${tx.player_id}`);
