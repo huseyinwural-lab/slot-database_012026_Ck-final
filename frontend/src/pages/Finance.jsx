@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ const parseCsvList = (v) =>
     .filter(Boolean);
 
 const Finance = () => {
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [txMeta, setTxMeta] = useState({ page: 1, page_size: 50, total: null });
   const [pageSize, setPageSize] = useState(50);
@@ -415,8 +417,24 @@ const Finance = () => {
               <div className="flex gap-2">
                 {selectedRows.length > 0 && (
                   <>
-                    <Button variant="outline" size="sm" className="text-green-600 bg-green-50 border-green-200">Approve ({selectedRows.length})</Button>
-                    <Button variant="outline" size="sm" className="text-red-600 bg-red-50 border-red-200">Reject ({selectedRows.length})</Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled
+                      title="Not available in this environment"
+                      className="text-green-600 bg-green-50 border-green-200"
+                    >
+                      Approve ({selectedRows.length})
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled
+                      title="Not available in this environment"
+                      className="text-red-600 bg-red-50 border-red-200"
+                    >
+                      Reject ({selectedRows.length})
+                    </Button>
                   </>
                 )}
                 
@@ -478,7 +496,16 @@ const Finance = () => {
                         <TableCell className="font-mono text-xs text-muted-foreground">{tx.id.substring(0, 8)}...</TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-medium text-blue-600 cursor-pointer hover:underline">{tx.player_username}</span>
+                            <span
+                              className="font-medium text-blue-600 cursor-pointer hover:underline"
+                              onClick={() => {
+                                if (!tx.player_id) return;
+                                navigate(`/players/${tx.player_id}`);
+                              }}
+                              title={tx.player_id ? 'View player' : undefined}
+                            >
+                              {tx.player_username}
+                            </span>
                             {tx.country && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Globe className="w-3 h-3"/> {tx.country}</span>}
                           </div>
                         </TableCell>
@@ -528,31 +555,39 @@ const Finance = () => {
                                   <DropdownMenuItem onClick={() => handleViewDetails(tx)}>
                                       <Eye className="w-4 h-4 mr-2"/> View Details
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem disabled title="Not available in this environment">
                                       <Edit className="w-4 h-4 mr-2"/> Edit Transaction
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem disabled title="Not available in this environment">
                                       <ExternalLink className="w-4 h-4 mr-2"/> Retry Callback
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   {tx.status === 'pending' || tx.status === 'under_review' ? (
                                       <>
-                                        <DropdownMenuItem className="text-green-600">
+                                        <DropdownMenuItem
+                                          disabled
+                                          title="Use Withdrawals page for approvals"
+                                          className="text-green-600"
+                                        >
                                             <CheckCircle className="w-4 h-4 mr-2"/> Approve
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem className="text-red-600">
+                                        <DropdownMenuItem
+                                          disabled
+                                          title="Use Withdrawals page for approvals"
+                                          className="text-red-600"
+                                        >
                                             <XCircle className="w-4 h-4 mr-2"/> Reject
                                         </DropdownMenuItem>
                                       </>
                                   ) : null}
-                                  <DropdownMenuItem className="text-orange-600">
+                                  <DropdownMenuItem disabled title="Not available in this environment" className="text-orange-600">
                                       <ShieldAlert className="w-4 h-4 mr-2"/> Open in Fraud
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem disabled title="Not available in this environment">
                                       <Upload className="w-4 h-4 mr-2"/> Upload Proof
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem disabled title="Not available in this environment">
                                       <MessageSquare className="w-4 h-4 mr-2"/> Add Note
                                   </DropdownMenuItem>
                               </DropdownMenuContent>
