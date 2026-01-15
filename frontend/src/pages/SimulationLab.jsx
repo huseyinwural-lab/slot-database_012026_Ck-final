@@ -32,8 +32,11 @@ const SimulationLab = () => {
 
   useEffect(() => {
     // initial fetch
-    fetchRuns();
+    const t = setTimeout(() => {
+      fetchRuns();
+    }, 0);
 
+    return () => clearTimeout(t);
   }, []);
 
   const getStatusBadge = (status) => {
