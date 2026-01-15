@@ -138,12 +138,11 @@ const KYCManagement = () => {
                                                                 <p>Preview: {doc.file_url}</p>
                                                                 {(() => {
                                                                   const downloadUrl = doc.download_url;
+                                                                  // Only guard based on the actual download URL. The preview image can legitimately be a placeholder.
                                                                   const isPlaceholder =
                                                                     !downloadUrl ||
                                                                     String(downloadUrl).includes('via.placeholder.com') ||
-                                                                    String(downloadUrl).includes('placehold.co') ||
-                                                                    String(doc.file_url || '').includes('via.placeholder.com') ||
-                                                                    String(doc.file_url || '').includes('placehold.co');
+                                                                    String(downloadUrl).includes('placehold.co');
 
                                                                   const isAvailable = !isPlaceholder;
 
