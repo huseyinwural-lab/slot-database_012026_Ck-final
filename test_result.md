@@ -1036,6 +1036,12 @@ agent_communication:
 
 - **STATUS:** ✅ ALL TESTS PASSED (3/3) - Payment Gateway Status, Retention & Churn, and Loss Leaders cards are NOW properly disabled with correct styling, tooltips, and blocked navigation
 
+### 2026-01-15 (E1) — Games Toggle Endpoint + UI State Alignment
+- **Backend:** `POST /api/v1/games/{id}/toggle` eklendi (Game.is_active flip)
+- **Backend:** `GET /api/v1/games` artık `business_status` ve `runtime_status` alanlarını deterministik döndürüyor (is_active’den türetilmiş)
+- **Frontend:** /games switch state’i artık doğrudan `game.is_active` üzerinden çalışıyor
+- **UI Smoke (screenshot_tool):** Toggle tıklaması sonrası switch state değişti ✅
+
 ### 2026-01-14 (E1) — P2-GO-BE-02 Standard Error Codes (Games domain)
 - **Scope (non-negotiable):** Error wrapping yalnızca `/api/v1/games*` için uygulanır. Diğer domain’ler değişmez.
 - **Sözleşme:** `{ "error_code": "...", "message": "...", "details": {...} }`
