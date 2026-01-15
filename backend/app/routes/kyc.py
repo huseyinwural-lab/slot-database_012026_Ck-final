@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlmodel import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # NOTE: This module is MOCKED UI support only and is gated off in prod/staging.
 
@@ -13,12 +13,29 @@ from app.utils.tenant import get_current_tenant_id
 
 from app.utils.permissions import feature_required
 from config import settings
+from jose import jwt
 
 router = APIRouter(prefix="/api/v1/kyc", tags=["kyc"])
 
 def _kyc_mock_guard():
     if settings.env in {"prod", "production", "staging"} or not settings.kyc_mock_enabled:
         raise HTTPException(status_code=404, detail="Not Found")
+
+
+
+def _make_download_url(doc_id: str, tenant_id: str) -> str:
+    """Return a signed/public-ish URL for download (P1-KYC-DL-01).
+
+    This simulates a signed S3 URL by embedding a short-lived token in the query.
+    The download endpoint validates the token and does not require admin auth.
+    """
+    exp = datetime.now(timezone.utc) + timedelta(minutes=10)
+    token = jwt.encode(
+        {"doc_id": doc_id, "tenant_id": tenant_id, "exp": exp},
+        settings.jwt_secret,
+        algorithm=settings.jwt_algorithm,
+    )
+    return f"/api/v1/kyc/documents/{doc_id}/download?token={token}"
 
 
 @router.get("/dashboard")
@@ -86,21 +103,21 @@ async def get_kyc_queue(
             "file_url": "https://via.placeholder.com/400x300.png?text=Passport",
             # P1-KYC-DL-01: provide a real usable download URL (smallest viable solution).
             # In real systems this would be a signed S3 URL; here we serve a tiny text file.
-            "download_url": f"/api/v1/kyc/documents/doc_{p.id}_1/download",
+            "download_url": _make_download_url(f"doc_{p.id}_1", tenant_id),
             "documents": [
                 {
                     "id": f"doc_{p.id}_1",
                     "type": "passport",
                     "status": "pending",
                     "url": "https://via.placeholder.com/400x300.png?text=Passport",
-                    "download_url": f"/api/v1/kyc/documents/doc_{p.id}_1/download",
+                    "download_url": _make_download_url(f"doc_{p.id}_1", tenant_id),
                 },
                 {
                     "id": f"doc_{p.id}_2",
                     "type": "utility_bill",
                     "status": "pending",
                     "url": "https://via.placeholder.com/400x300.png?text=Bill",
-                    "download_url": f"/api/v1/kyc/documents/doc_{p.id}_2/download",
+                    "download_url": _make_download_url(f"doc_{p.id}_2", tenant_id),
                 }
             ]
         })
@@ -112,10 +129,9 @@ async def get_kyc_queue(
 @router.get("/documents/{doc_id}/download")
 async def download_kyc_document(
     doc_id: str,
+    token: str,
     request: Request,
     session: AsyncSession = Depends(get_session),
-    _ = Depends(feature_required("can_manage_kyc")),
-    current_admin: AdminUser = Depends(get_current_admin),
 ):
     """P1-KYC-DL-01: Provide a real download response.
 
@@ -124,7 +140,16 @@ async def download_kyc_document(
     """
     _kyc_mock_guard()
 
-    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    # Validate token (simulated signed URL)
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+    except Exception:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    if payload.get("doc_id") != doc_id:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    tenant_id = payload.get("tenant_id")
     _ = tenant_id
 
     content = f"KYC document mock download for {doc_id}\n"
