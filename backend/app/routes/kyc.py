@@ -100,7 +100,7 @@ async def get_kyc_queue(
                     "type": "utility_bill",
                     "status": "pending",
                     "url": "https://via.placeholder.com/400x300.png?text=Bill",
-                    "download_url": f"/api/v1/kyc/documents/doc_{p.id}_2/download",
+                    "download_url": f"http://localhost:8001/api/v1/kyc/documents/doc_{p.id}_2/download",
                 }
             ]
         })
