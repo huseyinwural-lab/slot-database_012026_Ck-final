@@ -45,9 +45,10 @@ const SettingsPanel = () => {
   };
 
   // Initial load
+  // (lint note) fetchData sets state; this is a controlled one-time initial fetch.
   useEffect(() => {
     fetchData('brands');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
