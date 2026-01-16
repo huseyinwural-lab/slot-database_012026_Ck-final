@@ -25,8 +25,8 @@ const BrandSettings = ({ brands, onRefresh }) => {
       await api.post('/v1/settings/brands', newBrand);
       setIsBrandModalOpen(false);
       onRefresh();
-      toast.success('Marka oluşturuldu');
-    } catch { toast.error('Başarısız'); }
+      toast.success('Brand created');
+    } catch { toast.error('Failed'); }
   };
 
   return (
@@ -41,7 +41,7 @@ const BrandSettings = ({ brands, onRefresh }) => {
             <Button><Plus className="w-4 h-4 mr-2" /> Add Brand</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Yeni Marka</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>New Brand</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Brand Name</Label>
@@ -58,7 +58,7 @@ const BrandSettings = ({ brands, onRefresh }) => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleCreateBrand} className="w-full">Oluştur</Button>
+              <Button onClick={handleCreateBrand} className="w-full">Create</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -87,8 +87,12 @@ const BrandSettings = ({ brands, onRefresh }) => {
                 <TableCell className="text-xs">{new Date(brand.created_at).toLocaleDateString('tr-TR')}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                    <Button size="sm" variant="ghost"><Download className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" disabled title="Not available in this environment">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" disabled title="Not available in this environment">
+                      <Download className="w-4 h-4" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

@@ -60,7 +60,7 @@ const SettingsPanel = () => {
         <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
           <Settings className="w-8 h-8 text-blue-600" /> Settings Panel (Multi-Tenant)
         </h2>
-        <Button onClick={fetchData}><RefreshCw className="w-4 h-4 mr-2" /> Yenile</Button>
+        <Button onClick={fetchData}><RefreshCw className="w-4 h-4 mr-2" /> Refresh</Button>
       </div>
       
       <Tabs value={activeTab} onValueChange={handleTabChange}>
