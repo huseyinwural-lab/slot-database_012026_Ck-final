@@ -8,12 +8,9 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ApiKeySettings = ({ apiKeys, onRefresh }) => {
+  // P1: Settings-level API keys/webhooks generation is not available in this environment.
   const handleGenerateAPIKey = async () => {
-    try {
-      const result = await api.post('/v1/settings/api-keys/generate', { key_name: 'New API Key', owner: 'system' });
-      toast.success(`API Key: ${result.data.api_key}`);
-      onRefresh();
-    } catch { toast.error('Başarısız'); }
+    // no-op
   };
 
   return (
@@ -22,7 +19,7 @@ const ApiKeySettings = ({ apiKeys, onRefresh }) => {
         <div>
           <CardTitle className="flex items-center gap-2">API Keys & Webhooks</CardTitle>
         </div>
-        <Button onClick={handleGenerateAPIKey}><Plus className="w-4 h-4 mr-2" /> Generate Key</Button>
+        <Button disabled title="Not available in this environment"><Plus className="w-4 h-4 mr-2" /> Generate Key</Button>
       </CardHeader>
       <CardContent>
         <Table>
@@ -45,13 +42,13 @@ const ApiKeySettings = ({ apiKeys, onRefresh }) => {
                 <TableCell><Badge variant={key.status === 'active' ? 'default' : 'secondary'}>{key.status}</Badge></TableCell>
                 <TableCell className="text-xs">{new Date(key.created_at).toLocaleDateString('tr-TR')}</TableCell>
                 <TableCell>
-                  <Button size="sm" variant="destructive">Revoke</Button>
+                  <Button size="sm" variant="destructive" disabled title="Not available in this environment">Revoke</Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        {apiKeys.length === 0 && <p className="text-center text-muted-foreground py-8">Henüz API key yok</p>}
+        {apiKeys.length === 0 && <p className="text-center text-muted-foreground py-8">No API keys</p>}
       </CardContent>
     </Card>
   );
