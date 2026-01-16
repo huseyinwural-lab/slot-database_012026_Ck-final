@@ -158,7 +158,7 @@ const FeatureFlags = () => {
                 <CardDescription>Yeni özellikleri segmentlere göre aç/kapa</CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => toast.success('Export yapıldı')}>
+                <Button disabled title="Not available in this environment">
                   <Download className="w-4 h-4 mr-2" /> Export JSON
                 </Button>
                 <Dialog open={isFlagModalOpen} onOpenChange={setIsFlagModalOpen}>
