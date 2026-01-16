@@ -231,44 +231,7 @@ const ChargebackList = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upload Evidence</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label>Case</Label>
-              <Input
-                value={selectedCase ? `${selectedCase.id} / TX: ${selectedCase.transaction_id}` : ''}
-                disabled
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Evidence File URL</Label>
-              <Input
-                placeholder="https://..."
-                value={evidenceUrl}
-                onChange={(e) => setEvidenceUrl(e.target.value)}
-              />
-              <p className="text-[10px] text-muted-foreground">
-                In a real integration this would be connected to your storage (S3, GCS, etc.). For now we accept a
-                direct file URL.
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUploadEvidence} disabled={!evidenceUrl}>
-              Upload Evidence
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-
+      {/* Evidence upload is disabled in this environment (P1). */}
       {/* Guidelines Modal (P0) */}
       <Dialog open={guidelinesOpen} onOpenChange={setGuidelinesOpen}>
         <DialogContent>
