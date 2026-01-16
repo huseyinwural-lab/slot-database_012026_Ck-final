@@ -15,7 +15,7 @@ const KillSwitchPage = () => {
   const loadTenants = async () => {
     try {
       const res = await api.get('/v1/tenants/');
-      setTenants(res.data?.items || []);
+      setTenants(res.data || []);
     } catch (e) {
       toast.error('Failed to load tenants');
     }
