@@ -95,22 +95,13 @@ const ChargebackList = () => {
     fetchCases();
   }, []);
 
-  const openEvidenceDialog = (cbCase) => {
-    setSelectedCase(cbCase);
-    setEvidenceUrl('');
-    setDialogOpen(true);
+  // P1 decision: Evidence upload is NOT implemented in this environment.
+  const openEvidenceDialog = () => {
+    // no-op (button is disabled)
   };
 
   const handleUploadEvidence = async () => {
-    if (!selectedCase || !evidenceUrl) return;
-    try {
-      await api.post(`/v1/finance/chargebacks/${selectedCase.id}/evidence`, { file_url: evidenceUrl });
-      toast.success('Evidence uploaded');
-      setDialogOpen(false);
-      await fetchCases();
-    } catch (err) {
-      toast.error('Failed to upload evidence');
-    }
+    // no-op (modal not reachable)
   };
 
   const openGuidelines = async () => {
@@ -223,7 +214,12 @@ const ChargebackList = () => {
                     </TableCell>
                     <TableCell>{getStatusBadge(cb.status)}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => openEvidenceDialog(cb)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled
+                        title="Evidence upload is not available in this environment"
+                      >
                         <Paperclip className="w-4 h-4 mr-2" /> Upload Evidence
                       </Button>
                     </TableCell>
