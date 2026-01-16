@@ -678,6 +678,15 @@ agent_communication:
 - Result: ✅ PASS (Backend + partial FE smoke)
 - Verified:
   - List: GET `/api/v1/api-keys/` → 200
+
+### 2026-01-16 — D / Admin-Settings Sweep (Brands + Settings Panel /settings)
+- Result: ✅ PASS (E2E)
+- Verified:
+  - Settings page loads, Brands tab fetches values (GET `/api/v1/settings/brands` → 200)
+  - Add Brand works (POST `/api/v1/settings/brands` → 200/201) + success toast `Brand created`
+  - Brand table action icons (Edit/Download) are disabled with tooltip `Not available in this environment` (no toast/network)
+  - Refresh works without error
+
   - Scopes: GET `/api/v1/api-keys/scopes` → 200
   - Create: POST `/api/v1/api-keys/` → 200, secret shown once
   - Toggle active: PATCH `/api/v1/api-keys/{id}` → 200
