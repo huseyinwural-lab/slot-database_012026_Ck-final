@@ -738,6 +738,16 @@ agent_communication:
   - Actions are state-gated and only render when valid (pending: approve/reject; approved/processing: mark paid; processing: mark failed).
   - Disabled/inapplicable actions do not trigger toast or network calls.
 - Note:
+
+### 2026-01-16 — D / Admin-Settings Sweep (Kill Switch /kill-switch)
+- Result: ✅ PASS (E2E)
+- Fix:
+  - Prevented crash `tenants.map is not a function` by validating tenants response as array before rendering.
+- Verified:
+  - Tenants dropdown populates
+  - Apply updates calls POST `/api/v1/kill-switch/tenant` → 200 + success toast
+  - No generic failed/not-implemented toasts
+
   - In current dataset, withdrawals are mostly in final states (PAID/REJECTED), so approve/reject modal path may not always appear in UI. Backend endpoints were also validated via curl with a pending item.
 
 
