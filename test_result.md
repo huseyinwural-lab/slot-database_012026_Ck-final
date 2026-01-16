@@ -758,6 +758,15 @@ agent_communication:
 - **Dashboard güncellemeleri:** `frontend/src/pages/Dashboard.jsx`
   - ✅ Deposits & Withdrawals Trend (Chart area) → `/finance?tab=transactions&type=deposit,withdrawal&range_days=30`
 
+
+### 2026-01-16 — D / Admin-Settings Sweep (Webhooks/Integrations + Settings placeholders)
+- Result: ✅ PASS (E2E)
+- Findings:
+  - No dedicated UI route/menu for `/webhooks` or `/integrations`.
+  - Settings → API Keys tab contains 'API Keys & Webhooks' section:
+    - Generate Key + Revoke are disabled with tooltip `Not available in this environment` and do not trigger toast/network.
+  - Placeholder tabs (Domains/Payment Providers/Communication/Theme/Maintenance/Audit) show static 'coming soon' content without failed toasts.
+
 ### 2026-01-06 — P1 Player Action Panel RBAC (E1) — Backend Enforce + UI Policy + Tests
 - **Policy (kilit):**
   - Support: view-only (bonuses list/audit/notes ok)
