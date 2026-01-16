@@ -573,6 +573,18 @@ agent_communication:
 
 
   - **Withdrawals Functionality:** ✅ WORKING AS EXPECTED - No pending withdrawals available for testing Approve/Reject modals, but page loads correctly
+
+### 2026-01-16 — D / Admin-Settings Sweep (API Keys /keys)
+- Result: ✅ PASS (Backend + partial FE smoke)
+- Verified:
+  - List: GET `/api/v1/api-keys/` → 200
+  - Scopes: GET `/api/v1/api-keys/scopes` → 200
+  - Create: POST `/api/v1/api-keys/` → 200, secret shown once
+  - Toggle active: PATCH `/api/v1/api-keys/{id}` → 200
+- Notes:
+  - FE route appears as `/keys` in UI (menu/route naming), while API is `/api/v1/api-keys/*`.
+  - FE E2E had intermittent session issues, but endpoints + UI components validated and no deceptive clicks found.
+
   - **Action Menu:** ⚠️ PARTIAL - Could not locate working three-dots action menu to test disabled item tooltips (58 buttons found but none opened dropdown menus)
   - **Session Management:** ✅ STABLE - Authentication persisted throughout testing without timeouts
   - **Error Handling:** ✅ NO ISSUES - No generic 'Failed' toasts or error messages detected
