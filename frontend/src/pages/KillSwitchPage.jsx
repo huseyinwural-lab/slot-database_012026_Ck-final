@@ -15,9 +15,13 @@ const KillSwitchPage = () => {
   const loadTenants = async () => {
     try {
       const res = await api.get('/v1/tenants/');
-      setTenants(res.data || []);
+      // Ensure we always have an array
+      const tenantsData = Array.isArray(res.data) ? res.data : [];
+      setTenants(tenantsData);
     } catch (e) {
+      console.error('Failed to load tenants:', e);
       toast.error('Failed to load tenants');
+      setTenants([]); // Ensure we have an empty array on error
     }
   };
 
