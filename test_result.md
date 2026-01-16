@@ -518,6 +518,16 @@ agent_communication:
 
 - **DETAILED FINDINGS:**
   - **Player Navigation:** ✅ FULLY FUNCTIONAL - Player buttons with aria-label "View player" correctly navigate to `/players/:id` URLs
+
+### 2026-01-16 — B1 Finance Hub Sweep (Reconciliation)
+- Result: ✅ PASS (E2E)
+- Implemented:
+  - Export CSV works (GET `/api/v1/finance/reconciliation/export?provider=...` → download).
+  - Auto-Scheduler modal works (GET/POST `/api/v1/finance/reconciliation/config` → 200).
+  - Run Auto-Match Now works (POST `/api/v1/finance/reconciliation/run-auto` → 200) and UI updates to show the returned report + mismatch items.
+- Disabled (P1):
+  - Upload statement / Start Reconciliation (file upload/processing out of scope): disabled + tooltip `Not available in this environment`.
+
   - **Withdrawals Functionality:** ✅ WORKING AS EXPECTED - No pending withdrawals available for testing Approve/Reject modals, but page loads correctly
   - **Action Menu:** ⚠️ PARTIAL - Could not locate working three-dots action menu to test disabled item tooltips (58 buttons found but none opened dropdown menus)
   - **Session Management:** ✅ STABLE - Authentication persisted throughout testing without timeouts
