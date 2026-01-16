@@ -539,6 +539,17 @@ agent_communication:
 
     -agent: "testing"
 
+### 2026-01-16 — B1 Finance Hub Sweep (Withdrawals)
+- Result: ✅ PASS (E2E)
+- Verified:
+  - List loads from `GET /api/v1/withdrawals` (filters + pagination) with no error toasts.
+  - Export CSV works (GET `/api/v1/withdrawals/export` → 200 + download).
+  - Actions are state-gated and only render when valid (pending: approve/reject; approved/processing: mark paid; processing: mark failed).
+  - Disabled/inapplicable actions do not trigger toast or network calls.
+- Note:
+  - In current dataset, withdrawals are mostly in final states (PAID/REJECTED), so approve/reject modal path may not always appear in UI. Backend endpoints were also validated via curl with a pending item.
+
+
 ### 2026-01-06 — P1 Dashboard “Drill-down or Disabled” Standard (Decision Matrix A) — FIXED + E2E PASS
 - **Standard:** Her kart ya (1) drill-down link ile çalışır, ya da (2) disabled + tooltip “Coming soon” olur. Dead-click yok.
 - **Dashboard güncellemeleri:** `frontend/src/pages/Dashboard.jsx`
