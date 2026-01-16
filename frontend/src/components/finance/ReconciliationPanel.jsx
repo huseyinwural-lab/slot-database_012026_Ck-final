@@ -62,38 +62,26 @@ const ReconciliationPanel = () => {
     fetchHistory();
   }, [fetchHistory]);
 
+  // P1 decision: upload-based reconciliation is not available in this environment.
+  // (file upload/storage/processing lifecycle is out of scope)
   const handleUpload = async () => {
-    if (!selectedFile) return;
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
-    try {
-      const res = await api.post(`/v1/finance/reconciliation/upload?provider=${provider}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      toast.success('File processed');
-      // Select the latest report returned from backend if available
-      if (res.data) {
-        await fetchHistory();
-        setSelectedReport(res.data);
-      } else {
-        await fetchHistory();
-      }
-    } catch (err) {
-      toast.error('Processing failed');
-    } finally {
-      setLoading(false);
-    }
+    // no-op (UI disabled)
   };
 
   const handleRunAuto = async () => {
     try {
       const res = await api.post('/v1/finance/reconciliation/run-auto', { provider });
       toast.success('Auto-fetch initiated');
-      await fetchHistory();
+      // Backend history may be empty in this environment; still show the returned report deterministically.
       if (res.data) {
+        setReports((prev) => {
+          const next = Array.isArray(prev) ? prev : [];
+          const deduped = next.filter((r) => r?.id !== res.data?.id);
+          return [res.data, ...deduped];
+        });
         setSelectedReport(res.data);
+      } else {
+        await fetchHistory();
       }
     } catch (err) {
       toast.error('Auto-fetch failed');
@@ -222,12 +210,23 @@ const ReconciliationPanel = () => {
             </div>
             <div className="space-y-2">
               <Label>File (CSV)</Label>
-              <Input type="file" accept=".csv" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
-              <p className="text-[10px] text-muted-foreground">Required cols: tx_id, amount, currency</p>
+              <Input
+                type="file"
+                accept=".csv"
+                disabled
+                title="Not available in this environment"
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              />
+              <p className="text-[10px] text-muted-foreground">Upload is not available in this environment.</p>
             </div>
-            <Button className="w-full" onClick={handleUpload} disabled={loading || !selectedFile}>
+            <Button
+              className="w-full"
+              onClick={handleUpload}
+              disabled
+              title="Not available in this environment"
+            >
               <Upload className="w-4 h-4 mr-2" />
-              {loading ? 'Processing...' : 'Start Reconciliation'}
+              Start Reconciliation
             </Button>
           </CardContent>
         </Card>
