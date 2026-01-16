@@ -559,6 +559,17 @@ agent_communication:
 - Disabled (P1):
   - Upload statement / Start Reconciliation (file upload/processing out of scope): disabled + tooltip `Not available in this environment`.
 
+### 2026-01-16 — D / Admin-Settings Sweep (Feature Flags /features)
+- Result: ✅ PASS (E2E)
+- Implemented/Adjusted:
+  - Export JSON button is disabled with tooltip `Not available in this environment` (no deceptive success toast).
+  - Core actions remain functional via backend stubs:
+    - Create Flag: POST `/api/v1/flags/` → 200
+    - Toggle Flag: POST `/api/v1/flags/{id}/toggle` → 200 (if flags present)
+    - Kill Switch: POST `/api/v1/flags/kill-switch` → 200 with confirm dialog
+- Verified via auto_frontend_testing_agent; no dead-clicks or failed/not-implemented toasts.
+
+
   - **Withdrawals Functionality:** ✅ WORKING AS EXPECTED - No pending withdrawals available for testing Approve/Reject modals, but page loads correctly
   - **Action Menu:** ⚠️ PARTIAL - Could not locate working three-dots action menu to test disabled item tooltips (58 buttons found but none opened dropdown menus)
   - **Session Management:** ✅ STABLE - Authentication persisted throughout testing without timeouts
