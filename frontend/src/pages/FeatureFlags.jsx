@@ -72,17 +72,17 @@ const FeatureFlags = () => {
     try {
       await api.post(`/v1/flags/${flagId}/toggle`);
       fetchData();
-      toast.success('Flag durumu değiştirildi');
-    } catch { toast.error('Başarısız'); }
+      toast.success('Flag updated');
+    } catch { toast.error('Failed'); }
   };
 
   const handleKillSwitch = async () => {
-    if (!window.confirm('⚠️ TÜM FLAG\'LERİ KAPATMAK İSTEDİĞİNİZDEN EMİN MİSİNİZ?')) return;
+    if (!window.confirm('⛔ Are you sure you want to disable all flags?')) return;
     try {
       await api.post('/v1/flags/kill-switch');
       fetchData();
-      toast.success('🚨 Tüm flag\'ler kapatıldı!');
-    } catch { toast.error('Başarısız'); }
+      toast.success('Kill switch applied');
+    } catch { toast.error('Failed'); }
   };
 
   const handleCreateFlag = async () => {
@@ -91,8 +91,8 @@ const FeatureFlags = () => {
       await api.post('/v1/flags/', payload);
       setIsFlagModalOpen(false);
       fetchData();
-      toast.success('Flag oluşturuldu');
-    } catch { toast.error('Başarısız'); }
+      toast.success('Flag created');
+    } catch { toast.error('Failed'); }
   };
 
   const handleStartExperiment = async (expId) => {
