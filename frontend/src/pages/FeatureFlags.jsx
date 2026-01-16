@@ -99,16 +99,16 @@ const FeatureFlags = () => {
     try {
       await api.post(`/v1/flags/experiments/${expId}/start`);
       fetchData();
-      toast.success('Deney başlatıldı');
-    } catch { toast.error('Başarısız'); }
+      toast.success('Experiment started');
+    } catch { toast.error('Failed'); }
   };
 
   const handlePauseExperiment = async (expId) => {
     try {
       await api.post(`/v1/flags/experiments/${expId}/pause`);
       fetchData();
-      toast.success('Deney duraklatıldı');
-    } catch { toast.error('Başarısız'); }
+      toast.success('Experiment paused');
+    } catch { toast.error('Failed'); }
   };
 
   const getStatusBadge = (status) => {
