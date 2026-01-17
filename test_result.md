@@ -799,6 +799,24 @@ agent_communication:
     - Generate Key + Revoke are disabled with tooltip `Not available in this environment` and do not trigger toast/network.
   - Placeholder tabs (Domains/Payment Providers/Communication/Theme/Maintenance/Audit) show static 'coming soon' content without failed toasts.
 
+### 2026-01-17 — P0 CRM SEND (Resend, no custom domain)
+- Result: ✅ PASS (backend + UI)
+- Backend:
+  - Resend integration added using `resend==2.13.0`.
+  - Env: `RESEND_API_KEY`, `RESEND_FROM=onboarding@resend.dev`, `RESEND_REPLY_TO`, `RESEND_TEST_TO`.
+  - Endpoints:
+    - `POST /api/v1/crm/send-email` → 200 + `{status:SENT,message_id}`
+    - `POST /api/v1/crm/campaigns` → persists draft campaign
+    - `GET /api/v1/crm/campaigns` → returns tenant-scoped list
+    - `POST /api/v1/crm/campaigns/{id}/send` → sends via Resend, sets status=completed and increments sent_count; deterministic error_code on provider failures.
+- Frontend:
+  - CRM: New Campaign + Create Draft enabled; Send button enabled for draft rows.
+  - Send shows toast `Campaign sent` and performs real network call (no fake toast).
+- Evidence:
+  - cURL send-email and send-campaign returned 200 with Resend message_id.
+  - Playwright smoke: created draft and clicked Send successfully.
+
+
 ### 2026-01-06 — P1 Player Action Panel RBAC (E1) — Backend Enforce + UI Policy + Tests
 - **Policy (kilit):**
   - Support: view-only (bonuses list/audit/notes ok)
