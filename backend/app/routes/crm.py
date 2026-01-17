@@ -47,6 +47,16 @@ async def send_campaign(
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+
+    # P0: minimal email send (real inbox) using Resend.
+    # Campaign storage/segments/templates are P2; here we send a deterministic placeholder email.
+    result = send_email(
+        to=os.environ.get("RESEND_TEST_TO") or os.environ.get("RESEND_REPLY_TO") or "huseyinwural@gmail.com",
+        subject=f"CRM Campaign {campaign_id}",
+        html=f"<p>CRM campaign <strong>{campaign_id}</strong> sent.</p>",
+    )
+    return {"message": "SENT", "campaign_id": campaign_id, **result}
 
 
 @router.post("/send-email", response_model=CRMSendEmailResponse)
@@ -58,7 +68,7 @@ async def crm_send_email(
 ):
     """Minimal transactional email sender for CRM.
 
-    P0 target: clicking Send in CRM results in a real inbox email.
+    P0 target: allow ad-hoc email sending via backend.
     """
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
@@ -66,9 +76,6 @@ async def crm_send_email(
 
     result = send_email(to=payload.to, subject=payload.subject, html=payload.html)
     return CRMSendEmailResponse(status="SENT", message_id=result["message_id"], provider=result["provider"])
-
-    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
-    return {"message": "QUEUED", "campaign_id": campaign_id}
 
 
 @router.get("/templates")
