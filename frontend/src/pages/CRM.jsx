@@ -101,7 +101,7 @@ const CRM = () => {
                 <div className="flex justify-end mb-4">
                     <Dialog open={isCampOpen} onOpenChange={setIsCampOpen}>
                         <DialogTrigger asChild>
-                          <Button disabled title="Not available in this environment">
+                          <Button onClick={() => setIsCampOpen(true)}>
                             <Plus className="w-4 h-4 mr-2" /> New Campaign
                           </Button>
                         </DialogTrigger>
