@@ -1,10 +1,16 @@
 from typing import Optional, List, Dict
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, JSON
 import uuid
 
 # --- BONUS MODULE MODELS ---
+
+# Normalized campaign ↔ games mapping
+class BonusCampaignGame(SQLModel, table=True):
+    campaign_id: str = Field(foreign_key="bonuscampaign.id", primary_key=True)
+    game_id: str = Field(foreign_key="game.id", primary_key=True)
+
 
 class BonusCampaign(SQLModel, table=True):
     """Defines a bonus offer (Deposit Match or Free Spins)."""
