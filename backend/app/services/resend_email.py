@@ -1,19 +1,25 @@
-import os
-from typing import Optional
+from typing import Optional, List, Union
 
 import resend
 
+from config import settings
 from app.core.errors import AppError
 
 
 def _init_client():
-    api_key = os.environ.get("RESEND_API_KEY")
-    if not api_key:
+    if not settings.resend_api_key:
         raise AppError("EMAIL_PROVIDER_NOT_CONFIGURED", "Resend API key is not configured", 500)
-    resend.api_key = api_key
+    resend.api_key = settings.resend_api_key
 
 
-def send_email(*, to: str, subject: str, html: str, from_email: Optional[str] = None, reply_to: Optional[str] = None):
+def send_email(
+    *,
+    to: Union[str, List[str]],
+    subject: str,
+    html: str,
+    from_email: Optional[str] = None,
+    reply_to: Optional[str] = None,
+):
     """Send a transactional email via Resend.
 
     Raises AppError with deterministic error_code on failure.
@@ -21,24 +27,21 @@ def send_email(*, to: str, subject: str, html: str, from_email: Optional[str] = 
 
     _init_client()
 
-    from_env = os.environ.get("RESEND_FROM") or "onboarding@resend.dev"
-    reply_to_env = os.environ.get("RESEND_REPLY_TO")
+    to_list = [to] if isinstance(to, str) else list(to)
 
     payload = {
-        "from": from_email or from_env,
-        "to": [to],
+        "from": from_email or settings.resend_from,
+        "to": to_list,
         "subject": subject,
         "html": html,
     }
 
-    # Resend supports reply_to in most SDK versions; keep optional.
-    if reply_to or reply_to_env:
-        payload["reply_to"] = reply_to or reply_to_env
+    effective_reply_to = reply_to or settings.resend_reply_to
+    if effective_reply_to:
+        payload["reply_to"] = effective_reply_to
 
     try:
-        # SDK call
         result = resend.Emails.send(payload)
-        # Typical response: {'id': '...'}
         if not result or not result.get("id"):
             raise AppError("EMAIL_PROVIDER_SEND_FAILED", "Email provider did not return an id", 502)
         return {"provider": "resend", "message_id": result["id"]}

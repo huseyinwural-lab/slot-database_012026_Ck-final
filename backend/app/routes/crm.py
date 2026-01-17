@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 import os
 
@@ -9,7 +9,7 @@ from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
 from app.services.feature_access import enforce_module_access
 from app.utils.tenant import get_current_tenant_id
-from app.schemas.crm_email import CRMSendEmailRequest, CRMSendEmailResponse
+from app.schemas.crm_email import CRMSendEmailRequest, CRMSendEmailResponse, CRMSendCampaignRequest
 from app.services.resend_email import send_email
 
 
@@ -53,11 +53,23 @@ async def send_campaign(
 
     # P0: minimal email send (real inbox) using Resend.
     # Campaign storage/segments/templates are P2; here we send a deterministic placeholder email.
-    result = send_email(
-        to=os.environ.get("RESEND_TEST_TO") or os.environ.get("RESEND_REPLY_TO") or "huseyinwural@gmail.com",
-        subject=f"CRM Campaign {campaign_id}",
-        html=f"<p>CRM campaign <strong>{campaign_id}</strong> sent.</p>",
-    )
+    body: CRMSendCampaignRequest | None = Body(default=None)
+
+    recipients = None
+    subject = None
+    html = None
+
+    if body is not None:
+        recipients = [str(x) for x in body.to]
+        subject = body.subject
+        html = body.html
+
+    # Fallbacks (P0): deterministic defaults.
+    recipients = recipients or [os.environ.get("RESEND_TEST_TO") or os.environ.get("RESEND_REPLY_TO") or "huseyinwural@gmail.com"]
+    subject = subject or f"CRM Campaign {campaign_id}"
+    html = html or f"<p>CRM campaign <strong>{campaign_id}</strong> sent.</p>"
+
+    result = send_email(to=recipients, subject=subject, html=html)
     return {"message": "SENT", "campaign_id": campaign_id, **result}
 
 
@@ -76,7 +88,7 @@ async def crm_send_email(
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
 
-    result = send_email(to=payload.to, subject=payload.subject, html=payload.html)
+    result = send_email(to=[str(x) for x in payload.to], subject=payload.subject, html=payload.html)
     return CRMSendEmailResponse(status="SENT", message_id=result["message_id"], provider=result["provider"])
 
 

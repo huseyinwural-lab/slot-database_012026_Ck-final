@@ -48,6 +48,13 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     sendgrid_api_key: Optional[str] = None
     sendgrid_from_email: str = "admin@casino.com"
+
+    # Email (Resend)
+    resend_api_key: Optional[str] = Field(default=None, validation_alias=AliasChoices("RESEND_API_KEY"))
+    resend_from: str = Field(default="onboarding@resend.dev", validation_alias=AliasChoices("RESEND_FROM"))
+    resend_reply_to: Optional[str] = Field(default=None, validation_alias=AliasChoices("RESEND_REPLY_TO"))
+    resend_test_to: Optional[str] = Field(default=None, validation_alias=AliasChoices("RESEND_TEST_TO"))
+
     emergent_llm_key: Optional[str] = None
 
     kyc_unverified_daily_deposit_cap: float = 100.0
