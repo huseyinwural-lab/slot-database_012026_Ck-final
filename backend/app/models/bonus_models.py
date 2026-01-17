@@ -44,25 +44,30 @@ class BonusCampaign(SQLModel, table=True):
 
 class BonusGrant(SQLModel, table=True):
     """An instance of a bonus given to a player."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
     campaign_id: str = Field(foreign_key="bonuscampaign.id", index=True)
     player_id: str = Field(foreign_key="player.id", index=True)
-    
+
+    bonus_type: Optional[str] = None  # FREE_SPIN | FREE_BET | MANUAL_CREDIT
+
     amount_granted: float = 0.0
-    initial_balance: float = 0.0 # Snapshot
-    
-    # Wagering Tracking
+    initial_balance: float = 0.0  # Snapshot
+
+    # P0 consume tracking
+    remaining_uses: Optional[int] = None
+
+    # Wagering Tracking (P1)
     wagering_target: float = 0.0
     wagering_contributed: float = 0.0
-    
-    status: str = "active" # active | completed | expired | forfeited
-    
-    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+
+    status: str = "active"  # active | completed | expired | forfeited | cancelled
+
     granted_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     expires_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    
+
     # Abuse Tracking
     device_fingerprint: Optional[str] = None
     ip_address: Optional[str] = None
