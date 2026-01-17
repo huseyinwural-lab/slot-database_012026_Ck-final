@@ -51,7 +51,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("bonuscampaigngame")
+    bind = op.get_bind()
+    existing = bind.execute(sa.text("SELECT name FROM sqlite_master WHERE type='table' AND name='bonuscampaigngame'")).fetchone()
+    if existing:
+        op.drop_table("bonuscampaigngame")
 
     op.drop_column("bonusgrant", "remaining_uses")
     # no-op: constraint not created on SQLite
