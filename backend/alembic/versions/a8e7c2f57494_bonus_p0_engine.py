@@ -23,9 +23,15 @@ def upgrade() -> None:
     
     # 1) bonuscampaign: enum-ish bonus_type (already exists in some envs)
     # NOTE (SQLite): cannot ALTER TABLE to add CHECK constraints. Enforce via app-level validation.
-    op.add_column("bonuscampaign", sa.Column("bet_amount", sa.Float(), nullable=True))
-    op.add_column("bonuscampaign", sa.Column("spin_count", sa.Integer(), nullable=True))
-    op.add_column("bonuscampaign", sa.Column("max_uses", sa.Integer(), nullable=True))
+    # Columns may already exist if a partial migration ran.
+    bind = op.get_bind()
+    cols = [r[1] for r in bind.execute(sa.text("PRAGMA table_info('bonuscampaign')")).fetchall()]
+    if 'bet_amount' not in cols:
+        op.add_column("bonuscampaign", sa.Column("bet_amount", sa.Float(), nullable=True))
+    if 'spin_count' not in cols:
+        op.add_column("bonuscampaign", sa.Column("spin_count", sa.Integer(), nullable=True))
+    if 'max_uses' not in cols:
+        op.add_column("bonuscampaign", sa.Column("max_uses", sa.Integer(), nullable=True))
 
     # 2) bonusgrant: add remaining_uses + bonus_type for deterministic consume
     op.add_column(
