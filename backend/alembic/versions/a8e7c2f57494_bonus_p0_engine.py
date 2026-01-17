@@ -22,11 +22,7 @@ def upgrade() -> None:
     # P0 Bonus engine additions
     
     # 1) bonuscampaign: enum-ish bonus_type (already exists in some envs)
-    op.create_check_constraint(
-        "ck_bonuscampaign_bonus_type_allowed",
-        "bonuscampaign",
-        "bonus_type in ('FREE_SPIN','FREE_BET','MANUAL_CREDIT') OR bonus_type IS NULL",
-    )
+    # NOTE (SQLite): cannot ALTER TABLE to add CHECK constraints. Enforce via app-level validation.
     op.add_column("bonuscampaign", sa.Column("bet_amount", sa.Float(), nullable=True))
     op.add_column("bonuscampaign", sa.Column("spin_count", sa.Integer(), nullable=True))
     op.add_column("bonuscampaign", sa.Column("max_uses", sa.Integer(), nullable=True))
@@ -36,11 +32,7 @@ def upgrade() -> None:
         "bonusgrant",
         sa.Column("bonus_type", sa.String(), nullable=True),
     )
-    op.create_check_constraint(
-        "ck_bonusgrant_bonus_type_allowed",
-        "bonusgrant",
-        "bonus_type in ('FREE_SPIN','FREE_BET','MANUAL_CREDIT') OR bonus_type IS NULL",
-    )
+    # NOTE (SQLite): cannot ALTER TABLE to add CHECK constraints. Enforce via app-level validation.
     op.add_column("bonusgrant", sa.Column("remaining_uses", sa.Integer(), nullable=True))
 
     # 3) campaign ↔ games (normalized)
@@ -58,11 +50,11 @@ def downgrade() -> None:
     op.drop_table("bonuscampaigngame")
 
     op.drop_column("bonusgrant", "remaining_uses")
-    op.drop_constraint("ck_bonusgrant_bonus_type_allowed", "bonusgrant", type_="check")
+    # no-op: constraint not created on SQLite
     op.drop_column("bonusgrant", "bonus_type")
 
     op.drop_column("bonuscampaign", "max_uses")
     op.drop_column("bonuscampaign", "spin_count")
     op.drop_column("bonuscampaign", "bet_amount")
-    op.drop_constraint("ck_bonuscampaign_bonus_type_allowed", "bonuscampaign", type_="check")
+    # no-op: constraint not created on SQLite
     # bonuscampaign.bonus_type pre-existed; do not drop here.
