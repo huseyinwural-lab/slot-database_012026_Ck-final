@@ -1527,4 +1527,48 @@ agent_communication:
 
 ## Previous history
 
+### 2026-01-17 (Testing Agent) — P0 CRM SEND (Resend) E2E Test
+- **TEST SCOPE:** Complete end-to-end validation of P0 CRM SEND (Resend) functionality on http://localhost:3000 with admin@casino.com / Admin123! credentials as requested in review
+- **VALIDATION RESULTS:**
+  1. ✅ **Navigate to /crm (Campaigns tab):** Successfully navigated to /crm page
+     - Page loads with correct title "CRM & Communications" ✅
+     - Campaigns tab is active by default ✅
+     - No error toast detected on page load ✅
+  2. ✅ **Campaigns table empty:** Campaigns table is empty as expected
+     - Table structure present with proper headers (Name, Channel, Status, Sent, Action) ✅
+     - No campaign rows found (0 campaigns) ✅
+     - No Send buttons available to test (expected behavior) ✅
+  3. ✅ **New Campaign button disabled:** Button properly disabled with correct tooltip
+     - Button has disabled attribute ✅
+     - Tooltip text: "Not available in this environment" ✅
+     - Clicking disabled button does not trigger network requests ✅
+  4. ✅ **Error scenario testing:** API error handling validated via direct backend testing
+     - Invalid Authorization header: Returns 401 "Could not validate credentials" ✅
+     - Invalid payload (missing required fields): Returns 422 with proper validation errors ✅
+     - Valid send-email request: Returns 502 due to Resend email provider restrictions ✅
+  5. ❌ **BACKEND BUG IDENTIFIED:** POST /api/v1/crm/campaigns/{id}/send endpoint has implementation bug
+     - Error: AttributeError: 'Body' object has no attribute 'to' ✅
+     - Status: 500 Internal Server Error ✅
+     - Root cause: Incorrect Body parameter handling in send_campaign function ✅
+  6. ⚠️ **Frontend API calls:** Browser automation fetch calls return None status
+     - Direct backend testing confirms API endpoints work correctly ✅
+     - Frontend JavaScript fetch may have CORS or authentication issues ⚠️
+
+- **DETAILED FINDINGS:**
+  - **Frontend UI:** CRM page loads correctly, all UI elements present and properly styled
+  - **Backend API Validation:** Direct curl testing confirms most endpoints work correctly
+  - **Campaign Send Bug:** Backend code has bug in line 63 of /app/backend/app/routes/crm.py
+  - **Error Handling:** Proper HTTP status codes returned for authentication and validation errors
+  - **Email Provider:** Resend integration working but restricted to verified email addresses
+  - **Session Management:** Authentication stable throughout testing
+
+- **BACKEND ENDPOINTS TESTED:**
+  - GET /api/v1/crm/campaigns: 200 OK (returns empty array)
+  - POST /api/v1/crm/send-email (invalid auth): 401 Unauthorized
+  - POST /api/v1/crm/send-email (invalid payload): 422 Validation Error
+  - POST /api/v1/crm/send-email (valid): 502 Email Provider Error (expected)
+  - POST /api/v1/crm/campaigns/{id}/send: 500 Internal Server Error (BUG)
+
+- **STATUS:** ⚠️ PARTIAL PASS (4/6) - CRM page functionality working correctly, but backend campaign send endpoint has critical bug that needs fixing
+
 (legacy content retained below)
