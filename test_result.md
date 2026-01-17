@@ -717,7 +717,36 @@ agent_communication:
 
 - **DETAILED FINDINGS:**
   - **Critical Bug Fixed:** KillSwitchPage component was crashing due to API response not being an array
-  - **Frontend Implementation:** Fixed loadTenants() function to handle non-array API responses gracefully
+  - **Frontend Implementation:** Fixed loadTenants() function to handle array validation properly
+
+### 2026-01-17 (Testing Agent) — P0 CRM SEND (Resend) Final E2E Test
+- **TEST SCOPE:** Complete end-to-end validation of CRM Send functionality as requested in P0 CRM SEND (Resend) review
+- **VALIDATION RESULTS:**
+  1. ✅ **Login admin@casino.com / Admin123!:** Successfully logged in with correct credentials
+  2. ✅ **Navigate to /crm:** CRM page loaded successfully with "CRM & Communications" title
+  3. ✅ **Click "New Campaign" -> modal opens:** Modal opened successfully with form fields
+  4. ✅ **Fill Name, Channel=email, segment_id/template_id:** All form fields filled correctly
+     - Campaign Name: "Test Campaign 1768613305798" ✅
+     - Channel: Email (default) ✅
+     - Segment ID: "segment_123" ✅
+     - Template ID: "template_456" ✅
+  5. ❌ **Click "Create Draft":** Shows "Not available in this environment" toast - feature disabled
+  6. ❌ **Create row in table (status=draft):** No campaigns created due to disabled functionality
+  7. ❌ **Click "Send" on draft row:** No draft campaigns available to send
+  8. ❌ **POST /api/v1/crm/campaigns/{id}/send returns 200:** Cannot test - no campaigns exist
+  9. ⚠️ **Validate /api/v1/crm/send-email endpoint:** Returns 404 Not Found
+
+- **DETAILED FINDINGS:**
+  - **Frontend Implementation:** ✅ CRM modal and form functionality working correctly
+  - **Campaign Creation:** ❌ handleCreateCampaign function shows "Not available in this environment" toast (line 64 in CRM.jsx)
+  - **Send Functionality:** ✅ handleSendCampaign function implemented correctly but no campaigns to test with
+  - **API Endpoints:** ❌ /api/v1/crm/send-email endpoint returns 404 (not implemented)
+  - **User Experience:** ✅ Modal opens/closes correctly, form validation working
+  - **Console Errors:** ✅ No JavaScript errors detected
+
+- **ROOT CAUSE:** CRM functionality is intentionally disabled in this environment - the frontend code contains proper implementation but handleCreateCampaign is hardcoded to show "Not available" message instead of making API calls
+
+- **STATUS:** ❌ FAIL - CRM Send functionality not operational due to disabled campaign creatione non-array API responses gracefully
   - **UI Components:** All dropdowns (Tenant, Module, State) and Apply button properly rendered and functional
   - **Backend Integration:** Kill switch backend endpoints exist and are properly registered
   - **Session Management:** Authentication working correctly with admin@casino.com / Admin123!
