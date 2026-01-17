@@ -71,10 +71,22 @@ const CRM = () => {
 
   const handleSendCampaign = async (id) => {
     try {
-        const res = await api.post(`/v1/crm/campaigns/${id}/send`);
-        toast.success(res.data.message);
-        fetchData();
-    } catch { toast.error("Send failed"); }
+      const res = await api.post(`/v1/crm/campaigns/${id}/send`, {
+        to: [process.env.REACT_APP_CRM_TEST_RECIPIENT || 'huseyinwural@gmail.com'],
+        subject: `CRM Campaign ${id}`,
+        html: `<p>CRM campaign <strong>${id}</strong> sent.</p>`,
+      });
+      toast.success('Campaign sent');
+      fetchData();
+      return res.data;
+    } catch (err) {
+      const code = err?.response?.data?.error_code;
+      if (code) {
+        toast.error(code);
+      } else {
+        toast.error('Send failed');
+      }
+    }
   };
 
   return (
