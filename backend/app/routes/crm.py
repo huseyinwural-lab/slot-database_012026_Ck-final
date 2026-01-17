@@ -47,6 +47,26 @@ async def send_campaign(
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+
+
+@router.post("/send-email", response_model=CRMSendEmailResponse)
+async def crm_send_email(
+    request: Request,
+    payload: CRMSendEmailRequest,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    """Minimal transactional email sender for CRM.
+
+    P0 target: clicking Send in CRM results in a real inbox email.
+    """
+
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
+
+    result = send_email(to=payload.to, subject=payload.subject, html=payload.html)
+    return CRMSendEmailResponse(status="SENT", message_id=result["message_id"], provider=result["provider"])
+
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
     return {"message": "QUEUED", "campaign_id": campaign_id}
 
