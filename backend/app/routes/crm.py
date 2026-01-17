@@ -6,6 +6,8 @@ from typing import List
 
 from config import settings
 
+from app.core.errors import AppError
+
 from app.core.database import get_session
 from sqlmodel import select
 from datetime import datetime, timezone
