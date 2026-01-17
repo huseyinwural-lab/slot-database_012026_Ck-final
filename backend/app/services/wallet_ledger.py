@@ -138,6 +138,8 @@ async def apply_wallet_delta_with_ledger(
             currency=currency,
             balance_real_available=float(player.balance_real_available) + float(delta_available),
             balance_real_pending=float(player.balance_real_held) + float(delta_held),
+            balance_bonus_available=float(player.balance_bonus),
+            balance_bonus_pending=0.0,
             updated_at=now,
         )
         session.add(bal)
