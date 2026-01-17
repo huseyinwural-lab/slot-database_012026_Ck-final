@@ -4,6 +4,8 @@ import os
 
 from typing import List
 
+from config import settings
+
 from app.core.database import get_session
 from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
