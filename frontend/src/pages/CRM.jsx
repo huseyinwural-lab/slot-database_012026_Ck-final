@@ -140,7 +140,7 @@ const CRM = () => {
                                         <TableCell>{c.stats?.sent || 0}</TableCell>
                                         <TableCell className="text-right">
                                             {c.status === 'draft' && (
-                                              <Button size="sm" disabled title="Not available in this environment">
+                                              <Button size="sm" onClick={() => handleSendCampaign(c.id)}>
                                                 <Send className="w-4 h-4 mr-1" /> Send
                                               </Button>
                                             )}
