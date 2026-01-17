@@ -21,11 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # P0 Bonus engine additions
     
-    # 1) bonuscampaign: add structured fields + enum-ish bonus_type (nullable for legacy)
-    op.add_column(
-        "bonuscampaign",
-        sa.Column("bonus_type", sa.String(), nullable=True),
-    )
+    # 1) bonuscampaign: enum-ish bonus_type (already exists in some envs)
     op.create_check_constraint(
         "ck_bonuscampaign_bonus_type_allowed",
         "bonuscampaign",
@@ -69,4 +65,4 @@ def downgrade() -> None:
     op.drop_column("bonuscampaign", "spin_count")
     op.drop_column("bonuscampaign", "bet_amount")
     op.drop_constraint("ck_bonuscampaign_bonus_type_allowed", "bonuscampaign", type_="check")
-    op.drop_column("bonuscampaign", "bonus_type")
+    # bonuscampaign.bonus_type pre-existed; do not drop here.
