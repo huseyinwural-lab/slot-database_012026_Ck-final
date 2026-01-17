@@ -54,6 +54,10 @@ class WalletBalance(SQLModel, table=True):
     balance_real_available: float = 0.0
     balance_real_pending: float = 0.0
 
+    # P0-05: bonus snapshot
+    balance_bonus_available: float = 0.0
+    balance_bonus_pending: float = 0.0
+
     updated_at: datetime = Field(default_factory=lambda: datetime.utcnow(), index=True)
 
 
