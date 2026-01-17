@@ -117,7 +117,7 @@ const CRM = () => {
                                 </div>
                                 <div className="space-y-2"><Label>Segment (Mock ID)</Label><Input value={newCampaign.segment_id} onChange={e=>setNewCampaign({...newCampaign, segment_id: e.target.value})} placeholder="Segment ID" /></div>
                                 <div className="space-y-2"><Label>Template (Mock ID)</Label><Input value={newCampaign.template_id} onChange={e=>setNewCampaign({...newCampaign, template_id: e.target.value})} placeholder="Template ID" /></div>
-                                <Button disabled title="Not available in this environment" className="w-full">Create Draft</Button>
+                                <Button onClick={handleCreateCampaign} className="w-full">Create Draft</Button>
                             </div>
                         </DialogContent>
                     </Dialog>
