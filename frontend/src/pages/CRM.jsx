@@ -61,7 +61,17 @@ const CRM = () => {
   }, [activeTab, fetchData]);
 
   const handleCreateCampaign = async () => {
-    toast.message('Not available in this environment');
+    try {
+      const res = await api.post('/v1/crm/campaigns', newCampaign);
+      toast.success('Campaign created');
+      setIsCampOpen(false);
+      setNewCampaign({ name: '', channel: 'email', segment_id: '', template_id: '' });
+      fetchData();
+      return res.data;
+    } catch (err) {
+      const code = err?.response?.data?.error_code;
+      toast.error(code || 'Campaign create failed');
+    }
   };
 
   const handleSendCampaign = async (id) => {
