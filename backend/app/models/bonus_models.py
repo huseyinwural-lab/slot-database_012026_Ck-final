@@ -13,21 +13,32 @@ class BonusCampaignGame(SQLModel, table=True):
 
 
 class BonusCampaign(SQLModel, table=True):
-    """Defines a bonus offer (Deposit Match or Free Spins)."""
+    """Defines a bonus offer.
+
+    P0 supports FREE_SPIN / FREE_BET / MANUAL_CREDIT.
+    """
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
-    
+
     name: str
-    type: str # 'deposit_match' | 'free_spins'
-    status: str = "draft" # draft | active | paused | archived
-    
+    type: str  # legacy (keep)
+    status: str = "draft"  # draft | active | paused | archived
+
+    # P0 standardized type (case-sensitive)
+    bonus_type: Optional[str] = None  # FREE_SPIN | FREE_BET | MANUAL_CREDIT
+
+    # Optional typed fields (mirrors config for deterministic consume)
+    bet_amount: Optional[float] = None
+    spin_count: Optional[int] = None
+    max_uses: Optional[int] = None
+
     # Rules: multiplier, min_dep, max_bonus, wagering_mult, eligible_games, expiry_hours
     config: Dict = Field(default={}, sa_column=Column(JSON))
-    
+
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    
-    # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
+
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
     updated_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
