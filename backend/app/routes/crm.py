@@ -7,7 +7,10 @@ from typing import List
 from config import settings
 
 from app.core.database import get_session
-from app.models.sql_models import AdminUser
+from sqlmodel import select
+from datetime import datetime, timezone
+
+from app.models.sql_models import AdminUser, CRMCampaign
 from app.utils.auth import get_current_admin
 from app.services.feature_access import enforce_module_access
 from app.utils.tenant import get_current_tenant_id
@@ -18,7 +21,7 @@ from app.services.resend_email import send_email
 router = APIRouter(prefix="/api/v1/crm", tags=["crm"])
 
 
-# CRM stubs (UI contract)
+# CRM minimal persistence for P0 Send
 
 @router.get("/campaigns")
 async def list_campaigns(
@@ -28,7 +31,25 @@ async def list_campaigns(
 ) -> List[dict]:
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
-    return []
+
+    res = await session.execute(
+        select(CRMCampaign).where(CRMCampaign.tenant_id == tenant_id).order_by(CRMCampaign.created_at.desc())
+    )
+    rows = res.scalars().all()
+
+    return [
+        {
+            "id": c.id,
+            "name": c.name,
+            "channel": c.channel,
+            "status": c.status,
+            "segment_id": c.segment_id,
+            "template_id": c.template_id,
+            "stats": {"sent": c.sent_count},
+            "updated_at": c.updated_at.isoformat(),
+        }
+        for c in rows
+    ]
 
 
 @router.post("/campaigns")
@@ -40,7 +61,32 @@ async def create_campaign(
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
-    return {"message": "CREATED", "campaign": payload}
+
+    c = CRMCampaign(
+        tenant_id=tenant_id,
+        name=str(payload.get("name") or "Untitled"),
+        channel=str(payload.get("channel") or "email"),
+        segment_id=payload.get("segment_id"),
+        template_id=payload.get("template_id"),
+        status="draft",
+    )
+    session.add(c)
+    await session.commit()
+    await session.refresh(c)
+
+    return {
+        "message": "CREATED",
+        "campaign": {
+            "id": c.id,
+            "name": c.name,
+            "channel": c.channel,
+            "status": c.status,
+            "segment_id": c.segment_id,
+            "template_id": c.template_id,
+            "stats": {"sent": c.sent_count},
+            "updated_at": c.updated_at.isoformat(),
+        },
+    }
 
 
 @router.post("/campaigns/{campaign_id}/send")
@@ -54,6 +100,14 @@ async def send_campaign(
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
 
+    # Load campaign (must exist)
+    res = await session.execute(
+        select(CRMCampaign).where(CRMCampaign.id == campaign_id, CRMCampaign.tenant_id == tenant_id)
+    )
+    campaign = res.scalar_one_or_none()
+    if not campaign:
+        raise AppError("CRM_CAMPAIGN_NOT_FOUND", "Campaign not found", 404)
+
     recipients = None
     subject = None
     html = None
@@ -63,12 +117,24 @@ async def send_campaign(
         subject = body.subject
         html = body.html
 
-    # Fallbacks (P0): deterministic defaults.
     recipients = recipients or [settings.resend_test_to or settings.resend_reply_to or "huseyinwural@gmail.com"]
-    subject = subject or f"CRM Campaign {campaign_id}"
-    html = html or f"<p>CRM campaign <strong>{campaign_id}</strong> sent.</p>"
+    subject = subject or f"CRM Campaign: {campaign.name}"
+    html = html or f"<p>CRM campaign <strong>{campaign.name}</strong> sent.</p>"
 
-    result = send_email(to=recipients, subject=subject, html=html)
+    try:
+        result = send_email(to=recipients, subject=subject, html=html)
+        campaign.status = "completed"
+        campaign.sent_count += len(recipients)
+        campaign.last_error_code = None
+    except AppError as e:
+        campaign.status = "failed"
+        campaign.last_error_code = e.error_code
+        raise
+    finally:
+        campaign.updated_at = datetime.now(timezone.utc)
+        session.add(campaign)
+        await session.commit()
+
     return {"message": "SENT", "campaign_id": campaign_id, **result}
 
 

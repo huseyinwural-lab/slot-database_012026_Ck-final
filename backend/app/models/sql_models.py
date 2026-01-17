@@ -219,6 +219,22 @@ from app.models.reports_sql import ReportExportJob
 from app.models.simulation_sql import SimulationRun
 from app.models.player_ops_models import PlayerManualBonusGrant, PlayerSessionRevocation
 
+# --- CRM MODELS (P0 minimal persistence) ---
+
+class CRMCampaign(SQLModel, table=True):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    tenant_id: str = Field(index=True)
+    name: str
+    channel: str = "email"  # email|sms|push
+    segment_id: Optional[str] = None
+    template_id: Optional[str] = None
+    status: str = Field(default="draft", index=True)  # draft|completed|failed
+    sent_count: int = 0
+    last_error_code: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 
 class RiskRule(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
