@@ -45,15 +45,12 @@ async def create_campaign(
 async def send_campaign(
     campaign_id: str,
     request: Request,
+    body: CRMSendCampaignRequest | None = Body(default=None),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="crm")
-
-    # P0: minimal email send (real inbox) using Resend.
-    # Campaign storage/segments/templates are P2; here we send a deterministic placeholder email.
-    body: CRMSendCampaignRequest | None = Body(default=None)
 
     recipients = None
     subject = None
@@ -65,7 +62,7 @@ async def send_campaign(
         html = body.html
 
     # Fallbacks (P0): deterministic defaults.
-    recipients = recipients or [os.environ.get("RESEND_TEST_TO") or os.environ.get("RESEND_REPLY_TO") or "huseyinwural@gmail.com"]
+    recipients = recipients or [settings.resend_test_to or settings.resend_reply_to or "huseyinwural@gmail.com"]
     subject = subject or f"CRM Campaign {campaign_id}"
     html = html or f"<p>CRM campaign <strong>{campaign_id}</strong> sent.</p>"
 
