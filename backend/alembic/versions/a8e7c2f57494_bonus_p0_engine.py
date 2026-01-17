@@ -36,14 +36,18 @@ def upgrade() -> None:
     op.add_column("bonusgrant", sa.Column("remaining_uses", sa.Integer(), nullable=True))
 
     # 3) campaign ↔ games (normalized)
-    op.create_table(
-        "bonuscampaigngame",
-        sa.Column("campaign_id", sa.String(), nullable=False),
-        sa.Column("game_id", sa.String(), nullable=False),
-        sa.ForeignKeyConstraint(["campaign_id"], ["bonuscampaign.id"]),
-        sa.ForeignKeyConstraint(["game_id"], ["game.id"]),
-        sa.PrimaryKeyConstraint("campaign_id", "game_id"),
-    )
+    # NOTE: SQLite has no CREATE TABLE IF NOT EXISTS via alembic op. If table exists (partial migration), skip.
+    bind = op.get_bind()
+    existing = bind.execute(sa.text("SELECT name FROM sqlite_master WHERE type='table' AND name='bonuscampaigngame'")).fetchone()
+    if not existing:
+        op.create_table(
+            "bonuscampaigngame",
+            sa.Column("campaign_id", sa.String(), nullable=False),
+            sa.Column("game_id", sa.String(), nullable=False),
+            sa.ForeignKeyConstraint(["campaign_id"], ["bonuscampaign.id"]),
+            sa.ForeignKeyConstraint(["game_id"], ["game.id"]),
+            sa.PrimaryKeyConstraint("campaign_id", "game_id"),
+        )
 
 
 def downgrade() -> None:
