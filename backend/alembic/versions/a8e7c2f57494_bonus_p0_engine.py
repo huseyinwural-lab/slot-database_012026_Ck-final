@@ -34,12 +34,16 @@ def upgrade() -> None:
         op.add_column("bonuscampaign", sa.Column("max_uses", sa.Integer(), nullable=True))
 
     # 2) bonusgrant: add remaining_uses + bonus_type for deterministic consume
-    op.add_column(
-        "bonusgrant",
-        sa.Column("bonus_type", sa.String(), nullable=True),
-    )
+    bind = op.get_bind()
+    cols = [r[1] for r in bind.execute(sa.text("PRAGMA table_info('bonusgrant')")).fetchall()]
+    if 'bonus_type' not in cols:
+        op.add_column(
+            "bonusgrant",
+            sa.Column("bonus_type", sa.String(), nullable=True),
+        )
     # NOTE (SQLite): cannot ALTER TABLE to add CHECK constraints. Enforce via app-level validation.
-    op.add_column("bonusgrant", sa.Column("remaining_uses", sa.Integer(), nullable=True))
+    if 'remaining_uses' not in cols:
+        op.add_column("bonusgrant", sa.Column("remaining_uses", sa.Integer(), nullable=True))
 
     # 3) campaign ↔ games (normalized)
     # NOTE: SQLite has no CREATE TABLE IF NOT EXISTS via alembic op. If table exists (partial migration), skip.
