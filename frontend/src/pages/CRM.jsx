@@ -61,12 +61,7 @@ const CRM = () => {
   }, [activeTab, fetchData]);
 
   const handleCreateCampaign = async () => {
-    try {
-        await api.post('/v1/crm/campaigns', newCampaign);
-        setIsCampOpen(false);
-        fetchData();
-        toast.success("Campaign Created");
-    } catch { toast.error("Failed"); }
+    toast.message('Not available in this environment');
   };
 
   const handleSendCampaign = async (id) => {
