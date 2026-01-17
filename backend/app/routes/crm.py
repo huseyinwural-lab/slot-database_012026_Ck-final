@@ -7,6 +7,9 @@ from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
 from app.services.feature_access import enforce_module_access
 from app.utils.tenant import get_current_tenant_id
+from app.schemas.crm_email import CRMSendEmailRequest, CRMSendEmailResponse
+from app.services.resend_email import send_email
+
 
 router = APIRouter(prefix="/api/v1/crm", tags=["crm"])
 
