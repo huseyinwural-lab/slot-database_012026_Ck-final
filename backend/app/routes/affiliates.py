@@ -66,22 +66,21 @@ async def create_affiliate(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
+    """Back-compat endpoint (deprecated). Creates a partner and returns it."""
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
 
-    # UI sends: { username, email, company_name, model }
-    aff = Affiliate(
-        tenant_id=tenant_id,
-        username=affiliate_data.get("username") or affiliate_data.get("name") or "",
-        email=affiliate_data.get("email") or "",
-        commission_type=affiliate_data.get("model", "CPA"),
-        cpa_amount=float(affiliate_data.get("cpa_amount", 50.0)),
-        status="active",
-    )
-    session.add(aff)
+    name = affiliate_data.get("username") or affiliate_data.get("name") or ""
+    email = affiliate_data.get("email") or ""
+    if not name or not email:
+        raise HTTPException(status_code=400, detail={"error_code": "VALIDATION_ERROR"})
+
+    partner = await create_partner(session, tenant_id=tenant_id, name=name, email=email)
+    partner.status = "active"
+    session.add(partner)
     await session.commit()
-    await session.refresh(aff)
-    return aff
+    await session.refresh(partner)
+    return partner
 
 @router.get("/{affiliate_id}/links")
 async def get_affiliate_links(
@@ -132,18 +131,201 @@ async def create_affiliate_link(
     await session.refresh(link)
     return link
 
-# Stubs returning arrays
-@router.get("/offers")
-async def get_offers(
+# --- AFFILIATE P0 ENDPOINTS ---
+
+@router.get("/partners", response_model=List[PartnerOut])
+async def list_partners(
     request: Request,
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
-    return []
 
-@router.get("/payouts")
+    stmt = select(Affiliate).where(Affiliate.tenant_id == tenant_id)
+    partners = (await session.execute(stmt)).scalars().all()
+
+    # Compute balances by currency from affiliateledger.
+    balances = await compute_partner_balances(session, tenant_id=tenant_id)
+    for p in partners:
+        cur = balances.get(p.id) or {}
+        # Store a back-compat numeric balance (USD) for old UI; new UI should show per-currency.
+        try:
+            p.balance = float(cur.get("USD", 0.0))
+        except Exception:
+            p.balance = 0.0
+
+    return partners
+
+
+@router.post("/partners", response_model=PartnerOut)
+async def add_partner(
+    request: Request,
+    payload: PartnerCreate = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    partner = await create_partner(session, tenant_id=tenant_id, name=payload.name, email=payload.email)
+    await session.commit()
+    await session.refresh(partner)
+    return partner
+
+
+@router.post("/partners/{partner_id}/activate", response_model=PartnerOut)
+async def activate_partner(
+    partner_id: str,
+    request: Request,
+    payload: PartnerStatusRequest = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    partner = await set_partner_status(session, tenant_id=tenant_id, partner_id=partner_id, status="active")
+    await session.commit()
+    await session.refresh(partner)
+    return partner
+
+
+@router.post("/partners/{partner_id}/deactivate", response_model=PartnerOut)
+async def deactivate_partner(
+    partner_id: str,
+    request: Request,
+    payload: PartnerStatusRequest = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    partner = await set_partner_status(session, tenant_id=tenant_id, partner_id=partner_id, status="inactive")
+    await session.commit()
+    await session.refresh(partner)
+    return partner
+
+
+@router.get("/offers", response_model=List[OfferOut])
+async def list_offers(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    stmt = select(AffiliateOffer).where(AffiliateOffer.tenant_id == tenant_id).order_by(AffiliateOffer.created_at.desc())
+    return (await session.execute(stmt)).scalars().all()
+
+
+@router.post("/offers", response_model=OfferOut)
+async def create_offer_route(
+    request: Request,
+    payload: OfferCreate = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    offer = await create_offer(
+        session,
+        tenant_id=tenant_id,
+        name=payload.name,
+        model=payload.model,
+        currency=payload.currency,
+        cpa_amount=payload.cpa_amount,
+        min_deposit=payload.min_deposit,
+    )
+    await session.commit()
+    await session.refresh(offer)
+    return offer
+
+
+@router.post("/offers/{offer_id}/activate", response_model=OfferOut)
+async def activate_offer(
+    offer_id: str,
+    request: Request,
+    payload: OfferStatusRequest = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    offer = await set_offer_status(session, tenant_id=tenant_id, offer_id=offer_id, status="active")
+    await session.commit()
+    await session.refresh(offer)
+    return offer
+
+
+@router.post("/offers/{offer_id}/pause", response_model=OfferOut)
+async def pause_offer(
+    offer_id: str,
+    request: Request,
+    payload: OfferStatusRequest = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    offer = await set_offer_status(session, tenant_id=tenant_id, offer_id=offer_id, status="paused")
+    await session.commit()
+    await session.refresh(offer)
+    return offer
+
+
+@router.post("/tracking-links", response_model=TrackingLinkOut)
+async def create_tracking_link(
+    request: Request,
+    payload: TrackingLinkCreate = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    link = await generate_tracking_link(
+        session,
+        tenant_id=tenant_id,
+        partner_id=payload.partner_id,
+        offer_id=payload.offer_id,
+        landing_path=payload.landing_path,
+        reason=payload.reason,
+    )
+    await session.commit()
+    await session.refresh(link)
+
+    return TrackingLinkOut(code=link.code, tracking_url=make_tracking_url(link.code), expires_at=link.expires_at)
+
+
+@router.get("/r/{code}", response_model=ResolveOut)
+async def resolve_tracking_code(
+    code: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    # Public-ish resolve: no admin auth. Tenant is derived from header if present.
+    tenant_id = request.headers.get("X-Tenant-ID") or "default_casino"
+
+    resolved = await resolve_link(session, tenant_id=tenant_id, code=code)
+
+    # Count click
+    stmt = select(AffiliateLink).where(AffiliateLink.tenant_id == tenant_id, AffiliateLink.code == code)
+    link = (await session.execute(stmt)).scalars().first()
+    if link:
+        link.clicks = int(link.clicks or 0) + 1
+        session.add(link)
+        await session.commit()
+
+    return resolved
+
+
+@router.get("/payouts", response_model=List[PayoutOut])
 async def get_payouts(
     request: Request,
     session: AsyncSession = Depends(get_session),
@@ -151,10 +333,37 @@ async def get_payouts(
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
-    return []
+
+    stmt = select(AffiliatePayout).where(AffiliatePayout.tenant_id == tenant_id).order_by(AffiliatePayout.created_at.desc()).limit(200)
+    return (await session.execute(stmt)).scalars().all()
 
 
-@router.get("/creatives")
+@router.post("/payouts", response_model=PayoutOut)
+async def create_payout(
+    request: Request,
+    payload: PayoutCreate = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    payout = await record_payout(
+        session,
+        tenant_id=tenant_id,
+        partner_id=payload.partner_id,
+        amount=payload.amount,
+        currency=payload.currency,
+        method=payload.method,
+        reference=payload.reference,
+        reason=payload.reason,
+    )
+    await session.commit()
+    await session.refresh(payout)
+    return payout
+
+
+@router.get("/creatives", response_model=List[CreativeOut])
 async def get_creatives(
     request: Request,
     session: AsyncSession = Depends(get_session),
@@ -162,4 +371,42 @@ async def get_creatives(
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
-    return []
+
+    stmt = select(AffiliateCreative).where(AffiliateCreative.tenant_id == tenant_id).order_by(AffiliateCreative.created_at.desc()).limit(200)
+    return (await session.execute(stmt)).scalars().all()
+
+
+@router.post("/creatives", response_model=CreativeOut)
+async def create_creative_route(
+    request: Request,
+    payload: CreativeCreate = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    c = await create_creative(
+        session,
+        tenant_id=tenant_id,
+        name=payload.name,
+        type=payload.type,
+        url=payload.url,
+        size=payload.size,
+        language=payload.language,
+    )
+    await session.commit()
+    await session.refresh(c)
+    return c
+
+
+@router.get("/reports/summary", response_model=ReportSummaryOut)
+async def reports_summary(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+
+    return await summary_report(session, tenant_id=tenant_id)
