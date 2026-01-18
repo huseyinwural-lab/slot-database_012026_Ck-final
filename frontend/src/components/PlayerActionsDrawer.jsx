@@ -141,6 +141,7 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
     
     // P0 bonus engine: campaign-based grants
     if (!bonusReason.trim()) return toast.error('Reason is required');
+    if (!bonusType) return toast.error('Campaign is required');
     if (!bonusAmount || Number(bonusAmount) <= 0) return toast.error('Amount must be > 0');
 
     const payload = {
