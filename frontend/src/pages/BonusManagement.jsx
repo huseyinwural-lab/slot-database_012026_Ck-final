@@ -16,10 +16,12 @@ const BonusManagement = () => {
   const [loading, setLoading] = useState(false);
   const [newCampaign, setNewCampaign] = useState({
     name: '',
-    type: 'deposit_match',
-    multiplier: 1.0,
-    wagering_mult: 35,
-    min_deposit: 20
+    bonus_type: 'MANUAL_CREDIT',
+    status: 'draft',
+    amount: 20,
+    max_uses: 10,
+    game_ids: [],
+    is_onboarding: false,
   });
   const [reason, setReason] = useState('');
   const [isOpen, setIsOpen] = useState(false);
