@@ -228,7 +228,13 @@ const AffiliateManagement = () => {
                                 <TableCell>{a.email}</TableCell>
                                 <TableCell className="font-bold text-green-500">${a.balance}</TableCell>
                                 <TableCell><Badge variant={a.status==='active'?'default':'secondary'}>{a.status}</Badge></TableCell>
-                                <TableCell className="text-right">{a.status === 'pending' && <Button size="sm" onClick={() => handleStatus(a.id, 'active')}>Approve</Button>}</TableCell>
+                                <TableCell className="text-right">
+                                  {a.status === 'active' ? (
+                                    <Button size="sm" variant="outline" onClick={() => handleStatus(a.id, 'inactive')}>Deactivate</Button>
+                                  ) : (
+                                    <Button size="sm" onClick={() => handleStatus(a.id, 'active')}>Activate</Button>
+                                  )}
+                                </TableCell>
                             </TableRow>
                         ))}</TableBody>
                     </Table>
