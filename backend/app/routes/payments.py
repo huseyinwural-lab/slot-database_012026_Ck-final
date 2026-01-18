@@ -108,14 +108,18 @@ async def payments_webhook(
             
             # Since we just appended the event above, count should be 1 for the first time
             if dep_count == 1:
-                # 1. Affiliate Commission
-                aff_engine = AffiliateEngine()
-                await aff_engine.process_commission(
-                    session, 
-                    player_id=event.player_id, 
-                    event_type="FIRST_DEPOSIT", 
-                    amount=event.amount
-                )
+                # 1. Affiliate Commission (P0: CPA on first deposit)
+                try:
+                    await accrue_on_first_deposit(
+                        session,
+                        tenant_id=event.tenant_id,
+                        player_id=event.player_id,
+                        deposit_amount=event.amount,
+                        currency=event.currency,
+                    )
+                except Exception:
+                    # best-effort, do not break deposits
+                    pass
                 
                 # 2. CRM Trigger
                 crm_engine = CRMEngine()
