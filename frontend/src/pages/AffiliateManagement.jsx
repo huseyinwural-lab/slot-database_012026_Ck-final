@@ -392,6 +392,14 @@ const AffiliateManagement = () => {
                 </div>
             </TabsContent>
         </Tabs>
+        
+        <ReasonDialog
+          open={partnerReasonOpen}
+          onOpenChange={setPartnerReasonOpen}
+          onConfirm={confirmPartnerStatus}
+          title="Partner Status Change"
+          description={`Please provide a reason for ${pendingPartnerStatus?.status === 'active' ? 'activating' : 'deactivating'} this partner.`}
+        />
     </div>
     </RequireFeature>
   );
