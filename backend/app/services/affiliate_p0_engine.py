@@ -266,8 +266,8 @@ async def summary_report(session: AsyncSession, *, tenant_id: str) -> dict:
     # clicks/signups from links; first_deposits derived from ledger accruals
     stmt_links = select(AffiliateLink).where(AffiliateLink.tenant_id == tenant_id)
     links = (await session.execute(stmt_links)).scalars().all()
-    clicks = sum(int(l.clicks or 0) for l in links)
-    signups = sum(int(l.signups or 0) for l in links)
+    clicks = sum(int(link.clicks or 0) for link in links)
+    signups = sum(int(link.signups or 0) for link in links)
 
     stmt_led = select(AffiliateLedger).where(AffiliateLedger.tenant_id == tenant_id)
     entries = (await session.execute(stmt_led)).scalars().all()
