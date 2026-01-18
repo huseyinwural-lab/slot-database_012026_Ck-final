@@ -30,6 +30,11 @@ const OwnerRevenue = () => {
 
       const response = await api.get('/v1/revenue/all-tenants', { params });
 
+      // Phase C: owner-only page. If access denied, show clear disabled explanation.
+      if (response?.data?.error_code === 'OWNER_ONLY') {
+        toast.message('Owner only');
+      }
+
       // P1-1: response guard
       const data = response?.data || {};
       const tenants = Array.isArray(data) ? data : (data.items ?? data.rows ?? data.tenants ?? []);
