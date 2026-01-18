@@ -1331,6 +1331,555 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class BonusP0TestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.admin_token = None
+        self.test_player_id = None
+        self.test_player_email = None
+        self.manual_credit_campaign_id = None
+        self.free_spin_campaign_id = None
+        self.onboarding_grant_id = None
+        self.manual_credit_grant_id = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_admin_auth(self) -> bool:
+        """Setup admin authentication"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json=login_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                if not self.admin_token:
+                    self.log_result("Admin Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Admin Login", True, "Admin logged in successfully")
+                return True
+                
+        except Exception as e:
+            self.log_result("Admin Login", False, f"Exception: {str(e)}")
+            return False
+    
+    async def get_existing_game_id(self) -> str:
+        """Get an existing game ID for FREE_SPIN campaign"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/games",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Get Game ID", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return None
+                
+                data = response.json()
+                # Handle both array and paginated response formats
+                games = data if isinstance(data, list) else data.get("items", [])
+                
+                if not games:
+                    self.log_result("Get Game ID", False, "No games found")
+                    return None
+                
+                game_id = games[0].get("id")
+                self.log_result("Get Game ID", True, f"Found game ID: {game_id}")
+                return game_id
+                
+        except Exception as e:
+            self.log_result("Get Game ID", False, f"Exception: {str(e)}")
+            return None
+    
+    async def create_manual_credit_campaign(self) -> bool:
+        """Create a MANUAL_CREDIT campaign with config.amount, status=active, game_ids empty"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.admin_token}",
+                    "X-Reason": "Testing MANUAL_CREDIT campaign creation"
+                }
+                
+                campaign_data = {
+                    "name": f"Test Manual Credit Campaign {uuid.uuid4().hex[:8]}",
+                    "bonus_type": "MANUAL_CREDIT",
+                    "status": "ACTIVE",
+                    "game_ids": [],  # Empty as required
+                    "config": {
+                        "amount": 50.0
+                    }
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/bonuses/campaigns",
+                    json=campaign_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create MANUAL_CREDIT Campaign", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.manual_credit_campaign_id = data.get("id")
+                campaign_type = data.get("bonus_type")
+                
+                if not self.manual_credit_campaign_id:
+                    self.log_result("Create MANUAL_CREDIT Campaign", False, "No campaign ID in response")
+                    return False
+                
+                if campaign_type != "MANUAL_CREDIT":
+                    self.log_result("Create MANUAL_CREDIT Campaign", False, 
+                                  f"Expected MANUAL_CREDIT type, got {campaign_type}")
+                    return False
+                
+                self.log_result("Create MANUAL_CREDIT Campaign", True, 
+                              f"Campaign created with ID: {self.manual_credit_campaign_id}, Type: {campaign_type}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create MANUAL_CREDIT Campaign", False, f"Exception: {str(e)}")
+            return False
+    
+    async def create_free_spin_campaign(self) -> bool:
+        """Create a FREE_SPIN campaign with config.is_onboarding=true, status=active, max_uses=3"""
+        try:
+            # Get an existing game ID first
+            game_id = await self.get_existing_game_id()
+            if not game_id:
+                self.log_result("Create FREE_SPIN Campaign", False, "No game ID available")
+                return False
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.admin_token}",
+                    "X-Reason": "Testing FREE_SPIN onboarding campaign creation"
+                }
+                
+                campaign_data = {
+                    "name": f"Test Free Spin Onboarding Campaign {uuid.uuid4().hex[:8]}",
+                    "bonus_type": "FREE_SPIN",
+                    "status": "ACTIVE",
+                    "game_ids": [game_id],  # Include existing game ID
+                    "max_uses": 3,
+                    "config": {
+                        "is_onboarding": True
+                    }
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/bonuses/campaigns",
+                    json=campaign_data,
+                    headers=headers
+                )
+                
+                if response.status_code not in [200, 201]:
+                    self.log_result("Create FREE_SPIN Campaign", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.free_spin_campaign_id = data.get("id")
+                campaign_type = data.get("bonus_type")
+                
+                if not self.free_spin_campaign_id:
+                    self.log_result("Create FREE_SPIN Campaign", False, "No campaign ID in response")
+                    return False
+                
+                if campaign_type != "FREE_SPIN":
+                    self.log_result("Create FREE_SPIN Campaign", False, 
+                                  f"Expected FREE_SPIN type, got {campaign_type}")
+                    return False
+                
+                self.log_result("Create FREE_SPIN Campaign", True, 
+                              f"Campaign created with ID: {self.free_spin_campaign_id}, Type: {campaign_type}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Create FREE_SPIN Campaign", False, f"Exception: {str(e)}")
+            return False
+    
+    async def register_new_player(self) -> bool:
+        """Register a new player with unique email"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Generate unique player credentials
+                self.test_player_email = f"bonustest_{uuid.uuid4().hex[:8]}@casino.com"
+                
+                player_data = {
+                    "email": self.test_player_email,
+                    "username": f"bonustest_{uuid.uuid4().hex[:8]}",
+                    "password": "BonusTest123!",
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/auth/player/register",
+                    json=player_data
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Register New Player", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.test_player_id = data.get("player_id")
+                if not self.test_player_id:
+                    self.log_result("Register New Player", False, "No player ID in response")
+                    return False
+                
+                self.log_result("Register New Player", True, f"Player registered with ID: {self.test_player_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Register New Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def verify_onboarding_grant(self) -> bool:
+        """List player bonuses and assert exactly 1 onboarding grant exists with remaining_uses=3"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                response = await client.get(
+                    f"{self.base_url}/bonuses/players/{self.test_player_id}/bonuses",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Verify Onboarding Grant", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                bonuses = response.json()
+                
+                # Filter for onboarding grants (FREE_SPIN with is_onboarding=true)
+                onboarding_grants = [
+                    bonus for bonus in bonuses 
+                    if bonus.get("campaign_id") == self.free_spin_campaign_id
+                ]
+                
+                if len(onboarding_grants) != 1:
+                    self.log_result("Verify Onboarding Grant", False, 
+                                  f"Expected exactly 1 onboarding grant, found {len(onboarding_grants)}")
+                    return False
+                
+                grant = onboarding_grants[0]
+                self.onboarding_grant_id = grant.get("id")
+                remaining_uses = grant.get("remaining_uses")
+                
+                if remaining_uses != 3:
+                    self.log_result("Verify Onboarding Grant", False, 
+                                  f"Expected remaining_uses=3, got {remaining_uses}")
+                    return False
+                
+                self.log_result("Verify Onboarding Grant", True, 
+                              f"Found 1 onboarding grant with ID: {self.onboarding_grant_id}, remaining_uses: {remaining_uses}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Verify Onboarding Grant", False, f"Exception: {str(e)}")
+            return False
+    
+    async def consume_onboarding_grant_three_times(self) -> bool:
+        """Consume the onboarding grant 3 times; after 3rd consume it should become status=completed and remaining_uses=0"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.admin_token}",
+                    "X-Reason": "Testing bonus consumption"
+                }
+                
+                # Consume 3 times
+                for i in range(1, 4):
+                    consume_data = {
+                        "provider_event_id": f"test_event_{uuid.uuid4().hex[:8]}"
+                    }
+                    
+                    response = await client.post(
+                        f"{self.base_url}/bonuses/{self.onboarding_grant_id}/consume",
+                        json=consume_data,
+                        headers=headers
+                    )
+                    
+                    if response.status_code != 200:
+                        self.log_result(f"Consume Grant #{i}", False, 
+                                      f"Status: {response.status_code}, Response: {response.text}")
+                        return False
+                    
+                    data = response.json()
+                    remaining_uses = data.get("remaining_uses")
+                    status = data.get("status")
+                    
+                    expected_remaining = 3 - i
+                    if remaining_uses != expected_remaining:
+                        self.log_result(f"Consume Grant #{i}", False, 
+                                      f"Expected remaining_uses={expected_remaining}, got {remaining_uses}")
+                        return False
+                    
+                    self.log_result(f"Consume Grant #{i}", True, 
+                                  f"Consumption successful, remaining_uses: {remaining_uses}, status: {status}")
+                
+                # After 3rd consumption, verify status is completed and remaining_uses is 0
+                final_response = await client.get(
+                    f"{self.base_url}/bonuses/players/{self.test_player_id}/bonuses",
+                    headers={"Authorization": f"Bearer {self.admin_token}"}
+                )
+                
+                if final_response.status_code != 200:
+                    self.log_result("Verify Final Grant Status", False, 
+                                  f"Status: {final_response.status_code}, Response: {final_response.text}")
+                    return False
+                
+                bonuses = final_response.json()
+                grant = next((b for b in bonuses if b.get("id") == self.onboarding_grant_id), None)
+                
+                if not grant:
+                    self.log_result("Verify Final Grant Status", False, "Grant not found after consumption")
+                    return False
+                
+                final_remaining = grant.get("remaining_uses")
+                final_status = grant.get("status")
+                
+                if final_remaining != 0:
+                    self.log_result("Verify Final Grant Status", False, 
+                                  f"Expected remaining_uses=0, got {final_remaining}")
+                    return False
+                
+                if final_status != "COMPLETED":
+                    self.log_result("Verify Final Grant Status", False, 
+                                  f"Expected status=COMPLETED, got {final_status}")
+                    return False
+                
+                self.log_result("Consume Onboarding Grant 3 Times", True, 
+                              f"All 3 consumptions successful, final status: {final_status}, remaining_uses: {final_remaining}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Consume Onboarding Grant 3 Times", False, f"Exception: {str(e)}")
+            return False
+    
+    async def grant_manual_credit_to_player(self) -> bool:
+        """Grant MANUAL_CREDIT to player with amount override (15). Verify player balance_bonus becomes 15"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {
+                    "Authorization": f"Bearer {self.admin_token}",
+                    "X-Reason": "Testing manual credit grant"
+                }
+                
+                grant_data = {
+                    "campaign_id": self.manual_credit_campaign_id,
+                    "player_id": self.test_player_id,
+                    "amount": 15.0  # Amount override
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/bonuses/grant",
+                    json=grant_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Grant Manual Credit", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.manual_credit_grant_id = data.get("id")
+                granted_amount = data.get("amount")
+                
+                if not self.manual_credit_grant_id:
+                    self.log_result("Grant Manual Credit", False, "No grant ID in response")
+                    return False
+                
+                if granted_amount != 15.0:
+                    self.log_result("Grant Manual Credit", False, 
+                                  f"Expected amount=15.0, got {granted_amount}")
+                    return False
+                
+                # Verify player balance_bonus becomes 15
+                player_response = await client.get(
+                    f"{self.base_url}/players/{self.test_player_id}",
+                    headers={"Authorization": f"Bearer {self.admin_token}"}
+                )
+                
+                if player_response.status_code != 200:
+                    self.log_result("Verify Player Balance", False, 
+                                  f"Status: {player_response.status_code}, Response: {player_response.text}")
+                    return False
+                
+                player_data = player_response.json()
+                balance_bonus = player_data.get("balance_bonus", 0)
+                
+                if balance_bonus != 15.0:
+                    self.log_result("Grant Manual Credit", False, 
+                                  f"Expected balance_bonus=15.0, got {balance_bonus}")
+                    return False
+                
+                self.log_result("Grant Manual Credit", True, 
+                              f"Manual credit granted successfully, grant ID: {self.manual_credit_grant_id}, player balance_bonus: {balance_bonus}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Grant Manual Credit", False, f"Exception: {str(e)}")
+            return False
+    
+    async def revoke_manual_credit_grant(self) -> bool:
+        """Revoke the MANUAL_CREDIT grant; verify player balance_bonus decreases to 0 (no negative)"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                revoke_data = {
+                    "reason": "Testing grant revocation"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/bonuses/{self.manual_credit_grant_id}/revoke",
+                    json=revoke_data,
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Revoke Manual Credit Grant", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                grant_status = data.get("status")
+                
+                if grant_status != "REVOKED":
+                    self.log_result("Revoke Manual Credit Grant", False, 
+                                  f"Expected status=REVOKED, got {grant_status}")
+                    return False
+                
+                # Verify player balance_bonus decreases to 0
+                player_response = await client.get(
+                    f"{self.base_url}/players/{self.test_player_id}",
+                    headers=headers
+                )
+                
+                if player_response.status_code != 200:
+                    self.log_result("Verify Player Balance After Revoke", False, 
+                                  f"Status: {player_response.status_code}, Response: {player_response.text}")
+                    return False
+                
+                player_data = player_response.json()
+                balance_bonus = player_data.get("balance_bonus", 0)
+                
+                if balance_bonus < 0:
+                    self.log_result("Revoke Manual Credit Grant", False, 
+                                  f"Balance went negative: {balance_bonus}")
+                    return False
+                
+                if balance_bonus != 0:
+                    self.log_result("Revoke Manual Credit Grant", False, 
+                                  f"Expected balance_bonus=0, got {balance_bonus}")
+                    return False
+                
+                self.log_result("Revoke Manual Credit Grant", True, 
+                              f"Grant revoked successfully, status: {grant_status}, player balance_bonus: {balance_bonus}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Revoke Manual Credit Grant", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete BONUS P0 test suite"""
+        print("🚀 Starting BONUS P0 Backend End-to-End Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_admin_auth():
+            print("\n❌ Admin authentication setup failed. Cannot proceed with tests.")
+            return False
+        
+        # Run all tests in sequence
+        test_results = []
+        
+        # Test 1: Create MANUAL_CREDIT campaign
+        test_results.append(await self.create_manual_credit_campaign())
+        
+        # Test 2: Create FREE_SPIN campaign with onboarding
+        test_results.append(await self.create_free_spin_campaign())
+        
+        # Test 3: Register new player
+        test_results.append(await self.register_new_player())
+        
+        # Test 4: Verify onboarding grant auto-creation
+        test_results.append(await self.verify_onboarding_grant())
+        
+        # Test 5: Consume onboarding grant 3 times
+        if self.onboarding_grant_id:
+            test_results.append(await self.consume_onboarding_grant_three_times())
+        else:
+            self.log_result("Consume Onboarding Grant 3 Times", False, "Skipped - no onboarding grant ID")
+            test_results.append(False)
+        
+        # Test 6: Grant manual credit to player
+        test_results.append(await self.grant_manual_credit_to_player())
+        
+        # Test 7: Revoke manual credit grant
+        if self.manual_credit_grant_id:
+            test_results.append(await self.revoke_manual_credit_grant())
+        else:
+            self.log_result("Revoke Manual Credit Grant", False, "Skipped - no manual credit grant ID")
+            test_results.append(False)
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 BONUS P0 TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All BONUS P0 backend end-to-end tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class PlayersExportCSVTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
