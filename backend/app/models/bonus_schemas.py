@@ -36,6 +36,7 @@ class BonusCampaignOut(BaseModel):
 
 
 class BonusGrantOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     tenant_id: str
     campaign_id: str
