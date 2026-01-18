@@ -1715,9 +1715,15 @@ class BonusP0TestSuite:
                 
                 data = response.json()
                 self.manual_credit_grant_id = data.get("id")
+                granted_amount = data.get("amount_granted")  # Use amount_granted instead of amount
+                
+                if not self.manual_credit_grant_id:
+                    self.log_result("Grant Manual Credit", False, "No grant ID in response")
+                    return False
+                
                 if granted_amount != 15.0:
                     self.log_result("Grant Manual Credit", False, 
-                                  f"Expected amount=15.0, got {granted_amount}")
+                                  f"Expected amount_granted=15.0, got {granted_amount}")
                     return False
                 
                 # Verify player balance_bonus becomes 15
