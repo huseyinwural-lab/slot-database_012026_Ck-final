@@ -85,8 +85,8 @@ api.interceptors.response.use(
     const requestId = headers?.['x-request-id'] || headers?.['X-Request-ID'] || headers?.get?.('x-request-id') || headers?.get?.('X-Request-ID');
 
     const standardizedError = {
-      code: raw.error_code || detail.error_code || 'UNKNOWN_ERROR',
-      message: raw.message || detail.detail || error.message || 'An unexpected error occurred',
+      code: raw.error_code || detail.error_code || detail.code || 'UNKNOWN_ERROR',
+      message: raw.message || detail.message || detail.detail || error.message || 'An unexpected error occurred',
       details: raw.details || detail || {},
       status: error.response?.status,
       request_id: requestId,

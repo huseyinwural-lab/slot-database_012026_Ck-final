@@ -106,7 +106,7 @@ const BonusManagement = () => {
         config,
       };
 
-      await api.post('/v1/bonuses/campaigns', payload, { headers: { 'X-Reason': reason } });
+      await postWithReason('/v1/bonuses/campaigns', reason, payload);
       toast.success('Campaign created');
       setIsOpen(false);
       setReason('');
@@ -276,7 +276,6 @@ const BonusManagement = () => {
         title={pendingStatusChange?.newStatus === 'active' ? 'Activate Campaign' : 'Pause Campaign'}
         placeholder="Why are you changing campaign status?"
         confirmText={pendingStatusChange?.newStatus === 'active' ? 'Activate' : 'Pause'}
-        title={pendingStatusChange?.newStatus === 'active' ? 'Activate Campaign' : 'Pause Campaign'}
         onConfirm={confirmStatusChange}
       />
 
