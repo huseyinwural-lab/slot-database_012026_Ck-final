@@ -14,8 +14,8 @@ export const MENU_ITEMS = [
   { key: 'core.players', section: 'Core', label: 'Players', icon: Users, path: '/players' },
   { key: 'core.finance', section: 'Core', label: 'Finance', icon: DollarSign, path: '/finance', ownerOnly: true },
   { key: 'core.withdrawals', section: 'Core', label: 'Withdrawals', icon: DollarSign, path: '/finance/withdrawals', ownerOnly: true },
-  { key: 'core.all_revenue', section: 'Core', label: 'All Revenue', icon: TrendingUp, path: '/revenue/all-tenants', ownerOnly: true },
-  { key: 'core.my_revenue', section: 'Core', label: 'My Revenue', icon: TrendingUp, path: '/revenue/my-tenant', ownerOnly: false, tenantOnly: true }, // Logic handled in render
+  { key: 'core.all_revenue', section: 'Core', label: 'All Revenue', icon: TrendingUp, path: '/revenue', ownerOnly: true },
+  { key: 'core.my_revenue', section: 'Core', label: 'My Revenue', icon: TrendingUp, path: '/my-revenue', ownerOnly: false, tenantOnly: true }, // Logic handled in render
   { key: 'core.games', section: 'Core', label: 'Games', icon: Gamepad2, path: '/games' },
   { key: 'core.vip_games', section: 'Core', label: 'VIP Games', icon: Crown, path: '/vip-games', className: 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/50' },
 
