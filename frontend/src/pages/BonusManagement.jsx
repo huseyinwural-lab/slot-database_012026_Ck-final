@@ -89,7 +89,7 @@ const BonusManagement = () => {
     if (!reason) return;
 
     try {
-      await api.post(`/v1/bonuses/campaigns/${id}/status`, { status: newStatus, reason });
+      await api.post(`/v1/bonuses/campaigns/${id}/status`, { status: newStatus }, { headers: { 'X-Reason': reason } });
       toast.success(`Campaign ${newStatus}`);
       fetchCampaigns();
     } catch (e) {
