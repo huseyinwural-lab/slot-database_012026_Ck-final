@@ -409,6 +409,11 @@ const AffiliateManagement = () => {
                     ))}
                 </div>
             </TabsContent>
+
+            {/* REPORTS */}
+            <TabsContent value="reports" className="mt-4">
+              <AffiliateReports />
+            </TabsContent>
         </Tabs>
         
         <ReasonDialog
