@@ -15,7 +15,7 @@ async def require_reason(
             body = await request.json()
             if isinstance(body, dict):
                 reason = body.get("reason")
-        except:
+        except Exception:
             pass
 
     if not reason:
