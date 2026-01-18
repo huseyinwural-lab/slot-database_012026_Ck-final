@@ -128,18 +128,28 @@ const BonusManagement = () => {
   };
 
   const toggleStatus = async (id, currentStatus) => {
-    if (!reason) {
-      toast.error('Reason is required');
-      return;
-    }
-
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+    setPendingStatusChange({ id, newStatus });
+    setReasonModalOpen(true);
+  };
+
+  const confirmStatusChange = async (modalReason) => {
+    if (!pendingStatusChange) return;
+
     try {
-      await api.post(`/v1/bonuses/campaigns/${id}/status`, { status: newStatus }, { headers: { 'X-Reason': reason } });
-      toast.success(`Campaign ${newStatus}`);
+      await postWithReason(
+        `/v1/bonuses/campaigns/${pendingStatusChange.id}/status`,
+        modalReason,
+        { status: pendingStatusChange.newStatus }
+      );
+      toast.success(`Campaign ${pendingStatusChange.newStatus}`);
       fetchCampaigns();
+      setReasonModalOpen(false);
+      setPendingStatusChange(null);
     } catch (e) {
-      toast.error('Status update failed');
+      const code = e?.standardized?.code || e?.response?.data?.detail?.code || e?.response?.data?.detail?.error_code;
+      if (code === 'REASON_REQUIRED' || code === 'REASON_MISSING') toast.error('Audit reason is required');
+      else toast.error(e?.standardized?.message || 'Status update failed');
     }
   };
 
