@@ -162,8 +162,31 @@ const AffiliateManagement = () => {
       toast.error(e?.standardized?.message || e?.standardized?.code || 'Add creative failed');
     }
   };
+  const [partnerReasonOpen, setPartnerReasonOpen] = useState(false);
+  const [pendingPartnerStatus, setPendingPartnerStatus] = useState(null);
+
   const handleStatus = async (id, status) => {
-    try { await api.put(`/v1/affiliates/${id}/status`, { status }); toast.success("Status Updated"); fetchData(); } catch { toast.error("Failed"); }
+    // status here is 'active'|'inactive'
+    setPendingPartnerStatus({ id, status });
+    setPartnerReasonOpen(true);
+  };
+
+  const confirmPartnerStatus = async (reason) => {
+    if (!pendingPartnerStatus) return;
+
+    try {
+      const url = pendingPartnerStatus.status === 'active'
+        ? `/v1/affiliates/partners/${pendingPartnerStatus.id}/activate`
+        : `/v1/affiliates/partners/${pendingPartnerStatus.id}/deactivate`;
+
+      await postWithReason(url, reason, {});
+      toast.success(`Partner ${pendingPartnerStatus.status === 'active' ? 'activated' : 'deactivated'}`);
+      setPartnerReasonOpen(false);
+      setPendingPartnerStatus(null);
+      fetchData();
+    } catch (e) {
+      toast.error(e?.standardized?.message || e?.standardized?.code || 'Status update failed');
+    }
   };
 
   return (
