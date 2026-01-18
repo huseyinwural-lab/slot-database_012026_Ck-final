@@ -276,6 +276,7 @@ const BonusManagement = () => {
         title={pendingStatusChange?.newStatus === 'active' ? 'Activate Campaign' : 'Pause Campaign'}
         placeholder="Why are you changing campaign status?"
         confirmText={pendingStatusChange?.newStatus === 'active' ? 'Activate' : 'Pause'}
+        title={pendingStatusChange?.newStatus === 'active' ? 'Activate Campaign' : 'Pause Campaign'}
         onConfirm={confirmStatusChange}
       />
 
