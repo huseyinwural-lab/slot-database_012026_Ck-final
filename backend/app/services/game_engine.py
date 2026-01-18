@@ -63,52 +63,70 @@ class GameEngine:
             session.add(game_round)
             await session.flush() # Get ID
             
-        # 4. Calculate Ledger Delta
-        delta_avail = 0.0
-        
-        if payload.event_type == "BET":
-            delta_avail = -abs(payload.amount)
-            game_round.total_bet += abs(payload.amount)
-        elif payload.event_type == "WIN":
-            # Bonus: Update Wagering Progress
-            if player.wagering_remaining > 0:
-                # Contribute 100% of bet to wagering
-                player.wagering_remaining = max(0.0, player.wagering_remaining - abs(payload.amount))
-                if player.wagering_remaining == 0:
-                    # Bonus Unlocked Logic (MVP: Just clear the tracker)
-                    pass
-                session.add(player) # Stage update
-            delta_avail = +abs(payload.amount)
-            game_round.total_win += abs(payload.amount)
-        elif payload.event_type == "REFUND":
-            delta_avail = +abs(payload.amount)
-            # Adjust round stats? Usually refund cancels bet.
-            game_round.total_bet -= abs(payload.amount)
-            
-        # 5. Apply to Ledger (This handles Row Locking on Wallet)
+        # 4. Apply wallet changes with P0-05 precedence rules
         tx_id = str(uuid.uuid4())
-        
-        # Determine Ledger Event Type
         ledger_type = f"game_{payload.event_type.lower()}"
-        
+
         try:
-            success = await apply_wallet_delta_with_ledger(
-                session,
-                tenant_id=player.tenant_id,
-                player_id=player.id,
-                tx_id=tx_id,
-                event_type=ledger_type,
-                delta_available=delta_avail,
-                delta_held=0.0,
-                currency=payload.currency,
-                idempotency_key=f"game:{payload.provider_event_id}",
-                provider=payload.provider_id,
-                provider_ref=payload.provider_round_id,
-                provider_event_id=payload.provider_event_id
-            )
+            if payload.event_type == "BET":
+                # Debit: bonus first then real
+                await spend_with_bonus_precedence(
+                    session,
+                    tenant_id=player.tenant_id,
+                    player_id=player.id,
+                    tx_id=tx_id,
+                    event_type=ledger_type,
+                    amount=float(abs(payload.amount)),
+                    currency=payload.currency,
+                    idempotency_key=f"game:{payload.provider_event_id}",
+                    provider=payload.provider_id,
+                    provider_ref=payload.provider_round_id,
+                    provider_event_id=payload.provider_event_id,
+                )
+                game_round.total_bet += abs(payload.amount)
+
+            elif payload.event_type == "WIN":
+                # Bonus: Update Wagering Progress
+                if player.wagering_remaining > 0:
+                    player.wagering_remaining = max(0.0, player.wagering_remaining - abs(payload.amount))
+                    session.add(player)
+
+                await apply_wallet_delta_with_ledger(
+                    session,
+                    tenant_id=player.tenant_id,
+                    player_id=player.id,
+                    tx_id=tx_id,
+                    event_type=ledger_type,
+                    delta_available=float(abs(payload.amount)),
+                    delta_held=0.0,
+                    currency=payload.currency,
+                    idempotency_key=f"game:{payload.provider_event_id}",
+                    provider=payload.provider_id,
+                    provider_ref=payload.provider_round_id,
+                    provider_event_id=payload.provider_event_id,
+                )
+                game_round.total_win += abs(payload.amount)
+
+            elif payload.event_type == "REFUND":
+                await apply_wallet_delta_with_ledger(
+                    session,
+                    tenant_id=player.tenant_id,
+                    player_id=player.id,
+                    tx_id=tx_id,
+                    event_type=ledger_type,
+                    delta_available=float(abs(payload.amount)),
+                    delta_held=0.0,
+                    currency=payload.currency,
+                    idempotency_key=f"game:{payload.provider_event_id}",
+                    provider=payload.provider_id,
+                    provider_ref=payload.provider_round_id,
+                    provider_event_id=payload.provider_event_id,
+                )
+                game_round.total_bet -= abs(payload.amount)
+
         except Exception as e:
             logger.error(f"Ledger Error: {e}")
-            if "went negative" in str(e):
+            if "went negative" in str(e) or "INSUFFICIENT_FUNDS" in str(e):
                 raise AppError("INSUFFICIENT_FUNDS", 402)
             raise e
 
