@@ -130,9 +130,7 @@ class GameEngine:
                 raise AppError("INSUFFICIENT_FUNDS", 402)
             raise e
 
-        if not success:
-            # Should be covered by Step 2, but just in case
-            pass
+        # spend/apply functions are idempotent at the ledger level; nothing else required here.
 
         # 6. Record Game Event
         new_event = GameEvent(
