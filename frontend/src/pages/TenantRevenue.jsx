@@ -26,7 +26,15 @@ const TenantRevenue = () => {
         setRevenueData(response.data);
       } catch (error) {
         console.error('Failed to fetch revenue:', error);
-        toast.error('Failed to load revenue data');
+        const status = error?.response?.status;
+        const errorCode = error?.response?.data?.error_code || error?.response?.data?.detail?.error_code;
+        if (status === 404) {
+          toast.error('Revenue endpoint not available', { description: 'This environment does not support My Revenue yet.' });
+        } else if (status === 403) {
+          toast.error('Access denied', { description: errorCode || 'Forbidden' });
+        } else {
+          toast.error('Failed to load revenue data');
+        }
       } finally {
         setLoading(false);
       }
