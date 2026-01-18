@@ -4,7 +4,7 @@ from typing import Optional
 async def require_reason(
     request: Request,
     x_reason: Optional[str] = Header(None, alias="X-Reason"),
-    body_reason: Optional[str] = Body(None, embed=True, alias="reason")
+    body_reason: Optional[str] = Body(None, alias="reason")
 ) -> str:
     """Enforce presence of a reason for mutating actions."""
     reason = x_reason or body_reason
