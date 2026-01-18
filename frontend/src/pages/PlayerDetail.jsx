@@ -30,16 +30,18 @@ const PlayerDetail = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const [pRes, tRes, kRes, lRes] = await Promise.all([
+      const [pRes, tRes, kRes, lRes, bRes] = await Promise.all([
         api.get(`/v1/players/${id}`),
         api.get(`/v1/players/${id}/transactions`),
         api.get(`/v1/players/${id}/kyc`),
         api.get(`/v1/players/${id}/logs`),
+        api.get(`/v1/bonuses/players/${id}`),
       ]);
       setPlayer(pRes.data);
       setTransactions(tRes.data);
       setKycDocs(kRes.data);
       setLogs(lRes.data);
+      setBonuses(bRes.data || []);
     } catch (err) {
       toast.error("Failed to load player data");
     } finally {
