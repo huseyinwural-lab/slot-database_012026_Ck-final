@@ -174,7 +174,7 @@ const BonusManagement = () => {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Gift className="w-6 h-6" /> Bonuses
           </h1>
-          <p className="text-muted-foreground">P0 Campaign management (game-scoped + onboarding flag)</p>
+          <p className="text-muted-foreground">P0.5 Reason Modal enabled — P0 Campaign management (game-scoped + onboarding flag)</p>
         </div>
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
