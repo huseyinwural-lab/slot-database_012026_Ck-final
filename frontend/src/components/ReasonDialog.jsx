@@ -46,6 +46,7 @@ const ReasonDialog = ({ open, onOpenChange, title, placeholder, confirmText = 'C
             <Button
               onClick={() => onConfirm(reason.trim())}
               disabled={!canSubmit}
+              data-testid="reason-confirm"
             >
               {confirmText}
             </Button>
