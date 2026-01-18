@@ -156,8 +156,6 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
       toast.success('Bonus granted');
       await refreshAudit();
       setBonusAmount('');
-      setBonusQty('');
-      setBonusExpiry('');
       setBonusReason('');
     } catch (e) {
       toast.error(e?.response?.data?.detail?.error_code === 'FORBIDDEN' ? 'Unauthorized' : 'Bonus failed');
