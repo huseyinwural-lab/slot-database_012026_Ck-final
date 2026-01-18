@@ -68,6 +68,22 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, playerId]);
 
+
+  const refreshBonusCampaigns = async () => {
+    try {
+      const res = await api.get('/v1/bonuses/campaigns');
+      const rows = res.data || [];
+      setBonusCampaigns(Array.isArray(rows) ? rows.filter((c) => c.status === 'active') : []);
+      if (!bonusType && Array.isArray(rows) && rows.length) {
+        const firstActive = rows.find((c) => c.status === 'active');
+        if (firstActive) setBonusType(firstActive.id);
+      }
+    } catch {
+      // no-op
+    }
+  };
+
+
   const doCredit = async () => {
     if (!playerId) return;
     if (!creditAmount || Number(creditAmount) <= 0) return toast.error('Amount must be > 0');
