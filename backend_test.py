@@ -1468,6 +1468,59 @@ class BonusP0TestSuite:
             self.log_result("Create MANUAL_CREDIT Campaign", False, f"Exception: {str(e)}")
             return False
     
+    async def cleanup_existing_onboarding_campaigns(self) -> bool:
+        """Clean up existing onboarding campaigns to avoid conflicts"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Get all campaigns
+                response = await client.get(
+                    f"{self.base_url}/bonuses/campaigns",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Cleanup Existing Onboarding", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                campaigns = response.json()
+                
+                # Find existing onboarding campaigns
+                existing_onboarding = [
+                    c for c in campaigns 
+                    if c.get("config", {}).get("is_onboarding") and c.get("status") == "ACTIVE"
+                ]
+                
+                # Deactivate existing onboarding campaigns
+                for campaign in existing_onboarding:
+                    deactivate_headers = {
+                        "Authorization": f"Bearer {self.admin_token}",
+                        "X-Reason": "Cleanup for testing"
+                    }
+                    
+                    deactivate_response = await client.post(
+                        f"{self.base_url}/bonuses/campaigns/{campaign['id']}/status",
+                        json={"status": "PAUSED"},
+                        headers=deactivate_headers
+                    )
+                    
+                    if deactivate_response.status_code == 200:
+                        self.log_result("Cleanup Existing Onboarding", True, 
+                                      f"Deactivated existing onboarding campaign: {campaign['id']}")
+                    else:
+                        self.log_result("Cleanup Existing Onboarding", False, 
+                                      f"Failed to deactivate campaign {campaign['id']}: {deactivate_response.text}")
+                
+                self.log_result("Cleanup Existing Onboarding", True, 
+                              f"Cleaned up {len(existing_onboarding)} existing onboarding campaigns")
+                return True
+                
+        except Exception as e:
+            self.log_result("Cleanup Existing Onboarding", False, f"Exception: {str(e)}")
+            return False
+    
     async def create_free_spin_campaign(self) -> bool:
         """Create a FREE_SPIN campaign with config.is_onboarding=true, status=active, max_uses=3"""
         try:
