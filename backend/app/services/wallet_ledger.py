@@ -241,7 +241,7 @@ async def apply_bonus_delta_with_ledger(
             currency=currency,
             balance_real_available=float(player.balance_real_available),
             balance_real_pending=float(player.balance_real_held),
-            balance_bonus_available=float(player.balance_bonus) + float(delta_bonus_available),
+            balance_bonus_available=float(delta_bonus_available),
             balance_bonus_pending=float(delta_bonus_pending),
             updated_at=now,
         )
@@ -252,7 +252,8 @@ async def apply_bonus_delta_with_ledger(
         bal.updated_at = now
         session.add(bal)
 
-    player.balance_bonus = float(player.balance_bonus or 0.0) + float(delta_bonus_available)
+    # Mirror snapshot to Player aggregate.
+    player.balance_bonus = float(bal.balance_bonus_available)
 
     if not allow_negative:
         _assert_non_negative("player.balance_bonus", float(player.balance_bonus))
