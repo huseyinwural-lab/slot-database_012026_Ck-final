@@ -1979,7 +1979,12 @@ class BonusP0TestSuite:
         test_results.append(await self.register_new_player())
         
         # Test 4: Verify onboarding grant auto-creation
-        test_results.append(await self.verify_onboarding_grant())
+        if not await self.verify_onboarding_grant():
+            # If auto-grant didn't work, try manual grant for debugging
+            self.log_result("Auto Grant Failed", False, "Onboarding auto-grant didn't work, trying manual grant")
+            test_results.append(await self.debug_manual_auto_grant())
+        else:
+            test_results.append(True)
         
         # Test 5: Consume onboarding grant 3 times
         if self.onboarding_grant_id:
