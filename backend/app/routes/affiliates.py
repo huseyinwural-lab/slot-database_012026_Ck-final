@@ -1,6 +1,8 @@
 from app.models.growth_models import Affiliate, AffiliateLink, AffiliateAttribution
 from app.services.affiliate_engine import AffiliateEngine
 from app.services.affiliate_p0_engine import (
+from app.models.affiliate_p0_schemas import PartnerOut
+
     accrue_on_first_deposit,
     compute_partner_balances,
     create_creative,
