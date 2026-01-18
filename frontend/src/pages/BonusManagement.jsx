@@ -161,7 +161,7 @@ const BonusManagement = () => {
       setReasonModalOpen(false);
       setPendingStatusChange(null);
     } catch (e) {
-      const code = e?.standardized?.code || e?.response?.data?.detail?.code || e?.response?.data?.detail?.error_code;
+      const code = e?.standardized?.code;
       if (code === 'REASON_REQUIRED' || code === 'REASON_MISSING') toast.error('Audit reason is required');
       else toast.error(e?.standardized?.message || 'Status update failed');
     }
