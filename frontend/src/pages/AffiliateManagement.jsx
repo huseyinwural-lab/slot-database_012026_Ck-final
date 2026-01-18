@@ -288,10 +288,10 @@ const AffiliateManagement = () => {
                         <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Tracking URL</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
                         <TableBody>{links.map(l => (
                             <TableRow key={l.id}>
-                                <TableCell>{l.name}</TableCell>
-                                <TableCell className="font-mono text-xs text-muted-foreground truncate max-w-md">{l.url}</TableCell>
+                                <TableCell>{l.code}</TableCell>
+                                <TableCell className="font-mono text-xs text-muted-foreground truncate max-w-md">{l.tracking_url || l.url}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" size="sm" onClick={() => {navigator.clipboard.writeText(l.url); toast.success("Copied");}}><Copy className="w-4 h-4" /></Button>
+                                    <Button variant="ghost" size="sm" onClick={() => {navigator.clipboard.writeText(l.tracking_url || l.url); toast.success("Copied");}}><Copy className="w-4 h-4" /></Button>
                                 </TableCell>
                             </TableRow>
                         ))}</TableBody>
