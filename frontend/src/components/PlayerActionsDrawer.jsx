@@ -121,19 +121,19 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
     if (!playerId) return;
     if (!bonusReason.trim()) return toast.error('Reason is required');
 
-    const payload = { bonus_type: bonusType, reason: bonusReason };
-    if (bonusType === 'cash') {
-      if (!bonusAmount || Number(bonusAmount) <= 0) return toast.error('Amount must be > 0');
-      payload.amount = Number(bonusAmount);
-    } else {
-      if (!bonusQty || Number(bonusQty) <= 0) return toast.error('Quantity must be > 0');
-      payload.quantity = Number(bonusQty);
-    }
-    if (bonusExpiry) payload.expires_at = bonusExpiry;
+    // P0 bonus engine: campaign-based grants
+    if (!bonusReason.trim()) return toast.error('Reason is required');
+    if (!bonusAmount || Number(bonusAmount) <= 0) return toast.error('Amount must be > 0');
+
+    const payload = {
+      campaign_id: bonusType,
+      player_id: playerId,
+      amount: Number(bonusAmount),
+    };
 
     setLoading(true);
     try {
-      await api.post(`/v1/players/${playerId}/bonuses`, payload, { headers: { 'X-Reason': bonusReason } });
+      await api.post(`/v1/bonuses/grant`, payload, { headers: { 'X-Reason': bonusReason } });
       toast.success('Bonus granted');
       await refreshAudit();
       setBonusAmount('');
