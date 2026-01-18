@@ -96,19 +96,19 @@ async def get_affiliate_links(
     links = (await session.execute(stmt)).scalars().all()
 
     out = []
-    for l in links:
+    for link in links:
         out.append(
             {
-                "id": l.id,
-                "code": l.code,
-                "tracking_url": make_tracking_url(l.code),
-                "offer_id": l.offer_id,
-                "landing_path": l.landing_path,
-                "currency": l.currency,
-                "expires_at": l.expires_at,
-                "clicks": l.clicks,
-                "signups": l.signups,
-                "created_at": l.created_at,
+                "id": link.id,
+                "code": link.code,
+                "tracking_url": make_tracking_url(link.code),
+                "offer_id": link.offer_id,
+                "landing_path": link.landing_path,
+                "currency": link.currency,
+                "expires_at": link.expires_at,
+                "clicks": link.clicks,
+                "signups": link.signups,
+                "created_at": link.created_at,
             }
         )
 
