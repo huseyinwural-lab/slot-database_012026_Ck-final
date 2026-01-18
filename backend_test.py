@@ -1644,10 +1644,19 @@ class BonusP0TestSuite:
                     self.log_result("Debug Onboarding Campaigns", True, 
                                   f"Found {len(onboarding_campaigns)} active onboarding campaigns")
                     
+                    # Debug: Check the actual status of our campaign
+                    our_campaign = next((c for c in campaigns if c.get("id") == self.free_spin_campaign_id), None)
+                    if our_campaign:
+                        self.log_result("Debug Our Campaign Status", True, 
+                                      f"Our campaign status: '{our_campaign.get('status')}', config: {our_campaign.get('config')}")
+                    
                     # Check if there are multiple onboarding campaigns (which could cause 409)
                     if len(onboarding_campaigns) > 1:
                         self.log_result("Debug Multiple Onboarding", True, 
                                       f"Multiple onboarding campaigns detected - this may cause 409 conflict")
+                    elif len(onboarding_campaigns) == 0:
+                        self.log_result("Debug No Onboarding", True, 
+                                      f"No active onboarding campaigns found - auto-grant will not trigger")
                 
                 response = await client.get(
                     f"{self.base_url}/bonuses/players/{self.test_player_id}/bonuses",
