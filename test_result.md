@@ -48,6 +48,8 @@ Do not delete sections unless instructed.
 
   2. ✅ `yarn lint` in frontend: PASS (ESLint completed successfully in 0.83s)
   3. ✅ Git diff validation: Only `frontend/yarn.lock` modified (200 lines changed: 48 insertions, 152 deletions)
+- 2026-01-18 BONUS P0.5 Reason Modal: Implemented ReasonDialog + body-based reason sending. Local smoke verified (Pause/Activate opens modal, confirm sends request).
+
   4. ⚠️  Note: `.github/workflows/frontend-lint.yml` was NOT modified in current state (already contains Node 20.19.6 pinning)
 
 - **CI Drift Analysis:**
