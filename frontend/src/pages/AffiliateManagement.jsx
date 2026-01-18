@@ -245,7 +245,7 @@ const AffiliateManagement = () => {
                             <TableRow key={o.id}>
                                 <TableCell>{o.name}</TableCell>
                                 <TableCell className="uppercase">{o.model}</TableCell>
-                                <TableCell>{o.model === 'cpa' ? `$${o.default_commission.cpa_amount}` : `${o.default_commission.revshare_percentage}%`}</TableCell>
+                                <TableCell>{o.model === 'cpa' ? `${o.cpa_amount ?? 0} ${o.currency}` : `0 ${o.currency}`}</TableCell>
                                 <TableCell><Badge variant="outline">{o.status}</Badge></TableCell>
                             </TableRow>
                         ))}</TableBody>
