@@ -46,7 +46,7 @@ class GameEngine:
         # Find or Create Round
         stmt_round = select(GameRound).where(
             GameRound.provider_round_id == payload.provider_round_id,
-            GameRound.provider_round_id != None # Safety
+            GameRound.provider_round_id is not None # Safety
         )
         game_round = (await session.execute(stmt_round)).scalars().first()
         
