@@ -22,6 +22,10 @@ class PartnerOut(BaseModel):
     status: str
     created_at: datetime
 
+    # Computed fields (not persisted)
+    balance: float = 0.0
+    company_name: Optional[str] = None
+
 
 class PartnerStatusRequest(BaseModel):
     reason: str
