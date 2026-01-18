@@ -64,7 +64,10 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
   };
 
   useEffect(() => {
-    if (open) refreshAudit();
+    if (open) {
+      refreshAudit();
+      refreshBonusCampaigns();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, playerId]);
 
