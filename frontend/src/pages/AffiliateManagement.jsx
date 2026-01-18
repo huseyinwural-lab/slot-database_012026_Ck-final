@@ -81,25 +81,86 @@ const AffiliateManagement = () => {
 
   // Handlers
   const handleCreateAffiliate = async () => {
-    try { await api.post('/v1/affiliates', newAffiliate); setIsAffOpen(false); fetchData(); toast.success("Affiliate Created"); } catch { toast.error("Failed"); }
+    try {
+      await api.post('/v1/affiliates/partners', { name: newAffiliate.username, email: newAffiliate.email });
+      setIsAffOpen(false);
+      fetchData();
+      toast.success('Partner created');
+    } catch (e) {
+      toast.error(e?.standardized?.message || e?.standardized?.code || 'Create partner failed');
+    }
   };
   const handleCreateOffer = async () => {
     const payload = {
-        name: newOffer.name, model: newOffer.model,
-        default_commission: { model: newOffer.model, cpa_amount: newOffer.cpa_amount, revshare_percentage: newOffer.revshare_percentage }
+      name: newOffer.name,
+      model: newOffer.model,
+      currency: (newOffer.currency || 'USD'),
+      cpa_amount: newOffer.model === 'cpa' ? Number(newOffer.cpa_amount || 0) : null,
+      min_deposit: Number(newOffer.min_deposit || 0) || null,
     };
-    try { await api.post('/v1/affiliates/offers', payload); setIsOfferOpen(false); fetchData(); toast.success("Offer Created"); } catch { toast.error("Failed"); }
+
+    try {
+      await api.post('/v1/affiliates/offers', payload);
+      setIsOfferOpen(false);
+      fetchData();
+      toast.success('Offer created');
+    } catch (e) {
+      toast.error(e?.standardized?.message || e?.standardized?.code || 'Create offer failed');
+    }
   };
   const handleCreateLink = async () => {
-    // Backend does not support global link creation; it requires /affiliates/{affiliate_id}/links with a unique `code`.
-    toast.message('Not available in this environment');
+    try {
+      const payload = {
+        partner_id: newLink.affiliate_id,
+        offer_id: newLink.offer_id,
+        landing_path: newLink.landing_path || '/',
+        reason: newLink.reason || 'initial link',
+      };
+      const res = await api.post('/v1/affiliates/tracking-links', payload);
+      setIsLinkOpen(false);
+      fetchData();
+      toast.success('Link generated');
+      if (res?.data?.tracking_url) {
+        try { await navigator.clipboard.writeText(res.data.tracking_url); toast.message('Copied to clipboard'); } catch { /* ignore */ }
+      }
+    } catch (e) {
+      toast.error(e?.standardized?.message || e?.standardized?.code || 'Generate link failed');
+    }
   };
   const handleCreatePayout = async () => {
-    const payload = { ...newPayout, period_start: new Date().toISOString(), period_end: new Date().toISOString() };
-    try { await api.post('/v1/affiliates/payouts', payload); setIsPayoutOpen(false); fetchData(); toast.success("Payout Recorded"); } catch { toast.error("Failed"); }
+    try {
+      const payload = {
+        partner_id: newPayout.affiliate_id,
+        amount: Number(newPayout.amount || 0),
+        currency: (newPayout.currency || 'USD'),
+        method: newPayout.method || 'bank',
+        reference: newPayout.reference || 'TX',
+        reason: newPayout.reason || 'monthly payout',
+      };
+      await api.post('/v1/affiliates/payouts', payload);
+      setIsPayoutOpen(false);
+      fetchData();
+      toast.success('Payout recorded');
+    } catch (e) {
+      toast.error(e?.standardized?.message || e?.standardized?.code || 'Record payout failed');
+    }
   };
   const handleCreateCreative = async () => {
-    try { await api.post('/v1/affiliates/creatives', newCreative); setIsCreativeOpen(false); fetchData(); toast.success("Creative Added"); } catch { toast.error("Failed"); }
+    try {
+      const payload = {
+        name: newCreative.name,
+        type: newCreative.type,
+        url: newCreative.url,
+        size: newCreative.size,
+        language: newCreative.language,
+      };
+      await api.post('/v1/affiliates/creatives', payload);
+      setIsCreativeOpen(false);
+      fetchData();
+      toast.success('Creative added');
+    } catch (e) {
+      toast.error(e?.standardized?.message || e?.standardized?.code || 'Add creative failed');
+    }
   };
   const handleStatus = async (id, status) => {
     try { await api.put(`/v1/affiliates/${id}/status`, { status }); toast.success("Status Updated"); fetchData(); } catch { toast.error("Failed"); }
