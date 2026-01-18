@@ -37,7 +37,7 @@ class GameEngine:
             logger.info(f"Idempotency hit for GameEvent {payload.provider_event_id}")
             # Return current balance without processing
             return ProviderResponse(
-                balance=player.balance_real_available + player.balance_real_held, # Simplified
+                balance=float(player.balance_real_available or 0.0) + float(player.balance_bonus or 0.0),
                 currency=payload.currency,
                 event_id=existing_event.id
             )
