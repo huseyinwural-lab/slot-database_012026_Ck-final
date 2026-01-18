@@ -97,6 +97,8 @@ async def create_campaign_with_games(
         spin_count=spin_count,
         max_uses=max_uses,
         config=config or {},
+        start_date=None,
+        end_date=None,
     )
 
     session.add(campaign)
