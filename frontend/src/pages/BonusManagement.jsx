@@ -267,6 +267,18 @@ const BonusManagement = () => {
         </Dialog>
       </div>
 
+      <ReasonDialog
+        open={reasonModalOpen}
+        onOpenChange={(open) => {
+          setReasonModalOpen(open);
+          if (!open) setPendingStatusChange(null);
+        }}
+        title={pendingStatusChange?.newStatus === 'active' ? 'Activate Campaign' : 'Pause Campaign'}
+        placeholder="Why are you changing campaign status?"
+        confirmText={pendingStatusChange?.newStatus === 'active' ? 'Activate' : 'Pause'}
+        onConfirm={confirmStatusChange}
+      />
+
       <Card>
         <CardHeader>
           <CardTitle>Campaigns</CardTitle>
