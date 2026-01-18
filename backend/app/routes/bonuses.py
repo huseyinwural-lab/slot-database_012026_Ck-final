@@ -134,7 +134,7 @@ async def grant_bonus(
     return BonusGrantOut.model_validate(grant)
 
 
-@router.get("/players/{player_id}", response_model=List[BonusGrantOut])
+@router.get("/players/{player_id}/bonuses", response_model=List[BonusGrantOut])
 async def list_player_bonuses(
     request: Request,
     player_id: str,
