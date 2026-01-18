@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,13 +9,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Gift, Plus, Activity } from 'lucide-react';
+import { Gift, Plus } from 'lucide-react';
 
 const BonusManagement = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [games, setGames] = useState([]);
   const [gameSearch, setGameSearch] = useState('');
+
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [reason, setReason] = useState('');
+
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     bonus_type: 'MANUAL_CREDIT',
@@ -25,13 +29,6 @@ const BonusManagement = () => {
     game_ids: [],
     is_onboarding: false,
   });
-  const [reason, setReason] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    fetchCampaigns();
-    fetchGames();
-  }, []);
 
   const fetchCampaigns = async () => {
     setLoading(true);
@@ -42,6 +39,8 @@ const BonusManagement = () => {
       toast.error('Failed to load campaigns');
     } finally {
       setLoading(false);
+    }
+  };
 
   const fetchGames = async () => {
     try {
@@ -53,11 +52,16 @@ const BonusManagement = () => {
     }
   };
 
-    }
-  };
+  useEffect(() => {
+    fetchCampaigns();
+    fetchGames();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleCreate = async () => {
-    if (!reason) {
+  const filteredGames = useMemo(() => {
+    const q = (gameSearch || '').toLowerCase();
+    return (games || []).filter((g) => (g.name || '').toLowerCase().includes(q));
+  }, [games, gameSearch]);
 
   const toggleGame = (gameId) => {
     const exists = (newCampaign.game_ids || []).includes(gameId);
@@ -69,10 +73,8 @@ const BonusManagement = () => {
     });
   };
 
-  const filteredGames = (games || []).filter((g) =>
-    (g.name || '').toLowerCase().includes((gameSearch || '').toLowerCase())
-  );
-
+  const handleCreate = async () => {
+    if (!reason) {
       toast.error('Reason is required');
       return;
     }
@@ -104,6 +106,15 @@ const BonusManagement = () => {
       toast.success('Campaign created');
       setIsOpen(false);
       setReason('');
+      setNewCampaign({
+        name: '',
+        bonus_type: 'MANUAL_CREDIT',
+        status: 'draft',
+        amount: 20,
+        max_uses: 10,
+        game_ids: [],
+        is_onboarding: false,
+      });
       fetchCampaigns();
     } catch (e) {
       toast.error('Creation failed');
@@ -113,10 +124,12 @@ const BonusManagement = () => {
   };
 
   const toggleStatus = async (id, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-    const reason = prompt(`Reason to ${newStatus} campaign?`);
-    if (!reason) return;
+    if (!reason) {
+      toast.error('Reason is required');
+      return;
+    }
 
+    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     try {
       await api.post(`/v1/bonuses/campaigns/${id}/status`, { status: newStatus }, { headers: { 'X-Reason': reason } });
       toast.success(`Campaign ${newStatus}`);
@@ -127,47 +140,55 @@ const BonusManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Gift className="w-7 h-7 text-purple-500" /> Bonus Campaigns
-        </h2>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Gift className="w-6 h-6" /> Bonuses
+          </h1>
+          <p className="text-muted-foreground">P0 Campaign management (game-scoped + onboarding flag)</p>
+        </div>
+
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="w-4 h-4 mr-2" /> New Campaign</Button>
+            <Button><Plus className="w-4 h-4 mr-2" /> Create Campaign</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Create Bonus Campaign</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Campaign Name</Label>
-                <Input value={newCampaign.name} onChange={(e) => setNewCampaign({...newCampaign, name: e.target.value})} />
-              </div>
-              <div className="space-y-2">
-                <Label>Bonus Type</Label>
-                <Select value={newCampaign.bonus_type} onValueChange={(v) => setNewCampaign({ ...newCampaign, bonus_type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MANUAL_CREDIT">MANUAL_CREDIT</SelectItem>
-                    <SelectItem value="FREE_BET">FREE_BET</SelectItem>
-                    <SelectItem value="FREE_SPIN">FREE_SPIN</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Name</Label>
+                <Input value={newCampaign.name} onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })} />
               </div>
 
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select value={newCampaign.status} onValueChange={(v) => setNewCampaign({ ...newCampaign, status: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">draft</SelectItem>
-                    <SelectItem value="active">active</SelectItem>
-                    <SelectItem value="paused">paused</SelectItem>
-                    <SelectItem value="archived">archived</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Bonus Type</Label>
+                  <Select value={newCampaign.bonus_type} onValueChange={(v) => setNewCampaign({ ...newCampaign, bonus_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MANUAL_CREDIT">MANUAL_CREDIT</SelectItem>
+                      <SelectItem value="FREE_BET">FREE_BET</SelectItem>
+                      <SelectItem value="FREE_SPIN">FREE_SPIN</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={newCampaign.status} onValueChange={(v) => setNewCampaign({ ...newCampaign, status: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">draft</SelectItem>
+                      <SelectItem value="active">active</SelectItem>
+                      <SelectItem value="paused">paused</SelectItem>
+                      <SelectItem value="archived">archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {newCampaign.bonus_type === 'MANUAL_CREDIT' && (
@@ -194,18 +215,50 @@ const BonusManagement = () => {
                 <Label htmlFor="is_onboarding">Mark as onboarding campaign (config.is_onboarding=true)</Label>
               </div>
 
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Game scope</CardTitle>
+                  <CardDescription>Select which games this campaign applies to</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Input value={gameSearch} onChange={(e) => setGameSearch(e.target.value)} placeholder="Search games..." />
+                  <div className="max-h-48 overflow-auto border rounded p-2 space-y-1">
+                    {filteredGames.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">No games found</div>
+                    ) : filteredGames.map((g) => (
+                      <label key={g.id} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={(newCampaign.game_ids || []).includes(g.id)}
+                          onChange={() => toggleGame(g.id)}
+                        />
+                        <span>{g.name}</span>
+                        <span className="ml-auto font-mono text-xs text-muted-foreground">{g.id}</span>
+                      </label>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
               <div className="space-y-2 pt-2 border-t">
                 <Label>Audit Reason</Label>
-                <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why create this?" />
+                <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why create/update this?" />
               </div>
-              <Button className="w-full" onClick={handleCreate} disabled={loading}>Create Campaign</Button>
+
+              <div className="flex justify-end">
+                <Button disabled={loading} onClick={handleCreate}>Create</Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
       <Card>
-        <CardContent className="p-0">
+        <CardHeader>
+          <CardTitle>Campaigns</CardTitle>
+          <CardDescription>Existing bonus campaigns</CardDescription>
+        </CardHeader>
+        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
@@ -230,9 +283,9 @@ const BonusManagement = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => toggleStatus(c.id, c.status)}
                     >
                       {c.status === 'active' ? 'Pause' : 'Activate'}
@@ -240,11 +293,10 @@ const BonusManagement = () => {
                   </TableCell>
                 </TableRow>
               ))}
+
               {campaigns.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No active campaigns.
-                  </TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">No campaigns</TableCell>
                 </TableRow>
               )}
             </TableBody>
