@@ -217,7 +217,7 @@ const AffiliateManagement = () => {
                 <div className="flex justify-end mb-4">
                     <Dialog open={isOfferOpen} onOpenChange={setIsOfferOpen}>
                         <DialogTrigger asChild>
-                          <Button disabled title="Not available in this environment">
+                          <Button>
                             <Plus className="w-4 h-4 mr-2" /> New Offer
                           </Button>
                         </DialogTrigger>
