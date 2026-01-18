@@ -317,7 +317,11 @@ const BonusManagement = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => toggleStatus(c.id, c.status)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleStatus(c.id, c.status);
+                      }}
                     >
                       {c.status === 'active' ? 'Pause' : 'Activate'}
                     </Button>
