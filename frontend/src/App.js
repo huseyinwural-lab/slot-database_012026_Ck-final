@@ -65,6 +65,8 @@ function App() {
               <Route path="/games" element={<RequireAuth><GameManagement /></RequireAuth>} />
               <Route path="/vip-games" element={<RequireAuth><VipGames /></RequireAuth>} />
               
+              <Route path="/r/:code" element={<ReferralRedirect />} />
+
               <Route path="/bonuses" element={
                 <RequireAuth>
                   <RequireFeature feature="can_manage_bonus"><BonusManagement /></RequireFeature>
