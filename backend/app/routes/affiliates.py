@@ -91,9 +91,28 @@ async def get_affiliate_links(
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
-    
-    stmt = select(AffiliateLink).where(AffiliateLink.affiliate_id == affiliate_id, AffiliateLink.tenant_id == tenant_id)
-    return (await session.execute(stmt)).scalars().all()
+
+    stmt = select(AffiliateLink).where(AffiliateLink.tenant_id == tenant_id, AffiliateLink.affiliate_id == affiliate_id)
+    links = (await session.execute(stmt)).scalars().all()
+
+    out = []
+    for l in links:
+        out.append(
+            {
+                "id": l.id,
+                "code": l.code,
+                "tracking_url": make_tracking_url(l.code),
+                "offer_id": l.offer_id,
+                "landing_path": l.landing_path,
+                "currency": l.currency,
+                "expires_at": l.expires_at,
+                "clicks": l.clicks,
+                "signups": l.signups,
+                "created_at": l.created_at,
+            }
+        )
+
+    return out
 
 @router.post("/{affiliate_id}/links")
 async def create_affiliate_link(
