@@ -21,39 +21,6 @@ class CRMEngine:
         tenant_id = event.tenant_id
         player_id = event.player_id
         
-        # Check eligibility (Simple: No active bonus)
-        # Load active campaigns
-        stmt = select(BonusCampaign).where(BonusCampaign.tenant_id == tenant_id, BonusCampaign.status == 'active', BonusCampaign.type == 'deposit_match')
-        campaign = (await session.execute(stmt)).scalars().first()
-        
-        if campaign:
-            # Grant
-            # Use logic from Bonus Route/Service (duplicated here for simplicity/speed)
-            now = datetime.utcnow()
-            grant = BonusGrant(
-                id=str(uuid.uuid4()),
-                tenant_id=tenant_id,
-                campaign_id=campaign.id,
-                player_id=player_id,
-                amount_granted=50.0, # Mock fixed amount or based on payload
-                initial_balance=50.0,
-                wagering_target=50.0 * 35,
-                status="active",
-                granted_at=now,
-                expires_at=now + timedelta(hours=24),
-            )
-            session.add(grant)
-            
-            # Audit
-            await audit.log_event(
-                session=session,
-                request_id=f"crm_{event.id}",
-                actor_user_id="system-crm",
-                tenant_id=tenant_id,
-                action="CRM_OFFER_GRANT",
-                resource_type="bonus_grant",
-                resource_id=grant.id,
-                result="success",
-                reason="First Deposit Trigger",
-                details={"campaign": campaign.name}
-            )
+        # P0: Deposit-triggered bonuses are out of scope for the new bonus engine.
+        # Keep as a no-op to avoid conflicting bonus semantics.
+        return
