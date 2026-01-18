@@ -258,7 +258,7 @@ const AffiliateManagement = () => {
                 <div className="flex justify-end mb-4">
                     <Dialog open={isLinkOpen} onOpenChange={setIsLinkOpen}>
                         <DialogTrigger asChild>
-                              <Button disabled title="Not available in this environment">
+                              <Button>
                                 <Plus className="w-4 h-4 mr-2" /> Generate Link
                               </Button>
                             </DialogTrigger>
@@ -304,7 +304,7 @@ const AffiliateManagement = () => {
                 <div className="flex justify-end mb-4">
                     <Dialog open={isPayoutOpen} onOpenChange={setIsPayoutOpen}>
                         <DialogTrigger asChild>
-                          <Button disabled title="Not available in this environment">
+                          <Button>
                             <Plus className="w-4 h-4 mr-2" /> Record Payout
                           </Button>
                         </DialogTrigger>
@@ -343,7 +343,7 @@ const AffiliateManagement = () => {
                 <div className="flex justify-end mb-4">
                     <Dialog open={isCreativeOpen} onOpenChange={setIsCreativeOpen}>
                         <DialogTrigger asChild>
-                          <Button disabled title="Not available in this environment">
+                          <Button>
                             <Plus className="w-4 h-4 mr-2" /> Add Creative
                           </Button>
                         </DialogTrigger>
