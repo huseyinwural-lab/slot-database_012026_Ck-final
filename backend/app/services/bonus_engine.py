@@ -58,7 +58,11 @@ async def get_onboarding_campaign(session: AsyncSession, *, tenant_id: str) -> O
             onboarding.append(c)
 
     if len(onboarding) > 1:
-        raise HTTPException(status_code=409, detail={"error_code": "ONBOARDING_CAMPAIGN_AMBIGUOUS"})
+        logger.warning(
+            "ONBOARDING_CAMPAIGN_AMBIGUOUS",
+            extra={"error_code": "ONBOARDING_CAMPAIGN_AMBIGUOUS", "tenant_id": tenant_id, "count": len(onboarding)},
+        )
+        return None
 
     if not onboarding:
         return None
