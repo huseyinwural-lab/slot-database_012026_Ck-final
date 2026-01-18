@@ -128,6 +128,7 @@ const BonusManagement = () => {
   };
 
   const toggleStatus = async (id, currentStatus) => {
+    console.log('bonus:toggleStatus', { id, currentStatus });
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     setPendingStatusChange({ id, newStatus });
     setReasonModalOpen(true);

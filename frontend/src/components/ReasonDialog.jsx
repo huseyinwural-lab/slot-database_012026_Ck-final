@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 
 const ReasonDialog = ({ open, onOpenChange, title, placeholder, confirmText = 'Confirm', onConfirm }) => {
+  console.log('bonus:reasonDialogRender', { open, title });
   const [reason, setReason] = useState('');
   const [touched, setTouched] = useState(false);
 
