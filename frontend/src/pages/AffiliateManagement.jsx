@@ -395,10 +395,14 @@ const AffiliateManagement = () => {
         
         <ReasonDialog
           open={partnerReasonOpen}
-          onOpenChange={setPartnerReasonOpen}
+          onOpenChange={(open) => {
+            setPartnerReasonOpen(open);
+            if (!open) setPendingPartnerStatus(null);
+          }}
           onConfirm={confirmPartnerStatus}
-          title="Partner Status Change"
-          description={`Please provide a reason for ${pendingPartnerStatus?.status === 'active' ? 'activating' : 'deactivating'} this partner.`}
+          title={pendingPartnerStatus?.status === 'active' ? 'Activate Partner' : 'Deactivate Partner'}
+          placeholder="Audit reason"
+          confirmText={pendingPartnerStatus?.status === 'active' ? 'Activate' : 'Deactivate'}
         />
     </div>
     </RequireFeature>
