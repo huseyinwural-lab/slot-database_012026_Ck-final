@@ -299,32 +299,22 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                 <div className="font-semibold">Grant Bonus</div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label>Bonus Type</Label>
+                    <Label>Campaign</Label>
                     <Select value={bonusType} onValueChange={setBonusType}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Select campaign" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="cash">Cash</SelectItem>
-                        <SelectItem value="free_spins">Free Spins</SelectItem>
+                        {bonusCampaigns.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name} ({c.bonus_type || c.type})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    {bonusType === 'cash' ? (
-                      <>
-                        <Label>Amount</Label>
-                        <Input value={bonusAmount} onChange={(e) => setBonusAmount(e.target.value)} placeholder="5" />
-                      </>
-                    ) : (
-                      <>
-                        <Label>Quantity</Label>
-                        <Input value={bonusQty} onChange={(e) => setBonusQty(e.target.value)} placeholder="10" />
-                      </>
-                    )}
+                    <Label>Amount</Label>
+                    <Input value={bonusAmount} onChange={(e) => setBonusAmount(e.target.value)} placeholder="20" />
                   </div>
-                </div>
-                <div>
-                  <Label>Expiry (optional, ISO)</Label>
-                  <Input value={bonusExpiry} onChange={(e) => setBonusExpiry(e.target.value)} placeholder="2026-12-31T00:00:00" />
                 </div>
                 <div>
                   <Label>Reason</Label>
