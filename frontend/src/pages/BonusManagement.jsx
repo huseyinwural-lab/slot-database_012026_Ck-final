@@ -78,8 +78,8 @@ const BonusManagement = () => {
   };
 
   const handleCreate = async () => {
-    if (!reason) {
-      toast.error('Reason is required');
+    if (!reason.trim()) {
+      toast.error('Audit reason is required');
       return;
     }
     if (!newCampaign.name.trim()) {
