@@ -1576,6 +1576,26 @@ class BonusP0TestSuite:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 headers = {"Authorization": f"Bearer {self.admin_token}"}
                 
+                # First, let's check all campaigns to see if there are conflicts
+                campaigns_response = await client.get(
+                    f"{self.base_url}/bonuses/campaigns",
+                    headers=headers
+                )
+                
+                if campaigns_response.status_code == 200:
+                    campaigns = campaigns_response.json()
+                    onboarding_campaigns = [
+                        c for c in campaigns 
+                        if c.get("config", {}).get("is_onboarding") and c.get("status") == "ACTIVE"
+                    ]
+                    self.log_result("Debug Onboarding Campaigns", True, 
+                                  f"Found {len(onboarding_campaigns)} active onboarding campaigns")
+                    
+                    # Check if there are multiple onboarding campaigns (which could cause 409)
+                    if len(onboarding_campaigns) > 1:
+                        self.log_result("Debug Multiple Onboarding", True, 
+                                      f"Multiple onboarding campaigns detected - this may cause 409 conflict")
+                
                 response = await client.get(
                     f"{self.base_url}/bonuses/players/{self.test_player_id}/bonuses",
                     headers=headers
@@ -1587,6 +1607,8 @@ class BonusP0TestSuite:
                     return False
                 
                 bonuses = response.json()
+                self.log_result("Debug All Player Bonuses", True, 
+                              f"Player has {len(bonuses)} total bonuses")
                 
                 # Filter for onboarding grants (FREE_SPIN with is_onboarding=true)
                 onboarding_grants = [
@@ -1595,8 +1617,13 @@ class BonusP0TestSuite:
                 ]
                 
                 if len(onboarding_grants) != 1:
+                    # Let's check if there are any FREE_SPIN bonuses at all
+                    free_spin_grants = [
+                        bonus for bonus in bonuses 
+                        if bonus.get("bonus_type") == "FREE_SPIN"
+                    ]
                     self.log_result("Verify Onboarding Grant", False, 
-                                  f"Expected exactly 1 onboarding grant, found {len(onboarding_grants)}")
+                                  f"Expected exactly 1 onboarding grant, found {len(onboarding_grants)}. Total FREE_SPIN grants: {len(free_spin_grants)}")
                     return False
                 
                 grant = onboarding_grants[0]
