@@ -22,6 +22,7 @@ class BonusCampaignCreate(BaseModel):
 
 
 class BonusCampaignOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     tenant_id: str
     name: str
