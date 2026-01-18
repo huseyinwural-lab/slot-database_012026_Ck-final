@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from backend.config import settings
+from config import settings
 from app.models.affiliate_p0_models import AffiliateCreative, AffiliateLedger, AffiliateOffer, AffiliatePayout
 from app.models.growth_models import Affiliate, AffiliateAttribution, AffiliateLink
 
