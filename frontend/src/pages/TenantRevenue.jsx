@@ -22,7 +22,7 @@ const TenantRevenue = () => {
           to_date: new Date().toISOString()
         };
         
-        const response = await api.get('/v1/reports/revenue/my-tenant', { params });
+        const response = await api.get('/v1/revenue/my-tenant', { params });
         setRevenueData(response.data);
       } catch (error) {
         console.error('Failed to fetch revenue:', error);
