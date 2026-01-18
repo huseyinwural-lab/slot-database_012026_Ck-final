@@ -44,9 +44,20 @@ const AffiliateManagement = () => {
         if (activeTab === 'partners') setAffiliates((await api.get('/v1/affiliates/partners')).data);
         if (activeTab === 'offers') setOffers((await api.get('/v1/affiliates/offers')).data);
         if (activeTab === 'links') {
-            // Backend has no list-all links endpoint (only /affiliates/{affiliate_id}/links)
-            // So we keep links as empty list to avoid deceptive click/toast.
-            setLinks([]);
+            const res = await api.get('/v1/affiliates/partners');
+            const partners = res.data || [];
+            const all = [];
+            for (const p of partners) {
+              try {
+                const r = await api.get(`/v1/affiliates/${p.id}/links`);
+                for (const l of (r.data || [])) {
+                  all.push(l);
+                }
+              } catch {
+                // ignore
+              }
+            }
+            setLinks(all);
             setAffiliates((await api.get('/v1/affiliates/partners')).data); // Need for dropdown
             setOffers((await api.get('/v1/affiliates/offers')).data); // Need for dropdown
         }
