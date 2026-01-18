@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Ban, CheckCircle, Upload, DollarSign, Shield, FileText, History, Activity, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Save, Ban, CheckCircle, Upload, DollarSign, Shield, FileText, History, Activity, MessageSquare, Gift } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
