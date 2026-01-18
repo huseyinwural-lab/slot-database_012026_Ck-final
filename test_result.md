@@ -58,6 +58,18 @@ Do not delete sections unless instructed.
   - **Current state:** Lockfile drift resolved, CI environment standardized
 
 
+
+### 2026-01-18 — UI Sweep Phase C (Dashboard / Revenue) — In Progress
+- Scope locked: `/` (Dashboard), `/revenue`, `/my-revenue` only
+- Checklist: no dead-clicks, no deceptive-clicks; if disabled then clearly explained
+- Changes (so far):
+  - Dashboard: fixed internal KPI links to use `/revenue` (not legacy `/revenue/all-tenants`) + ComingSoon wrapper now blocks pointer events when disabled (prevents deceptive clicks)
+  - Routing: `/revenue` and `/my-revenue` are now the canonical routes; legacy `/revenue/all-tenants` and `/revenue/my-tenant` redirect
+- Local smoke (screenshot_tool):
+  - ✅ `/` loads
+  - ✅ `/revenue` loads and renders "All Tenants Revenue"
+  - ✅ `/my-revenue` loads
+
 ### 2026-01-05 (Docs) — Release Readiness Checklist added
 - Added: `/docs/new/en/runbooks/release-readiness-checklist.md` and `/docs/new/tr/runbooks/release-readiness-checklist.md`
 - Linked from: `docs/new/*/guides/ops-manual.md` and `docs/new/*/runbooks/README.md`
