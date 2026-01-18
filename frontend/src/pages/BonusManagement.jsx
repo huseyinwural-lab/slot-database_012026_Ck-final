@@ -34,7 +34,7 @@ const BonusManagement = () => {
     setLoading(true);
     try {
       const res = await api.get('/v1/bonuses/campaigns');
-      setCampaigns(res.data);
+      setCampaigns(res.data || []);
     } catch (e) {
       toast.error('Failed to load campaigns');
     } finally {
