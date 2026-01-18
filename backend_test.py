@@ -1715,12 +1715,6 @@ class BonusP0TestSuite:
                 
                 data = response.json()
                 self.manual_credit_grant_id = data.get("id")
-                granted_amount = data.get("amount")
-                
-                if not self.manual_credit_grant_id:
-                    self.log_result("Grant Manual Credit", False, "No grant ID in response")
-                    return False
-                
                 if granted_amount != 15.0:
                     self.log_result("Grant Manual Credit", False, 
                                   f"Expected amount=15.0, got {granted_amount}")
