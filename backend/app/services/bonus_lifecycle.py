@@ -292,24 +292,29 @@ async def forfeit_grant_admin(
         raise HTTPException(status_code=409, detail={"error_code": "GRANT_NOT_ACTIVE"})
 
     # Forfeit semantics (user-confirmed): remaining bonus is NOT transferred to real.
-    # P0: we only move balance for MANUAL_CREDIT using the known grant amount.
-    if grant.bonus_type == "MANUAL_CREDIT" and float(grant.amount_granted or 0.0) > 0:
-        # We don't track partial spend per grant yet (P1+). For P0 we forfeit the remaining
-        # by removing up to grant.amount_granted from bonus balance.
+    # P0: we do not track per-grant spent amounts yet, so we can only forfeit what's
+    # currently in the player's bonus snapshot.
+    if grant.bonus_type == "MANUAL_CREDIT":
+        from app.repositories.ledger_repo import get_balance
         from app.services.wallet_ledger import apply_bonus_delta_with_ledger
 
-        await apply_bonus_delta_with_ledger(
-            session,
-            tenant_id=tenant_id,
-            player_id=grant.player_id,
-            tx_id=str(uuid.uuid4()),
-            event_type="bonus_forfeited",
-            delta_bonus_available=-float(grant.amount_granted),
-            currency="USD",
-            provider="bonus",
-            provider_ref=reason,
-            provider_event_id=f"bonus_forfeit:{grant.id}",
-        )
+        bal = await get_balance(session, tenant_id=tenant_id, player_id=grant.player_id, currency="USD")
+        current_bonus = float(getattr(bal, "balance_bonus_available", 0.0) or 0.0)
+        to_forfeit = min(current_bonus, float(grant.amount_granted or 0.0))
+
+        if to_forfeit > 0:
+            await apply_bonus_delta_with_ledger(
+                session,
+                tenant_id=tenant_id,
+                player_id=grant.player_id,
+                tx_id=str(uuid.uuid4()),
+                event_type="bonus_forfeited",
+                delta_bonus_available=-float(to_forfeit),
+                currency="USD",
+                provider="bonus",
+                provider_ref=reason,
+                provider_event_id=f"bonus_forfeit:{grant.id}",
+            )
 
     grant.status = "forfeited" if action == "revoke" else "expired"
     if action == "expire":
