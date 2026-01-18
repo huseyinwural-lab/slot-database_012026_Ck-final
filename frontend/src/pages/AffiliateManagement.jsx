@@ -41,7 +41,7 @@ const AffiliateManagement = () => {
 
   const fetchData = useCallback(async () => {
     try {
-        if (activeTab === 'partners') setAffiliates((await api.get('/v1/affiliates')).data);
+        if (activeTab === 'partners') setAffiliates((await api.get('/v1/affiliates/partners')).data);
         if (activeTab === 'offers') setOffers((await api.get('/v1/affiliates/offers')).data);
         if (activeTab === 'links') {
             // Backend has no list-all links endpoint (only /affiliates/{affiliate_id}/links)
