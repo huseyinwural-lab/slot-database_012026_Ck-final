@@ -40,7 +40,7 @@ const AffiliateReports = () => {
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="text-sm text-muted-foreground">Loading</div>
+          <div className="text-sm text-muted-foreground">Loading...</div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Metric label="Clicks" value={data?.clicks ?? 0} />
