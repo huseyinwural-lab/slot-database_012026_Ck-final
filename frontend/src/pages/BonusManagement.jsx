@@ -22,6 +22,9 @@ const BonusManagement = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState('');
 
+  const [reasonModalOpen, setReasonModalOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState(null);
+
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     bonus_type: 'MANUAL_CREDIT',
