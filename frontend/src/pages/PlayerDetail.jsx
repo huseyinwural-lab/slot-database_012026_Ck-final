@@ -254,13 +254,13 @@ const PlayerDetail = () => {
                                 <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead><TableHead>Expires</TableHead></TableRow></TableHeader>
                                 <TableBody>
                                     {bonuses.length === 0 && <TableRow><TableCell colSpan={5} className="text-center">No bonuses</TableCell></TableRow>}
-                                    {bonuses.map(bonus => (
-                                        <TableRow key={bonus.id}>
-                                            <TableCell>{new Date(bonus.created_at).toLocaleDateString()}</TableCell>
-                                            <TableCell className="capitalize">{bonus.type}</TableCell>
-                                            <TableCell className="text-green-500">${bonus.amount}</TableCell>
-                                            <TableCell><Badge variant={bonus.status === 'active' ? 'default' : 'secondary'}>{bonus.status}</Badge></TableCell>
-                                            <TableCell>{bonus.expires_at ? new Date(bonus.expires_at).toLocaleDateString() : 'Never'}</TableCell>
+                                    {bonuses.map(b => (
+                                        <TableRow key={b.id}>
+                                            <TableCell>{b.granted_at ? new Date(b.granted_at).toLocaleString() : '-'}</TableCell>
+                                            <TableCell className="font-mono text-xs">{b.bonus_type || '-'}</TableCell>
+                                            <TableCell className="text-green-500">{(b.amount_granted ?? 0).toFixed ? `$${Number(b.amount_granted || 0).toFixed(2)}` : `$${Number(b.amount_granted || 0)}`}</TableCell>
+                                            <TableCell><Badge variant={b.status === 'active' ? 'default' : 'secondary'}>{b.status}</Badge></TableCell>
+                                            <TableCell>{b.expires_at ? new Date(b.expires_at).toLocaleString() : 'Never'}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
