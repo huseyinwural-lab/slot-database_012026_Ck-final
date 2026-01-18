@@ -7,7 +7,7 @@ import logging
 from app.models.game_models import GameSession, GameRound, GameEvent, Game
 from app.models.sql_models import Transaction, Player
 from app.schemas.game_schemas import ProviderEvent, ProviderResponse
-from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+from app.services.wallet_ledger import apply_wallet_delta_with_ledger, spend_with_bonus_precedence
 from app.core.errors import AppError
 
 logger = logging.getLogger(__name__)
