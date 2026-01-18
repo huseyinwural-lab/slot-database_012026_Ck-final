@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,17 +7,19 @@ const ReasonDialog = ({ open, onOpenChange, title, placeholder, confirmText = 'C
   const [reason, setReason] = useState('');
   const [touched, setTouched] = useState(false);
 
-  useEffect(() => {
-    if (!open) {
-      setReason('');
-      setTouched(false);
-    }
-  }, [open]);
-
   const canSubmit = reason.trim().length > 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        onOpenChange(nextOpen);
+        if (!nextOpen) {
+          setReason('');
+          setTouched(false);
+        }
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
