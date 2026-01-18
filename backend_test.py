@@ -1912,6 +1912,11 @@ class BonusP0TestSuite:
             print("\n❌ Admin authentication setup failed. Cannot proceed with tests.")
             return False
         
+        # Cleanup existing onboarding campaigns to avoid conflicts
+        if not await self.cleanup_existing_onboarding_campaigns():
+            print("\n❌ Failed to cleanup existing onboarding campaigns.")
+            return False
+        
         # Run all tests in sequence
         test_results = []
         
