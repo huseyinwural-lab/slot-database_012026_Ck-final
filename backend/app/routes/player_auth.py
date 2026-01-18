@@ -60,6 +60,18 @@ async def register_player(
         # no-op: onboarding may be missing or ambiguous; P0 spec allows no-op
         pass
 
+
+    # Affiliate Attribution from referral cookie (P0)
+    try:
+        from app.services.affiliate_p0_engine import bind_attribution_on_register
+
+        cookie_val = request.cookies.get("aff_ref") if request else None
+        await bind_attribution_on_register(session, tenant_id=tenant_id, player_id=player_id, affiliate_code_cookie=cookie_val)
+        await session.commit()
+    except Exception:
+        # best-effort; never break register
+        pass
+
     # Affiliate Attribution
     referral_code = payload.get("referral_code") or payload.get("ref_code")
     if referral_code:
