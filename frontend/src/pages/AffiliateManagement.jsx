@@ -16,6 +16,7 @@ import { Users, Target, Link as LinkIcon, DollarSign, Image as ImageIcon, BarCha
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 import RequireFeature from '../components/RequireFeature';
+import AffiliateReports from '../components/AffiliateReports';
 
 const AffiliateManagement = () => {
   const [activeTab, setActiveTab] = useState("partners");
