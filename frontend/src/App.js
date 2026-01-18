@@ -184,15 +184,20 @@ function App() {
                 </RequireAuth>
               } />
 
-              <Route path="/revenue/all-tenants" element={
+              {/* Phase C scope: /revenue and /my-revenue */}
+              <Route path="/revenue" element={
                 <RequireAuth>
                   <RequireFeature requireOwner={true}><OwnerRevenue /></RequireFeature>
                 </RequireAuth>
               } />
               
-              <Route path="/revenue/my-tenant" element={
+              <Route path="/my-revenue" element={
                 <RequireAuth><TenantRevenue /></RequireAuth>
               } />
+
+              {/* Back-compat redirects */}
+              <Route path="/revenue/all-tenants" element={<RequireAuth><RevenueAllTenantsRedirect /></RequireAuth>} />
+              <Route path="/revenue/my-tenant" element={<RequireAuth><RevenueMyTenantRedirect /></RequireAuth>} />
               
               <Route path="/kill-switch" element={
                 <RequireAuth>
