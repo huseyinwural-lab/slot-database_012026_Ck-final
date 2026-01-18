@@ -1623,6 +1623,46 @@ class BonusP0TestSuite:
             self.log_result("Register New Player", False, f"Exception: {str(e)}")
             return False
     
+    async def debug_manual_auto_grant(self) -> bool:
+        """Manually call the auto-grant function to debug what's happening"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Try to manually trigger the auto-grant by calling the bonus grant endpoint
+                # But first, let's check if we can manually grant the onboarding campaign
+                grant_data = {
+                    "campaign_id": self.free_spin_campaign_id,
+                    "player_id": self.test_player_id,
+                    "amount": None  # Should use campaign defaults
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/bonuses/grant",
+                    json=grant_data,
+                    headers={**headers, "X-Reason": "Manual onboarding grant test"}
+                )
+                
+                if response.status_code != 200:
+                    self.log_result("Debug Manual Auto Grant", False, 
+                                  f"Manual grant failed - Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                grant_id = data.get("id")
+                remaining_uses = data.get("remaining_uses")
+                
+                self.log_result("Debug Manual Auto Grant", True, 
+                              f"Manual grant successful - Grant ID: {grant_id}, remaining_uses: {remaining_uses}")
+                
+                # Store this as our onboarding grant for testing
+                self.onboarding_grant_id = grant_id
+                return True
+                
+        except Exception as e:
+            self.log_result("Debug Manual Auto Grant", False, f"Exception: {str(e)}")
+            return False
+    
     async def verify_onboarding_grant(self) -> bool:
         """List player bonuses and assert exactly 1 onboarding grant exists with remaining_uses=3"""
         try:
