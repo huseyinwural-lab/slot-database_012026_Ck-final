@@ -151,7 +151,7 @@ class GameEngine:
         await session.refresh(player)
         
         return ProviderResponse(
-            balance=player.balance_real_available,
+            balance=float(player.balance_real_available or 0.0) + float(player.balance_bonus or 0.0),
             currency=payload.currency,
             event_id=new_event.id
         )
