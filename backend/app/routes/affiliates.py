@@ -1,4 +1,36 @@
-from app.models.growth_models import Affiliate, AffiliateLink
+from app.models.growth_models import Affiliate, AffiliateLink, AffiliateAttribution
+from app.services.affiliate_engine import AffiliateEngine
+from app.services.affiliate_p0_engine import (
+    accrue_on_first_deposit,
+    compute_partner_balances,
+    create_creative,
+    create_offer,
+    create_partner,
+    generate_tracking_link,
+    make_tracking_url,
+    record_payout,
+    resolve_link,
+    set_offer_status,
+    set_partner_status,
+    summary_report,
+)
+from app.models.affiliate_p0_models import AffiliateOffer, AffiliatePayout, AffiliateCreative
+from app.models.affiliate_p0_schemas import (
+    CreativeCreate,
+    CreativeOut,
+    OfferCreate,
+    OfferOut,
+    OfferStatusRequest,
+    PartnerCreate,
+    PartnerOut,
+    PartnerStatusRequest,
+    PayoutCreate,
+    PayoutOut,
+    ReportSummaryOut,
+    ResolveOut,
+    TrackingLinkCreate,
+    TrackingLinkOut,
+)
 from fastapi import APIRouter, Depends, Body, Request, HTTPException
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
