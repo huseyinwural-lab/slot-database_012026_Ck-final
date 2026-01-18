@@ -5,20 +5,25 @@ from sqlalchemy import Column, JSON
 import uuid
 
 class Affiliate(SQLModel, table=True):
-    """Affiliate Partner."""
+    """Affiliate Partner ("Partner" in UI)."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(foreign_key="tenant.id", index=True)
+
+    # Partner identity
+    code: Optional[str] = Field(default=None, index=True)
     username: str
     email: str
-    
-    # Commission Plan
-    commission_type: str = "CPA" # CPA, REVSHARE, HYBRID
+
+    # Commission Plan (legacy, kept for back-compat)
+    commission_type: str = "CPA"  # CPA, REVSHARE, HYBRID
     cpa_amount: float = 0.0
     cpa_threshold: float = 20.0
     revshare_percent: float = 0.0
-    commission_rate: float = 0.0 # Legacy field for DB compatibility
-    
-    status: str = "active"
+    commission_rate: float = 0.0  # Legacy field for DB compatibility
+
+    # P0: we use active/inactive. Some old flows may still write pending.
+    status: str = "active"  # active|inactive|pending
+
     # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
