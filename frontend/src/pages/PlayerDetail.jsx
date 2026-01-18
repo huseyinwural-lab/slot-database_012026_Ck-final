@@ -168,10 +168,11 @@ const PlayerDetail = () => {
         {/* Tabs Area */}
         <div className="md:col-span-3">
             <Tabs defaultValue="profile">
-                <TabsList className="grid w-full grid-cols-6">
+                <TabsList className="grid w-full grid-cols-7">
                     <TabsTrigger value="profile"><UserIcon className="w-4 h-4 mr-2 hidden md:block" /> Profile</TabsTrigger>
                     <TabsTrigger value="kyc"><FileText className="w-4 h-4 mr-2 hidden md:block" /> KYC</TabsTrigger>
                     <TabsTrigger value="finance"><DollarSign className="w-4 h-4 mr-2 hidden md:block" /> Finance</TabsTrigger>
+                    <TabsTrigger value="bonuses"><Gift className="w-4 h-4 mr-2 hidden md:block" /> Bonuses</TabsTrigger>
                     <TabsTrigger value="games"><Activity className="w-4 h-4 mr-2 hidden md:block" /> Games</TabsTrigger>
                     <TabsTrigger value="logs"><History className="w-4 h-4 mr-2 hidden md:block" /> Logs</TabsTrigger>
                     <TabsTrigger value="notes"><MessageSquare className="w-4 h-4 mr-2 hidden md:block" /> Notes</TabsTrigger>
