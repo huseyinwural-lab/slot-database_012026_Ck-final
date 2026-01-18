@@ -166,15 +166,32 @@ async def list_partners(
 
     # Compute balances by currency from affiliateledger.
     balances = await compute_partner_balances(session, tenant_id=tenant_id)
+
+    out = []
     for p in partners:
         cur = balances.get(p.id) or {}
-        # Store a back-compat numeric balance (USD) for old UI; new UI should show per-currency.
+        # P0: UI shows single numeric balance; keep it USD for now.
+        bal = 0.0
         try:
-            p.balance = float(cur.get("USD", 0.0))
+            bal = float(cur.get("USD", 0.0))
         except Exception:
-            p.balance = 0.0
+            bal = 0.0
 
-    return partners
+        out.append(
+            PartnerOut(
+                id=p.id,
+                tenant_id=p.tenant_id,
+                code=getattr(p, "code", None),
+                username=p.username,
+                email=p.email,
+                status=p.status,
+                created_at=p.created_at,
+                balance=bal,
+                company_name=getattr(p, "company_name", None),
+            )
+        )
+
+    return out
 
 
 @router.post("/partners", response_model=PartnerOut)
