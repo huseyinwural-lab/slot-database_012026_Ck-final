@@ -17,6 +17,7 @@ from app.services.psp.webhook_parser import (
 )
 from app.services.ledger_shadow import shadow_append_event, shadow_apply_delta
 from app.services.affiliate_engine import AffiliateEngine
+from app.services.affiliate_p0_engine import accrue_on_first_deposit
 from app.services.crm_engine import CRMEngine
 from app.models.growth_models import GrowthEvent
 
