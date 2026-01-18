@@ -20,7 +20,7 @@ async def verify_signature(
     3. Signature (HMAC)
     """
     if not settings.webhook_signature_enforced:
-        return # Skip if disabled
+        return  # Skip if disabled
 
     signature = request.headers.get("X-Signature")
     timestamp = request.headers.get("X-Timestamp")
