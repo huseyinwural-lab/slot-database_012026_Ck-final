@@ -74,12 +74,6 @@ async def create_campaign_with_games(
     tenant_id: str,
     admin: AdminUser,
     request: Request,
-
-    # Normalize legacy types into P0 types for safe downstream behavior.
-    if bonus_type not in BONUS_TYPES_P0:
-        if str(bonus_type).lower() in {"deposit_match", "deposit"}:
-            bonus_type = "MANUAL_CREDIT"
-
     name: str,
     bonus_type: str,
     status: str,
@@ -90,6 +84,11 @@ async def create_campaign_with_games(
     config: dict,
     reason: str,
 ) -> BonusCampaign:
+    # Normalize legacy types into P0 types for safe downstream behavior.
+    if bonus_type not in BONUS_TYPES_P0:
+        if str(bonus_type).lower() in {"deposit_match", "deposit"}:
+            bonus_type = "MANUAL_CREDIT"
+
     if bonus_type not in BONUS_TYPES_P0:
         raise HTTPException(status_code=400, detail={"error_code": "BONUS_TYPE_INVALID"})
 
