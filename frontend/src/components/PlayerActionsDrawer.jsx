@@ -17,11 +17,11 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
   const [currency, setCurrency] = useState('USD');
   const [reason, setReason] = useState('');
 
-  const [bonusType, setBonusType] = useState('cash');
+  const [bonusType, setBonusType] = useState('');
   const [bonusAmount, setBonusAmount] = useState('');
-  const [bonusQty, setBonusQty] = useState('');
-  const [bonusExpiry, setBonusExpiry] = useState('');
   const [bonusReason, setBonusReason] = useState('');
+
+  const [bonusCampaigns, setBonusCampaigns] = useState([]);
 
   const [auditItems, setAuditItems] = useState([]);
   const [note, setNote] = useState('');
