@@ -23,6 +23,10 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
 
   const [bonusCampaigns, setBonusCampaigns] = useState([]);
 
+  const selectedCampaign = useMemo(() => {
+    return (bonusCampaigns || []).find((c) => c.id === bonusType) || null;
+  }, [bonusCampaigns, bonusType]);
+
   const [auditItems, setAuditItems] = useState([]);
   const [note, setNote] = useState('');
 
