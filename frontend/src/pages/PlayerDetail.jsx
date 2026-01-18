@@ -246,6 +246,29 @@ const PlayerDetail = () => {
                     </Card>
                 </TabsContent>
 
+                <TabsContent value="bonuses" className="mt-6">
+                    <Card>
+                        <CardHeader><CardTitle>Bonus History</CardTitle></CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead><TableHead>Expires</TableHead></TableRow></TableHeader>
+                                <TableBody>
+                                    {bonuses.length === 0 && <TableRow><TableCell colSpan={5} className="text-center">No bonuses</TableCell></TableRow>}
+                                    {bonuses.map(bonus => (
+                                        <TableRow key={bonus.id}>
+                                            <TableCell>{new Date(bonus.created_at).toLocaleDateString()}</TableCell>
+                                            <TableCell className="capitalize">{bonus.type}</TableCell>
+                                            <TableCell className="text-green-500">${bonus.amount}</TableCell>
+                                            <TableCell><Badge variant={bonus.status === 'active' ? 'default' : 'secondary'}>{bonus.status}</Badge></TableCell>
+                                            <TableCell>{bonus.expires_at ? new Date(bonus.expires_at).toLocaleDateString() : 'Never'}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
                 <TabsContent value="logs" className="mt-6">
                     <Card>
                         <CardHeader><CardTitle>Login & Security Logs</CardTitle></CardHeader>
