@@ -210,6 +210,9 @@ async def apply_bonus_delta_with_ledger(
     direction = "credit" if net >= 0 else "debit"
     amount = abs(float(delta_bonus_available)) + abs(float(delta_bonus_pending))
 
+    # IMPORTANT: for MANUAL_CREDIT grants we expect (provider, provider_event_id)
+    # idempotency. If a duplicate is detected, we still should return OK and not
+    # break the API response.
     _event, created = await append_event(
         session,
         tenant_id=tenant_id,
@@ -228,7 +231,7 @@ async def apply_bonus_delta_with_ledger(
     )
 
     if not created:
-        return False
+        return True
 
     now = datetime.utcnow()
     if not bal:
