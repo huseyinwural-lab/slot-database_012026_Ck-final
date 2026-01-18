@@ -21,6 +21,7 @@ const PlayerDetail = () => {
   const [transactions, setTransactions] = useState([]);
   const [kycDocs, setKycDocs] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [bonuses, setBonuses] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Balance Adjustment State
