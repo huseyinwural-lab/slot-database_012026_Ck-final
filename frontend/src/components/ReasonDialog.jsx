@@ -34,6 +34,7 @@ const ReasonDialog = ({ open, onOpenChange, title, placeholder, confirmText = 'C
               onChange={(e) => setReason(e.target.value)}
               onBlur={() => setTouched(true)}
               placeholder={placeholder || 'Enter audit reason...'}
+              data-testid="reason-input"
             />
             {touched && !canSubmit && (
               <div className="text-sm text-destructive mt-1">Reason cannot be empty</div>
