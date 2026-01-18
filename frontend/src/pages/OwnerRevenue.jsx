@@ -50,10 +50,14 @@ const OwnerRevenue = () => {
       const errorCode = error?.response?.data?.error_code || detail?.error_code;
       const detailText = typeof detail === 'string' ? detail : (detail?.message || detail?.error_code);
 
-      toast.error(
-        `Failed to load revenue data${status ? ` (${status})` : ''}${errorCode ? ` · ${errorCode}` : ''}`,
-        { description: detailText || error?.message || 'Unknown error' }
-      );
+      if (status === 403 && (errorCode === 'OWNER_ONLY' || detailText === 'OWNER_ONLY')) {
+        toast.error('Owner only', { description: 'This page is available only for platform owners.' });
+      } else {
+        toast.error(
+          `Failed to load revenue data${status ? ` (${status})` : ''}${errorCode ? ` · ${errorCode}` : ''}`,
+          { description: detailText || error?.message || 'Unknown error' }
+        );
+      }
     } finally {
       setLoading(false);
     }
