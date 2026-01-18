@@ -133,6 +133,20 @@ const BonusManagement = () => {
     setReasonModalOpen(true);
   };
 
+  useEffect(() => {
+    if (reasonModalOpen) {
+      // Ensure focus isn't stuck in other UI (e.g., global search)
+      setTimeout(() => {
+        try {
+          const el = document.querySelector('[data-testid="reason-input"]');
+          if (el) el.focus();
+        } catch {
+          // no-op
+        }
+      }, 50);
+    }
+  }, [reasonModalOpen]);
+
   const confirmStatusChange = async (modalReason) => {
     if (!pendingStatusChange) return;
 
