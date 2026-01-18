@@ -304,9 +304,14 @@ const BonusManagement = () => {
                     {JSON.stringify({ ...c.config, game_ids: c.game_ids })}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={c.status === 'active' ? 'default' : 'secondary'}>
-                      {c.status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={c.status === 'active' ? 'default' : 'secondary'}>
+                        {c.status}
+                      </Badge>
+                      {Array.isArray(c.game_ids) && c.game_ids.length === 0 && (
+                        <Badge variant="secondary">⚠ No games scoped</Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
