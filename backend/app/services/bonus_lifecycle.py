@@ -139,6 +139,9 @@ async def list_campaigns_with_games(session: AsyncSession, *, tenant_id: str) ->
 
         # Back-compat: many existing rows only have `type`.
         bonus_type = c.bonus_type or c.type
+        if bonus_type not in BONUS_TYPES_P0:
+            if str(bonus_type).lower() in {"deposit_match", "deposit"}:
+                bonus_type = "MANUAL_CREDIT"
 
         out.append(
             {
