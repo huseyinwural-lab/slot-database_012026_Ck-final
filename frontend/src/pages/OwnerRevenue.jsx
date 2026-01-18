@@ -65,6 +65,7 @@ const OwnerRevenue = () => {
 
   useEffect(() => {
     loadRevenue(rangeDays);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rangeDays, tenantScope]);
 
   if (loading) {
