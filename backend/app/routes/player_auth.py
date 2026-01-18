@@ -14,7 +14,11 @@ from app.schemas.player import PlayerPublic
 router = APIRouter(prefix="/api/v1/auth/player", tags=["player_auth"])
 
 @router.post("/register")
-async def register_player(payload: dict = Body(...), session: AsyncSession = Depends(get_session)):
+async def register_player(
+    request: Request,
+    payload: dict = Body(...),
+    session: AsyncSession = Depends(get_session),
+):
     email = payload.get("email")
     tenant_id = payload.get("tenant_id", "default_casino")
     
