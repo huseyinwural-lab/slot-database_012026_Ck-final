@@ -65,6 +65,10 @@ async def get_onboarding_campaign(session: AsyncSession, *, tenant_id: str) -> O
         return None
 
     if not onboarding:
+        logger.warning(
+            "ONBOARDING_CAMPAIGN_MISSING",
+            extra={"error_code": "ONBOARDING_CAMPAIGN_MISSING", "tenant_id": tenant_id},
+        )
         return None
 
     return onboarding[0]
