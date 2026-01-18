@@ -28,12 +28,12 @@ const ReasonDialog = ({ open, onOpenChange, title, placeholder, confirmText = 'C
 
         <div className="space-y-3">
           <div>
-            <Textarea
+            {/* Use Input for maximum Playwright selector compatibility */}
+            <Input
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               onBlur={() => setTouched(true)}
               placeholder={placeholder || 'Enter audit reason...'}
-              className="min-h-[110px]"
             />
             {touched && !canSubmit && (
               <div className="text-sm text-destructive mt-1">Reason cannot be empty</div>
