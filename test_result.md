@@ -627,6 +627,29 @@ agent_communication:
     -agent: "testing"
     -message: "❌ BONUS P0.5 REASON MODAL E2E TEST FAILED: Re-run Playwright E2E for BONUS P0.5 reason modal on http://localhost:3000 completed with CRITICAL ISSUES. RESULTS (3/8 PASS): ✅ Admin authentication successful (admin@casino.com / Admin123!) ✅ Bonuses page navigation successful (/bonuses) ✅ Campaigns table loading (22 campaigns found with Pause/Activate buttons) ❌ CRITICAL FAILURE: ReasonDialog does not open when clicking Pause/Activate buttons ❌ Session management issues causing frequent login redirects. TECHNICAL ANALYSIS: Frontend ReasonDialog component properly implemented with correct test IDs ([data-testid='reason-input'], [data-testid='reason-confirm']), BonusManagement component has proper modal integration (toggleStatus function, setReasonModalOpen, confirmStatusChange), but button click handlers not triggering modal. ROOT CAUSE: Modal click event not properly wired or JavaScript error preventing modal from opening. RECOMMENDATION: Debug button click handlers and check for JavaScript errors in browser console."
 
+### 2026-01-18 (Testing Agent) — BONUS P0.5 REASON MODAL E2E REGRESSION TEST COMPLETED
+- **TEST SCOPE:** Comprehensive E2E validation of BONUS P0.5 Reason modal functionality on https://gameboost-21.preview.emergentagent.com/bonuses
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Authentication:** Successfully logged in as admin@casino.com / Admin123!
+  2. ✅ **Bonuses Page Navigation:** Successfully navigated to /bonuses page
+  3. ✅ **Campaigns Table Loading:** Found 22 campaigns with 7 Pause buttons and 15 Activate buttons
+  4. ❌ **CRITICAL FAILURE:** Modal does NOT open when clicking Pause/Activate buttons
+  5. ❌ **CRITICAL ISSUE:** Button click sends direct API request without modal
+  6. ❌ **CRITICAL ISSUE:** "Reason is required" toast appears immediately (violates requirement)
+
+- **DETAILED FINDINGS:**
+  - **Expected Behavior:** Click Pause/Activate → Modal opens → User fills reason → Confirm → API request
+  - **Actual Behavior:** Click Pause/Activate → Direct API request → "Reason is required" error toast
+  - **Root Cause:** Button click handlers are NOT properly wired to open ReasonDialog modal
+  - **Technical Analysis:** ReasonDialog component exists with correct test IDs ([data-testid="reason-input"], [data-testid="reason-confirm"]) but modal never opens
+  - **API Endpoint:** Should be POST /api/v1/bonuses/campaigns/{id}/status but request is made without reason
+
+- **REQUIREMENT VIOLATION:** 
+  - Review request states: "Clicking Pause/Activate must open a modal (Radix dialog) and NOT send a request until reason is provided"
+  - Current implementation violates this by sending request immediately without modal
+
+- **STATUS:** ❌ CRITICAL FAILURE - Modal functionality completely broken, direct API calls without reason modal
+
 ### 2026-01-15 — B1 Finance Hub Sweep (Transactions — Action Menu + Modal) 
 - Result: ✅ PASS (E2E)
 - Changes:
