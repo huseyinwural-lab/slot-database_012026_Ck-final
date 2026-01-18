@@ -117,25 +117,54 @@ const BonusManagement = () => {
                 <Input value={newCampaign.name} onChange={(e) => setNewCampaign({...newCampaign, name: e.target.value})} />
               </div>
               <div className="space-y-2">
-                <Label>Type</Label>
-                <Select value={newCampaign.type} onValueChange={(v) => setNewCampaign({...newCampaign, type: v})}>
+                <Label>Bonus Type</Label>
+                <Select value={newCampaign.bonus_type} onValueChange={(v) => setNewCampaign({ ...newCampaign, bonus_type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="deposit_match">Deposit Match</SelectItem>
-                    <SelectItem value="free_spins">Free Spins</SelectItem>
+                    <SelectItem value="MANUAL_CREDIT">MANUAL_CREDIT</SelectItem>
+                    <SelectItem value="FREE_BET">FREE_BET</SelectItem>
+                    <SelectItem value="FREE_SPIN">FREE_SPIN</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Multiplier (x)</Label>
-                  <Input type="number" value={newCampaign.multiplier} onChange={(e) => setNewCampaign({...newCampaign, multiplier: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Wagering (x)</Label>
-                  <Input type="number" value={newCampaign.wagering_mult} onChange={(e) => setNewCampaign({...newCampaign, wagering_mult: e.target.value})} />
-                </div>
+
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={newCampaign.status} onValueChange={(v) => setNewCampaign({ ...newCampaign, status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">draft</SelectItem>
+                    <SelectItem value="active">active</SelectItem>
+                    <SelectItem value="paused">paused</SelectItem>
+                    <SelectItem value="archived">archived</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {newCampaign.bonus_type === 'MANUAL_CREDIT' && (
+                <div className="space-y-2">
+                  <Label>Amount (bonus credit)</Label>
+                  <Input type="number" value={newCampaign.amount} onChange={(e) => setNewCampaign({ ...newCampaign, amount: e.target.value })} />
+                </div>
+              )}
+
+              {newCampaign.bonus_type !== 'MANUAL_CREDIT' && (
+                <div className="space-y-2">
+                  <Label>Max Uses</Label>
+                  <Input type="number" value={newCampaign.max_uses} onChange={(e) => setNewCampaign({ ...newCampaign, max_uses: e.target.value })} />
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  id="is_onboarding"
+                  type="checkbox"
+                  checked={Boolean(newCampaign.is_onboarding)}
+                  onChange={(e) => setNewCampaign({ ...newCampaign, is_onboarding: e.target.checked })}
+                />
+                <Label htmlFor="is_onboarding">Mark as onboarding campaign (config.is_onboarding=true)</Label>
+              </div>
+
               <div className="space-y-2 pt-2 border-t">
                 <Label>Audit Reason</Label>
                 <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why create this?" />
