@@ -131,12 +131,16 @@ async def list_campaigns_with_games(session: AsyncSession, *, tenant_id: str) ->
     for c in campaigns:
         map_stmt = select(BonusCampaignGame.game_id).where(BonusCampaignGame.campaign_id == c.id)
         game_ids = [r[0] for r in (await session.execute(map_stmt)).all()]
+
+        # Back-compat: many existing rows only have `type`.
+        bonus_type = c.bonus_type or c.type
+
         out.append(
             {
                 "id": c.id,
                 "tenant_id": c.tenant_id,
                 "name": c.name,
-                "bonus_type": c.bonus_type,
+                "bonus_type": bonus_type,
                 "status": c.status,
                 "bet_amount": c.bet_amount,
                 "spin_count": c.spin_count,
