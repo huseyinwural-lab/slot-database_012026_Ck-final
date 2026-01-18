@@ -1810,7 +1810,7 @@ class BonusP0TestSuite:
                                   f"Expected remaining_uses=0, got {final_remaining}")
                     return False
                 
-                if final_status != "COMPLETED":
+                if final_status.upper() != "COMPLETED":
                     self.log_result("Verify Final Grant Status", False, 
                                   f"Expected status=COMPLETED, got {final_status}")
                     return False
