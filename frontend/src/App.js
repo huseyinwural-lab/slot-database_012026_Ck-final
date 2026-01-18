@@ -12,6 +12,7 @@ import FinanceWithdrawals from './pages/FinanceWithdrawals';
 import ApprovalQueue from './pages/ApprovalQueue';
 import GameManagement from './pages/GameManagement';
 import BonusManagement from './pages/BonusManagement';
+import ReferralRedirect from './pages/ReferralRedirect';
 import FraudCheck from './pages/FraudCheck';
 import Support from './pages/Support';
 import { FeatureFlags } from './pages/FeatureFlags';
