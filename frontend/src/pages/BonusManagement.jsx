@@ -191,9 +191,9 @@ const BonusManagement = () => {
               {campaigns.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell>{c.type}</TableCell>
+                  <TableCell>{c.bonus_type || c.type}</TableCell>
                   <TableCell className="text-xs font-mono">
-                    {JSON.stringify(c.config)}
+                    {JSON.stringify({ ...c.config, game_ids: c.game_ids })}
                   </TableCell>
                   <TableCell>
                     <Badge variant={c.status === 'active' ? 'default' : 'secondary'}>
