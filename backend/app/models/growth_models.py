@@ -28,16 +28,25 @@ class Affiliate(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
 class AffiliateLink(SQLModel, table=True):
-    """Tracking Links."""
+    """Tracking Links (extended for Affiliate P0)."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     affiliate_id: str = Field(foreign_key="affiliate.id", index=True)
     tenant_id: str = Field(index=True)
-    
-    code: str = Field(index=True, unique=True) # e.g. "SUMMER25"
+
+    code: str = Field(index=True, unique=True)  # e.g. "aff_ab12cd34"
+
+    # New P0 fields
+    offer_id: Optional[str] = Field(default=None, index=True)
+    landing_path: str = "/"
+    currency: Optional[str] = None
+    expires_at: Optional[datetime] = None
+
+    # Legacy/back-compat
     campaign: str = "default"
-    
+
     clicks: int = 0
     signups: int = 0
+
     # NOTE: DB column is TIMESTAMP WITHOUT TIME ZONE in Postgres.
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
