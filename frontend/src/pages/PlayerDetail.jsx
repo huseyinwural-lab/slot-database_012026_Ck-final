@@ -269,6 +269,20 @@ const PlayerDetail = () => {
                     </Card>
                 </TabsContent>
 
+                <TabsContent value="games" className="mt-6">
+                    <Card>
+                        <CardHeader><CardTitle>Game Activity</CardTitle></CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Game</TableHead><TableHead>Bet</TableHead><TableHead>Win</TableHead><TableHead>Result</TableHead></TableRow></TableHeader>
+                                <TableBody>
+                                    <TableRow><TableCell colSpan={5} className="text-center">No game activity</TableCell></TableRow>
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
                 <TabsContent value="logs" className="mt-6">
                     <Card>
                         <CardHeader><CardTitle>Login & Security Logs</CardTitle></CardHeader>
