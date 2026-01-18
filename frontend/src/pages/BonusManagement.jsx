@@ -13,6 +13,8 @@ import { Gift, Plus, Activity } from 'lucide-react';
 
 const BonusManagement = () => {
   const [campaigns, setCampaigns] = useState([]);
+  const [games, setGames] = useState([]);
+  const [gameSearch, setGameSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [newCampaign, setNewCampaign] = useState({
     name: '',
@@ -28,6 +30,7 @@ const BonusManagement = () => {
 
   useEffect(() => {
     fetchCampaigns();
+    fetchGames();
   }, []);
 
   const fetchCampaigns = async () => {
@@ -39,11 +42,37 @@ const BonusManagement = () => {
       toast.error('Failed to load campaigns');
     } finally {
       setLoading(false);
+
+  const fetchGames = async () => {
+    try {
+      const res = await api.get('/v1/games', { params: { page: 1, page_size: 200 } });
+      const rows = Array.isArray(res.data) ? res.data : (res.data.items || []);
+      setGames(rows || []);
+    } catch {
+      // no-op
+    }
+  };
+
     }
   };
 
   const handleCreate = async () => {
     if (!reason) {
+
+  const toggleGame = (gameId) => {
+    const exists = (newCampaign.game_ids || []).includes(gameId);
+    setNewCampaign({
+      ...newCampaign,
+      game_ids: exists
+        ? newCampaign.game_ids.filter((id) => id !== gameId)
+        : [...(newCampaign.game_ids || []), gameId],
+    });
+  };
+
+  const filteredGames = (games || []).filter((g) =>
+    (g.name || '').toLowerCase().includes((gameSearch || '').toLowerCase())
+  );
+
       toast.error('Reason is required');
       return;
     }

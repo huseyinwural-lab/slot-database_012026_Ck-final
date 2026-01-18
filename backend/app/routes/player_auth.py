@@ -42,20 +42,19 @@ async def register_player(payload: dict = Body(...), session: AsyncSession = Dep
     
     session.add(player)
     await session.commit()
-    await session.refresh(player) # Need ID for attribution
+    await session.refresh(player)  # Need ID for attribution
+
+    player_id = str(player.id)
 
     # P0 Bonus: Onboarding auto-grant (best-effort)
     try:
         from app.services.bonus_lifecycle import auto_grant_onboarding_if_eligible
 
-        await auto_grant_onboarding_if_eligible(session, tenant_id=tenant_id, player_id=player.id)
+        await auto_grant_onboarding_if_eligible(session, tenant_id=tenant_id, player_id=player_id)
         await session.commit()
     except Exception:
         # no-op: onboarding may be missing or ambiguous; P0 spec allows no-op
-        try:
-            await session.rollback()
-        except Exception:
-            pass
+        pass
 
     # Affiliate Attribution
     referral_code = payload.get("referral_code") or payload.get("ref_code")
@@ -64,7 +63,7 @@ async def register_player(payload: dict = Body(...), session: AsyncSession = Dep
         await aff_engine.attribute_player(session, player.id, tenant_id, referral_code)
         await session.commit()
     
-    return {"message": "Registered", "player_id": player.id}
+    return {"message": "Registered", "player_id": player_id}
 
 @router.post("/login")
 async def login_player(payload: dict = Body(...), session: AsyncSession = Depends(get_session)):
