@@ -258,7 +258,7 @@ const PlayerDetail = () => {
                                         <TableRow key={b.id}>
                                             <TableCell>{b.granted_at ? new Date(b.granted_at).toLocaleString() : '-'}</TableCell>
                                             <TableCell className="font-mono text-xs">{b.bonus_type || '-'}</TableCell>
-                                            <TableCell className="text-green-500">{(b.amount_granted ?? 0).toFixed ? `$${Number(b.amount_granted || 0).toFixed(2)}` : `$${Number(b.amount_granted || 0)}`}</TableCell>
+                                            <TableCell className="text-green-500">${Number(b.amount_granted || 0).toFixed(2)}</TableCell>
                                             <TableCell><Badge variant={b.status === 'active' ? 'default' : 'secondary'}>{b.status}</Badge></TableCell>
                                             <TableCell>{b.expires_at ? new Date(b.expires_at).toLocaleString() : 'Never'}</TableCell>
                                         </TableRow>
