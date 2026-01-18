@@ -52,7 +52,7 @@ const AffiliateManagement = () => {
         }
         if (activeTab === 'payouts') {
             setPayouts((await api.get('/v1/affiliates/payouts')).data);
-            setAffiliates((await api.get('/v1/affiliates')).data);
+            setAffiliates((await api.get('/v1/affiliates/partners')).data);
         }
         if (activeTab === 'creatives') setCreatives((await api.get('/v1/affiliates/creatives')).data);
     } catch (err) {
