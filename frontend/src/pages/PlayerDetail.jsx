@@ -35,7 +35,7 @@ const PlayerDetail = () => {
         api.get(`/v1/players/${id}/transactions`),
         api.get(`/v1/players/${id}/kyc`),
         api.get(`/v1/players/${id}/logs`),
-        api.get(`/v1/bonuses/players/${id}`),
+        api.get(`/v1/bonuses/players/${id}/bonuses`),
       ]);
       setPlayer(pRes.data);
       setTransactions(tRes.data);
