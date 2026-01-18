@@ -1,0 +1,4 @@
+/*
+  Temporary helper to provide stable selectors for Playwright.
+  Not used directly.
+*/
