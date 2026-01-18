@@ -164,3 +164,193 @@ async def apply_wallet_delta_with_ledger(
         _assert_non_negative("player.balance_real_held", float(player.balance_real_held))
 
     return True
+
+
+async def apply_bonus_delta_with_ledger(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    player_id: str,
+    tx_id: Optional[str],
+    event_type: str,
+    delta_bonus_available: float,
+    delta_bonus_pending: float = 0.0,
+    currency: str = "USD",
+    idempotency_key: Optional[str] = None,
+    provider: Optional[str] = None,
+    provider_ref: Optional[str] = None,
+    provider_event_id: Optional[str] = None,
+    allow_negative: bool = False,
+) -> bool:
+    """Apply a bonus-balance delta to WalletBalance + Player, with a ledger event.
+
+    Notes:
+    - P0-05 requires WalletBalance as the authoritative snapshot for bonus.
+    - We mirror WalletBalance.balance_bonus_available onto Player.balance_bonus.
+    """
+
+    player_stmt = select(Player).where(Player.id == player_id).with_for_update()
+    player = (await session.execute(player_stmt)).scalars().first()
+    if not player:
+        raise WalletInvariantError("PLAYER_NOT_FOUND")
+
+    bal_stmt = (
+        select(WalletBalance)
+        .where(
+            WalletBalance.tenant_id == tenant_id,
+            WalletBalance.player_id == player_id,
+            WalletBalance.currency == currency,
+        )
+        .with_for_update()
+    )
+    bal = (await session.execute(bal_stmt)).scalars().first()
+
+    # Ledger event (best-effort representation for bonus movements)
+    net = float(delta_bonus_available) + float(delta_bonus_pending)
+    direction = "credit" if net >= 0 else "debit"
+    amount = abs(float(delta_bonus_available)) + abs(float(delta_bonus_pending))
+
+    _event, created = await append_event(
+        session,
+        tenant_id=tenant_id,
+        player_id=player_id,
+        tx_id=tx_id,
+        type="wallet",
+        direction=direction,
+        amount=amount,
+        currency=currency,
+        status=event_type,
+        idempotency_key=idempotency_key,
+        provider=provider,
+        provider_ref=provider_ref,
+        provider_event_id=provider_event_id,
+        autocommit=False,
+    )
+
+    if not created:
+        return False
+
+    now = datetime.utcnow()
+    if not bal:
+        bal = WalletBalance(
+            tenant_id=tenant_id,
+            player_id=player_id,
+            currency=currency,
+            balance_real_available=float(player.balance_real_available),
+            balance_real_pending=float(player.balance_real_held),
+            balance_bonus_available=float(player.balance_bonus) + float(delta_bonus_available),
+            balance_bonus_pending=float(delta_bonus_pending),
+            updated_at=now,
+        )
+        session.add(bal)
+    else:
+        bal.balance_bonus_available = float(bal.balance_bonus_available) + float(delta_bonus_available)
+        bal.balance_bonus_pending = float(bal.balance_bonus_pending) + float(delta_bonus_pending)
+        bal.updated_at = now
+        session.add(bal)
+
+    player.balance_bonus = float(player.balance_bonus or 0.0) + float(delta_bonus_available)
+
+    if not allow_negative:
+        _assert_non_negative("player.balance_bonus", float(player.balance_bonus))
+        if bal:
+            _assert_non_negative("wallet.balance_bonus_available", float(bal.balance_bonus_available))
+            _assert_non_negative("wallet.balance_bonus_pending", float(bal.balance_bonus_pending))
+
+    return True
+
+
+async def spend_with_bonus_precedence(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    player_id: str,
+    tx_id: Optional[str],
+    event_type: str,
+    amount: float,
+    currency: str = "USD",
+    idempotency_key: Optional[str] = None,
+    provider: Optional[str] = None,
+    provider_ref: Optional[str] = None,
+    provider_event_id: Optional[str] = None,
+) -> bool:
+    """Debit with precedence: bonus_balance first, then real balance.
+
+    This is used for bets and any other spend-like operations.
+    """
+
+    if amount <= 0:
+        return True
+
+    player_stmt = select(Player).where(Player.id == player_id).with_for_update()
+    player = (await session.execute(player_stmt)).scalars().first()
+    if not player:
+        raise WalletInvariantError("PLAYER_NOT_FOUND")
+
+    bal_stmt = (
+        select(WalletBalance)
+        .where(
+            WalletBalance.tenant_id == tenant_id,
+            WalletBalance.player_id == player_id,
+            WalletBalance.currency == currency,
+        )
+        .with_for_update()
+    )
+    bal = (await session.execute(bal_stmt)).scalars().first()
+
+    # Ensure we have a snapshot row
+    now = datetime.utcnow()
+    if not bal:
+        bal = WalletBalance(
+            tenant_id=tenant_id,
+            player_id=player_id,
+            currency=currency,
+            balance_real_available=float(player.balance_real_available),
+            balance_real_pending=float(player.balance_real_held),
+            balance_bonus_available=float(player.balance_bonus or 0.0),
+            balance_bonus_pending=0.0,
+            updated_at=now,
+        )
+        session.add(bal)
+        await session.flush()
+
+    bonus_avail = float(bal.balance_bonus_available or 0.0)
+    use_bonus = min(bonus_avail, float(amount))
+    use_real = float(amount) - use_bonus
+
+    if float(bal.balance_real_available or 0.0) < use_real - 1e-9:
+        raise WalletInvariantError("INSUFFICIENT_FUNDS")
+
+    # Ledger event (single) for idempotency + traceability
+    _event, created = await append_event(
+        session,
+        tenant_id=tenant_id,
+        player_id=player_id,
+        tx_id=tx_id,
+        type="wallet",
+        direction="debit",
+        amount=float(amount),
+        currency=currency,
+        status=event_type,
+        idempotency_key=idempotency_key,
+        provider=provider,
+        provider_ref=provider_ref or f"bonus:{use_bonus}|real:{use_real}",
+        provider_event_id=provider_event_id,
+        autocommit=False,
+    )
+
+    if not created:
+        return False
+
+    bal.balance_bonus_available = float(bal.balance_bonus_available) - float(use_bonus)
+    bal.balance_real_available = float(bal.balance_real_available) - float(use_real)
+    bal.updated_at = now
+    session.add(bal)
+
+    player.balance_bonus = float(player.balance_bonus or 0.0) - float(use_bonus)
+    player.balance_real_available = float(player.balance_real_available) - float(use_real)
+
+    _assert_non_negative("player.balance_bonus", float(player.balance_bonus))
+    _assert_non_negative("player.balance_real_available", float(player.balance_real_available))
+
+    return True
