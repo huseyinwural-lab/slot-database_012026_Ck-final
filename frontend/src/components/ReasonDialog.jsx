@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 const ReasonDialog = ({ open, onOpenChange, title, placeholder, confirmText = 'Confirm', onConfirm }) => {
   const [reason, setReason] = useState('');
