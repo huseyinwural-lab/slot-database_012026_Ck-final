@@ -329,9 +329,11 @@ const BonusManagement = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
-                      onClick={(e) => {
+                      data-testid={`campaign-status-${c.id}`}
+                      onMouseDown={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         toggleStatus(c.id, c.status);
