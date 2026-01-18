@@ -55,7 +55,6 @@ const BonusManagement = () => {
   useEffect(() => {
     fetchCampaigns();
     fetchGames();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredGames = useMemo(() => {
