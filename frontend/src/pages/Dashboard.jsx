@@ -22,11 +22,15 @@ import BonusPerformanceCard from '../components/dashboard/BonusPerformanceCard';
 
 const ComingSoonCard = ({ children, enabled, tooltip }) => {
   if (enabled) return children;
+
+  // Prevent deceptive/dead clicks: keep tooltip active but block interactions inside.
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="opacity-50 cursor-not-allowed">{children}</div>
+          <div className="opacity-50 cursor-not-allowed">
+            <div className="pointer-events-none">{children}</div>
+          </div>
         </TooltipTrigger>
         <TooltipContent>
           <p>{tooltip || 'Coming soon'}</p>
@@ -200,7 +204,7 @@ const Dashboard = () => {
           trend="up" trendValue="12.5" color="#3b82f6"
           disabled={ownerRevenueDisabled}
           tooltip={ownerRevenueDisabled ? 'Owner only' : 'View details'}
-          onClick={() => go(`/revenue/all-tenants?metric=ggr&range_days=${rangeDays}`)}
+          onClick={() => go(`/revenue?metric=ggr&range_days=${rangeDays}`)}
         />
         <StatCard 
           title="NGR (Net Revenue)" 
@@ -209,7 +213,7 @@ const Dashboard = () => {
           trend="up" trendValue="10.2" color="#10b981"
           disabled={ownerRevenueDisabled}
           tooltip={ownerRevenueDisabled ? 'Owner only' : 'View details'}
-          onClick={() => go(`/revenue/all-tenants?metric=ngr&range_days=${rangeDays}`)}
+          onClick={() => go(`/revenue?metric=ngr&range_days=${rangeDays}`)}
         />
         <StatCard 
           title="Active Players" 
