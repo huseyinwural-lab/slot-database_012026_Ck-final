@@ -34,9 +34,9 @@ const AffiliateManagement = () => {
 
   // Forms
   const [newAffiliate, setNewAffiliate] = useState({ username: '', email: '', company_name: '', model: 'revshare' });
-  const [newOffer, setNewOffer] = useState({ name: '', model: 'cpa', cpa_amount: 50, revshare_percentage: 25 });
-  const [newLink, setNewLink] = useState({ affiliate_id: '', offer_id: '', name: 'Main Tracker' });
-  const [newPayout, setNewPayout] = useState({ affiliate_id: '', amount: 0, period_start: '', period_end: '' });
+  const [newOffer, setNewOffer] = useState({ name: '', model: 'cpa', currency: 'USD', cpa_amount: 50, min_deposit: 20 });
+  const [newLink, setNewLink] = useState({ affiliate_id: '', offer_id: '', landing_path: '/', reason: 'initial link' });
+  const [newPayout, setNewPayout] = useState({ affiliate_id: '', amount: 0, currency: 'USD', method: 'bank', reference: '', reason: 'monthly payout' });
   const [newCreative, setNewCreative] = useState({ name: '', type: 'banner', url: '' });
 
   const fetchData = useCallback(async () => {
