@@ -47,19 +47,31 @@ const BonusManagement = () => {
       toast.error('Reason is required');
       return;
     }
+    if (!newCampaign.name.trim()) {
+      toast.error('Campaign name is required');
+      return;
+    }
+
     setLoading(true);
     try {
+      const config = {};
+      if (newCampaign.bonus_type === 'MANUAL_CREDIT') {
+        config.amount = Number(newCampaign.amount || 0);
+      }
+      if (newCampaign.is_onboarding) {
+        config.is_onboarding = true;
+      }
+
       const payload = {
         name: newCampaign.name,
-        type: newCampaign.type,
-        config: {
-          multiplier: Number(newCampaign.multiplier),
-          wagering_mult: Number(newCampaign.wagering_mult),
-          min_deposit: Number(newCampaign.min_deposit)
-        },
+        bonus_type: newCampaign.bonus_type,
+        status: newCampaign.status,
+        game_ids: newCampaign.game_ids,
+        max_uses: newCampaign.bonus_type === 'MANUAL_CREDIT' ? null : Number(newCampaign.max_uses || 0),
+        config,
       };
-      // Backend expects multiple body params (payload + reason) => must be embedded.
-      await api.post('/v1/bonuses/campaigns', { payload, reason });
+
+      await api.post('/v1/bonuses/campaigns', payload, { headers: { 'X-Reason': reason } });
       toast.success('Campaign created');
       setIsOpen(false);
       setReason('');
