@@ -147,7 +147,8 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
     if (!bonusReason.trim()) return toast.error('Reason is required');
     if (!bonusType) return toast.error('Campaign is required');
     if (!selectedCampaign) return toast.error('Invalid campaign');
-    if (selectedCampaign.bonus_type && selectedCampaign.bonus_type !== 'MANUAL_CREDIT') {
+    const campaignType = selectedCampaign.bonus_type || selectedCampaign.type;
+    if (campaignType !== 'MANUAL_CREDIT') {
       return toast.error('Only MANUAL_CREDIT can be granted from here (P0)');
     }
     if (!bonusAmount || Number(bonusAmount) <= 0) return toast.error('Amount must be > 0');

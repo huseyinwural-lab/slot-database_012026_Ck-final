@@ -8,6 +8,7 @@ from app.models.game_models import GameSession, GameRound, GameEvent, Game
 from app.models.sql_models import Transaction, Player
 from app.schemas.game_schemas import ProviderEvent, ProviderResponse
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger, spend_with_bonus_precedence
+from app.services.bonus_engine import find_applicable_free_grant, consume_free_use
 from app.core.errors import AppError
 
 logger = logging.getLogger(__name__)
@@ -69,21 +70,35 @@ class GameEngine:
 
         try:
             if payload.event_type == "BET":
-                # Debit: bonus first then real
-                await spend_with_bonus_precedence(
+                # P0-01/02: if player has an applicable free bet/spin for this game, consume a use and skip debit.
+                game_id = payload.game_id or game_session.game_id
+                free_grant = await find_applicable_free_grant(
                     session,
                     tenant_id=player.tenant_id,
                     player_id=player.id,
-                    tx_id=tx_id,
-                    event_type=ledger_type,
-                    amount=float(abs(payload.amount)),
-                    currency=payload.currency,
-                    idempotency_key=f"game:{payload.provider_event_id}",
-                    provider=payload.provider_id,
-                    provider_ref=payload.provider_round_id,
-                    provider_event_id=payload.provider_event_id,
+                    game_id=str(game_id),
                 )
-                game_round.total_bet += abs(payload.amount)
+
+                if free_grant:
+                    await consume_free_use(session, grant=free_grant, provider_event_id=payload.provider_event_id)
+                    # Track bet volume but do not debit wallet.
+                    game_round.total_bet += abs(payload.amount)
+                else:
+                    # Debit: bonus first then real
+                    await spend_with_bonus_precedence(
+                        session,
+                        tenant_id=player.tenant_id,
+                        player_id=player.id,
+                        tx_id=tx_id,
+                        event_type=ledger_type,
+                        amount=float(abs(payload.amount)),
+                        currency=payload.currency,
+                        idempotency_key=f"game:{payload.provider_event_id}",
+                        provider=payload.provider_id,
+                        provider_ref=payload.provider_round_id,
+                        provider_event_id=payload.provider_event_id,
+                    )
+                    game_round.total_bet += abs(payload.amount)
 
             elif payload.event_type == "WIN":
                 # Bonus: Update Wagering Progress

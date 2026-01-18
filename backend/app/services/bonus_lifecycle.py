@@ -218,7 +218,7 @@ async def grant_bonus_admin(
         campaign=campaign,
         reason=reason,
         created_by_admin_id=str(admin.id),
-        provider_event_id=f"admin_grant:{campaign_id}:{player_id}",
+        provider_event_id=None,
         amount_override=amount,
     )
 
