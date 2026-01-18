@@ -1529,6 +1529,10 @@ class BonusP0TestSuite:
     async def register_new_player(self) -> bool:
         """Register a new player with unique email"""
         try:
+            # Wait a moment to ensure campaigns are fully created
+            import asyncio
+            await asyncio.sleep(1)
+            
             async with httpx.AsyncClient(timeout=30.0) as client:
                 # Generate unique player credentials
                 self.test_player_email = f"bonustest_{uuid.uuid4().hex[:8]}@casino.com"
@@ -1555,6 +1559,9 @@ class BonusP0TestSuite:
                 if not self.test_player_id:
                     self.log_result("Register New Player", False, "No player ID in response")
                     return False
+                
+                # Wait a moment for onboarding auto-grant to process
+                await asyncio.sleep(2)
                 
                 self.log_result("Register New Player", True, f"Player registered with ID: {self.test_player_id}")
                 return True
