@@ -38,6 +38,14 @@ Do not delete sections unless instructed.
   - Backend: `GET /api/v1/kyc/documents/{doc_id}/download?token=...` returns attachment (MOCK txt) with Content-Disposition.
   - Verified via Playwright screenshot flow on `http://localhost:3000` after frontend restart.
 
+
+### 2026-01-18 — BONUS P0 (Engine + Minimal UI) — In Progress
+- Status: IN PROGRESS
+- Changes done:
+  - Backend: new bonus engine routes/services, reason header fix, onboarding auto-grant hook, wallet debit precedence.
+  - Frontend: BonusManagement updated to new campaign schema + game selection; PlayerDetail “Bonuses” tab; PlayerActionsDrawer grant via /v1/bonuses/grant.
+- Next: Run backend & frontend testing subagents for full end-to-end verification.
+
   2. ✅ `yarn lint` in frontend: PASS (ESLint completed successfully in 0.83s)
   3. ✅ Git diff validation: Only `frontend/yarn.lock` modified (200 lines changed: 48 insertions, 152 deletions)
   4. ⚠️  Note: `.github/workflows/frontend-lint.yml` was NOT modified in current state (already contains Node 20.19.6 pinning)
