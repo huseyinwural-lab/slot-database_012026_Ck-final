@@ -7042,26 +7042,26 @@ class PlayersExportXLSXTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run Players XLSX Export Test Suite"""
-    print("🎯 Players XLSX Export Test Suite Runner")
+    """Main test runner - Run BONUS P0 Backend End-to-End Test Suite"""
+    print("🎯 BONUS P0 Backend End-to-End Test Suite Runner")
     print("=" * 80)
     
-    # Run Players XLSX Export test suite (primary focus for this review request)
-    players_xlsx_suite = PlayersExportXLSXTestSuite()
-    players_xlsx_success = await players_xlsx_suite.run_all_tests()
+    # Run BONUS P0 test suite (primary focus for this review request)
+    bonus_p0_suite = BonusP0TestSuite()
+    bonus_p0_success = await bonus_p0_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if players_xlsx_success else "❌ FAIL"
-    print(f"{status}: Players XLSX Export Tests")
+    status = "✅ PASS" if bonus_p0_success else "❌ FAIL"
+    print(f"{status}: BONUS P0 Backend End-to-End Tests")
     
-    if players_xlsx_success:
-        print("🎉 Players XLSX Export test suite PASSED!")
+    if bonus_p0_success:
+        print("🎉 BONUS P0 backend end-to-end test suite PASSED!")
         return True
     else:
-        print("⚠️  Players XLSX Export test suite failed.")
+        print("⚠️  BONUS P0 backend end-to-end test suite failed.")
         return False
 
 
