@@ -168,6 +168,7 @@ async def get_players(
     current_admin: AdminUser = Depends(get_current_admin),
     session: AsyncSession = Depends(get_session)
 ):
+    require_support_view(current_admin)
     query = select(Player)
     
     # Tenant Filter (P0-TENANT-SCOPE)
