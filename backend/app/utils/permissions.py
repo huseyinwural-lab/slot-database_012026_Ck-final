@@ -9,6 +9,23 @@ def require_owner(admin: AdminUser):
     if not admin.is_platform_owner:
         raise AppError("FORBIDDEN", "Platform Owner access required", 403)
 
+
+def require_ops(admin: AdminUser):
+    # Ops/Admin/Super Admin/Owner are allowed
+    if admin.role not in {"Ops", "Admin", "Super Admin"} and not admin.is_platform_owner:
+        raise AppError("FORBIDDEN", "Ops access required", 403)
+
+
+def require_admin(admin: AdminUser):
+    # Admin/Super Admin/Owner are allowed
+    if admin.role not in {"Admin", "Super Admin"} and not admin.is_platform_owner:
+        raise AppError("FORBIDDEN", "Admin access required", 403)
+
+
+def require_support_view(admin: AdminUser):
+    if admin.role not in {"Support", "Ops", "Admin", "Super Admin"} and not admin.is_platform_owner:
+        raise AppError("FORBIDDEN", "Support view access required", 403)
+
 async def require_feature(feature_key: str, admin: AdminUser, session: AsyncSession):
     """
     Core Logic to check if a feature is enabled for the admin's tenant.
