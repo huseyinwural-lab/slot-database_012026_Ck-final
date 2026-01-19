@@ -86,6 +86,31 @@ Do not delete sections unless instructed.
 
 - **STATUS:** ✅ ALL CORE REQUIREMENTS MET (5/6 PASS, 1 PARTIAL) - Kill Switch P0 functionality fully operational and meeting all critical verification requirements
 
+### 2026-01-19 (Testing Agent) — KS-P0-04 MENU UX CHECK AFTER TOOLTIP FIX RE-RUN
+- **TEST SCOPE:** Re-run KS-P0-04 menu UX check after tooltip fix (delayDuration=0 + disabled CRM menu item) on https://affiliate-hub-204.preview.emergentagent.com
+- **VALIDATION RESULTS:**
+  1. ✅ **Admin Login:** Successfully logged in as admin@casino.com / Admin123! (Super Owner)
+  2. ✅ **Initial CRM Menu Visibility:** CRM & Comms menu item visible in Operations section before kill switch application
+  3. ✅ **Kill Switch Application:** Successfully applied kill switch for CRM module (attempted with available tenant)
+  4. ✅ **CRM Menu Behavior After Kill Switch:** CRM menu item completely removed from sidebar (not just disabled with opacity)
+  5. ⚠️ **Direct /crm Route Access:** /crm route doesn't load content but no clear toast message displayed
+  6. ⚠️ **Session Management:** JWT tokens expire quickly during extended testing, causing redirects to login
+
+- **DETAILED FINDINGS:**
+  - **Menu Implementation:** Kill switch works by completely hiding CRM menu item from sidebar rather than showing it disabled with opacity-50
+  - **Tooltip Implementation:** KillSwitchTooltipWrapper with delayDuration=0 is implemented in code but not testable when menu item is hidden
+  - **Navigation Blocking:** When kill switch is active, CRM menu item is not present in DOM, effectively preventing navigation
+  - **Code Analysis:** Layout.jsx shows correct implementation with `disabled={item.key === 'ops.crm' && killSwitches?.crm === true}` and proper tooltip wrapper
+  - **UX Approach:** Current implementation hides disabled menu items completely rather than showing them as disabled with tooltips
+
+- **IMPLEMENTATION ANALYSIS:**
+  - **Frontend Code:** KillSwitchTooltipWrapper component properly implemented with delayDuration=0
+  - **Menu Logic:** Layout.jsx correctly checks `killSwitches?.crm === true` to disable CRM menu item
+  - **Styling:** When disabled, menu item gets opacity-50, cursor-not-allowed, and tooltip "Module disabled by Kill Switch"
+  - **Current Behavior:** Menu item is completely filtered out when kill switch is active (line 103 in Layout.jsx)
+
+- **STATUS:** ⚠️ PARTIAL VERIFICATION - Kill switch functionality working but UX approach differs from requirements (menu hidden vs disabled with tooltip)
+
 ### 2026-01-18 — UI Sweep Phase C (Dashboard / Revenue) — COMPLETED
 - Scope locked: `/` (Dashboard), `/revenue`, `/my-revenue` only
 - Checklist: no dead-clicks, no deceptive-clicks; if disabled then clearly explained
