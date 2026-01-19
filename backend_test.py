@@ -1559,14 +1559,35 @@ class P0MoneyLoopGateTestSuite:
                                   response.status_code, json.dumps(data, indent=2)[:300])
                     return False
                 
-                # Verify wallet balance available_real increased
+                # Check if balance is in the response, if not get it separately
                 available_real = balance.get("available_real", 0)
                 
                 if available_real < 100.0:
-                    self.log_result("Step 4: Deposit Happy Path", False, 
-                                  f"Expected available_real >= 100, got {available_real}", 
-                                  response.status_code, json.dumps(data, indent=2)[:300])
-                    return False
+                    # Try to get balance separately
+                    balance_headers = {
+                        "Authorization": f"Bearer {self.player_token}",
+                        "X-Tenant-ID": "default_casino"
+                    }
+                    
+                    balance_response = await client.get(
+                        f"{self.base_url}/player/wallet/balance",
+                        headers=balance_headers
+                    )
+                    
+                    if balance_response.status_code == 200:
+                        balance_data = balance_response.json()
+                        available_real = balance_data.get("available_real", 0)
+                        
+                        if available_real < 100.0:
+                            self.log_result("Step 4: Deposit Happy Path", False, 
+                                          f"Expected available_real >= 100, got {available_real} (checked separately)", 
+                                          response.status_code, json.dumps(data, indent=2)[:300])
+                            return False
+                    else:
+                        self.log_result("Step 4: Deposit Happy Path", False, 
+                                      f"Expected available_real >= 100, got {available_real} (balance check failed)", 
+                                      response.status_code, json.dumps(data, indent=2)[:300])
+                        return False
                 
                 self.deposit_tx_id = transaction.get("id")
                 
