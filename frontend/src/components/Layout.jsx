@@ -41,6 +41,11 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
 
   const { isOwner, tenantName, hasFeature, capabilities, loading: capabilitiesLoading } = useCapabilities();
+
+  const killSwitches = useMemo(
+    () => (capabilities?.kill_switches || {}),
+    [capabilities?.kill_switches]
+  );
   
   const menuFlags = useMemo(
     () => capabilities?.menu_flags || {},
