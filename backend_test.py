@@ -1939,6 +1939,22 @@ class P0MoneyLoopGateTestSuite:
                 return False
             
             async with httpx.AsyncClient(timeout=30.0) as client:
+                # First get current balance
+                balance_headers = {
+                    "Authorization": f"Bearer {self.player_token}",
+                    "X-Tenant-ID": "default_casino"
+                }
+                
+                initial_balance_response = await client.get(
+                    f"{self.base_url}/player/wallet/balance",
+                    headers=balance_headers
+                )
+                
+                initial_available = 0
+                if initial_balance_response.status_code == 200:
+                    initial_balance_data = initial_balance_response.json()
+                    initial_available = initial_balance_data.get("available_real", 0)
+                
                 headers = {
                     "Authorization": f"Bearer {self.player_token}",
                     "Idempotency-Key": str(uuid.uuid4()),
@@ -1975,12 +1991,23 @@ class P0MoneyLoopGateTestSuite:
                                   response.status_code, json.dumps(data, indent=2)[:200])
                     return False
                 
-                # Balance should remain at 40 (from previous successful flow)
+                # Check balance - should remain unchanged
                 available_real = balance.get("available_real", 0)
                 
-                if available_real != 40.0:
+                # If balance not in response, get it separately
+                if available_real == 0 and initial_available > 0:
+                    final_balance_response = await client.get(
+                        f"{self.base_url}/player/wallet/balance",
+                        headers=balance_headers
+                    )
+                    
+                    if final_balance_response.status_code == 200:
+                        final_balance_data = final_balance_response.json()
+                        available_real = final_balance_data.get("available_real", 0)
+                
+                if available_real != initial_available:
                     self.log_result("Step 7c: Failed Deposit Net-0 Test", False, 
-                                  f"Expected balance to remain 40, got {available_real}", 
+                                  f"Expected balance to remain {initial_available}, got {available_real}", 
                                   response.status_code, json.dumps(data, indent=2)[:200])
                     return False
                 
