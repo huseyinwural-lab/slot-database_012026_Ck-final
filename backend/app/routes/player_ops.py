@@ -88,7 +88,7 @@ async def manual_credit(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
-    # RBAC: Admin+
+    # RBAC: Ops+
     require_ops(current_admin)
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
@@ -185,7 +185,7 @@ async def manual_debit(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
-    # RBAC: Admin+
+    # RBAC: Ops+
     require_ops(current_admin)
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
@@ -307,7 +307,7 @@ async def grant_manual_bonus(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
-    # RBAC: Admin+
+    # RBAC: Ops+
     require_ops(current_admin)
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
