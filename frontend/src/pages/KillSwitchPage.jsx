@@ -15,9 +15,14 @@ const KillSwitchPage = () => {
   const loadTenants = async () => {
     try {
       const res = await api.get('/v1/tenants/');
-      // Ensure we always have an array
-      const tenantsData = Array.isArray(res.data) ? res.data : [];
+      const tenantsData = Array.isArray(res.data?.items) ? res.data.items : [];
       setTenants(tenantsData);
+
+      // Auto-select Demo tenant if present and nothing selected yet
+      if (!tenantId) {
+        const demo = tenantsData.find((t) => t?.id === 'demo');
+        if (demo) setTenantId('demo');
+      }
     } catch (e) {
       console.error('Failed to load tenants:', e);
       toast.error('Failed to load tenants');
