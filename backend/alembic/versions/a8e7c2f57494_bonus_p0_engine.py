@@ -20,36 +20,32 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # P0 Bonus engine additions
-    
-    # 1) bonuscampaign: enum-ish bonus_type (already exists in some envs)
-    # NOTE (SQLite): cannot ALTER TABLE to add CHECK constraints. Enforce via app-level validation.
-    # Columns may already exist if a partial migration ran.
-    bind = op.get_bind()
-    cols = [r[1] for r in bind.execute(sa.text("PRAGMA table_info('bonuscampaign')")).fetchall()]
-    if 'bet_amount' not in cols:
-        op.add_column("bonuscampaign", sa.Column("bet_amount", sa.Float(), nullable=True))
-    if 'spin_count' not in cols:
-        op.add_column("bonuscampaign", sa.Column("spin_count", sa.Integer(), nullable=True))
-    if 'max_uses' not in cols:
-        op.add_column("bonuscampaign", sa.Column("max_uses", sa.Integer(), nullable=True))
+    # Prod-safety invariant: migrations must be idempotent.
 
-    # 2) bonusgrant: add remaining_uses + bonus_type for deterministic consume
     bind = op.get_bind()
-    cols = [r[1] for r in bind.execute(sa.text("PRAGMA table_info('bonusgrant')")).fetchall()]
-    if 'bonus_type' not in cols:
-        op.add_column(
-            "bonusgrant",
-            sa.Column("bonus_type", sa.String(), nullable=True),
-        )
-    # NOTE (SQLite): cannot ALTER TABLE to add CHECK constraints. Enforce via app-level validation.
-    if 'remaining_uses' not in cols:
-        op.add_column("bonusgrant", sa.Column("remaining_uses", sa.Integer(), nullable=True))
+    inspector = sa.inspect(bind)
+    tables = set(inspector.get_table_names())
 
-    # 3) campaign ↔ games (normalized)
-    # NOTE: SQLite has no CREATE TABLE IF NOT EXISTS via alembic op. If table exists (partial migration), skip.
-    bind = op.get_bind()
-    existing = bind.execute(sa.text("SELECT name FROM sqlite_master WHERE type='table' AND name='bonuscampaigngame'")).fetchone()
-    if not existing:
+    # 1) bonuscampaign columns
+    if "bonuscampaign" in tables:
+        cols = {c["name"] for c in inspector.get_columns("bonuscampaign")}
+        if 'bet_amount' not in cols:
+            op.add_column("bonuscampaign", sa.Column("bet_amount", sa.Float(), nullable=True))
+        if 'spin_count' not in cols:
+            op.add_column("bonuscampaign", sa.Column("spin_count", sa.Integer(), nullable=True))
+        if 'max_uses' not in cols:
+            op.add_column("bonuscampaign", sa.Column("max_uses", sa.Integer(), nullable=True))
+
+    # 2) bonusgrant columns
+    if "bonusgrant" in tables:
+        cols = {c["name"] for c in inspector.get_columns("bonusgrant")}
+        if 'bonus_type' not in cols:
+            op.add_column("bonusgrant", sa.Column("bonus_type", sa.String(), nullable=True))
+        if 'remaining_uses' not in cols:
+            op.add_column("bonusgrant", sa.Column("remaining_uses", sa.Integer(), nullable=True))
+
+    # 3) campaign ↔ games join table
+    if "bonuscampaign" in tables and "game" in tables and "bonuscampaigngame" not in tables:
         op.create_table(
             "bonuscampaigngame",
             sa.Column("campaign_id", sa.String(), nullable=False),
