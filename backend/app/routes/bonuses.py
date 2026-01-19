@@ -117,6 +117,7 @@ async def grant_bonus(
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    require_admin(current_admin)
 
     grant = await grant_bonus_admin(
         session,
