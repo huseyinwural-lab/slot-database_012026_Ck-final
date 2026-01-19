@@ -50,7 +50,11 @@ def upgrade() -> None:
 
     # Payload fields expected by code/schema
     # On SQLite, JSONB is not available; use TEXT.
-    json_type = sa.Text() if is_sqlite else sa.dialects.postgresql.JSONB()
+    if is_sqlite:
+        json_type = sa.Text()
+    else:
+        from sqlalchemy.dialects.postgresql import JSONB
+        json_type = JSONB
 
     if not _column_exists("auditevent", "before_json"):
         op.add_column("auditevent", sa.Column("before_json", json_type, nullable=True))
