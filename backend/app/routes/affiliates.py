@@ -241,6 +241,7 @@ async def deactivate_partner(
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+    require_ops(current_admin)
 
     partner = await set_partner_status(session, tenant_id=tenant_id, partner_id=partner_id, status="inactive")
     await session.commit()
