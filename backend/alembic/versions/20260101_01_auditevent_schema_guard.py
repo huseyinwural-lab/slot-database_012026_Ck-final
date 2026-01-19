@@ -7,6 +7,7 @@ Create Date: 2026-01-01
 """
 
 from alembic import op
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "20260101_01"
@@ -15,26 +16,66 @@ branch_labels = None
 depends_on = None
 
 
+def _column_exists(table_name: str, column_name: str) -> bool:
+    bind = op.get_bind()
+
+    if bind.dialect.name == "sqlite":
+        cols = [row[1] for row in bind.execute(sa.text(f"PRAGMA table_info({table_name})")).fetchall()]
+        return column_name in cols
+
+    res = bind.execute(
+        sa.text(
+            """
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = :t
+              AND column_name = :c
+            LIMIT 1
+            """
+        ),
+        {"t": table_name, "c": column_name},
+    ).fetchone()
+    return res is not None
+
+
 def upgrade() -> None:
-    # Core fields added after initial audit table migration
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS status VARCHAR NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS reason VARCHAR NULL;")
+    bind = op.get_bind()
+    is_sqlite = bind.dialect.name == "sqlite"
+
+    # Core fields
+    if not _column_exists("auditevent", "status"):
+        op.add_column("auditevent", sa.Column("status", sa.String(), nullable=True))
+    if not _column_exists("auditevent", "reason"):
+        op.add_column("auditevent", sa.Column("reason", sa.String(), nullable=True))
 
     # Payload fields expected by code/schema
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS before_json JSONB NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS after_json JSONB NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS diff_json JSONB NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS metadata_json JSONB NULL;")
+    # On SQLite, JSONB is not available; use TEXT.
+    json_type = sa.Text() if is_sqlite else sa.dialects.postgresql.JSONB()
+
+    if not _column_exists("auditevent", "before_json"):
+        op.add_column("auditevent", sa.Column("before_json", json_type, nullable=True))
+    if not _column_exists("auditevent", "after_json"):
+        op.add_column("auditevent", sa.Column("after_json", json_type, nullable=True))
+    if not _column_exists("auditevent", "diff_json"):
+        op.add_column("auditevent", sa.Column("diff_json", json_type, nullable=True))
+    if not _column_exists("auditevent", "metadata_json"):
+        op.add_column("auditevent", sa.Column("metadata_json", json_type, nullable=True))
 
     # Error fields
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS error_code VARCHAR NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS error_message VARCHAR NULL;")
+    if not _column_exists("auditevent", "error_code"):
+        op.add_column("auditevent", sa.Column("error_code", sa.String(), nullable=True))
+    if not _column_exists("auditevent", "error_message"):
+        op.add_column("auditevent", sa.Column("error_message", sa.String(), nullable=True))
 
-    # Hash chain fields used by audit service queries
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS row_hash VARCHAR NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS prev_row_hash VARCHAR NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS chain_id VARCHAR NULL;")
-    op.execute("ALTER TABLE auditevent ADD COLUMN IF NOT EXISTS sequence INTEGER NULL;")
+    # Hash chain fields
+    if not _column_exists("auditevent", "row_hash"):
+        op.add_column("auditevent", sa.Column("row_hash", sa.String(), nullable=True))
+    if not _column_exists("auditevent", "prev_row_hash"):
+        op.add_column("auditevent", sa.Column("prev_row_hash", sa.String(), nullable=True))
+    if not _column_exists("auditevent", "chain_id"):
+        op.add_column("auditevent", sa.Column("chain_id", sa.String(), nullable=True))
+    if not _column_exists("auditevent", "sequence"):
+        op.add_column("auditevent", sa.Column("sequence", sa.Integer(), nullable=True))
 
 
 def downgrade() -> None:
