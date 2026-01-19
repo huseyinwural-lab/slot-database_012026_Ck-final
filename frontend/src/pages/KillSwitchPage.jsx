@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 const KillSwitchPage = () => {
   const [tenants, setTenants] = useState([]);
-  const [tenantId, setTenantId] = useState('demo_renter');
+  const [tenantId, setTenantId] = useState('');
   const [moduleKey, setModuleKey] = useState('crm');
   const [disabled, setDisabled] = useState(true);
 
