@@ -7896,26 +7896,26 @@ class PlayersExportXLSXTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run BONUS P0 Backend End-to-End Test Suite"""
-    print("🎯 BONUS P0 Backend End-to-End Test Suite Runner")
+    """Main test runner - Run P0 Money Loop Gate Backend Validation"""
+    print("🎯 P0 Money Loop Gate Backend Validation Runner")
     print("=" * 80)
     
-    # Run BONUS P0 test suite (primary focus for this review request)
-    bonus_p0_suite = BonusP0TestSuite()
-    bonus_p0_success = await bonus_p0_suite.run_all_tests()
+    # Run P0 Money Loop Gate test suite (primary focus for this review request)
+    p0_gate_suite = P0MoneyLoopGateTestSuite()
+    p0_gate_success = await p0_gate_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if bonus_p0_success else "❌ FAIL"
-    print(f"{status}: BONUS P0 Backend End-to-End Tests")
+    status = "✅ PASS" if p0_gate_success else "❌ FAIL"
+    print(f"{status}: P0 Money Loop Gate Backend Validation")
     
-    if bonus_p0_success:
-        print("🎉 BONUS P0 backend end-to-end test suite PASSED!")
+    if p0_gate_success:
+        print("🎉 P0 Money Loop Gate backend validation PASSED!")
         return True
     else:
-        print("⚠️  BONUS P0 backend end-to-end test suite failed.")
+        print("⚠️  P0 Money Loop Gate backend validation failed.")
         return False
 
 
