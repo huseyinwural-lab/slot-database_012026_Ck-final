@@ -354,6 +354,25 @@ async def seed_default_tenants(session: AsyncSession):
             "can_manage_bonus": True,
         }
     )
+
+    # Create Demo Tenant (Kill Switch verification)
+    demo = Tenant(
+        id="demo",
+        name="Demo Tenant",
+        type="renter",
+        features={
+            # demo is a real tenant context for kill switch verification
+            "can_use_crm": True,
+            "can_manage_affiliates": True,
+            "can_manage_bonus": True,
+            "can_manage_kyc": True,
+            "can_use_game_robot": True,
+            "can_view_reports": True,
+            "can_manage_admins": False,
+            "can_use_kill_switch": False,
+            "can_manage_experiments": False,
+        }
+    )
     
     # Create Demo Renter
     renter = Tenant(
@@ -374,6 +393,7 @@ async def seed_default_tenants(session: AsyncSession):
     )
     
     session.add(owner)
+    session.add(demo)
     session.add(renter)
     await session.commit()
     print("✅ SQL Tenants Seeded")
