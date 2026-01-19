@@ -35,6 +35,7 @@ const KillSwitchPage = () => {
       loadTenants();
     }, 0);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const apply = async () => {
