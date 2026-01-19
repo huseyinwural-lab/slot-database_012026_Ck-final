@@ -51,8 +51,8 @@ async def enforce_module_access(
     kill_switches = (features.get("kill_switches") or {}) if isinstance(features, dict) else {}
     if kill_switches.get(module_key) is True:
         raise AppError(
-            error_code="MODULE_TEMPORARILY_DISABLED",
-            message="Module temporarily disabled for tenant",
+            error_code="MODULE_DISABLED",
+            message="Module disabled",
             status_code=503,
             details={"module": module_key, "tenant_id": tenant_id, "reason": "tenant_kill_switch"},
         )
