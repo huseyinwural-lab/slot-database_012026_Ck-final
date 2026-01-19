@@ -112,8 +112,6 @@ async def create_deposit(
     body = {"amount": amount, "method": method}
     req_hash = _compute_request_hash("POST", "/api/v1/player/wallet/deposit", body)
 
-    # Optional test hook (dev/local/test): force deterministic PSP outcome
-    mock_outcome_body = (request.json.get("mock_outcome") if hasattr(request, "json") else None)
 
     # Check existing transaction by idempotency key
     stmt = select(Transaction).where(
