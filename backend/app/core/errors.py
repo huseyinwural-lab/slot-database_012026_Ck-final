@@ -39,6 +39,12 @@ async def app_exception_handler(request: Request, exc: AppError):
             if key in exc.details:
                 content[key] = exc.details[key]
 
+    if exc.error_code == "MODULE_DISABLED":
+        # Ensure module is exposed at top-level and uppercased (e.g., CRM)
+        mod = content.get("module")
+        if isinstance(mod, str):
+            content["module"] = mod.upper()
+
     return JSONResponse(status_code=exc.status_code, content=content)
 
 async def generic_exception_handler(request: Request, exc: Exception):
