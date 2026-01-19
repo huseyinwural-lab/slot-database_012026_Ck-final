@@ -80,7 +80,7 @@ async def set_tenant_kill_switch(
             "tenant_id": tenant_id,
             "module": module_key.upper() if isinstance(module_key, str) else module_key,
             "old_state": old_state,
-            "new_state": bool(disabled),
+            "new_state": new_state,
         },
         session=session,
         request_id=getattr(request.state, "request_id", None),
