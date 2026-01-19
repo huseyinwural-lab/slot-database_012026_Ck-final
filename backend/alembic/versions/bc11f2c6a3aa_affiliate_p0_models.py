@@ -17,19 +17,62 @@ branch_labels = None
 depends_on = None
 
 
+def _table_exists(name: str) -> bool:
+    bind = op.get_bind()
+    if bind.dialect.name == "sqlite":
+        res = bind.execute(sa.text("SELECT name FROM sqlite_master WHERE type='table' AND name=:n"), {"n": name}).fetchone()
+        return res is not None
+    insp = sa.inspect(bind)
+    return name in insp.get_table_names()
+
+
+def _column_exists(table_name: str, column_name: str) -> bool:
+    bind = op.get_bind()
+    if bind.dialect.name == "sqlite":
+        cols = [row[1] for row in bind.execute(sa.text(f"PRAGMA table_info({table_name})")).fetchall()]
+        return column_name in cols
+    res = bind.execute(
+        sa.text(
+            """
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = :t
+              AND column_name = :c
+            LIMIT 1
+            """
+        ),
+        {"t": table_name, "c": column_name},
+    ).fetchone()
+    return res is not None
+
+
 def upgrade() -> None:
     # --- affiliate: partner ---
-    with op.batch_alter_table("affiliate") as batch:
-        batch.add_column(sa.Column("code", sa.String(), nullable=True))
-        batch.create_unique_constraint("uq_affiliate_tenant_email", ["tenant_id", "email"])
-        batch.create_unique_constraint("uq_affiliate_tenant_code", ["tenant_id", "code"])
+    if _table_exists("affiliate"):
+        with op.batch_alter_table("affiliate") as batch:
+            if not _column_exists("affiliate", "code"):
+                batch.add_column(sa.Column("code", sa.String(), nullable=True))
+            # constraints: best-effort (may already exist)
+            try:
+                batch.create_unique_constraint("uq_affiliate_tenant_email", ["tenant_id", "email"])
+            except Exception:
+                pass
+            try:
+                batch.create_unique_constraint("uq_affiliate_tenant_code", ["tenant_id", "code"])
+            except Exception:
+                pass
 
     # --- affiliate: tracking link extension ---
-    with op.batch_alter_table("affiliatelink") as batch:
-        batch.add_column(sa.Column("offer_id", sa.String(), nullable=True))
-        batch.add_column(sa.Column("landing_path", sa.String(), nullable=True, server_default="/"))
-        batch.add_column(sa.Column("currency", sa.String(), nullable=True))
-        batch.add_column(sa.Column("expires_at", sa.DateTime(), nullable=True))
+    if _table_exists("affiliatelink"):
+        with op.batch_alter_table("affiliatelink") as batch:
+            if not _column_exists("affiliatelink", "offer_id"):
+                batch.add_column(sa.Column("offer_id", sa.String(), nullable=True))
+            if not _column_exists("affiliatelink", "landing_path"):
+                batch.add_column(sa.Column("landing_path", sa.String(), nullable=True, server_default="/"))
+            if not _column_exists("affiliatelink", "currency"):
+                batch.add_column(sa.Column("currency", sa.String(), nullable=True))
+            if not _column_exists("affiliatelink", "expires_at"):
+                batch.add_column(sa.Column("expires_at", sa.DateTime(), nullable=True))
 
     # --- offers ---
     op.create_table(
