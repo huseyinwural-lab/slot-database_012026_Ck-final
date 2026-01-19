@@ -91,12 +91,16 @@ const Layout = ({ children }) => {
 
   const groupedMenu = useMemo(() => {
     const visibleItems = MENU_ITEMS.filter(item => {
+        const isCrmKillDisabled = item.key === 'ops.crm' && killSwitches?.crm === true;
+
         // 1. Owner check
         if (item.ownerOnly && !isOwner) return false;
         if (item.tenantOnly && isOwner) return false;
 
         // 2. Feature check (Legacy)
-        if (item.feature && !hasFeature(item.feature)) return false;
+        // Kill Switch P0: if a module is disabled by kill switch, keep the menu item visible
+        // (disabled styling + tooltip) so it's not perceived as a bug.
+        if (item.feature && !hasFeature(item.feature) && !isCrmKillDisabled) return false;
 
         // 3. Menu Flag check (New)
         // If flag is explicitly false, hide it. Otherwise show.
