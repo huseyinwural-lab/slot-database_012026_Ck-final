@@ -36,6 +36,7 @@ const TenantSwitcher = () => {
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="default">Global Context</SelectItem>
+                <SelectItem value="demo">Demo Tenant</SelectItem>
                 <SelectItem value="demo_renter">Demo Renter Casino</SelectItem>
                 <SelectItem value="vip_casino">VIP Casino Operator</SelectItem>
             </SelectContent>
