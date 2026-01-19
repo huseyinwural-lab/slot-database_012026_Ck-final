@@ -35,11 +35,11 @@ const CRM = () => {
     } catch (err) {
       // Standard states:
       // - FEATURE_DISABLED -> ModuleDisabled (handled by RequireFeature)
-      // - MODULE_TEMPORARILY_DISABLED -> banner
+      // - MODULE_DISABLED -> kill switch
       // - 404 -> Coming soon
       const code = err?.standardized?.code;
-      if (code === 'MODULE_TEMPORARILY_DISABLED') {
-        toast.message('Temporarily disabled');
+      if (code === 'MODULE_DISABLED') {
+        toast.error('Module disabled by Kill Switch');
         return;
       }
       if (code === 'FEATURE_DISABLED') {
