@@ -4,12 +4,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 const KillSwitchTooltipWrapper = ({ disabled, tooltip, children }) => {
   if (!disabled) return children;
 
+  // Important: keep the wrapper hoverable for tooltip, but block navigation/click.
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="opacity-50 cursor-not-allowed">
-            <div className="pointer-events-none">{children}</div>
+          <div className="opacity-50 cursor-not-allowed" onClick={(e) => e.preventDefault()}>
+            {children}
           </div>
         </TooltipTrigger>
         <TooltipContent>
