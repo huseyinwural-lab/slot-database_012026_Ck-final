@@ -178,6 +178,38 @@ Do not delete sections unless instructed.
   - **Wallet Operations:** Deposit and withdrawal flows working correctly with proper balance tracking
   - **Admin Operations:** Withdrawal approval and mark-paid workflows functional with reason requirements
   - **Error Handling:** All negative test cases returning correct HTTP status codes and error codes
+
+### 2026-01-19 — Prod Readiness (P0 Data & Migration Health) — In Progress / Evidence
+
+#### MIG-P0-01 — Alembic single-head guard (repo)
+- `alembic heads` → `bc11f2c6a3aa (head)` ✅
+- `alembic history | tail` zinciri mevcut ve tek çizgide ✅
+
+#### MIG-P0-02 — Upgrade/downgrade smoke (staging eşleniği / fresh DB)
+- `pytest -q tests/test_alembic_heads_guard.py tests/test_runtime_alembic_sqlite_smoke.py` ✅ PASS (3 passed)
+- Başlangıçta fresh DB upgrade smoke FAIL idi: `no such table: affiliatelink`.
+  - Root cause: `bc11f2c6a3aa_affiliate_p0_models.py` migration’ı baseline’da olmayan `affiliatelink` tablosunu `batch_alter_table` ile alter ediyordu.
+  - Fix: migration idempotent hale getirildi (table/column existence check) ✅
+
+#### MIG-P0-03 — Migration invariants (prod-safety)
+- Upgrade içinde destructive op taraması yapıldı.
+- Upgrade içinde `drop_*` içeren revision’lar (prod risk notu):
+  - `3c4ee35573cd_t13_001_schema_drift_reset_full.py`
+  - `c553520d78cd_t17_dispute_models.py`
+  - `6512f9dafb83_register_game_models_fixed_2.py`
+  - `86d5b2971e22_t15_kill_table_game.py`
+  - `8b10a4b2c29b_t13_004_vip_loyalty_models.py`
+  (Bu task’te refactor yapılmadı; sadece risk listesi çıkarıldı.)
+
+#### MIG-P0-04 — Seed policy (prod/dev ayrımı)
+- Server startup seeding zaten `env in {dev,local} and SEED_ON_STARTUP=true` ile gated.
+- Demo tenant seed: yalnızca dev/local seed path’inde; prod/staging’de seed yok (fail-closed) ✅
+
+#### MIG-P0-05 — Startup safety check
+- `backend/scripts/start_prod.sh` prod/staging’de `alembic upgrade head` yapıyor.
+- `server.py` prod/staging’de create_all yapmıyor (migrations entrypoint’e bırakılmış) ✅
+
+
   - **State Management:** Transaction states and balance updates working correctly throughout the flow
 
 - **HTTP STATUS CODES & JSON RESPONSES:**
