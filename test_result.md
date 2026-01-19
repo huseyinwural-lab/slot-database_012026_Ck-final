@@ -111,6 +111,15 @@ Do not delete sections unless instructed.
 
 - **STATUS:** ⚠️ PARTIAL VERIFICATION - Kill switch functionality working but UX approach differs from requirements (menu hidden vs disabled with tooltip)
 
+### 2026-01-19 — Kill Switch P0 FINAL — VERIFIED (Post-fix)
+- ✅ KS-P0-01: Demo Tenant (id=demo) seeded + Kill Switch dropdown lists it; Apply disabled until tenant selected ("Tenant required")
+- ✅ KS-P0-02: Backend guard returns **HTTP 503** with deterministic body: `{"error":"MODULE_DISABLED","module":"CRM"}`
+- ✅ KS-P0-03: Disable → CRM blocked; Enable → CRM unblocked (validated via API + UI)
+- ✅ KS-P0-04: UX: CRM menu item stays visible but disabled (opacity/cursor-not-allowed), click does not navigate, tooltip shows "Module disabled by Kill Switch"; /crm shows clear toast
+- ✅ KS-P0-05: Audit: each Apply writes `kill_switch.tenant.updated` with actor + tenant_id + module + old_state/new_state
+- ✅ KS-P0-06: Smoke PASS (local)
+
+
 ### 2026-01-18 — UI Sweep Phase C (Dashboard / Revenue) — COMPLETED
 - Scope locked: `/` (Dashboard), `/revenue`, `/my-revenue` only
 - Checklist: no dead-clicks, no deceptive-clicks; if disabled then clearly explained
