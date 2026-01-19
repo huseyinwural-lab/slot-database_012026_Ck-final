@@ -29,6 +29,11 @@ async def app_exception_handler(request: Request, exc: AppError):
         "timestamp": datetime.utcnow().isoformat(),
     }
 
+    # Kill Switch contract (P0): standardize module disabled errors
+    # Required body: {"error":"MODULE_DISABLED","module":"CRM"}
+    if exc.error_code == "MODULE_DISABLED":
+        content["error"] = "MODULE_DISABLED"
+
     if isinstance(exc.details, dict):
         for key in ("feature", "module", "tenant_id", "reason"):
             if key in exc.details:
