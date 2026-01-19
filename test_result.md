@@ -218,6 +218,10 @@ Do not delete sections unless instructed.
   - Admin Login: 200 `{"access_token":"***","user_id":null}`
   - KYC Verification: 200 `{"message":"Review recorded","player_status":"verified"}`
   - Deposit: 200 `{"transaction":{"state":"completed","status":"completed"},"balance":{"available_real":100.0}}`
+- Local DB downgrade/upgrade smoke:
+  - ✅ `alembic downgrade -1` (bc11f2c6a3aa → a8e7c2f57494)
+  - ✅ `alembic upgrade head` (a8e7c2f57494 → bc11f2c6a3aa)
+
   - Withdraw: 200 `{"transaction":{"state":"requested","status":"pending"},"balance":{"held_real":60.0}}`
   - Approve: 200 `{"withdrawal":{"status":"approved","state":"approved"}}`
   - Mark Paid: 200 `{"withdrawal":{"status":"paid","state":"paid"}}`
