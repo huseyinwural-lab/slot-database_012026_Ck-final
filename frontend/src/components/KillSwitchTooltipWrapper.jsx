@@ -5,7 +5,7 @@ const KillSwitchTooltipWrapper = ({ disabled, tooltip, children }) => {
   if (!disabled) return children;
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
           {children}
