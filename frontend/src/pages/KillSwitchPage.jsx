@@ -19,10 +19,7 @@ const KillSwitchPage = () => {
       setTenants(tenantsData);
 
       // Auto-select Demo tenant if present and nothing selected yet
-      if (!tenantId) {
-        const demo = tenantsData.find((t) => t?.id === 'demo');
-        if (demo) setTenantId('demo');
-      }
+      // Do not auto-select: P0 requires Apply disabled until tenant is explicitly chosen.
     } catch (e) {
       console.error('Failed to load tenants:', e);
       toast.error('Failed to load tenants');
