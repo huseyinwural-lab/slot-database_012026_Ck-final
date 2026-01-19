@@ -187,6 +187,7 @@ async def revoke_grant(
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    require_admin(current_admin)
     grant = await forfeit_grant_admin(
         session,
         tenant_id=tenant_id,
@@ -210,6 +211,7 @@ async def expire_grant(
     current_admin: AdminUser = Depends(get_current_admin),
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    require_admin(current_admin)
     grant = await forfeit_grant_admin(
         session,
         tenant_id=tenant_id,
