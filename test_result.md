@@ -157,6 +157,43 @@ Do not delete sections unless instructed.
 #### Curl evidence (sample)
 - See chat transcript: commands executed against `REACT_APP_BACKEND_URL` with captured outputs.
 
+### 2026-01-19 (Testing Agent) — P0 Money Loop Gate Backend Validation COMPLETED SUCCESSFULLY
+- **TEST SCOPE:** Comprehensive backend validation of P0 Money Loop Gate functionality using curl-based checks against external ingress base URL
+- **VALIDATION RESULTS:**
+  1. ✅ **Player Registration & Login:** POST /api/v1/auth/player/register (200) → POST /api/v1/auth/player/login (200)
+  2. ✅ **Admin Authentication:** POST /api/v1/auth/login (200) with admin@casino.com credentials
+  3. ✅ **KYC Verification:** POST /api/v1/kyc/documents/{player_id}/review (200) with status=approved and X-Tenant-ID header
+  4. ✅ **Deposit Happy Path:** POST /api/v1/player/wallet/deposit (200) with amount=100, method=test, Idempotency-Key → state/status completed, available_real increased to 100
+  5. ✅ **Withdraw Happy Path:** POST /api/v1/player/wallet/withdraw (200) with amount=60, method=test_bank, address=test → state requested, held_real increased by 60
+  6. ✅ **Admin Approve Withdrawal:** POST /api/v1/withdrawals/{id}/approve (200) with reason → state/status approved
+  7. ✅ **Admin Mark Paid:** POST /api/v1/withdrawals/{id}/mark-paid (200) with reason → state/status paid, held_real=0, available_real=40
+  8. ✅ **Insufficient Funds Test:** New verified player withdraw 60 without deposit → 400 with error_code INSUFFICIENT_FUNDS
+  9. ✅ **Duplicate Payout Guard:** Mark-paid twice → 409 with error_code INVALID_STATE_TRANSITION
+  10. ✅ **Failed Deposit Net-0:** Deposit with X-Mock-Outcome: fail header → transaction returned but balance unchanged (net-0)
+
+- **DETAILED FINDINGS:**
+  - **External URL:** All tests executed against https://affiliate-hub-204.preview.emergentagent.com/api/v1
+  - **Authentication:** Both admin and player authentication working correctly with JWT tokens
+  - **KYC Integration:** Mock KYC review endpoint functional with proper tenant isolation
+  - **Wallet Operations:** Deposit and withdrawal flows working correctly with proper balance tracking
+  - **Admin Operations:** Withdrawal approval and mark-paid workflows functional with reason requirements
+  - **Error Handling:** All negative test cases returning correct HTTP status codes and error codes
+  - **State Management:** Transaction states and balance updates working correctly throughout the flow
+
+- **HTTP STATUS CODES & JSON RESPONSES:**
+  - Player Registration: 200 `{"message":"Registered","player_id":"..."}`
+  - Player Login: 200 `{"access_token":"***","player_id":null}`
+  - Admin Login: 200 `{"access_token":"***","user_id":null}`
+  - KYC Verification: 200 `{"message":"Review recorded","player_status":"verified"}`
+  - Deposit: 200 `{"transaction":{"state":"completed","status":"completed"},"balance":{"available_real":100.0}}`
+  - Withdraw: 200 `{"transaction":{"state":"requested","status":"pending"},"balance":{"held_real":60.0}}`
+  - Approve: 200 `{"withdrawal":{"status":"approved","state":"approved"}}`
+  - Mark Paid: 200 `{"withdrawal":{"status":"paid","state":"paid"}}`
+  - Insufficient Funds: 400 `{"detail":{"error_code":"INSUFFICIENT_FUNDS"}}`
+  - Duplicate Payout: 409 `{"detail":{"error_code":"INVALID_STATE_TRANSITION"}}`
+
+- **STATUS:** ✅ ALL TESTS PASSED (10/10) - P0 Money Loop Gate backend validation fully operational and meeting all gate requirements
+
   - ✅ `/revenue` loads and renders "All Tenants Revenue"
   - ✅ `/my-revenue` loads
 
