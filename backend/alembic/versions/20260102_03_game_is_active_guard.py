@@ -34,10 +34,8 @@ def upgrade() -> None:
     cols = {c["name"] for c in inspector.get_columns("game")}
 
     if "is_active" not in cols:
-        op.add_column("game", sa.Column("is_active", sa.Boolean(), nullable=True))
+        op.add_column("game", sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("TRUE")))
         op.execute("UPDATE game SET is_active = TRUE WHERE is_active IS NULL")
-        op.alter_column("game", "is_active", nullable=False)
-        op.alter_column("game", "is_active", server_default=sa.text("TRUE"))
 
 
 def downgrade() -> None:
