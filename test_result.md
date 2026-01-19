@@ -128,6 +128,35 @@ Do not delete sections unless instructed.
   - Routing: `/revenue` and `/my-revenue` are now the canonical routes; legacy `/revenue/all-tenants` and `/revenue/my-tenant` redirect
 - Local smoke (screenshot_tool):
   - ✅ `/` loads
+
+### 2026-01-19 — Prod Readiness (P0 Money Loop Gate) — VERIFIED (MockPSP)
+**Decision lock:** MockPSP, withdrawals admin endpoint (mark-paid), evidence = md + curl.
+
+#### ✅ E2E Happy Path (Deposit → Withdraw → Admin Approve → Mark Paid)
+- Player created in `default_casino`, KYC verified via mock KYC review endpoint.
+- Deposit:
+  - `POST /api/v1/player/wallet/deposit` (Idempotency-Key, method=test) → state/status `completed`
+  - Balance: available increases by deposit amount.
+- Withdraw:
+  - `POST /api/v1/player/wallet/withdraw` (method=test_bank, address provided) → state `requested`, status `pending`
+  - Balance: available decreases, held increases (hold created).
+- Admin approve:
+  - `POST /api/v1/withdrawals/{id}/approve` → state/status `approved`.
+- Admin mark paid:
+  - `POST /api/v1/withdrawals/{id}/mark-paid` → state/status `paid`.
+  - Balance: held returns to 0; available remains net(deposit - withdrawal).
+
+#### ✅ Negative Paths
+- Insufficient funds:
+  - withdraw without deposit → HTTP 400 `{error_code: INSUFFICIENT_FUNDS}`
+- Duplicate payout guard:
+  - `mark-paid` on an already paid withdrawal → HTTP 409 `{error_code: INVALID_STATE_TRANSITION}`
+- Fail deposit net-0 (deterministic):
+  - deposit with header `X-Mock-Outcome: fail` → tx still created but wallet delta not applied; balance remains 0.
+
+#### Curl evidence (sample)
+- See chat transcript: commands executed against `REACT_APP_BACKEND_URL` with captured outputs.
+
   - ✅ `/revenue` loads and renders "All Tenants Revenue"
   - ✅ `/my-revenue` loads
 
