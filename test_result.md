@@ -103,6 +103,41 @@ Do not delete sections unless instructed.
 
 - **STATUS:** ✅ ALL REQUIREMENTS MET - UI Sweep Phase C fully functional and meeting all checklist requirements
 
+### 2026-01-19 — CI/CD Failures (Best-effort, log yok) — Local CI-Mirror Sonuçları
+- **Not:** GitHub Actions log’ları olmadan CI’da fail eden spesifik step %100 tespit edilemez. Bu bölüm “en sık kırılan” job’ları lokal mirror ederek repo-kaynaklı problemleri elemek içindir.
+
+**CI-MIR-01 Workflow envanteri**
+- `.github/workflows/frontend-lint.yml`: `yarn install --frozen-lockfile` + `yarn lint`
+- `.github/workflows/backend-psp03d-postgres.yml`: `pip install -r requirements.txt` + `alembic upgrade head` + `pytest -q tests/test_reconciliation_runs_api.py`
+- `.github/workflows/docs-smoke.yml`: `bash scripts/docs_smoke.sh`
+- `.github/workflows/prod-compose-acceptance.yml`: Docker Compose build/up + Playwright E2E (runner Docker gerektirir)
+
+**CI-MIR-02 Frontend mirror**
+- ✅ `cd frontend && yarn install --frozen-lockfile` PASS
+- ✅ `cd frontend && yarn lint` PASS
+- ✅ `cd frontend && yarn build` PASS
+
+**CI-MIR-03 Backend mirror (local sqlite env)**
+- ✅ `pip install -r backend/requirements.txt --extra-index-url ...` PASS
+- ✅ `pytest -q backend/tests/test_reconciliation_runs_api.py` PASS
+
+**CI-MIR-04 Alembic head guard (local sqlite)**
+- ✅ `alembic heads` tek head PASS
+- ✅ `alembic current` head ile match PASS
+
+**CI-MIR-05 E2E mirror (hafif)**
+- ✅ `cd e2e && yarn install --frozen-lockfile` PASS
+- ✅ `npx playwright --version` PASS
+- ⚠️ Full Playwright test koşumu bu ortamda CI’daki docker-compose acceptance ile birebir mirror edilemedi (Docker required).
+
+**CI-MIR-06 Docker/Compose acceptance**
+- ⚠️ Bu runtime’da Docker çalıştırılamadığı için `prod-compose-acceptance` job’ı birebir koşturulamadı.
+
+**Sonuç / Next**
+- Repo kaynaklı sık CI kırıkları (frontend lint/build + docs smoke + backend smoke) lokal mirror’da **PASS**.
+- Eğer CI hâlâ kırmızıysa, büyük olasılık `prod-compose-acceptance` (docker/build) veya runner/secrets kaynaklı bir issue’dur → log paketi gelince deterministik fix yapılır.
+
+
 ### 2026-01-05 (Docs) — Release Readiness Checklist added
 - Added: `/docs/new/en/runbooks/release-readiness-checklist.md` and `/docs/new/tr/runbooks/release-readiness-checklist.md`
 - Linked from: `docs/new/*/guides/ops-manual.md` and `docs/new/*/runbooks/README.md`
