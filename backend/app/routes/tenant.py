@@ -329,14 +329,36 @@ async def update_menu_flags(
 
 # Seeding function adapted for SQL
 async def seed_default_tenants(session: AsyncSession):
-    # Check if default exists
+    # If already seeded (default exists), ensure demo tenant exists as well.
     stmt = select(Tenant).where(Tenant.id == "default_casino")
     result = await session.execute(stmt)
-    if result.scalars().first():
+    default_exists = result.scalars().first() is not None
+
+    if default_exists:
+        demo_stmt = select(Tenant).where(Tenant.id == "demo")
+        demo_res = await session.execute(demo_stmt)
+        if demo_res.scalars().first() is None:
+            demo = Tenant(
+                id="demo",
+                name="Demo Tenant",
+                type="renter",
+                features={
+                    "can_use_crm": True,
+                    "can_manage_affiliates": True,
+                    "can_manage_bonus": True,
+                    "can_manage_kyc": True,
+                    "can_use_game_robot": True,
+                    "can_view_reports": True,
+                    "can_manage_admins": False,
+                    "can_use_kill_switch": False,
+                    "can_manage_experiments": False,
+                },
+            )
+            session.add(demo)
+            await session.commit()
         return
 
-    # Ensure demo_renter is also cleanly re-created if needed
-
+    # Fresh seed
     # Create Owner Tenant
     owner = Tenant(
         id="default_casino", 
