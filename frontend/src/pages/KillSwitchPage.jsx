@@ -33,11 +33,12 @@ const KillSwitchPage = () => {
   }, []);
 
   const apply = async () => {
+    if (!tenantId) return;
     try {
       await api.post('/v1/kill-switch/tenant', { tenant_id: tenantId, module_key: moduleKey, disabled });
       toast.success('Kill switch updated');
     } catch (e) {
-      toast.error('Failed to update');
+      toast.error(e?.standardized?.message || 'Failed to update');
     }
   };
 
