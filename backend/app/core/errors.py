@@ -29,21 +29,23 @@ async def app_exception_handler(request: Request, exc: AppError):
         "timestamp": datetime.utcnow().isoformat(),
     }
 
-    # Kill Switch contract (P0): standardize module disabled errors
-    # Required body: {"error":"MODULE_DISABLED","module":"CRM"}
+    # Kill Switch contract (P0): module disabled errors MUST return a minimal,
+    # deterministic body: {"error":"MODULE_DISABLED","module":"CRM"}
     if exc.error_code == "MODULE_DISABLED":
-        content["error"] = "MODULE_DISABLED"
+        mod = None
+        if isinstance(exc.details, dict):
+            mod = exc.details.get("module")
+        if isinstance(mod, str):
+            mod = mod.upper()
+        else:
+            mod = "UNKNOWN"
+
+        return JSONResponse(status_code=exc.status_code, content={"error": "MODULE_DISABLED", "module": mod})
 
     if isinstance(exc.details, dict):
         for key in ("feature", "module", "tenant_id", "reason"):
             if key in exc.details:
                 content[key] = exc.details[key]
-
-    if exc.error_code == "MODULE_DISABLED":
-        # Ensure module is exposed at top-level and uppercased (e.g., CRM)
-        mod = content.get("module")
-        if isinstance(mod, str):
-            content["module"] = mod.upper()
 
     return JSONResponse(status_code=exc.status_code, content=content)
 

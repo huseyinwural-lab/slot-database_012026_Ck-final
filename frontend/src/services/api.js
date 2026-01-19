@@ -85,12 +85,18 @@ api.interceptors.response.use(
     const requestId = headers?.['x-request-id'] || headers?.['X-Request-ID'] || headers?.get?.('x-request-id') || headers?.get?.('X-Request-ID');
 
     const standardizedError = {
-      code: raw.error_code || detail.error_code || detail.code || 'UNKNOWN_ERROR',
+      code: raw.error_code || raw.error || detail.error_code || detail.code || 'UNKNOWN_ERROR',
       message: raw.message || detail.message || detail.detail || error.message || 'An unexpected error occurred',
       details: raw.details || detail || {},
       status: error.response?.status,
       request_id: requestId,
     };
+
+    // Kill Switch body may be minimal and not contain details/message.
+    if (standardizedError.code === 'MODULE_DISABLED') {
+      standardizedError.message = 'Module disabled by Kill Switch';
+      standardizedError.details = { module: raw.module };
+    }
 
     // Persist last error for Support panel
     setLastError({
