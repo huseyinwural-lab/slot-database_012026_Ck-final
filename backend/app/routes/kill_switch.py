@@ -58,9 +58,10 @@ async def set_tenant_kill_switch(
     old_state = bool(before_kill_switches.get(module_key) is True)
 
     # New state
+    new_state = bool(disabled)
     after_features = dict(before_features)
     kill_switches = dict(before_kill_switches)
-    kill_switches[module_key] = bool(disabled)
+    kill_switches[module_key] = new_state
     after_features["kill_switches"] = kill_switches
 
     # Use update statement to ensure the JSON field is properly updated
