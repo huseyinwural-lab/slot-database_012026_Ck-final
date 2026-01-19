@@ -203,6 +203,7 @@ async def add_partner(
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+    require_ops(current_admin)
 
     partner = await create_partner(session, tenant_id=tenant_id, name=payload.name, email=payload.email)
     await session.commit()
@@ -383,6 +384,7 @@ async def create_payout(
 ):
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
     await enforce_module_access(session=session, tenant_id=tenant_id, module_key="affiliates")
+    require_ops(current_admin)
 
     payout = await record_payout(
         session,
