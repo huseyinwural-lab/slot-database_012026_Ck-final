@@ -21,6 +21,8 @@ from app.utils.pagination import get_pagination_params
 from app.models.common import PaginationMeta, PaginationParams
 from app.schemas.pagination import PaginatedResponsePublic
 from app.core.database import get_session
+from app.utils.permissions import require_support_view
+
 from app.core.errors import AppError
 
 
