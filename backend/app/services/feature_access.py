@@ -37,8 +37,8 @@ async def enforce_module_access(
     # 1) Global kill switch
     if mod.non_core and _is_kill_switch_all_enabled():
         raise AppError(
-            error_code="MODULE_TEMPORARILY_DISABLED",
-            message="Module temporarily disabled by global kill switch",
+            error_code="MODULE_DISABLED",
+            message="Module disabled",
             status_code=503,
             details={"module": module_key, "reason": "global_kill_switch"},
         )
