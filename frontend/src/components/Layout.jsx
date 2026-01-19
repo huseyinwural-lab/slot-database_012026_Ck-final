@@ -119,7 +119,7 @@ const Layout = ({ children }) => {
     // Order sections based on MENU_ITEMS order logic (preserved via insertion order usually, but let's be safe if needed)
     // Actually dict keys iteration order is insertion order in modern JS.
     return groups;
-  }, [isOwner, hasFeature, menuFlags]);
+  }, [isOwner, hasFeature, menuFlags, killSwitches]);
 
   return (
     <div className="min-h-screen bg-background flex">
