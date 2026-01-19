@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
+import KillSwitchTooltipWrapper from './KillSwitchTooltipWrapper';
 import { Search, LogOut, CreditCard, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
