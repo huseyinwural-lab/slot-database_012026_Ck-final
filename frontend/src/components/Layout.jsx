@@ -12,7 +12,26 @@ import { MENU_ITEMS } from '../config/menu';
 import TenantSwitcher from './TenantSwitcher';
 
 const SidebarItem = ({ to, icon: Icon, label, activeClassName, className, disabled, disabledTooltip }) => {
-  const base = (
+  if (disabled) {
+    return (
+      <KillSwitchTooltipWrapper disabled={true} tooltip={disabledTooltip}>
+        <div
+          role="link"
+          aria-disabled="true"
+          tabIndex={0}
+          onClick={(e) => e.preventDefault()}
+          className={`grid grid-cols-[20px_1fr] items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors min-h-[40px] opacity-50 cursor-not-allowed ${
+            className || 'text-muted-foreground'
+          }`}
+        >
+          <Icon className="w-5 h-5" />
+          <span className="leading-none">{label}</span>
+        </div>
+      </KillSwitchTooltipWrapper>
+    );
+  }
+
+  return (
     <NavLink
       to={to}
       className={({ isActive }) =>
@@ -26,12 +45,6 @@ const SidebarItem = ({ to, icon: Icon, label, activeClassName, className, disabl
       <Icon className="w-5 h-5" />
       <span className="leading-none">{label}</span>
     </NavLink>
-  );
-
-  return (
-    <KillSwitchTooltipWrapper disabled={disabled} tooltip={disabledTooltip}>
-      {base}
-    </KillSwitchTooltipWrapper>
   );
 };
 
