@@ -25,7 +25,13 @@ depends_on = None
 
 def _column_exists(table_name: str, column_name: str) -> bool:
     bind = op.get_bind()
-    # Works on Postgres
+
+    # Dialect-safe check (SQLite doesn't have information_schema)
+    if bind.dialect.name == "sqlite":
+        cols = [row[1] for row in bind.execute(sa.text(f"PRAGMA table_info({table_name})")).fetchall()]
+        return column_name in cols
+
+    # Postgres / others
     res = bind.execute(
         sa.text(
             """
