@@ -130,6 +130,8 @@ const Layout = ({ children }) => {
                                     label={item.label} 
                                     activeClassName={theme.activeItem}
                                     className={item.className}
+                                    disabled={item.key === 'ops.crm' && killSwitches?.crm === true}
+                                    disabledTooltip="Module disabled by Kill Switch"
                                 />
                             </li>
                         ))}
