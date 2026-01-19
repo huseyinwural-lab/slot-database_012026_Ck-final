@@ -96,7 +96,10 @@ const KillSwitchPage = () => {
               </div>
             </div>
 
-            <Button onClick={apply}>Apply</Button>
+            <div className="flex items-center gap-3">
+              <Button onClick={apply} disabled={!tenantId}>Apply</Button>
+              {!tenantId && <div className="text-xs text-muted-foreground">Tenant required</div>}
+            </div>
           </CardContent>
         </Card>
       </div>
