@@ -41,8 +41,8 @@ async def set_tenant_kill_switch(
 ):
     """Owner-only: update tenant.features.kill_switches[module_key]"""
     require_owner(current_admin)
-    tenant_id = await get_current_tenant_id(request, current_admin, session=session)
-    await enforce_module_access(session=session, tenant_id=tenant_id, module_key="kill_switch")
+    owner_tenant_id = await get_current_tenant_id(request, current_admin, session=session)
+    await enforce_module_access(session=session, tenant_id=owner_tenant_id, module_key="kill_switch")
 
     tenant_id = payload.get("tenant_id")
     module_key = payload.get("module_key")
@@ -52,19 +52,42 @@ async def set_tenant_kill_switch(
     if not tenant:
         return {"message": "TENANT_NOT_FOUND"}
 
-    # Create new features dict to avoid SQLAlchemy mutation detection issues
-    features = dict(tenant.features or {})
-    kill_switches = features.get("kill_switches", {})
+    # Old state
+    before_features = dict(tenant.features or {})
+    before_kill_switches = dict(before_features.get("kill_switches", {}) or {})
+    old_state = bool(before_kill_switches.get(module_key) is True)
+
+    # New state
+    after_features = dict(before_features)
+    kill_switches = dict(before_kill_switches)
     kill_switches[module_key] = bool(disabled)
-    features["kill_switches"] = kill_switches
+    after_features["kill_switches"] = kill_switches
 
     # Use update statement to ensure the JSON field is properly updated
     from sqlalchemy import update
-    stmt = update(Tenant).where(Tenant.id == tenant_id).values(features=features)
+    stmt = update(Tenant).where(Tenant.id == tenant_id).values(features=after_features)
     await session.execute(stmt)
+
+    # Audit (KS-P0-05)
+    from app.services.audit import audit
+    await audit.log(
+        admin=current_admin,
+        action="kill_switch.tenant.updated",
+        module="kill_switch",
+        target_id=str(tenant_id),
+        details={
+            "tenant_id": tenant_id,
+            "module": module_key.upper() if isinstance(module_key, str) else module_key,
+            "old_state": old_state,
+            "new_state": bool(disabled),
+        },
+        session=session,
+        request_id=getattr(request.state, "request_id", None),
+        tenant_id=str(tenant_id),
+        resource_type="tenant",
+        result="success",
+    )
+
     await session.commit()
-    
-    # Get fresh tenant data
-    tenant = await session.get(Tenant, tenant_id)
 
     return {"message": "UPDATED", "tenant_id": tenant_id, "kill_switches": kill_switches}
