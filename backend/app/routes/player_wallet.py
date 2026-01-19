@@ -315,8 +315,8 @@ async def create_deposit(
     psp = get_psp()
     psp_idem_key = build_psp_idem_key(str(tx.id))
 
-    # In dev/test, allow tests to force a deterministic PSP outcome via header or body.
-    mock_outcome = (request.headers.get("X-Mock-Outcome") or payload.get("mock_outcome") or "").strip()
+    # In dev/test, allow tests to force a deterministic PSP outcome via header.
+    mock_outcome = (request.headers.get("X-Mock-Outcome") or "").strip()
     if mock_outcome and hasattr(psp, "register_outcome_override"):
         try:
             psp.register_outcome_override(psp_idem_key, mock_outcome)
