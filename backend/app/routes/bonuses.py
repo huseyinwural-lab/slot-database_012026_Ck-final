@@ -27,6 +27,7 @@ from app.services.bonus_lifecycle import (
 from app.utils.auth import get_current_admin
 from app.utils.reason import require_reason
 from app.utils.tenant import get_current_tenant_id
+from app.services.rbac import require_admin
 
 
 router = APIRouter(prefix="/api/v1/bonuses", tags=["bonuses"])
