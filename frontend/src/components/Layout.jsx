@@ -11,21 +11,29 @@ import { MENU_ITEMS } from '../config/menu';
 
 import TenantSwitcher from './TenantSwitcher';
 
-const SidebarItem = ({ to, icon: Icon, label, activeClassName, className }) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `grid grid-cols-[20px_1fr] items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors min-h-[40px] ${
-        className || (isActive
-          ? activeClassName || 'bg-primary text-primary-foreground'
-          : 'text-muted-foreground hover:bg-secondary hover:text-foreground')
-      }`
-    }
-  >
-    <Icon className="w-5 h-5" />
-    <span className="leading-none">{label}</span>
-  </NavLink>
-);
+const SidebarItem = ({ to, icon: Icon, label, activeClassName, className, disabled, disabledTooltip }) => {
+  const base = (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `grid grid-cols-[20px_1fr] items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors min-h-[40px] ${
+          className || (isActive
+            ? activeClassName || 'bg-primary text-primary-foreground'
+            : 'text-muted-foreground hover:bg-secondary hover:text-foreground')
+        }`
+      }
+    >
+      <Icon className="w-5 h-5" />
+      <span className="leading-none">{label}</span>
+    </NavLink>
+  );
+
+  return (
+    <KillSwitchTooltipWrapper disabled={disabled} tooltip={disabledTooltip}>
+      {base}
+    </KillSwitchTooltipWrapper>
+  );
+};
 
 const Layout = ({ children }) => {
   const [open, setOpen] = useState(false);
