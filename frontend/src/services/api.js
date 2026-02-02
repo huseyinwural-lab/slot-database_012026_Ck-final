@@ -2,8 +2,9 @@ import axios from 'axios';
 import { setLastError } from './supportDiagnostics';
 
 // Prefer explicit env var.
-// Local dev (CRA) can override backend to avoid CORS issues when REACT_APP_BACKEND_URL
-// points to an external preview domain.
+// Some environments expose a local backend port but do not include localhost in CORS.
+// In that case, using localhost:8001 from the browser fails with net::ERR_ABORTED.
+// We therefore only use the LOCAL override when the primary backend URL is itself local.
 const LOCAL_DEV_API_URL = process.env.REACT_APP_BACKEND_URL_LOCAL;
 
 // Some preview environments run the app in NODE_ENV=development but are served over HTTPS
