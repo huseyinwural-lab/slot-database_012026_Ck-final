@@ -23,6 +23,7 @@ router = APIRouter(prefix="/api/v1/players", tags=["player_ops"])
 
 
 from app.services.rbac import require_admin, require_ops, require_support_view
+from app.utils.reason import require_reason
 
 
 async def _get_player_or_404(session: AsyncSession, *, tenant_id: str, player_id: str) -> Player:
@@ -84,7 +85,7 @@ async def manual_credit(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str | None = Header(default=None, alias="X-Reason"),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -181,7 +182,7 @@ async def manual_debit(
     player_id: str,
     request: Request,
     payload: dict = Body(default={}),
-    reason: str | None = Header(default=None, alias="X-Reason"),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
@@ -483,6 +484,7 @@ async def unsuspend_player(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin_from_token),
 ):
+    # RBAC: Ops+
     require_ops(current_admin)
 
     tenant_id = await get_current_tenant_id(request, current_admin, session=session)
