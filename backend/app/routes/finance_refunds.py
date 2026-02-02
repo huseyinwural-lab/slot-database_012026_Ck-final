@@ -6,7 +6,7 @@ import logging
 
 from app.core.database import get_session
 from app.models.sql_models import Transaction, AdminUser
-from app.routes.auth_snippet import get_current_admin
+from app.utils.auth import get_current_admin
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from app.services.audit import audit
 from pydantic import BaseModel, Field
