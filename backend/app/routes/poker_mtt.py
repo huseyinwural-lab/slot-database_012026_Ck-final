@@ -204,7 +204,7 @@ async def finish_tournament(
             session.add(player)
             
             # Ledger
-            lt = LedgerTransaction(
+            lt = Transaction(
                 tenant_id=trn.tenant_id, player_id=player_id, type="mtt_prize",
                 amount=amount, status="success", direction="credit", provider="internal_mtt",
                 provider_ref=tournament_id
