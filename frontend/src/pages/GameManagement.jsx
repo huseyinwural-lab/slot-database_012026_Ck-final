@@ -154,6 +154,35 @@ const GameManagement = () => {
     }
   };
 
+  const pollRef = useRef(null);
+
+  const pollJobUntil = useCallback(async (jobId, { untilStatuses, maxMs = 60000 }) => {
+    const started = Date.now();
+
+    while (Date.now() - started < maxMs) {
+      const res = await api.get(`/v1/game-import/jobs/${jobId}`);
+      const status = res.data?.status;
+
+      setImportJob({
+        id: res.data?.job_id,
+        status,
+        total_items: res.data?.total_items,
+        total_errors: res.data?.total_errors,
+        error_summary: res.data?.error_summary,
+      });
+      setImportItems(res.data?.items || []);
+
+      if (untilStatuses.includes(status)) {
+        return res.data;
+      }
+
+      // Keep UI responsive
+      await new Promise((r) => setTimeout(r, 800));
+    }
+
+    throw new Error('JOB_POLL_TIMEOUT');
+  }, []);
+
   const handleUpload = async () => {
     if (isImporting) return;
 
@@ -162,95 +191,80 @@ const GameManagement = () => {
     setImportLogs([]);
     setImportJob(null);
     setImportItems([]);
-
-    const addLog = (msg) => setImportLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+    setIsPreviewOpen(false);
 
     try {
-      addLog('Initializing import sequence...');
-      setImportProgress(10);
-
+      // --- Provider auto-fetch flow is out of scope; keep UX but avoid broken endpoint.
       if (uploadForm.method === 'fetch_api') {
-        addLog(`Connecting to ${uploadForm.provider} API Gateway...`);
-        await new Promise((r) => setTimeout(r, 800));
-        setImportProgress(30);
-
-        addLog('Authenticating and fetching catalog...');
-        await new Promise((r) => setTimeout(r, 800));
-        setImportProgress(50);
-
-        addLog('Found 35 new games. Starting synchronization...');
-
-        // TODO: Provider auto-fetch flow will be implemented in a separate task.
-        const res = await api.post('/v1/games/upload', uploadForm);
-        setImportProgress(90);
-        addLog('Finalizing database entries...');
-        await new Promise((r) => setTimeout(r, 500));
-        setImportProgress(100);
-        addLog('Import process completed successfully.');
-        fetchAll();
-        toast.success(res.data.message);
-      } else {
-        // Manual JSON/ZIP upload via game-import manual endpoint (client-aware)
-        addLog('Uploading bundle to server...');
-        setImportProgress(30);
-
-        const formData = new FormData();
-        if (uploadForm.file) {
-          formData.append('file', uploadForm.file);
-        }
-        if (uploadForm.source_label) {
-          formData.append('source_label', uploadForm.source_label);
-        }
-        if (uploadForm.notes) {
-          formData.append('notes', uploadForm.notes);
-        }
-        if (uploadForm.client_type) {
-          formData.append('client_type', uploadForm.client_type);
-        }
-        if (uploadForm.launch_url) {
-          formData.append('launch_url', uploadForm.launch_url);
-        }
-        if (uploadForm.min_version) {
-          formData.append('min_version', uploadForm.min_version);
-        }
-
-        const res = await api.post('/v1/game-import/manual/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+        toast.info('Coming soon', {
+          description: 'Auto-fetch from provider API is not implemented yet. Please use manual upload.',
         });
-
-        const { job_id, status, total_errors, total_warnings } = res.data;
-
-        addLog(`Manual upload analyzed. Job ${job_id}, status=${status}, errors=${total_errors}, warnings=${total_warnings}.`);
-        setImportProgress(60);
-
-        // Job & item preview için detay çek
-        try {
-          const jobRes = await api.get(`/v1/game-import/jobs/${job_id}`);
-          setImportJob(jobRes.data.job);
-          setImportItems(jobRes.data.items || []);
-        } catch (e) {
-          console.error(e);
-          addLog('Failed to load job preview details.');
-        }
-
-        setImportProgress(80);
-
-        if (status === 'failed' || total_errors > 0) {
-          addLog('Import job has validation errors. Please review the errors before importing.');
-          toast.error('Manual upload contains validation errors.');
-          setImportProgress(100);
-        } else {
-          addLog('Validation completed. Review the preview below and click Import to finalize.');
-          setImportProgress(90);
-        }
+        return;
       }
+
+      // --- Manual JSON/ZIP upload
+      const file = uploadForm.file;
+      if (!file) {
+        toast.error('Missing file', { description: 'Please select a .json or .zip file.' });
+        return;
+      }
+
+      const name = (file.name || '').toLowerCase();
+      const isZip = name.endsWith('.zip');
+      const isJson = name.endsWith('.json');
+      if (!isZip && !isJson) {
+        toast.error('Geçersiz Dosya Formatı', { description: 'Sadece .zip veya .json yükleyebilirsiniz.' });
+        return;
+      }
+
+      setImportProgress(15);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadRes = await api.post('/v1/game-import/manual/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const jobId = uploadRes.data?.job_id;
+      if (!jobId) {
+        throw new Error('MISSING_JOB_ID');
+      }
+
+      setImportProgress(35);
+
+      await pollJobUntil(jobId, { untilStatuses: ['ready', 'failed'], maxMs: 60000 });
+
+      setImportProgress(70);
+      setIsPreviewOpen(true);
+
+      const status = importJob?.status;
+      if (status === 'failed') {
+        toast.error('Upload failed', { description: 'Bundle parsing/validation failed. Please review errors.' });
+      } else {
+        toast.success('Preview ready', { description: 'Review the preview and confirm Import.' });
+      }
+
+      setImportProgress(85);
     } catch (err) {
-      console.error(err);
-      addLog('ERROR: Import failed. Check console.');
-      toast.error('Upload failed');
+      const code = err?.standardized?.code || err?.response?.data?.error_code;
+      const status = err?.response?.status;
+
+      if (code === 'UNSUPPORTED_FILE') {
+        toast.error('Geçersiz Dosya Formatı', { description: 'Backend bu dosya formatını desteklemiyor.' });
+      } else if (code === 'UPLOAD_TOO_LARGE' || status === 413) {
+        toast.error('Upload too large', { description: 'Dosya boyutu limitini aşıyor.' });
+      } else if (status === 500 || status === 502 || status === 503) {
+        toast.error('Service unavailable', {
+          description: 'Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin.',
+        });
+      } else {
+        toast.error('Upload failed');
+      }
+
       setImportProgress(0);
     } finally {
-      setTimeout(() => setIsImporting(false), 2000);
+      setIsImporting(false);
     }
   };
 
