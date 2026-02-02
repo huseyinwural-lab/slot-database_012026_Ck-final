@@ -110,7 +110,7 @@ async def register_player(
     )
     session.add(tx)
     
-    ledger = Transaction(
+    ledger = LedgerTransaction(
         tenant_id=trn.tenant_id, player_id=player_id, type="mtt_buyin",
         amount=total_cost, status="success", direction="debit", provider="internal_mtt",
         provider_ref=tournament_id
