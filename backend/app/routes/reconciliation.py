@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser
-from app.routes.auth_snippet import get_current_admin
+from app.utils.auth import get_current_admin
 from app.queue.arq_client import get_queue
 from app.schemas.reconciliation import (
     ReconciliationRunCreate,
