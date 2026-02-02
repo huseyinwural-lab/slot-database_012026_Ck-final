@@ -220,7 +220,9 @@ const GameManagement = () => {
       setImportProgress(15);
 
       const formData = new FormData();
+      // Backend accepts any of: file | bundle | upload
       formData.append('file', file);
+      formData.append('bundle', file);
 
       let jobId = null;
 
