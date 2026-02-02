@@ -757,10 +757,8 @@ const GameManagement = () => {
                     <span>{importProgress}%</span>
                   </div>
                   <Progress value={importProgress} className="h-2" />
-                  <div className="h-24 bg-slate-950 text-green-400 p-2 text-xs font-mono overflow-auto rounded border border-slate-800">
-                    {importLogs.map((l, i) => (
-                      <div key={i}>{l}</div>
-                    ))}
+                  <div className="text-[10px] text-muted-foreground">
+                    Upload/preview işlemi backend job status ile takip ediliyor.
                   </div>
                 </div>
               )}
