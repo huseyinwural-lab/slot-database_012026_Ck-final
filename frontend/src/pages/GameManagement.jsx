@@ -221,9 +221,24 @@ const GameManagement = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const uploadRes = await api.post('/v1/game-import/manual/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      let jobId = null;
+
+      // Important: axios instance has default JSON content-type.
+      // For multipart, bypass it and use a raw axios call.
+      const token = localStorage.getItem('admin_token');
+      const tenantId = localStorage.getItem('impersonate_tenant_id');
+      const base = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/$/, '');
+      const url = base ? `${base}/api/v1/game-import/manual/upload` : '/api/v1/game-import/manual/upload';
+
+      const uploadRes = await axios.post(url, formData, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(tenantId ? { 'X-Tenant-ID': tenantId } : {}),
+          // Let axios set boundary automatically
+        },
       });
+
+      jobId = uploadRes.data?.job_id;
 
       const jobId = uploadRes.data?.job_id;
       if (!jobId) {
