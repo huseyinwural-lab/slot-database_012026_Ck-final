@@ -1,0 +1,1208 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - generic:
+      - complementary:
+        - generic:
+          - heading [level=1]: Platform Admin
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: Core
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /
+                      - img
+                      - generic: Dashboard
+                  - listitem:
+                    - link:
+                      - /url: /players
+                      - img
+                      - generic: Players
+                  - listitem:
+                    - link:
+                      - /url: /finance
+                      - img
+                      - generic: Finance
+                  - listitem:
+                    - link:
+                      - /url: /finance/withdrawals
+                      - img
+                      - generic: Withdrawals
+                  - listitem:
+                    - link:
+                      - /url: /revenue
+                      - img
+                      - generic: All Revenue
+                  - listitem:
+                    - link:
+                      - /url: /games
+                      - img
+                      - generic: Games
+                  - listitem:
+                    - link:
+                      - /url: /vip-games
+                      - img
+                      - generic: VIP Games
+              - generic:
+                - generic: Operations
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /kyc
+                      - img
+                      - generic: KYC Verification
+                  - listitem:
+                    - link:
+                      - /url: /crm
+                      - img
+                      - generic: CRM & Comms
+                  - listitem:
+                    - link:
+                      - /url: /bonuses
+                      - img
+                      - generic: Bonuses
+                  - listitem:
+                    - link:
+                      - /url: /affiliates
+                      - img
+                      - generic: Affiliates
+                  - listitem:
+                    - link:
+                      - /url: /kill-switch
+                      - img
+                      - generic: Kill Switch
+                  - listitem:
+                    - link:
+                      - /url: /support
+                      - img
+                      - generic: Support
+              - generic:
+                - generic: Risk & Compliance
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /risk
+                      - img
+                      - generic: Risk Rules
+                  - listitem:
+                    - link:
+                      - /url: /fraud
+                      - img
+                      - generic: Fraud Check
+                  - listitem:
+                    - link:
+                      - /url: /approvals
+                      - img
+                      - generic: Approval Queue
+                  - listitem:
+                    - link:
+                      - /url: /rg
+                      - img
+                      - generic: Responsible Gaming
+              - generic:
+                - generic: Game Engine
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /robots
+                      - img
+                      - generic: Robots
+                  - listitem:
+                    - link:
+                      - /url: /math-assets
+                      - img
+                      - generic: Math Assets
+              - generic:
+                - generic: System
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /cms
+                      - img
+                      - generic: CMS
+                  - listitem:
+                    - link:
+                      - /url: /reports
+                      - img
+                      - generic: Reports
+                  - listitem:
+                    - link:
+                      - /url: /logs
+                      - img
+                      - generic: Logs
+                  - listitem:
+                    - link:
+                      - /url: /audit
+                      - img
+                      - generic: Audit Log
+                  - listitem:
+                    - link:
+                      - /url: /admins
+                      - img
+                      - generic: Admin Users
+                  - listitem:
+                    - link:
+                      - /url: /tenants
+                      - img
+                      - generic: Tenants
+                  - listitem:
+                    - link:
+                      - /url: /keys
+                      - img
+                      - generic: API Keys
+                  - listitem:
+                    - link:
+                      - /url: /features
+                      - img
+                      - generic: Feature Flags
+                  - listitem:
+                    - link:
+                      - /url: /simulator
+                      - img
+                      - generic: Simulator
+                  - listitem:
+                    - link:
+                      - /url: /settings
+                      - img
+                      - generic: Settings
+        - generic:
+          - button:
+            - img
+            - text: Logout
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - img
+              - textbox:
+                - /placeholder: Global Search (Press Ctrl+K)
+          - generic:
+            - generic:
+              - img
+              - combobox:
+                - generic: Global Context
+                - img
+            - generic:
+              - paragraph: Super Owner
+              - paragraph: admin@casino.com
+            - generic: SO
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=2]: Player Management
+              - button: Export Excel
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - textbox:
+                      - /placeholder: Search ID, Username, Email...
+                  - generic:
+                    - combobox:
+                      - generic: All Status
+                      - img
+                  - generic:
+                    - combobox:
+                      - generic: All VIP
+                      - img
+                  - generic:
+                    - combobox:
+                      - generic: All Risk
+                      - img
+                  - button:
+                    - img
+                    - text: Filter
+              - generic:
+                - generic:
+                  - table:
+                    - rowgroup:
+                      - row:
+                        - columnheader: ID
+                        - columnheader: User / Email
+                        - columnheader: Registered
+                        - columnheader: Country
+                        - columnheader: Balance
+                        - columnheader: VIP
+                        - columnheader: Risk
+                        - columnheader: Status
+                        - columnheader: Action
+                    - rowgroup:
+                      - row:
+                        - cell: f3d6a61e...
+                        - cell:
+                          - generic: p0gate_nofunds_c97716f0
+                          - generic: p0gate_nofunds_db0ebf24@casino.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $200.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 01e833d3...
+                        - cell:
+                          - generic: p0gate_9c44db88
+                          - generic: p0gate_846362f9@casino.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 4f48e006...
+                        - cell:
+                          - generic: p0gate_nofunds_38e49a7c
+                          - generic: p0gate_nofunds_3b4054aa@casino.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: c754a7c8...
+                        - cell:
+                          - generic: p0gate_0687e155
+                          - generic: p0gate_a89c5adf@casino.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 9877462d...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816716@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: b26924b2...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816647@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: b494a2df...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816636@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: ecc3ff3a...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816586@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 382dfa6e...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816575@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: bae5609d...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816562@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: c092a096...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816550@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: f8239233...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816536@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 938e9032...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816521@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 789bfe3a...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816485@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 35b59745...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816385@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 5b47470d...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816373@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 8ecaadfa...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816342@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: b68b22a0...
+                        - cell:
+                          - generic: gate_user
+                          - generic: gate_1768816324@test.com
+                        - cell: 1/19/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 8e9dd472...
+                        - cell:
+                          - generic: testplayer_1768769202976
+                          - generic: player_1768769202976@testcasino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: a95bc8f1...
+                        - cell:
+                          - generic: player_117814302
+                          - generic: player_117814302@testcasino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: f50d0010...
+                        - cell:
+                          - generic: aff_user1
+                          - generic: aff_user1@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 789b500c...
+                        - cell:
+                          - generic: bonus_p0_user7
+                          - generic: bonus_p0_user7@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: a966f1d9...
+                        - cell:
+                          - generic: bonustest_a49a8398
+                          - generic: bonustest_70f74f85@casino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 6dccd480...
+                        - cell:
+                          - generic: bonustest_9c0109c4
+                          - generic: bonustest_4bfc0a13@casino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 5c12660a...
+                        - cell:
+                          - generic: bonustest_b1363643
+                          - generic: bonustest_64d3769f@casino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: a8647bfe...
+                        - cell:
+                          - generic: bonustest_68372c38
+                          - generic: bonustest_41528824@casino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 0f47a94c...
+                        - cell:
+                          - generic: bonustest_9f0723c4
+                          - generic: bonustest_f5da7728@casino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 65c6f29b...
+                        - cell:
+                          - generic: bonustest_005229d7
+                          - generic: bonustest_401130d8@casino.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 3e04f406...
+                        - cell:
+                          - generic: bonus_p0_user6
+                          - generic: bonus_p0_user6@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: dd0a3aef...
+                        - cell:
+                          - generic: bonus_p0_user5
+                          - generic: bonus_p0_user5@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 8711e283...
+                        - cell:
+                          - generic: bonus_p0_user4
+                          - generic: bonus_p0_user4@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: bac4d984...
+                        - cell:
+                          - generic: bonus_p0_user3
+                          - generic: bonus_p0_user3@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 136b5df1...
+                        - cell:
+                          - generic: bonus_p0_user2
+                          - generic: bonus_p0_user2@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 52907ded...
+                        - cell:
+                          - generic: bonus_p0_user1
+                          - generic: bonus_p0_user1@test.com
+                        - cell: 1/18/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 67c3b3a4...
+                        - cell:
+                          - generic: ops_p13
+                          - generic: ops_p13@test.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $10.00
+                          - generic: "B: $10.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 1e2f8cf5...
+                        - cell:
+                          - generic: ops_p12
+                          - generic: ops_p12@test.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 32421337...
+                        - cell:
+                          - generic: ops_p11
+                          - generic: ops_p11@test.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: c16a811c...
+                        - cell:
+                          - generic: ops_p10
+                          - generic: ops_p10@test.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: e9d14f73...
+                        - cell:
+                          - generic: testuser_1767708966
+                          - generic: test_user_1767708966@example.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 5c5a281b...
+                        - cell:
+                          - generic: ui_fresh_user_1767708508
+                          - generic: ui_fresh_1767708508@hotmail.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 7b1ab6da...
+                        - cell:
+                          - generic: test_user_fresh
+                          - generic: fresh_test@example.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 3f14f6b2...
+                        - cell:
+                          - generic: ui_new_user_1
+                          - generic: ui_new_1@hotmail.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 2f8bfa36...
+                        - cell:
+                          - generic: ui_test3
+                          - generic: ui_test3@hotmail.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 455147bc...
+                        - cell:
+                          - generic: test2
+                          - generic: test2@hotmail.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: b18d997e...
+                        - cell:
+                          - generic: test1
+                          - generic: test1@hotmail.com
+                        - cell: 1/6/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: ba9597ec...
+                        - cell:
+                          - generic: rcuser1767446979273
+                          - generic: rc_1767446979273@example.com
+                        - cell: 1/3/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 096f0e03...
+                        - cell:
+                          - generic: rcuser1767441602729
+                          - generic: rc_1767441602729@example.com
+                        - cell: 1/3/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 822c9a9f...
+                        - cell:
+                          - generic: u1767435962
+                          - generic: cooldown1767435962@ex.com
+                        - cell: 1/3/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: 611a0f83...
+                        - cell:
+                          - generic: u1767435946
+                          - generic: cooldown1767435946@ex.com
+                        - cell: 1/3/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+                      - row:
+                        - cell: a69c6055...
+                        - cell:
+                          - generic: payouttest_4c783899
+                          - generic: payouttest_d31c2a75@example.com
+                        - cell: 1/3/2026
+                        - cell
+                        - cell:
+                          - generic: $0.00
+                          - generic: "B: $0.00"
+                        - cell: Lvl
+                        - cell:
+                          - generic: low
+                        - cell:
+                          - generic: active
+                        - cell:
+                          - button:
+                            - img
+          - region "Notifications alt+T"
+  - link:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic:
+      - img
+      - paragraph: Made with Emergent
+  - dialog "Player Actions" [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Player Actions" [level=2] [ref=e4]
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - text: p0gate_nofunds_c97716f0
+          - generic [ref=e7]: (p0gate_nofunds_db0ebf24@casino.com)
+        - generic [ref=e8]: f3d6a61e-e55f-4132-807c-80062b0cb764
+    - generic [ref=e9]:
+      - tablist [ref=e10]:
+        - tab "Quick Actions" [active] [selected] [ref=e11] [cursor=pointer]
+        - tab "Notes / Audit" [ref=e12] [cursor=pointer]
+      - tabpanel "Quick Actions" [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]: Credit
+            - generic [ref=e17]:
+              - generic [ref=e18]:
+                - text: Amount
+                - textbox "10" [ref=e19]
+              - generic [ref=e20]:
+                - text: Currency
+                - textbox "USD" [ref=e21]
+            - generic [ref=e22]:
+              - text: Reason
+              - textbox "Required" [ref=e23]
+            - button "Credit" [ref=e24] [cursor=pointer]
+          - generic [ref=e25]:
+            - generic [ref=e26]: Debit
+            - generic [ref=e27]:
+              - generic [ref=e28]:
+                - text: Amount
+                - textbox "10" [ref=e29]
+              - generic [ref=e30]:
+                - text: Currency
+                - textbox "USD" [ref=e31]
+            - generic [ref=e32]:
+              - text: Reason
+              - textbox "Required" [ref=e33]
+            - button "Debit" [ref=e34] [cursor=pointer]
+          - generic [ref=e35]:
+            - generic [ref=e36]: Grant Bonus
+            - generic [ref=e37]:
+              - generic [ref=e38]:
+                - text: Campaign
+                - combobox [ref=e39] [cursor=pointer]:
+                  - generic: CRM Test Deposit Match 31d0cfe8 (MANUAL_CREDIT)
+                  - img [ref=e40]
+              - generic [ref=e42]:
+                - text: Amount
+                - textbox "20" [ref=e43]
+            - generic [ref=e44]:
+              - text: Reason
+              - textbox "Required" [ref=e45]
+            - button "Grant Bonus" [ref=e46] [cursor=pointer]
+          - generic [ref=e47]:
+            - generic [ref=e48]: Account Controls
+            - generic [ref=e49]:
+              - text: Reason
+              - textbox "Required" [ref=e50]
+            - generic [ref=e51]:
+              - button "Suspend" [ref=e52] [cursor=pointer]
+              - button "Unsuspend" [ref=e53] [cursor=pointer]
+              - button "Force Logout" [ref=e54] [cursor=pointer]
+    - button "Close" [ref=e55] [cursor=pointer]:
+      - img [ref=e56]
+      - generic [ref=e59]: Close
+```
