@@ -11,7 +11,7 @@ from sqlmodel import select
 from app.core.database import get_session
 from app.models.sql_models import AdminUser, Player
 from app.repositories.ledger_repo import get_balance
-from app.routes.auth_snippet import get_current_admin
+from app.utils.auth import get_current_admin
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from app.utils.tenant import get_current_tenant_id
 
