@@ -14,19 +14,31 @@ def require_owner(admin: AdminUser):
 
 
 def require_ops(admin: AdminUser):
-    # Ops/Admin/Super Admin/Owner are allowed
-    if admin.role not in {"Ops", "Admin", "Super Admin"} and not admin.is_platform_owner:
+    # Ops+/Admin+/Super Admin/Owner are allowed
+    if admin.is_platform_owner:
+        return
+
+    role = normalize_role(getattr(admin, "role", None))
+    if role not in {ROLE_OPS, ROLE_ADMIN, ROLE_SUPER_ADMIN}:
         raise AppError("FORBIDDEN", "Ops access required", 403)
 
 
 def require_admin(admin: AdminUser):
-    # Admin/Super Admin/Owner are allowed
-    if admin.role not in {"Admin", "Super Admin"} and not admin.is_platform_owner:
+    # Admin+/Super Admin/Owner are allowed
+    if admin.is_platform_owner:
+        return
+
+    role = normalize_role(getattr(admin, "role", None))
+    if role not in {ROLE_ADMIN, ROLE_SUPER_ADMIN}:
         raise AppError("FORBIDDEN", "Admin access required", 403)
 
 
 def require_support_view(admin: AdminUser):
-    if admin.role not in {"Support", "Ops", "Admin", "Super Admin"} and not admin.is_platform_owner:
+    if admin.is_platform_owner:
+        return
+
+    role = normalize_role(getattr(admin, "role", None))
+    if role not in {ROLE_SUPPORT, ROLE_OPS, ROLE_ADMIN, ROLE_SUPER_ADMIN}:
         raise AppError("FORBIDDEN", "Support view access required", 403)
 
 async def require_feature(feature_key: str, admin: AdminUser, session: AsyncSession):
