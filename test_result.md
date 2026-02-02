@@ -18,6 +18,15 @@ Do not delete sections unless instructed.
 - **TESTING RESULTS (2026-02-02 UI RBAC MATRIX):**
   - ❌ **CRITICAL DEPLOYMENT ISSUE**: Frontend test IDs not deployed to running application
   - ✅ **RBAC FUNCTIONALITY WORKING**: All expected buttons visible in PlayerActionsDrawer for Super Admin
+### 2026-02-02 — SEC-P0-02 UI RBAC Cross-Role Validation — PASS
+- Playwright: `e2e/tests/sec-rbac-ui-matrix.spec.ts`
+- Matrix validated (PlayerActionsDrawer):
+  - Super Admin: sees Credit/Debit/Bonus + Ops actions ✅
+  - Tenant Admin (role string drift): sees Credit/Debit/Bonus + Ops actions ✅
+  - Ops: sees Ops actions only (no Credit/Debit/Bonus) ✅
+  - Support: sees none of the action buttons ✅
+
+
   - ✅ **RBAC HELPERS IMPLEMENTED**: `frontend/src/lib/rbac.js` with role normalization and permission matrix
   - ✅ **COMPONENT INTEGRATION**: PlayerActionsDrawer correctly uses RBAC helpers for button visibility
   - ❌ **PLAYWRIGHT TESTS FAILING**: Cannot locate elements due to missing `data-testid` attributes
