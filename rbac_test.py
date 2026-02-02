@@ -320,9 +320,11 @@ class RBACTestSuite:
                     
                     headers = {
                         "Authorization": f"Bearer {token}",
-                        "X-Tenant-ID": "default_casino",
                         "X-Reason": f"RBAC test debit by {role_name}"
                     }
+                    # Only Super Admin can use X-Tenant-ID header for impersonation
+                    if role_name == "Super Admin":
+                        headers["X-Tenant-ID"] = "default_casino"
                     payload = {"amount": 1, "currency": "USD"}
                     
                     response = await client.post(
