@@ -98,11 +98,11 @@ async def payments_webhook(
 
             # --- GROWTH LOOP START ---
             # Check if First Deposit by counting successful deposits in Ledger
-            stmt = select(func.count(Transaction.id)).where(
-                Transaction.tenant_id == event.tenant_id,
-                Transaction.player_id == event.player_id,
-                Transaction.type == "deposit",
-                Transaction.status == "deposit_captured"
+            stmt = select(func.count(LedgerTransaction.id)).where(
+                LedgerTransaction.tenant_id == event.tenant_id,
+                LedgerTransaction.player_id == event.player_id,
+                LedgerTransaction.type == "deposit",
+                LedgerTransaction.status == "deposit_captured"
             )
             dep_count = (await session.execute(stmt)).scalar() or 0
             
