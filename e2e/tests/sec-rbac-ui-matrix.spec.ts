@@ -7,6 +7,12 @@ const OWNER_EMAIL = process.env.OWNER_EMAIL || 'admin@casino.com';
 const OWNER_PASSWORD = process.env.OWNER_PASSWORD || 'Admin123!';
 const DEFAULT_PASSWORD = process.env.E2E_ROLE_PASSWORD || 'Admin123!';
 
+const ROLE_PASSWORDS: Record<string, string> = {
+  'admin_user@casino.com': DEFAULT_PASSWORD,
+  'ops@casino.com': DEFAULT_PASSWORD,
+  'support@casino.com': process.env.E2E_SUPPORT_PASSWORD || DEFAULT_PASSWORD,
+};
+
 async function apiLogin(ctx: any, email: string, password: string) {
   const res = await ctx.post('/api/v1/auth/login', { data: { email, password } });
   const text = await res.text();
