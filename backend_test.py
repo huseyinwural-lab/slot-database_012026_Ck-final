@@ -1331,6 +1331,609 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class SECP002RBACTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.owner_token = None  # Super Admin
+        self.admin_token = None  # Admin
+        self.ops_token = None   # Ops
+        self.support_token = None  # Support
+        self.test_player_id = None
+        self.bonus_grant_id = None
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def setup_roles_and_auth(self) -> bool:
+        """Setup authentication for all roles"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # 1. Login as Owner/Super Admin
+                login_data = {
+                    "email": "admin@casino.com",
+                    "password": "Admin123!"
+                }
+                
+                response = await client.post(f"{self.base_url}/auth/login", json=login_data)
+                if response.status_code != 200:
+                    self.log_result("Owner Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.owner_token = data.get("access_token")
+                if not self.owner_token:
+                    self.log_result("Owner Login", False, "No access token in response")
+                    return False
+                
+                self.log_result("Owner Login", True, "Super Admin logged in successfully")
+                
+                # 2. Create Admin user if not exists
+                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino"}
+                admin_payload = {
+                    "email": "admin_user@casino.com",
+                    "password": "Admin123!",
+                    "role": "Admin",
+                    "full_name": "Admin User",
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(f"{self.base_url}/admin/users", json=admin_payload, headers=headers)
+                if response.status_code not in [200, 201, 400]:  # 400 if user exists
+                    self.log_result("Create Admin User", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login as Admin
+                admin_login = {"email": "admin_user@casino.com", "password": "Admin123!"}
+                response = await client.post(f"{self.base_url}/auth/login", json=admin_login)
+                if response.status_code != 200:
+                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.admin_token = data.get("access_token")
+                self.log_result("Admin Login", True, "Admin user logged in successfully")
+                
+                # 3. Create Ops user if not exists
+                ops_payload = {
+                    "email": "ops@casino.com",
+                    "password": "Admin123!",
+                    "role": "Ops",
+                    "full_name": "Ops User",
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(f"{self.base_url}/admin/users", json=ops_payload, headers=headers)
+                if response.status_code not in [200, 201, 400]:
+                    self.log_result("Create Ops User", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login as Ops
+                ops_login = {"email": "ops@casino.com", "password": "Admin123!"}
+                response = await client.post(f"{self.base_url}/auth/login", json=ops_login)
+                if response.status_code != 200:
+                    self.log_result("Ops Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.ops_token = data.get("access_token")
+                self.log_result("Ops Login", True, "Ops user logged in successfully")
+                
+                # 4. Create Support user if not exists
+                support_payload = {
+                    "email": "support@casino.com",
+                    "password": "Admin123!",
+                    "role": "Support",
+                    "full_name": "Support User",
+                    "tenant_id": "default_casino"
+                }
+                
+                response = await client.post(f"{self.base_url}/admin/users", json=support_payload, headers=headers)
+                if response.status_code not in [200, 201, 400]:
+                    self.log_result("Create Support User", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                # Login as Support
+                support_login = {"email": "support@casino.com", "password": "Admin123!"}
+                response = await client.post(f"{self.base_url}/auth/login", json=support_login)
+                if response.status_code != 200:
+                    self.log_result("Support Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                self.support_token = data.get("access_token")
+                self.log_result("Support Login", True, "Support user logged in successfully")
+                
+                return True
+                
+        except Exception as e:
+            self.log_result("Setup Roles and Auth", False, f"Exception: {str(e)}")
+            return False
+    
+    async def get_existing_player(self) -> bool:
+        """Get an existing player from the tenant"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino"}
+                
+                response = await client.get(f"{self.base_url}/players?status=all&page=1&page_size=1", headers=headers)
+                if response.status_code != 200:
+                    self.log_result("Get Existing Player", False, f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                items = data.get("items", [])
+                if not items:
+                    self.log_result("Get Existing Player", False, "No players found in tenant")
+                    return False
+                
+                self.test_player_id = items[0]["id"]
+                self.log_result("Get Existing Player", True, f"Using player ID: {self.test_player_id}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Get Existing Player", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_credit_rbac(self) -> dict:
+        """Test POST /api/v1/players/{player_id}/credit RBAC"""
+        results = {}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                payload = {"amount": 1, "currency": "USD", "reason": "RBAC test credit"}
+                
+                # Test each role
+                roles = [
+                    ("Super Admin", self.owner_token, 200),
+                    ("Admin", self.admin_token, 200),
+                    ("Ops", self.ops_token, 403),
+                    ("Support", self.support_token, 403)
+                ]
+                
+                for role_name, token, expected_status in roles:
+                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test credit"}
+                    
+                    response = await client.post(f"{self.base_url}/players/{self.test_player_id}/credit", json=payload, headers=headers)
+                    
+                    success = response.status_code == expected_status
+                    results[role_name] = {
+                        "expected": expected_status,
+                        "actual": response.status_code,
+                        "success": success
+                    }
+                    
+                    if not success:
+                        results[role_name]["response"] = response.text[:200]
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def test_debit_rbac(self) -> dict:
+        """Test POST /api/v1/players/{player_id}/debit RBAC"""
+        results = {}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                payload = {"amount": 1, "currency": "USD", "reason": "RBAC test debit"}
+                
+                # Test each role
+                roles = [
+                    ("Super Admin", self.owner_token, [200, 409]),  # 409 if insufficient funds
+                    ("Admin", self.admin_token, [200, 409]),
+                    ("Ops", self.ops_token, 403),
+                    ("Support", self.support_token, 403)
+                ]
+                
+                for role_name, token, expected_statuses in roles:
+                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test debit"}
+                    
+                    response = await client.post(f"{self.base_url}/players/{self.test_player_id}/debit", json=payload, headers=headers)
+                    
+                    success = response.status_code in expected_statuses
+                    results[role_name] = {
+                        "expected": expected_statuses,
+                        "actual": response.status_code,
+                        "success": success
+                    }
+                    
+                    if not success:
+                        results[role_name]["response"] = response.text[:200]
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def test_suspend_rbac(self) -> dict:
+        """Test POST /api/v1/players/{player_id}/suspend RBAC"""
+        results = {}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                payload = {"reason": "RBAC test suspend"}
+                
+                # Test each role
+                roles = [
+                    ("Super Admin", self.owner_token, 200),
+                    ("Admin", self.admin_token, 200),
+                    ("Ops", self.ops_token, 200),
+                    ("Support", self.support_token, 403)
+                ]
+                
+                for role_name, token, expected_status in roles:
+                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test suspend"}
+                    
+                    response = await client.post(f"{self.base_url}/players/{self.test_player_id}/suspend", json=payload, headers=headers)
+                    
+                    success = response.status_code == expected_status
+                    results[role_name] = {
+                        "expected": expected_status,
+                        "actual": response.status_code,
+                        "success": success
+                    }
+                    
+                    if not success:
+                        results[role_name]["response"] = response.text[:200]
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def test_unsuspend_rbac(self) -> dict:
+        """Test POST /api/v1/players/{player_id}/unsuspend RBAC"""
+        results = {}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                payload = {"reason": "RBAC test unsuspend"}
+                
+                # Test each role
+                roles = [
+                    ("Super Admin", self.owner_token, [200, 409]),  # 409 if not suspended
+                    ("Admin", self.admin_token, [200, 409]),
+                    ("Ops", self.ops_token, [200, 409]),
+                    ("Support", self.support_token, 403)
+                ]
+                
+                for role_name, token, expected_statuses in roles:
+                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test unsuspend"}
+                    
+                    response = await client.post(f"{self.base_url}/players/{self.test_player_id}/unsuspend", json=payload, headers=headers)
+                    
+                    success = response.status_code in expected_statuses
+                    results[role_name] = {
+                        "expected": expected_statuses,
+                        "actual": response.status_code,
+                        "success": success
+                    }
+                    
+                    if not success:
+                        results[role_name]["response"] = response.text[:200]
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def test_bonus_grant_rbac(self) -> dict:
+        """Test POST /api/v1/bonuses/grant RBAC"""
+        results = {}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # First create a campaign to grant from
+                campaign_payload = {
+                    "name": "RBAC Test Campaign",
+                    "bonus_type": "cash",
+                    "status": "active",
+                    "game_ids": [],
+                    "bet_amount": 10.0,
+                    "config": {}
+                }
+                
+                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test campaign"}
+                response = await client.post(f"{self.base_url}/bonuses/campaigns", json=campaign_payload, headers=headers)
+                
+                if response.status_code not in [200, 201]:
+                    return {"error": f"Failed to create campaign: {response.status_code} {response.text}"}
+                
+                campaign_data = response.json()
+                campaign_id = campaign_data.get("id")
+                
+                grant_payload = {
+                    "campaign_id": campaign_id,
+                    "player_id": self.test_player_id,
+                    "amount": 10.0
+                }
+                
+                # Test each role
+                roles = [
+                    ("Super Admin", self.owner_token, 200),
+                    ("Admin", self.admin_token, 200),
+                    ("Ops", self.ops_token, 403),
+                    ("Support", self.support_token, 403)
+                ]
+                
+                for role_name, token, expected_status in roles:
+                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test grant"}
+                    
+                    response = await client.post(f"{self.base_url}/bonuses/grant", json=grant_payload, headers=headers)
+                    
+                    success = response.status_code == expected_status
+                    results[role_name] = {
+                        "expected": expected_status,
+                        "actual": response.status_code,
+                        "success": success
+                    }
+                    
+                    if not success:
+                        results[role_name]["response"] = response.text[:200]
+                    
+                    # Store grant ID for revoke/expire tests
+                    if success and response.status_code == 200:
+                        grant_data = response.json()
+                        self.bonus_grant_id = grant_data.get("id")
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def test_bonus_revoke_rbac(self) -> dict:
+        """Test POST /api/v1/bonuses/{grant_id}/revoke RBAC"""
+        results = {}
+        
+        if not self.bonus_grant_id:
+            return {"error": "No bonus grant ID available for testing"}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                payload = {"reason": "RBAC test revoke"}
+                
+                # Test each role
+                roles = [
+                    ("Super Admin", self.owner_token, 200),
+                    ("Admin", self.admin_token, 200),
+                    ("Ops", self.ops_token, 403),
+                    ("Support", self.support_token, 403)
+                ]
+                
+                for role_name, token, expected_status in roles:
+                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test revoke"}
+                    
+                    response = await client.post(f"{self.base_url}/bonuses/{self.bonus_grant_id}/revoke", json=payload, headers=headers)
+                    
+                    success = response.status_code == expected_status
+                    results[role_name] = {
+                        "expected": expected_status,
+                        "actual": response.status_code,
+                        "success": success
+                    }
+                    
+                    if not success:
+                        results[role_name]["response"] = response.text[:200]
+                    
+                    # If successful revoke, break to avoid multiple revokes
+                    if success and response.status_code == 200:
+                        break
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def test_affiliate_payout_rbac(self) -> dict:
+        """Test POST /api/v1/affiliates/payouts RBAC"""
+        results = {}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # First create a partner
+                partner_payload = {"name": "RBAC Test Partner", "email": "rbactest@example.com"}
+                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino"}
+                
+                response = await client.post(f"{self.base_url}/affiliates/partners", json=partner_payload, headers=headers)
+                if response.status_code not in [200, 201]:
+                    return {"error": f"Failed to create partner: {response.status_code} {response.text}"}
+                
+                partner_data = response.json()
+                partner_id = partner_data.get("id")
+                
+                payout_payload = {
+                    "partner_id": partner_id,
+                    "amount": 100.0,
+                    "currency": "USD",
+                    "method": "bank_transfer",
+                    "reference": "RBAC-TEST-001"
+                }
+                
+                # Test each role
+                roles = [
+                    ("Super Admin", self.owner_token, 200),
+                    ("Admin", self.admin_token, 200),
+                    ("Ops", self.ops_token, 200),
+                    ("Support", self.support_token, 403)
+                ]
+                
+                for role_name, token, expected_status in roles:
+                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test payout"}
+                    
+                    response = await client.post(f"{self.base_url}/affiliates/payouts", json=payout_payload, headers=headers)
+                    
+                    success = response.status_code == expected_status
+                    results[role_name] = {
+                        "expected": expected_status,
+                        "actual": response.status_code,
+                        "success": success
+                    }
+                    
+                    if not success:
+                        results[role_name]["response"] = response.text[:200]
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def test_reason_enforcement(self) -> dict:
+        """Test reason enforcement for Admin+ operations"""
+        results = {}
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Test credit without reason
+                headers = {"Authorization": f"Bearer {self.admin_token}", "X-Tenant-ID": "default_casino"}
+                payload = {"amount": 1, "currency": "USD"}
+                
+                response = await client.post(f"{self.base_url}/players/{self.test_player_id}/credit", json=payload, headers=headers)
+                
+                success = response.status_code == 400
+                if success:
+                    data = response.json()
+                    error_detail = data.get("detail", {})
+                    if isinstance(error_detail, dict):
+                        error_code = error_detail.get("error_code")
+                        success = error_code == "REASON_REQUIRED"
+                    else:
+                        success = "REASON_REQUIRED" in str(error_detail)
+                
+                results["credit_without_reason"] = {
+                    "expected": "400 REASON_REQUIRED",
+                    "actual": f"{response.status_code} {response.text[:100]}",
+                    "success": success
+                }
+                
+                return results
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    async def run_all_tests(self):
+        """Run the complete SEC-P0-02 RBAC test suite"""
+        print("🚀 Starting SEC-P0-02 RBAC Backend Enforcement Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Setup
+        if not await self.setup_roles_and_auth():
+            print("\n❌ Role setup and authentication failed. Cannot proceed with tests.")
+            return False
+        
+        if not await self.get_existing_player():
+            print("\n❌ Failed to get existing player. Cannot proceed with tests.")
+            return False
+        
+        # Run RBAC tests
+        print("\n📋 Testing RBAC Matrix...")
+        
+        # Test 1: Credit RBAC (Admin+ allowed)
+        credit_results = await self.test_credit_rbac()
+        if "error" in credit_results:
+            self.log_result("Credit RBAC", False, credit_results["error"])
+        else:
+            all_passed = all(r["success"] for r in credit_results.values())
+            details = ", ".join([f"{role}: {r['actual']}" for role, r in credit_results.items()])
+            self.log_result("Credit RBAC", all_passed, details)
+        
+        # Test 2: Debit RBAC (Admin+ allowed)
+        debit_results = await self.test_debit_rbac()
+        if "error" in debit_results:
+            self.log_result("Debit RBAC", False, debit_results["error"])
+        else:
+            all_passed = all(r["success"] for r in debit_results.values())
+            details = ", ".join([f"{role}: {r['actual']}" for role, r in debit_results.items()])
+            self.log_result("Debit RBAC", all_passed, details)
+        
+        # Test 3: Suspend RBAC (Ops+ allowed)
+        suspend_results = await self.test_suspend_rbac()
+        if "error" in suspend_results:
+            self.log_result("Suspend RBAC", False, suspend_results["error"])
+        else:
+            all_passed = all(r["success"] for r in suspend_results.values())
+            details = ", ".join([f"{role}: {r['actual']}" for role, r in suspend_results.items()])
+            self.log_result("Suspend RBAC", all_passed, details)
+        
+        # Test 4: Unsuspend RBAC (Ops+ allowed)
+        unsuspend_results = await self.test_unsuspend_rbac()
+        if "error" in unsuspend_results:
+            self.log_result("Unsuspend RBAC", False, unsuspend_results["error"])
+        else:
+            all_passed = all(r["success"] for r in unsuspend_results.values())
+            details = ", ".join([f"{role}: {r['actual']}" for role, r in unsuspend_results.items()])
+            self.log_result("Unsuspend RBAC", all_passed, details)
+        
+        # Test 5: Bonus Grant RBAC (Admin+ allowed)
+        bonus_grant_results = await self.test_bonus_grant_rbac()
+        if "error" in bonus_grant_results:
+            self.log_result("Bonus Grant RBAC", False, bonus_grant_results["error"])
+        else:
+            all_passed = all(r["success"] for r in bonus_grant_results.values())
+            details = ", ".join([f"{role}: {r['actual']}" for role, r in bonus_grant_results.items()])
+            self.log_result("Bonus Grant RBAC", all_passed, details)
+        
+        # Test 6: Bonus Revoke RBAC (Admin+ allowed)
+        bonus_revoke_results = await self.test_bonus_revoke_rbac()
+        if "error" in bonus_revoke_results:
+            self.log_result("Bonus Revoke RBAC", False, bonus_revoke_results["error"])
+        else:
+            all_passed = all(r["success"] for r in bonus_revoke_results.values())
+            details = ", ".join([f"{role}: {r['actual']}" for role, r in bonus_revoke_results.items()])
+            self.log_result("Bonus Revoke RBAC", all_passed, details)
+        
+        # Test 7: Affiliate Payout RBAC (Ops+ allowed)
+        payout_results = await self.test_affiliate_payout_rbac()
+        if "error" in payout_results:
+            self.log_result("Affiliate Payout RBAC", False, payout_results["error"])
+        else:
+            all_passed = all(r["success"] for r in payout_results.values())
+            details = ", ".join([f"{role}: {r['actual']}" for role, r in payout_results.items()])
+            self.log_result("Affiliate Payout RBAC", all_passed, details)
+        
+        # Test 8: Reason Enforcement
+        reason_results = await self.test_reason_enforcement()
+        if "error" in reason_results:
+            self.log_result("Reason Enforcement", False, reason_results["error"])
+        else:
+            all_passed = all(r["success"] for r in reason_results.values())
+            details = ", ".join([f"{test}: {r['actual']}" for test, r in reason_results.items()])
+            self.log_result("Reason Enforcement", all_passed, details)
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 SEC-P0-02 RBAC TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(1 for result in self.test_results if result["success"])
+        total = len(self.test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All SEC-P0-02 RBAC tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class P0MoneyLoopGateTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
