@@ -673,7 +673,8 @@ class RBACTestSuite:
                         "amount": 10.0,
                         "currency": "USD",
                         "method": "bank_transfer",
-                        "reference": f"rbac-test-{uuid.uuid4().hex[:8]}"
+                        "reference": f"rbac-test-{uuid.uuid4().hex[:8]}",
+                        "reason": f"RBAC test affiliate payout by {role_name}"  # Add reason to payload
                     }
                     
                     response = await client.post(f"{self.base_url}/affiliates/payouts", json=payload, headers=headers)
