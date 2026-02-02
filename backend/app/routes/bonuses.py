@@ -183,6 +183,7 @@ async def revoke_grant(
     request: Request,
     grant_id: str,
     payload: BonusAdminActionRequest = Body(...),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
@@ -194,7 +195,7 @@ async def revoke_grant(
         admin=current_admin,
         request=request,
         grant_id=grant_id,
-        reason=payload.reason,
+        reason=reason,
         action="revoke",
     )
     await session.commit()
@@ -207,6 +208,7 @@ async def expire_grant(
     request: Request,
     grant_id: str,
     payload: BonusAdminActionRequest = Body(...),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
@@ -218,7 +220,7 @@ async def expire_grant(
         admin=current_admin,
         request=request,
         grant_id=grant_id,
-        reason=payload.reason,
+        reason=reason,
         action="expire",
     )
     await session.commit()
