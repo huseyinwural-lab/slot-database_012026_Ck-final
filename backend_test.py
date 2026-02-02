@@ -1356,10 +1356,10 @@ class SECP002RBACTestSuite:
             print(f"    {details}")
     
     async def setup_roles_and_auth(self) -> bool:
-        """Setup authentication for all roles"""
+        """Setup authentication for all roles as specified in review request"""
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                # 1. Login as Owner/Super Admin
+                # 1. Login as Super Admin: admin@casino.com / Admin123!
                 login_data = {
                     "email": "admin@casino.com",
                     "password": "Admin123!"
@@ -1367,44 +1367,44 @@ class SECP002RBACTestSuite:
                 
                 response = await client.post(f"{self.base_url}/auth/login", json=login_data)
                 if response.status_code != 200:
-                    self.log_result("Owner Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    self.log_result("Super Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
                     return False
                 
                 data = response.json()
-                self.owner_token = data.get("access_token")
-                if not self.owner_token:
-                    self.log_result("Owner Login", False, "No access token in response")
+                self.super_admin_token = data.get("access_token")
+                if not self.super_admin_token:
+                    self.log_result("Super Admin Login", False, "No access token in response")
                     return False
                 
-                self.log_result("Owner Login", True, "Super Admin logged in successfully")
+                self.log_result("Super Admin Login", True, "Super Admin logged in successfully")
                 
-                # 2. Create Admin user if not exists
-                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino"}
-                admin_payload = {
+                # 2. Create/Update Tenant Admin user with role EXACTLY "Tenant Admin"
+                headers = {"Authorization": f"Bearer {self.super_admin_token}", "X-Tenant-ID": "default_casino"}
+                tenant_admin_payload = {
                     "email": "admin_user@casino.com",
                     "password": "Admin123!",
-                    "role": "Admin",
-                    "full_name": "Admin User",
+                    "role": "Tenant Admin",  # EXACTLY as specified in review request
+                    "full_name": "Tenant Admin User",
                     "tenant_id": "default_casino"
                 }
                 
-                response = await client.post(f"{self.base_url}/admin/users", json=admin_payload, headers=headers)
+                response = await client.post(f"{self.base_url}/admin/users", json=tenant_admin_payload, headers=headers)
                 if response.status_code not in [200, 201, 400]:  # 400 if user exists
-                    self.log_result("Create Admin User", False, f"Status: {response.status_code}, Response: {response.text}")
+                    self.log_result("Create Tenant Admin User", False, f"Status: {response.status_code}, Response: {response.text}")
                     return False
                 
-                # Login as Admin
-                admin_login = {"email": "admin_user@casino.com", "password": "Admin123!"}
-                response = await client.post(f"{self.base_url}/auth/login", json=admin_login)
+                # Login as Tenant Admin
+                tenant_admin_login = {"email": "admin_user@casino.com", "password": "Admin123!"}
+                response = await client.post(f"{self.base_url}/auth/login", json=tenant_admin_login)
                 if response.status_code != 200:
-                    self.log_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                    self.log_result("Tenant Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
                     return False
                 
                 data = response.json()
-                self.admin_token = data.get("access_token")
-                self.log_result("Admin Login", True, "Admin user logged in successfully")
+                self.tenant_admin_token = data.get("access_token")
+                self.log_result("Tenant Admin Login", True, "Tenant Admin user logged in successfully")
                 
-                # 3. Create Ops user if not exists
+                # 3. Create Ops user with role="Ops"
                 ops_payload = {
                     "email": "ops@casino.com",
                     "password": "Admin123!",
@@ -1429,7 +1429,7 @@ class SECP002RBACTestSuite:
                 self.ops_token = data.get("access_token")
                 self.log_result("Ops Login", True, "Ops user logged in successfully")
                 
-                # 4. Create Support user if not exists
+                # 4. Create Support user with role="Support"
                 support_payload = {
                     "email": "support@casino.com",
                     "password": "Admin123!",
