@@ -142,7 +142,8 @@ test.describe('SEC-P0-02 UI RBAC Matrix (PlayerActionsDrawer)', () => {
   for (const row of MATRIX) {
     test(`${row.name}: button visibility`, async ({ browser }) => {
       const api = await pwRequest.newContext({ baseURL: API_BASE });
-      const { token, admin } = await apiLogin(api, row.email, row.password);
+      const pw = ROLE_PASSWORDS[row.email] || row.password;
+      const { token, admin } = await apiLogin(api, row.email, pw);
 
       const context = await browser.newContext();
       const page = await context.newPage();
