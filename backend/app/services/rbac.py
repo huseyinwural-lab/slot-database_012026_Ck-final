@@ -21,11 +21,7 @@ def normalize_role(raw_role: str | None) -> str:
     key = r.replace("-", " ").replace("_", " ").strip().upper()
 
     # Admin aliases (treat Tenant Admin as ADMIN for P0 "least surprise")
-    if key in {"TENANT ADMIN", "TENANTADMIN", "TENANT  ADMIN", "TENANT", "ADMIN", "TENANT ADMINISTRATOR"}:
-        return ROLE_ADMIN
-    if key in {"TENANT_ADMIN", "TENANTADMIN", "TENANT ADMIN"}:
-        return ROLE_ADMIN
-    if key in {"ADMIN", "ADMINISTRATOR"}:
+    if key in {"TENANT ADMIN", "TENANTADMIN", "TENANT ADMINISTRATOR", "ADMIN", "ADMINISTRATOR"}:
         return ROLE_ADMIN
 
     # Ops aliases
