@@ -479,7 +479,8 @@ const GameManagement = () => {
                         />
                       </TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
