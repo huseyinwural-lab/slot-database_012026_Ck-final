@@ -51,7 +51,7 @@ const GameManagement = () => {
   });
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
-  const [importLogs, setImportLogs] = useState([]);
+  const [importLogs, setImportLogs] = useState([]); // legacy, kept for now
   const [importJob, setImportJob] = useState(null); // {id,status,total_items,total_errors,error_summary}
   const [importItems, setImportItems] = useState([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
