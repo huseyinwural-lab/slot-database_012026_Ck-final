@@ -7,6 +7,15 @@ Do not delete sections unless instructed.
 
 ## Latest iteration
 
+### 2026-02-02 — SEC-P0-02 RBAC Backend Enforcement — IN PROGRESS
+- Scope: enforce minimal locked RBAC set (Ops vs Admin vs Support view) + X-Reason requirement via `require_reason`.
+- Changes staged:
+  - `player_ops.py`: suspend -> Ops+, credit/debit -> Admin+ with `require_reason`
+  - `bonuses.py`: revoke/expire now require `require_reason` (header/body)
+  - `affiliates.py`: payouts create now require `require_reason` (header/body)
+- Next: run backend RBAC matrix tests (curl) + frontend role-based UI smoke (Playwright)
+
+
 ### 2026-01-04 (Docs-only) — Documentation smoke checks
 - Ran: `./scripts/docs_smoke.sh`
 - Result: PASS
