@@ -23,10 +23,33 @@ async function ensureAdminUser(ownerCtx: any, ownerToken: string, email: string,
   const listRes = await ownerCtx.get('/api/v1/admin/users', {
     headers: { Authorization: `Bearer ${ownerToken}` },
   });
+
   if (listRes.ok()) {
     const users = await listRes.json();
-    const exists = (users || []).some((u: any) => (u.email || '').toLowerCase() === email.toLowerCase());
-    if (exists) return;
+    const existing = (users || []).find((u: any) => (u.email || '').toLowerCase() === email.toLowerCase());
+
+    if (existing) {
+      // Reset password + role drift to a known state for deterministic tests
+      const patchRes = await ownerCtx.patch(`/api/v1/admin/users/${existing.id}`,
+        {
+          headers: { Authorization: `Bearer ${ownerToken}` },
+          data: {
+            full_name: fullName,
+            role,
+            password: DEFAULT_PASSWORD,
+            status: 'active',
+            failed_login_attempts: 0,
+          },
+        }
+      );
+
+      // If patch isn't supported, we still try to login with the default password.
+      if (!patchRes.ok()) {
+        const body = await patchRes.text();
+        console.warn(`ensureAdminUser patch failed ${patchRes.status()} body=${body}`);
+      }
+      return;
+    }
   }
 
   // Create if missing
@@ -41,10 +64,8 @@ async function ensureAdminUser(ownerCtx: any, ownerToken: string, email: string,
     },
   });
 
-  // If it already exists due to race, it's fine.
   if (!createRes.ok()) {
     const body = await createRes.text();
-    // Accept "already exists" type errors
     if (!body.toLowerCase().includes('exists')) {
       throw new Error(`ensureAdminUser create failed ${createRes.status()} body=${body}`);
     }
