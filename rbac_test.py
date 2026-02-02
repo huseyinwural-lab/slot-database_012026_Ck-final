@@ -293,9 +293,10 @@ class RBACTestSuite:
                 # First credit some funds with Super Admin to ensure sufficient balance
                 headers = {
                     "Authorization": f"Bearer {self.super_admin_token}",
-                    "X-Tenant-ID": "default_casino",
                     "X-Reason": "Setup funds for debit test"
                 }
+                # Only Super Admin can use X-Tenant-ID header for impersonation
+                headers["X-Tenant-ID"] = "default_casino"
                 payload = {"amount": 100, "currency": "USD"}
                 
                 await client.post(
