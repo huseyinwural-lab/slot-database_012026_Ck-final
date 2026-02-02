@@ -66,7 +66,7 @@ async def poker_transaction(
         session.add(tx)
         
         # Ledger
-        lt = Transaction(
+        lt = LedgerTransaction(
             tenant_id=tenant_id, player_id=player_id, type="poker_bet", amount=amount,
             currency=payload.get("currency", "USD"), status="success", direction="debit",
             provider="poker_provider", provider_ref=round_id
@@ -86,7 +86,7 @@ async def poker_transaction(
         )
         session.add(tx)
         
-        lt = Transaction(
+        lt = LedgerTransaction(
             tenant_id=tenant_id, player_id=player_id, type="poker_win", amount=amount,
             currency=payload.get("currency", "USD"), status="success", direction="credit",
             provider="poker_provider", provider_ref=round_id
