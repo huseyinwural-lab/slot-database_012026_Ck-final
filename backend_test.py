@@ -1334,11 +1334,12 @@ class E2EBlockerTestSuite:
 class SECP002RBACTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
-        self.owner_token = None  # Super Admin
-        self.admin_token = None  # Admin
-        self.ops_token = None   # Ops
-        self.support_token = None  # Support
+        self.super_admin_token = None  # Super Admin: admin@casino.com
+        self.tenant_admin_token = None  # Tenant Admin: admin_user@casino.com
+        self.ops_token = None   # Ops: ops@casino.com
+        self.support_token = None  # Support: support@casino.com
         self.test_player_id = None
+        self.bonus_campaign_id = None
         self.bonus_grant_id = None
         self.test_results = []
         
