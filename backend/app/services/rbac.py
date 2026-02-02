@@ -6,19 +6,48 @@ from app.models.sql_models import AdminUser
 
 
 # Canonical roles for Player Ops RBAC
+# NOTE: We normalize raw role strings to avoid "string drift" causing accidental 403s.
 ROLE_SUPPORT = "Support"
 ROLE_OPS = "Ops"
 ROLE_ADMIN = "Admin"
 ROLE_SUPER_ADMIN = "Super Admin"
 
 
+def normalize_role(raw_role: str | None) -> str:
+    r = (raw_role or "").strip()
+    if not r:
+        return ""
+
+    key = r.replace("-", " ").replace("_", " ").strip().upper()
+
+    # Admin aliases (treat Tenant Admin as ADMIN for P0 "least surprise")
+    if key in {"TENANT ADMIN", "TENANTADMIN", "TENANT  ADMIN", "TENANT", "ADMIN", "TENANT ADMINISTRATOR"}:
+        return ROLE_ADMIN
+    if key in {"TENANT_ADMIN", "TENANTADMIN", "TENANT ADMIN"}:
+        return ROLE_ADMIN
+    if key in {"ADMIN", "ADMINISTRATOR"}:
+        return ROLE_ADMIN
+
+    # Ops aliases
+    if key in {"OPS", "OPERATIONS", "OPERATION", "OP"}:
+        return ROLE_OPS
+
+    # Support aliases
+    if key in {"SUPPORT", "CS", "CUSTOMER SUPPORT", "CUSTOMERSUPPORT"}:
+        return ROLE_SUPPORT
+
+    # Super admin aliases
+    if key in {"SUPER ADMIN", "SUPERADMIN"}:
+        return ROLE_SUPER_ADMIN
+
+    # If unknown, keep original trimmed string
+    return r
+
+
 def canonical_role(admin: AdminUser) -> str:
-    """Return the canonical role label used by RBAC.
+    """Return the canonical role label used by RBAC."""
 
-    Current codebase primarily uses AdminUser.role as a display string.
-    """
-
-    return (getattr(admin, "role", None) or "").strip()
+    return normalize_role(getattr(admin, "role", None))
 
 
 def require_role_any(admin: AdminUser, allowed: set[str]) -> None:
