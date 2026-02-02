@@ -40,7 +40,7 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
 
     return {
       admin,
-      effectiveRole,
+      role: effectiveRole,
       canView: hasPermission(admin, PERMISSIONS.SUPPORT_VIEW),
       canOps: hasPermission(admin, PERMISSIONS.OPS_ACTIONS),
       canAdmin: hasPermission(admin, PERMISSIONS.CREDIT_ADJUSTMENT),
