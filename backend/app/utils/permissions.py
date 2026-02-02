@@ -1,9 +1,12 @@
 from fastapi import Depends
-from app.models.sql_models import AdminUser, Tenant
-from app.utils.auth import get_current_admin
-from app.core.database import get_session
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_session
 from app.core.errors import AppError
+from app.models.sql_models import AdminUser, Tenant
+from app.services.rbac import ROLE_ADMIN, ROLE_OPS, ROLE_SUPPORT, ROLE_SUPER_ADMIN, normalize_role
+from app.utils.auth import get_current_admin
 
 def require_owner(admin: AdminUser):
     if not admin.is_platform_owner:
