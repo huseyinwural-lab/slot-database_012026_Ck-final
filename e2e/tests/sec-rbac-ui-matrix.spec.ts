@@ -46,6 +46,15 @@ async function ensureAdminUser(ownerCtx: any, ownerToken: string, email: string,
         }
       );
 
+      // Ensure user is enabled (in case it was disabled)
+      const statusRes = await ownerCtx.post(`/api/v1/admin/users/${existing.id}/status`, {
+        headers: { Authorization: `Bearer ${ownerToken}` },
+        data: { is_active: true },
+      });
+      if (!statusRes.ok()) {
+        console.warn(`ensureAdminUser status update failed ${statusRes.status()} body=${await statusRes.text()}`);
+      }
+
       // If patch isn't supported, we still try to login with the default password.
       if (!patchRes.ok()) {
         const body = await patchRes.text();
