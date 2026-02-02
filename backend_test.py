@@ -20,16 +20,16 @@ import uuid
 import subprocess
 import re
 
-# Use backend URL from frontend/.env as specified in the review request
+# Use external ingress base URL from REACT_APP_BACKEND_URL as specified in the review request
 def get_backend_url():
     try:
         with open("/app/frontend/.env", "r") as f:
             for line in f:
-                if line.startswith("REACT_APP_BACKEND_URL_LOCAL="):
+                if line.startswith("REACT_APP_BACKEND_URL="):
                     return line.split("=", 1)[1].strip()
     except Exception:
         pass
-    return "http://localhost:8001"  # fallback
+    return "https://casinorbac.preview.emergentagent.com"  # fallback
 
 BACKEND_URL = get_backend_url()
 
