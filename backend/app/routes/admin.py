@@ -172,6 +172,10 @@ async def update_admin_user(
         record_change("tenant_role", admin.tenant_role, payload.tenant_role, pii=False)
         admin.tenant_role = payload.tenant_role
 
+    # password (not audited)
+    if getattr(payload, "password", None):
+        admin.password_hash = get_password_hash(payload.password)
+
     session.add(admin)
 
     request_id = getattr(request.state, "request_id", "unknown")
