@@ -853,8 +853,7 @@ const GameManagement = () => {
 
               {/* Legacy inline preview removed (moved to modal) */}
 
-              {false && (
-                <div className="mt-4 space-y-2 border-t pt-4">
+              {/* legacy preview block removed */}
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold">Manual Import Preview</span>
                     <span className="text-muted-foreground">
