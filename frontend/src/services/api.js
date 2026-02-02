@@ -24,10 +24,7 @@ const isPlaywright =
 const primary = process.env.REACT_APP_BACKEND_URL || '';
 const primaryIsLocal = primary.includes('localhost') || primary.includes('127.0.0.1');
 
-const RAW =
-  process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL && isLocalBrowser && primaryIsLocal
-    ? LOCAL_DEV_API_URL
-    : primary;
+const RAW = primary;
 
 // If the primary backend URL is external (preview/ingress), always prefer it even in local dev.
 // This avoids CORS / net::ERR_ABORTED issues when localhost:8001 is not allowed.
