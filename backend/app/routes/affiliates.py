@@ -381,6 +381,7 @@ async def get_payouts(
 async def create_payout(
     request: Request,
     payload: PayoutCreate = Body(...),
+    reason: str = Depends(require_reason),
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin),
 ):
