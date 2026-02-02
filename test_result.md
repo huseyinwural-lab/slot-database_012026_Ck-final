@@ -7,13 +7,22 @@ Do not delete sections unless instructed.
 
 ## Latest iteration
 
-### 2026-02-02 — SEC-P0-02 RBAC Backend Enforcement — IN PROGRESS
+### 2026-02-02 — SEC-P0-02 RBAC Backend Enforcement — TESTED WITH ISSUES
 - Scope: enforce minimal locked RBAC set (Ops vs Admin vs Support view) + X-Reason requirement via `require_reason`.
 - Changes staged:
   - `player_ops.py`: suspend -> Ops+, credit/debit -> Admin+ with `require_reason`
   - `bonuses.py`: revoke/expire now require `require_reason` (header/body)
   - `affiliates.py`: payouts create now require `require_reason` (header/body)
-- Next: run backend RBAC matrix tests (curl) + frontend role-based UI smoke (Playwright)
+- **TESTING RESULTS (2026-02-02):**
+  - ✅ Authentication: Super Admin, Admin, and Ops users can login successfully
+  - ❌ **CRITICAL ISSUE**: Admin role getting 403 for credit/debit operations (should be 200)
+  - ❌ **CRITICAL ISSUE**: Admin role getting 403 for suspend operations (should be 200)  
+  - ✅ Reason enforcement working: 400 REASON_REQUIRED when X-Reason header missing
+  - ❌ Support user creation/login failing (401 INVALID_CREDENTIALS)
+  - ❌ Bonus campaign creation failing (400 BONUS_TYPE_INVALID)
+  - ❌ Affiliate payout operations returning 422 validation errors
+- **ROOT CAUSE**: RBAC implementation not matching expected matrix - Admin role should have same permissions as Super Admin for player operations
+- Next: Fix RBAC implementation to match SEC-P0-02 requirements
 
 
 ### 2026-01-04 (Docs-only) — Documentation smoke checks
