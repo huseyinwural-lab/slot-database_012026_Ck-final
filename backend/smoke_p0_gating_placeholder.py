@@ -1,9 +1,6 @@
-import asyncio
-import os
 from unittest.mock import patch
 from httpx import AsyncClient, ASGITransport
 from server import app
-from config import settings
 
 # Helper to run async test
 async def run_gating_check():

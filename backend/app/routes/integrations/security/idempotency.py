@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from app.models.sql_models import Transaction
-from fastapi import HTTPException
 
 async def check_idempotency(session: AsyncSession, idempotency_key: str):
     """

@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Optional, Dict, Any, Union
+from datetime import datetime
+from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, desc
 from app.models.sql_models import AdminUser, AuditEvent

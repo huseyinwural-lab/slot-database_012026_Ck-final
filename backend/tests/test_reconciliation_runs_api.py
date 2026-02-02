@@ -6,7 +6,6 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.sql_models import AdminUser
 from app.models.reconciliation_run import ReconciliationRun
 
 

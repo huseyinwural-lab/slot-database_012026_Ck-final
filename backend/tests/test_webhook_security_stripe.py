@@ -2,9 +2,7 @@ import pytest
 from httpx import AsyncClient
 from unittest.mock import patch, MagicMock
 from app.models.sql_models import Transaction
-from config import settings
 import stripe
-import time
 
 @pytest.mark.asyncio
 async def test_stripe_webhook_signature_failure(client: AsyncClient, session):

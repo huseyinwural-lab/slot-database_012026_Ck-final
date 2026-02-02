@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Any, Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
 
 from app.core.database import get_session
 from app.jobs.reconcile_psp import reconcile_mockpsp_vs_ledger

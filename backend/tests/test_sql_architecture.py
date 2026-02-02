@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel, select
-from app.models.sql_models import Tenant, AdminUser, Player
+from app.models.sql_models import Tenant, AdminUser
 
 # Test with SQLite to verify ORM logic without running Postgres container
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"

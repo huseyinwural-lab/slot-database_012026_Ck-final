@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
-from typing import Iterable, List, Dict, Any
+from typing import List, Dict, Any
 
 
 def dicts_to_csv_bytes(rows: List[Dict[str, Any]], *, fieldnames: List[str]) -> bytes:

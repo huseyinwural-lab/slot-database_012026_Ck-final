@@ -2,18 +2,15 @@ import os
 import sys
 import asyncio
 
-import pytest
 from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 
 from server import app  # noqa: F401
-from app.core.database import async_session
 from app.repositories.ledger_repo import LedgerTransaction
 from app.models.reconciliation import ReconciliationFinding
 from app.jobs.reconcile_psp import reconcile_mockpsp_vs_ledger
 from app.services.psp import get_psp, _reset_psp_singleton_for_tests
-from app.services.psp.psp_interface import PSPStatus
 
 
 async def _count_findings(async_session_factory):

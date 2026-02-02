@@ -3,7 +3,6 @@ import sys
 import asyncio
 
 import pytest
-from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 

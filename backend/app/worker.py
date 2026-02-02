@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import asyncio
 from arq import cron
 from app.core.database import get_session
 from app.jobs.reconciliation_run_job import run_reconciliation_for_run_id
@@ -13,7 +12,6 @@ logger = logging.getLogger(__name__)
 async def startup(ctx):
     logger.info("Worker starting...")
     # Engine is initialized at module level in app.core.database
-    from app.core.database import engine
     logger.info("worker.db_engine_initialized", extra={"event": "worker.db_engine_initialized"})
 
 async def shutdown(ctx):

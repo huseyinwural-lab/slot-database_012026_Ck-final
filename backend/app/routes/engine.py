@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from typing import Dict, Any, List
 import uuid
-import json
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser

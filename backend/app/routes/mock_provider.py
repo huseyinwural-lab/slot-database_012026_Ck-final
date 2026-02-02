@@ -1,11 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
 import uuid
-import time
-import hmac
 import hashlib
-import json
 import logging
 
 from app.core.database import get_session
@@ -14,7 +10,6 @@ from app.services.slot_math import SlotMath
 from app.core.errors import AppError
 from app.schemas.game_schemas import ProviderEvent
 from app.services.game_engine import GameEngine
-from config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/mock-provider", tags=["mock_provider"])

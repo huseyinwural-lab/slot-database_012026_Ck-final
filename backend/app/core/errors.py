@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 class AppError(HTTPException):

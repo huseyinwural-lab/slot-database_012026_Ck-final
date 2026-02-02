@@ -1,8 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from datetime import datetime, timezone
 import hashlib
-import uuid
 
 from app.models.offer_models import Experiment, ExperimentAssignment
 

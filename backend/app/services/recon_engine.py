@@ -1,5 +1,4 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
 from sqlalchemy import text
 from app.models.sql_models import ReconciliationReport
 

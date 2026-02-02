@@ -4,8 +4,8 @@ from datetime import datetime
 import uuid
 import logging
 
-from app.models.game_models import GameSession, GameRound, GameEvent, Game
-from app.models.sql_models import Transaction, Player
+from app.models.game_models import GameSession, GameRound, GameEvent
+from app.models.sql_models import Player
 from app.schemas.game_schemas import ProviderEvent, ProviderResponse
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger, spend_with_bonus_precedence
 from app.services.bonus_engine import find_applicable_free_grant, consume_free_use

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from arq.connections import RedisSettings
 
 from config import settings
 from app.jobs.reconciliation_run_job import run_reconciliation_for_run_id

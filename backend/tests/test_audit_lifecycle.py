@@ -59,7 +59,7 @@ async def test_audit_lifecycle(session):
     # Verify Deletion
     engine = create_async_engine(settings.database_url)
     async with engine.connect() as conn:
-        res = await conn.execute(text(f"SELECT count(*) FROM auditevent WHERE id='life_1'"))
+        res = await conn.execute(text("SELECT count(*) FROM auditevent WHERE id='life_1'"))
         count = res.scalar()
         assert count == 0
     await engine.dispose()
@@ -70,7 +70,7 @@ async def test_audit_lifecycle(session):
     # Verify Restoration
     engine = create_async_engine(settings.database_url)
     async with engine.connect() as conn:
-        res = await conn.execute(text(f"SELECT count(*) FROM auditevent WHERE id='life_1'"))
+        res = await conn.execute(text("SELECT count(*) FROM auditevent WHERE id='life_1'"))
         count = res.scalar()
         assert count == 1
     await engine.dispose()

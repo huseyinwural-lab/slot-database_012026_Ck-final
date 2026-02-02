@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select, text
+from sqlalchemy import select
 from app.models.sql_models import AuditEvent
 from datetime import timezone
 import hashlib

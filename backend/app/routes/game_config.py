@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Dict, Any
+from typing import Dict, Any
 
 from app.core.database import get_session
 from app.models.game_models import Game

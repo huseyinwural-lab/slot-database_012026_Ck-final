@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.database import get_session
-from app.core.errors import AppError
 from app.models.simulation_sql import SimulationRun
 from app.services.audit import audit
 from app.utils.auth import get_current_admin, AdminUser

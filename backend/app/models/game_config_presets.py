@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 class ConfigPreset(BaseModel):

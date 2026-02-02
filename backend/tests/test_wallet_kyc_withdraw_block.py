@@ -1,13 +1,12 @@
-import os, sys
+import os
+import sys
 
 import pytest
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from fastapi.testclient import TestClient
 
-from server import app
-from tests.conftest import async_session_factory, _create_tenant, _create_player, _make_player_token
+from tests.conftest import _create_tenant, _create_player, _make_player_token
 
 
 @pytest.mark.usefixtures("client")

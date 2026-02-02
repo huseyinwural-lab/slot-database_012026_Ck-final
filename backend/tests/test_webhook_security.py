@@ -1,11 +1,9 @@
 import hmac
-import os
 import time
 from hashlib import sha256
 
 import pytest
 from fastapi import status
-from server import app
 
 
 

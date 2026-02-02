@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from typing import Optional, Dict
@@ -6,14 +6,12 @@ import uuid
 import logging
 import stripe
 from app.core.database import get_session
-from app.models.sql_models import Transaction, Player, AuditEvent
+from app.models.sql_models import Transaction, Player
 from app.utils.auth_player import get_current_player
-from app.services.audit import audit
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse
 from app.services.metrics import metrics
 from config import settings
-import os
 from pydantic import BaseModel, Field
 
 # Initialize router

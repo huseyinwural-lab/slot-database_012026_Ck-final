@@ -1,9 +1,8 @@
 import pytest
 from httpx import AsyncClient
 from unittest.mock import patch
-from app.models.sql_models import Transaction, PayoutAttempt
+from app.models.sql_models import Transaction
 from sqlmodel import select
-from config import settings
 
 @pytest.mark.asyncio
 async def test_payout_provider_mock_gated_in_prod(client: AsyncClient, admin_token, session):

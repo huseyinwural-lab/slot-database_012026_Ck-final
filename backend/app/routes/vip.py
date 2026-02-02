@@ -5,7 +5,7 @@ from typing import List
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser, Player
-from app.models.vip_models import VipTier, PlayerVipStatus, LoyaltyTransaction
+from app.models.vip_models import VipTier
 from app.services.vip_engine import VipEngine
 from app.utils.auth import get_current_admin
 from app.utils.auth_player import get_current_player

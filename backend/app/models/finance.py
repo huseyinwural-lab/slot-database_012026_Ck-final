@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
+from datetime import datetime
 import uuid
 from enum import Enum
 

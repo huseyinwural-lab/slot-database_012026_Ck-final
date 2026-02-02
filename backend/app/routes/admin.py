@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Body, Request, HTTPException
+from fastapi import APIRouter, Depends, Body, Request
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +8,7 @@ from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin, get_password_hash, create_access_token
 from app.core.errors import AppError
 from app.utils.permissions import require_owner
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from app.services.audit import audit
 from app.schemas.admin import AdminUserPublic
 from app.schemas.admin_update import AdminUpdateRequest, AdminStatusRequest

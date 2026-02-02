@@ -1,12 +1,11 @@
 import asyncio
 import httpx
 import logging
-from app.models.sql_models import Transaction, Player, AdminUser, Tenant
+from app.models.sql_models import Transaction, Player, Tenant
 from app.core.database import async_session
 from sqlalchemy import select
 from datetime import datetime
 import uuid
-import os
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

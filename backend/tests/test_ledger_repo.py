@@ -9,12 +9,10 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from app.repositories.ledger_repo import (
     LedgerTransaction,
-    WalletBalance,
     append_event,
     get_balance,
     apply_balance_delta,
 )
-from server import app
 from tests.conftest import _create_tenant, _create_player
 
 

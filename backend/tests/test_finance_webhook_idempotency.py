@@ -7,7 +7,6 @@ from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from server import app
 from tests.conftest import _create_tenant, _create_player
 from app.models.sql_models import Transaction, AuditEvent
 

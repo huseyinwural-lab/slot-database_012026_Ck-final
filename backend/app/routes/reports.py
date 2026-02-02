@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.database import get_session
-from app.core.errors import AppError
 from app.models.game_models import Game
 from app.models.reports_sql import ReportExportJob
 from app.models.sql_models import Player

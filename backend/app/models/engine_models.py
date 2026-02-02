@@ -1,6 +1,6 @@
-from typing import Optional, Dict, List
+from typing import Dict
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, JSON
 import uuid
 

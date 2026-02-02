@@ -2,7 +2,6 @@ import os
 import sys
 import asyncio
 
-import pytest
 
 sys.path.append(os.path.abspath("/app/backend"))
 

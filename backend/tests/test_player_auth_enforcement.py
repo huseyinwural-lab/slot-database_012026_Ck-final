@@ -40,7 +40,7 @@ async def test_force_logout_revokes_old_token(client, session):
     - New login -> token2 works
     """
 
-    from datetime import datetime, timezone, timedelta
+    from datetime import timedelta
     from app.models.sql_models import Tenant, Player, AdminUser
     from app.utils.auth import get_password_hash
 

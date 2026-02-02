@@ -1,6 +1,5 @@
 from fastapi import APIRouter
-from typing import List, Dict, Any
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 import random
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])

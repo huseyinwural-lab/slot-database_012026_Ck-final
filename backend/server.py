@@ -4,7 +4,7 @@ import logging
 from config import settings
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
-from app.core.errors import AppError, app_exception_handler, generic_exception_handler
+from app.core.errors import AppError, generic_exception_handler
 
 from app.core.logging_config import configure_logging
 

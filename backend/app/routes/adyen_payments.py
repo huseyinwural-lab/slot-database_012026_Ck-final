@@ -6,7 +6,7 @@ import uuid
 import logging
 
 from app.core.database import get_session
-from app.models.sql_models import Transaction, Player, AuditEvent
+from app.models.sql_models import Transaction, Player
 from app.utils.auth_player import get_current_player
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from app.services.adyen_psp import AdyenPSP

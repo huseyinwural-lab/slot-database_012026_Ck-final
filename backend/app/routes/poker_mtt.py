@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
+from typing import Dict, Any
+from datetime import datetime
 import uuid
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser, Player, Transaction, LedgerTransaction
-from app.models.poker_mtt_models import PokerTournament, TournamentRegistration, RiskSignal
+from app.models.poker_mtt_models import PokerTournament, TournamentRegistration
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 from app.services.audit import audit

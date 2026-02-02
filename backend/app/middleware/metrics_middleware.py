@@ -1,6 +1,5 @@
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp
-from fastapi import Request, Response
+from fastapi import Request
 from app.services.metrics import metrics
 
 class MetricsMiddleware(BaseHTTPMiddleware):

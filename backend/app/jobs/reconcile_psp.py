@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.repositories.ledger_repo import LedgerTransaction
-from app.models.reconciliation import ReconciliationFinding, create_finding
+from app.models.reconciliation import create_finding
 from app.services.psp import get_psp
 
 

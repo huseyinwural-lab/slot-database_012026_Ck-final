@@ -1,16 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from datetime import datetime, timezone, timedelta
 import uuid
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser, Player
-from app.models.rg_models import PlayerRGProfile, PlayerKYC
+from app.models.rg_models import PlayerRGProfile
 from app.utils.auth import get_current_admin
 from app.utils.auth_player import get_current_player
-from app.utils.tenant import get_current_tenant_id
 from app.services.audit import audit
 from app.utils.reason import require_reason
 

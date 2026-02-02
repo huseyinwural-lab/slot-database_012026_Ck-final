@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict
 from datetime import datetime, timezone
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, JSON
 import uuid
 
@@ -26,4 +26,3 @@ class PaymentIntent(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # Dispute moved to dispute_models.py
-from app.models.dispute_models import Dispute

@@ -11,11 +11,9 @@ from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from server import app
 from tests.conftest import _create_tenant, _create_player
 from app.models.sql_models import Transaction, Player, PayoutAttempt, AuditEvent
 from app.repositories.ledger_repo import LedgerTransaction
-from app.core.database import async_session
 from app.utils.auth import create_access_token
 
 

@@ -2,7 +2,6 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.auth import AdminAPIKeyContext, get_api_key_context, require_scope

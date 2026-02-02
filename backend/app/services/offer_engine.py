@@ -1,12 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from datetime import datetime, timezone
-import uuid
 
 from app.models.offer_models import Offer, OfferDecisionRecord, Experiment
 from app.models.sql_models import Player
 from app.services.experiment_engine import ExperimentEngine
-from app.services.audit import audit
 
 class OfferEngine:
     

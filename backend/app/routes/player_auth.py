@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from datetime import datetime, timezone, timedelta
 from app.models.rg_models import PlayerRGProfile
-import uuid
 
 from app.models.sql_models import Player
 from app.services.affiliate_engine import AffiliateEngine

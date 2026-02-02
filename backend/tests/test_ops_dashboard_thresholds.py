@@ -1,4 +1,3 @@
-import pytest
 from app.services.metrics import MetricsService
 
 def test_ops_metrics_defaults():

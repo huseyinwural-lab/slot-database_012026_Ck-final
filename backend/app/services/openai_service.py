@@ -1,5 +1,5 @@
 import json
-from openai import OpenAI, APIError, RateLimitError
+from openai import OpenAI
 from config import settings
 from app.models.fraud import FraudAnalysisResponse, TransactionData
 import logging

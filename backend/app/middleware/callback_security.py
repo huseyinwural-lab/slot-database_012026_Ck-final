@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import hashlib
 import hmac
 import time
-import uuid
 
 async def verify_signature(
     request: Request,

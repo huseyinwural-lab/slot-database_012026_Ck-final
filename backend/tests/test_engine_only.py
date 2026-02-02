@@ -5,9 +5,8 @@ import os
 # Set path manually
 sys.path.append(os.path.abspath("/app/backend"))
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel, select
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel import select
 # Do not import app.models.sql_models here to isolate connection issue
 # Define minimal models here to test engine connectivity first
 

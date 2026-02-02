@@ -1,11 +1,9 @@
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch, MagicMock
-from app.models.sql_models import Transaction, Player, PayoutAttempt, Tenant
+from unittest.mock import patch
+from app.models.sql_models import Transaction, Player, Tenant
 from sqlmodel import select
-from config import settings
 import uuid
-import logging
 
 # Ensure PayoutAttempt is available in models
 # We assume models are already correct, but just in case we can import from app.models.sql_models

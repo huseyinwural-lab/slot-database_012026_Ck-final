@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone, date as date_cls
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 from app.models.sql_models import Transaction, PayoutAttempt
 from app.repositories.ledger_repo import LedgerTransaction

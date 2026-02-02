@@ -1,16 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select, func
-from typing import List
-from datetime import datetime, timezone, timedelta
+from sqlmodel import select
+from datetime import datetime, timezone
 import uuid
 
 from app.core.database import get_session
-from app.models.sql_models import Transaction, AdminUser, PayoutAttempt, Tenant, AuditEvent
+from app.models.sql_models import Transaction, AdminUser, PayoutAttempt, Tenant
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 from app.services.audit import audit
-from app.services.psp import get_psp
 
 from app.services.metrics import metrics
 from config import settings

@@ -3,7 +3,7 @@ import uuid
 from httpx import AsyncClient
 from sqlalchemy import select
 from app.models.sql_models import AuditEvent
-from app.models.robot_models import RobotDefinition, GameRobotBinding, MathAsset
+from app.models.robot_models import RobotDefinition
 from app.models.game_models import Game
 
 @pytest.mark.asyncio

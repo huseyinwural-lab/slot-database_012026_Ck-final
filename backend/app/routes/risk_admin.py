@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Request
+from fastapi import APIRouter, Depends, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from typing import List
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser
-from app.models.poker_mtt_models import PokerTournament, TournamentRegistration, RiskSignal
+from app.models.poker_mtt_models import RiskSignal
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
 from app.services.poker_risk_engine import PokerRiskEngine

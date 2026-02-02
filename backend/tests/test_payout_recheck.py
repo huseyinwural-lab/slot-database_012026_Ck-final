@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath("/app/backend"))
 
 from server import app  # noqa: F401
 from tests.conftest import _create_tenant, _create_player
-from app.models.sql_models import Transaction, Player, PayoutAttempt, AuditEvent, AdminUser
+from app.models.sql_models import Transaction, Player, PayoutAttempt, AdminUser
 from app.repositories.ledger_repo import LedgerTransaction
 from app.utils.auth import create_access_token
 

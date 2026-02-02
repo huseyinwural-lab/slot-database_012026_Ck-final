@@ -1,7 +1,7 @@
 import os
 import io
 import boto3
-from typing import Optional, List, BinaryIO
+from typing import List, BinaryIO
 from config import settings
 
 class StorageClient:

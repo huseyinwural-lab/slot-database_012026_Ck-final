@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Body
 from sqlalchemy.ext.asyncio import AsyncSession
-import os
 
 from typing import List
 

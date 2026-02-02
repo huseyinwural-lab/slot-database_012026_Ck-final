@@ -1,8 +1,6 @@
 import pytest
 import os
 import json
-import gzip
-from httpx import AsyncClient
 from datetime import datetime, timezone
 from sqlalchemy import text
 import sys

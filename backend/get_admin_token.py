@@ -1,6 +1,6 @@
 import asyncio
 from app.core.database import async_session
-from app.models.sql_models import AdminUser, Tenant
+from app.models.sql_models import AdminUser
 from app.utils.auth import create_access_token
 from datetime import timedelta
 from sqlmodel import select

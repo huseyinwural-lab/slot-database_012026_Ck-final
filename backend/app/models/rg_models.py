@@ -1,7 +1,6 @@
-from typing import Optional, List, Dict
+from typing import Optional
 from datetime import datetime, timezone
-from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import Column, JSON
+from sqlmodel import SQLModel, Field
 import uuid
 
 class PlayerRGProfile(SQLModel, table=True):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +15,7 @@ from app.services.audit import audit
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from fastapi import Header
 
-from app.utils.auth import get_current_admin, get_current_admin_from_token
+from app.utils.auth import get_current_admin_from_token
 from app.utils.tenant import get_current_tenant_id
 
 

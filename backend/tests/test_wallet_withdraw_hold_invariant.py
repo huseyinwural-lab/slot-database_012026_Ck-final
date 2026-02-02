@@ -5,9 +5,7 @@ import pytest
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from fastapi.testclient import TestClient
 
-from server import app
 
 
 @pytest.mark.usefixtures("client", "player_with_token")

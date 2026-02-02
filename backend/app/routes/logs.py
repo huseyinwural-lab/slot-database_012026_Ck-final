@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 
 from app.core.database import get_session
 from app.models.sql_models import AuditLog, AdminUser

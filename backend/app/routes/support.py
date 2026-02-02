@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, Body, HTTPException, Request
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 
 from app.core.database import get_session
 from app.models.sql_models import SupportTicket, AdminUser
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
-from datetime import datetime, timezone
+from datetime import datetime
 
 router = APIRouter(prefix="/api/v1/support", tags=["support"])
 

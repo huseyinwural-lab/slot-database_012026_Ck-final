@@ -1,5 +1,4 @@
 import asyncio
-import os
 from sqlmodel import select
 from app.core.database import async_session
 from app.models.sql_models import AdminUser, Player, Transaction, Tenant

@@ -1,15 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException
 from app.utils.auth_player import get_current_player
-from app.models.sql_models import PayoutAttempt
 from app.services.adyen_psp import AdyenPSP
 from app.core.database import get_session
 from sqlmodel import select
 from config import settings
-from datetime import datetime
-from typing import Dict, Any
 import uuid
 import logging
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 logger = logging.getLogger(__name__)

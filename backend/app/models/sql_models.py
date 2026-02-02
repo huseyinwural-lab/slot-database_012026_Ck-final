@@ -213,11 +213,6 @@ class AuditEvent(SQLModel, table=True):
     timestamp: datetime = Field(default_factory=lambda: datetime.utcnow(), index=True)
 
 # Affiliate moved to growth_models.py
-from app.models.growth_models import Affiliate
-from app.models.game_import_sql import GameImportJob, GameImportItem
-from app.models.reports_sql import ReportExportJob
-from app.models.simulation_sql import SimulationRun
-from app.models.player_ops_models import PlayerManualBonusGrant, PlayerSessionRevocation
 
 # --- CRM MODELS (P0 minimal persistence) ---
 
@@ -370,5 +365,4 @@ class FeatureFlag(SQLModel, table=True):
     created_at: str = ""
 
 # LedgerTransaction and WalletBalance moved to repositories/ledger_repo.py to avoid duplicates
-from app.repositories.ledger_repo import LedgerTransaction, WalletBalance
 

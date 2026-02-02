@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, Request
+from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func
-from typing import List, Optional, Dict
+from typing import Optional, Dict
 import hashlib
 import json
 import uuid

@@ -4,7 +4,6 @@ import pytest
 @pytest.mark.asyncio
 async def test_game_config_readonly_endpoint_returns_min_payload(client, session, admin_token):
     from app.models.game_models import Game
-    from sqlmodel import select
 
     # Seed a game under the same tenant as the admin token
     from jose import jwt

@@ -5,20 +5,12 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import pool, create_engine
 from sqlalchemy.engine import Connection
-from sqlalchemy.engine.url import make_url
 
 from app.core.connection_strings import derive_sync_database_url
 
 # P1-001: Correct import path for settings
 from app.core.database import SQLModel  # Use absolute path
 # Import all models to register with metadata
-from app.models import (
-    sql_models, game_models, robot_models, growth_models, bonus_models, reconciliation,
-    engine_models, payment_models, poker_models, poker_mtt_models, poker_table_models,
-    rg_models, payment_analytics_models, reconciliation_run, sql_models_extended, vip_models,
-    offer_models, dispute_models
-)
-from app.repositories import ledger_repo
 from config import settings
 
 # this is the Alembic Config object, which provides

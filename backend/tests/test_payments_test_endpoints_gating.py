@@ -1,7 +1,6 @@
 import pytest
 from httpx import AsyncClient
 from unittest.mock import patch
-from config import settings
 
 @pytest.mark.asyncio
 async def test_stripe_webhook_simulation_gated_in_prod(client: AsyncClient):

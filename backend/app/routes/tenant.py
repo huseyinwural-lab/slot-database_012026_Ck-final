@@ -1,4 +1,3 @@
-from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession

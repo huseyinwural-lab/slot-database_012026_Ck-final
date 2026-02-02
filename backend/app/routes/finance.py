@@ -3,14 +3,11 @@ from pydantic import BaseModel
 from typing import Literal, Optional
 from sqlmodel import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 from datetime import datetime, timedelta
 
 
-from app.core.errors import AppError
 from app.models.sql_models import Transaction, Player, PayoutAttempt
 from app.services.audit import audit
-from app.services.ledger_shadow import shadow_append_event, shadow_apply_delta
 
 
 from app.core.database import get_session
@@ -990,10 +987,9 @@ async def run_wallet_reconciliation(
     """
 
     from datetime import date as date_cls
-    from app.models.reconciliation_run import ReconciliationRun
     from app.models.reconciliation import ReconciliationFinding
     from app.services.reconciliation import compute_daily_findings
-    from app.services.reconciliation_runs import create_run, get_run
+    from app.services.reconciliation_runs import create_run
     from app.services.audit import audit
 
     provider = "wallet_ledger"
@@ -1230,7 +1226,7 @@ async def get_wallet_reconciliation_tx_snapshot(
 ):
     """Return a snapshot for a single transaction for reconciliation drill-down."""
 
-    from app.models.sql_models import Transaction, Player
+    from app.models.sql_models import Transaction
     from app.models.reconciliation import ReconciliationFinding
     from app.models.sql_models import PayoutAttempt
     from app.repositories.ledger_repo import LedgerTransaction

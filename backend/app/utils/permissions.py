@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from app.models.sql_models import AdminUser, Tenant
 from app.utils.auth import get_current_admin
 from app.core.database import get_session

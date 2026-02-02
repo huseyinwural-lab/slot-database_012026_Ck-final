@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select, func
-from typing import Dict, Any, List
+from sqlmodel import select
 from datetime import datetime, timedelta, timezone
 
 from app.core.database import get_session

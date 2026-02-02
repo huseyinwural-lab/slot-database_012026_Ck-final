@@ -1,15 +1,13 @@
 import os
 import sys
-import asyncio
 
 import pytest
 from sqlmodel import select
 
 sys.path.append(os.path.abspath("/app/backend"))
 
-from server import app
 from tests.conftest import _create_tenant, _create_player, _make_player_token
-from app.models.sql_models import Transaction, Player, AuditEvent, AdminUser
+from app.models.sql_models import Transaction, Player, AdminUser
 from config import settings
 from app.utils.auth import create_access_token
 

@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, text
 from app.core.database import get_session
-from app.models.sql_models import AdminUser, AuditEvent
+from app.models.sql_models import AdminUser
 from app.utils.auth import get_current_admin
 from config import settings
-from datetime import datetime, timezone
+from datetime import datetime
 import os
 
 router = APIRouter(prefix="/api/v1/ops", tags=["ops"])

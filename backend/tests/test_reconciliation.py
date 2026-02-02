@@ -1,15 +1,12 @@
 import os
 import sys
-from datetime import datetime, timedelta, timezone, date as date_cls
+from datetime import datetime, timezone, date as date_cls
 
 import pytest
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from server import app  # noqa: E402
-from app.core.database import async_session  # noqa: E402
 from app.models.sql_models import Transaction  # noqa: E402
-from app.models.reconciliation import ReconciliationFinding  # noqa: E402
 from app.services.reconciliation import compute_daily_findings  # noqa: E402
 
 

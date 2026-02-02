@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Body, status, Request
+from fastapi import APIRouter, Depends, Body, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -11,7 +10,6 @@ from app.utils.auth import (
     verify_password,
     get_password_hash,
     create_access_token,
-    get_admin_by_email,
     get_current_admin,
 )
 from config import settings

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Dict
-from datetime import datetime, timezone
+from datetime import datetime
 import uuid
 
 

@@ -3,7 +3,7 @@ import time
 from hashlib import sha256
 from typing import Tuple
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException
 
 from config import settings
 

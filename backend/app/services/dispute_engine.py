@@ -1,12 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from datetime import datetime, timezone
-import uuid
 
 from app.models.dispute_models import Dispute, AffiliateClawback
 from app.models.sql_models import Transaction
-from app.repositories.ledger_repo import append_event, apply_balance_delta, get_balance
-from app.services.audit import audit
+from app.repositories.ledger_repo import append_event, apply_balance_delta
 
 class DisputeEngine:
     

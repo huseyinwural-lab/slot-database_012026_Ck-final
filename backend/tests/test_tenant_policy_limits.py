@@ -7,7 +7,6 @@ import pytest
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from server import app  # noqa: E402
 from app.models.sql_models import Tenant  # noqa: E402
 
 

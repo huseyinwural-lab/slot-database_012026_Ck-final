@@ -1,9 +1,7 @@
-from typing import List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from app.models.growth_models import Affiliate, AffiliateLink, AffiliateAttribution
 from app.models.sql_models import LedgerTransaction
-from datetime import datetime, timezone
 import uuid
 
 class AffiliateEngine:

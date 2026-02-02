@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlmodel import select
 from app.core.database import engine
 from sqlalchemy.ext.asyncio import AsyncSession

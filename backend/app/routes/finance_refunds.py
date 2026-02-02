@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Request
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from typing import Optional, Dict
 import uuid
 import logging
 
@@ -10,7 +9,6 @@ from app.models.sql_models import Transaction, AdminUser
 from app.routes.auth_snippet import get_current_admin
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
 from app.services.audit import audit
-from app.services.metrics import metrics
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/api/v1/finance/deposits", tags=["finance"])

@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from sqlmodel import select, func
+from sqlmodel import select
 from datetime import datetime, timedelta, timezone
 import uuid
 
