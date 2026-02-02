@@ -240,7 +240,6 @@ const GameManagement = () => {
 
       jobId = uploadRes.data?.job_id;
 
-      const jobId = uploadRes.data?.job_id;
       if (!jobId) {
         throw new Error('MISSING_JOB_ID');
       }
