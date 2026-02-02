@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutGrid, Table as TableIcon, Upload, Activity, Plus, Settings2, Server, Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -22,6 +22,7 @@ const GameManagement = () => {
   const { featureFlags, loading: capabilitiesLoading } = useCapabilities();
 
   const [games, setGames] = useState([]);
+  const [gamesLoading, setGamesLoading] = useState(false);
   const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });
   const [gamesPageSize, setGamesPageSize] = useState(50);
   const [tables, setTables] = useState([]);
@@ -51,10 +52,14 @@ const GameManagement = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [importLogs, setImportLogs] = useState([]);
-  const [importJob, setImportJob] = useState(null);
+  const [importJob, setImportJob] = useState(null); // {id,status,total_items,total_errors,error_summary}
   const [importItems, setImportItems] = useState([]);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const fetchAll = useCallback(async (category = 'all', page = 1, pageSizeOverride) => {
+    setGamesLoading(true);
+    setGames([]);
+
     try {
       const gameParams = {};
       if (category && category !== 'all') gameParams.category = category;
@@ -70,8 +75,17 @@ const GameManagement = () => {
       setGames(data.items || []);
       setGamesMeta(data.meta || { page, page_size: effectivePageSize, total: null });
       setTables(tablesRes.data || []);
-    } catch {
-      toast.error('Failed to load games');
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 500 || status === 502 || status === 503) {
+        toast.error('Service unavailable', {
+          description: 'Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin.',
+        });
+      } else {
+        toast.error('Failed to load games');
+      }
+    } finally {
+      setGamesLoading(false);
     }
   }, [gamesPageSize]);
 
