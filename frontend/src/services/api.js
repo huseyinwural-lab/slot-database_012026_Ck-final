@@ -13,6 +13,13 @@ const isLocalBrowser =
   typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
+// Playwright/CI sometimes runs the app under localhost but still needs to hit
+// the externally routable backend URL (ingress), since localhost:8001 isn't
+// reachable from the browser context.
+const isPlaywright =
+  typeof navigator !== 'undefined' &&
+  /playwright/i.test(navigator.userAgent || '');
+
 const RAW =
   process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL && isLocalBrowser
     ? LOCAL_DEV_API_URL
