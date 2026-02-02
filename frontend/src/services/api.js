@@ -29,6 +29,9 @@ const RAW =
     ? LOCAL_DEV_API_URL
     : primary;
 
+// If the primary backend URL is external (preview/ingress), always prefer it even in local dev.
+// This avoids CORS / net::ERR_ABORTED issues when localhost:8001 is not allowed.
+
 const isHttpsPage = typeof window !== 'undefined' && window.location?.protocol === 'https:';
 const isHttpBackend = Boolean(RAW) && RAW.startsWith('http://');
 
