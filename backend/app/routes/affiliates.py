@@ -30,6 +30,8 @@ from app.models.affiliate_p0_schemas import (
     TrackingLinkOut,
 )
 from fastapi import APIRouter, Depends, Body, Request, HTTPException
+
+from app.utils.reason import require_reason
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
@@ -397,7 +399,7 @@ async def create_payout(
         currency=payload.currency,
         method=payload.method,
         reference=payload.reference,
-        reason=payload.reason,
+        reason=reason,
     )
     await session.commit()
     await session.refresh(payout)
