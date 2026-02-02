@@ -766,6 +766,94 @@ const GameManagement = () => {
               )}
 
               {importJob && (
+                <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                  <DialogContent className="max-w-5xl">
+                    <DialogHeader>
+                      <DialogTitle>Import Preview</DialogTitle>
+                      <CardDescription>
+                        Job #{importJob.id} • status: {importJob.status} • items: {importJob.total_items ?? '-'} • errors: {importJob.total_errors ?? 0}
+                      </CardDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-2">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>External ID</TableHead>
+                            <TableHead>Provider</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>RTP</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Errors</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {importItems.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell>{item.name || '-'}</TableCell>
+                              <TableCell>{item.external_id || '-'}</TableCell>
+                              <TableCell>{item.provider_id || '-'}</TableCell>
+                              <TableCell>{item.type || '-'}</TableCell>
+                              <TableCell>{item.rtp ?? '-'}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={item.status === 'valid' ? 'default' : item.status === 'invalid' ? 'destructive' : 'secondary'}
+                                  className="uppercase text-[10px]"
+                                >
+                                  {item.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-[10px] text-red-500 max-w-[180px] truncate" title={(item.errors || []).join('; ')}>
+                                {(item.errors || []).length}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <DialogFooter className="flex items-center justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsPreviewOpen(false);
+                        }}
+                      >
+                        Close
+                      </Button>
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setImportJob(null);
+                            setImportItems([]);
+                            setIsPreviewOpen(false);
+                          }}
+                        >
+                          Clear
+                        </Button>
+                        <Button
+                          onClick={handleManualImportConfirm}
+                          disabled={
+                            isImporting ||
+                            importJob.status !== 'ready' ||
+                            (importJob.total_errors || 0) > 0 ||
+                            !importItems.some((it) => it.status === 'valid')
+                          }
+                        >
+                          Import
+                        </Button>
+                      </div>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+
+              {/* Legacy inline preview removed (moved to modal) */}
+
+              {false && (
                 <div className="mt-4 space-y-2 border-t pt-4">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold">Manual Import Preview</span>
