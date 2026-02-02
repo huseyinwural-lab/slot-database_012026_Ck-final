@@ -7,6 +7,7 @@ import uuid
 
 from app.core.database import get_session
 from app.models.sql_models import AdminUser, Player, Transaction
+from app.repositories.ledger_repo import LedgerTransaction
 from app.models.poker_mtt_models import PokerTournament, TournamentRegistration
 from app.utils.auth import get_current_admin
 from app.utils.tenant import get_current_tenant_id
