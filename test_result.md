@@ -7,13 +7,13 @@ Do not delete sections unless instructed.
 
 ## Latest iteration
 
-### 2026-02-02 — SEC-P0-02 RBAC Backend Enforcement — TESTED WITH ISSUES
+### 2026-02-02 — SEC-P0-02 RBAC Backend Enforcement — RE-TESTED WITH SAME ISSUES
 - Scope: enforce minimal locked RBAC set (Ops vs Admin vs Support view) + X-Reason requirement via `require_reason`.
 - Changes staged:
   - `player_ops.py`: suspend -> Ops+, credit/debit -> Admin+ with `require_reason`
   - `bonuses.py`: revoke/expire now require `require_reason` (header/body)
   - `affiliates.py`: payouts create now require `require_reason` (header/body)
-- **TESTING RESULTS (2026-02-02):**
+- **TESTING RESULTS (2026-02-02 RE-TEST):**
   - ✅ Authentication: Super Admin, Admin, and Ops users can login successfully
   - ❌ **CRITICAL ISSUE**: Admin role getting 403 for credit/debit operations (should be 200)
   - ❌ **CRITICAL ISSUE**: Admin role getting 403 for suspend operations (should be 200)  
@@ -21,7 +21,13 @@ Do not delete sections unless instructed.
   - ❌ Support user creation/login failing (401 INVALID_CREDENTIALS)
   - ❌ Bonus campaign creation failing (400 BONUS_TYPE_INVALID)
   - ❌ Affiliate payout operations returning 422 validation errors
-- **ROOT CAUSE**: RBAC implementation not matching expected matrix - Admin role should have same permissions as Super Admin for player operations
+- **ROOT CAUSE CONFIRMED**: RBAC implementation not matching expected matrix - Admin role should have same permissions as Super Admin for player operations
+- **DETAILED FINDINGS**:
+  - Role normalization working correctly (Tenant Admin -> Admin)
+  - Super Admin can perform all operations (200 OK)
+  - Admin users getting 403 FORBIDDEN instead of 200 OK for credit/debit/suspend
+  - Ops users getting 403 FORBIDDEN for suspend (should be 200 OK)
+  - Support user creation fails - user may not exist or password incorrect
 - Next: Fix RBAC implementation to match SEC-P0-02 requirements
 
 
