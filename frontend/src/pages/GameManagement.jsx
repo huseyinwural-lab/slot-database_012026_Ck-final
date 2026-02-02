@@ -396,7 +396,7 @@ const GameManagement = () => {
                     </TableRow>
                   ) : (
                     games.map((game) => (
-                    <TableRow key={game.id}>
+                      <TableRow key={game.id}>
                       <TableCell>
                         <div className="font-medium flex items-center gap-2">
                           {game.is_special_game && (
