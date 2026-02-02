@@ -266,24 +266,45 @@ const GameManagement = () => {
   };
 
   const handleManualImportConfirm = async () => {
-    if (!importJob) return;
-    const addLog = (msg) => setImportLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+    if (!importJob?.id) return;
 
     try {
-      addLog('Starting manual import...');
       setIsImporting(true);
-      setImportProgress((p) => (p < 90 ? 90 : p));
+      setImportProgress((p) => (p < 80 ? 80 : p));
+
       const res = await api.post(`/v1/game-import/jobs/${importJob.id}/import`);
-      addLog(res.data.message || 'Import completed.');
+
+      // Import endpoint is synchronous; still fetch job for final status.
+      await pollJobUntil(importJob.id, { untilStatuses: ['completed', 'failed'], maxMs: 60000 });
+
       setImportProgress(100);
-      toast.success(res.data.message || 'Game imported successfully.');
-      fetchAll();
+
+      toast.success('Import completed', {
+        description: `Imported: ${res.data?.imported_count ?? 0}`,
+      });
+
+      setIsPreviewOpen(false);
+      setImportJob(null);
+      setImportItems([]);
+
+      await fetchAll(gameCategory, 1);
     } catch (err) {
-      console.error(err);
-      addLog('ERROR: Manual import failed.');
-      toast.error('Manual import failed');
+      const code = err?.standardized?.code || err?.response?.data?.error_code;
+      const status = err?.response?.status;
+
+      if (code === 'JOB_NOT_READY' || status === 409) {
+        toast.error('Job not ready', { description: 'Preview is not ready yet. Please wait.' });
+      } else if (status === 500 || status === 502 || status === 503) {
+        toast.error('Service unavailable', {
+          description: 'Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin.',
+        });
+      } else {
+        toast.error('Manual import failed');
+      }
+
+      setImportProgress(0);
     } finally {
-      setTimeout(() => setIsImporting(false), 2000);
+      setIsImporting(false);
     }
   };
 
