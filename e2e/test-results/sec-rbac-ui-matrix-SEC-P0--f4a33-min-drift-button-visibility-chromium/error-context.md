@@ -1,0 +1,1050 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - heading "Default Casino" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Tenant Panel
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: Core
+          - list [ref=e13]:
+            - listitem [ref=e14]:
+              - link "Dashboard" [ref=e15] [cursor=pointer]:
+                - /url: /
+                - img [ref=e16]
+                - generic [ref=e21]: Dashboard
+            - listitem [ref=e22]:
+              - link "Players" [ref=e23] [cursor=pointer]:
+                - /url: /players
+                - img [ref=e24]
+                - generic [ref=e29]: Players
+            - listitem [ref=e30]:
+              - link "My Revenue" [ref=e31] [cursor=pointer]:
+                - /url: /my-revenue
+                - img [ref=e32]
+                - generic [ref=e35]: My Revenue
+            - listitem [ref=e36]:
+              - link "Games" [ref=e37] [cursor=pointer]:
+                - /url: /games
+                - img [ref=e38]
+                - generic [ref=e40]: Games
+            - listitem [ref=e41]:
+              - link "VIP Games" [ref=e42] [cursor=pointer]:
+                - /url: /vip-games
+                - img [ref=e43]
+                - generic [ref=e45]: VIP Games
+        - generic [ref=e46]:
+          - generic [ref=e47]: Operations
+          - list [ref=e48]:
+            - listitem [ref=e49]:
+              - link "KYC Verification" [ref=e50] [cursor=pointer]:
+                - /url: /kyc
+                - img [ref=e51]
+                - generic [ref=e54]: KYC Verification
+            - listitem [ref=e55]:
+              - link "CRM & Comms" [ref=e56] [cursor=pointer]:
+                - /url: /crm
+                - img [ref=e57]
+                - generic [ref=e60]: CRM & Comms
+            - listitem [ref=e61]:
+              - link "Bonuses" [ref=e62] [cursor=pointer]:
+                - /url: /bonuses
+                - img [ref=e63]
+                - generic [ref=e67]: Bonuses
+            - listitem [ref=e68]:
+              - link "Affiliates" [ref=e69] [cursor=pointer]:
+                - /url: /affiliates
+                - img [ref=e70]
+                - generic [ref=e75]: Affiliates
+            - listitem [ref=e76]:
+              - link "Support" [ref=e77] [cursor=pointer]:
+                - /url: /support
+                - img [ref=e78]
+                - generic [ref=e80]: Support
+        - generic [ref=e81]:
+          - generic [ref=e82]: Game Engine
+          - list [ref=e83]:
+            - listitem [ref=e84]:
+              - link "Robots" [ref=e85] [cursor=pointer]:
+                - /url: /robots
+                - img [ref=e86]
+                - generic [ref=e89]: Robots
+            - listitem [ref=e90]:
+              - link "Math Assets" [ref=e91] [cursor=pointer]:
+                - /url: /math-assets
+                - img [ref=e92]
+                - generic [ref=e97]: Math Assets
+        - generic [ref=e98]:
+          - generic [ref=e99]: System
+          - list [ref=e100]:
+            - listitem [ref=e101]:
+              - link "Reports" [ref=e102] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e103]
+                - generic [ref=e105]: Reports
+            - listitem [ref=e106]:
+              - link "Admin Users" [ref=e107] [cursor=pointer]:
+                - /url: /admins
+                - img [ref=e108]
+                - generic [ref=e120]: Admin Users
+            - listitem [ref=e121]:
+              - link "Simulator" [ref=e122] [cursor=pointer]:
+                - /url: /simulator
+                - img [ref=e123]
+                - generic [ref=e125]: Simulator
+      - button "Logout" [ref=e127] [cursor=pointer]:
+        - img [ref=e128]
+        - text: Logout
+    - main [ref=e131]:
+      - generic [ref=e132]:
+        - generic [ref=e134]:
+          - img [ref=e135]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e138]
+        - generic [ref=e139]:
+          - generic [ref=e140]:
+            - paragraph [ref=e141]: Admin User
+            - paragraph [ref=e142]: admin_user@casino.com
+          - generic [ref=e143]: AU
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - heading "Player Management" [level=2] [ref=e147]
+            - button "Export Excel" [ref=e148] [cursor=pointer]
+          - generic [ref=e149]:
+            - generic [ref=e151]:
+              - textbox "Search ID, Username, Email..." [ref=e153]
+              - combobox [ref=e155] [cursor=pointer]:
+                - generic: All Status
+                - img [ref=e156]
+              - combobox [ref=e159] [cursor=pointer]:
+                - generic: All VIP
+                - img [ref=e160]
+              - combobox [ref=e163] [cursor=pointer]:
+                - generic: All Risk
+                - img [ref=e164]
+              - button "Filter" [ref=e166] [cursor=pointer]:
+                - img
+                - text: Filter
+            - table [ref=e169]:
+              - rowgroup [ref=e170]:
+                - row "ID User / Email Registered Country Balance VIP Risk Status Action" [ref=e171]:
+                  - columnheader "ID" [ref=e172]
+                  - columnheader "User / Email" [ref=e173]
+                  - columnheader "Registered" [ref=e174]
+                  - columnheader "Country" [ref=e175]
+                  - columnheader "Balance" [ref=e176]
+                  - columnheader "VIP" [ref=e177]
+                  - columnheader "Risk" [ref=e178]
+                  - columnheader "Status" [ref=e179]
+                  - columnheader "Action" [ref=e180]
+              - rowgroup [ref=e181]:
+                - 'row "f3d6a61e... p0gate_nofunds_c97716f0 p0gate_nofunds_db0ebf24@casino.com 1/19/2026 $200.00 B: $0.00 Lvl low active" [ref=e182]':
+                  - cell "f3d6a61e..." [ref=e183]
+                  - cell "p0gate_nofunds_c97716f0 p0gate_nofunds_db0ebf24@casino.com" [ref=e184]:
+                    - generic [ref=e185]: p0gate_nofunds_c97716f0
+                    - generic [ref=e186]: p0gate_nofunds_db0ebf24@casino.com
+                  - cell "1/19/2026" [ref=e187]
+                  - cell [ref=e188]
+                  - 'cell "$200.00 B: $0.00" [ref=e189]':
+                    - generic [ref=e190]: $200.00
+                    - generic [ref=e191]: "B: $0.00"
+                  - cell "Lvl" [ref=e192]
+                  - cell "low" [ref=e193]:
+                    - generic [ref=e194]: low
+                  - cell "active" [ref=e195]:
+                    - generic [ref=e196]: active
+                  - cell [ref=e197]:
+                    - button [ref=e198] [cursor=pointer]:
+                      - img
+                - 'row "01e833d3... p0gate_9c44db88 p0gate_846362f9@casino.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e199]':
+                  - cell "01e833d3..." [ref=e200]
+                  - cell "p0gate_9c44db88 p0gate_846362f9@casino.com" [ref=e201]:
+                    - generic [ref=e202]: p0gate_9c44db88
+                    - generic [ref=e203]: p0gate_846362f9@casino.com
+                  - cell "1/19/2026" [ref=e204]
+                  - cell [ref=e205]
+                  - 'cell "$0.00 B: $0.00" [ref=e206]':
+                    - generic [ref=e207]: $0.00
+                    - generic [ref=e208]: "B: $0.00"
+                  - cell "Lvl" [ref=e209]
+                  - cell "low" [ref=e210]:
+                    - generic [ref=e211]: low
+                  - cell "active" [ref=e212]:
+                    - generic [ref=e213]: active
+                  - cell [ref=e214]:
+                    - button [ref=e215] [cursor=pointer]:
+                      - img
+                - 'row "4f48e006... p0gate_nofunds_38e49a7c p0gate_nofunds_3b4054aa@casino.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e216]':
+                  - cell "4f48e006..." [ref=e217]
+                  - cell "p0gate_nofunds_38e49a7c p0gate_nofunds_3b4054aa@casino.com" [ref=e218]:
+                    - generic [ref=e219]: p0gate_nofunds_38e49a7c
+                    - generic [ref=e220]: p0gate_nofunds_3b4054aa@casino.com
+                  - cell "1/19/2026" [ref=e221]
+                  - cell [ref=e222]
+                  - 'cell "$0.00 B: $0.00" [ref=e223]':
+                    - generic [ref=e224]: $0.00
+                    - generic [ref=e225]: "B: $0.00"
+                  - cell "Lvl" [ref=e226]
+                  - cell "low" [ref=e227]:
+                    - generic [ref=e228]: low
+                  - cell "active" [ref=e229]:
+                    - generic [ref=e230]: active
+                  - cell [ref=e231]:
+                    - button [ref=e232] [cursor=pointer]:
+                      - img
+                - 'row "c754a7c8... p0gate_0687e155 p0gate_a89c5adf@casino.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e233]':
+                  - cell "c754a7c8..." [ref=e234]
+                  - cell "p0gate_0687e155 p0gate_a89c5adf@casino.com" [ref=e235]:
+                    - generic [ref=e236]: p0gate_0687e155
+                    - generic [ref=e237]: p0gate_a89c5adf@casino.com
+                  - cell "1/19/2026" [ref=e238]
+                  - cell [ref=e239]
+                  - 'cell "$0.00 B: $0.00" [ref=e240]':
+                    - generic [ref=e241]: $0.00
+                    - generic [ref=e242]: "B: $0.00"
+                  - cell "Lvl" [ref=e243]
+                  - cell "low" [ref=e244]:
+                    - generic [ref=e245]: low
+                  - cell "active" [ref=e246]:
+                    - generic [ref=e247]: active
+                  - cell [ref=e248]:
+                    - button [ref=e249] [cursor=pointer]:
+                      - img
+                - 'row "9877462d... gate_user gate_1768816716@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e250]':
+                  - cell "9877462d..." [ref=e251]
+                  - cell "gate_user gate_1768816716@test.com" [ref=e252]:
+                    - generic [ref=e253]: gate_user
+                    - generic [ref=e254]: gate_1768816716@test.com
+                  - cell "1/19/2026" [ref=e255]
+                  - cell [ref=e256]
+                  - 'cell "$0.00 B: $0.00" [ref=e257]':
+                    - generic [ref=e258]: $0.00
+                    - generic [ref=e259]: "B: $0.00"
+                  - cell "Lvl" [ref=e260]
+                  - cell "low" [ref=e261]:
+                    - generic [ref=e262]: low
+                  - cell "active" [ref=e263]:
+                    - generic [ref=e264]: active
+                  - cell [ref=e265]:
+                    - button [ref=e266] [cursor=pointer]:
+                      - img
+                - 'row "b26924b2... gate_user gate_1768816647@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e267]':
+                  - cell "b26924b2..." [ref=e268]
+                  - cell "gate_user gate_1768816647@test.com" [ref=e269]:
+                    - generic [ref=e270]: gate_user
+                    - generic [ref=e271]: gate_1768816647@test.com
+                  - cell "1/19/2026" [ref=e272]
+                  - cell [ref=e273]
+                  - 'cell "$0.00 B: $0.00" [ref=e274]':
+                    - generic [ref=e275]: $0.00
+                    - generic [ref=e276]: "B: $0.00"
+                  - cell "Lvl" [ref=e277]
+                  - cell "low" [ref=e278]:
+                    - generic [ref=e279]: low
+                  - cell "active" [ref=e280]:
+                    - generic [ref=e281]: active
+                  - cell [ref=e282]:
+                    - button [ref=e283] [cursor=pointer]:
+                      - img
+                - 'row "b494a2df... gate_user gate_1768816636@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e284]':
+                  - cell "b494a2df..." [ref=e285]
+                  - cell "gate_user gate_1768816636@test.com" [ref=e286]:
+                    - generic [ref=e287]: gate_user
+                    - generic [ref=e288]: gate_1768816636@test.com
+                  - cell "1/19/2026" [ref=e289]
+                  - cell [ref=e290]
+                  - 'cell "$0.00 B: $0.00" [ref=e291]':
+                    - generic [ref=e292]: $0.00
+                    - generic [ref=e293]: "B: $0.00"
+                  - cell "Lvl" [ref=e294]
+                  - cell "low" [ref=e295]:
+                    - generic [ref=e296]: low
+                  - cell "active" [ref=e297]:
+                    - generic [ref=e298]: active
+                  - cell [ref=e299]:
+                    - button [ref=e300] [cursor=pointer]:
+                      - img
+                - 'row "ecc3ff3a... gate_user gate_1768816586@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e301]':
+                  - cell "ecc3ff3a..." [ref=e302]
+                  - cell "gate_user gate_1768816586@test.com" [ref=e303]:
+                    - generic [ref=e304]: gate_user
+                    - generic [ref=e305]: gate_1768816586@test.com
+                  - cell "1/19/2026" [ref=e306]
+                  - cell [ref=e307]
+                  - 'cell "$0.00 B: $0.00" [ref=e308]':
+                    - generic [ref=e309]: $0.00
+                    - generic [ref=e310]: "B: $0.00"
+                  - cell "Lvl" [ref=e311]
+                  - cell "low" [ref=e312]:
+                    - generic [ref=e313]: low
+                  - cell "active" [ref=e314]:
+                    - generic [ref=e315]: active
+                  - cell [ref=e316]:
+                    - button [ref=e317] [cursor=pointer]:
+                      - img
+                - 'row "382dfa6e... gate_user gate_1768816575@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e318]':
+                  - cell "382dfa6e..." [ref=e319]
+                  - cell "gate_user gate_1768816575@test.com" [ref=e320]:
+                    - generic [ref=e321]: gate_user
+                    - generic [ref=e322]: gate_1768816575@test.com
+                  - cell "1/19/2026" [ref=e323]
+                  - cell [ref=e324]
+                  - 'cell "$0.00 B: $0.00" [ref=e325]':
+                    - generic [ref=e326]: $0.00
+                    - generic [ref=e327]: "B: $0.00"
+                  - cell "Lvl" [ref=e328]
+                  - cell "low" [ref=e329]:
+                    - generic [ref=e330]: low
+                  - cell "active" [ref=e331]:
+                    - generic [ref=e332]: active
+                  - cell [ref=e333]:
+                    - button [ref=e334] [cursor=pointer]:
+                      - img
+                - 'row "bae5609d... gate_user gate_1768816562@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e335]':
+                  - cell "bae5609d..." [ref=e336]
+                  - cell "gate_user gate_1768816562@test.com" [ref=e337]:
+                    - generic [ref=e338]: gate_user
+                    - generic [ref=e339]: gate_1768816562@test.com
+                  - cell "1/19/2026" [ref=e340]
+                  - cell [ref=e341]
+                  - 'cell "$0.00 B: $0.00" [ref=e342]':
+                    - generic [ref=e343]: $0.00
+                    - generic [ref=e344]: "B: $0.00"
+                  - cell "Lvl" [ref=e345]
+                  - cell "low" [ref=e346]:
+                    - generic [ref=e347]: low
+                  - cell "active" [ref=e348]:
+                    - generic [ref=e349]: active
+                  - cell [ref=e350]:
+                    - button [ref=e351] [cursor=pointer]:
+                      - img
+                - 'row "c092a096... gate_user gate_1768816550@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e352]':
+                  - cell "c092a096..." [ref=e353]
+                  - cell "gate_user gate_1768816550@test.com" [ref=e354]:
+                    - generic [ref=e355]: gate_user
+                    - generic [ref=e356]: gate_1768816550@test.com
+                  - cell "1/19/2026" [ref=e357]
+                  - cell [ref=e358]
+                  - 'cell "$0.00 B: $0.00" [ref=e359]':
+                    - generic [ref=e360]: $0.00
+                    - generic [ref=e361]: "B: $0.00"
+                  - cell "Lvl" [ref=e362]
+                  - cell "low" [ref=e363]:
+                    - generic [ref=e364]: low
+                  - cell "active" [ref=e365]:
+                    - generic [ref=e366]: active
+                  - cell [ref=e367]:
+                    - button [ref=e368] [cursor=pointer]:
+                      - img
+                - 'row "f8239233... gate_user gate_1768816536@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e369]':
+                  - cell "f8239233..." [ref=e370]
+                  - cell "gate_user gate_1768816536@test.com" [ref=e371]:
+                    - generic [ref=e372]: gate_user
+                    - generic [ref=e373]: gate_1768816536@test.com
+                  - cell "1/19/2026" [ref=e374]
+                  - cell [ref=e375]
+                  - 'cell "$0.00 B: $0.00" [ref=e376]':
+                    - generic [ref=e377]: $0.00
+                    - generic [ref=e378]: "B: $0.00"
+                  - cell "Lvl" [ref=e379]
+                  - cell "low" [ref=e380]:
+                    - generic [ref=e381]: low
+                  - cell "active" [ref=e382]:
+                    - generic [ref=e383]: active
+                  - cell [ref=e384]:
+                    - button [ref=e385] [cursor=pointer]:
+                      - img
+                - 'row "938e9032... gate_user gate_1768816521@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e386]':
+                  - cell "938e9032..." [ref=e387]
+                  - cell "gate_user gate_1768816521@test.com" [ref=e388]:
+                    - generic [ref=e389]: gate_user
+                    - generic [ref=e390]: gate_1768816521@test.com
+                  - cell "1/19/2026" [ref=e391]
+                  - cell [ref=e392]
+                  - 'cell "$0.00 B: $0.00" [ref=e393]':
+                    - generic [ref=e394]: $0.00
+                    - generic [ref=e395]: "B: $0.00"
+                  - cell "Lvl" [ref=e396]
+                  - cell "low" [ref=e397]:
+                    - generic [ref=e398]: low
+                  - cell "active" [ref=e399]:
+                    - generic [ref=e400]: active
+                  - cell [ref=e401]:
+                    - button [ref=e402] [cursor=pointer]:
+                      - img
+                - 'row "789bfe3a... gate_user gate_1768816485@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e403]':
+                  - cell "789bfe3a..." [ref=e404]
+                  - cell "gate_user gate_1768816485@test.com" [ref=e405]:
+                    - generic [ref=e406]: gate_user
+                    - generic [ref=e407]: gate_1768816485@test.com
+                  - cell "1/19/2026" [ref=e408]
+                  - cell [ref=e409]
+                  - 'cell "$0.00 B: $0.00" [ref=e410]':
+                    - generic [ref=e411]: $0.00
+                    - generic [ref=e412]: "B: $0.00"
+                  - cell "Lvl" [ref=e413]
+                  - cell "low" [ref=e414]:
+                    - generic [ref=e415]: low
+                  - cell "active" [ref=e416]:
+                    - generic [ref=e417]: active
+                  - cell [ref=e418]:
+                    - button [ref=e419] [cursor=pointer]:
+                      - img
+                - 'row "35b59745... gate_user gate_1768816385@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e420]':
+                  - cell "35b59745..." [ref=e421]
+                  - cell "gate_user gate_1768816385@test.com" [ref=e422]:
+                    - generic [ref=e423]: gate_user
+                    - generic [ref=e424]: gate_1768816385@test.com
+                  - cell "1/19/2026" [ref=e425]
+                  - cell [ref=e426]
+                  - 'cell "$0.00 B: $0.00" [ref=e427]':
+                    - generic [ref=e428]: $0.00
+                    - generic [ref=e429]: "B: $0.00"
+                  - cell "Lvl" [ref=e430]
+                  - cell "low" [ref=e431]:
+                    - generic [ref=e432]: low
+                  - cell "active" [ref=e433]:
+                    - generic [ref=e434]: active
+                  - cell [ref=e435]:
+                    - button [ref=e436] [cursor=pointer]:
+                      - img
+                - 'row "5b47470d... gate_user gate_1768816373@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e437]':
+                  - cell "5b47470d..." [ref=e438]
+                  - cell "gate_user gate_1768816373@test.com" [ref=e439]:
+                    - generic [ref=e440]: gate_user
+                    - generic [ref=e441]: gate_1768816373@test.com
+                  - cell "1/19/2026" [ref=e442]
+                  - cell [ref=e443]
+                  - 'cell "$0.00 B: $0.00" [ref=e444]':
+                    - generic [ref=e445]: $0.00
+                    - generic [ref=e446]: "B: $0.00"
+                  - cell "Lvl" [ref=e447]
+                  - cell "low" [ref=e448]:
+                    - generic [ref=e449]: low
+                  - cell "active" [ref=e450]:
+                    - generic [ref=e451]: active
+                  - cell [ref=e452]:
+                    - button [ref=e453] [cursor=pointer]:
+                      - img
+                - 'row "8ecaadfa... gate_user gate_1768816342@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e454]':
+                  - cell "8ecaadfa..." [ref=e455]
+                  - cell "gate_user gate_1768816342@test.com" [ref=e456]:
+                    - generic [ref=e457]: gate_user
+                    - generic [ref=e458]: gate_1768816342@test.com
+                  - cell "1/19/2026" [ref=e459]
+                  - cell [ref=e460]
+                  - 'cell "$0.00 B: $0.00" [ref=e461]':
+                    - generic [ref=e462]: $0.00
+                    - generic [ref=e463]: "B: $0.00"
+                  - cell "Lvl" [ref=e464]
+                  - cell "low" [ref=e465]:
+                    - generic [ref=e466]: low
+                  - cell "active" [ref=e467]:
+                    - generic [ref=e468]: active
+                  - cell [ref=e469]:
+                    - button [ref=e470] [cursor=pointer]:
+                      - img
+                - 'row "b68b22a0... gate_user gate_1768816324@test.com 1/19/2026 $0.00 B: $0.00 Lvl low active" [ref=e471]':
+                  - cell "b68b22a0..." [ref=e472]
+                  - cell "gate_user gate_1768816324@test.com" [ref=e473]:
+                    - generic [ref=e474]: gate_user
+                    - generic [ref=e475]: gate_1768816324@test.com
+                  - cell "1/19/2026" [ref=e476]
+                  - cell [ref=e477]
+                  - 'cell "$0.00 B: $0.00" [ref=e478]':
+                    - generic [ref=e479]: $0.00
+                    - generic [ref=e480]: "B: $0.00"
+                  - cell "Lvl" [ref=e481]
+                  - cell "low" [ref=e482]:
+                    - generic [ref=e483]: low
+                  - cell "active" [ref=e484]:
+                    - generic [ref=e485]: active
+                  - cell [ref=e486]:
+                    - button [ref=e487] [cursor=pointer]:
+                      - img
+                - 'row "8e9dd472... testplayer_1768769202976 player_1768769202976@testcasino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e488]':
+                  - cell "8e9dd472..." [ref=e489]
+                  - cell "testplayer_1768769202976 player_1768769202976@testcasino.com" [ref=e490]:
+                    - generic [ref=e491]: testplayer_1768769202976
+                    - generic [ref=e492]: player_1768769202976@testcasino.com
+                  - cell "1/18/2026" [ref=e493]
+                  - cell [ref=e494]
+                  - 'cell "$0.00 B: $0.00" [ref=e495]':
+                    - generic [ref=e496]: $0.00
+                    - generic [ref=e497]: "B: $0.00"
+                  - cell "Lvl" [ref=e498]
+                  - cell "low" [ref=e499]:
+                    - generic [ref=e500]: low
+                  - cell "active" [ref=e501]:
+                    - generic [ref=e502]: active
+                  - cell [ref=e503]:
+                    - button [ref=e504] [cursor=pointer]:
+                      - img
+                - 'row "a95bc8f1... player_117814302 player_117814302@testcasino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e505]':
+                  - cell "a95bc8f1..." [ref=e506]
+                  - cell "player_117814302 player_117814302@testcasino.com" [ref=e507]:
+                    - generic [ref=e508]: player_117814302
+                    - generic [ref=e509]: player_117814302@testcasino.com
+                  - cell "1/18/2026" [ref=e510]
+                  - cell [ref=e511]
+                  - 'cell "$0.00 B: $0.00" [ref=e512]':
+                    - generic [ref=e513]: $0.00
+                    - generic [ref=e514]: "B: $0.00"
+                  - cell "Lvl" [ref=e515]
+                  - cell "low" [ref=e516]:
+                    - generic [ref=e517]: low
+                  - cell "active" [ref=e518]:
+                    - generic [ref=e519]: active
+                  - cell [ref=e520]:
+                    - button [ref=e521] [cursor=pointer]:
+                      - img
+                - 'row "f50d0010... aff_user1 aff_user1@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e522]':
+                  - cell "f50d0010..." [ref=e523]
+                  - cell "aff_user1 aff_user1@test.com" [ref=e524]:
+                    - generic [ref=e525]: aff_user1
+                    - generic [ref=e526]: aff_user1@test.com
+                  - cell "1/18/2026" [ref=e527]
+                  - cell [ref=e528]
+                  - 'cell "$0.00 B: $0.00" [ref=e529]':
+                    - generic [ref=e530]: $0.00
+                    - generic [ref=e531]: "B: $0.00"
+                  - cell "Lvl" [ref=e532]
+                  - cell "low" [ref=e533]:
+                    - generic [ref=e534]: low
+                  - cell "active" [ref=e535]:
+                    - generic [ref=e536]: active
+                  - cell [ref=e537]:
+                    - button [ref=e538] [cursor=pointer]:
+                      - img
+                - 'row "789b500c... bonus_p0_user7 bonus_p0_user7@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e539]':
+                  - cell "789b500c..." [ref=e540]
+                  - cell "bonus_p0_user7 bonus_p0_user7@test.com" [ref=e541]:
+                    - generic [ref=e542]: bonus_p0_user7
+                    - generic [ref=e543]: bonus_p0_user7@test.com
+                  - cell "1/18/2026" [ref=e544]
+                  - cell [ref=e545]
+                  - 'cell "$0.00 B: $0.00" [ref=e546]':
+                    - generic [ref=e547]: $0.00
+                    - generic [ref=e548]: "B: $0.00"
+                  - cell "Lvl" [ref=e549]
+                  - cell "low" [ref=e550]:
+                    - generic [ref=e551]: low
+                  - cell "active" [ref=e552]:
+                    - generic [ref=e553]: active
+                  - cell [ref=e554]:
+                    - button [ref=e555] [cursor=pointer]:
+                      - img
+                - 'row "a966f1d9... bonustest_a49a8398 bonustest_70f74f85@casino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e556]':
+                  - cell "a966f1d9..." [ref=e557]
+                  - cell "bonustest_a49a8398 bonustest_70f74f85@casino.com" [ref=e558]:
+                    - generic [ref=e559]: bonustest_a49a8398
+                    - generic [ref=e560]: bonustest_70f74f85@casino.com
+                  - cell "1/18/2026" [ref=e561]
+                  - cell [ref=e562]
+                  - 'cell "$0.00 B: $0.00" [ref=e563]':
+                    - generic [ref=e564]: $0.00
+                    - generic [ref=e565]: "B: $0.00"
+                  - cell "Lvl" [ref=e566]
+                  - cell "low" [ref=e567]:
+                    - generic [ref=e568]: low
+                  - cell "active" [ref=e569]:
+                    - generic [ref=e570]: active
+                  - cell [ref=e571]:
+                    - button [ref=e572] [cursor=pointer]:
+                      - img
+                - 'row "6dccd480... bonustest_9c0109c4 bonustest_4bfc0a13@casino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e573]':
+                  - cell "6dccd480..." [ref=e574]
+                  - cell "bonustest_9c0109c4 bonustest_4bfc0a13@casino.com" [ref=e575]:
+                    - generic [ref=e576]: bonustest_9c0109c4
+                    - generic [ref=e577]: bonustest_4bfc0a13@casino.com
+                  - cell "1/18/2026" [ref=e578]
+                  - cell [ref=e579]
+                  - 'cell "$0.00 B: $0.00" [ref=e580]':
+                    - generic [ref=e581]: $0.00
+                    - generic [ref=e582]: "B: $0.00"
+                  - cell "Lvl" [ref=e583]
+                  - cell "low" [ref=e584]:
+                    - generic [ref=e585]: low
+                  - cell "active" [ref=e586]:
+                    - generic [ref=e587]: active
+                  - cell [ref=e588]:
+                    - button [ref=e589] [cursor=pointer]:
+                      - img
+                - 'row "5c12660a... bonustest_b1363643 bonustest_64d3769f@casino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e590]':
+                  - cell "5c12660a..." [ref=e591]
+                  - cell "bonustest_b1363643 bonustest_64d3769f@casino.com" [ref=e592]:
+                    - generic [ref=e593]: bonustest_b1363643
+                    - generic [ref=e594]: bonustest_64d3769f@casino.com
+                  - cell "1/18/2026" [ref=e595]
+                  - cell [ref=e596]
+                  - 'cell "$0.00 B: $0.00" [ref=e597]':
+                    - generic [ref=e598]: $0.00
+                    - generic [ref=e599]: "B: $0.00"
+                  - cell "Lvl" [ref=e600]
+                  - cell "low" [ref=e601]:
+                    - generic [ref=e602]: low
+                  - cell "active" [ref=e603]:
+                    - generic [ref=e604]: active
+                  - cell [ref=e605]:
+                    - button [ref=e606] [cursor=pointer]:
+                      - img
+                - 'row "a8647bfe... bonustest_68372c38 bonustest_41528824@casino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e607]':
+                  - cell "a8647bfe..." [ref=e608]
+                  - cell "bonustest_68372c38 bonustest_41528824@casino.com" [ref=e609]:
+                    - generic [ref=e610]: bonustest_68372c38
+                    - generic [ref=e611]: bonustest_41528824@casino.com
+                  - cell "1/18/2026" [ref=e612]
+                  - cell [ref=e613]
+                  - 'cell "$0.00 B: $0.00" [ref=e614]':
+                    - generic [ref=e615]: $0.00
+                    - generic [ref=e616]: "B: $0.00"
+                  - cell "Lvl" [ref=e617]
+                  - cell "low" [ref=e618]:
+                    - generic [ref=e619]: low
+                  - cell "active" [ref=e620]:
+                    - generic [ref=e621]: active
+                  - cell [ref=e622]:
+                    - button [ref=e623] [cursor=pointer]:
+                      - img
+                - 'row "0f47a94c... bonustest_9f0723c4 bonustest_f5da7728@casino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e624]':
+                  - cell "0f47a94c..." [ref=e625]
+                  - cell "bonustest_9f0723c4 bonustest_f5da7728@casino.com" [ref=e626]:
+                    - generic [ref=e627]: bonustest_9f0723c4
+                    - generic [ref=e628]: bonustest_f5da7728@casino.com
+                  - cell "1/18/2026" [ref=e629]
+                  - cell [ref=e630]
+                  - 'cell "$0.00 B: $0.00" [ref=e631]':
+                    - generic [ref=e632]: $0.00
+                    - generic [ref=e633]: "B: $0.00"
+                  - cell "Lvl" [ref=e634]
+                  - cell "low" [ref=e635]:
+                    - generic [ref=e636]: low
+                  - cell "active" [ref=e637]:
+                    - generic [ref=e638]: active
+                  - cell [ref=e639]:
+                    - button [ref=e640] [cursor=pointer]:
+                      - img
+                - 'row "65c6f29b... bonustest_005229d7 bonustest_401130d8@casino.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e641]':
+                  - cell "65c6f29b..." [ref=e642]
+                  - cell "bonustest_005229d7 bonustest_401130d8@casino.com" [ref=e643]:
+                    - generic [ref=e644]: bonustest_005229d7
+                    - generic [ref=e645]: bonustest_401130d8@casino.com
+                  - cell "1/18/2026" [ref=e646]
+                  - cell [ref=e647]
+                  - 'cell "$0.00 B: $0.00" [ref=e648]':
+                    - generic [ref=e649]: $0.00
+                    - generic [ref=e650]: "B: $0.00"
+                  - cell "Lvl" [ref=e651]
+                  - cell "low" [ref=e652]:
+                    - generic [ref=e653]: low
+                  - cell "active" [ref=e654]:
+                    - generic [ref=e655]: active
+                  - cell [ref=e656]:
+                    - button [ref=e657] [cursor=pointer]:
+                      - img
+                - 'row "3e04f406... bonus_p0_user6 bonus_p0_user6@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e658]':
+                  - cell "3e04f406..." [ref=e659]
+                  - cell "bonus_p0_user6 bonus_p0_user6@test.com" [ref=e660]:
+                    - generic [ref=e661]: bonus_p0_user6
+                    - generic [ref=e662]: bonus_p0_user6@test.com
+                  - cell "1/18/2026" [ref=e663]
+                  - cell [ref=e664]
+                  - 'cell "$0.00 B: $0.00" [ref=e665]':
+                    - generic [ref=e666]: $0.00
+                    - generic [ref=e667]: "B: $0.00"
+                  - cell "Lvl" [ref=e668]
+                  - cell "low" [ref=e669]:
+                    - generic [ref=e670]: low
+                  - cell "active" [ref=e671]:
+                    - generic [ref=e672]: active
+                  - cell [ref=e673]:
+                    - button [ref=e674] [cursor=pointer]:
+                      - img
+                - 'row "dd0a3aef... bonus_p0_user5 bonus_p0_user5@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e675]':
+                  - cell "dd0a3aef..." [ref=e676]
+                  - cell "bonus_p0_user5 bonus_p0_user5@test.com" [ref=e677]:
+                    - generic [ref=e678]: bonus_p0_user5
+                    - generic [ref=e679]: bonus_p0_user5@test.com
+                  - cell "1/18/2026" [ref=e680]
+                  - cell [ref=e681]
+                  - 'cell "$0.00 B: $0.00" [ref=e682]':
+                    - generic [ref=e683]: $0.00
+                    - generic [ref=e684]: "B: $0.00"
+                  - cell "Lvl" [ref=e685]
+                  - cell "low" [ref=e686]:
+                    - generic [ref=e687]: low
+                  - cell "active" [ref=e688]:
+                    - generic [ref=e689]: active
+                  - cell [ref=e690]:
+                    - button [ref=e691] [cursor=pointer]:
+                      - img
+                - 'row "8711e283... bonus_p0_user4 bonus_p0_user4@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e692]':
+                  - cell "8711e283..." [ref=e693]
+                  - cell "bonus_p0_user4 bonus_p0_user4@test.com" [ref=e694]:
+                    - generic [ref=e695]: bonus_p0_user4
+                    - generic [ref=e696]: bonus_p0_user4@test.com
+                  - cell "1/18/2026" [ref=e697]
+                  - cell [ref=e698]
+                  - 'cell "$0.00 B: $0.00" [ref=e699]':
+                    - generic [ref=e700]: $0.00
+                    - generic [ref=e701]: "B: $0.00"
+                  - cell "Lvl" [ref=e702]
+                  - cell "low" [ref=e703]:
+                    - generic [ref=e704]: low
+                  - cell "active" [ref=e705]:
+                    - generic [ref=e706]: active
+                  - cell [ref=e707]:
+                    - button [ref=e708] [cursor=pointer]:
+                      - img
+                - 'row "bac4d984... bonus_p0_user3 bonus_p0_user3@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e709]':
+                  - cell "bac4d984..." [ref=e710]
+                  - cell "bonus_p0_user3 bonus_p0_user3@test.com" [ref=e711]:
+                    - generic [ref=e712]: bonus_p0_user3
+                    - generic [ref=e713]: bonus_p0_user3@test.com
+                  - cell "1/18/2026" [ref=e714]
+                  - cell [ref=e715]
+                  - 'cell "$0.00 B: $0.00" [ref=e716]':
+                    - generic [ref=e717]: $0.00
+                    - generic [ref=e718]: "B: $0.00"
+                  - cell "Lvl" [ref=e719]
+                  - cell "low" [ref=e720]:
+                    - generic [ref=e721]: low
+                  - cell "active" [ref=e722]:
+                    - generic [ref=e723]: active
+                  - cell [ref=e724]:
+                    - button [ref=e725] [cursor=pointer]:
+                      - img
+                - 'row "136b5df1... bonus_p0_user2 bonus_p0_user2@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e726]':
+                  - cell "136b5df1..." [ref=e727]
+                  - cell "bonus_p0_user2 bonus_p0_user2@test.com" [ref=e728]:
+                    - generic [ref=e729]: bonus_p0_user2
+                    - generic [ref=e730]: bonus_p0_user2@test.com
+                  - cell "1/18/2026" [ref=e731]
+                  - cell [ref=e732]
+                  - 'cell "$0.00 B: $0.00" [ref=e733]':
+                    - generic [ref=e734]: $0.00
+                    - generic [ref=e735]: "B: $0.00"
+                  - cell "Lvl" [ref=e736]
+                  - cell "low" [ref=e737]:
+                    - generic [ref=e738]: low
+                  - cell "active" [ref=e739]:
+                    - generic [ref=e740]: active
+                  - cell [ref=e741]:
+                    - button [ref=e742] [cursor=pointer]:
+                      - img
+                - 'row "52907ded... bonus_p0_user1 bonus_p0_user1@test.com 1/18/2026 $0.00 B: $0.00 Lvl low active" [ref=e743]':
+                  - cell "52907ded..." [ref=e744]
+                  - cell "bonus_p0_user1 bonus_p0_user1@test.com" [ref=e745]:
+                    - generic [ref=e746]: bonus_p0_user1
+                    - generic [ref=e747]: bonus_p0_user1@test.com
+                  - cell "1/18/2026" [ref=e748]
+                  - cell [ref=e749]
+                  - 'cell "$0.00 B: $0.00" [ref=e750]':
+                    - generic [ref=e751]: $0.00
+                    - generic [ref=e752]: "B: $0.00"
+                  - cell "Lvl" [ref=e753]
+                  - cell "low" [ref=e754]:
+                    - generic [ref=e755]: low
+                  - cell "active" [ref=e756]:
+                    - generic [ref=e757]: active
+                  - cell [ref=e758]:
+                    - button [ref=e759] [cursor=pointer]:
+                      - img
+                - 'row "67c3b3a4... ops_p13 ops_p13@test.com 1/6/2026 $10.00 B: $10.00 Lvl low active" [ref=e760]':
+                  - cell "67c3b3a4..." [ref=e761]
+                  - cell "ops_p13 ops_p13@test.com" [ref=e762]:
+                    - generic [ref=e763]: ops_p13
+                    - generic [ref=e764]: ops_p13@test.com
+                  - cell "1/6/2026" [ref=e765]
+                  - cell [ref=e766]
+                  - 'cell "$10.00 B: $10.00" [ref=e767]':
+                    - generic [ref=e768]: $10.00
+                    - generic [ref=e769]: "B: $10.00"
+                  - cell "Lvl" [ref=e770]
+                  - cell "low" [ref=e771]:
+                    - generic [ref=e772]: low
+                  - cell "active" [ref=e773]:
+                    - generic [ref=e774]: active
+                  - cell [ref=e775]:
+                    - button [ref=e776] [cursor=pointer]:
+                      - img
+                - 'row "1e2f8cf5... ops_p12 ops_p12@test.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e777]':
+                  - cell "1e2f8cf5..." [ref=e778]
+                  - cell "ops_p12 ops_p12@test.com" [ref=e779]:
+                    - generic [ref=e780]: ops_p12
+                    - generic [ref=e781]: ops_p12@test.com
+                  - cell "1/6/2026" [ref=e782]
+                  - cell [ref=e783]
+                  - 'cell "$0.00 B: $0.00" [ref=e784]':
+                    - generic [ref=e785]: $0.00
+                    - generic [ref=e786]: "B: $0.00"
+                  - cell "Lvl" [ref=e787]
+                  - cell "low" [ref=e788]:
+                    - generic [ref=e789]: low
+                  - cell "active" [ref=e790]:
+                    - generic [ref=e791]: active
+                  - cell [ref=e792]:
+                    - button [ref=e793] [cursor=pointer]:
+                      - img
+                - 'row "32421337... ops_p11 ops_p11@test.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e794]':
+                  - cell "32421337..." [ref=e795]
+                  - cell "ops_p11 ops_p11@test.com" [ref=e796]:
+                    - generic [ref=e797]: ops_p11
+                    - generic [ref=e798]: ops_p11@test.com
+                  - cell "1/6/2026" [ref=e799]
+                  - cell [ref=e800]
+                  - 'cell "$0.00 B: $0.00" [ref=e801]':
+                    - generic [ref=e802]: $0.00
+                    - generic [ref=e803]: "B: $0.00"
+                  - cell "Lvl" [ref=e804]
+                  - cell "low" [ref=e805]:
+                    - generic [ref=e806]: low
+                  - cell "active" [ref=e807]:
+                    - generic [ref=e808]: active
+                  - cell [ref=e809]:
+                    - button [ref=e810] [cursor=pointer]:
+                      - img
+                - 'row "c16a811c... ops_p10 ops_p10@test.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e811]':
+                  - cell "c16a811c..." [ref=e812]
+                  - cell "ops_p10 ops_p10@test.com" [ref=e813]:
+                    - generic [ref=e814]: ops_p10
+                    - generic [ref=e815]: ops_p10@test.com
+                  - cell "1/6/2026" [ref=e816]
+                  - cell [ref=e817]
+                  - 'cell "$0.00 B: $0.00" [ref=e818]':
+                    - generic [ref=e819]: $0.00
+                    - generic [ref=e820]: "B: $0.00"
+                  - cell "Lvl" [ref=e821]
+                  - cell "low" [ref=e822]:
+                    - generic [ref=e823]: low
+                  - cell "active" [ref=e824]:
+                    - generic [ref=e825]: active
+                  - cell [ref=e826]:
+                    - button [ref=e827] [cursor=pointer]:
+                      - img
+                - 'row "e9d14f73... testuser_1767708966 test_user_1767708966@example.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e828]':
+                  - cell "e9d14f73..." [ref=e829]
+                  - cell "testuser_1767708966 test_user_1767708966@example.com" [ref=e830]:
+                    - generic [ref=e831]: testuser_1767708966
+                    - generic [ref=e832]: test_user_1767708966@example.com
+                  - cell "1/6/2026" [ref=e833]
+                  - cell [ref=e834]
+                  - 'cell "$0.00 B: $0.00" [ref=e835]':
+                    - generic [ref=e836]: $0.00
+                    - generic [ref=e837]: "B: $0.00"
+                  - cell "Lvl" [ref=e838]
+                  - cell "low" [ref=e839]:
+                    - generic [ref=e840]: low
+                  - cell "active" [ref=e841]:
+                    - generic [ref=e842]: active
+                  - cell [ref=e843]:
+                    - button [ref=e844] [cursor=pointer]:
+                      - img
+                - 'row "5c5a281b... ui_fresh_user_1767708508 ui_fresh_1767708508@hotmail.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e845]':
+                  - cell "5c5a281b..." [ref=e846]
+                  - cell "ui_fresh_user_1767708508 ui_fresh_1767708508@hotmail.com" [ref=e847]:
+                    - generic [ref=e848]: ui_fresh_user_1767708508
+                    - generic [ref=e849]: ui_fresh_1767708508@hotmail.com
+                  - cell "1/6/2026" [ref=e850]
+                  - cell [ref=e851]
+                  - 'cell "$0.00 B: $0.00" [ref=e852]':
+                    - generic [ref=e853]: $0.00
+                    - generic [ref=e854]: "B: $0.00"
+                  - cell "Lvl" [ref=e855]
+                  - cell "low" [ref=e856]:
+                    - generic [ref=e857]: low
+                  - cell "active" [ref=e858]:
+                    - generic [ref=e859]: active
+                  - cell [ref=e860]:
+                    - button [ref=e861] [cursor=pointer]:
+                      - img
+                - 'row "7b1ab6da... test_user_fresh fresh_test@example.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e862]':
+                  - cell "7b1ab6da..." [ref=e863]
+                  - cell "test_user_fresh fresh_test@example.com" [ref=e864]:
+                    - generic [ref=e865]: test_user_fresh
+                    - generic [ref=e866]: fresh_test@example.com
+                  - cell "1/6/2026" [ref=e867]
+                  - cell [ref=e868]
+                  - 'cell "$0.00 B: $0.00" [ref=e869]':
+                    - generic [ref=e870]: $0.00
+                    - generic [ref=e871]: "B: $0.00"
+                  - cell "Lvl" [ref=e872]
+                  - cell "low" [ref=e873]:
+                    - generic [ref=e874]: low
+                  - cell "active" [ref=e875]:
+                    - generic [ref=e876]: active
+                  - cell [ref=e877]:
+                    - button [ref=e878] [cursor=pointer]:
+                      - img
+                - 'row "3f14f6b2... ui_new_user_1 ui_new_1@hotmail.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e879]':
+                  - cell "3f14f6b2..." [ref=e880]
+                  - cell "ui_new_user_1 ui_new_1@hotmail.com" [ref=e881]:
+                    - generic [ref=e882]: ui_new_user_1
+                    - generic [ref=e883]: ui_new_1@hotmail.com
+                  - cell "1/6/2026" [ref=e884]
+                  - cell [ref=e885]
+                  - 'cell "$0.00 B: $0.00" [ref=e886]':
+                    - generic [ref=e887]: $0.00
+                    - generic [ref=e888]: "B: $0.00"
+                  - cell "Lvl" [ref=e889]
+                  - cell "low" [ref=e890]:
+                    - generic [ref=e891]: low
+                  - cell "active" [ref=e892]:
+                    - generic [ref=e893]: active
+                  - cell [ref=e894]:
+                    - button [ref=e895] [cursor=pointer]:
+                      - img
+                - 'row "2f8bfa36... ui_test3 ui_test3@hotmail.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e896]':
+                  - cell "2f8bfa36..." [ref=e897]
+                  - cell "ui_test3 ui_test3@hotmail.com" [ref=e898]:
+                    - generic [ref=e899]: ui_test3
+                    - generic [ref=e900]: ui_test3@hotmail.com
+                  - cell "1/6/2026" [ref=e901]
+                  - cell [ref=e902]
+                  - 'cell "$0.00 B: $0.00" [ref=e903]':
+                    - generic [ref=e904]: $0.00
+                    - generic [ref=e905]: "B: $0.00"
+                  - cell "Lvl" [ref=e906]
+                  - cell "low" [ref=e907]:
+                    - generic [ref=e908]: low
+                  - cell "active" [ref=e909]:
+                    - generic [ref=e910]: active
+                  - cell [ref=e911]:
+                    - button [ref=e912] [cursor=pointer]:
+                      - img
+                - 'row "455147bc... test2 test2@hotmail.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e913]':
+                  - cell "455147bc..." [ref=e914]
+                  - cell "test2 test2@hotmail.com" [ref=e915]:
+                    - generic [ref=e916]: test2
+                    - generic [ref=e917]: test2@hotmail.com
+                  - cell "1/6/2026" [ref=e918]
+                  - cell [ref=e919]
+                  - 'cell "$0.00 B: $0.00" [ref=e920]':
+                    - generic [ref=e921]: $0.00
+                    - generic [ref=e922]: "B: $0.00"
+                  - cell "Lvl" [ref=e923]
+                  - cell "low" [ref=e924]:
+                    - generic [ref=e925]: low
+                  - cell "active" [ref=e926]:
+                    - generic [ref=e927]: active
+                  - cell [ref=e928]:
+                    - button [ref=e929] [cursor=pointer]:
+                      - img
+                - 'row "b18d997e... test1 test1@hotmail.com 1/6/2026 $0.00 B: $0.00 Lvl low active" [ref=e930]':
+                  - cell "b18d997e..." [ref=e931]
+                  - cell "test1 test1@hotmail.com" [ref=e932]:
+                    - generic [ref=e933]: test1
+                    - generic [ref=e934]: test1@hotmail.com
+                  - cell "1/6/2026" [ref=e935]
+                  - cell [ref=e936]
+                  - 'cell "$0.00 B: $0.00" [ref=e937]':
+                    - generic [ref=e938]: $0.00
+                    - generic [ref=e939]: "B: $0.00"
+                  - cell "Lvl" [ref=e940]
+                  - cell "low" [ref=e941]:
+                    - generic [ref=e942]: low
+                  - cell "active" [ref=e943]:
+                    - generic [ref=e944]: active
+                  - cell [ref=e945]:
+                    - button [ref=e946] [cursor=pointer]:
+                      - img
+                - 'row "ba9597ec... rcuser1767446979273 rc_1767446979273@example.com 1/3/2026 $0.00 B: $0.00 Lvl low active" [ref=e947]':
+                  - cell "ba9597ec..." [ref=e948]
+                  - cell "rcuser1767446979273 rc_1767446979273@example.com" [ref=e949]:
+                    - generic [ref=e950]: rcuser1767446979273
+                    - generic [ref=e951]: rc_1767446979273@example.com
+                  - cell "1/3/2026" [ref=e952]
+                  - cell [ref=e953]
+                  - 'cell "$0.00 B: $0.00" [ref=e954]':
+                    - generic [ref=e955]: $0.00
+                    - generic [ref=e956]: "B: $0.00"
+                  - cell "Lvl" [ref=e957]
+                  - cell "low" [ref=e958]:
+                    - generic [ref=e959]: low
+                  - cell "active" [ref=e960]:
+                    - generic [ref=e961]: active
+                  - cell [ref=e962]:
+                    - button [ref=e963] [cursor=pointer]:
+                      - img
+                - 'row "096f0e03... rcuser1767441602729 rc_1767441602729@example.com 1/3/2026 $0.00 B: $0.00 Lvl low active" [ref=e964]':
+                  - cell "096f0e03..." [ref=e965]
+                  - cell "rcuser1767441602729 rc_1767441602729@example.com" [ref=e966]:
+                    - generic [ref=e967]: rcuser1767441602729
+                    - generic [ref=e968]: rc_1767441602729@example.com
+                  - cell "1/3/2026" [ref=e969]
+                  - cell [ref=e970]
+                  - 'cell "$0.00 B: $0.00" [ref=e971]':
+                    - generic [ref=e972]: $0.00
+                    - generic [ref=e973]: "B: $0.00"
+                  - cell "Lvl" [ref=e974]
+                  - cell "low" [ref=e975]:
+                    - generic [ref=e976]: low
+                  - cell "active" [ref=e977]:
+                    - generic [ref=e978]: active
+                  - cell [ref=e979]:
+                    - button [ref=e980] [cursor=pointer]:
+                      - img
+                - 'row "822c9a9f... u1767435962 cooldown1767435962@ex.com 1/3/2026 $0.00 B: $0.00 Lvl low active" [ref=e981]':
+                  - cell "822c9a9f..." [ref=e982]
+                  - cell "u1767435962 cooldown1767435962@ex.com" [ref=e983]:
+                    - generic [ref=e984]: u1767435962
+                    - generic [ref=e985]: cooldown1767435962@ex.com
+                  - cell "1/3/2026" [ref=e986]
+                  - cell [ref=e987]
+                  - 'cell "$0.00 B: $0.00" [ref=e988]':
+                    - generic [ref=e989]: $0.00
+                    - generic [ref=e990]: "B: $0.00"
+                  - cell "Lvl" [ref=e991]
+                  - cell "low" [ref=e992]:
+                    - generic [ref=e993]: low
+                  - cell "active" [ref=e994]:
+                    - generic [ref=e995]: active
+                  - cell [ref=e996]:
+                    - button [ref=e997] [cursor=pointer]:
+                      - img
+                - 'row "611a0f83... u1767435946 cooldown1767435946@ex.com 1/3/2026 $0.00 B: $0.00 Lvl low active" [ref=e998]':
+                  - cell "611a0f83..." [ref=e999]
+                  - cell "u1767435946 cooldown1767435946@ex.com" [ref=e1000]:
+                    - generic [ref=e1001]: u1767435946
+                    - generic [ref=e1002]: cooldown1767435946@ex.com
+                  - cell "1/3/2026" [ref=e1003]
+                  - cell [ref=e1004]
+                  - 'cell "$0.00 B: $0.00" [ref=e1005]':
+                    - generic [ref=e1006]: $0.00
+                    - generic [ref=e1007]: "B: $0.00"
+                  - cell "Lvl" [ref=e1008]
+                  - cell "low" [ref=e1009]:
+                    - generic [ref=e1010]: low
+                  - cell "active" [ref=e1011]:
+                    - generic [ref=e1012]: active
+                  - cell [ref=e1013]:
+                    - button [ref=e1014] [cursor=pointer]:
+                      - img
+                - 'row "a69c6055... payouttest_4c783899 payouttest_d31c2a75@example.com 1/3/2026 $0.00 B: $0.00 Lvl low active" [ref=e1015]':
+                  - cell "a69c6055..." [ref=e1016]
+                  - cell "payouttest_4c783899 payouttest_d31c2a75@example.com" [ref=e1017]:
+                    - generic [ref=e1018]: payouttest_4c783899
+                    - generic [ref=e1019]: payouttest_d31c2a75@example.com
+                  - cell "1/3/2026" [ref=e1020]
+                  - cell [ref=e1021]
+                  - 'cell "$0.00 B: $0.00" [ref=e1022]':
+                    - generic [ref=e1023]: $0.00
+                    - generic [ref=e1024]: "B: $0.00"
+                  - cell "Lvl" [ref=e1025]
+                  - cell "low" [ref=e1026]:
+                    - generic [ref=e1027]: low
+                  - cell "active" [ref=e1028]:
+                    - generic [ref=e1029]: active
+                  - cell [ref=e1030]:
+                    - button [ref=e1031] [cursor=pointer]:
+                      - img
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e1032] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e1033]:
+      - img [ref=e1034]
+      - paragraph [ref=e1035]: Made with Emergent
+```
