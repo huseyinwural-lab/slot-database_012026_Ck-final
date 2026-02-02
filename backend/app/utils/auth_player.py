@@ -6,7 +6,8 @@ from sqlmodel import select
 from datetime import datetime, timezone
 
 from app.core.database import get_session
-from app.models.sql_models import Player, PlayerSessionRevocation
+from app.models.sql_models import Player
+from app.models.player_ops_models import PlayerSessionRevocation
 from config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/player/login")
