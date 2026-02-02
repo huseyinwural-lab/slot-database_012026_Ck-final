@@ -53,7 +53,7 @@ class AffiliateEngine:
         
         if commission > 0:
             # Ledger Entry
-            lt = LedgerTransaction(
+            lt = Transaction(
                 id=str(uuid.uuid4()),
                 tenant_id=attr.tenant_id,
                 player_id=affiliate.id, # Affiliate as 'player' in ledger or separate entity? 
