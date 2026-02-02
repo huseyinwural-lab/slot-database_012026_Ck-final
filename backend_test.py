@@ -8547,26 +8547,26 @@ class PlayersExportXLSXTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run P0 Money Loop Gate Backend Validation"""
-    print("🎯 P0 Money Loop Gate Backend Validation Runner")
+    """Main test runner - Run SEC-P0-02 RBAC Backend Enforcement"""
+    print("🎯 SEC-P0-02 RBAC Backend Enforcement Test Runner")
     print("=" * 80)
     
-    # Run P0 Money Loop Gate test suite (primary focus for this review request)
-    p0_gate_suite = P0MoneyLoopGateTestSuite()
-    p0_gate_success = await p0_gate_suite.run_all_tests()
+    # Run SEC-P0-02 RBAC test suite (primary focus for this review request)
+    rbac_suite = SECP002RBACTestSuite()
+    rbac_success = await rbac_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if p0_gate_success else "❌ FAIL"
-    print(f"{status}: P0 Money Loop Gate Backend Validation")
+    status = "✅ PASS" if rbac_success else "❌ FAIL"
+    print(f"{status}: SEC-P0-02 RBAC Backend Enforcement")
     
-    if p0_gate_success:
-        print("🎉 P0 Money Loop Gate backend validation PASSED!")
+    if rbac_success:
+        print("🎉 SEC-P0-02 RBAC backend enforcement tests PASSED!")
         return True
     else:
-        print("⚠️  P0 Money Loop Gate backend validation failed.")
+        print("⚠️  SEC-P0-02 RBAC backend enforcement tests failed.")
         return False
 
 
