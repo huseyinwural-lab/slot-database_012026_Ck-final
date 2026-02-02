@@ -21,7 +21,7 @@ const isPlaywright =
   /playwright/i.test(navigator.userAgent || '');
 
 const RAW =
-  process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL && isLocalBrowser
+  process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL && isLocalBrowser && !isPlaywright
     ? LOCAL_DEV_API_URL
     : (process.env.REACT_APP_BACKEND_URL || '');
 
