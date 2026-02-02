@@ -273,6 +273,7 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                   <Label>Reason</Label>
                   <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Required" />
                 </div>
+                {/* RBAC Credit Button */}
                 {canCreditDebitBonus ? (
                   <Button data-testid="player-action-credit" disabled={loading} onClick={doCredit}>Credit</Button>
                 ) : null}
