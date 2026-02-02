@@ -21,10 +21,13 @@ const isPlaywright =
   typeof navigator !== 'undefined' &&
   /playwright/i.test(navigator.userAgent || '');
 
+const primary = process.env.REACT_APP_BACKEND_URL || '';
+const primaryIsLocal = primary.includes('localhost') || primary.includes('127.0.0.1');
+
 const RAW =
-  process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL && isLocalBrowser && !isPlaywright
+  process.env.NODE_ENV === 'development' && LOCAL_DEV_API_URL && isLocalBrowser && primaryIsLocal
     ? LOCAL_DEV_API_URL
-    : (process.env.REACT_APP_BACKEND_URL || '');
+    : primary;
 
 const isHttpsPage = typeof window !== 'undefined' && window.location?.protocol === 'https:';
 const isHttpBackend = Boolean(RAW) && RAW.startsWith('http://');
