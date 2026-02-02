@@ -154,8 +154,6 @@ const GameManagement = () => {
     }
   };
 
-  const pollRef = useRef(null);
-
   const pollJobUntil = useCallback(async (jobId, { untilStatuses, maxMs = 60000 }) => {
     const started = Date.now();
 
@@ -233,13 +231,12 @@ const GameManagement = () => {
 
       setImportProgress(35);
 
-      await pollJobUntil(jobId, { untilStatuses: ['ready', 'failed'], maxMs: 60000 });
+      const jobData = await pollJobUntil(jobId, { untilStatuses: ['ready', 'failed'], maxMs: 60000 });
 
       setImportProgress(70);
       setIsPreviewOpen(true);
 
-      const status = importJob?.status;
-      if (status === 'failed') {
+      if (jobData?.status === 'failed') {
         toast.error('Upload failed', { description: 'Bundle parsing/validation failed. Please review errors.' });
       } else {
         toast.success('Preview ready', { description: 'Review the preview and confirm Import.' });
