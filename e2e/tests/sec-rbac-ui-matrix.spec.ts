@@ -36,9 +36,6 @@ async function ensureAdminUser(ownerCtx: any, ownerToken: string, email: string,
           data: {
             full_name: fullName,
             role,
-            password: DEFAULT_PASSWORD,
-            status: 'active',
-            failed_login_attempts: 0,
           },
         }
       );
