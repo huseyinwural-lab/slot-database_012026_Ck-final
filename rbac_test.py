@@ -458,11 +458,11 @@ class RBACTestSuite:
                 
                 payload = {
                     "name": f"RBAC Test Campaign {uuid.uuid4().hex[:8]}",
-                    "bonus_type": "cash",
+                    "bonus_type": "free_spins",  # Changed from "cash" to "free_spins"
                     "status": "active",
                     "game_ids": [],
-                    "bet_amount": 10.0,
-                    "spin_count": None,
+                    "bet_amount": None,
+                    "spin_count": 10,  # Required for free_spins
                     "max_uses": 100,
                     "config": {}
                 }
