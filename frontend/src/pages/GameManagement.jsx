@@ -17,6 +17,7 @@ import { useCapabilities } from '../context/CapabilitiesContext';
 
 import { toast } from 'sonner';
 import api from '../services/api';
+import axios from 'axios';
 import GameConfigReadOnlyPanel from '../components/games/GameConfigReadOnlyPanel';
 
 const GameManagement = () => {
