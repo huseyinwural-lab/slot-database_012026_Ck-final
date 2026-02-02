@@ -164,6 +164,7 @@ const PlayerList = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
+                    {/* Player Actions Button */}
                     <Button
                       data-testid="player-actions-open"
                       variant="ghost"
