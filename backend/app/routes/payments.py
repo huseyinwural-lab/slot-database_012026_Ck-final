@@ -4,7 +4,7 @@ from sqlmodel import select, func
 from typing import Optional
 
 from app.core.database import get_session
-from app.models.sql_models import Transaction, AdminUser
+from app.repositories.ledger_repo import LedgerTransaction
 from app.models.reconciliation import ReconciliationFinding
 from app.services.audit import audit
 from app.utils.auth import get_current_admin
