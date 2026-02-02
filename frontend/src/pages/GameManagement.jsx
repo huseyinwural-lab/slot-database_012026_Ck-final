@@ -372,7 +372,30 @@ const GameManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {games.map((game) => (
+                  {gamesLoading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <TableRow key={`skeleton-${i}`}>
+                        <TableCell colSpan={6}>
+                          <Skeleton className="h-8 w-full" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : games.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <div className="py-10 text-center">
+                          <div className="text-sm font-medium">Henüz veri bulunamadı</div>
+                          <div className="text-xs text-muted-foreground">Yeni bir tane ekleyin veya import edin.</div>
+                          <div className="mt-3">
+                            <Button size="sm" variant="outline" onClick={() => fetchAll(gameCategory, 1)}>
+                              Refresh
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    games.map((game) => (
                     <TableRow key={game.id}>
                       <TableCell>
                         <div className="font-medium flex items-center gap-2">
