@@ -150,7 +150,7 @@ async def poker_hand_audit(
     
     # 4. Ledger Entry for Rake Revenue (System Gain)
     # We book the Rake as "Revenue"
-    lt = Transaction(
+    lt = LedgerTransaction(
         tenant_id=tenant_id,
         player_id="system", # System account
         type="poker_rake",
