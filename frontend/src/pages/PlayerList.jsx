@@ -165,6 +165,7 @@ const PlayerList = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
+                      data-testid="player-actions-open"
                       variant="ghost"
                       size="sm"
                       onClick={() => {

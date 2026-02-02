@@ -33,23 +33,18 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
   const playerId = player?.id;
 
   const permissions = useMemo(() => {
-    try {
-      const u = JSON.parse(localStorage.getItem('admin_user') || 'null');
-      const role = u?.role;
+    const { getAdminFromStorage, getEffectiveRole, hasPermission, PERMISSIONS } = require('../lib/rbac');
 
-      const canView = !!role;
-      const canOps = role === 'Ops' || role === 'Admin' || role === 'Super Admin';
-      const canAdmin = role === 'Admin' || role === 'Super Admin';
+    const admin = getAdminFromStorage();
+    const effectiveRole = getEffectiveRole(admin);
 
-      return {
-        role,
-        canView,
-        canOps,
-        canAdmin,
-      };
-    } catch {
-      return { role: null, canView: false, canOps: false, canAdmin: false };
-    }
+    return {
+      admin,
+      effectiveRole,
+      canView: hasPermission(admin, PERMISSIONS.SUPPORT_VIEW),
+      canOps: hasPermission(admin, PERMISSIONS.OPS_ACTIONS),
+      canAdmin: hasPermission(admin, PERMISSIONS.CREDIT_ADJUSTMENT),
+    };
   }, []);
 
   const canCreditDebitBonus = permissions.canAdmin;
@@ -279,7 +274,7 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                   <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Required" />
                 </div>
                 {canCreditDebitBonus ? (
-                  <Button disabled={loading} onClick={doCredit}>Credit</Button>
+                  <Button data-testid="player-action-credit" disabled={loading} onClick={doCredit}>Credit</Button>
                 ) : null}
               </div>
 
@@ -300,7 +295,7 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                   <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Required" />
                 </div>
                 {canCreditDebitBonus ? (
-                  <Button disabled={loading} onClick={doDebit}>Debit</Button>
+                  <Button data-testid="player-action-debit" disabled={loading} onClick={doDebit}>Debit</Button>
                 ) : null}
               </div>
 
@@ -330,7 +325,7 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                   <Input value={bonusReason} onChange={(e) => setBonusReason(e.target.value)} placeholder="Required" />
                 </div>
                 {canCreditDebitBonus ? (
-                  <Button disabled={loading} onClick={doBonus}>Grant Bonus</Button>
+                  <Button data-testid="player-action-bonus" disabled={loading} onClick={doBonus}>Grant Bonus</Button>
                 ) : null}
               </div>
 
@@ -343,9 +338,9 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                 <div className="flex flex-wrap gap-2">
                   {canSuspendForce ? (
                     <>
-                      <Button disabled={loading} onClick={doSuspend} variant="destructive">Suspend</Button>
-                      <Button disabled={loading} onClick={doUnsuspend} variant="secondary">Unsuspend</Button>
-                      <Button disabled={loading} onClick={doForceLogout} variant="outline">Force Logout</Button>
+                      <Button data-testid="player-action-suspend" disabled={loading} onClick={doSuspend} variant="destructive">Suspend</Button>
+                      <Button data-testid="player-action-unsuspend" disabled={loading} onClick={doUnsuspend} variant="secondary">Unsuspend</Button>
+                      <Button data-testid="player-action-force-logout" disabled={loading} onClick={doForceLogout} variant="outline">Force Logout</Button>
                     </>
                   ) : null}
                 </div>
