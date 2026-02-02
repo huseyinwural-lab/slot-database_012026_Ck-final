@@ -8,6 +8,7 @@ class AdminUpdateRequest(BaseModel):
     email: Optional[EmailStr] = None
     role: Optional[str] = None
     tenant_role: Optional[str] = None
+    password: Optional[str] = None
 
 
 class AdminStatusRequest(BaseModel):
