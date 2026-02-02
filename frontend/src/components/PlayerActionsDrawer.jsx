@@ -33,7 +33,6 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
   const playerId = player?.id;
 
   const permissions = useMemo(() => {
-    // eslint-disable-next-line global-require
     const { getAdminFromStorage, getEffectiveRole, hasPermission, PERMISSIONS } = require('../lib/rbac');
 
     const admin = getAdminFromStorage();
