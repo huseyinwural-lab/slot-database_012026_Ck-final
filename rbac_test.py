@@ -212,7 +212,10 @@ class RBACTestSuite:
                         results[role_name] = {"status": "SKIP", "reason": "No token available"}
                         continue
                     
-                    headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default_casino"}
+                    headers = {"Authorization": f"Bearer {token}"}
+                    # Only Super Admin can use X-Tenant-ID header for impersonation
+                    if role_name == "Super Admin":
+                        headers["X-Tenant-ID"] = "default_casino"
                     response = await client.get(f"{self.base_url}/players?page=1&page_size=10", headers=headers)
                     
                     actual_status = response.status_code
