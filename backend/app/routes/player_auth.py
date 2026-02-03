@@ -62,7 +62,11 @@ async def register_player(
     )
     
     session.add(player)
-    await session.commit()
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=400, detail={"error_code": "PLAYER_CREATE_FAILED"})
     await session.refresh(player)  # Need ID for attribution
 
     player_id = str(player.id)
