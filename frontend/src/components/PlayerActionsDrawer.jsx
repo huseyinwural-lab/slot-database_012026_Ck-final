@@ -121,12 +121,17 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
 
     setLoading(true);
     try {
-      await api.post(
+      const res = await api.post(
         `/v1/players/${playerId}/debit`,
         { amount: Number(debitAmount), currency, reason },
         { headers: { 'X-Reason': reason } }
       );
       toast.success('Debited');
+      onPlayerUpdated?.({
+        balance_real: res.data.balance_real,
+        balance_bonus: res.data.balance_bonus,
+        balance_real_available: res.data.balance_real_available,
+      });
       await refreshAudit();
       setDebitAmount('');
       setReason('');
