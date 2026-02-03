@@ -29,7 +29,7 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Ops Header Health Widget (30sn polling, DB/Redis tooltip)
 - Robots backend stub: `/api/v1/robots/status` → `{ status: "idle", active_bots: 0 }`
 - Robots list stub: `/api/v1/robots` → `items: []`
-- Finance approve/retry aksiyonları + Deposits tabı “Yakında” moduna alındı
+- Finance approve/retry aksiyonları + Deposits tabı empty-state moduna alındı
 - Settings placeholder sekmeleri + Currencies “Yakında” moduna alındı
 - Deploy checklist env doğrulaması: `POSTGRES_URL` eklendi
 - Sidebar’dan Advanced Analytics / Audit Logs / System Health kaldırıldı
