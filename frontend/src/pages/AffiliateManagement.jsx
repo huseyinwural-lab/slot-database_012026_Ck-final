@@ -317,7 +317,7 @@ const AffiliateManagement = () => {
                                     <Button size="sm" onClick={() => handleStatus(a.id, 'active')}>Activate</Button>
                                   )}
                                 </TableCell>
-                            </TableRow>
+                              </TableRow>
                             ))
                           )}
                         </TableBody>
