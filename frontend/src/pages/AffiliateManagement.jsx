@@ -549,7 +549,8 @@ const AffiliateManagement = () => {
                             </div>
                             <div className="p-2 text-sm font-medium truncate">{c.name}</div>
                         </Card>
-                    ))}
+                      ))
+                    )}
                 </div>
             </TabsContent>
 
