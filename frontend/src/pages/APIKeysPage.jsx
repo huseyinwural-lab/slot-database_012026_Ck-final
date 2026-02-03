@@ -63,17 +63,15 @@ const APIKeysPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <Table data-testid="api-keys-table">
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Key Prefix</TableHead>
-                <TableHead>Tenant</TableHead>
                 <TableHead>Scopes</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead>Last Used</TableHead>
-                <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
