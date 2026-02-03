@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +21,31 @@ import CountrySettings from '../components/settings/CountrySettings';
 import ApiKeySettings from '../components/settings/ApiKeySettings';
 import PaymentsPolicySettings from '../components/settings/PaymentsPolicySettings';
 
+const COMING_SOON_TABS = new Set([
+  'currencies',
+  'domains',
+  'payment',
+  'games',
+  'communication',
+  'regulatory',
+  'theme',
+  'maintenance',
+  'audit',
+]);
+
+const ComingSoonCard = ({ title, description, testId }) => (
+  <Card data-testid={testId}>
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-muted-foreground" data-testid={`${testId}-message`}>
+        {description}
+      </p>
+    </CardContent>
+  </Card>
+);
+
 const SettingsPanel = () => {
   const [activeTab, setActiveTab] = useState("brands");
   const [brands, setBrands] = useState([]);
@@ -30,12 +56,12 @@ const SettingsPanel = () => {
 
 
   const fetchData = async (tab = activeTab) => {
+    if (COMING_SOON_TABS.has(tab)) return;
     try {
       if (tab === 'brands') {
         const data = (await api.get('/v1/settings/brands')).data;
         setBrands(Array.isArray(data) ? data : []);
       }
-      if (tab === 'currencies') setCurrencies((await api.get('/v1/settings/currencies')).data);
       if (tab === 'countries') setCountryRules((await api.get('/v1/settings/country-rules')).data);
       if (tab === 'defaults') setPlatformDefaults((await api.get('/v1/settings/platform-defaults')).data);
       if (tab === 'api-keys') setApiKeys((await api.get('/v1/settings/api-keys')).data);
