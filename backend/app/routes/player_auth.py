@@ -1,6 +1,7 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, func
 from datetime import datetime, timezone, timedelta
 from app.models.rg_models import PlayerRGProfile
 
