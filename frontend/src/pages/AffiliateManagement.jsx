@@ -305,20 +305,9 @@ const AffiliateManagement = () => {
                             />
                           ) : (
                             affiliates.map(a => (
-                            <TableRow key={a.id}>
-                                <TableCell className="font-medium">{a.company_name || a.username}</TableCell>
-                                <TableCell>{a.email}</TableCell>
-                                <TableCell className="font-bold text-green-500">${a.balance}</TableCell>
-                                <TableCell><Badge variant={a.status==='active'?'default':'secondary'}>{a.status}</Badge></TableCell>
-                                <TableCell className="text-right">
-                                  {a.status === 'active' ? (
-                                    <Button size="sm" variant="outline" onClick={() => handleStatus(a.id, 'inactive')}>Deactivate</Button>
-                                  ) : (
-                                    <Button size="sm" onClick={() => handleStatus(a.id, 'active')}>Activate</Button>
-                                  )}
-                                </TableCell>
-                            </TableRow>
-                        ))}</TableBody>
+                            ))
+                          )}
+                        </TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
