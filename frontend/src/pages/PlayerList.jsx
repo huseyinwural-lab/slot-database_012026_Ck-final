@@ -187,7 +187,7 @@ const PlayerList = () => {
                     <div className="text-green-500 font-bold">${player.balance_real.toFixed(2)}</div>
                     <div className="text-xs text-yellow-500">B: ${player.balance_bonus.toFixed(2)}</div>
                   </TableCell>
-                  <TableCell>Lvl {player.vip_level}</TableCell>
+                    <TableCell>Lvl {player.vip_level}</TableCell>
                   <TableCell>
                     <Badge variant={player.risk_score === 'high' ? 'destructive' : 'outline'}>{player.risk_score}</Badge>
                   </TableCell>
