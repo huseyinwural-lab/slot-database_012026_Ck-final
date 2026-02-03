@@ -48,6 +48,14 @@ async def list_robots(
         "meta": {"total": total, "page": page, "page_size": limit}
     }
 
+
+@router.get("/status")
+async def robots_status(
+    current_admin: AdminUser = Depends(get_current_admin),
+):
+    _ = current_admin
+    return {"status": "idle", "active_bots": 0}
+
 @router.get("/{robot_id}", response_model=RobotDefinition)
 async def get_robot(
     robot_id: str,
