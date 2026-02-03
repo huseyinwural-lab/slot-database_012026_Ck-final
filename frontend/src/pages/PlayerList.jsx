@@ -177,26 +177,26 @@ const PlayerList = () => {
                 players.map((player) => (
                   <TableRow key={player.id}>
                     <TableCell className="font-mono text-xs text-muted-foreground">{player.id.substring(0,8)}...</TableCell>
-                  <TableCell>
-                    <div className="font-medium">{player.username}</div>
-                    <div className="text-xs text-muted-foreground">{player.email}</div>
-                  </TableCell>
-                  <TableCell className="text-xs">{new Date(player.registered_at).toLocaleDateString()}</TableCell>
-                  <TableCell>{player.country}</TableCell>
-                  <TableCell>
-                    <div className="text-green-500 font-bold">${player.balance_real.toFixed(2)}</div>
-                    <div className="text-xs text-yellow-500">B: ${player.balance_bonus.toFixed(2)}</div>
-                  </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{player.username}</div>
+                      <div className="text-xs text-muted-foreground">{player.email}</div>
+                    </TableCell>
+                    <TableCell className="text-xs">{new Date(player.registered_at).toLocaleDateString()}</TableCell>
+                    <TableCell>{player.country}</TableCell>
+                    <TableCell>
+                      <div className="text-green-500 font-bold">${player.balance_real.toFixed(2)}</div>
+                      <div className="text-xs text-yellow-500">B: ${player.balance_bonus.toFixed(2)}</div>
+                    </TableCell>
                     <TableCell>Lvl {player.vip_level}</TableCell>
-                  <TableCell>
-                    <Badge variant={player.risk_score === 'high' ? 'destructive' : 'outline'}>{player.risk_score}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={player.status === 'active' ? 'default' : 'secondary'}>
-                      {player.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
+                    <TableCell>
+                      <Badge variant={player.risk_score === 'high' ? 'destructive' : 'outline'}>{player.risk_score}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={player.status === 'active' ? 'default' : 'secondary'}>
+                        {player.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
                     {/* Player Actions Button */}
                     <Button
                       data-testid="player-actions-open"
