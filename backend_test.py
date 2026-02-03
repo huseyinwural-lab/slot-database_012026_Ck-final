@@ -1589,7 +1589,7 @@ class SECP002RBACTestSuite:
         """Get an existing player from the tenant"""
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino"}
+                headers = {"Authorization": f"Bearer {self.super_admin_token}", "X-Tenant-ID": "default_casino"}
                 
                 response = await client.get(f"{self.base_url}/players?status=all&page=1&page_size=1", headers=headers)
                 if response.status_code != 200:
@@ -1620,7 +1620,7 @@ class SECP002RBACTestSuite:
                 
                 # Test each role
                 roles = [
-                    ("Super Admin", self.owner_token, 200),
+                    ("Super Admin", self.super_admin_token, 200),
                     ("Admin", self.admin_token, 200),
                     ("Ops", self.ops_token, 403),
                     ("Support", self.support_token, 403)
@@ -1656,7 +1656,7 @@ class SECP002RBACTestSuite:
                 
                 # Test each role
                 roles = [
-                    ("Super Admin", self.owner_token, [200, 409]),  # 409 if insufficient funds
+                    ("Super Admin", self.super_admin_token, [200, 409]),  # 409 if insufficient funds
                     ("Admin", self.admin_token, [200, 409]),
                     ("Ops", self.ops_token, 403),
                     ("Support", self.support_token, 403)
@@ -1692,7 +1692,7 @@ class SECP002RBACTestSuite:
                 
                 # Test each role
                 roles = [
-                    ("Super Admin", self.owner_token, 200),
+                    ("Super Admin", self.super_admin_token, 200),
                     ("Admin", self.admin_token, 200),
                     ("Ops", self.ops_token, 200),
                     ("Support", self.support_token, 403)
@@ -1728,7 +1728,7 @@ class SECP002RBACTestSuite:
                 
                 # Test each role
                 roles = [
-                    ("Super Admin", self.owner_token, [200, 409]),  # 409 if not suspended
+                    ("Super Admin", self.super_admin_token, [200, 409]),  # 409 if not suspended
                     ("Admin", self.admin_token, [200, 409]),
                     ("Ops", self.ops_token, [200, 409]),
                     ("Support", self.support_token, 403)
@@ -1770,7 +1770,7 @@ class SECP002RBACTestSuite:
                     "config": {}
                 }
                 
-                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test campaign"}
+                headers = {"Authorization": f"Bearer {self.super_admin_token}", "X-Tenant-ID": "default_casino", "X-Reason": "RBAC test campaign"}
                 response = await client.post(f"{self.base_url}/bonuses/campaigns", json=campaign_payload, headers=headers)
                 
                 if response.status_code not in [200, 201]:
@@ -1787,7 +1787,7 @@ class SECP002RBACTestSuite:
                 
                 # Test each role
                 roles = [
-                    ("Super Admin", self.owner_token, 200),
+                    ("Super Admin", self.super_admin_token, 200),
                     ("Admin", self.admin_token, 200),
                     ("Ops", self.ops_token, 403),
                     ("Support", self.support_token, 403)
@@ -1831,7 +1831,7 @@ class SECP002RBACTestSuite:
                 
                 # Test each role
                 roles = [
-                    ("Super Admin", self.owner_token, 200),
+                    ("Super Admin", self.super_admin_token, 200),
                     ("Admin", self.admin_token, 200),
                     ("Ops", self.ops_token, 403),
                     ("Support", self.support_token, 403)
@@ -1869,7 +1869,7 @@ class SECP002RBACTestSuite:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 # First create a partner
                 partner_payload = {"name": "RBAC Test Partner", "email": "rbactest@example.com"}
-                headers = {"Authorization": f"Bearer {self.owner_token}", "X-Tenant-ID": "default_casino"}
+                headers = {"Authorization": f"Bearer {self.super_admin_token}", "X-Tenant-ID": "default_casino"}
                 
                 response = await client.post(f"{self.base_url}/affiliates/partners", json=partner_payload, headers=headers)
                 if response.status_code not in [200, 201]:
@@ -1888,7 +1888,7 @@ class SECP002RBACTestSuite:
                 
                 # Test each role
                 roles = [
-                    ("Super Admin", self.owner_token, 200),
+                    ("Super Admin", self.super_admin_token, 200),
                     ("Admin", self.admin_token, 200),
                     ("Ops", self.ops_token, 200),
                     ("Support", self.support_token, 403)
