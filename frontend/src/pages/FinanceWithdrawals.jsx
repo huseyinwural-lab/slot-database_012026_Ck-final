@@ -457,7 +457,7 @@ const FinanceWithdrawals = () => {
                                 disabled={actionLoading}
                                 onClick={() => openActionModal(w, 'approve')}
                               >
-                                <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
+                                <CheckCircle2 className="w-4 h-4 mr-1" /> {actionLoading ? 'İşleniyor…' : 'Approve'}
                               </Button>
                               <Button
                                 size="sm"
