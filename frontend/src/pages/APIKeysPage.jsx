@@ -75,45 +75,59 @@ const APIKeysPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {keys.map((key) => (
-                <TableRow key={key.id}>
-                  <TableCell>{key.name}</TableCell>
-                  <TableCell className="font-mono text-xs">{maskPrefix(key.key_prefix)}</TableCell>
-                  <TableCell className="text-xs">{key.tenant_id}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {key.scopes.map((s) => (
-                        <Badge key={s} variant="outline" className="text-[10px]">
-                          {s}
-                        </Badge>
-                      ))}
+              {keysTable.loading ? (
+                <TableSkeletonRows colSpan={6} rows={5} />
+              ) : keysTable.error ? (
+                <TableRow>
+                  <TableCell colSpan={6}>
+                    <div className="py-10 text-center" data-testid="api-keys-error-state">
+                      <div className="text-sm font-medium">API anahtarı verileri yüklenemedi</div>
+                      <div className="text-xs text-muted-foreground">Lütfen daha sonra tekrar deneyin.</div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={key.active ? 'default' : 'secondary'}>
-                      {key.active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {key.created_at ? new Date(key.created_at).toLocaleString('en-US') : '-'}
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {key.last_used_at ? new Date(key.last_used_at).toLocaleString('en-US') : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={key.active}
-                      onCheckedChange={() => handleToggleActive(key.id, key.active)}
-                    />
-                  </TableCell>
                 </TableRow>
-              ))}
-              {keys.length === 0 && !loading && (
+              ) : keys.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground text-sm py-8">
-                    No API keys yet.
+                  <TableCell colSpan={6}>
+                    <div className="py-10 text-center" data-testid="api-keys-empty-state">
+                      <div className="text-sm font-medium">Aktif API anahtarı bulunmamaktadır</div>
+                      <div className="text-xs text-muted-foreground">
+                        Yeni anahtarlar yalnızca sistem yöneticisi tarafından oluşturulabilir.
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
+              ) : (
+                keys.map((key) => (
+                  <TableRow key={key.id} data-testid={`api-key-row-${key.id}`}>
+                    <TableCell>{key.name}</TableCell>
+                    <TableCell className="font-mono text-xs">{maskPrefix(key.key_prefix)}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {(key.scopes || []).length ? (
+                          key.scopes.map((s) => (
+                            <Badge key={s} variant="outline" className="text-[10px]">
+                              {s}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={key.active ? 'default' : 'secondary'}>
+                        {key.active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {key.created_at ? new Date(key.created_at).toLocaleString('tr-TR') : '-'}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {key.last_used_at ? new Date(key.last_used_at).toLocaleString('tr-TR') : '-'}
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
