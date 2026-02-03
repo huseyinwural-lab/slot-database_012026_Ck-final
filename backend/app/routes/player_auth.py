@@ -69,7 +69,7 @@ async def register_player(
         username=payload.get("username", email),
         tenant_id=tenant_id,
         password_hash=hashed_password,
-        registered_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        registered_at=datetime.utcnow(),
         last_login=None,
     )
     
