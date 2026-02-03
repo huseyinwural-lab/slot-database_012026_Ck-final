@@ -35,6 +35,8 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Sidebar’dan Advanced Analytics / Audit Logs / System Health kaldırıldı
 - API Keys sayfası stabilize edildi (useTableState) + yetki kısıtlaması toastu
 - Finance Deposits + aksiyonlar “Aktif işlem bulunmamaktadır” empty state’e çekildi
+- Robots sayfası empty state + hata toast’ları sessize alındı (silent API)
+- API client’ta `silent` flag ile global error toast baskılama eklendi
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
