@@ -417,27 +417,22 @@ const GameManagement = () => {
                 </TableHeader>
                 <TableBody>
                   {gamesLoading ? (
-                    Array.from({ length: 6 }).map((_, i) => (
-                      <TableRow key={`skeleton-${i}`}>
-                        <TableCell colSpan={6}>
-                          <Skeleton className="h-8 w-full" />
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    <TableSkeletonRows colSpan={6} rows={6} />
+                  ) : gamesError ? (
+                    <TableErrorState
+                      colSpan={6}
+                      title="Veri şu an çekilemiyor"
+                      description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                      onRetry={() => fetchAll(gameCategory, 1)}
+                    />
                   ) : games.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6}>
-                        <div className="py-10 text-center">
-                          <div className="text-sm font-medium">Henüz veri bulunamadı</div>
-                          <div className="text-xs text-muted-foreground">Yeni bir tane ekleyin veya import edin.</div>
-                          <div className="mt-3">
-                            <Button size="sm" variant="outline" onClick={() => fetchAll(gameCategory, 1)}>
-                              Refresh
-                            </Button>
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <TableEmptyState
+                      colSpan={6}
+                      title="Aradığınız kriterlere uygun kayıt bulunamadı"
+                      description="Filtreleri temizleyip tekrar deneyin."
+                      actionLabel="Filtreleri Temizle"
+                      onAction={() => fetchAll('all', 1)}
+                    />
                   ) : (
                     games.map((game) => (
                       <TableRow key={game.id}>
