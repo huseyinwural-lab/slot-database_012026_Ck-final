@@ -308,7 +308,20 @@ const BonusManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {campaigns.map((c) => (
+              {campaignsTable.loading ? (
+                <TableSkeletonRows colSpan={5} rows={6} />
+              ) : campaignsTable.error ? (
+                campaignsTable.error === 'coming_soon' ? (
+                  <TableEmptyState colSpan={5} title="Yakında" description="Bonuses servisi güncelleniyor." />
+                ) : (
+                  <TableErrorState
+                    colSpan={5}
+                    title="Veri şu an çekilemiyor"
+                    description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                    onRetry={() => fetchCampaigns()}
+                  />
+                )
+              ) : campaigns.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.bonus_type || c.type}</TableCell>
