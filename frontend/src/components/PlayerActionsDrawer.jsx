@@ -284,7 +284,9 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                 </div>
                 {/* RBAC Credit Button */}
                 {canCreditDebitBonus ? (
-                  <Button data-testid="player-action-credit" disabled={loading} onClick={doCredit}>Credit</Button>
+                  <Button data-testid="player-action-credit" disabled={loading} onClick={doCredit}>
+                    {loading ? 'Processing…' : 'Credit'}
+                  </Button>
                 ) : null}
               </div>
 
