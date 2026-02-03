@@ -28,6 +28,11 @@ Do not delete sections unless instructed.
 
 
   - ✅ **RBAC HELPERS IMPLEMENTED**: `frontend/src/lib/rbac.js` with role normalization and permission matrix
+### 2026-02-03 — P0-2 Game Import Manual Flow — PASS
+- UI/E2E Playwright: `e2e/tests/game-import-manual-flow.spec.ts` (1 passed)
+- Flow: manual upload (.json) -> preview modal -> import -> games list shows imported games ✅
+
+
   - ✅ **COMPONENT INTEGRATION**: PlayerActionsDrawer correctly uses RBAC helpers for button visibility
   - ❌ **PLAYWRIGHT TESTS FAILING**: Cannot locate elements due to missing `data-testid` attributes
 
