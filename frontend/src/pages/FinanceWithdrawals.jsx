@@ -391,18 +391,30 @@ const FinanceWithdrawals = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
-                      Loading withdrawals...
-                    </TableCell>
-                  </TableRow>
+                {table.loading ? (
+                  <TableSkeletonRows colSpan={8} rows={8} />
+                ) : table.error ? (
+                  table.error === 'coming_soon' ? (
+                    <TableEmptyState colSpan={8} title="Yakında" description="Withdrawals servisi güncelleniyor." />
+                  ) : (
+                    <TableErrorState
+                      colSpan={8}
+                      title="Veri şu an çekilemiyor"
+                      description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                      onRetry={() => fetchWithdrawals(page)}
+                    />
+                  )
                 ) : items.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
-                      No withdrawals found for current filters.
-                    </TableCell>
-                  </TableRow>
+                  <TableEmptyState
+                    colSpan={8}
+                    title="Aradığınız kriterlere uygun kayıt bulunamadı"
+                    description="Filtreleri temizleyip tekrar deneyin."
+                    actionLabel="Filtreleri Temizle"
+                    onAction={() => {
+                      setFilters({ status: 'all', q: '', provider_ref: '' });
+                      fetchWithdrawals(1);
+                    }}
+                  />
                 ) : (
                   items.map((w) => (
                     <TableRow key={w.id} className="cursor-pointer" onClick={() => handleOpenDetail(w)}>
