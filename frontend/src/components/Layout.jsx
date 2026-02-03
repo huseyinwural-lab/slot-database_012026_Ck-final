@@ -3,6 +3,7 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import KillSwitchTooltipWrapper from './KillSwitchTooltipWrapper';
 import { Search, LogOut, CreditCard, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '../services/api';
@@ -11,7 +12,7 @@ import { MENU_ITEMS } from '../config/menu';
 
 import TenantSwitcher from './TenantSwitcher';
 
-const SidebarItem = ({ to, icon: Icon, label, activeClassName, className, disabled, disabledTooltip }) => {
+const SidebarItem = ({ to, icon: Icon, label, activeClassName, className, disabled, disabledTooltip, badgeText }) => {
   if (disabled) {
     return (
       <KillSwitchTooltipWrapper disabled={true} tooltip={disabledTooltip}>
@@ -25,7 +26,14 @@ const SidebarItem = ({ to, icon: Icon, label, activeClassName, className, disabl
           }`}
         >
           <Icon className="w-5 h-5" />
-          <span className="leading-none">{label}</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="leading-none">{label}</span>
+            {badgeText ? (
+              <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5">
+                {badgeText}
+              </Badge>
+            ) : null}
+          </div>
         </div>
       </KillSwitchTooltipWrapper>
     );
@@ -140,8 +148,9 @@ const Layout = ({ children }) => {
                                     label={item.label} 
                                     activeClassName={theme.activeItem}
                                     className={item.className}
-                                    disabled={item.key === 'ops.crm' && killSwitches?.crm === true}
-                                    disabledTooltip="Module disabled by Kill Switch"
+                                    disabled={(item.key === 'ops.crm' && killSwitches?.crm === true) || item.comingSoon}
+                                    disabledTooltip={item.comingSoon ? 'Yakında' : 'Module disabled by Kill Switch'}
+                                    badgeText={item.comingSoon ? 'Yakında' : null}
                                 />
                             </li>
                         ))}
