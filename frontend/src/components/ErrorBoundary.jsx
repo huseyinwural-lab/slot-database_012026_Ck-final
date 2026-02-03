@@ -42,18 +42,23 @@ class ErrorBoundary extends React.Component {
               <div className="mx-auto bg-red-100 p-3 rounded-full w-fit mb-4">
                 <AlertTriangle className="w-8 h-8 text-red-600" />
               </div>
-              <CardTitle className="text-xl">Something went wrong</CardTitle>
+              <CardTitle className="text-xl">Bir şeyler ters gitti</CardTitle>
+              <CardDescription>
+                Beklenmedik bir hata oluştu. Yenilemeyi deneyebilir veya temiz bir başlangıç için çıkış yapabilirsiniz.
+              </CardDescription>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <p className="text-muted-foreground text-sm">
-                An unexpected error has occurred. Our team has been notified.
-              </p>
+              <div className="flex gap-2">
+                <Button onClick={this.handleReload} className="w-full" variant="outline">
+                  <RefreshCw className="w-4 h-4 mr-2" /> Yenile
+                </Button>
+                <Button onClick={this.handleLogout} className="w-full" variant="destructive">
+                  <LogOut className="w-4 h-4 mr-2" /> Çıkış Yap
+                </Button>
+              </div>
               <div className="bg-slate-100 p-3 rounded text-xs font-mono text-left overflow-auto max-h-32">
                 {this.state.error?.message || 'Unknown Error'}
               </div>
-              <Button onClick={this.handleReload} className="w-full">
-                <RefreshCw className="w-4 h-4 mr-2" /> Reload Page
-              </Button>
             </CardContent>
           </Card>
         </div>
