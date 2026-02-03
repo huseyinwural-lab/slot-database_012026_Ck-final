@@ -358,7 +358,7 @@ const FinanceWithdrawals = () => {
             </div>
 
             <div className="flex gap-2 ml-auto">
-              <Button onClick={applyFilters} disabled={loading}>
+              <Button onClick={applyFilters} disabled={table.loading}>
                 Apply
               </Button>
             </div>
