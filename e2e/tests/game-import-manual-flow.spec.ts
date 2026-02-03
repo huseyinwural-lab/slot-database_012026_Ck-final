@@ -19,7 +19,7 @@ test.describe('P0-2 Game Import (manual upload -> preview -> import)', () => {
 
     // Upload JSON fixture
     const fileInput = page.locator('input[type="file"]').first();
-    await fileInput.setInputFiles('e2e/fixtures/demo_games.json');
+    await fileInput.setInputFiles('fixtures/demo_games.json');
 
     await page.getByRole('button', { name: 'Upload & Analyze' }).click();
 
