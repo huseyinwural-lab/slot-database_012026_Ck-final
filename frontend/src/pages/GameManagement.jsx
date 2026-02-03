@@ -909,7 +909,7 @@ const GameManagement = () => {
                             !importItems.some((it) => it.status === 'valid')
                           }
                         >
-                          Import
+                          İçe Aktarmayı Başlat
                         </Button>
                       </div>
                     </DialogFooter>
