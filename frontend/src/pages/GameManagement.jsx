@@ -25,6 +25,7 @@ const GameManagement = () => {
 
   const [games, setGames] = useState([]);
   const [gamesLoading, setGamesLoading] = useState(false);
+  const [gamesError, setGamesError] = useState(null);
   const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });
   const [gamesPageSize, setGamesPageSize] = useState(50);
   const [tables, setTables] = useState([]);
