@@ -169,7 +169,10 @@ const Finance = () => {
     }
   };
 
-  useEffect(() => { fetchData(1); }, [filters, activeTab]); // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchData(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, activeTab]);
 
   const handleViewDetails = (tx) => {
     setSelectedTx(tx);
