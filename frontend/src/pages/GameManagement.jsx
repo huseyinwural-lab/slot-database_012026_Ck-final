@@ -404,9 +404,9 @@ const GameManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {gamesLoading ? (
+                  {gamesTable.loading ? (
                     <TableSkeletonRows colSpan={6} rows={6} />
-                  ) : gamesError ? (
+                  ) : gamesTable.error ? (
                     <TableErrorState
                       colSpan={6}
                       title="Veri şu an çekilemiyor"
