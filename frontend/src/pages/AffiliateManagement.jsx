@@ -318,7 +318,8 @@ const AffiliateManagement = () => {
                                   )}
                                 </TableCell>
                             </TableRow>
-                        ))}</TableBody>
+                            ))
+                          )}</TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
