@@ -356,10 +356,12 @@ const BonusManagement = () => {
                 </TableRow>
               ))}
 
-              {campaigns.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">No campaigns</TableCell>
-                </TableRow>
+              {!campaignsTable.loading && !campaignsTable.error && campaigns.length === 0 && (
+                <TableEmptyState
+                  colSpan={5}
+                  title="Aradığınız kriterlere uygun kayıt bulunamadı"
+                  description="Henüz kampanya yok."
+                />
               )}
             </TableBody>
           </Table>
