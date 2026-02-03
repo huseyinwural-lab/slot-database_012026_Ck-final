@@ -49,8 +49,5 @@ export const MENU_ITEMS = [
   { key: 'sys.simulator', section: 'System', label: 'Simulator', icon: FlaskConical, path: '/simulator', feature: 'can_use_game_robot' },
   { key: 'sys.settings', section: 'System', label: 'Settings', icon: Settings, path: '/settings', ownerOnly: true },
 
-  // COMING SOON (P1-1)
-  { key: 'sys.advanced_analytics', section: 'System', label: 'Advanced Analytics', icon: BarChart3, path: '/advanced-analytics', ownerOnly: true, comingSoon: true },
-  { key: 'sys.audit_logs', section: 'System', label: 'Audit Logs', icon: ScrollText, path: '/audit-logs', ownerOnly: true, comingSoon: true },
-  { key: 'sys.system_health', section: 'System', label: 'System Health', icon: ShieldAlert, path: '/system-health', ownerOnly: true, comingSoon: true },
+  // (Coming soon items removed for launch readiness)
 ];
