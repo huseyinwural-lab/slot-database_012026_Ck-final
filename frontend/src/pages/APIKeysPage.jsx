@@ -50,74 +50,9 @@ const APIKeysPage = () => {
             Manage scope-based API keys for Game Robot and external integrations.
           </p>
         </div>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" /> New API Key
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New API Key</DialogTitle>
-              <DialogDescription>
-                This key will only be shown once. Please store it securely after creation.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Scopes</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {scopes.map((scope) => (
-                    <button
-                      key={scope}
-                      type="button"
-                      onClick={() => toggleScope(scope)}
-                      className={`flex items-center justify-between border rounded px-3 py-2 text-xs ${
-                        newKeyScopes.includes(scope)
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'hover:bg-secondary'
-                      }`}
-                    >
-                      <span>{scope}</span>
-                      {newKeyScopes.includes(scope) && <span>✓</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <Button className="w-full" onClick={handleCreate} disabled={loading}>
-                Create
-              </Button>
-
-              {generatedSecret && generatedMeta && (
-                <Card className="mt-4 bg-muted">
-                  <CardHeader>
-                    <CardTitle className="text-sm">API Key Created</CardTitle>
-                    <CardDescription className="text-xs">
-                      This key will only be shown on this screen. Please copy and store it safely.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <code className="text-xs bg-background px-2 py-1 rounded flex-1 truncate">
-                        {generatedSecret}
-                      </code>
-                      <Button size="icon" variant="outline" onClick={copySecret}>
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Key prefix: <span className="font-mono">{generatedMeta.key_prefix}</span>
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleCreateClick} data-testid="api-keys-create-button">
+          <Plus className="w-4 h-4 mr-2" /> API Anahtarı Oluştur
+        </Button>
       </div>
 
       <Card>
