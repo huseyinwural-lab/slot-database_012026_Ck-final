@@ -378,7 +378,9 @@ const AffiliateManagement = () => {
                                 <TableCell>{o.model === 'cpa' ? `${o.cpa_amount ?? 0} ${o.currency}` : `0 ${o.currency}`}</TableCell>
                                 <TableCell><Badge variant="outline">{o.status}</Badge></TableCell>
                             </TableRow>
-                        ))}</TableBody>
+                            ))
+                          )}
+                        </TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
@@ -424,7 +426,9 @@ const AffiliateManagement = () => {
                                     <Button variant="ghost" size="sm" onClick={() => {navigator.clipboard.writeText(l.tracking_url || l.url); toast.success("Copied");}}><Copy className="w-4 h-4" /></Button>
                                 </TableCell>
                             </TableRow>
-                        ))}</TableBody>
+                            ))
+                          )}
+                        </TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
@@ -463,7 +467,9 @@ const AffiliateManagement = () => {
                                 <TableCell>{new Date(p.created_at).toLocaleDateString()}</TableCell>
                                 <TableCell><Badge variant="outline">{p.status}</Badge></TableCell>
                             </TableRow>
-                        ))}</TableBody>
+                            ))
+                          )}
+                        </TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
