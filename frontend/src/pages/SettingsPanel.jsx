@@ -16,7 +16,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Sub-components
 import BrandSettings from '../components/settings/BrandSettings';
-import CurrencySettings from '../components/settings/CurrencySettings';
 import CountrySettings from '../components/settings/CountrySettings';
 import ApiKeySettings from '../components/settings/ApiKeySettings';
 import PaymentsPolicySettings from '../components/settings/PaymentsPolicySettings';
@@ -49,7 +48,6 @@ const ComingSoonCard = ({ title, description, testId }) => (
 const SettingsPanel = () => {
   const [activeTab, setActiveTab] = useState("brands");
   const [brands, setBrands] = useState([]);
-  const [currencies, setCurrencies] = useState([]);
   const [countryRules, setCountryRules] = useState([]);
   const [platformDefaults, setPlatformDefaults] = useState(null);
   const [apiKeys, setApiKeys] = useState([]);
@@ -208,13 +206,19 @@ const SettingsPanel = () => {
 
         {/* PLACEHOLDER TABS */}
         <TabsContent value="domains" className="mt-4">
-          <Card><CardHeader><CardTitle>Domains & Markets</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Domain yönetimi yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Domains & Markets"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-domains-coming-soon"
+          />
         </TabsContent>
 
         <TabsContent value="payment" className="mt-4">
-          <Card><CardHeader><CardTitle>Payment Settings</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Ödeme sağlayıcı yönetimi yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Payment Settings"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-payment-coming-soon"
+          />
         </TabsContent>
 
         <TabsContent value="payments-policy" className="mt-4">
@@ -222,28 +226,43 @@ const SettingsPanel = () => {
         </TabsContent>
 
         <TabsContent value="games" className="mt-4">
-          <Card><CardHeader><CardTitle>Game Availability Rules</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Game Availability Rules"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-games-coming-soon"
+          />
         </TabsContent>
 
         <TabsContent value="communication" className="mt-4">
-          <Card><CardHeader><CardTitle>Email / SMS / Push Providers</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Email / SMS / Push Providers"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-communication-coming-soon"
+          />
         </TabsContent>
 
         <TabsContent value="regulatory" className="mt-4">
-          <Card><CardHeader><CardTitle>Compliance & Regulatory</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Compliance & Regulatory"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-regulatory-coming-soon"
+          />
         </TabsContent>
 
         <TabsContent value="theme" className="mt-4">
-          <Card><CardHeader><CardTitle>Theme & UI Branding</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Theme & UI Branding"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-theme-coming-soon"
+          />
         </TabsContent>
 
         <TabsContent value="maintenance" className="mt-4">
-          <Card><CardHeader><CardTitle>Maintenance & Downtime</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Bakım planları yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Maintenance & Downtime"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-maintenance-coming-soon"
+          />
         </TabsContent>
 
         <TabsContent value="versions" className="mt-4">
@@ -285,8 +304,11 @@ const SettingsPanel = () => {
         </TabsContent>
 
         <TabsContent value="audit" className="mt-4">
-          <Card><CardHeader><CardTitle>Config Audit Log</CardTitle></CardHeader>
-          <CardContent><p className="text-muted-foreground">Audit log yakında eklenecek</p></CardContent></Card>
+          <ComingSoonCard
+            title="Config Audit Log"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-audit-coming-soon"
+          />
         </TabsContent>
       </Tabs>
     </div>
