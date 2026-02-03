@@ -701,7 +701,7 @@ const Finance = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="reports" className="space-y-6">
+        <TabsContent value="reports" className="space-y-4">
             <div className="flex justify-end">
               <Button
                 variant="outline"
