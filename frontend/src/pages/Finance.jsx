@@ -155,28 +155,9 @@ const Finance = () => {
         ? res.data
         : res.data.items ?? res.data.rows ?? [];
 
-      setTransactions(Array.isArray(items) ? items : []);
+      txTable.setRows(Array.isArray(items) ? items : []);
       setTxMeta(res.data.meta || { page: safePage, page_size: effectivePageSize, total: null });
-    } catch (err) {
-      const status = err?.response?.status;
-      const detail = err?.response?.data?.detail;
-      const errorCode =
-        err?.response?.data?.error_code ||
-        err?.response?.data?.detail?.error_code ||
-        err?.code;
-
-      const detailText =
-        typeof detail === 'string' ? detail : (detail?.error_code || detail?.message);
-
-      toast.error(
-        `Failed to load transactions${status ? ` (${status})` : ''}${errorCode ? ` · ${errorCode}` : ''}`,
-        {
-          description: detailText || err?.message || 'Unknown error',
-        }
-      );
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const fetchReports = async () => {
