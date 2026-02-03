@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useTableState from '@/hooks/useTableState';
 import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,9 +14,8 @@ import PlayerActionsDrawer from '../components/PlayerActionsDrawer';
 
 const PlayerList = () => {
   const navigate = useNavigate();
-  const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const table = useTableState([]);
+  const players = table.rows;
   const [opsOpen, setOpsOpen] = useState(false);
   const [opsPlayer, setOpsPlayer] = useState(null);
   
@@ -26,27 +26,15 @@ const PlayerList = () => {
   const [riskScore, setRiskScore] = useState("all");
 
   const fetchPlayers = async ({ resetPage = false } = {}) => {
-    setLoading(true);
-    setError(null);
-
-    try {
+    await table.run(async () => {
       const params = { search };
       if (status !== "all") params.status = status;
       if (vipLevel !== "all") params.vip_level = vipLevel;
       if (riskScore !== "all") params.risk_score = riskScore;
 
       const res = await api.get('/v1/players', { params });
-      setPlayers(res.data.items || []);
-    } catch (err) {
-      const statusCode = err?.response?.status;
-      if (statusCode === 500 || statusCode === 502 || statusCode === 503) {
-        setError('db_unavailable');
-      } else {
-        setError('generic');
-      }
-    } finally {
-      setLoading(false);
-    }
+      table.setRows(res.data.items || []);
+    });
   };
 
   useEffect(() => {
