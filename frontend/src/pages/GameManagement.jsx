@@ -857,7 +857,7 @@ const GameManagement = () => {
                         <TableBody>
                           {importItems.map((item) => (
                             <TableRow key={item.id}>
-                              <TableCell>{item.name || '-'}</TableCell>
+                              <TableCell className="font-medium">{item.name || '-'}</TableCell>
                               <TableCell>{item.external_id || '-'}</TableCell>
                               <TableCell>{item.provider_id || '-'}</TableCell>
                               <TableCell>{item.type || '-'}</TableCell>
