@@ -273,11 +273,12 @@ const Finance = () => {
           if (v === 'reports') fetchReports();
         }}
       >
-        <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
+        <TabsList className="grid w-full grid-cols-5 lg:w-[760px]">
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+          <TabsTrigger value="deposits">Deposits</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
-          <TabsTrigger value="chargebacks">Chargebacks</TabsTrigger>
         </TabsList>
         <TabsContent value="transactions" className="space-y-4">
           {/* Main Filter Bar */}
