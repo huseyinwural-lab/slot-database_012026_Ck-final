@@ -148,7 +148,11 @@ const Dashboard = () => {
       const res = await api.get('/v1/dashboard/comprehensive-stats');
       setStats(res.data);
     } catch (err) {
+      // Endpoint not available in this environment -> show Coming Soon instead of fake numbers.
       console.error("Failed to fetch stats", err);
+      setStats({
+        __comingSoon: true,
+      });
     } finally {
       setLoading(false);
     }
