@@ -124,8 +124,7 @@ const Finance = () => {
   const fetchData = async (page = 1, pageSizeOverride) => {
     const safePage = Number(page) || 1;
 
-    setLoading(true);
-    try {
+    await txTable.run(async () => {
       const params = new URLSearchParams();
 
       // type can be CSV list in deep-links: bet,deposit,withdrawal
