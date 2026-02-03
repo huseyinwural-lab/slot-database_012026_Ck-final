@@ -244,7 +244,8 @@ const Dashboard = () => {
           tooltip="View details"
           onClick={() => go(`/finance?tab=transactions&type=bet&range_days=${rangeDays}`)}
         />
-      </div>
+        </div>
+      )}
 
       {/* 2. Critical Alerts & Financial Summary Row */}
       <div className="grid gap-4 md:grid-cols-12">
