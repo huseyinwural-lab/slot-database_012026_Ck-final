@@ -98,6 +98,9 @@ tmp_artifacts4/
 # Environment files
 *.env
 *.env.*
+
+!/.env.example
+!**/.env.example
 !.env.example
 !**/.env.example
 
