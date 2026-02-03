@@ -8673,9 +8673,15 @@ class PlayersExportXLSXTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run SEC-P0-02 RBAC Backend Enforcement"""
-    print("🎯 SEC-P0-02 RBAC Backend Enforcement Test Runner")
+    """Main test runner - Run Health Endpoints and SEC-P0-02 RBAC Backend Enforcement"""
+    print("🎯 P0 Health Endpoints + SEC-P0-02 RBAC Backend Enforcement Test Runner")
     print("=" * 80)
+    
+    # Run Health Endpoints test suite (P0 requirement from review request)
+    health_suite = HealthEndpointsTestSuite()
+    health_success = await health_suite.run_all_tests()
+    
+    print("\n" + "=" * 80)
     
     # Run SEC-P0-02 RBAC test suite (primary focus for this review request)
     rbac_suite = SECP002RBACTestSuite()
@@ -8685,14 +8691,19 @@ async def main():
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
-    status = "✅ PASS" if rbac_success else "❌ FAIL"
-    print(f"{status}: SEC-P0-02 RBAC Backend Enforcement")
+    health_status = "✅ PASS" if health_success else "❌ FAIL"
+    rbac_status = "✅ PASS" if rbac_success else "❌ FAIL"
     
-    if rbac_success:
-        print("🎉 SEC-P0-02 RBAC backend enforcement tests PASSED!")
+    print(f"{health_status}: P0 Health Endpoints (/api/v1/healthz, /api/v1/readyz)")
+    print(f"{rbac_status}: SEC-P0-02 RBAC Backend Enforcement")
+    
+    overall_success = health_success and rbac_success
+    
+    if overall_success:
+        print("🎉 All P0 health endpoints and RBAC backend enforcement tests PASSED!")
         return True
     else:
-        print("⚠️  SEC-P0-02 RBAC backend enforcement tests failed.")
+        print("⚠️  Some tests failed. Review the details above.")
         return False
 
 
