@@ -301,21 +301,9 @@ const Finance = () => {
         <TabsContent value="deposits" className="space-y-4">
           <Card>
             <CardContent className="p-6">
-              <div className="text-sm font-medium">Deposits</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Deposits özelliği yakında aktif edilecektir.
-              </div>
-              <div className="mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // 501 simulation through useTableState policy
-                    txTable.setError('coming_soon');
-                  }}
-                >
-                  Durumu Göster
-                </Button>
+              <div className="text-sm font-medium" data-testid="finance-deposits-title">Deposits</div>
+              <div className="text-xs text-muted-foreground mt-1" data-testid="finance-deposits-coming-soon">
+                Bu özellik yakında aktif edilecektir.
               </div>
             </CardContent>
           </Card>
