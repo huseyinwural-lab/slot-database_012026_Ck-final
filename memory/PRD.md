@@ -48,6 +48,7 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Player register: registered_at naive UTC (datetime.utcnow) set edildi
 - .gitignore güncellendi: `.env.example` dosyalarının versiyonlanması için ignore override
 - .gitignore temizlendi; `.env.example` unignore kesin olarak dosyanın sonunda
+- Frontend lint uyumu: eslint 8.57.1 + eslint-plugin-react-hooks 5.2.0 ile package.json & yarn.lock hizalandı
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
