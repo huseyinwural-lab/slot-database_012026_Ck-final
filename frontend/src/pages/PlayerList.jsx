@@ -55,6 +55,14 @@ const PlayerList = () => {
 
   const handleFilter = () => fetchPlayers();
 
+  const resetFilters = () => {
+    setSearch('');
+    setStatus('all');
+    setVipLevel('all');
+    setRiskScore('all');
+    fetchPlayers();
+  };
+
   const handleExportXlsx = async () => {
     console.info('export_xlsx_clicked');
     try {
