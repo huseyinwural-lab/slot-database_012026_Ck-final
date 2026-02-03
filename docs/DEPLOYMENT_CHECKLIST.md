@@ -11,7 +11,8 @@ Docker/Nginx config gerekmiyor.
 - [ ] “Coming Soon” placeholder’lar doğru mu? (feature yoksa fake data yok)
 
 ## Env doğrulama (Emergent UI -> Settings/Env)
-- [ ] `DATABASE_URL` doğru mu?
+- [ ] `POSTGRES_URL` doğru mu?
+- [ ] `DATABASE_URL` gerekiyorsa set mi? (legacy)
 - [ ] `JWT_SECRET` set mi?
 - [ ] `CORS_ORIGINS` prod domain’i içeriyor mu?
 - [ ] `REDIS_URL` gerekiyorsa set mi?
