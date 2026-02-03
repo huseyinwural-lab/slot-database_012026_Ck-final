@@ -33,6 +33,12 @@ Do not delete sections unless instructed.
 - Flow: manual upload (.json) -> preview modal -> import -> games list shows imported games ✅
 
 
+### 2026-02-03 — P0-2 Upload Polling Revizyonu — PASS
+- Frontend: job polling artık `useEffect + setInterval(2000)` ile çalışıyor (cleanup + unmount-safe).
+- Backend: `POST /api/v1/game-import/manual/upload` artık **201** döner.
+- Playwright tekrar koşuldu: `e2e/tests/game-import-manual-flow.spec.ts` PASS ✅
+
+
   - ✅ **COMPONENT INTEGRATION**: PlayerActionsDrawer correctly uses RBAC helpers for button visibility
   - ❌ **PLAYWRIGHT TESTS FAILING**: Cannot locate elements due to missing `data-testid` attributes
 
