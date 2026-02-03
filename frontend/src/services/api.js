@@ -120,6 +120,7 @@ api.interceptors.response.use(
     }
 
     const hasShownToast = Boolean(originalRequest.__reqid_toast_shown);
+    const silent = Boolean(originalRequest.silent);
 
     const formatRequestId = () => `Request ID: ${standardizedError.request_id || 'unavailable'}`;
 
@@ -136,7 +137,7 @@ api.interceptors.response.use(
     };
 
     const showToast = async (type, title, description) => {
-      if (hasShownToast) return;
+      if (silent || hasShownToast) return;
        
       originalRequest.__reqid_toast_shown = true;
 
