@@ -16,7 +16,8 @@ import { toast } from 'sonner';
 import { Gift, Plus } from 'lucide-react';
 
 const BonusManagement = () => {
-  const [campaigns, setCampaigns] = useState([]);
+  const campaignsTable = useTableState([]);
+  const campaigns = campaignsTable.rows;
   const [games, setGames] = useState([]);
   const [gameSearch, setGameSearch] = useState('');
 
