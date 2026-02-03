@@ -45,6 +45,7 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Player register: tenant auto-create + IntegrityError yakalama (400) eklendi
 - Player register: REGISTER_VELOCITY_LIMIT int() parse + register velocity guard
 - Player model: registered_at server_default + naive default, last_login nullable
+- Player register: registered_at naive UTC (datetime.utcnow) set edildi
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
