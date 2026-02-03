@@ -480,8 +480,10 @@ const AffiliateManagement = () => {
                                 <TableCell className="font-bold">${p.amount}</TableCell>
                                 <TableCell>{new Date(p.created_at).toLocaleDateString()}</TableCell>
                                 <TableCell><Badge variant="outline">{p.status}</Badge></TableCell>
-                            </TableRow>
-                        ))}</TableBody>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
