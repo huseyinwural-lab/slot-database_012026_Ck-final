@@ -83,6 +83,7 @@ const Finance = () => {
       const rangeDays = params.get('range_days');
 
       if (tab && ['transactions', 'reports', 'reconciliation', 'chargebacks'].includes(tab)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveTab(tab);
       }
 
