@@ -70,8 +70,14 @@ class Player(SQLModel, table=True):
     status: str = "active"
     kyc_status: str = "pending"
     risk_score: str = "low"
-    last_login: Optional[datetime] = None
-    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    registered_at: datetime = Field(
+        default_factory=lambda: datetime.utcnow(),
+        sa_column=Column(DateTime(), server_default=func.now(), nullable=False),
+    )
+    last_login: Optional[datetime] = Field(
+        default=None,
+        sa_column=Column(DateTime(), nullable=True),
+    )
 
     tenant: Tenant = Relationship(back_populates="players")
     transactions: List["Transaction"] = Relationship(back_populates="player")
