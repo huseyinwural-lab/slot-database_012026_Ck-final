@@ -80,14 +80,7 @@ const Layout = ({ children }) => {
     activeItem: 'bg-emerald-600 text-white'
   };
 
-  const handleSearch = async (val) => {
-    if (val.length > 2) {
-      try {
-        const res = await api.get(`/v1/search?q=${val}`);
-        setResults(res.data);
-      } catch (e) { console.error(e); }
-    }
-  };
+  const handleSearch = async () => {};
 
   const groupedMenu = useMemo(() => {
     const visibleItems = MENU_ITEMS.filter(item => {
@@ -180,11 +173,14 @@ const Layout = ({ children }) => {
           <div className="flex items-center gap-4 flex-1">
              <div className="relative w-full max-w-md">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Global Search (Press Ctrl+K)"
-                  className="pl-8 bg-secondary/50 border-0"
-                  onFocus={() => setOpen(true)}
-                />
+                <KillSwitchTooltipWrapper disabled={true} tooltip="Search service is being updated">
+                  <Input
+                    placeholder="Global Search (Press Ctrl+K)"
+                    className="pl-8 bg-secondary/50 border-0"
+                    readOnly
+                    onFocus={(e) => e.currentTarget.blur()}
+                  />
+                </KillSwitchTooltipWrapper>
              </div>
           </div>
           <div className="flex items-center gap-4">
@@ -248,24 +244,7 @@ const Layout = ({ children }) => {
           {children}
         </div>
 
-        <CommandDialog open={open} onOpenChange={setOpen}>
-          <CommandInput placeholder="Type to search players, transactions..." onValueChange={handleSearch} />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="Results">
-                {results.map((item, i) => (
-                    <CommandItem key={i} onSelect={() => {
-                        setOpen(false);
-                        if(item.type === 'player') navigate(`/players/${item.id}`);
-                    }}>
-                        {item.type === 'player' ? <Users className="mr-2 h-4 w-4" /> : <CreditCard className="mr-2 h-4 w-4" />}
-                        <span>{item.title}</span>
-                        <span className="ml-2 text-muted-foreground text-xs">({item.details})</span>
-                    </CommandItem>
-                ))}
-            </CommandGroup>
-          </CommandList>
-        </CommandDialog>
+        {/* Global Search disabled (P1-1) because backend /v1/search is not available. */}
 
       </main>
     </div>
