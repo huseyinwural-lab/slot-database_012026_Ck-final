@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import KillSwitchTooltipWrapper from './KillSwitchTooltipWrapper';
 import { Search, LogOut, CreditCard, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import api from '../services/api';
 import { useCapabilities } from '../context/CapabilitiesContext';
@@ -57,9 +57,16 @@ const SidebarItem = ({ to, icon: Icon, label, activeClassName, className, disabl
   );
 };
 
+const HEALTH_POLL_MS = 30000;
+
 const Layout = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState([]);
+  const [healthStatus, setHealthStatus] = useState({
+    status: 'loading',
+    db: 'unknown',
+    redis: 'unknown',
+  });
   const navigate = useNavigate();
 
   const { isOwner, tenantName, hasFeature, capabilities, loading: capabilitiesLoading } = useCapabilities();
@@ -73,6 +80,59 @@ const Layout = ({ children }) => {
     () => capabilities?.menu_flags || {},
     [capabilities?.menu_flags]
   );
+
+  useEffect(() => {
+    let active = true;
+
+    const resolveHealthUrl = () => {
+      const raw = process.env.REACT_APP_BACKEND_URL || '';
+      const isHttpsPage = typeof window !== 'undefined' && window.location?.protocol === 'https:';
+      const isHttpBackend = raw.startsWith('http://');
+      const base = (isHttpsPage && isHttpBackend) ? '' : (raw ? raw.replace(/\/$/, '') : '');
+      return base ? `${base}/api/v1/readyz` : '/api/v1/readyz';
+    };
+
+    const fetchHealth = async () => {
+      const url = resolveHealthUrl();
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error('Health check failed');
+        }
+        const data = await res.json();
+        if (!active) return;
+        const deps = data?.dependencies || {};
+        setHealthStatus({
+          status: data?.status || 'ready',
+          db: deps.database || 'unknown',
+          redis: deps.redis || 'unknown',
+        });
+      } catch {
+        if (!active) return;
+        setHealthStatus({ status: 'offline', db: 'offline', redis: 'offline' });
+      }
+    };
+
+    fetchHealth();
+    const intervalId = setInterval(fetchHealth, HEALTH_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  const formatDependency = (value) => {
+    const normalized = (value || '').toString().toLowerCase();
+    if (normalized === 'connected') return 'Online';
+    if (normalized === 'skipped') return 'Skipped';
+    if (['unreachable', 'offline', 'not_configured'].includes(normalized)) return 'Offline';
+    if (!normalized) return 'Unknown';
+    return value;
+  };
+
+  const isHealthy = healthStatus.status === 'ready';
+  const healthLabel = isHealthy ? 'Sistem Stabil' : healthStatus.status === 'loading' ? 'Kontrol ediliyor' : 'Sistem Offline';
+  const dotClass = isHealthy ? 'bg-emerald-500' : healthStatus.status === 'loading' ? 'bg-amber-400' : 'bg-red-500';
 
   // Theme Config based on Role
   const theme = isOwner ? {
@@ -200,6 +260,28 @@ const Layout = ({ children }) => {
              </div>
           </div>
           <div className="flex items-center gap-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/60 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="ops-health-widget"
+                  aria-label="Ops health status"
+                >
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${dotClass}`}
+                    data-testid="ops-health-widget-dot"
+                  />
+                  <span data-testid="ops-health-widget-label">{healthLabel}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent data-testid="ops-health-tooltip">
+                <div className="text-xs space-y-1">
+                  <div data-testid="ops-health-db-status">DB: {formatDependency(healthStatus.db)}</div>
+                  <div data-testid="ops-health-redis-status">Redis: {formatDependency(healthStatus.redis)}</div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
             <TenantSwitcher />
             <div className="text-sm text-right hidden md:block">
               <p className="font-medium">
