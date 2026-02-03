@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
@@ -151,9 +152,11 @@ async def check_velocity_limit(
 
     from config import settings
 
-    limit_count = getattr(settings, "max_tx_velocity_count", None)
-    if limit_count is None:
-        limit_count = getattr(settings, "register_velocity_limit", 100) or 100
+    raw_limit = os.getenv("REGISTER_VELOCITY_LIMIT", "100")
+    try:
+        limit_count = int(raw_limit)
+    except (TypeError, ValueError):
+        limit_count = 100
     window_minutes = settings.max_tx_velocity_window_minutes
 
     # DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
@@ -170,7 +173,7 @@ async def check_velocity_limit(
     count = (await session.execute(stmt)).scalar_one() or 0
 
     if count >= limit_count:
-        raise HTTPException(status_code=429, detail="Too many requests")
+        raise HTTPException(status_code=429, detail="Too many registration requests")
 
 
 async def check_wagering_requirement(
