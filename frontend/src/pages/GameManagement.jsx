@@ -312,7 +312,7 @@ const GameManagement = () => {
 
       setImportProgress(0);
     } finally {
-      setIsImporting(false);
+      // isImporting will be turned off by poller on terminal state
     }
   };
 
@@ -355,7 +355,7 @@ const GameManagement = () => {
 
       setImportProgress(0);
     } finally {
-      setIsImporting(false);
+      // isImporting will be turned off by poller on terminal state
     }
   };
 
