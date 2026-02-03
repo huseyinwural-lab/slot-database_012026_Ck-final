@@ -307,7 +307,9 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                   <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Required" />
                 </div>
                 {canCreditDebitBonus ? (
-                  <Button data-testid="player-action-debit" disabled={loading} onClick={doDebit}>Debit</Button>
+                  <Button data-testid="player-action-debit" disabled={loading} onClick={doDebit}>
+                    {loading ? 'Processing…' : 'Debit'}
+                  </Button>
                 ) : null}
               </div>
 
