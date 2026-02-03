@@ -39,15 +39,10 @@ const BonusManagement = () => {
   });
 
   const fetchCampaigns = async () => {
-    setLoading(true);
-    try {
+    await campaignsTable.run(async () => {
       const res = await api.get('/v1/bonuses/campaigns');
-      setCampaigns(res.data || []);
-    } catch (e) {
-      toast.error('Failed to load campaigns');
-    } finally {
-      setLoading(false);
-    }
+      campaignsTable.setRows(res.data || []);
+    });
   };
 
   const fetchGames = async () => {
