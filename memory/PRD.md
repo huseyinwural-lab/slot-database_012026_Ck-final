@@ -39,7 +39,7 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - API client’ta `silent` flag ile global error toast baskılama eklendi
 - Root `.env.example` merge edildi ve `REGISTER_VELOCITY_LIMIT=100` eklendi
 - Frontend `yarn.lock` yeniden üretildi
-- Velocity limit kontrolü: None fallback (100) + 429 (Too many requests) koruması
+- Velocity limit kontrolü: os.getenv + int() cast + 429 (Too many registration requests) koruması
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
