@@ -78,7 +78,7 @@ async def _audit_best_effort(
             pass
 
 
-@router.post("/manual/upload")
+@router.post("/manual/upload", status_code=201)
 async def manual_upload(
     request: Request,
     session: AsyncSession = Depends(get_session),

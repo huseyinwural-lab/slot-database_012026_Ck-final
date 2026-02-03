@@ -57,6 +57,8 @@ const GameManagement = () => {
   const [importJob, setImportJob] = useState(null); // {id,status,total_items,total_errors,error_summary}
   const [importItems, setImportItems] = useState([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [importJobId, setImportJobId] = useState(null);
+  const [pollActive, setPollActive] = useState(false);
 
   const fetchAll = useCallback(async (category = 'all', page = 1, pageSizeOverride) => {
     setGamesLoading(true);
