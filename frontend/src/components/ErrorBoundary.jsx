@@ -13,9 +13,21 @@ class ErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, errorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+  componentDidCatch() {
+    // Intentionally do not log to console in production UI polish phase.
   }
+
+  handleLogout = () => {
+    try {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_user');
+      localStorage.removeItem('impersonate_tenant_id');
+    } catch {
+      // ignore
+    }
+
+    window.location.href = '/login';
+  };
 
   handleReload = () => {
     window.location.reload();
