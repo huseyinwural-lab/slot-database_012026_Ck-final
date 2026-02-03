@@ -151,7 +151,11 @@ async def check_velocity_limit(
 
     from config import settings
 
-    limit_count = settings.max_tx_velocity_count
+    limit_count = getattr(settings, "register_velocity_limit", None)
+    if limit_count is None:
+        limit_count = getattr(settings, "max_tx_velocity_count", None)
+    if limit_count is None:
+        limit_count = 9999
     window_minutes = settings.max_tx_velocity_window_minutes
 
     # DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
@@ -168,15 +172,7 @@ async def check_velocity_limit(
     count = (await session.execute(stmt)).scalar_one() or 0
 
     if count >= limit_count:
-        raise HTTPException(
-            status_code=429,
-            detail={
-                "error_code": "VELOCITY_LIMIT_EXCEEDED",
-                "message": f"Too many {action} requests. Please wait.",
-                "limit": limit_count,
-                "window_minutes": window_minutes,
-            },
-        )
+        raise HTTPException(status_code=429, detail="Too many requests")
 
 
 async def check_wagering_requirement(
