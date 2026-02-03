@@ -22,11 +22,18 @@ import AffiliateReports from '../components/AffiliateReports';
 
 const AffiliateManagement = () => {
   const [activeTab, setActiveTab] = useState("partners");
-  const [affiliates, setAffiliates] = useState([]);
-  const [offers, setOffers] = useState([]);
-  const [links, setLinks] = useState([]);
-  const [payouts, setPayouts] = useState([]);
-  const [creatives, setCreatives] = useState([]);
+
+  const partnersTable = useTableState([]);
+  const offersTable = useTableState([]);
+  const linksTable = useTableState([]);
+  const payoutsTable = useTableState([]);
+  const creativesTable = useTableState([]);
+
+  const affiliates = partnersTable.rows;
+  const offers = offersTable.rows;
+  const links = linksTable.rows;
+  const payouts = payoutsTable.rows;
+  const creatives = creativesTable.rows;
   
   // Dialog States
   const [isAffOpen, setIsAffOpen] = useState(false);
