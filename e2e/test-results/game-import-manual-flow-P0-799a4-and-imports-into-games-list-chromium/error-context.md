@@ -1,0 +1,302 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - generic:
+      - complementary:
+        - generic:
+          - heading [level=1]: Platform Admin
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: Core
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /
+                      - img
+                      - generic: Dashboard
+                  - listitem:
+                    - link:
+                      - /url: /players
+                      - img
+                      - generic: Players
+                  - listitem:
+                    - link:
+                      - /url: /finance
+                      - img
+                      - generic: Finance
+                  - listitem:
+                    - link:
+                      - /url: /finance/withdrawals
+                      - img
+                      - generic: Withdrawals
+                  - listitem:
+                    - link:
+                      - /url: /revenue
+                      - img
+                      - generic: All Revenue
+                  - listitem:
+                    - link:
+                      - /url: /games
+                      - img
+                      - generic: Games
+                  - listitem:
+                    - link:
+                      - /url: /vip-games
+                      - img
+                      - generic: VIP Games
+              - generic:
+                - generic: Operations
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /kyc
+                      - img
+                      - generic: KYC Verification
+                  - listitem:
+                    - link:
+                      - /url: /crm
+                      - img
+                      - generic: CRM & Comms
+                  - listitem:
+                    - link:
+                      - /url: /bonuses
+                      - img
+                      - generic: Bonuses
+                  - listitem:
+                    - link:
+                      - /url: /affiliates
+                      - img
+                      - generic: Affiliates
+                  - listitem:
+                    - link:
+                      - /url: /kill-switch
+                      - img
+                      - generic: Kill Switch
+                  - listitem:
+                    - link:
+                      - /url: /support
+                      - img
+                      - generic: Support
+              - generic:
+                - generic: Risk & Compliance
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /risk
+                      - img
+                      - generic: Risk Rules
+                  - listitem:
+                    - link:
+                      - /url: /fraud
+                      - img
+                      - generic: Fraud Check
+                  - listitem:
+                    - link:
+                      - /url: /approvals
+                      - img
+                      - generic: Approval Queue
+                  - listitem:
+                    - link:
+                      - /url: /rg
+                      - img
+                      - generic: Responsible Gaming
+              - generic:
+                - generic: Game Engine
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /robots
+                      - img
+                      - generic: Robots
+                  - listitem:
+                    - link:
+                      - /url: /math-assets
+                      - img
+                      - generic: Math Assets
+              - generic:
+                - generic: System
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /cms
+                      - img
+                      - generic: CMS
+                  - listitem:
+                    - link:
+                      - /url: /reports
+                      - img
+                      - generic: Reports
+                  - listitem:
+                    - link:
+                      - /url: /logs
+                      - img
+                      - generic: Logs
+                  - listitem:
+                    - link:
+                      - /url: /audit
+                      - img
+                      - generic: Audit Log
+                  - listitem:
+                    - link:
+                      - /url: /admins
+                      - img
+                      - generic: Admin Users
+                  - listitem:
+                    - link:
+                      - /url: /tenants
+                      - img
+                      - generic: Tenants
+                  - listitem:
+                    - link:
+                      - /url: /keys
+                      - img
+                      - generic: API Keys
+                  - listitem:
+                    - link:
+                      - /url: /features
+                      - img
+                      - generic: Feature Flags
+                  - listitem:
+                    - link:
+                      - /url: /simulator
+                      - img
+                      - generic: Simulator
+                  - listitem:
+                    - link:
+                      - /url: /settings
+                      - img
+                      - generic: Settings
+        - generic:
+          - button:
+            - img
+            - text: Logout
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - img
+              - textbox:
+                - /placeholder: Global Search (Press Ctrl+K)
+          - generic:
+            - generic:
+              - img
+              - combobox:
+                - generic: Global Context
+                - img
+            - generic:
+              - paragraph: Super Owner
+              - paragraph: admin@casino.com
+            - generic: SO
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: "Category filter:"
+                - combobox:
+                  - generic: All
+                  - img
+            - heading [level=2]: Game Operations
+            - generic:
+              - tablist:
+                - tab:
+                  - img
+                  - text: Slots & Games
+                - tab:
+                  - img
+                  - text: Live Tables
+                - tab [selected]:
+                  - img
+                  - text: Upload & Import
+              - tabpanel:
+                - generic:
+                  - generic:
+                    - generic: Game Import Wizard
+                    - generic: Fetch games from providers or upload bundles.
+                  - generic:
+                    - generic:
+                      - text: Method
+                      - combobox:
+                        - generic: Upload HTML5 Game Bundle
+                        - img
+                    - generic:
+                      - text: Client Model / Runtime
+                      - generic:
+                        - button: HTML5
+                        - button: Unity WebGL
+                      - paragraph: Bu bilgi, import sonrası game.client_variants ve primary_client_type alanlarına yazılır.
+                    - generic:
+                      - text: Game Bundle File
+                      - generic:
+                        - button
+                      - paragraph: "Supported: .json metadata or .zip asset bundle."
+                    - generic:
+                      - text: Launch URL (optional)
+                      - textbox:
+                        - /placeholder: https://cdn.example.com/games/slot123/index.html
+                    - generic:
+                      - text: Min Client Version (optional)
+                      - textbox:
+                        - /placeholder: 1.0.0
+                    - generic:
+                      - text: Source / Studio (optional)
+                      - textbox:
+                        - /placeholder: Custom Studio X
+                    - generic:
+                      - text: Notes (optional)
+                      - textbox:
+                        - /placeholder: Any internal notes about this bundle
+                    - button:
+                      - img
+                      - text: Upload & Analyze
+          - region "Notifications alt+T"
+  - link:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic:
+      - img
+      - paragraph: Made with Emergent
+  - dialog "Import Preview" [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Import Preview" [level=2] [ref=e4]
+      - generic [ref=e5]: "Job #bfe06512-5c6e-44a3-a5a3-ed0cf2ae0e7f • status: ready • items: 2 • errors: 0"
+    - table [ref=e8]:
+      - rowgroup [ref=e9]:
+        - row "Name External ID Provider Type RTP Status Errors" [ref=e10]:
+          - columnheader "Name" [ref=e11]
+          - columnheader "External ID" [ref=e12]
+          - columnheader "Provider" [ref=e13]
+          - columnheader "Type" [ref=e14]
+          - columnheader "RTP" [ref=e15]
+          - columnheader "Status" [ref=e16]
+          - columnheader "Errors" [ref=e17]
+      - rowgroup [ref=e18]:
+        - row "Demo Game 101 demo_game_101 demo slot 96.2 valid 0" [ref=e19]:
+          - cell "Demo Game 101" [ref=e20]
+          - cell "demo_game_101" [ref=e21]
+          - cell "demo" [ref=e22]
+          - cell "slot" [ref=e23]
+          - cell "96.2" [ref=e24]
+          - cell "valid" [ref=e25]:
+            - generic [ref=e26]: valid
+          - cell "0" [ref=e27]
+        - row "Demo Game 102 demo_game_102 demo crash 97 valid 0" [ref=e28]:
+          - cell "Demo Game 102" [ref=e29]
+          - cell "demo_game_102" [ref=e30]
+          - cell "demo" [ref=e31]
+          - cell "crash" [ref=e32]
+          - cell "97" [ref=e33]
+          - cell "valid" [ref=e34]:
+            - generic [ref=e35]: valid
+          - cell "0" [ref=e36]
+    - generic [ref=e37]:
+      - button "Close" [active] [ref=e38] [cursor=pointer]
+      - generic [ref=e39]:
+        - button "Clear" [ref=e40] [cursor=pointer]
+        - button "İçe Aktarmayı Başlat" [ref=e41] [cursor=pointer]
+    - button "Close" [ref=e42] [cursor=pointer]:
+      - img [ref=e43]
+      - generic [ref=e46]: Close
+```
