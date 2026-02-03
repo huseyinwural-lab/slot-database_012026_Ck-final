@@ -377,7 +377,8 @@ const AffiliateManagement = () => {
                                 <TableCell>{o.model === 'cpa' ? `${o.cpa_amount ?? 0} ${o.currency}` : `0 ${o.currency}`}</TableCell>
                                 <TableCell><Badge variant="outline">{o.status}</Badge></TableCell>
                             </TableRow>
-                        ))}</TableBody>
+                            ))
+                          )}</TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
