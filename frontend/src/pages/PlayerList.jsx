@@ -51,6 +51,7 @@ const PlayerList = () => {
 
   useEffect(() => {
     fetchPlayers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFilter = () => fetchPlayers();
