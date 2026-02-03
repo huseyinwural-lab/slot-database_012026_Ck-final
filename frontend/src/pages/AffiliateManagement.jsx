@@ -456,7 +456,24 @@ const AffiliateManagement = () => {
                 <Card><CardContent className="pt-6">
                     <Table>
                         <TableHeader><TableRow><TableHead>Partner</TableHead><TableHead>Amount</TableHead><TableHead>Date</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                        <TableBody>{payouts.map(p => (
+                        <TableBody>
+                          {payoutsTable.loading ? (
+                            <TableSkeletonRows colSpan={6} rows={6} />
+                          ) : payoutsTable.error ? (
+                            payoutsTable.error === 'coming_soon' ? (
+                              <TableEmptyState colSpan={6} title="Yakında" description="Payouts servisi güncelleniyor." />
+                            ) : (
+                              <TableErrorState
+                                colSpan={6}
+                                title="Veri şu an çekilemiyor"
+                                description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                                onRetry={() => fetchData()}
+                              />
+                            )
+                          ) : payouts.length === 0 ? (
+                            <TableEmptyState colSpan={6} title="Aradığınız kriterlere uygun kayıt bulunamadı" description="Henüz payout yok." />
+                          ) : (
+                            payouts.map(p => (
                             <TableRow key={p.id}>
                                 <TableCell>{p.affiliate_id.substring(0,8)}...</TableCell>
                                 <TableCell className="font-bold">${p.amount}</TableCell>
