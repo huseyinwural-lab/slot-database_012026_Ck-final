@@ -465,7 +465,7 @@ const FinanceWithdrawals = () => {
                                 disabled={actionLoading}
                                 onClick={() => openActionModal(w, 'reject')}
                               >
-                                <XCircle className="w-4 h-4 mr-1" /> Reject
+                                <XCircle className="w-4 h-4 mr-1" /> {actionLoading ? 'İşleniyor…' : 'Reject'}
                               </Button>
                             </>
                           )}
@@ -476,7 +476,7 @@ const FinanceWithdrawals = () => {
                               disabled={actionLoading}
                               onClick={() => openActionModal(w, 'mark_paid')}
                             >
-                              <CheckCircle2 className="w-4 h-4 mr-1" /> Mark Paid
+                              <CheckCircle2 className="w-4 h-4 mr-1" /> {actionLoading ? 'İşleniyor…' : 'Mark Paid'}
                             </Button>
                           )}
                           {canMarkFailed(w) && (
@@ -486,7 +486,7 @@ const FinanceWithdrawals = () => {
                               disabled={actionLoading}
                               onClick={() => openActionModal(w, 'mark_failed')}
                             >
-                              <XCircle className="w-4 h-4 mr-1" /> Mark Failed
+                              <XCircle className="w-4 h-4 mr-1" /> {actionLoading ? 'İşleniyor…' : 'Mark Failed'}
                             </Button>
                           )}
                         </div>
