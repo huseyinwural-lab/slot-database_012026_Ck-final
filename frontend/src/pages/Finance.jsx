@@ -469,10 +469,34 @@ const Finance = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loading ? (
-                    <TableRow><TableCell colSpan={15} className="text-center h-32">Loading...</TableCell></TableRow>
+                  {txTable.loading ? (
+                    <TableSkeletonRows colSpan={15} rows={8} />
+                  ) : txTable.error ? (
+                    txTable.error === 'coming_soon' ? (
+                      <TableEmptyState colSpan={15} title="Yakında" description="Finance servisi güncelleniyor." />
+                    ) : (
+                      <TableErrorState
+                        colSpan={15}
+                        title="Veri şu an çekilemiyor"
+                        description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                        onRetry={() => fetchData(txMeta.page || 1)}
+                      />
+                    )
                   ) : transactions.length === 0 ? (
-                    <TableRow><TableCell colSpan={15} className="text-center h-32 text-muted-foreground">No transactions found matching filters</TableCell></TableRow>
+                    <TableEmptyState
+                      colSpan={15}
+                      title="Aradığınız kriterlere uygun kayıt bulunamadı"
+                      description="Filtreleri temizleyip tekrar deneyin."
+                      actionLabel="Filtreleri Temizle"
+                      onAction={() => {
+                        setType('all');
+                        setStatus('all');
+                        setMethod('all');
+                        setProvider('all');
+                        setSearch('');
+                        fetchData(1);
+                      }}
+                    />
                   ) : (
                     transactions.map((tx) => (
                       <TableRow key={tx.id}>
