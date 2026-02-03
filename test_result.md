@@ -43,6 +43,14 @@ Do not delete sections unless instructed.
   - ❌ **PLAYWRIGHT TESTS FAILING**: Cannot locate elements due to missing `data-testid` attributes
 
 - **DETAILED FINDINGS**:
+### 2026-02-03 — P1-1 Nav Integrity — PASS
+- Admin: `ModuleDisabled` return button now navigates to `/` (not `/dashboard`) ✅
+- Admin sidebar: Coming-soon items shown as disabled + badge “Yakında” + tooltip ✅
+- Player UI: /slots and /promotions links removed ✅
+- Global Search: disabled (readOnly + tooltip, command palette removed) ✅
+- Playwright: `e2e/tests/nav-integrity.spec.ts` (2 passed)
+
+
   - **Source Code Analysis**: ✅ All required test IDs present in source code:
     - `data-testid="player-actions-open"` in PlayerList.jsx (line 168)
     - `data-testid="player-action-credit/debit/bonus/suspend/unsuspend/force-logout"` in PlayerActionsDrawer.jsx
