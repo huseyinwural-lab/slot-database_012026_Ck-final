@@ -290,20 +290,10 @@ const GameManagement = () => {
         throw new Error('MISSING_JOB_ID');
       }
 
-      setImportProgress(35);
-
-      const jobData = await pollJobUntil(jobId, { untilStatuses: ['ready', 'failed'], maxMs: 60000 });
-
-      setImportProgress(70);
-      setIsPreviewOpen(true);
-
-      if (jobData?.status === 'failed') {
-        toast.error('Upload failed', { description: 'Bundle parsing/validation failed. Please review errors.' });
-      } else {
-        toast.success('Preview ready', { description: 'Review the preview and confirm Import.' });
-      }
-
-      setImportProgress(85);
+      // Start polling
+      setImportJobId(jobId);
+      setPollActive(true);
+      setImportProgress(20);
     } catch (err) {
       const code = err?.standardized?.code || err?.response?.data?.error_code;
       const status = err?.response?.status;
