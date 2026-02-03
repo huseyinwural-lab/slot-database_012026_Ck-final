@@ -40,6 +40,9 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Root `.env.example` merge edildi ve `REGISTER_VELOCITY_LIMIT=100` eklendi
 - Frontend `yarn.lock` yeniden üretildi
 - Velocity limit kontrolü: os.getenv + int() cast + 429 (Too many registration requests) koruması
+- Docs smoke: root/backend/frontend/frontend-player `.env.example` dosyaları tamamlandı
+- Frontend lint: `@eslint/js` 8.57.1 hizalandı + yarn.lock güncellendi
+- Player register: tenant auto-create + IntegrityError yakalama (400) eklendi
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
