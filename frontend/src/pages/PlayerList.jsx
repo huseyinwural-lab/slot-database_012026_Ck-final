@@ -157,9 +157,25 @@ const PlayerList = () => {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={9} className="text-center">Loading...</TableCell></TableRow>
-              ) : players.map((player) => (
-                <TableRow key={player.id}>
+                <TableSkeletonRows colSpan={9} rows={8} />
+              ) : error ? (
+                <TableErrorState
+                  colSpan={9}
+                  title="Veri şu an çekilemiyor"
+                  description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                  onRetry={() => fetchPlayers()}
+                />
+              ) : players.length === 0 ? (
+                <TableEmptyState
+                  colSpan={9}
+                  title="Aradığınız kriterlere uygun kayıt bulunamadı"
+                  description="Filtreleri temizleyip tekrar deneyin."
+                  actionLabel="Filtreleri Temizle"
+                  onAction={resetFilters}
+                />
+              ) : (
+                players.map((player) => (
+                  <TableRow key={player.id}>
                   <TableCell className="font-mono text-xs text-muted-foreground">{player.id.substring(0,8)}...</TableCell>
                   <TableCell>
                     <div className="font-medium">{player.username}</div>
