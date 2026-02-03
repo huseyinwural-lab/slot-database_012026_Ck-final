@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     kyc_unverified_daily_deposit_cap: float = 100.0
     max_tx_velocity_count: int = 5
     max_tx_velocity_window_minutes: int = 1
-    register_velocity_limit: Optional[int] = Field(default=None, validation_alias=AliasChoices("REGISTER_VELOCITY_LIMIT"))
+    register_velocity_limit: int = Field(default=100, validation_alias=AliasChoices("REGISTER_VELOCITY_LIMIT"))
 
 
     # Player frontend base URL (used for payment redirect construction when Origin header is absent)
