@@ -158,32 +158,73 @@ const GameManagement = () => {
     }
   };
 
-  const pollJobUntil = useCallback(async (jobId, { untilStatuses, maxMs = 60000 }) => {
-    const started = Date.now();
+  const fetchJob = useCallback(async (jobId) => {
+    const res = await api.get(`/v1/game-import/jobs/${jobId}`);
+    const status = res.data?.status;
 
-    while (Date.now() - started < maxMs) {
-      const res = await api.get(`/v1/game-import/jobs/${jobId}`);
-      const status = res.data?.status;
+    setImportJob({
+      id: res.data?.job_id,
+      status,
+      total_items: res.data?.total_items,
+      total_errors: res.data?.total_errors,
+      error_summary: res.data?.error_summary,
+    });
+    setImportItems(res.data?.items || []);
 
-      setImportJob({
-        id: res.data?.job_id,
-        status,
-        total_items: res.data?.total_items,
-        total_errors: res.data?.total_errors,
-        error_summary: res.data?.error_summary,
-      });
-      setImportItems(res.data?.items || []);
-
-      if (untilStatuses.includes(status)) {
-        return res.data;
-      }
-
-      // Keep UI responsive
-      await new Promise((r) => setTimeout(r, 800));
-    }
-
-    throw new Error('JOB_POLL_TIMEOUT');
+    return res.data;
   }, []);
+
+  // Poll job every 2s when active. Ensures proper cleanup on unmount.
+  useEffect(() => {
+    if (!importJobId || !pollActive) return undefined;
+
+    let cancelled = false;
+
+    const tick = async () => {
+      try {
+        const data = await fetchJob(importJobId);
+        if (cancelled) return;
+
+        // Map backend status -> UI progress
+        if (data?.status === 'queued') setImportProgress(20);
+        if (data?.status === 'running') setImportProgress(50);
+        if (data?.status === 'ready') setImportProgress(80);
+        if (data?.status === 'completed') setImportProgress(100);
+        if (data?.status === 'failed') setImportProgress(100);
+
+        // Terminal states
+        if (data?.status === 'ready') {
+          setPollActive(false);
+          setIsImporting(false);
+          setIsPreviewOpen(true);
+        }
+        if (data?.status === 'failed') {
+          setPollActive(false);
+          setIsImporting(false);
+          toast.error('Upload failed', {
+            description: JSON.stringify(data?.error_summary || 'Validation failed'),
+          });
+        }
+        if (data?.status === 'completed') {
+          setPollActive(false);
+          setIsImporting(false);
+        }
+      } catch (e) {
+        if (cancelled) return;
+        setPollActive(false);
+        setIsImporting(false);
+      }
+    };
+
+    // run immediately, then interval
+    tick();
+    const id = setInterval(tick, 2000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [importJobId, pollActive, fetchJob]);
 
   const handleUpload = async () => {
     if (isImporting) return;
