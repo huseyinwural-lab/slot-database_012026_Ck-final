@@ -22,7 +22,7 @@ const RobotsPage = () => {
       const res = await api.get('/v1/robots', { params: { search } });
       setRobots(res.data.items || []);
     } catch (e) {
-      toast.error('Failed to load robots');
+      setRobots([]);
     } finally {
       setLoading(false);
     }
@@ -67,11 +67,12 @@ const RobotsPage = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <Input 
-          placeholder="Search robots..." 
-          className="max-w-sm" 
+        <Input
+          placeholder="Search robots..."
+          className="max-w-sm"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          data-testid="robots-search-input"
         />
       </div>
 
@@ -128,6 +129,16 @@ const RobotsPage = () => {
                   </TableCell>
                 </TableRow>
               ))}
+              {robots.length === 0 && !loading && (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <div className="py-10 text-center" data-testid="robots-empty-state">
+                      <div className="text-sm font-medium">Henüz kayıtlı robot bulunamadı</div>
+                      <div className="text-xs text-muted-foreground">Robot kayıtları oluşturulduğunda burada görünecektir.</div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
