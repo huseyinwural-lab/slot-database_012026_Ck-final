@@ -283,7 +283,28 @@ const AffiliateManagement = () => {
                 <Card><CardContent className="pt-6">
                     <Table>
                         <TableHeader><TableRow><TableHead>Partner</TableHead><TableHead>Email</TableHead><TableHead>Balance</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
-                        <TableBody>{affiliates.map(a => (
+                        <TableBody>
+                          {partnersTable.loading ? (
+                            <TableSkeletonRows colSpan={5} rows={6} />
+                          ) : partnersTable.error ? (
+                            partnersTable.error === 'coming_soon' ? (
+                              <TableEmptyState colSpan={5} title="Yakında" description="Affiliates servisi güncelleniyor." />
+                            ) : (
+                              <TableErrorState
+                                colSpan={5}
+                                title="Veri şu an çekilemiyor"
+                                description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                                onRetry={() => fetchData()}
+                              />
+                            )
+                          ) : affiliates.length === 0 ? (
+                            <TableEmptyState
+                              colSpan={5}
+                              title="Aradığınız kriterlere uygun kayıt bulunamadı"
+                              description="Henüz partner yok."
+                            />
+                          ) : (
+                            affiliates.map(a => (
                             <TableRow key={a.id}>
                                 <TableCell className="font-medium">{a.company_name || a.username}</TableCell>
                                 <TableCell>{a.email}</TableCell>
