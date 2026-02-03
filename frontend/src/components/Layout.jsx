@@ -167,6 +167,7 @@ const Layout = ({ children }) => {
 
         <div className="p-4 border-t border-border mt-auto bg-card">
           <button
+            data-testid="sidebar-logout-button"
             className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg w-full transition-colors"
             onClick={() => {
               if (typeof window !== 'undefined') {
