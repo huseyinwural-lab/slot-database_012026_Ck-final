@@ -1331,6 +1331,130 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class HealthEndpointsTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def test_healthz_endpoint(self) -> bool:
+        """Test GET /api/v1/healthz returns status ok"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(f"{self.base_url}/healthz")
+                
+                if response.status_code != 200:
+                    self.log_result("Health Check (/api/v1/healthz)", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                status = data.get("status")
+                
+                if status != "ok":
+                    self.log_result("Health Check (/api/v1/healthz)", False, 
+                                  f"Expected status 'ok', got '{status}'")
+                    return False
+                
+                self.log_result("Health Check (/api/v1/healthz)", True, 
+                              f"Health endpoint returned status: {status}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Health Check (/api/v1/healthz)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_readyz_endpoint(self) -> bool:
+        """Test GET /api/v1/readyz returns ready with database connected"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(f"{self.base_url}/readyz")
+                
+                if response.status_code != 200:
+                    self.log_result("Readiness Check (/api/v1/readyz)", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+                
+                data = response.json()
+                status = data.get("status")
+                dependencies = data.get("dependencies", {})
+                
+                if status != "ready":
+                    self.log_result("Readiness Check (/api/v1/readyz)", False, 
+                                  f"Expected status 'ready', got '{status}'")
+                    return False
+                
+                # Check database dependency
+                db_status = dependencies.get("database")
+                if db_status != "connected":
+                    self.log_result("Readiness Check (/api/v1/readyz)", False, 
+                                  f"Expected database 'connected', got '{db_status}'")
+                    return False
+                
+                # Redis should be skipped if not configured
+                redis_status = dependencies.get("redis")
+                if redis_status not in ["skipped", "connected"]:
+                    self.log_result("Readiness Check (/api/v1/readyz)", False, 
+                                  f"Expected redis 'skipped' or 'connected', got '{redis_status}'")
+                    return False
+                
+                self.log_result("Readiness Check (/api/v1/readyz)", True, 
+                              f"Readiness endpoint returned status: {status}, db: {db_status}, redis: {redis_status}")
+                return True
+                
+        except Exception as e:
+            self.log_result("Readiness Check (/api/v1/readyz)", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete health endpoints test suite"""
+        print("🚀 Starting Health Endpoints Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: Health check endpoint
+        test_results.append(await self.test_healthz_endpoint())
+        
+        # Test 2: Readiness check endpoint
+        test_results.append(await self.test_readyz_endpoint())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 HEALTH ENDPOINTS TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All health endpoint tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class SECP002RBACTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
