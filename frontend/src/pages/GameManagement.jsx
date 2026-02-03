@@ -76,19 +76,10 @@ const GameManagement = () => {
         api.get('/v1/tables'),
       ]);
       const data = gamesRes.data || {};
-      setGames(data.items || []);
+      gamesTable.setRows(data.items || []);
       setGamesMeta(data.meta || { page, page_size: effectivePageSize, total: null });
       setTables(tablesRes.data || []);
-    } catch (err) {
-      const status = err?.response?.status;
-      if (status === 500 || status === 502 || status === 503) {
-        setGamesError('db_unavailable');
-      } else {
-        setGamesError('generic');
-      }
-    } finally {
-      setGamesLoading(false);
-    }
+    });
   }, [gamesPageSize]);
 
   useEffect(() => {
