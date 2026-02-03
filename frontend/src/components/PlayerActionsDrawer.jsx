@@ -354,9 +354,15 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
                 <div className="flex flex-wrap gap-2">
                   {canSuspendForce ? (
                     <>
-                      <Button data-testid="player-action-suspend" disabled={loading} onClick={doSuspend} variant="destructive">Suspend</Button>
-                      <Button data-testid="player-action-unsuspend" disabled={loading} onClick={doUnsuspend} variant="secondary">Unsuspend</Button>
-                      <Button data-testid="player-action-force-logout" disabled={loading} onClick={doForceLogout} variant="outline">Force Logout</Button>
+                      <Button data-testid="player-action-suspend" disabled={loading} onClick={doSuspend} variant="destructive">
+                        {loading ? 'Processing…' : 'Suspend'}
+                      </Button>
+                      <Button data-testid="player-action-unsuspend" disabled={loading} onClick={doUnsuspend} variant="secondary">
+                        {loading ? 'Processing…' : 'Unsuspend'}
+                      </Button>
+                      <Button data-testid="player-action-force-logout" disabled={loading} onClick={doForceLogout} variant="outline">
+                        {loading ? 'Processing…' : 'Force Logout'}
+                      </Button>
                     </>
                   ) : null}
                 </div>
