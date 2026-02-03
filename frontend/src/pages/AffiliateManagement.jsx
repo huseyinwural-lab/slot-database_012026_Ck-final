@@ -354,7 +354,24 @@ const AffiliateManagement = () => {
                 <Card><CardContent className="pt-6">
                     <Table>
                         <TableHeader><TableRow><TableHead>Offer</TableHead><TableHead>Model</TableHead><TableHead>Rate</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                        <TableBody>{offers.map(o => (
+                        <TableBody>
+                          {offersTable.loading ? (
+                            <TableSkeletonRows colSpan={4} rows={6} />
+                          ) : offersTable.error ? (
+                            offersTable.error === 'coming_soon' ? (
+                              <TableEmptyState colSpan={4} title="Yakında" description="Offers servisi güncelleniyor." />
+                            ) : (
+                              <TableErrorState
+                                colSpan={4}
+                                title="Veri şu an çekilemiyor"
+                                description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                                onRetry={() => fetchData()}
+                              />
+                            )
+                          ) : offers.length === 0 ? (
+                            <TableEmptyState colSpan={4} title="Aradığınız kriterlere uygun kayıt bulunamadı" description="Henüz offer yok." />
+                          ) : (
+                            offers.map(o => (
                             <TableRow key={o.id}>
                                 <TableCell>{o.name}</TableCell>
                                 <TableCell className="uppercase">{o.model}</TableCell>
