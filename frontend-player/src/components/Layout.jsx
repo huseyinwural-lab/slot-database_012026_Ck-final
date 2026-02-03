@@ -27,7 +27,7 @@ const Layout = () => {
             <Link to="/" className="hover:text-primary transition-colors">Lobby</Link>
             {/* Slots route not implemented yet (P1-1). */}
             <Link to="/wallet" className="hover:text-primary transition-colors">Wallet</Link>
-            <Link to="/promotions" className="hover:text-primary transition-colors">Promotions</Link>
+            {/* Promotions route not implemented yet (P1-1). */}
           </nav>
 
           <div className="flex items-center gap-4">
