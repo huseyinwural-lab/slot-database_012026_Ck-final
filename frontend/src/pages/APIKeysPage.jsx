@@ -16,7 +16,7 @@ const APIKeysPage = () => {
   const fetchData = async () => {
     await keysTable
       .run(async () => {
-        const keysRes = await api.get('/v1/api-keys/');
+        const keysRes = await api.get('/v1/api-keys/', { silent: true });
         keysTable.setRows(Array.isArray(keysRes.data) ? keysRes.data : []);
       })
       .catch(() => {
