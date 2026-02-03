@@ -21,7 +21,24 @@ async def register_player(
 ):
     email = payload.get("email")
     tenant_id = payload.get("tenant_id", "default_casino")
-    
+
+    tenant = await session.get(Tenant, tenant_id)
+    if tenant is None:
+        if tenant_id == "default_casino":
+            tenant = Tenant(
+                id="default_casino",
+                name="Default Casino",
+                type="owner",
+                features={},
+            )
+            session.add(tenant)
+            try:
+                await session.commit()
+            except IntegrityError:
+                await session.rollback()
+        else:
+            raise HTTPException(status_code=400, detail={"error_code": "TENANT_NOT_FOUND"})
+
     # Check exists
     stmt = select(Player).where(Player.email == email).where(Player.tenant_id == tenant_id)
     res = await session.execute(stmt)
