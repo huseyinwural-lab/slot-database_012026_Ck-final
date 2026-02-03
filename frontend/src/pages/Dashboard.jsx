@@ -200,7 +200,15 @@ const Dashboard = () => {
       </div>
       
       {/* 1. KPI Cards Row */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {stats?.__comingSoon ? (
+        <Card className="p-6">
+          <CardTitle>Dashboard Metrics</CardTitle>
+          <CardDescription className="mt-1">
+            Yakında: metrik endpoint’leri güncelleniyor.
+          </CardDescription>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard 
           title="GGR (Gross Revenue)" 
           value={`$154,200`} 
