@@ -475,7 +475,7 @@ const AffiliateManagement = () => {
                             <TableEmptyState colSpan={6} title="Aradığınız kriterlere uygun kayıt bulunamadı" description="Henüz payout yok." />
                           ) : (
                             payouts.map(p => (
-                            <TableRow key={p.id}>
+                              <TableRow key={p.id}>
                                 <TableCell>{p.affiliate_id.substring(0,8)}...</TableCell>
                                 <TableCell className="font-bold">${p.amount}</TableCell>
                                 <TableCell>{new Date(p.created_at).toLocaleDateString()}</TableCell>
