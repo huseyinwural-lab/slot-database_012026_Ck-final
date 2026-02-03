@@ -451,19 +451,33 @@ const Finance = () => {
                       variant="outline"
                       size="sm"
                       disabled
-                      title="Not available in this environment"
+                      title="Yakında aktif edilecektir"
                       className="text-green-600 bg-green-50 border-green-200"
+                      data-testid="finance-bulk-approve-coming-soon"
                     >
                       Approve ({selectedRows.length})
+                      <span
+                        className="ml-2 text-[10px] uppercase text-muted-foreground"
+                        data-testid="finance-bulk-approve-badge"
+                      >
+                        Yakında
+                      </span>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       disabled
-                      title="Not available in this environment"
+                      title="Yakında aktif edilecektir"
                       className="text-red-600 bg-red-50 border-red-200"
+                      data-testid="finance-bulk-reject-coming-soon"
                     >
                       Reject ({selectedRows.length})
+                      <span
+                        className="ml-2 text-[10px] uppercase text-muted-foreground"
+                        data-testid="finance-bulk-reject-badge"
+                      >
+                        Yakında
+                      </span>
                     </Button>
                   </>
                 )}
