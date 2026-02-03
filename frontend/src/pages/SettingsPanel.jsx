@@ -158,7 +158,11 @@ const SettingsPanel = () => {
 
         {/* CURRENCIES */}
         <TabsContent value="currencies" className="mt-4">
-          <CurrencySettings currencies={currencies} onRefresh={fetchData} />
+          <ComingSoonCard
+            title="Currencies"
+            description="Bu özellik yakında aktif edilecektir."
+            testId="settings-currencies-coming-soon"
+          />
         </TabsContent>
 
         {/* COUNTRIES */}
