@@ -68,6 +68,17 @@ Do not delete sections unless instructed.
     - Suspend, Unsuspend, Force Logout buttons present (Ops+ permissions)
   - **RBAC Logic**: ✅ Role normalization working ("Tenant Admin" → "Admin")
   - **Permission Matrix**: ✅ Correct button visibility based on user role
+### 2026-02-03 — P1-2 Phase 2 Table Standardization — PASS
+- Added `useTableState` hook and applied across:
+  - PlayerList, GameManagement (GameList)
+  - Finance (Transactions)
+  - FinanceWithdrawals
+  - BonusManagement
+  - AffiliateManagement (Partners/Offers/Links/Payouts/Creatives)
+- Coming Soon policy: **only on HTTP 501** (Phase 2 policy)
+- Playwright regression suite re-run after Phase 2: 7/7 PASS ✅
+
+
 
 - **ROOT CAUSE**: Frontend hot reload/deployment issue preventing test IDs from appearing in browser
 - **IMPACT**: Playwright tests cannot execute due to missing selectors, but underlying RBAC functionality is working
