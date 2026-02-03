@@ -264,7 +264,6 @@ const Layout = ({ children }) => {
       </main>
         </div>
       </TooltipProvider>
-      </TooltipProvider>
     </div>
   );
 };
