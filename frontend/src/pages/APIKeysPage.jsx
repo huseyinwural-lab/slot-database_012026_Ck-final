@@ -28,54 +28,10 @@ const APIKeysPage = () => {
     fetchData();
   }, []);
 
-  const toggleScope = (scope) => {
-    setNewKeyScopes((prev) =>
-      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
-    );
-  };
-
-  const handleCreate = async () => {
-    if (!newKeyName.trim()) {
-      toast.error('Name is required');
-      return;
-    }
-    if (newKeyScopes.length === 0) {
-      toast.error('You must select at least one scope');
-      return;
-    }
-    try {
-      const res = await api.post('/v1/api-keys/', {
-        name: newKeyName.trim(),
-        scopes: newKeyScopes,
-      });
-      setGeneratedSecret(res.data.api_key);
-      setGeneratedMeta(res.data.key);
-      toast.success('API key created');
-      setNewKeyName('');
-      setNewKeyScopes([]);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-      const detail = err?.response?.data?.detail;
-      if (detail?.error_code === 'INVALID_API_KEY_SCOPE') {
-        toast.error('Invalid scope selection');
-      } else if (err?.response?.status === 403 && detail?.error_code === 'TENANT_FEATURE_DISABLED') {
-        toast.error('This module is disabled for your tenant.');
-      } else {
-        toast.error('Failed to create API key');
-      }
-    }
-  };
-
-  const handleToggleActive = async (id, current) => {
-    try {
-      const res = await api.patch(`/v1/api-keys/${id}`, { active: !current });
-      setKeys((prev) => prev.map((k) => (k.id === id ? res.data : k)));
-      toast.success('API key status updated');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to update status');
-    }
+  const handleCreateClick = () => {
+    toast.warning('API Anahtarı oluşturma yetkiniz bulunmamaktadır.', {
+      description: 'Lütfen sistem yöneticisi ile iletişime geçin.',
+    });
   };
 
   const maskPrefix = (prefix) => {
@@ -83,14 +39,9 @@ const APIKeysPage = () => {
     return `${prefix}****`;
   };
 
-  const copySecret = async () => {
-    if (!generatedSecret) return;
-    try {
-      await navigator.clipboard.writeText(generatedSecret);
-      toast.success('API key copied');
-    } catch {
-      toast.error('Copy failed');
-    }
+  const maskPrefix = (prefix) => {
+    if (!prefix) return '';
+    return `${prefix}****`;
   };
 
   return (
