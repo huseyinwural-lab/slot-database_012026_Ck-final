@@ -302,8 +302,8 @@ const Finance = () => {
           <Card>
             <CardContent className="p-6">
               <div className="text-sm font-medium" data-testid="finance-deposits-title">Deposits</div>
-              <div className="text-xs text-muted-foreground mt-1" data-testid="finance-deposits-coming-soon">
-                Bu özellik yakında aktif edilecektir.
+              <div className="text-xs text-muted-foreground mt-1" data-testid="finance-deposits-empty-state">
+                Aktif işlem bulunmamaktadır.
               </div>
             </CardContent>
           </Card>
