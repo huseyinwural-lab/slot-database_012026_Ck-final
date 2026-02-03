@@ -527,7 +527,22 @@ const AffiliateManagement = () => {
                     </Dialog>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {creatives.map(c => (
+                    {creativesTable.loading ? (
+                      <div className="col-span-full">
+                        <TableSkeletonRows colSpan={1} rows={6} />
+                      </div>
+                    ) : creativesTable.error ? (
+                      <div className="col-span-full">
+                        {creativesTable.error === 'coming_soon' ? (
+                          <div className="py-10 text-center text-sm text-muted-foreground">Yakında</div>
+                        ) : (
+                          <div className="py-10 text-center text-sm text-muted-foreground">Veri şu an çekilemiyor</div>
+                        )}
+                      </div>
+                    ) : creatives.length === 0 ? (
+                      <div className="col-span-full py-10 text-center text-sm text-muted-foreground">Aradığınız kriterlere uygun kayıt bulunamadı</div>
+                    ) : (
+                      creatives.map(c => (
                         <Card key={c.id} className="overflow-hidden">
                             <div className="aspect-video bg-secondary flex items-center justify-center text-muted-foreground">
                                 {c.preview_url ? <img src={c.preview_url} alt={c.name} className="w-full h-full object-cover" /> : <ImageIcon className="w-8 h-8" />}
