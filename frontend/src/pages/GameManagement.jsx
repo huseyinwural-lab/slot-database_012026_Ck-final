@@ -63,11 +63,8 @@ const GameManagement = () => {
   const [pollActive, setPollActive] = useState(false);
 
   const fetchAll = useCallback(async (category = 'all', page = 1, pageSizeOverride) => {
-    setGamesLoading(true);
-    setGamesError(null);
-    setGames([]);
-
-    try {
+    await gamesTable.run(async () => {
+      gamesTable.setRows([]);
       const gameParams = {};
       if (category && category !== 'all') gameParams.category = category;
       const effectivePageSize = pageSizeOverride || gamesPageSize;
