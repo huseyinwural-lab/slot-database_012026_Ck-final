@@ -145,9 +145,9 @@ const PlayerList = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {table.loading ? (
                 <TableSkeletonRows colSpan={9} rows={8} />
-              ) : error ? (
+              ) : table.error ? (
                 <TableErrorState
                   colSpan={9}
                   title="Veri şu an çekilemiyor"
