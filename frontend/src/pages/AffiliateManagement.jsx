@@ -50,48 +50,88 @@ const AffiliateManagement = () => {
   const [newCreative, setNewCreative] = useState({ name: '', type: 'banner', url: '' });
 
   const fetchData = useCallback(async () => {
+    const map501 = (table, status) => {
+      if (status === 501) {
+        table.setError('coming_soon');
+        return true;
+      }
+      if (status === 500 || status === 502 || status === 503) {
+        table.setError('db_unavailable');
+        return true;
+      }
+      return false;
+    };
+
     try {
-        if (activeTab === 'partners') setAffiliates((await api.get('/v1/affiliates/partners')).data);
-        if (activeTab === 'offers') setOffers((await api.get('/v1/affiliates/offers')).data);
-        if (activeTab === 'links') {
-            const res = await api.get('/v1/affiliates/partners');
-            const partners = res.data || [];
-            const all = [];
-            for (const p of partners) {
-              try {
-                const r = await api.get(`/v1/affiliates/${p.id}/links`);
-                for (const l of (r.data || [])) {
-                  all.push(l);
-                }
-              } catch {
-                // ignore
+      if (activeTab === 'partners') {
+        await partnersTable.run(async () => {
+          const res = await api.get('/v1/affiliates/partners');
+          partnersTable.setRows(res.data || []);
+        });
+      }
+
+      if (activeTab === 'offers') {
+        await offersTable.run(async () => {
+          const res = await api.get('/v1/affiliates/offers');
+          offersTable.setRows(res.data || []);
+        });
+      }
+
+      if (activeTab === 'links') {
+        await linksTable.run(async () => {
+          const res = await api.get('/v1/affiliates/partners');
+          const partners = res.data || [];
+
+          const all = [];
+          for (const p of partners) {
+            try {
+              const r = await api.get(`/v1/affiliates/${p.id}/links`);
+              for (const l of (r.data || [])) {
+                all.push(l);
               }
+            } catch {
+              // ignore
             }
-            setLinks(all);
-            setAffiliates((await api.get('/v1/affiliates/partners')).data); // Need for dropdown
-            setOffers((await api.get('/v1/affiliates/offers')).data); // Need for dropdown
-        }
-        if (activeTab === 'payouts') {
-            setPayouts((await api.get('/v1/affiliates/payouts')).data);
-            setAffiliates((await api.get('/v1/affiliates/partners')).data);
-        }
-        if (activeTab === 'creatives') setCreatives((await api.get('/v1/affiliates/creatives')).data);
+          }
+
+          linksTable.setRows(all);
+          partnersTable.setRows(partners); // dropdown
+
+          const offersRes = await api.get('/v1/affiliates/offers');
+          offersTable.setRows(offersRes.data || []); // dropdown
+        });
+      }
+
+      if (activeTab === 'payouts') {
+        await payoutsTable.run(async () => {
+          const pRes = await api.get('/v1/affiliates/payouts');
+          payoutsTable.setRows(pRes.data || []);
+
+          const aRes = await api.get('/v1/affiliates/partners');
+          partnersTable.setRows(aRes.data || []);
+        });
+      }
+
+      if (activeTab === 'creatives') {
+        await creativesTable.run(async () => {
+          const res = await api.get('/v1/affiliates/creatives');
+          creativesTable.setRows(res.data || []);
+        });
+      }
+
     } catch (err) {
-      const code = err?.standardized?.code;
-      if (code === 'MODULE_TEMPORARILY_DISABLED') {
-        toast.message('Temporarily disabled');
-        return;
-      }
-      if (code === 'FEATURE_DISABLED') {
-        return;
-      }
-      if (err?.standardized?.status === 404) {
-        toast.message('Coming soon / Not implemented');
-        return;
-      }
+      const status = err?.response?.status;
+
+      // Convert 501 to comingSoon state (per Phase 2 policy)
+      if (activeTab === 'partners') map501(partnersTable, status);
+      if (activeTab === 'offers') map501(offersTable, status);
+      if (activeTab === 'links') map501(linksTable, status);
+      if (activeTab === 'payouts') map501(payoutsTable, status);
+      if (activeTab === 'creatives') map501(creativesTable, status);
+
       toast.error('Unexpected error');
     }
-  }, [activeTab]);
+  }, [activeTab, partnersTable, offersTable, linksTable, payoutsTable, creativesTable]);
 
   useEffect(() => {
     const t = setTimeout(() => {
