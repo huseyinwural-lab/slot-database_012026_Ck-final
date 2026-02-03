@@ -129,11 +129,12 @@ app.add_exception_handler(Exception, generic_exception_handler)
 # Disabled routers are commented out to prevent legacy (pre-SQL migration) errors
 
 # 1. Core Auth & Admin
-from app.routes import auth, admin, tenant, api_keys
+from app.routes import auth, admin, tenant, api_keys, health as health_router
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(tenant.router)
 app.include_router(api_keys.router) 
+app.include_router(health_router.router)
 
 # 2. Player Side
 from app.routes import player_auth, player_lobby, player_wallet
