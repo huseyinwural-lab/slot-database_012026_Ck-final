@@ -271,6 +271,7 @@ const Finance = () => {
         onValueChange={(v) => {
           setActiveTab(v);
           if (v === 'reports') fetchReports();
+          if (v === 'transactions') fetchData(1);
         }}
       >
         <TabsList className="grid w-full grid-cols-5 lg:w-[760px]">
