@@ -322,41 +322,33 @@ const GameManagement = () => {
 
     try {
       setIsImporting(true);
-      setImportProgress((p) => (p < 80 ? 80 : p));
+      setImportProgress((p) => (p < 85 ? 85 : p));
 
       const res = await api.post(`/v1/game-import/jobs/${importJob.id}/import`);
 
-      // Import endpoint is synchronous; still fetch job for final status.
-      await pollJobUntil(importJob.id, { untilStatuses: ['completed', 'failed'], maxMs: 60000 });
+      setImportProgress(95);
 
-      setImportProgress(100);
-
+      // Import is synchronous in backend; refresh list now.
       toast.success('Import completed', {
         description: `Imported: ${res.data?.imported_count ?? 0}`,
       });
 
       setIsPreviewOpen(false);
+      setImportJobId(null);
+      setPollActive(false);
       setImportJob(null);
       setImportItems([]);
 
       await fetchAll(gameCategory, 1);
+      setImportProgress(100);
     } catch (err) {
-      const code = err?.standardized?.code || err?.response?.data?.error_code;
       const status = err?.response?.status;
-
-      if (code === 'JOB_NOT_READY' || status === 409) {
-        toast.error('Job not ready', { description: 'Preview is not ready yet. Please wait.' });
-      } else if (status === 500 || status === 502 || status === 503) {
-        toast.error('Service unavailable', {
-          description: 'Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin.',
-        });
-      } else {
-        toast.error('Manual import failed');
-      }
-
+      toast.error('Manual import failed', {
+        description: status ? `HTTP ${status}` : undefined,
+      });
       setImportProgress(0);
     } finally {
-      // isImporting will be turned off by poller on terminal state
+      setIsImporting(false);
     }
   };
 
