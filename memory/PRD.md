@@ -37,9 +37,9 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Finance Deposits + aksiyonlar “Aktif işlem bulunmamaktadır” empty state’e çekildi
 - Robots sayfası empty state + hata toast’ları sessize alındı (silent API)
 - API client’ta `silent` flag ile global error toast baskılama eklendi
-- Root `.env.example` merge edildi ve `REGISTER_VELOCITY_LIMIT` eklendi
+- Root `.env.example` merge edildi ve `REGISTER_VELOCITY_LIMIT=100` eklendi
 - Frontend `yarn.lock` yeniden üretildi
-- Velocity limit kontrolü: None fallback + 429 (Too many requests) koruması
+- Velocity limit kontrolü: None fallback (100) + 429 (Too many requests) koruması
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
