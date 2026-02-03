@@ -417,7 +417,24 @@ const AffiliateManagement = () => {
                 <Card><CardContent className="pt-6">
                     <Table>
                         <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Tracking URL</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
-                        <TableBody>{links.map(l => (
+                        <TableBody>
+                          {linksTable.loading ? (
+                            <TableSkeletonRows colSpan={3} rows={6} />
+                          ) : linksTable.error ? (
+                            linksTable.error === 'coming_soon' ? (
+                              <TableEmptyState colSpan={3} title="Yakında" description="Links servisi güncelleniyor." />
+                            ) : (
+                              <TableErrorState
+                                colSpan={3}
+                                title="Veri şu an çekilemiyor"
+                                description="Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin."
+                                onRetry={() => fetchData()}
+                              />
+                            )
+                          ) : links.length === 0 ? (
+                            <TableEmptyState colSpan={3} title="Aradığınız kriterlere uygun kayıt bulunamadı" description="Henüz link yok." />
+                          ) : (
+                            links.map(l => (
                             <TableRow key={l.id}>
                                 <TableCell>{l.code}</TableCell>
                                 <TableCell className="font-mono text-xs text-muted-foreground truncate max-w-md">{l.tracking_url || l.url}</TableCell>
