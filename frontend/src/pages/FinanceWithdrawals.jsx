@@ -133,15 +133,10 @@ const FinanceWithdrawals = () => {
 
       // P0 decision: Withdrawal approvals live under /withdrawals (source of truth)
       const res = await api.get('/v1/withdrawals', { params });
-      setItems(res.data.items || []);
+      table.setRows(res.data.items || []);
       setMeta(res.data.meta || { total: 0, limit, offset });
       setPage(nextPage);
-    } catch (err) {
-      const message = err?.standardized?.message || 'Failed to load withdrawals';
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
