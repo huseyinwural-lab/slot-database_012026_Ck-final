@@ -18,7 +18,7 @@ const RobotsPage = () => {
   const fetchRobots = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/v1/robots', { params: { search } });
+      const res = await api.get('/v1/robots', { params: { search }, silent: true });
       setRobots(res.data.items || []);
     } catch (e) {
       setRobots([]);
