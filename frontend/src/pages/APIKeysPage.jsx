@@ -10,14 +10,8 @@ import { toast } from 'sonner';
 import { KeyRound, Plus } from 'lucide-react';
 
 const APIKeysPage = () => {
-  const [keys, setKeys] = useState([]);
-  const [scopes, setScopes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [newKeyName, setNewKeyName] = useState('');
-  const [newKeyScopes, setNewKeyScopes] = useState([]);
-  const [generatedSecret, setGeneratedSecret] = useState('');
-  const [generatedMeta, setGeneratedMeta] = useState(null);
+  const keysTable = useTableState([]);
+  const keys = keysTable.rows;
 
   const fetchData = async () => {
     setLoading(true);
