@@ -38,7 +38,8 @@ const parseCsvList = (v) =>
 
 const Finance = () => {
   const navigate = useNavigate();
-  const [transactions, setTransactions] = useState([]);
+  const txTable = useTableState([]);
+  const transactions = txTable.rows;
   const [txMeta, setTxMeta] = useState({ page: 1, page_size: 50, total: null });
   const [pageSize, setPageSize] = useState(50);
   const [activeTab, setActiveTab] = useState('transactions');
