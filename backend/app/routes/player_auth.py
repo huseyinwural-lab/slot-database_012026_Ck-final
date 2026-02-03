@@ -66,10 +66,11 @@ async def register_player(
     
     player = Player(
         email=email,
-        username=payload.get("username"),
+        username=payload.get("username", email),
         tenant_id=tenant_id,
         password_hash=hashed_password,
-        registered_at=datetime.now(timezone.utc)
+        registered_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        last_login=None,
     )
     
     session.add(player)
@@ -77,7 +78,7 @@ async def register_player(
         await session.commit()
     except IntegrityError:
         await session.rollback()
-        raise HTTPException(status_code=400, detail={"error_code": "PLAYER_CREATE_FAILED"})
+        raise HTTPException(status_code=400, detail="PLAYER_ALREADY_EXISTS")
     await session.refresh(player)  # Need ID for attribution
 
     player_id = str(player.id)
