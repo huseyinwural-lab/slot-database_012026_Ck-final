@@ -63,6 +63,7 @@ const GameManagement = () => {
 
   const fetchAll = useCallback(async (category = 'all', page = 1, pageSizeOverride) => {
     setGamesLoading(true);
+    setGamesError(null);
     setGames([]);
 
     try {
