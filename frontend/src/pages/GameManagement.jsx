@@ -84,11 +84,9 @@ const GameManagement = () => {
     } catch (err) {
       const status = err?.response?.status;
       if (status === 500 || status === 502 || status === 503) {
-        toast.error('Service unavailable', {
-          description: 'Veritabanına şu an ulaşılamıyor, lütfen az sonra tekrar deneyin.',
-        });
+        setGamesError('db_unavailable');
       } else {
-        toast.error('Failed to load games');
+        setGamesError('generic');
       }
     } finally {
       setGamesLoading(false);
