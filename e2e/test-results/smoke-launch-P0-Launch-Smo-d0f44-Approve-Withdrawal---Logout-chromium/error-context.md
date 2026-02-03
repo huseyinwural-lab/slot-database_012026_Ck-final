@@ -1,0 +1,228 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - heading "Platform Admin" [level=1] [ref=e7]
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: Core
+          - list [ref=e13]:
+            - listitem [ref=e14]:
+              - link "Dashboard" [ref=e15] [cursor=pointer]:
+                - /url: /
+                - img [ref=e16]
+                - generic [ref=e21]: Dashboard
+            - listitem [ref=e22]:
+              - link "Players" [ref=e23] [cursor=pointer]:
+                - /url: /players
+                - img [ref=e24]
+                - generic [ref=e29]: Players
+            - listitem [ref=e30]:
+              - link "Finance" [ref=e31] [cursor=pointer]:
+                - /url: /finance
+                - img [ref=e32]
+                - generic [ref=e34]: Finance
+            - listitem [ref=e35]:
+              - link "Withdrawals" [ref=e36] [cursor=pointer]:
+                - /url: /finance/withdrawals
+                - img [ref=e37]
+                - generic [ref=e39]: Withdrawals
+            - listitem [ref=e40]:
+              - link "All Revenue" [ref=e41] [cursor=pointer]:
+                - /url: /revenue
+                - img [ref=e42]
+                - generic [ref=e45]: All Revenue
+            - listitem [ref=e46]:
+              - link "Games" [ref=e47] [cursor=pointer]:
+                - /url: /games
+                - img [ref=e48]
+                - generic [ref=e50]: Games
+            - listitem [ref=e51]:
+              - link "VIP Games" [ref=e52] [cursor=pointer]:
+                - /url: /vip-games
+                - img [ref=e53]
+                - generic [ref=e55]: VIP Games
+        - generic [ref=e56]:
+          - generic [ref=e57]: Operations
+          - list [ref=e58]:
+            - listitem [ref=e59]:
+              - link "KYC Verification" [ref=e60] [cursor=pointer]:
+                - /url: /kyc
+                - img [ref=e61]
+                - generic [ref=e64]: KYC Verification
+            - listitem [ref=e65]:
+              - link "CRM & Comms" [ref=e66] [cursor=pointer]:
+                - /url: /crm
+                - img [ref=e67]
+                - generic [ref=e70]: CRM & Comms
+            - listitem [ref=e71]:
+              - link "Bonuses" [ref=e72] [cursor=pointer]:
+                - /url: /bonuses
+                - img [ref=e73]
+                - generic [ref=e77]: Bonuses
+            - listitem [ref=e78]:
+              - link "Affiliates" [ref=e79] [cursor=pointer]:
+                - /url: /affiliates
+                - img [ref=e80]
+                - generic [ref=e85]: Affiliates
+            - listitem [ref=e86]:
+              - link "Kill Switch" [ref=e87] [cursor=pointer]:
+                - /url: /kill-switch
+                - img [ref=e88]
+                - generic [ref=e90]: Kill Switch
+            - listitem [ref=e91]:
+              - link "Support" [ref=e92] [cursor=pointer]:
+                - /url: /support
+                - img [ref=e93]
+                - generic [ref=e95]: Support
+        - generic [ref=e96]:
+          - generic [ref=e97]: Risk & Compliance
+          - list [ref=e98]:
+            - listitem [ref=e99]:
+              - link "Risk Rules" [ref=e100] [cursor=pointer]:
+                - /url: /risk
+                - img [ref=e101]
+                - generic [ref=e103]: Risk Rules
+            - listitem [ref=e104]:
+              - link "Fraud Check" [ref=e105] [cursor=pointer]:
+                - /url: /fraud
+                - img [ref=e106]
+                - generic [ref=e108]: Fraud Check
+            - listitem [ref=e109]:
+              - link "Approval Queue" [ref=e110] [cursor=pointer]:
+                - /url: /approvals
+                - img [ref=e111]
+                - generic [ref=e114]: Approval Queue
+            - listitem [ref=e115]:
+              - link "Responsible Gaming" [ref=e116] [cursor=pointer]:
+                - /url: /rg
+                - img [ref=e117]
+                - generic [ref=e121]: Responsible Gaming
+        - generic [ref=e122]:
+          - generic [ref=e123]: Game Engine
+          - list [ref=e124]:
+            - listitem [ref=e125]:
+              - link "Robots" [ref=e126] [cursor=pointer]:
+                - /url: /robots
+                - img [ref=e127]
+                - generic [ref=e130]: Robots
+            - listitem [ref=e131]:
+              - link "Math Assets" [ref=e132] [cursor=pointer]:
+                - /url: /math-assets
+                - img [ref=e133]
+                - generic [ref=e138]: Math Assets
+        - generic [ref=e139]:
+          - generic [ref=e140]: System
+          - list [ref=e141]:
+            - listitem [ref=e142]:
+              - link "CMS" [ref=e143] [cursor=pointer]:
+                - /url: /cms
+                - img [ref=e144]
+                - generic [ref=e147]: CMS
+            - listitem [ref=e148]:
+              - link "Reports" [ref=e149] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e150]
+                - generic [ref=e152]: Reports
+            - listitem [ref=e153]:
+              - link "Logs" [ref=e154] [cursor=pointer]:
+                - /url: /logs
+                - img [ref=e155]
+                - generic [ref=e158]: Logs
+            - listitem [ref=e159]:
+              - link "Audit Log" [ref=e160] [cursor=pointer]:
+                - /url: /audit
+                - img [ref=e161]
+                - generic [ref=e164]: Audit Log
+            - listitem [ref=e165]:
+              - link "Admin Users" [ref=e166] [cursor=pointer]:
+                - /url: /admins
+                - img [ref=e167]
+                - generic [ref=e179]: Admin Users
+            - listitem [ref=e180]:
+              - link "Tenants" [ref=e181] [cursor=pointer]:
+                - /url: /tenants
+                - img [ref=e182]
+                - generic [ref=e185]: Tenants
+            - listitem [ref=e186]:
+              - link "API Keys" [ref=e187] [cursor=pointer]:
+                - /url: /keys
+                - img [ref=e188]
+                - generic [ref=e191]: API Keys
+            - listitem [ref=e192]:
+              - link "Feature Flags" [ref=e193] [cursor=pointer]:
+                - /url: /features
+                - img [ref=e194]
+                - generic [ref=e197]: Feature Flags
+            - listitem [ref=e198]:
+              - link "Simulator" [ref=e199] [cursor=pointer]:
+                - /url: /simulator
+                - img [ref=e200]
+                - generic [ref=e202]: Simulator
+            - listitem [ref=e203]:
+              - link "Settings" [ref=e204] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e205]
+                - generic [ref=e208]: Settings
+            - listitem [ref=e209]:
+              - link "Advanced Analytics Yakında" [disabled] [ref=e210]:
+                - img [ref=e211]
+                - generic [ref=e213]:
+                  - generic [ref=e214]: Advanced Analytics
+                  - generic [ref=e215]: Yakında
+            - listitem [ref=e216]:
+              - link "Audit Logs Yakında" [disabled] [ref=e217]:
+                - img [ref=e218]
+                - generic [ref=e221]:
+                  - generic [ref=e222]: Audit Logs
+                  - generic [ref=e223]: Yakında
+            - listitem [ref=e224]:
+              - link "System Health Yakında" [disabled] [ref=e225]:
+                - img [ref=e226]
+                - generic [ref=e228]:
+                  - generic [ref=e229]: System Health
+                  - generic [ref=e230]: Yakında
+      - button "Logout" [ref=e232] [cursor=pointer]:
+        - img [ref=e233]
+        - text: Logout
+    - main [ref=e236]:
+      - generic [ref=e237]:
+        - generic [ref=e239]:
+          - img [ref=e240]
+          - textbox "Global Search (Press Ctrl+K)" [ref=e243]
+        - generic [ref=e244]:
+          - generic [ref=e245]:
+            - img [ref=e246]
+            - combobox [ref=e249] [cursor=pointer]:
+              - generic: Global Context
+              - img [ref=e250]
+          - generic [ref=e252]:
+            - paragraph [ref=e253]: Super Owner
+            - paragraph [ref=e254]: admin@casino.com
+          - generic [ref=e255]: SO
+      - generic [ref=e256]:
+        - generic [ref=e258]:
+          - generic [ref=e259]:
+            - img [ref=e262]
+            - generic [ref=e264]: Admin Login
+            - generic [ref=e265]: Enter your credentials to access the CasinoAdmin control panel.
+          - generic [ref=e267]:
+            - generic [ref=e268]:
+              - text: Email
+              - textbox "Email" [ref=e269]
+            - generic [ref=e270]:
+              - text: Password
+              - generic [ref=e271]:
+                - textbox "Password" [ref=e272]
+                - button [ref=e273] [cursor=pointer]:
+                  - img [ref=e274]
+            - button "Sign In" [ref=e277] [cursor=pointer]
+        - region "Notifications alt+T"
+  - link "Made with Emergent" [ref=e278] [cursor=pointer]:
+    - /url: https://app.emergent.sh/?utm_source=emergent-badge
+    - generic [ref=e279]:
+      - img [ref=e280]
+      - paragraph [ref=e281]: Made with Emergent
+```
