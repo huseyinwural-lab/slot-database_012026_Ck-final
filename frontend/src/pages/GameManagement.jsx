@@ -264,8 +264,8 @@ const GameManagement = () => {
 
       const formData = new FormData();
       // Backend accepts any of: file | bundle | upload
+      // Standardize on `file`.
       formData.append('file', file);
-      formData.append('bundle', file);
 
       let jobId = null;
 
