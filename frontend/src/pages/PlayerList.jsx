@@ -214,7 +214,7 @@ const PlayerList = () => {
         onPlayerUpdated={(patch) => {
           if (!patch || !opsPlayer) return;
           // Minimal in-place update for status/wallet changes
-          setPlayers((prev) =>
+          table.setRows((prev) =>
             prev.map((p) => (p.id === opsPlayer.id ? { ...p, ...patch } : p))
           );
           setOpsPlayer((p) => (p ? { ...p, ...patch } : p));
