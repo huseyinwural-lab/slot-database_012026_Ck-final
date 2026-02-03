@@ -25,9 +25,8 @@ import GameConfigReadOnlyPanel from '../components/games/GameConfigReadOnlyPanel
 const GameManagement = () => {
   const { featureFlags, loading: capabilitiesLoading } = useCapabilities();
 
-  const [games, setGames] = useState([]);
-  const [gamesLoading, setGamesLoading] = useState(false);
-  const [gamesError, setGamesError] = useState(null);
+  const gamesTable = useTableState([]);
+  const games = gamesTable.rows;
   const [gamesMeta, setGamesMeta] = useState({ page: 1, page_size: 50, total: null });
   const [gamesPageSize, setGamesPageSize] = useState(50);
   const [tables, setTables] = useState([]);
