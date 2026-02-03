@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import useTableState from '@/hooks/useTableState';
+import { TableEmptyState, TableErrorState, TableSkeletonRows } from '@/components/TableState';
 import api from '../services/api';
 import WithdrawalsDetailDrawer from '../components/WithdrawalsDetailDrawer';
 import { callMoneyAction } from '../services/moneyActions';
@@ -80,10 +82,11 @@ const FinanceWithdrawals = () => {
     provider_ref: '',
   });
 
-  const [items, setItems] = useState([]);
+  const table = useTableState([]);
+  const items = table.rows;
   const [meta, setMeta] = useState({ total: 0, limit: PAGE_SIZE, offset: 0 });
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  // loading/error handled by table hook
 
   const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
