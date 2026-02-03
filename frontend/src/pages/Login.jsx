@@ -75,6 +75,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
                 required
+                data-testid="login-email-input"
               />
             </div>
             <div className="space-y-2">
@@ -88,17 +89,19 @@ const Login = () => {
                   autoComplete="current-password"
                   required
                   className="pr-10"
+                  data-testid="login-password-input"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                  data-testid="login-password-toggle-button"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full mt-2" disabled={loading}>
+            <Button type="submit" className="w-full mt-2" disabled={loading} data-testid="login-submit-button">
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
             {/* Demo credentials removed for production */}
