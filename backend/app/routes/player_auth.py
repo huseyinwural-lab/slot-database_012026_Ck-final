@@ -4,7 +4,8 @@ from sqlmodel import select
 from datetime import datetime, timezone, timedelta
 from app.models.rg_models import PlayerRGProfile
 
-from app.models.sql_models import Player
+from app.models.sql_models import Player, Tenant
+from sqlalchemy.exc import IntegrityError
 from app.services.affiliate_engine import AffiliateEngine
 from app.core.database import get_session
 from app.utils.auth import get_password_hash, verify_password, create_access_token
