@@ -623,7 +623,7 @@ const Finance = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={loading || txMeta.page <= 1}
+                  disabled={txTable.loading || txMeta.page <= 1}
                   onClick={() => {
                     const prevPage = (txMeta.page || 1) - 1;
                     if (prevPage < 1) return;
