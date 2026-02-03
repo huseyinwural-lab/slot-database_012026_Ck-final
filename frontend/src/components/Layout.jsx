@@ -262,6 +262,7 @@ const Layout = ({ children }) => {
         {/* Global Search disabled (P1-1) because backend /v1/search is not available. */}
 
       </main>
+        </div>
       </TooltipProvider>
     </div>
   );
