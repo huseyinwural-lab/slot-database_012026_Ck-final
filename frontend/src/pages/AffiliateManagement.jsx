@@ -442,7 +442,9 @@ const AffiliateManagement = () => {
                                     <Button variant="ghost" size="sm" onClick={() => {navigator.clipboard.writeText(l.tracking_url || l.url); toast.success("Copied");}}><Copy className="w-4 h-4" /></Button>
                                 </TableCell>
                             </TableRow>
-                        ))}</TableBody>
+                            ))
+                          )}
+                        </TableBody>
                     </Table>
                 </CardContent></Card>
             </TabsContent>
