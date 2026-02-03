@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "provider_id": "demo",
+      "external_id": "demo_game_101",
+      "name": "Demo Game 101",
+      "type": "slot",
+      "rtp": 96.2
+    },
+    {
+      "provider_id": "demo",
+      "external_id": "demo_game_102",
+      "name": "Demo Game 102",
+      "type": "crash",
+      "rtp": 97.0
+    }
+  ]
+}
