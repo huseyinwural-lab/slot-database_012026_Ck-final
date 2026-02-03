@@ -119,8 +119,7 @@ const FinanceWithdrawals = () => {
     const limit = PAGE_SIZE;
     const offset = (nextPage - 1) * limit;
 
-    setLoading(true);
-    try {
+    await table.run(async () => {
       const params = {
         limit,
         offset,
