@@ -78,6 +78,14 @@ Do not delete sections unless instructed.
 - Coming Soon policy: **only on HTTP 501** (Phase 2 policy)
 - Playwright regression suite re-run after Phase 2: 7/7 PASS ✅
 
+### 2026-02-03 — P1-2 Phase 3 Final Polish — PASS
+- Finance: Deposits tab added in `/finance` with Coming Soon (501 simulation via table state)
+- FinanceWithdrawals: approve/reject/mark paid/failed now show “İşleniyor…” while actionLoading + immediate refetch
+- Global ErrorBoundary: TR message + Yenile + Çıkış Yap
+- Deployment prep: `.env.example` extended + `docs/DEPLOYMENT_CHECKLIST.md`
+- Playwright regression suite rerun: 7/7 PASS ✅
+
+
 
 
 - **ROOT CAUSE**: Frontend hot reload/deployment issue preventing test IDs from appearing in browser
