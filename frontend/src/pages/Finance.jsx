@@ -489,11 +489,14 @@ const Finance = () => {
                       description="Filtreleri temizleyip tekrar deneyin."
                       actionLabel="Filtreleri Temizle"
                       onAction={() => {
-                        setType('all');
-                        setStatus('all');
-                        setMethod('all');
-                        setProvider('all');
-                        setSearch('');
+                        setFilters((prev) => ({
+                          ...prev,
+                          type: 'all',
+                          status: 'all',
+                          method: 'all',
+                          provider: 'all',
+                          q: '',
+                        }));
                         fetchData(1);
                       }}
                     />
