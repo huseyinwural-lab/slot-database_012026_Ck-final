@@ -23,22 +23,32 @@ async def register_player(
     email = payload.get("email")
     tenant_id = payload.get("tenant_id", "default_casino")
 
+    raw_limit = os.getenv("REGISTER_VELOCITY_LIMIT", "100")
+    try:
+        limit_count = int(raw_limit)
+    except ValueError:
+        limit_count = 100
+
+    since = datetime.utcnow() - timedelta(minutes=1)
+    current_count = (
+        await session.execute(
+            select(func.count())
+            .select_from(Player)
+            .where(Player.tenant_id == tenant_id)
+            .where(Player.registered_at >= since)
+        )
+    ).scalar() or 0
+    if current_count >= limit_count:
+        raise HTTPException(status_code=429, detail="Too many registration requests")
+
     tenant = await session.get(Tenant, tenant_id)
     if tenant is None:
         if tenant_id == "default_casino":
-            tenant = Tenant(
-                id="default_casino",
-                name="Default Casino",
-                type="owner",
-                features={},
-            )
+            tenant = Tenant(id="default_casino", name="Default Casino")
             session.add(tenant)
-            try:
-                await session.commit()
-            except IntegrityError:
-                await session.rollback()
+            await session.flush()
         else:
-            raise HTTPException(status_code=400, detail={"error_code": "TENANT_NOT_FOUND"})
+            raise HTTPException(status_code=400, detail="INVALID_TENANT")
 
     # Check exists
     stmt = select(Player).where(Player.email == email).where(Player.tenant_id == tenant_id)
