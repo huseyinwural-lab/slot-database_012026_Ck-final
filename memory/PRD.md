@@ -26,6 +26,11 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - `docs/RUNBOOK.md` (migrasyon, bootstrap owner, log kontrolü)
 - Golden Path smoke test: `e2e/tests/smoke-launch.spec.ts`
 - Login/Logout data-testid eklendi
+- Ops Header Health Widget (30sn polling, DB/Redis tooltip)
+- Robots backend stub: `/api/v1/robots/status` → `{ status: "idle", active_bots: 0 }`
+- Finance approve/retry aksiyonları + Deposits tabı “Yakında” moduna alındı
+- Settings placeholder sekmeleri + Currencies “Yakında” moduna alındı
+- Deploy checklist env doğrulaması: `POSTGRES_URL` eklendi
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
