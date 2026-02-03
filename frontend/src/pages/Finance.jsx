@@ -637,7 +637,7 @@ const Finance = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={loading || transactions.length < (txMeta.page_size || pageSize)}
+                  disabled={txTable.loading || transactions.length < (txMeta.page_size || pageSize)}
                   onClick={() => {
                     const nextPage = (txMeta.page || 1) + 1;
                     fetchData(nextPage).then(() => {
