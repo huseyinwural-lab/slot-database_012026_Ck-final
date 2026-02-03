@@ -126,7 +126,10 @@ const Layout = ({ children }) => {
   }, [isOwner, hasFeature, menuFlags, killSwitches]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background">
+      {/* TooltipProvider ensures tooltips work across the app */}
+      <TooltipProvider delayDuration={200}>
+        <div className="flex">
       {/* Sidebar */}
       <aside className={`w-64 border-r border-border ${theme.sidebarBg} flex flex-col fixed h-full z-20 transition-colors duration-300`}>
         <div className="p-6">
