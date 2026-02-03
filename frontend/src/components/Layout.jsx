@@ -79,13 +79,15 @@ const Layout = ({ children }) => {
     headerGradient: 'from-primary to-blue-400',
     iconColor: 'text-primary',
     brandName: 'Platform Admin',
-    activeItem: 'bg-primary text-primary-foreground'
+    activeItem: 'bg-primary text-primary-foreground',
+    disabledItem: 'opacity-50 cursor-not-allowed'
   } : {
     sidebarBg: 'bg-slate-900',
     headerGradient: 'from-emerald-400 to-teal-500',
     iconColor: 'text-emerald-400',
     brandName: tenantName || 'Tenant Portal',
-    activeItem: 'bg-emerald-600 text-white'
+    activeItem: 'bg-emerald-600 text-white',
+    disabledItem: 'opacity-50 cursor-not-allowed'
   };
 
   const handleSearch = async () => {};
