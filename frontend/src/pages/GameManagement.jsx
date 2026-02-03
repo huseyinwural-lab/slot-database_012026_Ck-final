@@ -80,6 +80,7 @@ const GameManagement = () => {
       setGamesMeta(data.meta || { page, page_size: effectivePageSize, total: null });
       setTables(tablesRes.data || []);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gamesPageSize]);
 
   useEffect(() => {
