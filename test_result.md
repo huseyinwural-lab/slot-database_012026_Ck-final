@@ -53,6 +53,14 @@ Do not delete sections unless instructed.
 
   - **Source Code Analysis**: ✅ All required test IDs present in source code:
     - `data-testid="player-actions-open"` in PlayerList.jsx (line 168)
+### 2026-02-03 — P1-2 UI Stabilizasyon (Phase 1) — PASS
+- PlayerList: loading skeleton + empty state (Filtreleri Temizle) + error state (Tekrar Dene) standardize edildi.
+- GameList: loading skeleton + empty state + error state standardize edildi.
+- PlayerActionsDrawer: suspend/unsuspend/credit/debit/bonus butonlarında loading state + optimistic patch (parent list anında güncelleniyor) ✅
+- Dashboard: metrik endpoint unavailable ise fake sayı yerine “Yakında” kartı gösteriliyor ✅
+- Playwright regression suite: (P0-2 import + P1-1 nav + SEC-P0-02 RBAC) tekrar koşuldu → 7/7 PASS ✅
+
+
     - `data-testid="player-action-credit/debit/bonus/suspend/unsuspend/force-logout"` in PlayerActionsDrawer.jsx
   - **Browser Testing**: ❌ Test IDs not found in deployed frontend (0 elements with test IDs)
   - **Manual UI Verification**: ✅ PlayerActionsDrawer opens correctly, all RBAC buttons visible for Super Admin:
