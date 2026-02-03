@@ -610,8 +610,8 @@ const Finance = () => {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     disabled
-                                    title="Yakında aktif edilecektir"
-                                    data-testid="finance-retry-callback-coming-soon"
+                                    title="Aktif işlem bulunmamaktadır"
+                                    data-testid="finance-retry-callback-disabled"
                                   >
                                       <ExternalLink className="w-4 h-4 mr-2"/> Retry Callback
                                   </DropdownMenuItem>
@@ -620,17 +620,17 @@ const Finance = () => {
                                       <>
                                         <DropdownMenuItem
                                           disabled
-                                          title="Yakında aktif edilecektir"
+                                          title="Aktif işlem bulunmamaktadır"
                                           className="text-green-600"
-                                          data-testid="finance-row-approve-coming-soon"
+                                          data-testid="finance-row-approve-disabled"
                                         >
                                             <CheckCircle className="w-4 h-4 mr-2"/> Approve
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           disabled
-                                          title="Yakında aktif edilecektir"
+                                          title="Aktif işlem bulunmamaktadır"
                                           className="text-red-600"
-                                          data-testid="finance-row-reject-coming-soon"
+                                          data-testid="finance-row-reject-disabled"
                                         >
                                             <XCircle className="w-4 h-4 mr-2"/> Reject
                                         </DropdownMenuItem>
