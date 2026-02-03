@@ -31,7 +31,7 @@ test.describe('P0-2 Game Import (manual upload -> preview -> import)', () => {
     await expect(page.getByText('Demo Game 102')).toBeVisible();
 
     // Import
-    await page.getByRole('button', { name: 'Import' }).click();
+    await page.getByRole('button', { name: 'İçe Aktarmayı Başlat' }).click();
 
     // Switch back to Slots tab and verify games appear.
     await page.getByRole('tab', { name: 'Slots' }).click();
