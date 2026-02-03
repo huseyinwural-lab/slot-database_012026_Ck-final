@@ -56,6 +56,7 @@ const Finance = () => {
   };
 
   const [loading, setLoading] = useState(true);
+  // Phase 2: main table state handled by txTable
   const [reportData, setReportData] = useState(null);
   
   const [filters, setFilters] = useState({
