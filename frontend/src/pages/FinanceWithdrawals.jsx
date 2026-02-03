@@ -280,7 +280,7 @@ const FinanceWithdrawals = () => {
           <Button
             variant="outline"
             onClick={() => fetchWithdrawals(1)}
-            disabled={loading}
+            disabled={table.loading}
           >
             Refresh
           </Button>
