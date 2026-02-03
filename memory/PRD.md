@@ -43,6 +43,8 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Docs smoke: root/backend/frontend/frontend-player `.env.example` dosyaları tamamlandı
 - Frontend lint: `@eslint/js` 8.57.1 hizalandı + yarn.lock güncellendi
 - Player register: tenant auto-create + IntegrityError yakalama (400) eklendi
+- Player register: REGISTER_VELOCITY_LIMIT int() parse + register velocity guard
+- Player model: registered_at server_default + naive default, last_login nullable
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
