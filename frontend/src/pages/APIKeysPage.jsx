@@ -14,20 +14,14 @@ const APIKeysPage = () => {
   const keys = keysTable.rows;
 
   const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [keysRes, scopesRes] = await Promise.all([
-        api.get('/v1/api-keys/'),
-        api.get('/v1/api-keys/scopes'),
-      ]);
-      setKeys(keysRes.data || []);
-      setScopes(scopesRes.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to load API key data');
-    } finally {
-      setLoading(false);
-    }
+    await keysTable
+      .run(async () => {
+        const keysRes = await api.get('/v1/api-keys/');
+        keysTable.setRows(Array.isArray(keysRes.data) ? keysRes.data : []);
+      })
+      .catch(() => {
+        keysTable.setRows([]);
+      });
   };
 
   useEffect(() => {
