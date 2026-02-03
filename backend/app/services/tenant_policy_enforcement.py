@@ -151,11 +151,9 @@ async def check_velocity_limit(
 
     from config import settings
 
-    limit_count = getattr(settings, "register_velocity_limit", None)
+    limit_count = getattr(settings, "max_tx_velocity_count", None)
     if limit_count is None:
-        limit_count = getattr(settings, "max_tx_velocity_count", None)
-    if limit_count is None:
-        limit_count = 9999
+        limit_count = getattr(settings, "register_velocity_limit", 100) or 100
     window_minutes = settings.max_tx_velocity_window_minutes
 
     # DB uses TIMESTAMP WITHOUT TIME ZONE in several environments.
