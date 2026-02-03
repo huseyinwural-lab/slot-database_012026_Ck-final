@@ -245,9 +245,11 @@ const FinanceWithdrawals = () => {
         mark_failed: 'Withdrawal marked as failed',
       };
       toast.success(successMsgs[type] || 'Action completed');
-      
+
       setActionModal({ open: false, type: null, tx: null });
       setActionReason('');
+
+      // Action-Sync (P1-2 Phase 3): refetch immediately after success
       await fetchWithdrawals(page);
     } catch (err) {
       await handleActionError(err);
