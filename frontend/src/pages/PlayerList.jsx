@@ -176,7 +176,7 @@ const PlayerList = () => {
               ) : (
                 players.map((player) => (
                   <TableRow key={player.id}>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{player.id.substring(0,8)}...</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{player.id.substring(0,8)}...</TableCell>
                   <TableCell>
                     <div className="font-medium">{player.username}</div>
                     <div className="text-xs text-muted-foreground">{player.email}</div>
