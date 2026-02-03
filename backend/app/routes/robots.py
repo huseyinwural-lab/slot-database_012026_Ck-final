@@ -26,26 +26,10 @@ async def list_robots(
     session: AsyncSession = Depends(get_session),
     current_admin: AdminUser = Depends(get_current_admin)
 ):
-    query = select(RobotDefinition)
-    
-    if search:
-        query = query.where(RobotDefinition.name.ilike(f"%{search}%"))
-    
-    if is_active is not None:
-        query = query.where(RobotDefinition.is_active == is_active)
-        
-    query = query.order_by(RobotDefinition.created_at.desc())
-    
-    # Count
-    count_query = select(func.count()).select_from(query.subquery())
-    total = (await session.execute(count_query)).scalar() or 0
-    
-    query = query.offset((page - 1) * limit).limit(limit)
-    robots = (await session.execute(query)).scalars().all()
-    
+    _ = session, current_admin, search, is_active, motor_type
     return {
-        "items": robots,
-        "meta": {"total": total, "page": page, "page_size": limit}
+        "items": [],
+        "meta": {"total": 0, "page": page, "page_size": limit}
     }
 
 
