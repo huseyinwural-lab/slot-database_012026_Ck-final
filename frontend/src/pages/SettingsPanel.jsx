@@ -98,27 +98,56 @@ const SettingsPanel = () => {
         <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
           <Settings className="w-8 h-8 text-blue-600" /> Settings Panel (Multi-Tenant)
         </h2>
-        <Button onClick={fetchData}><RefreshCw className="w-4 h-4 mr-2" /> Refresh</Button>
+        <Button onClick={fetchData} data-testid="settings-refresh-button">
+          <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+        </Button>
       </div>
       
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <ScrollArea className="w-full whitespace-nowrap rounded-md border">
           <TabsList className="w-full flex justify-start">
-            <TabsTrigger value="brands"><Building2 className="w-4 h-4 mr-2" /> Brands</TabsTrigger>
-            <TabsTrigger value="domains"><Globe className="w-4 h-4 mr-2" /> Domains</TabsTrigger>
-            <TabsTrigger value="currencies"><DollarSign className="w-4 h-4 mr-2" /> Currencies</TabsTrigger>
-            <TabsTrigger value="payment"><CreditCard className="w-4 h-4 mr-2" /> Payment Providers</TabsTrigger>
-            <TabsTrigger value="payments-policy"><Scale className="w-4 h-4 mr-2" /> Payments Policy</TabsTrigger>
-            <TabsTrigger value="countries"><Shield className="w-4 h-4 mr-2" /> Countries</TabsTrigger>
-            <TabsTrigger value="games"><Gamepad2 className="w-4 h-4 mr-2" /> Games</TabsTrigger>
-            <TabsTrigger value="communication"><Mail className="w-4 h-4 mr-2" /> Communication</TabsTrigger>
-            <TabsTrigger value="regulatory"><Scale className="w-4 h-4 mr-2" /> Regulatory</TabsTrigger>
-            <TabsTrigger value="defaults"><Wrench className="w-4 h-4 mr-2" /> Defaults</TabsTrigger>
-            <TabsTrigger value="api-keys"><Key className="w-4 h-4 mr-2" /> API Keys</TabsTrigger>
-            <TabsTrigger value="theme"><Palette className="w-4 h-4 mr-2" /> Theme</TabsTrigger>
-            <TabsTrigger value="maintenance"><AlertTriangle className="w-4 h-4 mr-2" /> Maintenance</TabsTrigger>
-            <TabsTrigger value="versions"><GitBranch className="w-4 h-4 mr-2" /> Versions</TabsTrigger>
-            <TabsTrigger value="audit"><FileText className="w-4 h-4 mr-2" /> Audit</TabsTrigger>
+            <TabsTrigger value="brands" data-testid="settings-tab-brands"><Building2 className="w-4 h-4 mr-2" /> Brands</TabsTrigger>
+            <TabsTrigger value="domains" data-testid="settings-tab-domains">
+              <Globe className="w-4 h-4 mr-2" /> Domains
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-domains-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="currencies" data-testid="settings-tab-currencies">
+              <DollarSign className="w-4 h-4 mr-2" /> Currencies
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-currencies-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="payment" data-testid="settings-tab-payment">
+              <CreditCard className="w-4 h-4 mr-2" /> Payment Providers
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-payment-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="payments-policy" data-testid="settings-tab-payments-policy"><Scale className="w-4 h-4 mr-2" /> Payments Policy</TabsTrigger>
+            <TabsTrigger value="countries" data-testid="settings-tab-countries"><Shield className="w-4 h-4 mr-2" /> Countries</TabsTrigger>
+            <TabsTrigger value="games" data-testid="settings-tab-games">
+              <Gamepad2 className="w-4 h-4 mr-2" /> Games
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-games-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="communication" data-testid="settings-tab-communication">
+              <Mail className="w-4 h-4 mr-2" /> Communication
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-communication-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="regulatory" data-testid="settings-tab-regulatory">
+              <Scale className="w-4 h-4 mr-2" /> Regulatory
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-regulatory-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="defaults" data-testid="settings-tab-defaults"><Wrench className="w-4 h-4 mr-2" /> Defaults</TabsTrigger>
+            <TabsTrigger value="api-keys" data-testid="settings-tab-api-keys"><Key className="w-4 h-4 mr-2" /> API Keys</TabsTrigger>
+            <TabsTrigger value="theme" data-testid="settings-tab-theme">
+              <Palette className="w-4 h-4 mr-2" /> Theme
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-theme-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="maintenance" data-testid="settings-tab-maintenance">
+              <AlertTriangle className="w-4 h-4 mr-2" /> Maintenance
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-maintenance-badge">Yakında</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="versions" data-testid="settings-tab-versions"><GitBranch className="w-4 h-4 mr-2" /> Versions</TabsTrigger>
+            <TabsTrigger value="audit" data-testid="settings-tab-audit">
+              <FileText className="w-4 h-4 mr-2" /> Audit
+              <Badge variant="secondary" className="ml-2" data-testid="settings-tab-audit-badge">Yakında</Badge>
+            </TabsTrigger>
           </TabsList>
         </ScrollArea>
 
