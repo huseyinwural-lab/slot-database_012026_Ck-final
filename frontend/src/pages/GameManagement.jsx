@@ -291,6 +291,7 @@ const GameManagement = () => {
       }
 
       // Start polling
+      setIsImporting(true);
       setImportJobId(jobId);
       setPollActive(true);
       setImportProgress(20);
