@@ -99,7 +99,11 @@ const PlayerActionsDrawer = ({ open, onOpenChange, player, onPlayerUpdated }) =>
         { headers: { 'X-Reason': reason } }
       );
       toast.success('Credited');
-      onPlayerUpdated?.(res.data.wallet);
+      onPlayerUpdated?.({
+        balance_real: res.data.balance_real,
+        balance_bonus: res.data.balance_bonus,
+        balance_real_available: res.data.balance_real_available,
+      });
       await refreshAudit();
       setCreditAmount('');
       setReason('');
