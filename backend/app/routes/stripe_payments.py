@@ -74,6 +74,9 @@ async def create_checkout_session(
         currency=body.currency,
     )
 
+    if StripeCheckout is None:
+        raise HTTPException(status_code=501, detail="Stripe integration not available")
+
     if not STRIPE_API_KEY:
         # CI/dev/test deterministic mock: allow simulated checkout without real Stripe keys.
         if settings.env.lower() in {"ci", "test", "dev"} or settings.stripe_mock:
@@ -183,6 +186,9 @@ async def get_checkout_status(
     """
     Poll status of a session and update DB if changed.
     """
+    if StripeCheckout is None:
+        raise HTTPException(status_code=501, detail="Stripe integration not available")
+
     if not STRIPE_API_KEY:
         # CI/dev/test deterministic mock: allow polling without real Stripe keys.
         if settings.env.lower() in {"ci", "test", "dev"} or settings.stripe_mock:
