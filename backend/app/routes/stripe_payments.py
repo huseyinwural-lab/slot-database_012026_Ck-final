@@ -49,8 +49,14 @@ class StripeDepositRequest(BaseModel):
     currency: str = Field("USD", description="Currency code")
     metadata: Optional[Dict[str, str]] = Field(default_factory=dict)
 
-class CheckoutSessionResponseWithTxId(CheckoutSessionResponse):
-    tx_id: str
+if CheckoutSessionResponse is None:
+    class CheckoutSessionResponseWithTxId(BaseModel):
+        session_id: str
+        url: str
+        tx_id: str
+else:
+    class CheckoutSessionResponseWithTxId(CheckoutSessionResponse):
+        tx_id: str
 
 
 @router.post("/checkout/session", response_model=CheckoutSessionResponseWithTxId)
