@@ -157,8 +157,16 @@ app.include_router(ledger_admin.router)
 from app.routes import payments
 app.include_router(payments.router)
 
-from app.routes import stripe_payments
-app.include_router(stripe_payments.router)
+ENABLE_STRIPE = os.getenv("ENABLE_STRIPE", "0") == "1"
+if ENABLE_STRIPE:
+    try:
+        from app.routes import stripe_payments
+    except ModuleNotFoundError as e:
+        logger.warning("Stripe disabled due to missing dependency: %s", e)
+        ENABLE_STRIPE = False
+
+if ENABLE_STRIPE:
+    app.include_router(stripe_payments.router)
 
 from app.routes import adyen_payments
 app.include_router(adyen_payments.router)
