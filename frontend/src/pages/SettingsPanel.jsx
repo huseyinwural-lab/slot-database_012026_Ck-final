@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { 
   Settings, Building2, Globe, DollarSign, CreditCard, Shield, Gamepad2,
   Mail, Scale, Wrench, Key, Palette, AlertTriangle, GitBranch, FileText,
-  RefreshCw
+  RefreshCw, ToggleRight
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
