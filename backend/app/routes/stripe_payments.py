@@ -9,6 +9,7 @@ from app.core.database import get_session
 from app.models.sql_models import Transaction, Player
 from app.utils.auth_player import get_current_player
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+from app.services.system_flags import is_system_flag_enabled
 from pydantic import BaseModel, Field
 try:
     from emergentintegrations.payments.stripe.checkout import (
@@ -77,6 +78,9 @@ async def create_checkout_session(
 
     if StripeCheckout is None:
         raise HTTPException(status_code=501, detail="Stripe integration not available")
+
+    if not await is_system_flag_enabled(session, "ENABLE_STRIPE"):
+        raise HTTPException(status_code=503, detail="Stripe feature disabled")
 
     if not STRIPE_API_KEY:
         # CI/dev/test deterministic mock: allow simulated checkout without real Stripe keys.
@@ -189,6 +193,9 @@ async def get_checkout_status(
     """
     if StripeCheckout is None:
         raise HTTPException(status_code=501, detail="Stripe integration not available")
+
+    if not await is_system_flag_enabled(session, "ENABLE_STRIPE"):
+        raise HTTPException(status_code=503, detail="Stripe feature disabled")
 
     if not STRIPE_API_KEY:
         # CI/dev/test deterministic mock: allow polling without real Stripe keys.

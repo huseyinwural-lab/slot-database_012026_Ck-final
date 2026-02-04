@@ -3,6 +3,7 @@ import logging
 import os
 from typing import Dict, Any
 from config import settings
+from app.services.system_flags import get_system_flags
 
 try:
     from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -20,8 +21,12 @@ class RiskAnalyzer:
         
         self.model = "gpt-4o"
 
-    async def analyze_transaction(self, transaction: Dict[str, Any]) -> Dict[str, Any]:
+    async def analyze_transaction(self, transaction: Dict[str, Any], session: Any = None) -> Dict[str, Any]:
         enable_ai = (os.getenv("ENABLE_AI", "1").strip() == "1")
+        if session is not None:
+            flags = await get_system_flags(session)
+            enable_ai = bool(flags.get("ENABLE_AI", {}).get("enabled"))
+
         if not enable_ai or not self.api_key or LlmChat is None or UserMessage is None:
             return {
                 "risk_score": 0,

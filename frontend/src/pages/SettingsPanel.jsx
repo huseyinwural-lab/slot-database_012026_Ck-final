@@ -3,6 +3,9 @@ import api from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,6 +51,10 @@ const ComingSoonCard = ({ title, description, testId }) => (
 const SettingsPanel = () => {
   const [activeTab, setActiveTab] = useState("brands");
   const [brands, setBrands] = useState([]);
+  const [featureFlags, setFeatureFlags] = useState([]);
+  const [flagDialogOpen, setFlagDialogOpen] = useState(false);
+  const [selectedFlag, setSelectedFlag] = useState(null);
+  const [flagReason, setFlagReason] = useState('');
   const [countryRules, setCountryRules] = useState([]);
   const [platformDefaults, setPlatformDefaults] = useState(null);
   const [apiKeys, setApiKeys] = useState([]);
@@ -60,12 +67,35 @@ const SettingsPanel = () => {
         const data = (await api.get('/v1/settings/brands')).data;
         setBrands(Array.isArray(data) ? data : []);
       }
+      if (tab === 'feature-flags') {
+        const data = (await api.get('/v1/settings/feature-flags')).data;
+        setFeatureFlags(Array.isArray(data) ? data : []);
+      }
       if (tab === 'countries') setCountryRules((await api.get('/v1/settings/country-rules')).data);
       if (tab === 'defaults') setPlatformDefaults((await api.get('/v1/settings/platform-defaults')).data);
       if (tab === 'api-keys') setApiKeys((await api.get('/v1/settings/api-keys')).data);
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const openFlagDialog = (flag) => {
+    setSelectedFlag(flag);
+    setFlagReason('');
+    setFlagDialogOpen(true);
+  };
+
+  const handleFlagUpdate = async () => {
+    if (!selectedFlag) return;
+    if (!flagReason.trim()) {
+      return;
+    }
+    await api.put(`/v1/settings/feature-flags/${selectedFlag.key}`, {
+      enabled: !selectedFlag.enabled,
+      reason: flagReason.trim(),
+    });
+    setFlagDialogOpen(false);
+    fetchData('feature-flags');
   };
 
   // Initial load
@@ -105,6 +135,9 @@ const SettingsPanel = () => {
         <ScrollArea className="w-full whitespace-nowrap rounded-md border">
           <TabsList className="w-full flex justify-start">
             <TabsTrigger value="brands" data-testid="settings-tab-brands"><Building2 className="w-4 h-4 mr-2" /> Brands</TabsTrigger>
+            <TabsTrigger value="feature-flags" data-testid="settings-tab-feature-flags">
+              <ToggleRight className="w-4 h-4 mr-2" /> Feature Flags
+            </TabsTrigger>
             <TabsTrigger value="domains" data-testid="settings-tab-domains">
               <Globe className="w-4 h-4 mr-2" /> Domains
               <Badge variant="secondary" className="ml-2" data-testid="settings-tab-domains-badge">Yakında</Badge>
@@ -153,6 +186,55 @@ const SettingsPanel = () => {
         <TabsContent value="brands" className="mt-4">
           <BrandSettings brands={brands} onRefresh={fetchData} />
         </TabsContent>
+
+        <TabsContent value="feature-flags" className="mt-4">
+          <Card data-testid="settings-feature-flags-card">
+            <CardHeader>
+              <CardTitle>Feature Flags</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {featureFlags.length === 0 ? (
+                <div className="text-sm text-muted-foreground" data-testid="settings-feature-flags-empty">
+                  Henüz feature flag bulunmamaktadır.
+                </div>
+              ) : (
+                featureFlags.map((flag) => (
+                  <div key={flag.key} className="flex items-center justify-between border rounded-lg p-3" data-testid={`feature-flag-${flag.key}`}>
+                    <div>
+                      <div className="font-medium" data-testid={`feature-flag-${flag.key}-name`}>{flag.key}</div>
+                      <div className="text-xs text-muted-foreground" data-testid={`feature-flag-${flag.key}-desc`}>{flag.description}</div>
+                    </div>
+                    <Switch
+                      checked={flag.enabled}
+                      onCheckedChange={() => openFlagDialog(flag)}
+                      data-testid={`feature-flag-${flag.key}-toggle`}
+                    />
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <Dialog open={flagDialogOpen} onOpenChange={setFlagDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Feature Flag Güncelle</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground" data-testid="feature-flag-reason-help">
+                Değişiklik için kısa bir gerekçe girin.
+              </p>
+              <Textarea
+                value={flagReason}
+                onChange={(e) => setFlagReason(e.target.value)}
+                placeholder="Örn: Prod ödeme kapalı, bakım var"
+                data-testid="feature-flag-reason-input"
+              />
+              <Button onClick={handleFlagUpdate} data-testid="feature-flag-reason-submit">Kaydet</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* CURRENCIES */}
         <TabsContent value="currencies" className="mt-4">

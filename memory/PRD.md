@@ -51,6 +51,7 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Frontend lint uyumu: eslint 8.57.1 + eslint-plugin-react-hooks 5.2.0 ile package.json & yarn.lock hizalandı
 - emergentintegrations bağımlılığı kaldırıldı; AI/Stripe entegrasyonları yoksa 501 dönecek şekilde güvenli hale getirildi
 - Stripe routes only ENABLE_STRIPE=1 iken yükleniyor; AI analiz ENABLE_AI=1 ile aktif
+- System feature flags (ENABLE_STRIPE/ENABLE_AI) için DB + Redis cache + audit log + UI toggle taslağı eklendi
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
