@@ -9,7 +9,24 @@ from app.core.database import get_session
 from app.models.sql_models import Transaction, Player
 from app.utils.auth_player import get_current_player
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
-from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse
+try:
+    from emergentintegrations.payments.stripe.checkout import (
+        StripeCheckout,
+        CheckoutSessionRequest,
+        CheckoutSessionResponse,
+    )
+except Exception:
+    StripeCheckout = None
+    class CheckoutSessionRequest(BaseModel):
+        amount: float
+        currency: str
+        success_url: str
+        cancel_url: str
+        metadata: Optional[Dict[str, str]] = None
+
+    class CheckoutSessionResponse(BaseModel):
+        session_id: str
+        url: str
 from app.services.metrics import metrics
 from config import settings
 from pydantic import BaseModel, Field
