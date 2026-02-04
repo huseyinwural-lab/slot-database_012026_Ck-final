@@ -157,9 +157,8 @@ app.include_router(ledger_admin.router)
 from app.routes import payments
 app.include_router(payments.router)
 
-if os.getenv("ENABLE_STRIPE", "0").strip() == "1":
-    from app.routes import stripe_payments
-    app.include_router(stripe_payments.router)
+from app.routes import stripe_payments
+app.include_router(stripe_payments.router)
 
 from app.routes import adyen_payments
 app.include_router(adyen_payments.router)
