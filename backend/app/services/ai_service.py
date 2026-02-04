@@ -2,7 +2,12 @@ import json
 import logging
 from typing import Dict, Any
 from config import settings
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+try:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+except Exception:
+    LlmChat = None
+    UserMessage = None
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +20,11 @@ class RiskAnalyzer:
         self.model = "gpt-4o"
 
     async def analyze_transaction(self, transaction: Dict[str, Any]) -> Dict[str, Any]:
-        if not self.api_key:
+        if not self.api_key or LlmChat is None or UserMessage is None:
             return {
                 "risk_score": 0,
                 "risk_level": "unknown",
-                "reason": "AI Service not configured (Missing Key)",
+                "reason": "AI Service not configured",
                 "details": {}
             }
 
