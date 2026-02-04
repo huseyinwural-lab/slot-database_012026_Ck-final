@@ -88,14 +88,20 @@ const SettingsPanel = () => {
   const handleFlagUpdate = async () => {
     if (!selectedFlag) return;
     if (!flagReason.trim()) {
+      toast.error('Lütfen gerekçe girin');
       return;
     }
-    await api.put(`/v1/settings/feature-flags/${selectedFlag.key}`, {
-      enabled: !selectedFlag.enabled,
-      reason: flagReason.trim(),
-    });
-    setFlagDialogOpen(false);
-    fetchData('feature-flags');
+    try {
+      await api.put(`/v1/settings/feature-flags/${selectedFlag.key}`, {
+        enabled: !selectedFlag.enabled,
+        reason: flagReason.trim(),
+      });
+      toast.success('Feature flag güncellendi');
+      setFlagDialogOpen(false);
+      fetchData('feature-flags');
+    } catch {
+      toast.error('Feature flag güncellenemedi');
+    }
   };
 
   // Initial load
