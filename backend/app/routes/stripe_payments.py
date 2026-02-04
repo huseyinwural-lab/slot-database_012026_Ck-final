@@ -9,14 +9,16 @@ from app.core.database import get_session
 from app.models.sql_models import Transaction, Player
 from app.utils.auth_player import get_current_player
 from app.services.wallet_ledger import apply_wallet_delta_with_ledger
+from pydantic import BaseModel, Field
 try:
     from emergentintegrations.payments.stripe.checkout import (
         StripeCheckout,
         CheckoutSessionRequest,
         CheckoutSessionResponse,
     )
-except Exception:
+except ModuleNotFoundError:
     StripeCheckout = None
+
     class CheckoutSessionRequest(BaseModel):
         amount: float
         currency: str
@@ -29,7 +31,6 @@ except Exception:
         url: str
 from app.services.metrics import metrics
 from config import settings
-from pydantic import BaseModel, Field
 
 # Initialize router
 router = APIRouter(prefix="/api/v1/payments/stripe", tags=["payments", "stripe"])
