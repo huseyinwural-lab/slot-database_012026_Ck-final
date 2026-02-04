@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from typing import Dict, Any
 from config import settings
 
@@ -20,7 +21,8 @@ class RiskAnalyzer:
         self.model = "gpt-4o"
 
     async def analyze_transaction(self, transaction: Dict[str, Any]) -> Dict[str, Any]:
-        if not self.api_key or LlmChat is None or UserMessage is None:
+        enable_ai = (os.getenv("ENABLE_AI", "1").strip() == "1")
+        if not enable_ai or not self.api_key or LlmChat is None or UserMessage is None:
             return {
                 "risk_score": 0,
                 "risk_level": "unknown",
