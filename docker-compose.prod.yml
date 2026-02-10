@@ -39,7 +39,7 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
-      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-postgresql+psycopg2://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
       REDIS_URL: ${REDIS_URL:-}
       REDIS_REQUIRED: ${REDIS_REQUIRED:-false}
       ENV: ${ENV:-prod}
@@ -81,7 +81,7 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
-      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-postgresql+psycopg2://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
       REDIS_URL: ${REDIS_URL:-}
       REDIS_REQUIRED: ${REDIS_REQUIRED:-false}
       ENV: ${ENV:-prod}
