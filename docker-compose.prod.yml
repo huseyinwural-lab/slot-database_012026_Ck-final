@@ -8,7 +8,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: casino_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -38,8 +38,8 @@ services:
     restart: "no"
     environment:
       PYTHONUNBUFFERED: "1"
-      DATABASE_URL: ${DATABASE_URL}
-      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
       REDIS_URL: ${REDIS_URL:-}
       REDIS_REQUIRED: ${REDIS_REQUIRED:-false}
       ENV: ${ENV:-prod}
@@ -80,8 +80,8 @@ services:
         condition: service_healthy
     environment:
       PYTHONUNBUFFERED: "1"
-      DATABASE_URL: ${DATABASE_URL}
-      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-casino_db}}
       REDIS_URL: ${REDIS_URL:-}
       REDIS_REQUIRED: ${REDIS_REQUIRED:-false}
       ENV: ${ENV:-prod}
