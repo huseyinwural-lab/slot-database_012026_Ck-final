@@ -53,6 +53,7 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Stripe routes only ENABLE_STRIPE=1 iken yükleniyor; AI analiz ENABLE_AI=1 ile aktif
 - Server tarafında Stripe router import’u ENABLE_STRIPE + ModuleNotFoundError guard ile soft-fail
 - System feature flags (ENABLE_STRIPE/ENABLE_AI) için DB + Redis cache + audit log + UI toggle taslağı eklendi
+- docker-compose.prod.yml: DATABASE_URL/SYNC_DATABASE_URL/POSTGRES_PASSWORD varsayılanları eklendi (ENV yoksa postgres default)
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
