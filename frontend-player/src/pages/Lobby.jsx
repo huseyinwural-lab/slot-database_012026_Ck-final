@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
 import { GameCard } from '@/components/GameCard';
 import { CategoryRail } from '@/components/CategoryRail';
 import { SkeletonBlock } from '@/components/SkeletonBlock';
