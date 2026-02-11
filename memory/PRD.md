@@ -72,6 +72,13 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Support ticket stub `/api/v1/support/ticket`
 - Wallet + Game launch API uyumu (player routes)
 
+## Uygulananlar (2026-02-11 - devam)
+- Resend/Twilio adapter iskeleti (env guard + provider katmanı)
+- Player doğrulama alanları eklendi (email_verified, sms_verified) + migration
+- Telemetry event persistence + KPI endpoint `/api/v1/telemetry/kpi/game-start-rate`
+- Player payments (Stripe checkout + webhook) endpointleri eklendi (env guard)
+- Support ticket DB persist + player context
+
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
 - E2E: `smoke-launch.spec.ts` PASS
