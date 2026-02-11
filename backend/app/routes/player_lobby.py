@@ -5,6 +5,7 @@ from app.models.game_models import Game
 from app.utils.auth_player import get_current_player
 from app.models.sql_models import Player
 
+from app.database import get_session
 router = APIRouter(prefix="/api/v1/player", tags=["player_lobby"])
 
 @router.get("/games")
