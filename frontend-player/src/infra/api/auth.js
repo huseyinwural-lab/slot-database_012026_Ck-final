@@ -4,13 +4,13 @@ export const authApi = {
   register: (payload) =>
     request({
       method: 'POST',
-      url: '/api/v1/auth/player/register',
+      url: '/auth/player/register',
       data: payload,
     }),
   login: (payload) =>
     request({
       method: 'POST',
-      url: '/api/v1/auth/player/login',
+      url: '/auth/player/login',
       data: payload,
     }),
 };
