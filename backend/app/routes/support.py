@@ -64,7 +64,7 @@ async def reply_ticket(
 
 
 @router.post("/ticket")
-async def create_player_ticket(payload: PlayerSupportRequest, session: SessionLocal = Depends(get_db)):
+async def create_player_ticket(payload: PlayerSupportRequest, session: AsyncSession = Depends(get_session)):
     ticket = SupportTicket(
         tenant_id=payload.tenant_id,
         player_id=payload.player_id,
@@ -76,6 +76,6 @@ async def create_player_ticket(payload: PlayerSupportRequest, session: SessionLo
         }],
     )
     session.add(ticket)
-    session.commit()
-    session.refresh(ticket)
+    await session.commit()
+    await session.refresh(ticket)
     return {"ok": True, "data": {"ticket_id": ticket.id, "status": "received"}}
