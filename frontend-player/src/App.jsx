@@ -9,7 +9,6 @@ import GameRoom from './pages/GameRoom';
 import VerifyEmail from './pages/VerifyEmail';
 import VerifySms from './pages/VerifySms';
 import Support from './pages/Support';
-import Layout from './components/Layout';
 import { ToastProvider } from './components/ToastProvider';
 import { useAuthStore, useVerificationStore } from './domain';
 
@@ -47,9 +46,7 @@ function App() {
             element={(
               <RequireAuth>
                 <RequireVerified>
-                  <Layout>
-                    <Lobby />
-                  </Layout>
+                  <Lobby />
                 </RequireVerified>
               </RequireAuth>
             )}
@@ -59,9 +56,7 @@ function App() {
             element={(
               <RequireAuth>
                 <RequireVerified>
-                  <Layout>
-                    <WalletPage />
-                  </Layout>
+                  <WalletPage />
                 </RequireVerified>
               </RequireAuth>
             )}
@@ -71,9 +66,7 @@ function App() {
             element={(
               <RequireAuth>
                 <RequireVerified>
-                  <Layout>
-                    <GameRoom />
-                  </Layout>
+                  <GameRoom />
                 </RequireVerified>
               </RequireAuth>
             )}
@@ -82,9 +75,7 @@ function App() {
             path="/support"
             element={(
               <RequireAuth>
-                <Layout>
-                  <Support />
-                </Layout>
+                <Support />
               </RequireAuth>
             )}
           />
