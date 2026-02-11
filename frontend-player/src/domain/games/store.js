@@ -22,7 +22,7 @@ export const useGamesStore = create((set) => ({
   launchGame: async (game) => {
     set({ launchStatus: 'launching', launchUrl: null, error: null });
     trackEvent('game_launch_click', { game_id: game.id });
-    const response = await gamesApi.launchGame({ game_id: game.id });
+    const response = await gamesApi.launchGame(game.id);
     if (response.ok) {
       trackEvent('game_launch_success', { game_id: game.id });
       set({ launchStatus: 'launched', launchUrl: response.data?.launch_url, error: null });
