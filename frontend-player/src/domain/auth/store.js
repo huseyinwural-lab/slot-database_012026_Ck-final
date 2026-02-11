@@ -44,6 +44,7 @@ export const useAuthStore = create((set, get) => ({
   logout: () => {
     clearAuthToken();
     clearStoredUser();
+    localStorage.removeItem('player_verification');
     set({ status: 'idle', token: null, user: null, error: null });
   },
 }));
