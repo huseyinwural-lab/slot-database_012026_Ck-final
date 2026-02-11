@@ -4,17 +4,25 @@
  
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
+    --background: 220 32% 4%;
     --foreground: 0 0% 98%;
-    --primary: 142 76% 36%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 3.7% 15.9%;
+    --primary: 172 80% 50%;
+    --primary-foreground: 220 20% 10%;
+    --secondary: 215 23% 12%;
     --secondary-foreground: 0 0% 98%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 31 100% 58%;
+    --accent-foreground: 240 8% 10%;
+    --border: 220 16% 20%;
+    --ring: 172 80% 50%;
+    --menu: 215 30% 10%;
+    --header: 215 30% 12%;
+    --footer: 220 28% 8%;
   }
 }
  
 body {
   @apply bg-background text-foreground;
+  background: radial-gradient(circle at top, rgba(25, 224, 195, 0.12), transparent 45%),
+    radial-gradient(circle at 20% 20%, rgba(255, 139, 44, 0.12), transparent 50%),
+    hsl(var(--background));
 }
