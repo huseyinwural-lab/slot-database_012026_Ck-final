@@ -13,7 +13,10 @@ router = APIRouter(prefix="/api/v1/support", tags=["support"])
 
 
 class PlayerSupportRequest(BaseModel):
+    player_id: str
+    tenant_id: str
     message: str
+    subject: str | None = None
 
 @router.get("/tickets")
 async def get_tickets(
@@ -61,5 +64,18 @@ async def reply_ticket(
 
 
 @router.post("/ticket")
-async def create_player_ticket(payload: PlayerSupportRequest):
-    return {"ok": True, "data": {"status": "received"}}
+async def create_player_ticket(payload: PlayerSupportRequest, session: SessionLocal = Depends(get_db)):
+    ticket = SupportTicket(
+        tenant_id=payload.tenant_id,
+        player_id=payload.player_id,
+        subject=payload.subject or "Player Support",
+        messages=[{
+            "sender": "player",
+            "text": payload.message,
+            "time": datetime.utcnow().isoformat(),
+        }],
+    )
+    session.add(ticket)
+    session.commit()
+    session.refresh(ticket)
+    return {"ok": True, "data": {"ticket_id": ticket.id, "status": "received"}}
