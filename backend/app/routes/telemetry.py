@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from typing import Literal
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -10,8 +11,20 @@ from app.models.sql_models import TelemetryEvent, Player
 router = APIRouter(prefix="/api/v1/telemetry", tags=["telemetry"])
 
 
+TelemetryEventName = Literal[
+    "register_success",
+    "login_success",
+    "email_verified",
+    "sms_verified",
+    "lobby_loaded",
+    "game_launch_click",
+    "game_launch_success",
+    "game_launch_fail",
+]
+
+
 class TelemetryEventRequest(BaseModel):
-    event: str
+    event: TelemetryEventName
     payload: dict | None = None
     ts: str | None = None
     session_id: str | None = None
