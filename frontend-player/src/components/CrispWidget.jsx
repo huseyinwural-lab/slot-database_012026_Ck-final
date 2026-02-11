@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { env } from '@/config/env';
-import { getStoredUser } from '@/domain/auth/storage';
+import { getStoredUser } from '@/domain/auth/session';
 
 export const CrispWidget = ({ onReady }) => {
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { telemetryApi } from '@/infra/api/telemetry';
-import { getStoredUser } from '@/domain/auth/storage';
+import { getStoredUser } from '@/domain/auth/session';
 
 const SESSION_KEY = 'player_session_id';
 

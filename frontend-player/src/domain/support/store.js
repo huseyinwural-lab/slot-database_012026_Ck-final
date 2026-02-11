@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { supportApi } from '@/infra/api/support';
-import { getStoredUser } from '@/domain/auth/storage';
+import { getStoredUser } from '@/domain/auth/session';
 
 export const useSupportStore = create((set) => ({
   status: 'idle',
