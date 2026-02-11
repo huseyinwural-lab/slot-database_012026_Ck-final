@@ -8,6 +8,15 @@ export const useVerificationStore = create((set, get) => ({
   emailState: stored.emailState || 'unverified',
   smsState: stored.smsState || 'unverified',
   error: null,
+  syncFromUser: (user) => {
+    if (!user) return;
+    const next = {
+      emailState: user.email_verified ? 'verified' : 'unverified',
+      smsState: user.sms_verified ? 'verified' : 'unverified',
+    };
+    localStorage.setItem('player_verification', JSON.stringify(next));
+    set(next);
+  },
   sendEmail: async (payload) => {
     set({ emailState: 'pending', error: null });
     const response = await verificationApi.sendEmail(payload);
