@@ -46,31 +46,26 @@ test.describe('P0 Player Journey', () => {
       console.log('Verifying Email...');
       await expect(page).toHaveURL(/\/verify\/email/, { timeout: 10000 });
       
-      // MUST click Send first to prime the backend mock state
       await page.getByTestId('verify-email-input').fill(email);
       await page.getByTestId('verify-email-send').click();
       
-      // Wait a moment for async send
       await page.waitForTimeout(1000);
       
       await page.getByTestId('verify-email-code').fill('123456');
       await page.getByTestId('verify-email-confirm').click();
       
-      // Wait for navigation
       await page.waitForTimeout(1000);
 
       // 3. SMS Verification
       console.log('Verifying SMS...');
       await expect(page).toHaveURL(/\/verify\/sms/, { timeout: 10000 });
       
-      // SMS Send
       // Fallback selector strategy for phone input
       const phoneInput = page.getByPlaceholder(/Phone|Telefon/i);
       if (await phoneInput.count() > 0) {
          await phoneInput.fill(phone);
       }
       
-      // Send button
       const sendBtn = page.getByRole('button', { name: /Kodu Gönder|Send/i });
       if (await sendBtn.count() > 0) {
         await sendBtn.click();
@@ -83,7 +78,19 @@ test.describe('P0 Player Journey', () => {
       
       await page.waitForTimeout(1000);
 
-      // 4. Lobby (Game Start Rate KPI)
+      // 4. Login (Redirected after verification)
+      console.log('Logging In...');
+      await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+      
+      // Login form
+      // Assuming typical login form selectors. If not, I'll need to check Login.jsx
+      // But typically email/username and password.
+      // Trying likely selectors
+      await page.locator('input[type="email"]').fill(email);
+      await page.locator('input[type="password"]').fill(password);
+      await page.getByRole('button', { name: /Login|Giriş/i }).click();
+
+      // 5. Lobby (Game Start Rate KPI)
       console.log('Entering Lobby...');
       await expect(page).toHaveURL(/\/lobby/, { timeout: 10000 });
       await expect(page.getByText(/Lobby|Games/i).first()).toBeVisible();
