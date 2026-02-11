@@ -4,25 +4,25 @@ export const verificationApi = {
   sendEmail: (payload) =>
     request({
       method: 'POST',
-      url: '/api/v1/verify/email/send',
+      url: '/verify/email/send',
       data: payload,
     }),
   confirmEmail: (payload) =>
     request({
       method: 'POST',
-      url: '/api/v1/verify/email/confirm',
+      url: '/verify/email/confirm',
       data: payload,
     }),
   sendSms: (payload) =>
     request({
       method: 'POST',
-      url: '/api/v1/verify/sms/send',
+      url: '/verify/sms/send',
       data: payload,
     }),
   confirmSms: (payload) =>
     request({
       method: 'POST',
-      url: '/api/v1/verify/sms/confirm',
+      url: '/verify/sms/confirm',
       data: payload,
     }),
 };
