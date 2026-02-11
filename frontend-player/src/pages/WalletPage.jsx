@@ -75,7 +75,6 @@ const WalletPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 
