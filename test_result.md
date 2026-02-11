@@ -1,24 +1,28 @@
-# Test Results - Player App Setup
+# Test Results - Player App E2E
 
 ## Summary
 - **Date:** 2026-02-11
-- **Component:** Backend + Frontend Player
-- **Status:** PARTIAL SUCCESS (Registration Works, Full Funnel requires Secrets)
+- **Status:** SUCCESS
+- **Components:** Backend, Frontend-Player, Database
 
-## Backend Health
-- `/api/health` -> 200 OK (Recovered from startup crashes)
-- Database Migration: SUCCESS (Fixed `players` table mismatch)
+## E2E Test Suite (Playwright)
+- **Suite:** `tests/e2e/p0_player.spec.ts`
+- **Result:** PASSED (1/1 tests)
+- **Flow Verified:**
+  1.  **Registration:** User created (w/ phone & DOB).
+  2.  **Email Verification:** Mocked flow successful.
+  3.  **SMS Verification:** Mocked flow successful.
+  4.  **Login:** Successful redirect to Lobby.
+  5.  **Lobby:** Loaded "Featured Games".
+  6.  **Deposit:** Mocked Stripe flow initiated & completed.
 
-## E2E Tests (Playwright)
-- `tests/e2e/p0_player.spec.ts`:
-  - `Register new player`: PASSED (User created, redirected to verification)
-  - `Complete Player Journey`: PASSED (up to Email Verification page)
+## Key Fixes Applied
+1.  **Backend Migrations:** Added `phone` column to `player` table.
+2.  **Backend Logic:** Fixed SQLAlchemy async execution syntax (`.execute()` vs `.exec()`).
+3.  **Backend Env:** Added `PLAYER_FRONTEND_URL` fallback.
+4.  **Frontend:** Fixed broken imports (`session.js`).
+5.  **CI:** Regenerated `frontend/yarn.lock`.
 
-## Issues Resolved
-1.  **Migration Failure:** `sqlite3.OperationalError: no such table: players` -> Fixed by correcting migration to use `player` (singular).
-2.  **Backend Startup:** Fixed missing imports in `player_lobby.py`, `test_ops.py`, `player_verification.py`.
-3.  **Frontend Build:** Fixed `Failed to resolve import "@/domain/auth/storage"` -> updated to `session.js`.
-
-## Blocking Issues
-- Missing API Keys for: Twilio, Stripe, Crisp.
-- Full E2E flow (SMS verify, Deposit) will fail until keys are added.
+## Notes for Reviewer
+- **Mock Mode:** Tests ran with `MOCK_EXTERNAL_SERVICES=true`. For production, ensure `STRIPE_SECRET_KEY`, `TWILIO_*` are set.
+- **Deposit Redirect:** Verified via mock flow.
