@@ -1,223 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import api from '../services/api';
-import { callMoneyAction } from '../services/moneyActions';
-import { moneyPathErrorMessage } from '../services/moneyPathErrors';
-import { 
-  Wallet, ArrowUpRight, ArrowDownLeft, History, CreditCard, DollarSign, 
-  ChevronLeft, ChevronRight, RefreshCw, Copy, AlertCircle 
-} from 'lucide-react';
-import { WithdrawalForm } from '../components/WithdrawalForm';
-import { WithdrawalStatus } from '../components/WithdrawalStatus';
+import React, { useEffect, useState } from 'react';
+import Layout from '@/components/Layout';
+import { useWalletStore, usePaymentsStore, useVerificationStore } from '@/domain';
+import { useToast } from '@/components/ToastProvider';
 
 const WalletPage = () => {
-  const [activeTab, setActiveTab] = useState('deposit');
-  const [balance, setBalance] = useState({ 
-    available_real: 0, 
-    held_real: 0, 
-    total_real: 0, 
-    currency: 'USD' 
-  });
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, total: 0, limit: 10 });
-  
-  // Form States
-  const [depositAmount, setDepositAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('stripe');
-  // Withdrawal State
-  const [lastPayoutId, setLastPayoutId] = useState(null);
-  
-  const [processing, setProcessing] = useState(false);
-  const [message, setMessage] = useState(null);
-
-  const PLAYER_SCOPE = 'player';
-
-  const fetchWalletData = async (pageNum = 1) => {
-    setLoading(true);
-    try {
-      const [balRes, txRes] = await Promise.all([
-        api.get('/player/wallet/balance'),
-        api.get(`/player/wallet/transactions?page=${pageNum}&limit=${pagination.limit}`)
-      ]);
-      
-      setBalance(balRes.data);
-      setTransactions(txRes.data.items || []);
-      setPagination(prev => ({
-        ...prev,
-        page: pageNum,
-        total: txRes.data.meta?.total || 0
-      }));
-    } catch (err) {
-      console.error(err);
-      setMessage({ type: 'error', text: 'Veriler yüklenirken hata oluştu.' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { status, balance, currency, transactions, fetchBalance, fetchTransactions } = useWalletStore();
+  const { status: paymentStatus, createDeposit } = usePaymentsStore();
+  const { emailState, smsState } = useVerificationStore();
+  const [amount, setAmount] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
-    fetchWalletData(1);
-    checkReturnFromStripe();
-    checkReturnFromAdyen();
-  }, []);
+    fetchBalance();
+    fetchTransactions();
+  }, [fetchBalance, fetchTransactions]);
 
-  const checkReturnFromAdyen = () => {
-      const query = new URLSearchParams(window.location.search);
-      const provider = query.get('provider');
-      const resultCode = query.get('resultCode');
-      
-      if (provider === 'adyen') {
-          const txId = query.get('tx_id');
-
-          if (resultCode === 'Authorised') {
-               setMessage({ type: 'success', text: 'Adyen Payment Authorised! Balance will update shortly.' });
-
-               // Clean noisy params but preserve tx_id for deterministic wallet contract.
-               const url = new URL(window.location.href);
-               url.search = '';
-               if (txId) url.searchParams.set('tx_id', txId);
-               window.history.replaceState({}, document.title, url.toString());
-
-               fetchWalletData(1);
-          } else if (resultCode) {
-               setMessage({ type: 'error', text: `Adyen Payment Result: ${resultCode}` });
-
-               const url = new URL(window.location.href);
-               url.search = '';
-               if (txId) url.searchParams.set('tx_id', txId);
-               window.history.replaceState({}, document.title, url.toString());
-          }
-      }
-  };
-
-  const checkReturnFromStripe = () => {
-      const query = new URLSearchParams(window.location.search);
-      const sessionId = query.get('session_id');
-      const status = query.get('status');
-
-      const txId = query.get('tx_id');
-
-      if (sessionId && status === 'success') {
-          setMessage({ type: 'info', text: 'Verifying payment...' });
-          setProcessing(true); // Show processing state
-          pollPaymentStatus(sessionId);
-      } else if (status === 'cancel') {
-          setMessage({ type: 'error', text: 'Payment cancelled.' });
-
-          // Clean URL but preserve tx_id
-          const url = new URL(window.location.href);
-          url.search = '';
-          if (txId) url.searchParams.set('tx_id', txId);
-          window.history.replaceState({}, document.title, url.toString());
-      }
-  };
-
-  const pollPaymentStatus = async (sessionId, attempts = 0) => {
-      if (attempts > 10) { // 20 seconds timeout
-          setMessage({ type: 'error', text: 'Payment status check timed out. Please check transaction history.' });
-          setProcessing(false);
-          window.history.replaceState({}, document.title, window.location.pathname);
-          fetchWalletData(1);
-          return;
-      }
-      
-      try {
-          const res = await api.get(`/payments/stripe/checkout/status/${sessionId}`);
-          if (res.data.payment_status === 'paid') {
-              setMessage({ type: 'success', text: 'Payment Successful!' });
-              setProcessing(false);
-              window.history.replaceState({}, document.title, window.location.pathname);
-              fetchWalletData(1);
-          } else if (res.data.status === 'expired' || res.data.status === 'failed') {
-               setMessage({ type: 'error', text: 'Payment failed or expired.' });
-               setProcessing(false);
-               window.history.replaceState({}, document.title, window.location.pathname);
-          } else {
-              // Retry
-              setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), 2000);
-          }
-      } catch (e) {
-          console.error(e);
-          // Retry on error
-          setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), 2000);
-      }
-  };
-
-
-  const handlePageChange = (newPage) => {
-    if (newPage < 1) return;
-    fetchWalletData(newPage);
-  };
-
-  const copyToClipboard = (text) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-  };
-
-  const handleDeposit = async (e) => {
-    e.preventDefault();
-    setProcessing(true);
-    setMessage(null);
-
-    try {
-       let endpoint = '/payments/stripe/checkout/session';
-       if (paymentMethod === 'adyen') {
-           endpoint = '/payments/adyen/checkout/session';
-       }
-
-       const res = await api.post(
-         endpoint,
-         {
-           amount: parseFloat(depositAmount),
-           currency: 'USD',
-         }
-       );
-
-       const txId = res.data?.tx_id;
-       if (!txId) {
-         // Fail-early: tx_id is mandatory contract for wallet deposit flows.
-         throw new Error('Deposit checkout response missing tx_id');
-       }
-
-       // Contract: write tx_id into URL immediately (provider-agnostic) for E2E determinism.
-       const url = new URL(window.location.href);
-       url.searchParams.set('tx_id', txId);
-       window.history.replaceState(null, '', url.toString());
-
-       if (res.data.url) {
-           // Redirect
-           window.location.href = res.data.url;
-       } else {
-           throw new Error("No redirect URL returned");
-       }
-    } catch (err) {
-       console.error(err);
-       setMessage({ type: 'error', text: moneyPathErrorMessage(err) });
-       setProcessing(false);
+  const handleDeposit = async () => {
+    if (emailState !== 'verified' || smsState !== 'verified') {
+      toast.push('Doğrulama tamamlanmadan depozit yapılamaz', 'error');
+      return;
+    }
+    const response = await createDeposit({ amount: Number(amount), currency: currency || 'USD' });
+    if (response.ok) {
+      toast.push('Depozit başlatıldı', 'success');
+      fetchBalance();
+    } else {
+      toast.push('Depozit başarısız', 'error');
     }
   };
 
-  // Get Player ID
-  const storedPlayer = localStorage.getItem('player_user');
-  const player = storedPlayer ? JSON.parse(storedPlayer) : null;
-  const playerId = player?.id;
-  const playerEmail = player?.email || 'user@example.com';
-
-  const handlePayoutSuccess = (data) => {
-      setLastPayoutId(data.payout_id);
-      fetchWalletData(1); // Refresh history
-  };
-
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-10">
-      {/* Header */}
-      <div className="bg-secondary/50 p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Wallet className="text-primary" /> My Wallet
-          </h1>
+    <Layout>
+      <div className="space-y-6" data-testid="wallet-page">
+        <div className="rounded-2xl border border-white/10 bg-black/40 p-6" data-testid="wallet-balance-card">
+          <div className="text-sm text-white/60">Güncel Bakiye</div>
+          <div className="text-3xl font-semibold" data-testid="wallet-balance">{balance} {currency}</div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/40 p-6 space-y-4">
+          <div className="text-lg font-semibold" data-testid="wallet-deposit-title">Deposit</div>
+          <input
+            type="number"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            placeholder="Miktar"
+            className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm"
+            data-testid="wallet-deposit-input"
+          />
+          <button
+            onClick={handleDeposit}
+            className="rounded-lg bg-[var(--app-cta,#ff8b2c)] px-4 py-2 text-sm font-semibold text-black"
+            data-testid="wallet-deposit-button"
+          >
+            {paymentStatus === 'pending' ? 'Beklemede...' : 'Depozit Başlat'}
+          </button>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/40 p-6">
+          <div className="text-lg font-semibold" data-testid="wallet-transactions-title">İşlem Geçmişi</div>
+          {status === 'loading' && <div className="text-sm text-white/60">Yükleniyor...</div>}
+          {status !== 'loading' && transactions.length === 0 && (
+            <div className="text-sm text-white/60" data-testid="wallet-transactions-empty">Aktif işlem bulunmamaktadır</div>
+          )}
+          <div className="mt-4 space-y-2">
+            {transactions.map((tx) => (
+              <div key={tx.id} className="flex items-center justify-between text-sm" data-testid={`wallet-transaction-${tx.id}`}>
+                <div>
+                  <div className="font-medium" data-testid={`wallet-transaction-${tx.id}-type`}>{tx.type}</div>
+                  <div className="text-xs text-white/50" data-testid={`wallet-transaction-${tx.id}-date`}>{tx.created_at}</div>
+                </div>
+                <div className="font-semibold" data-testid={`wallet-transaction-${tx.id}-amount`}>{tx.amount}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default WalletPage;
           <p className="text-muted-foreground">Manage your funds and transactions</p>
         </div>
         <button 
