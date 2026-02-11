@@ -148,6 +148,8 @@ from app.routes import payouts
 app.include_router(payouts.router)
 from app.routes import player_ops
 app.include_router(player_ops.router)
+from app.routes import test_ops
+app.include_router(test_ops.router)
 
 # 3. Core Business Logic (Partially Refactored)
 from app.routes import core
