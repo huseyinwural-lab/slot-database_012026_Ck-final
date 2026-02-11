@@ -45,9 +45,7 @@ function App() {
             path="/lobby"
             element={(
               <RequireAuth>
-                <RequireVerified>
-                  <Lobby />
-                </RequireVerified>
+                <Lobby />
               </RequireAuth>
             )}
           />
@@ -55,9 +53,7 @@ function App() {
             path="/wallet"
             element={(
               <RequireAuth>
-                <RequireVerified>
-                  <WalletPage />
-                </RequireVerified>
+                <WalletPage />
               </RequireAuth>
             )}
           />
