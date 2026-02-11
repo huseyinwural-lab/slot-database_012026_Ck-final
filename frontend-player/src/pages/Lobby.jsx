@@ -5,12 +5,14 @@ import { GameCard } from '@/components/GameCard';
 import { CategoryRail } from '@/components/CategoryRail';
 import { SkeletonBlock } from '@/components/SkeletonBlock';
 import { useGamesStore, useWalletStore, useVerificationStore } from '@/domain';
+import { useToast } from '@/components/ToastProvider';
 
 const Lobby = () => {
   const { games, lobbyStatus, fetchLobby, launchGame, launchStatus } = useGamesStore();
   const { markStale } = useWalletStore();
   const { emailState, smsState } = useVerificationStore();
   const [query, setQuery] = useState('');
+  const toast = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +25,10 @@ const Lobby = () => {
   }, [games, query]);
 
   const handleLaunch = async (game) => {
-    if (emailState !== 'verified' || smsState !== 'verified') return;
+    if (emailState !== 'verified' || smsState !== 'verified') {
+      toast.push('Email ve SMS doğrulaması gerekli', 'error');
+      return;
+    }
     const response = await launchGame(game);
     if (response.ok) {
       markStale();
