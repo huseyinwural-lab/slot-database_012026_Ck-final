@@ -30,7 +30,6 @@ const WalletPage = () => {
   };
 
   return (
-    <Layout>
       <div className="space-y-6" data-testid="wallet-page">
         <div className="rounded-2xl border border-white/10 bg-black/40 p-6" data-testid="wallet-balance-card">
           <div className="text-sm text-white/60">Güncel Bakiye</div>
