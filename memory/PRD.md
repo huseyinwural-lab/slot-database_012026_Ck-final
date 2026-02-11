@@ -15,6 +15,14 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - UI stabilizasyonu (tablo loading/error/empty standardizasyonu)
 - Prod readiness: healthz/readyz + runbook + smoke test
 
+## Player App Requirements (Özet)
+- Landing → Register → Email/SMS verify → Login → Lobby → Game launch akışı
+- Email/SMS doğrulama zorunlu (game launch + deposit öncesi)
+- Wallet: balance + transaction history, backend authoritative
+- Support: Crisp widget (key varsa) + ticket fallback
+- Telemetry event tracking (register/login/lobby/game launch)
+- Tema: turkuaz accent + turuncu CTA, ayrıca arkaplan/header/footer/menu renkleri manuel ayarlanabilir
+
 ## Mimari
 - **Frontend**: React (craco), Tailwind UI
 - **Backend**: FastAPI + SQLModel
@@ -54,6 +62,15 @@ Full-stack casino admin platformında P0 stabilite ve prod readiness hedefleri. 
 - Server tarafında Stripe router import’u ENABLE_STRIPE + ModuleNotFoundError guard ile soft-fail
 - System feature flags (ENABLE_STRIPE/ENABLE_AI) için DB + Redis cache + audit log + UI toggle taslağı eklendi
 - docker-compose.prod.yml: DATABASE_URL/SYNC_DATABASE_URL/POSTGRES_PASSWORD varsayılanları eklendi (ENV yoksa postgres default)
+
+## Uygulananlar (2026-02-11)
+- Player frontend temel mimari kuruldu (domain/infra/ui ayrımı)
+- Landing, Register, Login, Verify Email/SMS, Lobby, GameRoom, Wallet, Support sayfaları
+- Manual tema özelleştirme (arkaplan/header/footer/menu renkleri)
+- Telemetry client + backend stub `/api/v1/telemetry/events`
+- Email/SMS verify backend stub `/api/v1/verify/*` (kod: 123456)
+- Support ticket stub `/api/v1/support/ticket`
+- Wallet + Game launch API uyumu (player routes)
 
 ## Test Durumu
 - Backend: `/api/v1/healthz`, `/api/v1/readyz` curl PASS
