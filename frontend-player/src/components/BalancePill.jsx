@@ -4,6 +4,6 @@ export const BalancePill = ({ balance, currency }) => (
     data-testid="balance-pill"
   >
     <span className="text-white/70" data-testid="balance-label">Bakiye</span>
-    <span className="font-semibold text-white" data-testid="balance-value">{balance} {currency}</span>
+    <span className="font-semibold text-white" data-testid="balance-value">{Number(balance).toFixed(2)} {currency}</span>
   </div>
 );
