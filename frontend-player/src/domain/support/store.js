@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supportApi } from '@/infra/api/support';
+import { getStoredUser } from '@/domain/auth/storage';
 
 export const useSupportStore = create((set) => ({
   status: 'idle',
@@ -8,7 +9,13 @@ export const useSupportStore = create((set) => ({
   widgetOpened: () => set({ status: 'opened', error: null }),
   submitTicket: async (payload) => {
     set({ status: 'sending', error: null });
-    const response = await supportApi.createTicket(payload);
+    const user = getStoredUser();
+    const enriched = {
+      ...payload,
+      player_id: user?.id,
+      tenant_id: user?.tenant_id || 'default_casino',
+    };
+    const response = await supportApi.createTicket(enriched);
     if (response.ok) {
       set({ status: 'sent', error: null });
     } else {
