@@ -1,369 +1,186 @@
 <analysis>**original_problem_statement:**
-The user initiated a series of tasks to enhance and stabilize a full-stack casino platform. The initial request was to fix all dead clicks in the **Affiliate Management** section, which evolved into a full P0 implementation of the affiliate engine. After successfully completing that and its E2E tests, the user requested a **UI Sweep for Phase C (Dashboard/Revenue)** to fix more dead clicks. This was followed by a best-effort investigation into **CI/CD failures**. Subsequently, the user prioritized verifying the **Kill Switch** functionality by adding a dummy tenant and ensuring end-to-end functionality.
+The user initiated a Prod Readiness Checklist for a casino platform. After completing most items, a series of persistent CI/CD failures (related to  files and  synchronization) blocked progress. The user became frustrated with the agent's inability to resolve these recurring issues.
 
-Most recently, the user triggered the **Prod Readiness Checklist** epic, which included verifying the **P0 Money Loop Gate** and **P0 Data & Migration Health**. In this session, the agent completed the **P0 Security / RBAC / Audit Matrix** and the **P1 UI Stabilization** tasks. The current and final task is to implement the **P0 Healthz/Readyz + Runbook** to make the application ready for production deployment.
+Following this, the user pivoted to a new, major epic: building a brand-new, production-grade **Player Application** () from scratch. The user provided a detailed, multi-sprint Final Görev Listesi (Final Task List) outlining a strict, domain-driven architecture, specific features, and a clear Definition of Done. The core KPI is the Game Start Rate.
+
+The agent's current task is to implement this new Player App, starting with the foundational architecture and implementing all P0 features in a keyless manner, where integrations are ready but will be activated once the user provides API keys.
 
 **PRODUCT REQUIREMENTS:**
-1.  **(P0) Complete the Affiliate P0 Implementation:** Delivered.
-2.  **(P0) UI Sweep Phase C:** Delivered.
-3.  **(P0) Kill Switch Verification:** Delivered.
-4.  **(P0) Prod Readiness Checklist:** A sequential checklist to prepare the application for production.
-    *   : **COMPLETED**
-    *   : **COMPLETED**
-    *   : **COMPLETED**
-    *   : **COMPLETED**
-    *   : **COMPLETED**
-    *   : **IN PROGRESS**
+- **Architecture:** Must follow a strict Domain-Driven Design (DDD) with , , , and  layers. State management with Zustand. API Contract-first development. Feature flags for all integrations from day one.
+- **P0 Features (to be implemented keyless):**
+    - **Auth & Verification:** Register (with age gate), Login, and mandatory Email (Resend) & SMS (Twilio) verification before any core actions.
+    - **Lobby & Game Launch:** A functional game lobby and a game launch flow, tracking the Game Start Rate KPI.
+    - **Wallet:** A backend-authoritative wallet with transaction history.
+    - **Payments (Stripe):** A deposit flow using Stripe Checkout.
+    - **Live Support (Crisp):** A live chat widget integration.
+- **UI/UX:** A dark-themed UI with turkuaz and turuncu accents, using a component-based design system. The user also requested that theme colors (background, footer, header, menu) be customizable via CSS variables.
+- **Secrets Management:** The user will provide API keys for Crisp, Resend, and Twilio manually. The agent must prepare the application to accept these keys via environment variables without them being committed to the repository.
 
 **User's preferred language**: Turkish
 
 **what currently exists?**
-The application is a feature-rich casino platform with a React frontend and FastAPI backend. All major P0 and P1 features are complete, including the Affiliate Engine, Kill Switch, and a robust, standardized RBAC security model.
-
-In this session, the agent successfully resolved a major blocker by implementing the backend RBAC enforcement and frontend role normalization. It then fixed a critical broken Game Import feature. Following that, it executed a massive UI/UX stabilization and refactoring effort across the entire application, introducing a custom  hook and  component to standardize loading, error, and empty states for all data tables (, , , , ). The application is now highly consistent, resilient, and has been prepared for deployment.
+The agent has successfully scaffolded the new  application and the corresponding backend extensions. This includes:
+- **Project Structure:** A complete DDD folder structure (, , , , , ) has been created in .
+- **Backend APIs:** All necessary backend endpoints for the Player App P0 features have been created. This includes routes for auth, verification (email/SMS), lobby, wallet, payments, support, and telemetry.
+- **Keyless Integrations:** The backend integrations (Resend, Twilio, Stripe) and frontend integration (Crisp) are guarded. They are implemented with provider adapters and will return a  error until API keys are provided in the environment.
+- **Database:** New models and Alembic migrations have been created for , , and , and new verification fields have been added to the  model.
+- **UI & Theming:** The  has a basic layout with a dark theme. A dynamic theming system using CSS variables has been implemented in , allowing the user to change colors for the background, header, footer, and menu.
+- **State Management:** Zustand stores have been created for managing state across different domains (auth, wallet, payments, etc.).
 
 **Last working item**:
-- **Last item agent was working:** **P0 — Production Readiness & Launch**. The agent was about to begin the implementation of health check endpoints ( and ) and create an operational  as the final step before deployment. The user has approved the plan, including making the Redis check in  optional.
-- **Status:** NOT STARTED
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** backend testing agent to verify the new  and  endpoints. The agent should also create a new Playwright E2E test file () for the final Golden Path smoke test and run it.
+- **Last item agent was working:** The agent completed the keyless implementation of EPICs C, D, E, and F. This involved creating the backend provider adapters, DB models, and endpoints with appropriate guards for missing keys, and wiring up the frontend state management and UI components for Verification, Support, Telemetry, and Payments.
+- **Status:** USER VERIFICATION PENDING
+- **Agent Testing Done:** Y (Agent performed basic registration and confirmed that guarded endpoints correctly return 503 errors without API keys.)
+- **Which testing method agent to use?** Manual testing by the user after providing API keys. Following that,  to run comprehensive E2E Playwright tests covering the entire P0 funnel (EPIC G).
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1:** (P0) Prod Readiness Checklist — P0 Healthz/Readyz + Runbook
-  - **Description:** This is the implementation of the final production readiness step. The agent needs to create backend endpoints for health monitoring and document operational procedures.
-  - **Status:** NOT STARTED
-- **Issue 2:** (P1) CI/CD Pipeline Failures
-  - **Description:** An ongoing issue where the CI/CD pipeline fails for reasons not reproducible locally.
-  - **Status:** BLOCKED (waiting for user to provide CI job logs).
+- **Issue 1:** (P0) CI/CD Pipeline  Failure
+- **Issue 2:** (P0) CI/CD Pipeline  Failure
 
 **Issues Detail:**
-- **Issue 1: Prod Readiness Checklist — P0 Healthz/Readyz + Runbook**
-    - **Attempted fixes:** None yet. The agent has a user-approved plan.
-    - **Next debug checklist:**
-        1.  Create  to define the  (simple ) and  endpoints.
-        2.  The  endpoint should check the database connection and optionally the Redis connection.
-        3.  Register the new health router in .
-        4.  Create  detailing DB migrations (Alembic), initial admin user creation, and log-checking procedures.
-        5.  Create a new E2E test  to cover the Golden Path: Login -> Import Game -> Approve Withdrawal -> Logout.
-        6.  Run all Playwright test suites to ensure no regressions.
-    - **Why fix this issue and what will be achieved with the fix?** This is the final step to make the application production-ready, enabling automated monitoring by the hosting platform (Emergent) and providing critical operational documentation.
-    - **Status:** NOT STARTED
-    - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?** both
-    - **Blocked on other issue:** No
+- **Issue 1: (P0) CI/CD Pipeline  Failure**
+  - **Attempted fixes:** The agent has repeatedly tried to fix this recurring issue by regenerating the  file. The user has also been provided with the correct file content and instructions multiple times. The root cause is a persistent mismatch between  and  in the committed code, causing the  check in CI to fail.
+  - **Next debug checklist:**
+    1.  The user must ensure the correct, newly generated  file is committed and pushed to the repository.
+    2.  Run yarn install v1.22.22
+info No lockfile found.
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+Done in 55.08s..
+    3.  Commit the newly generated  and .
+  - **Why fix this issue and what will be achieved with the fix?** A passing CI pipeline is essential for reliable builds and deployments.
+  - **Status:** NOT STARTED
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** frontend
+  - **Blocked on other issue:** No
 
-- **Issue 2: CI/CD Pipeline Failures**
-    - **Attempted fixes:** Local linting and dependency checks passed.
-    - **Next debug checklist:** The issue is blocked until the user provides the CI workflow logs.
-    - **Why fix this issue and what will be achieved with the fix?** A passing CI/CD pipeline is crucial for reliable and automated deployments.
-    - **Status:** BLOCKED
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** N/A
-    - **Blocked on other issue:** No
+- **Issue 2: (P0) CI/CD Pipeline  Failure**
+  - **Attempted fixes:** The agent identified that the migration was failing due to missing  environment variables in the CI environment. A fix was applied to  to provide default fallback values for the database URLs. However, the logs provided by the user are incomplete and do not show the actual Alembic stacktrace, only .
+  - **Next debug checklist:**
+    1.  The user needs to run the migration command and provide the full stacktrace if it fails again.
+    2.  Command to get logs: 
+  - **Why fix this issue and what will be achieved with the fix?** The database migration must succeed for the application to start correctly.
+  - **Status:** BLOCKED
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** backend
+  - **Blocked on other issue:** No
 
 **In progress Task List**:
-- **Task 1: (P0) Prod Readiness Checklist — P0 Healthz/Readyz + Runbook**
-    - **Where to resume:** Start by creating the  file and the associated health-checking logic.
-    - **What will be achieved with this?** The application will have industry-standard health endpoints, and operators will have a runbook for common procedures.
-    - **Status:** NOT STARTED
-    - **Should Test frontend/backend/both after fix?** both
-    - **Blocked on something:** No
+- **Task 1: (P0) Activate and E2E Test the Player App**
+  - **Description:** The user needs to provide the necessary API keys to fully activate the application's features.
+  - **Where to resume:** User needs to populate the  files with API keys for Crisp, Resend, Twilio, and Stripe.
+  - **What will be achieved with this?** This will enable the new Player App's P0 features (verification, payments, support) to be fully functional and testable.
+  - **Status:** BLOCKED (Waiting for user to provide API keys)
+  - **Should Test frontend/backend/both after fix?** both
+  - **Blocked on something:** User providing API keys.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
--   **(P1) BONUS-P1 - Wager/Turnover Engine:** Implement wagering logic for the bonus system.
--   **(P1) BONUS-P1 - Bonus State Machine & Expiry:** Implement the full state machine and expiry for bonuses.
+-   **(P0) EPIC G - E2E Playwright Testing:** Once keys are provided and migrations are run, create and execute a full suite of Playwright tests for the entire P0 player funnel (Register -> Verify -> Login -> Lobby -> Game Launch -> Deposit).
+-   **(P1.5) EPIC H - Game Start Rate Enhancements:** Implement Continue Playing and Favorites rails in the lobby to reduce friction.
+-   **(P2) UI Audit Log Panel:** Display the audit log for feature flag changes in the admin panel.
 
-**Future Tasks (P2 Frozen Pool):**
--   P2-KYC-DL-02: Implement real document storage (S3/GCS) for KYC.
--   P2-CRM-CAMPAIGNS-01: Build the full CRM campaign infrastructure.
--   P2-AFFILIATE-PAYOUTS-01: Implement the full affiliate payout lifecycle.
--   P2-CHARGEBACK-EVIDENCE-01: Implement evidence upload for chargebacks.
--   P2-RECON-UPLOAD-01: Implement file upload for reconciliation.
--   P2-SETTINGS-TABS-01: Implement the backend for placeholder tabs in the Settings panel.
--   P2-SESSION-01: Implement a session refresh mechanism.
+**Future Tasks:**
+-   None specified beyond the current player app epic.
 
 **Completed work in this session**
-- **(P0) Security / RBAC / Audit Matrix:**
-  - Implemented backend role normalization ( in ) to handle role aliases.
-  - Integrated frontend RBAC logic () and refactored .
-  - Added comprehensive backend (============================= test session starts ==============================
-platform linux -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0
-rootdir: /app
-configfile: pytest.ini
-plugins: anyio-4.11.0, asyncio-1.3.0
-asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
-collected 239 items / 7 errors
-
-==================================== ERRORS ====================================
-________________ ERROR collecting scripts/test_velocity_stub.py ________________
-ImportError while importing test module '/app/scripts/test_velocity_stub.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-scripts/test_velocity_stub.py:8: in <module>
-    from app.backend.app.services.tenant_policy_enforcement import check_velocity_limit
-E   ModuleNotFoundError: No module named 'app.backend'
-____________________ ERROR collecting test_client_upload.py ____________________
-ImportError while importing test module '/app/test_client_upload.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_client_upload.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/backend_test.py)
-_____________________ ERROR collecting test_dice_fixed.py ______________________
-ImportError while importing test module '/app/test_dice_fixed.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_dice_fixed.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/backend_test.py)
-______________________ ERROR collecting test_dice_only.py ______________________
-ImportError while importing test module '/app/test_dice_only.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_dice_only.py:7: in <module>
-    from backend_test import CasinoAdminAPITester
-E   ImportError: cannot import name 'CasinoAdminAPITester' from 'backend_test' (/app/backend_test.py)
-_________________ ERROR collecting tests/test_runner_utils.py __________________
-ImportError while importing test module '/app/tests/test_runner_utils.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'tests.test_runner_utils'
-__________ ERROR collecting tests/test_withdraw_admin_idempotency.py ___________
-ImportError while importing test module '/app/tests/test_withdraw_admin_idempotency.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'tests.test_withdraw_admin_idempotency'
-_____________ ERROR collecting tests/test_withdraw_idempotency.py ______________
-ImportError while importing test module '/app/tests/test_withdraw_idempotency.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'tests.test_withdraw_idempotency'
-=============================== warnings summary ===============================
-../root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295
-  /root/.venv/lib/python3.11/site-packages/pydantic/_internal/_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
-
-../root/.venv/lib/python3.11/site-packages/pydantic/_migration.py:283
-  /root/.venv/lib/python3.11/site-packages/pydantic/_migration.py:283: UserWarning: `pydantic.generics:GenericModel` has been moved to `pydantic.BaseModel`.
-    warnings.warn(f'`{import_path}` has been moved to `{new_location}`.')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:24
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:24: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('amount')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:30
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:30: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('quantity')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:36
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('stripe_price_id')
-
-../root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:44
-  /root/.venv/lib/python3.11/site-packages/emergentintegrations/payments/stripe/checkout.py:44: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
-    @validator('payment_methods')
-
-backend/server.py:286
-  /app/backend/server.py:286: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    @app.on_event("startup")
-
-../root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495
-../root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495
-../root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495
-  /root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    return self.router.on_event(event_type)
-
-backend/server.py:460
-  /app/backend/server.py:460: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    @app.on_event("shutdown")
-
-backend/server.py:477
-  /app/backend/server.py:477: DeprecationWarning: 
-          on_event is deprecated, use lifespan event handlers instead.
-  
-          Read more about it in the
-          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
-          
-    @app.on_event("shutdown")
-
-backend_regression_test.py:21
-  /app/backend_regression_test.py:21: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: backend_regression_test.py)
-    class TestResult:
-
-p2_observability_final_test.py:30
-  /app/p2_observability_final_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_final_test.py)
-    class TestResult:
-
-p2_observability_test.py:30
-  /app/p2_observability_test.py:30: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: p2_observability_test.py)
-    class TestResult:
-
-test_audit_comprehensive.py:27
-  /app/test_audit_comprehensive.py:27: PytestCollectionWarning: cannot collect test class 'TestResult' because it has a __init__ constructor (from: test_audit_comprehensive.py)
-    class TestResult:
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-=========================== short test summary info ============================
-ERROR scripts/test_velocity_stub.py
-ERROR test_client_upload.py
-ERROR test_dice_fixed.py
-ERROR test_dice_only.py
-ERROR tests/test_runner_utils.py
-ERROR tests/test_withdraw_admin_idempotency.py
-ERROR tests/test_withdraw_idempotency.py
-!!!!!!!!!!!!!!!!!!! Interrupted: 7 errors during collection !!!!!!!!!!!!!!!!!!!!
-======================== 16 warnings, 7 errors in 3.41s ========================) and frontend () tests for RBAC.
-- **(P0) Game Import Wizard Fix:**
-  - Repaired the broken game upload flow by correcting the API endpoint and implementing a job-polling mechanism in .
-  - Added a new Playwright test () to validate the entire E2E flow.
-- **(P1) Navigational Integrity & Cleanup:**
-  - Fixed broken redirects and disabled non-functional sidebar links, replacing them with Coming Soon badges.
-  - Added a Playwright test () to prevent future 404 errors from navigation.
-- **(P1) UI Stabilization & Refactoring (All Tables):**
-  - **Created  hook** to standardize data fetching (loading, error, empty states).
-  - **Created  component** to provide consistent Skeleton, Error, and Empty UIs.
-  - **Refactored ALL major data tables** (, , , , , ) to use the new hook, eliminating inconsistent states.
-- **(P1) Final Polish & Deployment Prep:**
-  - Added a Deposits tab to the Finance page with a Coming Soon state.
-  - Implemented auto-refetching and processing states for financial actions.
-  - Added a global  to prevent full-page crashes.
-  - Cleaned all  statements from the frontend.
-  - Created  and  to prepare for deployment.
+- **Player App Scaffolding (EPIC A & B):**
+  - Created the new  application with a DDD structure.
+  - Implemented a dynamic theming system via CSS variables.
+  - Established the base project configuration, including  files and  updates.
+  - Configured CORS on the backend to allow requests from the new player frontend (port 3001).
+- **Keyless P0 Feature Implementation (EPIC C, D, E, F):**
+  - **Verification:** Implemented backend logic for email (Resend) and SMS (Twilio) verification, including state management, provider adapters, and endpoints guarded by ENV flags. Added  and  to the  model with a new Alembic migration.
+  - **Live Support:** Implemented a backend  model and API. On the frontend, created a  component that loads conditionally based on .
+  - **Telemetry:** Created a  model and a backend endpoint () to persist events. Implemented a  function on the frontend and integrated it into key user flows (login, register).
+  - **Payments:** Implemented backend endpoints for creating a Stripe deposit session and handling webhooks, guarded by  and  flags.
+- **Initial Player Credentials:** Created a sample player user for testing purposes.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Role Normalization:** Abstracting raw role strings (e.g., Tenant Admin) into canonical roles (, ) for consistent backend permission checks.
-- **Custom React Hooks ():** Encapsulating and standardizing data fetching logic (loading, error, data states) to ensure UI consistency and reduce code duplication across all tables.
-- **Component-based UI State ():** A reusable component for rendering skeleton loaders, empty states, and error messages, promoting a unified user experience.
-- **Job-based Asynchronous Operations:** Implementing a polling mechanism to track the status of long-running backend jobs (like game imports) and provide real-time feedback to the user.
-- **Global Error Handling (ErrorBoundary):** Preventing application-wide crashes from React rendering errors by catching them and displaying a graceful fallback UI with recovery options.
-- **Health & Readiness Probes:** Industry-standard endpoints (, ) that allow automated systems (like Kubernetes or managed platforms) to monitor application health and manage traffic routing.
+- **Domain-Driven Design (DDD) on Frontend:** The  app is structured with clear boundaries between  (business logic, state),  (API calls, external services), and  (React components).
+- **Zustand for State Management:** Lightweight, centralized state management for different domains like auth, wallet, and payments.
+- **Keyless Integration with Guards:** Backend endpoints for third-party services (Stripe, Resend, Twilio) are designed to fail gracefully with a  error if API keys are not present in the environment.
+- **Dynamic Theming with CSS Variables:** A theming system was implemented in  to allow easy customization of primary colors, accents, and backgrounds, as requested by the user.
+- **API Contract First:** The agent established a clear API contract with standardized error codes (, , etc.) before implementing the full UI, ensuring predictable frontend error handling.
+- **Event-Driven Telemetry:** A system for tracking key user events (, ) was implemented to measure the primary KPI (Game Start Rate).
 
 **key DB schema**
-- No database schema changes were made in this session.
+-   **Player:** (MODIFIED) added , , , .
+-   **VerificationRequest:** (NEW) { uid=0(root) gid=0(root) groups=0(root), ,  ('email'/'sms'), ,  }
+-   **TelemetryEvent:** (NEW) { uid=0(root) gid=0(root) groups=0(root), , , , ,  }
+-   **SupportTicket:** (NEW) { uid=0(root) gid=0(root) groups=0(root), , , , ,  }
 
 **changes in tech stack**
-- None.
+- **New Frontend App:** A new, separate  application was created using **Vite** and **React**.
+- **State Management:** **Zustand** was introduced for state management in the new player frontend.
+- **Backend Dependencies:**  and  were added to the backend.
 
 **All files of reference**
-- **To be created:**
-  - 
-  - 
-  - 
-- **To be modified:**
-  -  (to register the new health router)
-- **Key existing files:**
-  -  (The new standard for table logic)
-  - 
-  - 
-  - 
-
-**key api endpoints**
-- **To be created:**
-  - 
-  - 
-- **Fixed/Modified:**
-  - 
-  - All admin endpoints were updated with stricter, normalized RBAC guards.
+-  (The entire new player application directory)
+-  (New DB migration)
+- 
+- 
+- 
+-  (Updated with new keys)
+-  (New)
+-  (Updated for the new frontend service)
 
 **Critical Info for New Agent**
-- You are on the final task of the Prod Readiness Checklist. The user has approved a clear plan to implement health endpoints and a runbook.
-- **The immediate task is to implement **. Follow the plan in the Issues Detail section.
-- ** is the new standard**. Any future work involving data tables should use this custom hook to maintain consistency.
-- The user is highly plan-oriented. Present your plan clearly before execution and stick to the approved priorities.
-- The CI/CD issue remains blocked; do not work on it unless the user provides new information.
+- **The Player App is brand new.** You are not modifying an old app; you are continuing the build-out of a fresh  application.
+- **Activation is blocked on the user.** The core application logic is in place, but it cannot be fully tested until the user provides API keys for **Crisp, Resend, Twilio, and Stripe**. Do not proceed with E2E testing until the user confirms they have provided the keys and run the database migrations.
+- **Address the CI failures.** The  and  jobs are failing. The  issue is a high-priority recurring problem that needs a definitive fix. Do not assume previous attempts worked. The  issue requires the user to provide a full stacktrace.
+- **Follow the User's Plan:** The user has provided a very detailed, multi-epic plan (A-H). The next step is **EPIC G (E2E Playwright Testing)**, but it's blocked by user actions (providing keys, fixing CI).
 
 **documents and test reports created in this job**
 - 
-- 
--  (Updated to reflect Phase 2 and 3 PASS status)
-- 
-- 
-- 
-- 
-- 
+- Updated  with the new Player App requirements.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **AGENT:** Completes P1-2 Phase 2 (UI standardization) and asks for the next step.
-2.  **USER:** Defines P1-2 Phase 3 (Final Polish & Deployment Prep), including a Deposits tab, action-sync, cleanup, and manual deployment prep (Docker/Nginx).
-3.  **AGENT:** Clarifies that Docker/Nginx is handled by the Emergent platform and proposes an Emergent Ready plan instead, asking for details on the Deposits text and ErrorBoundary buttons.
-4.  **USER:** Approves the Emergent-ready plan and provides clarifications: Turkish text for Deposits Coming Soon and Yenile + Logout buttons for the error boundary.
-5.  **AGENT:** Implements and completes all tasks for Phase 3.
-6.  **AGENT:** Reports completion of Phase 3 and proposes the final Prod Readiness task: .
-7.  **USER:** Approves the final plan and provides a detailed task list for health endpoints, a runbook, and a final smoke test.
-8.  **AGENT:** Asks for clarification on  logic: which DB URL to use and whether the Redis check is mandatory.
-9.  **USER:** Confirms  should be used and the Redis check should be optional (fail gracefully if Redis is not configured).
-10. **AGENT:** Confirms understanding of the finalized plan and is about to begin implementation. No pending user messages.
+1.  **USER:** Approves the final, detailed task list for building the Player App.
+2.  **USER:** Asks the agent to start, even without API keys, and confirms they will be entered manually later.
+3.  **AGENT:** Starts building the keyless foundation of the player app, creating the folder structure and initial components.
+4.  **USER:** Asks the agent to make the theme colors (background, header, footer, menu) customizable.
+5.  **AGENT:** Implements the customizable theme and continues building the P0 features.
+6.  **AGENT:** Completes the keyless implementation of EPICs C, D, E, and F, and reports the status, noting which endpoints will return 503 errors and what  variables are now needed. Asks the user to provide keys and run migrations so E2E testing can begin.
+7.  **USER:** Provides a new, detailed task list (PLAYER APP — DEVAM GÖREV LİSTESİ) that re-iterates and expands upon the remaining epics (C-H), emphasizing the need to fix the Player UI port and proxy issues first.
+8.  **AGENT:** Acknowledges the new list, confirms understanding of the plan, and proceeds with EPIC A and B (stabilizing the player app environment and finalizing secrets management).
+9.  **AGENT:** Submits a plan for EPIC C-H, assuming keys will be manually entered.
+10. **USER:** Confirms to proceed with the plan, with keys to be entered manually.
 
 **Project Health Check:**
-- **Broken:** None.
-- **Mocked:**
-  -  serves a mock file.
-  - The Deposits tab in the Finance section is a placeholder that simulates a Coming Soon (HTTP 501) state.
+-   **Broken:**
+    -   CI Pipeline:  job fails due to  mismatch.
+    -   CI Pipeline:  job fails with  (root cause unknown due to missing logs).
+-   **Mocked:**
+    -   Email Verification (Resend): Will return 503 until key is provided.
+    -   SMS Verification (Twilio): Will return 503 until keys are provided.
+    -   Payments (Stripe): Will return 503 until keys are provided.
+    -   Live Support (Crisp): The widget will not load until a Website ID is provided.
+    -   Game Launch: The endpoint returns a mock HTML page.
 
 **3rd Party Integrations**
 - PostgreSQL
 - Redis
-- 
-- 
--  (for transactional emails)
+- **Resend** (for transactional emails, requires user API key)
+- **Twilio** (for SMS OTP, requires user credentials)
+- **Stripe** (for payments, uses system key but requires user webhook secret)
+- **Crisp** (for live chat, requires user Website ID)
 
 **Testing status**
-- **Testing agent used after significant changes:** NO (Agent ran Playwright tests directly).
-- **Troubleshoot agent used after agent stuck in loop:** NO.
-- **Test files created:**
-  - 
-  - 
-  - 
-  - 
-  - 
-- **Known regressions:** None. All existing and new tests passed at the end of the session.
+- **Testing agent used after significant changes:** YES, a comprehensive test plan for the player app was generated.
+- **Test files created:** None yet for the new player app. E2E tests are part of the upcoming **EPIC G**.
+- **Known regressions:** The CI/CD pipeline is consistently failing on  and .
 
 **Credentials to test flow:**
-- **Owner:**  / 
-- **Admin:** 
-- **Ops:** 
-- **Support:** 
+-   **Admin (for casino admin app):**  / 
+-   **Player (for new player app):**  /  (email/password for login)
 
 **What agent forgot to execute**
-- Nothing was forgotten. The agent systematically addressed all user requests and priorities, completing a large volume of work including bug fixing, major refactoring, and new feature implementation. The agent is currently poised to start the final user-approved task.</analysis>
+The agent got stuck in a very long and frustrating loop with the user over the recurring  and CI/CD issues. Despite numerous attempts and explanations, the agent was unable to guide the user to a permanent fix, consuming a significant amount of time and user patience. The agent also spent time on speculative fixes for the  issue without first insisting on obtaining the necessary stacktrace logs.</analysis>
