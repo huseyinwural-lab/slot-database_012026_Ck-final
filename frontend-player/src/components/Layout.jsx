@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, NavLink } from 'react-router-dom';
+import { Link, useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { Gamepad2, LogOut } from 'lucide-react';
 import { BalancePill } from './BalancePill';
 import { Modal } from './Modal';
 import { ThemeCustomizer } from './ThemeCustomizer';
 import { useAuthStore, useWalletStore } from '@/domain';
 
-const Layout = () => {
+const Layout = ({ children }) => {
   const navigate = useNavigate();
   const { token, user, logout } = useAuthStore();
   const { balance, currency, fetchBalance } = useWalletStore();
@@ -86,7 +86,7 @@ const Layout = () => {
 
       {/* Content */}
       <main className="container mx-auto px-4 py-8">
-        <Outlet />
+        {children || <Outlet />}
       </main>
 
       {/* Footer */}
