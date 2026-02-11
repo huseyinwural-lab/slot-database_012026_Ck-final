@@ -20,6 +20,8 @@ class PlayerPublic(BaseModel):
     status: str
     kyc_status: str
     risk_score: str
+    email_verified: bool = False
+    sms_verified: bool = False
 
     last_login: Optional[datetime] = None
     registered_at: datetime
