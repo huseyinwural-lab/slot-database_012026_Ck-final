@@ -91,29 +91,12 @@ test.describe('P0 Player Journey', () => {
       await page.goto('/wallet');
       await expect(page).toHaveURL(/\/wallet/);
       
-      const amountInput = page.locator('input[placeholder*="Amount"], input[type="number"]');
-      if (await amountInput.count() > 0) {
-          await amountInput.fill('100');
-          // Assuming there's a deposit button. 
-          // If not standard, look for testid if possible or text.
-          const btn = page.locator('button').filter({ hasText: /Deposit|Yatır/i });
-          if (await btn.count() > 0) {
-             await btn.first().click();
-          } else {
-             // Fallback
-             await page.getByRole('button', { name: /Deposit|Yatır/i }).click();
-          }
-      } else {
-          // Maybe a "Deposit" button opens a modal?
-          const depositBtn = page.getByRole('button', { name: /Deposit|Para Yatır/i });
-          if (await depositBtn.count() > 0) {
-              await depositBtn.first().click();
-              await page.waitForTimeout(500);
-              await page.locator('input[type="number"]').fill('100');
-              await page.getByRole('button', { name: /Confirm|Pay|Yatır/i }).click();
-          }
-      }
+      // Use test IDs for wallet elements
+      await page.getByTestId('wallet-deposit-input').fill('100');
+      await page.getByTestId('wallet-deposit-button').click();
 
+      // In Mock Mode, backend returns a redirect URL that IS the success URL.
+      // And window.location.href updates.
       await expect(page).toHaveURL(/status=success/, { timeout: 10000 });
       
       console.log('Deposit Successful (Mock).');
