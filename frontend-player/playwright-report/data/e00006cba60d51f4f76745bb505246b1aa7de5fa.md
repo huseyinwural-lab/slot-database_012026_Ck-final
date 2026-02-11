@@ -16,7 +16,7 @@
         - link "Support" [ref=e13] [cursor=pointer]:
           - /url: /support
       - generic [ref=e14]:
-        - generic [ref=e16]: user1770843250396
+        - generic [ref=e16]: user1770843317673
         - generic [ref=e17]:
           - generic [ref=e18]: Bakiye
           - generic [ref=e19]: 0.00 USD
@@ -30,8 +30,8 @@
         - generic [ref=e29]: 0 USD
       - generic [ref=e30]:
         - generic [ref=e31]: Deposit
-        - spinbutton [active] [ref=e32]: "100"
-        - button "Depozit Başlat" [ref=e33] [cursor=pointer]
+        - spinbutton [ref=e32]: "100"
+        - button "Depozit Başlat" [active] [ref=e33] [cursor=pointer]
       - generic [ref=e34]:
         - generic [ref=e35]: İşlem Geçmişi
         - generic [ref=e36]: Aktif işlem bulunmamaktadır
