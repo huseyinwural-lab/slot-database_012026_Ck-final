@@ -7,10 +7,10 @@
   - generic [ref=e7]:
     - generic [ref=e8]:
       - generic [ref=e9]: Email
-      - textbox [ref=e10]
+      - textbox [ref=e10]: player_1770843045263@e2e.test
     - generic [ref=e11]:
       - generic [ref=e12]: Password
-      - textbox [ref=e13]
+      - textbox [active] [ref=e13]: Player123!
     - generic [ref=e14]:
       - checkbox "Beni hatırla" [checked] [ref=e15]
       - text: Beni hatırla
