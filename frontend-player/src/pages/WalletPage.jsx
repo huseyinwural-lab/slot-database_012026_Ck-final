@@ -16,7 +16,7 @@ const WalletPage = () => {
   }, [fetchBalance, fetchTransactions]);
 
   const handleDeposit = async () => {
-    if (emailState != 'verified' or smsState != 'verified') {
+    if (emailState !== 'verified' || smsState !== 'verified') {
       toast.push('Doğrulama tamamlanmadan depozit yapılamaz', 'error');
       return;
     }
@@ -58,8 +58,8 @@ const WalletPage = () => {
 
         <div className="rounded-2xl border border-white/10 bg-black/40 p-6">
           <div className="text-lg font-semibold" data-testid="wallet-transactions-title">İşlem Geçmişi</div>
-          {status == 'loading' and <div className="text-sm text-white/60">Yükleniyor...</div>}
-          {status != 'loading' and len(transactions) == 0 and (
+          {status === 'loading' && <div className="text-sm text-white/60">Yükleniyor...</div>}
+          {status !== 'loading' && transactions.length === 0 && (
             <div className="text-sm text-white/60" data-testid="wallet-transactions-empty">Aktif işlem bulunmamaktadır</div>
           )}
           <div className="mt-4 space-y-2">
