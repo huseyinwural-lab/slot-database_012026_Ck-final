@@ -4,7 +4,7 @@ import os
 
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.future import select
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
 from app.core.database import get_session
@@ -48,20 +48,21 @@ def _integration_error(key: str):
 
 @router.post("/email/send")
 async def send_email_code(payload: EmailSendRequest, session: AsyncSession = Depends(get_session)):
-    player = await session.exec(select(Player).where(Player.email == payload.email))
-    player = player.first()
+    # FIX: Use .execute() instead of .exec() for SQLAlchemy AsyncSession
+    result = await session.execute(select(Player).where(Player.email == payload.email))
+    player = result.scalars().first()
+    
     if not player:
         return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
 
     record = _EMAIL_CODES.get(payload.email)
     now = datetime.utcnow()
-    # Mock mode skips rate limit for ease of testing if needed, or keep it. Keeping it.
+    
     if record and now - record["sent_at"] < RESEND_COOLDOWN:
         raise HTTPException(status_code=429, detail={"error_code": "RATE_LIMIT", "message": "Please wait"})
 
     code = f"{secrets.randbelow(999999):06d}"
     if MOCK_MODE:
-        # Fixed code for mock
         code = "123456"
         print(f"MOCK EMAIL SEND: {payload.email} -> {code}")
     else:
@@ -82,8 +83,6 @@ async def send_email_code(payload: EmailSendRequest, session: AsyncSession = Dep
 async def confirm_email_code(payload: EmailConfirmRequest, session: AsyncSession = Depends(get_session)):
     record = _EMAIL_CODES.get(payload.email)
     if not record:
-        # In mock mode, allow if code is 123456 even if not "sent" explicitly? 
-        # Better to require send first to test flow.
         return {"ok": False, "error": {"code": "VERIFY_EMAIL_REQUIRED", "message": "Code not sent"}}
     
     if datetime.utcnow() > record["expires_at"]:
@@ -92,8 +91,9 @@ async def confirm_email_code(payload: EmailConfirmRequest, session: AsyncSession
     if record["code"] != payload.code:
         return {"ok": False, "error": {"code": "VERIFY_EMAIL_REQUIRED", "message": "Invalid code"}}
 
-    player = await session.exec(select(Player).where(Player.email == payload.email))
-    player = player.first()
+    result = await session.execute(select(Player).where(Player.email == payload.email))
+    player = result.scalars().first()
+    
     if not player:
         return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
 
@@ -104,8 +104,9 @@ async def confirm_email_code(payload: EmailConfirmRequest, session: AsyncSession
 
 @router.post("/sms/send")
 async def send_sms_code(payload: SmsSendRequest, session: AsyncSession = Depends(get_session)):
-    player = await session.exec(select(Player).where(Player.phone == payload.phone))
-    player = player.first()
+    result = await session.execute(select(Player).where(Player.phone == payload.phone))
+    player = result.scalars().first()
+    
     if not player:
         return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
 
@@ -148,8 +149,9 @@ async def confirm_sms_code(payload: SmsConfirmRequest, session: AsyncSession = D
         _SMS_ATTEMPTS[payload.phone] = attempt
         return {"ok": False, "error": {"code": "VERIFY_SMS_REQUIRED", "message": "Invalid code"}}
 
-    player = await session.exec(select(Player).where(Player.phone == payload.phone))
-    player = player.first()
+    result = await session.execute(select(Player).where(Player.phone == payload.phone))
+    player = result.scalars().first()
+    
     if not player:
         return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
     player.sms_verified = True
