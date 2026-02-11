@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, NavLink, Outlet } from 'react-router-dom';
+import { Link, useNavigate, NavLink } from 'react-router-dom';
 import { Gamepad2, LogOut } from 'lucide-react';
 import { BalancePill } from './BalancePill';
 import { Modal } from './Modal';
