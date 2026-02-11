@@ -34,7 +34,11 @@ const Layout = () => {
             <span>CasinoLobby</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6" data-testid="player-nav">
+          <nav
+            className="hidden md:flex items-center gap-6 rounded-full px-4 py-2"
+            style={{ backgroundColor: 'var(--player-menu)' }}
+            data-testid="player-nav"
+          >
             <NavLink to="/lobby" className={navLinkClass} data-testid="nav-lobby">Lobby</NavLink>
             <NavLink to="/wallet" className={navLinkClass} data-testid="nav-wallet">Wallet</NavLink>
             <NavLink to="/support" className={navLinkClass} data-testid="nav-support">Support</NavLink>
