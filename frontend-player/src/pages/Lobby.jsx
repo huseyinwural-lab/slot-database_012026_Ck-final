@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Layout from '@/components/Layout';
 import { GameCard } from '@/components/GameCard';
 import { CategoryRail } from '@/components/CategoryRail';
 import { SkeletonBlock } from '@/components/SkeletonBlock';
@@ -36,6 +37,7 @@ const Lobby = () => {
   };
 
   return (
+    <Layout>
       <div className="space-y-6" data-testid="lobby-page">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -87,6 +89,7 @@ const Lobby = () => {
           <div className="text-sm text-white/60" data-testid="game-launch-loading">Oyun başlatılıyor...</div>
         )}
       </div>
+    </Layout>
   );
 };
 
