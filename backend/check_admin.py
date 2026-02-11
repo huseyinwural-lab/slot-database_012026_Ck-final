@@ -2,15 +2,20 @@ import asyncio
 import os
 from sqlalchemy.future import select
 from app.core.database import async_session
-from app.models.sql_models import AdminUser
-from app.infra.utils import hash_password # wait, I might have replaced this import in test_ops but need to check where it is.
-# Actually I replaced it in test_ops.py. Let's see where hash_password really is.
-# routes/player_auth.py used app.utils.auth.get_password_hash. 
-# Let's use that.
+from app.models.sql_models import AdminUser, Tenant
 from app.utils.auth import get_password_hash
 
 async def check_admin():
     async with async_session() as session:
+        # Check Tenant first
+        result = await session.execute(select(Tenant).where(Tenant.id == "default_casino"))
+        tenant = result.scalars().first()
+        if not tenant:
+            print("Creating default tenant...")
+            tenant = Tenant(id="default_casino", name="Default Casino", type="owner")
+            session.add(tenant)
+            await session.commit()
+
         result = await session.execute(select(AdminUser).where(AdminUser.email == "admin@casino.com"))
         user = result.scalars().first()
         
