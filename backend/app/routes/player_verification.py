@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.future import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.database import get_session
+from app.core.database import get_session
 from app.models.sql_models import Player
 from app.infra.providers import IntegrationNotConfigured, send_email_otp, send_sms_otp, confirm_sms_otp
 from pydantic import BaseModel

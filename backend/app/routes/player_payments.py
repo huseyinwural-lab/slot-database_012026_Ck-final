@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy.future import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.database import get_session
+from app.core.database import get_session
 from app.models.sql_models import Player, Transaction
 from app.utils.auth_player import get_current_player
 

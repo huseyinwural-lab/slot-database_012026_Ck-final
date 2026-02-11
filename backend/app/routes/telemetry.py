@@ -7,7 +7,7 @@ from sqlalchemy import func
 from datetime import datetime, timedelta
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.database import get_session
+from app.core.database import get_session
 from app.models.sql_models import TelemetryEvent, Player
 
 router = APIRouter(prefix="/api/v1/telemetry", tags=["telemetry"])
