@@ -37,7 +37,6 @@ const Lobby = () => {
   };
 
   return (
-    <Layout>
       <div className="space-y-6" data-testid="lobby-page">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
