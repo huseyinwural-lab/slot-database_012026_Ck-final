@@ -83,36 +83,40 @@ test.describe('P0 Player Journey', () => {
       // 5. Lobby
       console.log('Entering Lobby...');
       await expect(page).toHaveURL(/\/lobby/, { timeout: 10000 });
-      await expect(page.getByText(/Lobby|Games/i).first()).toBeVisible();
+      // "Featured Games" is the title in H2
+      await expect(page.getByTestId('lobby-title')).toHaveText(/Featured Games|Öne Çıkanlar/i);
 
       // 6. Deposit
       console.log('Testing Deposit...');
       await page.goto('/wallet');
       await expect(page).toHaveURL(/\/wallet/);
       
-      // Need wallet selectors. Let's assume standard deposit flow.
-      // If no deposit form, we might need to click "Deposit" first.
-      
-      // Checking WalletPage.jsx would be good, but let's guess standard UI.
       const amountInput = page.locator('input[placeholder*="Amount"], input[type="number"]');
       if (await amountInput.count() > 0) {
           await amountInput.fill('100');
-          await page.getByRole('button', { name: /Deposit/i }).click();
+          // Assuming there's a deposit button. 
+          // If not standard, look for testid if possible or text.
+          const btn = page.locator('button').filter({ hasText: /Deposit|Yatır/i });
+          if (await btn.count() > 0) {
+             await btn.first().click();
+          } else {
+             // Fallback
+             await page.getByRole('button', { name: /Deposit|Yatır/i }).click();
+          }
       } else {
           // Maybe a "Deposit" button opens a modal?
-          const depositBtn = page.getByRole('button', { name: /Deposit/i });
+          const depositBtn = page.getByRole('button', { name: /Deposit|Para Yatır/i });
           if (await depositBtn.count() > 0) {
               await depositBtn.first().click();
               await page.waitForTimeout(500);
               await page.locator('input[type="number"]').fill('100');
-              await page.getByRole('button', { name: /Confirm|Pay/i }).click();
+              await page.getByRole('button', { name: /Confirm|Pay|Yatır/i }).click();
           }
       }
 
       await expect(page).toHaveURL(/status=success/, { timeout: 10000 });
       
-      // Verify balance increased (from 0 to 100)
-      // await expect(page.getByText('$100')).toBeVisible(); // Might be flaky
+      console.log('Deposit Successful (Mock).');
     });
   });
 });
