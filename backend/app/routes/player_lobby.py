@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from app.models.game_models import Game
-from app.core.database import get_session
 from app.utils.auth_player import get_current_player
 from app.models.sql_models import Player
 
