@@ -137,12 +137,13 @@ app.include_router(api_keys.router)
 app.include_router(health_router.router)
 
 # 2. Player Side
-from app.routes import player_auth, player_lobby, player_wallet, player_verification, telemetry
+from app.routes import player_auth, player_lobby, player_wallet, player_verification, telemetry, player_payments
 app.include_router(player_auth.router)
 app.include_router(player_lobby.router)
 app.include_router(player_wallet.router)
 app.include_router(player_verification.router)
 app.include_router(telemetry.router)
+app.include_router(player_payments.router)
 from app.routes import payouts
 app.include_router(payouts.router)
 from app.routes import player_ops
