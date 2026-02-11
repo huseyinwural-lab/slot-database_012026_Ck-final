@@ -4,7 +4,7 @@ import { trackEvent } from '@/telemetry';
 
 const stored = JSON.parse(localStorage.getItem('player_verification') || '{}');
 
-export const useVerificationStore = create((set) => ({
+export const useVerificationStore = create((set, get) => ({
   emailState: stored.emailState || 'unverified',
   smsState: stored.smsState || 'unverified',
   error: null,
@@ -21,7 +21,7 @@ export const useVerificationStore = create((set) => ({
     const response = await verificationApi.confirmEmail(payload);
     if (response.ok) {
       trackEvent('email_verified', { email: payload.email });
-      const next = { emailState: 'verified', smsState: stored.smsState || 'unverified' };
+      const next = { emailState: 'verified', smsState: get().smsState };
       localStorage.setItem('player_verification', JSON.stringify(next));
       set({ emailState: 'verified', error: null });
     } else {
@@ -42,7 +42,7 @@ export const useVerificationStore = create((set) => ({
     const response = await verificationApi.confirmSms(payload);
     if (response.ok) {
       trackEvent('sms_verified', { phone: payload.phone });
-      const next = { emailState: stored.emailState || 'unverified', smsState: 'verified' };
+      const next = { emailState: get().emailState, smsState: 'verified' };
       localStorage.setItem('player_verification', JSON.stringify(next));
       set({ smsState: 'verified', error: null });
     } else {
