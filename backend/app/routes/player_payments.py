@@ -44,7 +44,7 @@ async def create_deposit(
         )
 
     _require_env("STRIPE_SECRET_KEY")
-    frontend_url = os.getenv("PLAYER_FRONTEND_URL")
+    frontend_url = os.getenv("PLAYER_FRONTEND_URL", "http://localhost:3001")
     if not frontend_url:
         raise HTTPException(
             status_code=503,
