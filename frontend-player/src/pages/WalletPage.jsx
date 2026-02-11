@@ -21,8 +21,12 @@ const WalletPage = () => {
       return;
     }
     const response = await createDeposit({ amount: Number(amount), currency: currency || 'USD' });
-    if (response.ok) {
+    if (response?.ok) {
       toast.push('Depozit başlatıldı', 'success');
+      if (response.data?.redirect_url) {
+        window.location.href = response.data.redirect_url;
+        return;
+      }
       fetchBalance();
     } else {
       toast.push('Depozit başarısız', 'error');
@@ -30,6 +34,7 @@ const WalletPage = () => {
   };
 
   return (
+    <Layout>
       <div className="space-y-6" data-testid="wallet-page">
         <div className="rounded-2xl border border-white/10 bg-black/40 p-6" data-testid="wallet-balance-card">
           <div className="text-sm text-white/60">Güncel Bakiye</div>
@@ -75,6 +80,7 @@ const WalletPage = () => {
           </div>
         </div>
       </div>
+    </Layout>
   );
 };
 
