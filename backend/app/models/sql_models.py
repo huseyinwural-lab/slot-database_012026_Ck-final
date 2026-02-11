@@ -70,6 +70,14 @@ class Player(SQLModel, table=True):
     status: str = "active"
     kyc_status: str = "pending"
     risk_score: str = "low"
+    email_verified: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, server_default="false", nullable=False),
+    )
+    sms_verified: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, server_default="false", nullable=False),
+    )
     registered_at: datetime = Field(
         default_factory=lambda: datetime.utcnow(),
         sa_column=Column(DateTime(), server_default=func.now(), nullable=False),
