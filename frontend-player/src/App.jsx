@@ -9,6 +9,7 @@ import GameRoom from './pages/GameRoom';
 import VerifyEmail from './pages/VerifyEmail';
 import VerifySms from './pages/VerifySms';
 import Support from './pages/Support';
+import Layout from './components/Layout';
 import { ToastProvider } from './components/ToastProvider';
 import { useAuthStore, useVerificationStore } from './domain';
 
