@@ -57,7 +57,7 @@
     "zod": "^3.24.4"
   },
   "scripts": {
-    "start": "tail -f /dev/null",
+    "start": "craco start",
     "build": "craco build",
     "test": "craco test",
     "lint": "eslint \"src/**/*.{js,jsx}\""

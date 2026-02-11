@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000, // Swapped for Preview (Admin stopped)
+    port: 3001, // Player App
     host: true,
     proxy: {
       '/api': {
