@@ -12,8 +12,8 @@ export const useGamesStore = create((set) => ({
     set({ lobbyStatus: 'loading', error: null });
     const response = await gamesApi.listLobby();
     if (response.ok) {
-      trackEvent('lobby_loaded', { count: response.data?.games?.length || 0 });
-      set({ lobbyStatus: 'ready', games: response.data?.games || [], error: null });
+      trackEvent('lobby_loaded', { count: response.data?.items?.length || 0 });
+      set({ lobbyStatus: 'ready', games: response.data?.items || [], error: null });
     } else {
       set({ lobbyStatus: 'failed', error: response.error });
     }
