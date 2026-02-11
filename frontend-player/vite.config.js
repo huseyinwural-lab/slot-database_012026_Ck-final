@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001, // Admin is 3000
+    port: 3000, // Swapped for Preview (Admin stopped)
     host: true,
     proxy: {
       '/api': {
