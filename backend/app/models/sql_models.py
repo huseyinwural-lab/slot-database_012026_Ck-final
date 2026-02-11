@@ -78,6 +78,7 @@ class Player(SQLModel, table=True):
         default=False,
         sa_column=Column(Boolean, server_default="false", nullable=False),
     )
+    phone: Optional[str] = Field(default=None, index=True)
     registered_at: datetime = Field(
         default_factory=lambda: datetime.utcnow(),
         sa_column=Column(DateTime(), server_default=func.now(), nullable=False),
