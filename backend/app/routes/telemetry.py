@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from typing import Literal
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
+from sqlalchemy import func
+from datetime import datetime, timedelta
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session
@@ -58,3 +60,32 @@ async def capture_event(event: TelemetryEventRequest, session: AsyncSession = De
     except SQLAlchemyError:
         await session.rollback()
     return {"ok": True, "data": {"received": True}}
+
+
+@router.get("/kpi/game-start-rate")
+async def game_start_rate(session: AsyncSession = Depends(get_session)):
+    since = datetime.utcnow() - timedelta(days=1)
+    lobby_count = await session.exec(
+        select(func.count()).select_from(TelemetryEvent).where(
+            TelemetryEvent.event_name == "lobby_loaded",
+            TelemetryEvent.created_at >= since,
+        )
+    )
+    launch_count = await session.exec(
+        select(func.count()).select_from(TelemetryEvent).where(
+            TelemetryEvent.event_name == "game_launch_success",
+            TelemetryEvent.created_at >= since,
+        )
+    )
+    lobby_value = lobby_count.first() or 0
+    launch_value = launch_count.first() or 0
+    rate = (launch_value / lobby_value) if lobby_value else 0
+    return {
+        "ok": True,
+        "data": {
+            "since": since.isoformat(),
+            "lobby_loaded": lobby_value,
+            "game_launch_success": launch_value,
+            "game_start_rate": rate,
+        },
+    }
