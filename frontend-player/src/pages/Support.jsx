@@ -48,7 +48,6 @@ const Support = () => {
           </div>
         )}
       </div>
-    </Layout>
   );
 };
 
