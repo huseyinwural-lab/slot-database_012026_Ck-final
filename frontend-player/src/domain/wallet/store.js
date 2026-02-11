@@ -11,7 +11,8 @@ export const useWalletStore = create((set) => ({
     set({ status: 'loading', error: null });
     const response = await walletApi.getBalance();
     if (response.ok) {
-      set({ status: 'ready', balance: response.data?.balance || 0, currency: response.data?.currency || 'USD' });
+      const total = response.data?.total_real ?? response.data?.balance ?? 0;
+      set({ status: 'ready', balance: total, currency: response.data?.currency || 'USD' });
     } else {
       set({ status: 'failed', error: response.error });
     }
