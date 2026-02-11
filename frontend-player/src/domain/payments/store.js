@@ -8,7 +8,10 @@ export const usePaymentsStore = create((set) => ({
   error: null,
   createDeposit: async (payload) => {
     set({ status: 'initializing', error: null });
-    const response = await paymentsApi.createDeposit(payload);
+    const response = await paymentsApi.createDeposit({
+      ...payload,
+      method: payload.method || 'stripe',
+    });
     if (response.ok) {
       set({ status: 'pending', lastPaymentId: response.data?.payment_id || null });
       trackEvent('payment_pending', { payment_id: response.data?.payment_id });
