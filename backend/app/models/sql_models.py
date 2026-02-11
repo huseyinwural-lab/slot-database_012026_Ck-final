@@ -378,5 +378,20 @@ class FeatureFlag(SQLModel, table=True):
     is_enabled: bool = False
     created_at: str = ""
 
+
+class TelemetryEvent(SQLModel, table=True):
+    __tablename__ = "telemetry_events"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    tenant_id: str = Field(index=True)
+    player_id: Optional[str] = Field(default=None, foreign_key="players.id")
+    session_id: str
+    event_name: str
+    payload: Dict = Field(default={}, sa_column=Column(JSON))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.utcnow(),
+        sa_column=Column(DateTime, server_default=func.now(), nullable=False),
+    )
+
 # LedgerTransaction and WalletBalance moved to repositories/ledger_repo.py to avoid duplicates
 
