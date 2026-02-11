@@ -49,8 +49,9 @@ const WalletPage = () => {
           />
           <button
             onClick={handleDeposit}
-            className="rounded-lg bg-[var(--app-cta,#ff8b2c)] px-4 py-2 text-sm font-semibold text-black"
+            className="rounded-lg bg-[var(--app-cta,#ff8b2c)] px-4 py-2 text-sm font-semibold text-black disabled:opacity-60"
             data-testid="wallet-deposit-button"
+            disabled={!amount}
           >
             {paymentStatus === 'pending' ? 'Beklemede...' : 'Depozit Başlat'}
           </button>
