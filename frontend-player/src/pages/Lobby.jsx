@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { GameCard } from '@/components/GameCard';
 import { CategoryRail } from '@/components/CategoryRail';
@@ -10,6 +11,7 @@ const Lobby = () => {
   const { markStale } = useWalletStore();
   const { emailState, smsState } = useVerificationStore();
   const [query, setQuery] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchLobby();
@@ -25,6 +27,7 @@ const Lobby = () => {
     const response = await launchGame(game);
     if (response.ok) {
       markStale();
+      navigate('/game');
     }
   };
 
