@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Body, HTTPException, Request
+from pydantic import BaseModel
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +10,10 @@ from app.utils.tenant import get_current_tenant_id
 from datetime import datetime
 
 router = APIRouter(prefix="/api/v1/support", tags=["support"])
+
+
+class PlayerSupportRequest(BaseModel):
+    message: str
 
 @router.get("/tickets")
 async def get_tickets(
@@ -53,3 +58,8 @@ async def reply_ticket(
     session.add(ticket)
     await session.commit()
     return {"message": "Replied"}
+
+
+@router.post("/ticket")
+async def create_player_ticket(payload: PlayerSupportRequest):
+    return {"ok": True, "data": {"status": "received"}}
