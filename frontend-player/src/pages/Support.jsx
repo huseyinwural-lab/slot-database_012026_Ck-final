@@ -21,6 +21,7 @@ const Support = () => {
   };
 
   return (
+    <Layout>
       <div className="space-y-6" data-testid="support-page">
         <h2 className="text-2xl font-semibold" data-testid="support-title">Canlı Destek</h2>
         {env.crispWebsiteId ? (
@@ -48,6 +49,7 @@ const Support = () => {
           </div>
         )}
       </div>
+    </Layout>
   );
 };
 
