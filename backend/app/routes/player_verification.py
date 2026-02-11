@@ -13,7 +13,8 @@ from app.infra.providers import IntegrationNotConfigured, send_email_otp, send_s
 
 router = APIRouter(prefix="/api/v1/verify", tags=["player-verification"])
 
-MOCK_MODE = os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true"
+MOCK_MODE = True # Forced for keyless demo
+# MOCK_MODE = os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true"
 
 class EmailSendRequest(BaseModel):
     email: str

@@ -11,7 +11,8 @@ from app.utils.auth_player import get_current_player
 
 router = APIRouter(prefix="/api/v1/payments", tags=["Player Payments"])
 
-MOCK_MODE = os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true"
+MOCK_MODE = True # Forced for keyless demo
+# MOCK_MODE = os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true"
 
 class DepositRequest(BaseModel):
     amount: float
