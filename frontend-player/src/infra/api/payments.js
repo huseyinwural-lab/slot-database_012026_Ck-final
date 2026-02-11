@@ -4,7 +4,7 @@ export const paymentsApi = {
   createDeposit: (payload) =>
     request({
       method: 'POST',
-      url: '/player/wallet/deposit',
+      url: '/payments/deposit',
       data: payload,
       headers: {
         'Idempotency-Key': crypto.randomUUID(),
