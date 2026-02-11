@@ -1,5 +1,14 @@
 import os
-from fastapi import APIRouter, HTTPException
+import secrets
+from datetime import datetime, timedelta
+
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.future import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.database import get_session
+from app.models.sql_models import Player
+from app.infra.providers import IntegrationNotConfigured, send_email_otp, send_sms_otp, confirm_sms_otp
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/v1/verify", tags=["player-verification"])
@@ -24,42 +33,110 @@ class SmsConfirmRequest(BaseModel):
 
 
 _EMAIL_CODES = {}
-_SMS_CODES = {}
+_SMS_SEND_LOG = {}
+_SMS_ATTEMPTS = {}
+
+OTP_TTL = timedelta(minutes=5)
+RESEND_COOLDOWN = timedelta(seconds=60)
+MAX_SMS_ATTEMPTS = 5
+SMS_LOCKOUT = timedelta(minutes=15)
 
 
-def _require_env(key: str, error_code: str):
-    if not os.getenv(key):
-        raise HTTPException(
-            status_code=503,
-            detail={"error_code": error_code, "message": f"Missing {key}"},
-        )
+def _integration_error(key: str):
+    raise HTTPException(
+        status_code=503,
+        detail={"error_code": "INTEGRATION_NOT_CONFIGURED", "message": f"Missing {key}"},
+    )
 
 
 @router.post("/email/send")
-async def send_email_code(payload: EmailSendRequest):
-    _require_env("RESEND_API_KEY", "VERIFY_EMAIL_REQUIRED")
-    _EMAIL_CODES[payload.email] = "123456"
+async def send_email_code(payload: EmailSendRequest, session: AsyncSession = Depends(get_session)):
+    player = await session.exec(select(Player).where(Player.email == payload.email))
+    player = player.first()
+    if not player:
+        return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
+
+    record = _EMAIL_CODES.get(payload.email)
+    now = datetime.utcnow()
+    if record and now - record["sent_at"] < RESEND_COOLDOWN:
+        raise HTTPException(status_code=429, detail={"error_code": "RATE_LIMIT", "message": "Please wait"})
+
+    code = f"{secrets.randbelow(999999):06d}"
+    try:
+        send_email_otp(payload.email, code)
+    except IntegrationNotConfigured as exc:
+        _integration_error(exc.key)
+
+    _EMAIL_CODES[payload.email] = {
+        "code": code,
+        "expires_at": now + OTP_TTL,
+        "sent_at": now,
+    }
     return {"ok": True, "data": {"status": "pending"}}
 
 
 @router.post("/email/confirm")
-async def confirm_email_code(payload: EmailConfirmRequest):
-    _require_env("RESEND_API_KEY", "VERIFY_EMAIL_REQUIRED")
-    if _EMAIL_CODES.get(payload.email) != payload.code:
+async def confirm_email_code(payload: EmailConfirmRequest, session: AsyncSession = Depends(get_session)):
+    record = _EMAIL_CODES.get(payload.email)
+    if not record:
+        return {"ok": False, "error": {"code": "VERIFY_EMAIL_REQUIRED", "message": "Code not sent"}}
+    if datetime.utcnow() > record["expires_at"]:
+        return {"ok": False, "error": {"code": "VERIFY_EMAIL_REQUIRED", "message": "Code expired"}}
+    if record["code"] != payload.code:
         return {"ok": False, "error": {"code": "VERIFY_EMAIL_REQUIRED", "message": "Invalid code"}}
+
+    player = await session.exec(select(Player).where(Player.email == payload.email))
+    player = player.first()
+    if not player:
+        return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
+
+    player.email_verified = True
+    await session.commit()
     return {"ok": True, "data": {"status": "verified"}}
 
 
 @router.post("/sms/send")
-async def send_sms_code(payload: SmsSendRequest):
-    _require_env("TWILIO_VERIFY_SERVICE_SID", "VERIFY_SMS_REQUIRED")
-    _SMS_CODES[payload.phone] = "123456"
+async def send_sms_code(payload: SmsSendRequest, session: AsyncSession = Depends(get_session)):
+    player = await session.exec(select(Player).where(Player.phone == payload.phone))
+    player = player.first()
+    if not player:
+        return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
+
+    now = datetime.utcnow()
+    last_sent = _SMS_SEND_LOG.get(payload.phone)
+    if last_sent and now - last_sent < RESEND_COOLDOWN:
+        raise HTTPException(status_code=429, detail={"error_code": "RATE_LIMIT", "message": "Please wait"})
+
+    try:
+        send_sms_otp(payload.phone)
+    except IntegrationNotConfigured as exc:
+        _integration_error(exc.key)
+
+    _SMS_SEND_LOG[payload.phone] = now
+    _SMS_ATTEMPTS[payload.phone] = {"count": 0, "first": now}
     return {"ok": True, "data": {"status": "pending"}}
 
 
 @router.post("/sms/confirm")
-async def confirm_sms_code(payload: SmsConfirmRequest):
-    _require_env("TWILIO_VERIFY_SERVICE_SID", "VERIFY_SMS_REQUIRED")
-    if _SMS_CODES.get(payload.phone) != payload.code:
+async def confirm_sms_code(payload: SmsConfirmRequest, session: AsyncSession = Depends(get_session)):
+    attempt = _SMS_ATTEMPTS.get(payload.phone, {"count": 0, "first": datetime.utcnow()})
+    if attempt["count"] >= MAX_SMS_ATTEMPTS and datetime.utcnow() - attempt["first"] < SMS_LOCKOUT:
+        raise HTTPException(status_code=429, detail={"error_code": "RATE_LIMIT", "message": "Too many attempts"})
+
+    try:
+        approved = confirm_sms_otp(payload.phone, payload.code)
+    except IntegrationNotConfigured as exc:
+        _integration_error(exc.key)
+
+    if not approved:
+        attempt["count"] += 1
+        _SMS_ATTEMPTS[payload.phone] = attempt
         return {"ok": False, "error": {"code": "VERIFY_SMS_REQUIRED", "message": "Invalid code"}}
+
+    player = await session.exec(select(Player).where(Player.phone == payload.phone))
+    player = player.first()
+    if not player:
+        return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
+    player.sms_verified = True
+    await session.commit()
     return {"ok": True, "data": {"status": "verified"}}
