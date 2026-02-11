@@ -1,53 +1,71 @@
-import React from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Gamepad2, User, LogIn, LogOut } from 'lucide-react';
+import React, { useState } from 'react';
+import { Outlet, Link, useNavigate, NavLink } from 'react-router-dom';
+import { Gamepad2, LogOut } from 'lucide-react';
+import { BalancePill } from './BalancePill';
+import { Modal } from './Modal';
+import { ThemeCustomizer } from './ThemeCustomizer';
+import { useAuthStore, useWalletStore } from '@/domain';
 
 const Layout = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('player_token');
-  const user = JSON.parse(localStorage.getItem('player_user') || '{}');
+  const { token, user, logout } = useAuthStore();
+  const { balance, currency } = useWalletStore();
+  const [themeOpen, setThemeOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('player_token');
-    localStorage.removeItem('player_user');
+    logout();
     navigate('/login');
   };
 
+  const navLinkClass = ({ isActive }) =>
+    `text-sm ${isActive ? 'text-[var(--app-accent,#19e0c3)]' : 'text-white/70 hover:text-white'}`;
+
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
+    <div className="min-h-screen text-foreground font-sans" style={{ backgroundColor: 'var(--player-bg)' }} data-testid="player-layout">
       {/* Navbar */}
-      <header className="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
+      <header
+        className="border-b border-white/10 sticky top-0 z-50"
+        style={{ backgroundColor: 'var(--player-header)' }}
+        data-testid="player-header"
+      >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
+          <Link to="/lobby" className="flex items-center gap-2 text-2xl font-bold text-primary" data-testid="player-logo">
             <Gamepad2 className="w-8 h-8" />
             <span>CasinoLobby</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="hover:text-primary transition-colors">Lobby</Link>
-            {/* Slots route not implemented yet (P1-1). */}
-            <Link to="/wallet" className="hover:text-primary transition-colors">Wallet</Link>
-            {/* Promotions route not implemented yet (P1-1). */}
+          <nav className="hidden md:flex items-center gap-6" data-testid="player-nav">
+            <NavLink to="/lobby" className={navLinkClass} data-testid="nav-lobby">Lobby</NavLink>
+            <NavLink to="/wallet" className={navLinkClass} data-testid="nav-wallet">Wallet</NavLink>
+            <NavLink to="/support" className={navLinkClass} data-testid="nav-support">Support</NavLink>
           </nav>
 
           <div className="flex items-center gap-4">
             {token ? (
               <>
-                <div className="flex flex-col items-end mr-2">
-                    <span className="text-sm font-medium">{user.username || 'Player'}</span>
-                    <span className="text-xs text-green-400 font-mono">${user.balance_real?.toFixed(2) || '0.00'}</span>
+                <div className="flex flex-col items-end mr-2" data-testid="player-user-info">
+                    <span className="text-sm font-medium" data-testid="player-username">{user?.username || 'Player'}</span>
                 </div>
+                <BalancePill balance={balance} currency={currency} />
                 <button 
                     onClick={handleLogout}
                     className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                    data-testid="logout-button"
                 >
                     <LogOut className="w-5 h-5" />
+                </button>
+                <button
+                  className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70"
+                  onClick={() => setThemeOpen(true)}
+                  data-testid="theme-button"
+                >
+                  Tema
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-medium hover:text-primary">Log In</Link>
-                <Link to="/register" className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-bold hover:bg-primary/90 transition-colors">
+                <Link to="/login" className="text-sm font-medium hover:text-primary" data-testid="nav-login">Log In</Link>
+                <Link to="/register" className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-bold hover:bg-primary/90 transition-colors" data-testid="nav-register">
                   Sign Up
                 </Link>
               </>
@@ -68,6 +86,10 @@ const Layout = () => {
           <p className="mt-2 text-xs">Responsible Gaming | 18+</p>
         </div>
       </footer>
+
+      <Modal open={themeOpen} title="Tema Ayarları" onClose={() => setThemeOpen(false)}>
+        <ThemeCustomizer />
+      </Modal>
     </div>
   );
 };
