@@ -66,9 +66,11 @@ const Lobby = () => {
         {lobbyStatus === 'ready' && (
           <CategoryRail
             title="Trend"
-            items={filtered.map((game) => (
+            items={filtered.length ? filtered.map((game) => (
               <GameCard key={game.id} game={game} onLaunch={handleLaunch} />
-            ))}
+            )) : [
+              <div key="empty" className="text-sm text-white/60" data-testid="lobby-empty">Oyun bulunamadı.</div>,
+            ]}
           />
         )}
 
