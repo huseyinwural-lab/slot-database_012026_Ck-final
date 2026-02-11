@@ -71,6 +71,7 @@ async def register_player(
         password_hash=hashed_password,
         registered_at=datetime.utcnow(),
         last_login=None,
+        phone=payload.get("phone"),
     )
     
     session.add(player)
