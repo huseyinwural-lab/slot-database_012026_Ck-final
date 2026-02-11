@@ -1,4 +1,5 @@
 import { telemetryApi } from '@/infra/api/telemetry';
+import { getStoredUser } from '@/domain/auth/storage';
 
 const QUEUE_KEY = 'player_telemetry_queue';
 
@@ -15,10 +16,14 @@ const persistQueue = (queue) => {
 };
 
 export const trackEvent = async (event, payload = {}) => {
+  const user = getStoredUser();
   const record = {
     event,
     payload,
     ts: new Date().toISOString(),
+    session_id: localStorage.getItem('player_session_id'),
+    player_id: user?.id || null,
+    tenant_id: user?.tenant_id || null,
   };
 
   try {
