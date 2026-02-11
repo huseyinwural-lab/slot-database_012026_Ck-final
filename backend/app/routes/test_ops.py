@@ -7,7 +7,7 @@ from sqlalchemy.future import select
 
 from app.core.database import get_session
 from app.models.sql_models import Player
-from app.infra.utils import hash_password
+from app.utils.auth import get_password_hash as hash_password
 
 router = APIRouter(prefix="/api/v1/test", tags=["test-ops"])
 
