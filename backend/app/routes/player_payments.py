@@ -1,5 +1,6 @@
 import os
 import stripe
+import json
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.future import select
@@ -11,14 +12,15 @@ from app.utils.auth_player import get_current_player
 
 router = APIRouter(prefix="/api/v1/payments", tags=["Player Payments"])
 
-MOCK_MODE = os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true"
+def is_mock_mode():
+    return os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true"
 
 class DepositRequest(BaseModel):
     amount: float
     currency: str = "USD"
 
 def _require_env(key: str):
-    if MOCK_MODE:
+    if is_mock_mode():
         return
     if not os.getenv(key):
         raise HTTPException(
@@ -43,7 +45,6 @@ async def create_deposit(
         )
 
     _require_env("STRIPE_SECRET_KEY")
-    # P0.8: Fallback for local preview if env var missing
     frontend_url = os.getenv("PLAYER_FRONTEND_URL", "http://localhost:3001")
     if not frontend_url:
         raise HTTPException(
@@ -51,7 +52,7 @@ async def create_deposit(
             detail={"error_code": "INTEGRATION_NOT_CONFIGURED", "message": "Missing PLAYER_FRONTEND_URL"},
         )
 
-    if not MOCK_MODE:
+    if not is_mock_mode():
         stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
     transaction = Transaction(
@@ -74,7 +75,7 @@ async def create_deposit(
     checkout_id = f"sess_mock_{transaction.id}"
     checkout_url = success_url # Auto success for mock
 
-    if not MOCK_MODE:
+    if not is_mock_mode():
         checkout = stripe.checkout.Session.create(
             mode="payment",
             success_url=success_url,
@@ -96,8 +97,7 @@ async def create_deposit(
         checkout_url = checkout.url
 
     transaction.provider_tx_id = checkout_id
-    if MOCK_MODE:
-        # Auto-complete for mock
+    if is_mock_mode():
         transaction.status = "completed"
         transaction.state = "completed"
         transaction.balance_after = current_player.balance_real + payload.amount
@@ -144,11 +144,7 @@ async def stripe_webhook(request: Request, session: AsyncSession = Depends(get_s
 
     event = None
 
-    if MOCK_MODE:
-        # In mock mode, we might assume trusted internal calls or simplistic parsing
-        # BUT the requirement says: "Mock açıkken bile güvenlik katmanı çalışır"
-        # Since we can't easily sign requests in mock mode without the library, 
-        # we might skip signature check IF explicitly mocked, but implement the structure.
+    if is_mock_mode():
         try:
             event = json.loads(payload)
         except:
@@ -171,40 +167,27 @@ async def stripe_webhook(request: Request, session: AsyncSession = Depends(get_s
         event_id = event.get("id")
         
         if transaction_id:
-            # Idempotency Check
-            # Check if this event_id is already processed for this transaction
-            # (Simplest way: Check if transaction has provider_event_id set to this event_id)
-            # A more robust way is a dedicated Idempotency table, but standard plan allows using Transaction table fields.
-            
             transaction = await session.get(Transaction, transaction_id)
             
             if not transaction:
-                # Should we return 404? No, Stripe retries. 200 OK to stop retries if it's junk data?
-                # Best practice: 200 OK if we can't do anything about it, to stop spam.
                 return {"ok": True, "status": "ignored_no_tx"}
 
             if transaction.provider_event_id == event_id:
-                # Already processed
                 return {"ok": True, "status": "idempotent_skip"}
             
             if transaction.status == "completed":
-                # Already completed by another event?
                 return {"ok": True, "status": "already_completed"}
 
-            # Amount Validation
-            # Stripe amounts are in cents/smallest unit
             stripe_amount = data.get("amount_total")
             if stripe_amount is not None:
                 expected = int(transaction.amount * 100)
                 if stripe_amount != expected:
-                    # Mismatch! Flag manual review
                     transaction.status = "failed"
                     transaction.state = "review_needed"
                     transaction.review_reason = f"Amount mismatch: {stripe_amount} vs {expected}"
                     await session.commit()
                     return {"ok": True, "status": "mismatch_flagged"}
 
-            # Process
             transaction.status = "completed"
             transaction.state = "completed"
             transaction.provider_event_id = event_id
