@@ -88,7 +88,6 @@ const Lobby = () => {
           <div className="text-sm text-white/60" data-testid="game-launch-loading">Oyun başlatılıyor...</div>
         )}
       </div>
-    </Layout>
   );
 };
 
