@@ -47,7 +47,9 @@ function App() {
             element={(
               <RequireAuth>
                 <RequireVerified>
-                  <Lobby />
+                  <Layout>
+                    <Lobby />
+                  </Layout>
                 </RequireVerified>
               </RequireAuth>
             )}
@@ -57,7 +59,9 @@ function App() {
             element={(
               <RequireAuth>
                 <RequireVerified>
-                  <WalletPage />
+                  <Layout>
+                    <WalletPage />
+                  </Layout>
                 </RequireVerified>
               </RequireAuth>
             )}
@@ -67,7 +71,9 @@ function App() {
             element={(
               <RequireAuth>
                 <RequireVerified>
-                  <GameRoom />
+                  <Layout>
+                    <GameRoom />
+                  </Layout>
                 </RequireVerified>
               </RequireAuth>
             )}
@@ -76,7 +82,9 @@ function App() {
             path="/support"
             element={(
               <RequireAuth>
-                <Support />
+                <Layout>
+                  <Support />
+                </Layout>
               </RequireAuth>
             )}
           />
