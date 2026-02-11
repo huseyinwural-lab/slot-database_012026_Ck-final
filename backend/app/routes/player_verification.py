@@ -3,17 +3,24 @@ import hashlib
 from datetime import datetime, timedelta
 import os
 import json
+import logging
 
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 from app.core.database import get_session
 from app.models.sql_models import Player
 from app.infra.providers import IntegrationNotConfigured, send_email_otp, send_sms_otp, confirm_sms_otp
 from app.core.redis_client import get_redis
 from redis.asyncio import Redis
+
+# Force load env
+load_dotenv("/app/backend/.env")
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/verify", tags=["player-verification"])
 
@@ -24,7 +31,8 @@ MAX_ATTEMPTS = 5
 LOCKOUT_DURATION = 900 # 15 minutes
 
 def is_mock_mode():
-    return os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true"
+    val = os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower()
+    return val == "true"
 
 def _integration_error(key: str):
     if is_mock_mode():
@@ -67,6 +75,8 @@ async def send_email_code(
     session: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
+    logger.info(f"Send Email: {payload.email}, MockMode: {is_mock_mode()}")
+    
     # 1. Rate Limit (IP)
     client_ip = request.client.host if request.client else "unknown"
     ip_key = f"rl:ip:{client_ip}:email_send"
@@ -99,6 +109,7 @@ async def send_email_code(
     code_key = f"vfy:email:code:{payload.email}"
     attempts_key = f"vfy:attempts:email:{payload.email}"
     
+    # Explicitly set without pipeline to debug potential mock issues
     await redis.setex(code_key, OTP_TTL, _hash_code(code))
     await redis.setex(cooldown_key, RESEND_COOLDOWN, "1")
     await redis.delete(attempts_key)
@@ -112,6 +123,7 @@ async def confirm_email_code(
     session: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
+    logger.info(f"Confirm Email: {payload.email}, Code: {payload.code}, MockMode: {is_mock_mode()}")
     code_key = f"vfy:email:code:{payload.email}"
     attempts_key = f"vfy:attempts:email:{payload.email}"
     lock_key = f"vfy:lock:email:{payload.email}"
@@ -125,8 +137,8 @@ async def confirm_email_code(
     if stored_hash and _hash_code(payload.code) == stored_hash:
         approved = True
     elif is_mock_mode() and payload.code == "123456":
-        # Fallback for dev/test stability
         approved = True
+        logger.info("Mock approval triggered")
 
     if not approved:
         # If not approved via fallback and no hash, check existence first
@@ -219,7 +231,6 @@ async def confirm_sms_code(
     elif is_mock_mode() and payload.code == "123456":
         approved = True
     else:
-        # Real logic for Twilio if not in mock mode or redis failed
         if not is_mock_mode():
             try:
                 approved = confirm_sms_otp(payload.phone, payload.code)
