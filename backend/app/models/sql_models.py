@@ -384,7 +384,7 @@ class TelemetryEvent(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     tenant_id: str = Field(index=True)
-    player_id: Optional[str] = Field(default=None, foreign_key="players.id")
+    player_id: Optional[str] = Field(default=None, foreign_key="player.id")
     session_id: str
     event_name: str
     payload: Dict = Field(default={}, sa_column=Column(JSON))

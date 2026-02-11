@@ -17,15 +17,15 @@ depends_on = None
 
 def upgrade():
     op.add_column(
-        "players",
+        "player",
         sa.Column("email_verified", sa.Boolean(), server_default=sa.text("false"), nullable=False),
     )
     op.add_column(
-        "players",
+        "player",
         sa.Column("sms_verified", sa.Boolean(), server_default=sa.text("false"), nullable=False),
     )
 
 
 def downgrade():
-    op.drop_column("players", "sms_verified")
-    op.drop_column("players", "email_verified")
+    op.drop_column("player", "sms_verified")
+    op.drop_column("player", "email_verified")
