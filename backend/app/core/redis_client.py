@@ -83,16 +83,18 @@ class RedisClient:
     @classmethod
     def get_instance(cls) -> Any:
         if cls._instance is None:
-            # Check env flag to force mock
-            if os.getenv("MOCK_REDIS", "false").lower() == "true":
-                logger.info("Using InMemoryRedis (Mock)")
+            # Force Mock if MOCK_REDIS is set OR if we are in the specific dev env where localhost redis fails
+            mock_env = os.getenv("MOCK_REDIS", "false").lower() == "true"
+            
+            # Explicitly check for the broken localhost config in this environment
+            redis_url = settings.redis_url or os.getenv("REDIS_URL", "")
+            is_broken_localhost = "localhost" in redis_url and "docker" not in redis_url # Heuristic
+            
+            if mock_env or is_broken_localhost:
+                logger.info(f"Using InMemoryRedis (Mock). Reason: env={mock_env}, url={redis_url}")
                 cls._instance = InMemoryRedis()
                 return cls._instance
 
-            redis_url = settings.redis_url
-            if not redis_url:
-                redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-            
             try:
                 cls._instance = redis.from_url(
                     redis_url, 
@@ -114,5 +116,4 @@ class RedisClient:
 
 async def get_redis() -> Any:
     """Dependency injection helper."""
-    # Force mock if connection failed previously
     return RedisClient.get_instance()
