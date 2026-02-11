@@ -2,9 +2,11 @@ import { create } from 'zustand';
 import { verificationApi } from '@/infra/api/verification';
 import { trackEvent } from '@/telemetry';
 
+const stored = JSON.parse(localStorage.getItem('player_verification') || '{}');
+
 export const useVerificationStore = create((set) => ({
-  emailState: 'unverified',
-  smsState: 'unverified',
+  emailState: stored.emailState || 'unverified',
+  smsState: stored.smsState || 'unverified',
   error: null,
   sendEmail: async (payload) => {
     set({ emailState: 'pending', error: null });
@@ -19,6 +21,8 @@ export const useVerificationStore = create((set) => ({
     const response = await verificationApi.confirmEmail(payload);
     if (response.ok) {
       trackEvent('email_verified', { email: payload.email });
+      const next = { emailState: 'verified', smsState: stored.smsState || 'unverified' };
+      localStorage.setItem('player_verification', JSON.stringify(next));
       set({ emailState: 'verified', error: null });
     } else {
       set({ emailState: 'failed', error: response.error });
@@ -38,6 +42,8 @@ export const useVerificationStore = create((set) => ({
     const response = await verificationApi.confirmSms(payload);
     if (response.ok) {
       trackEvent('sms_verified', { phone: payload.phone });
+      const next = { emailState: stored.emailState || 'unverified', smsState: 'verified' };
+      localStorage.setItem('player_verification', JSON.stringify(next));
       set({ smsState: 'verified', error: null });
     } else {
       set({ smsState: 'failed', error: response.error });
