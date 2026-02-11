@@ -58,6 +58,12 @@ async def create_deposit(
     if amount <= 0:
         raise HTTPException(400, "Amount must be positive")
 
+    if not current_player.email_verified or not current_player.sms_verified:
+        raise HTTPException(
+            status_code=403,
+            detail={"error_code": "AUTH_UNVERIFIED", "message": "Verification required"},
+        )
+
     # Tenant daily deposit limit enforcement (TENANT-POLICY-001)
     from app.services.tenant_policy_enforcement import ensure_within_tenant_daily_limits
 
