@@ -73,7 +73,7 @@ yarn start
 ```bash
 cd frontend-player
 yarn install
-yarn dev
+yarn dev --host
 ```
 
 ## 🔑 Initial Access (Staging/Prod)
