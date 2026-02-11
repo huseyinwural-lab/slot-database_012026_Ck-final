@@ -1,6 +1,17 @@
 import { telemetryApi } from '@/infra/api/telemetry';
 import { getStoredUser } from '@/domain/auth/storage';
 
+const SESSION_KEY = 'player_session_id';
+
+const getSessionId = () => {
+  let sessionId = localStorage.getItem(SESSION_KEY);
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem(SESSION_KEY, sessionId);
+  }
+  return sessionId;
+};
+
 const QUEUE_KEY = 'player_telemetry_queue';
 
 const loadQueue = () => {
@@ -21,7 +32,7 @@ export const trackEvent = async (event, payload = {}) => {
     event,
     payload,
     ts: new Date().toISOString(),
-    session_id: localStorage.getItem('player_session_id'),
+    session_id: getSessionId(),
     player_id: user?.id || null,
     tenant_id: user?.tenant_id || null,
   };
