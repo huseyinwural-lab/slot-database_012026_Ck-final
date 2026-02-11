@@ -21,7 +21,7 @@ export const useWalletStore = create((set) => ({
   fetchTransactions: async () => {
     const response = await walletApi.getTransactions();
     if (response.ok) {
-      set({ transactions: response.data?.transactions || [] });
+      set({ transactions: response.data?.items || response.data?.transactions || [] });
     }
     return response;
   },
