@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.future import select
 
-from app.database import get_session
+from app.core.database import get_session
 from app.models.sql_models import Player
 from app.infra.utils import hash_password
 
