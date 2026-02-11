@@ -2,7 +2,9 @@ import asyncio
 import os
 from sqlalchemy.future import select
 from app.core.database import async_session
+# Import ALL models to ensure registry is populated
 from app.models.sql_models import AdminUser, Tenant
+from app.models.game_models import Game
 from app.utils.auth import get_password_hash
 
 async def check_admin():
@@ -21,6 +23,11 @@ async def check_admin():
         
         if user:
             print(f"Admin Found: {user.email}, ID: {user.id}")
+            # Reset password to ensure it matches
+            user.password_hash = get_password_hash("Admin123!")
+            session.add(user)
+            await session.commit()
+            print("Admin password reset to 'Admin123!'")
         else:
             print("Admin NOT Found. Creating...")
             # Create Default Admin
