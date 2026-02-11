@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { authApi } from '@/infra/api/auth';
 import { trackEvent } from '@/telemetry';
+import { useVerificationStore } from '@/domain/verification/store';
 import {
   getAuthToken,
   setAuthToken,
@@ -31,9 +32,10 @@ export const useAuthStore = create((set, get) => ({
     const response = await authApi.login(payload);
     if (response.ok) {
       const token = response.data?.access_token;
-      const user = response.data?.player || { email: payload.email };
+      const user = response.data?.user || { email: payload.email };
       setAuthToken(token);
       setStoredUser(user);
+      useVerificationStore.getState().syncFromUser(user);
       trackEvent('login_success', { email: payload.email });
       set({ status: 'authenticated', token, user, error: null });
     } else {
