@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useNavigate, NavLink } from 'react-router-dom';
 import { Gamepad2, LogOut } from 'lucide-react';
 import { BalancePill } from './BalancePill';
@@ -9,13 +9,19 @@ import { useAuthStore, useWalletStore } from '@/domain';
 const Layout = () => {
   const navigate = useNavigate();
   const { token, user, logout } = useAuthStore();
-  const { balance, currency } = useWalletStore();
+  const { balance, currency, fetchBalance } = useWalletStore();
   const [themeOpen, setThemeOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  useEffect(() => {
+    if (token) {
+      fetchBalance();
+    }
+  }, [token, fetchBalance]);
 
   const navLinkClass = ({ isActive }) =>
     `text-sm ${isActive ? 'text-[var(--app-accent,#19e0c3)]' : 'text-white/70 hover:text-white'}`;
