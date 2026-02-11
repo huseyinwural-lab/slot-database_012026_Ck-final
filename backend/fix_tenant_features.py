@@ -2,7 +2,9 @@ import asyncio
 import os
 from sqlalchemy.future import select
 from app.core.database import async_session
-from app.models.sql_models import Tenant
+# Import models to populate registry
+from app.models.sql_models import Tenant, AdminUser
+from app.models.game_models import Game
 
 async def fix_tenant():
     async with async_session() as session:
@@ -24,7 +26,6 @@ async def fix_tenant():
                 "can_use_game_robot": True,
                 "can_manage_kyc": True,
                 "can_manage_bonus": True,
-                # Add any others just in case, though these cover menu.js
             }
             
             tenant.features = features
