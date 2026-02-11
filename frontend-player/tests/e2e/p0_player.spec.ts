@@ -46,40 +46,42 @@ test.describe('P0 Player Journey', () => {
       console.log('Verifying Email...');
       await expect(page).toHaveURL(/\/verify\/email/, { timeout: 10000 });
       
-      // Auto-filled email? Or need to type? The component shows an input.
+      // MUST click Send first to prime the backend mock state
       await page.getByTestId('verify-email-input').fill(email);
       await page.getByTestId('verify-email-send').click();
       
-      // Wait for success toast? or just proceed. 
-      // The backend mock is instant.
+      // Wait a moment for async send
+      await page.waitForTimeout(1000);
       
-      // In Mock Mode, backend accepts "123456"
       await page.getByTestId('verify-email-code').fill('123456');
       await page.getByTestId('verify-email-confirm').click();
+      
+      // Wait for navigation
+      await page.waitForTimeout(1000);
 
       // 3. SMS Verification
       console.log('Verifying SMS...');
       await expect(page).toHaveURL(/\/verify\/sms/, { timeout: 10000 });
       
-      // Assume phone input needs filling
-      // Assuming selectors based on VerifySms.jsx (guessing structure similar to Email)
-      // We can try to guess or inspect. Let's assume input type="tel" or placeholder "Phone"
-      const phoneInput = page.locator('input[type="tel"]');
+      // SMS Send
+      // Fallback selector strategy for phone input
+      const phoneInput = page.getByPlaceholder(/Phone|Telefon/i);
       if (await phoneInput.count() > 0) {
          await phoneInput.fill(phone);
-      } else {
-         // Fallback to text input if type not set
-         await page.getByPlaceholder(/Phone|Telefon/i).fill(phone);
       }
       
-      const sendBtn = page.getByRole('button', { name: /Send|Gönder/i });
-      // Might be "Kodu Gönder"
+      // Send button
+      const sendBtn = page.getByRole('button', { name: /Kodu Gönder|Send/i });
       if (await sendBtn.count() > 0) {
         await sendBtn.click();
       }
+      
+      await page.waitForTimeout(1000);
 
-      await page.getByPlaceholder(/Code|Kod/i).fill('123456');
+      await page.getByPlaceholder(/Code|Doğrulama Kodu/i).fill('123456');
       await page.getByRole('button', { name: /Verify|Doğrula/i }).click();
+      
+      await page.waitForTimeout(1000);
 
       // 4. Lobby (Game Start Rate KPI)
       console.log('Entering Lobby...');
