@@ -47,6 +47,17 @@ class Metrics:
         # Risk
         self.risk_score_updates = Counter("risk_score_updates_total", "Total risk score updates")
         self.risk_blocks = Counter("risk_blocks_total", "Total blocked actions due to risk")
+        # Provider Metrics
+        self.provider_requests_total = Counter(
+            "provider_requests_total",
+            "Total provider callback requests",
+            ["provider", "method", "status"]
+        )
+        self.provider_signature_failures = Counter(
+            "provider_signature_failures_total",
+            "Total signature validation failures",
+            ["provider"]
+        )
         self.risk_flags = Counter("risk_flags_total", "Total actions flagged for review")
 
 # Global Instance
