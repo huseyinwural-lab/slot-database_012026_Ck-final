@@ -51,12 +51,12 @@ class Metrics:
         self.provider_requests_total = Counter(
             "provider_requests_total",
             "Total provider callback requests",
+            ["provider", "method", "status"]
+        )
         self.provider_wallet_drift_detected_total = Counter(
             "provider_wallet_drift_detected_total",
             "Total wallet drift detected during reconciliation",
             ["provider"]
-        )
-            ["provider", "method", "status"]
         )
         self.provider_signature_failures = Counter(
             "provider_signature_failures_total",
