@@ -6,7 +6,7 @@ from typing import Dict, List, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func
 from app.core.database import async_session
-from app.models.sql_models import Transaction
+from app.repositories.ledger_repo import LedgerTransaction
 from app.core.metrics import metrics
 from app.models.reconciliation_run import ReconciliationReport
 
