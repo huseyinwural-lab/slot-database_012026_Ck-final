@@ -52,6 +52,14 @@ test.describe('P0 Withdrawal Flow', () => {
     playerContext = await browser.newContext();
     playerPage = await playerContext.newPage();
     
+    // Intercept network requests to debug failure
+    playerPage.on('response', response => {
+      if (response.url().includes('/withdraw') && response.status() !== 200) {
+        console.log(`Withdraw failed: ${response.status()} ${response.statusText()}`);
+        response.json().then(data => console.log("Response body:", data)).catch(() => {});
+      }
+    });
+
     await playerPage.goto('/login');
     await playerPage.getByTestId('login-email-input').fill(playerEmail);
     await playerPage.getByTestId('login-password-input').fill("Password123!");
@@ -65,14 +73,17 @@ test.describe('P0 Withdrawal Flow', () => {
     await playerPage.getByTestId('tab-withdraw').click();
     await playerPage.getByTestId('amount-input').fill('100');
     await playerPage.getByTestId('address-input').fill('TR123456');
+    
+    // Listen for response explicitly
+    const withdrawPromise = playerPage.waitForResponse(resp => resp.url().includes('/withdraw'));
     await playerPage.getByTestId('submit-button').click();
     
-    // Check if error toast appears (e.g. KYC limit again?)
-    const errorToast = playerPage.locator('.bg-red-500'); // Assuming toast class
-    if (await errorToast.count() > 0) {
-        console.log("Error Toast:", await errorToast.innerText());
-    }
-
+    const response = await withdrawPromise;
+    expect(response.status()).toBe(200); // Check status first
+    
+    // Wait for Toast
+    await expect(playerPage.getByText(/Withdrawal requested/)).toBeVisible();
+    
     // Wait for Balance text to change
     await expect(playerPage.getByTestId('wallet-balance')).toContainText('400', { timeout: 10000 });
     await expect(playerPage.getByText(/Locked: 100|Kilitli: 100/i)).toBeVisible();
