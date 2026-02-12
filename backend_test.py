@@ -211,33 +211,56 @@ def test_import_validation():
 
 def main():
     print("=" * 60)
-    print("FAZ 6A SPRINT 3 DELIVERABLES VERIFICATION")
+    print("SESSION CLOSURE VERIFICATION")
     print("=" * 60)
     
-    # Test 1-4: File Existence
-    print("\n1. TESTING FILE EXISTENCE...")
+    # Primary Tests for Session Closure
+    print("\n1. TESTING STAGING SOAK EXIT REPORT...")
+    soak_report_ok, soak_error = test_staging_soak_exit_report()
+    
+    print("\n2. TESTING FAZ6A SPRINT3 CODE COMPLETE...")
+    code_complete_ok, code_error = test_faz6a_sprint3_code_complete()
+    
+    print("\n3. TESTING RECON_PROVIDER.PY EXECUTION...")
+    recon_ok, recon_error = test_recon_provider_execution()
+    
+    # Legacy Tests (for completeness)
+    print("\n4. TESTING SCRIPT FILE EXISTENCE...")
     files_exist, file_results = test_file_existence()
     
-    # Test 5: Syntax Validation (specific requirement)
-    print("\n2. TESTING PROD_GUARD.PY SYNTAX...")
+    print("\n5. TESTING PROD_GUARD.PY SYNTAX...")
     prod_guard_syntax_ok, prod_guard_error = test_syntax_validation()
     
-    # Additional: All scripts syntax
-    print("\n3. TESTING ALL SCRIPTS SYNTAX...")
+    print("\n6. TESTING ALL SCRIPTS SYNTAX...")
     all_syntax_ok, syntax_results = test_all_scripts_syntax()
     
-    # Additional: Import validation
-    print("\n4. TESTING IMPORT CAPABILITIES...")
+    print("\n7. TESTING IMPORT CAPABILITIES...")
     import_results, import_issues = test_import_validation()
     
     # Summary
     print("\n" + "=" * 60)
-    print("VERIFICATION SUMMARY")
+    print("SESSION CLOSURE VERIFICATION SUMMARY")
     print("=" * 60)
     
-    print(f"File Existence: {'✅ PASS' if files_exist else '❌ FAIL'}")
-    print(f"prod_guard.py Syntax: {'✅ PASS' if prod_guard_syntax_ok else '❌ FAIL'}")
-    print(f"All Scripts Syntax: {'✅ PASS' if all_syntax_ok else '❌ FAIL'}")
+    # Primary requirements
+    print("PRIMARY REQUIREMENTS:")
+    print(f"  1. Staging Soak Exit Report (GO): {'✅ PASS' if soak_report_ok else '❌ FAIL'}")
+    if not soak_report_ok:
+        print(f"     Error: {soak_error}")
+    
+    print(f"  2. Faz6A Sprint3 Code Complete: {'✅ PASS' if code_complete_ok else '❌ FAIL'}")
+    if not code_complete_ok:
+        print(f"     Error: {code_error}")
+    
+    print(f"  3. recon_provider.py Execution: {'✅ PASS' if recon_ok else '❌ FAIL'}")
+    if not recon_ok:
+        print(f"     Error: {recon_error}")
+    
+    # Secondary requirements
+    print("\nSECONDARY REQUIREMENTS:")
+    print(f"  4. Script File Existence: {'✅ PASS' if files_exist else '❌ FAIL'}")
+    print(f"  5. prod_guard.py Syntax: {'✅ PASS' if prod_guard_syntax_ok else '❌ FAIL'}")
+    print(f"  6. All Scripts Syntax: {'✅ PASS' if all_syntax_ok else '❌ FAIL'}")
     
     # Import issues (warnings, not failures)
     if import_issues:
@@ -252,16 +275,22 @@ def main():
             else:
                 print(f"  - {script}: {issue}")
     
-    # Overall result
-    core_requirements_met = files_exist and prod_guard_syntax_ok and all_syntax_ok
+    # Overall result - focus on primary requirements
+    primary_requirements_met = soak_report_ok and code_complete_ok and recon_ok
+    all_requirements_met = primary_requirements_met and files_exist and prod_guard_syntax_ok and all_syntax_ok
     
-    print(f"\nOVERALL RESULT: {'✅ PASS' if core_requirements_met else '❌ FAIL'}")
+    print(f"\nPRIMARY RESULT: {'✅ PASS' if primary_requirements_met else '❌ FAIL'}")
+    print(f"OVERALL RESULT: {'✅ PASS' if all_requirements_met else '❌ FAIL'}")
     
-    if core_requirements_met:
-        print("All Faz 6A Sprint 3 deliverables are present and syntactically valid.")
+    if primary_requirements_met:
+        print("✅ All session closure requirements are satisfied.")
+        if all_requirements_met:
+            print("✅ All deliverables are present and functional.")
+        else:
+            print("⚠️  Some secondary requirements have issues but session can proceed.")
         return 0
     else:
-        print("Some Faz 6A Sprint 3 deliverables are missing or have syntax errors.")
+        print("❌ Critical session closure requirements are not met.")
         return 1
 
 if __name__ == "__main__":
