@@ -324,6 +324,20 @@ class GameEngine:
         metrics.engine_latency.labels(operation="rollback", provider=provider).observe(time.time() - start_time)
         
         return await self._get_wallet_snapshot(session, player_id, currency)
+    async def get_balance(self, session: AsyncSession, player_id: str, currency: str) -> Dict:
+        return await self._get_wallet_snapshot(session, player_id, currency)
+
+    async def authenticate(self, session: AsyncSession, token: str) -> Optional[str]:
+        """Validate token and return player_id."""
+        # Simple implementation: check if token matches a player session or JWT
+        # For P1, we assume token IS player_id or we decode it.
+        # Let's assume token is JWT.
+        from app.utils.auth import decode_token
+        try:
+            payload = decode_token(token)
+            return payload.get("sub")
+        except:
+            return None
 
     async def _get_wallet_snapshot(self, session: AsyncSession, player_id: str, currency: str) -> Dict:
         player = await session.get(Player, player_id)
