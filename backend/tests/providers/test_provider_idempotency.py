@@ -38,6 +38,17 @@ async def test_provider_idempotency(client: AsyncClient, async_session_factory):
         from app.repositories.ledger_repo import WalletBalance
         wb = WalletBalance(tenant_id=tenant.id, player_id=player.id, currency="USD", balance_real_available=50.0)
         s.add(wb)
+        
+        # Create Game (Required for validation)
+        from app.models.game_models import Game
+        game = Game(
+            id="g_idem",
+            tenant_id=tenant.id,
+            provider_id="pragmatic",
+            external_id="g_idem",
+            name="Test Idempotency Game"
+        )
+        s.add(game)
         await s.commit()
 
     with pytest.MonkeyPatch.context() as m:
