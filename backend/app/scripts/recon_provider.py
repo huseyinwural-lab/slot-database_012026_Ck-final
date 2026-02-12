@@ -23,18 +23,16 @@ class ReconciliationEngine:
         self.session = session
         
     async def fetch_internal_ledger(self, start_time: datetime, end_time: datetime) -> Dict[str, float]:
-        """Aggregate Internal Ledger by Currency and Type."""
-        # Note: We group by currency. 
-        # In real world, we might group by (currency, type)
+        """Aggregate Internal Ledger by Currency."""
+        # Use LedgerTransaction as the source of truth for Game Events
         stmt = select(
-            Transaction.currency,
-            func.sum(Transaction.amount)
+            LedgerTransaction.currency,
+            func.sum(LedgerTransaction.amount)
         ).where(
-            Transaction.provider == PROVIDER_ID,
-            Transaction.created_at >= start_time,
-            Transaction.created_at < end_time,
-            Transaction.state == "completed" # Only settled transactions
-        ).group_by(Transaction.currency)
+            LedgerTransaction.provider == PROVIDER_ID,
+            LedgerTransaction.created_at >= start_time,
+            LedgerTransaction.created_at < end_time
+        ).group_by(LedgerTransaction.currency)
         
         result = await self.session.execute(stmt)
         totals = {}
