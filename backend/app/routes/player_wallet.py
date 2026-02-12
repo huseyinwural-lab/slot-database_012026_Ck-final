@@ -16,6 +16,8 @@ from config import settings
 from app.repositories.ledger_repo import get_balance
 from app.services import ledger_telemetry
 
+from app.services.risk_service import RiskService
+from app.core.redis_client import get_redis
 router = APIRouter(prefix="/api/v1/player/wallet", tags=["player_wallet"])
 
 def is_test_mode():
@@ -255,6 +257,19 @@ async def create_deposit(
     await session.refresh(tx)
     await session.refresh(current_player)
 
+    # Risk Velocity Update (Deposit)
+    try:
+        redis_client = await get_redis()
+        risk_service = RiskService(session, redis_client)
+        await risk_service.process_event(
+            "DEPOSIT_REQUESTED", 
+            str(current_player.id), 
+            str(current_player.tenant_id), 
+            {"amount": float(amount)}
+        )
+    except Exception:
+        pass
+
     total_real = current_player.balance_real_available + current_player.balance_real_held
     return {
         "transaction": tx,
@@ -280,6 +295,14 @@ async def create_withdrawal(
     if not is_test_mode():
         from app.services.tenant_policy_enforcement import check_velocity_limit
         await check_velocity_limit(session, player_id=current_player.id, action="withdraw")
+
+    # Risk Guard (Faz 6C)
+    redis_client = await get_redis()
+    risk_service = RiskService(session, redis_client)
+    risk_verdict = await risk_service.evaluate_withdrawal(str(current_player.id), float(amount))
+    
+    if risk_verdict == "BLOCK":
+        raise HTTPException(status_code=403, detail={"error_code": "RISK_BLOCK", "message": "Withdrawal blocked by risk engine"})
 
     if not idempotency_key:
         raise HTTPException(status_code=400, detail={"error_code": "IDEMPOTENCY_KEY_REQUIRED"})
@@ -394,6 +417,18 @@ async def create_withdrawal(
     await session.refresh(tx)
     # Crucial: Refresh player to get new balance for response
     await session.refresh(current_player)
+
+    # Risk Velocity Update
+    try:
+        await risk_service.process_event(
+            "WITHDRAW_REQUESTED", 
+            str(current_player.id), 
+            str(current_player.tenant_id), 
+            {"amount": float(amount)}
+        )
+    except Exception as e:
+        # Non-blocking
+        pass
 
     total_real = current_player.balance_real_available + current_player.balance_real_held
     return {
