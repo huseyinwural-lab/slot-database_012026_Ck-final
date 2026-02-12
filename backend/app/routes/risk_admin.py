@@ -82,7 +82,10 @@ async def override_risk_score(
     profile.last_event_at = datetime.utcnow()
     if expires_at:
         profile.override_expires_at = expires_at
-        profile.flags["override_active"] = True
+        # Need to assign a new dict to trigger JSON tracking if using SQLModel/SQLAlchemy JSON type sometimes
+        current_flags = dict(profile.flags or {})
+        current_flags["override_active"] = True
+        profile.flags = current_flags
     
     history = RiskHistory(
         user_id=profile.user_id,
