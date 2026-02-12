@@ -103,6 +103,10 @@ async def apply_wallet_delta_with_ledger(
         provider=provider,
         provider_ref=provider_ref,
         provider_event_id=provider_event_id,
+        gross_amount=gross_amount,
+        discount_amount=discount_amount,
+        net_amount=amount,
+        applied_discount_id=applied_discount_id,
         autocommit=False,
     )
 
