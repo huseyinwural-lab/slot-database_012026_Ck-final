@@ -3,13 +3,68 @@ from __future__ import annotations
 import os
 import asyncio
 import time
-from typing import Optional, Any
+from typing import Optional, Any, List
 
 import redis.asyncio as redis
 from config import settings
 import logging
 
 logger = logging.getLogger(__name__)
+
+class MockPipeline:
+    def __init__(self, store, expires, lock):
+        self._store = store
+        self._expires = expires
+        self._lock = lock
+        self._commands: List[tuple] = []
+
+    def incr(self, key: str) -> MockPipeline:
+        self._commands.append(("incr", key))
+        return self
+
+    def incrbyfloat(self, key: str, amount: float) -> MockPipeline:
+        self._commands.append(("incrbyfloat", key, amount))
+        return self
+
+    def expire(self, key: str, seconds: int, nx: bool = False) -> MockPipeline:
+        self._commands.append(("expire", key, seconds, nx))
+        return self
+
+    async def execute(self):
+        results = []
+        async with self._lock:
+            for cmd in self._commands:
+                op = cmd[0]
+                if op == "incr":
+                    key = cmd[1]
+                    self._prune(key)
+                    val = int(self._store.get(key, 0))
+                    val += 1
+                    self._store[key] = str(val)
+                    results.append(val)
+                elif op == "incrbyfloat":
+                    key = cmd[1]
+                    amount = cmd[2]
+                    self._prune(key)
+                    val = float(self._store.get(key, 0.0))
+                    val += float(amount)
+                    self._store[key] = str(val)
+                    results.append(val)
+                elif op == "expire":
+                    key = cmd[1]
+                    seconds = cmd[2]
+                    # nx ignored in mock for simplicity, or implement if needed
+                    if key in self._store:
+                        self._expires[key] = time.time() + seconds
+                        results.append(True)
+                    else:
+                        results.append(False)
+        return results
+
+    def _prune(self, key: str):
+        if key in self._expires and time.time() > self._expires[key]:
+            self._store.pop(key, None)
+            self._expires.pop(key, None)
 
 class InMemoryRedis:
     """A simple in-memory mock of Redis for environments without a real Redis service."""
@@ -63,12 +118,8 @@ class InMemoryRedis:
             self._store.pop(key, None)
             self._expires.pop(key, None)
 
-    # Pipeline support (simplistic)
     def pipeline(self):
-        return self
-
-    async def execute(self):
-        pass
+        return MockPipeline(self._store, self._expires, self._lock)
     
     async def __aenter__(self):
         return self
