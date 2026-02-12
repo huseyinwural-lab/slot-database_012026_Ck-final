@@ -65,13 +65,13 @@ test.describe('P0 Withdrawal Flow', () => {
     await playerPage.getByTestId('amount-input').fill('100');
     await playerPage.getByTestId('address-input').fill('TR123456');
     
-    // Use requestPromise without filter first to debug if request is even sent
-    // Simplify filter to just URL part
+    // Setup listener BEFORE action
     const withdrawPromise = playerPage.waitForResponse(res => res.url().includes('withdraw'));
     
+    // Action
     await playerPage.getByTestId('submit-button').click();
     
-    // Wait with longer timeout for debugging
+    // Wait
     const withdrawResponse = await withdrawPromise;
     console.log('Withdraw status:', withdrawResponse.status());
     const body = await withdrawResponse.json();
@@ -80,17 +80,8 @@ test.describe('P0 Withdrawal Flow', () => {
     expect(withdrawResponse.status()).toBe(200);
     expect(body.balance.available_real).toBe(400); 
 
-    const apiContext = await playerPage.context().request;
-    await expect.poll(async () => {
-      const res = await apiContext.get('/api/v1/player/wallet/balance', {
-          headers: { Authorization: `Bearer ${token}` }
-      });
-      const wallet = await res.json();
-      return wallet.available_real;
-    }, {
-      timeout: 5000
-    }).toBe(400);
-
+    // UI Verification
     await expect(playerPage.getByTestId('wallet-balance')).toContainText('400');
+    await expect(playerPage.getByText(/Locked: 100|Kilitli: 100/i)).toBeVisible();
   });
 });
