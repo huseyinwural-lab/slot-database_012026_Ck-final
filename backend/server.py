@@ -105,6 +105,10 @@ app.add_middleware(
 # Rate limiting (basic IP-based)
 app.add_middleware(RateLimitMiddleware)
 
+# Prometheus Monitoring
+from prometheus_fastapi_instrumentator import Instrumentator
+instrumentator = Instrumentator().instrument(app).expose(app, include_in_schema=False)
+
 # Request logging & correlation ID (outermost middleware; runs before rate limiting)
 app.add_middleware(RequestLoggingMiddleware)
 # Request Context (Task 4)
