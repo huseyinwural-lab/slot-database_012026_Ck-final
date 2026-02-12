@@ -1,7 +1,7 @@
 from typing import Optional, Dict, TYPE_CHECKING
-from datetime import datetime
+from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, JSON, UniqueConstraint
 import uuid
 
 if TYPE_CHECKING:
@@ -50,13 +50,10 @@ class GameRound(SQLModel, table=True):
     game_id: str = Field(foreign_key="game.id")
     
     provider_round_id: str = Field(index=True)
-    
     status: str = "open"
     
     total_bet: float = 0.0
     total_win: float = 0.0
-    
-    # Denormalized for reporting performance (Phase 4B)
     currency: str = Field(default="USD", index=True)
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -70,8 +67,7 @@ class GameEvent(SQLModel, table=True):
     
     provider_event_id: str = Field(index=True) 
     provider: str = Field(index=True)
-    
-    type: str # BET, WIN, REFUND
+    type: str 
     amount: float
     currency: str
     
@@ -84,3 +80,26 @@ class CallbackNonce(SQLModel, table=True):
     nonce: str = Field(index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     expires_at: datetime
+
+# Phase 4C: Aggregation Table
+class DailyGameAggregation(SQLModel, table=True):
+    __tablename__ = "daily_game_aggregation"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "date", "provider", "currency", name="uq_daily_game_agg"),
+        {'extend_existing': True}
+    )
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    tenant_id: str = Field(index=True)
+    date: date = Field(index=True)
+    
+    provider: str = Field(index=True)
+    currency: str = Field(index=True)
+    
+    total_bet: float = 0.0
+    total_win: float = 0.0
+    rounds_count: int = 0
+    active_players: int = 0
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
