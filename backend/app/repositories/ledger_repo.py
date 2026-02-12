@@ -41,6 +41,11 @@ class LedgerTransaction(SQLModel, table=True):
     provider_ref: Optional[str] = Field(default=None, index=True)
     provider_event_id: Optional[str] = Field(default=None, index=True)
 
+    # Pricing / Discount fields (P1.2)
+    gross_amount: Optional[float] = None
+    discount_amount: float = 0.0
+    net_amount: Optional[float] = None
+    applied_discount_id: Optional[str] = Field(default=None, foreign_key="discounts.id")
     created_at: datetime = Field(default_factory=lambda: datetime.utcnow(), index=True)
 
 
@@ -76,6 +81,11 @@ async def append_event(
     provider: Optional[str] = None,
     provider_ref: Optional[str] = None,
     provider_event_id: Optional[str] = None,
+    # Pricing fields
+    gross_amount: Optional[float] = None,
+    discount_amount: float = 0.0,
+    net_amount: Optional[float] = None,
+    applied_discount_id: Optional[str] = None,
     autocommit: bool = True,
 ) -> Tuple[LedgerTransaction, bool]:
     """Append a ledger event, enforcing idempotency.
@@ -131,6 +141,10 @@ async def append_event(
         provider=provider,
         provider_ref=provider_ref,
         provider_event_id=provider_event_id,
+        gross_amount=gross_amount,
+        discount_amount=discount_amount,
+        net_amount=net_amount,
+        applied_discount_id=applied_discount_id,
     )
 
     session.add(event)
