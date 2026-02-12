@@ -30,6 +30,8 @@ test.describe('P0 Game Provider Simulator Flow', () => {
     const headers = { Authorization: `Bearer ${token}` };
     
     // 3. Verify & KYC (Mock)
+    await request.post('/api/v1/verify/email/send', { data: { email: playerEmail }, headers });
+    await request.post('/api/v1/verify/email/confirm', { data: { email: playerEmail, code: "123456" }, headers });
     await request.post('/api/v1/test/set-kyc', { data: { email: playerEmail, status: "verified" } });
     
     // 4. Deposit 1000
@@ -37,6 +39,8 @@ test.describe('P0 Game Provider Simulator Flow', () => {
         data: { amount: 1000, currency: "USD", method: "test" },
         headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
+    const depData = await depRes.json();
+    console.log("Deposit Response:", JSON.stringify(depData));
     expect(depRes.ok()).toBeTruthy();
   });
 
