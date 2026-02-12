@@ -2,13 +2,22 @@ import pytest
 import pytest_asyncio
 from datetime import datetime
 from decimal import Decimal
+from sqlmodel import delete
 from app.pricing.discount_resolver import DiscountResolver
 from app.models.discount import Discount, DiscountRules, DiscountTypeEnum, SegmentTypeEnum
 
 @pytest_asyncio.fixture
 async def db_session(async_session_factory):
     async with async_session_factory() as session:
+        # Cleanup before yielding
+        await session.execute(delete(DiscountRules))
+        await session.execute(delete(Discount))
+        await session.commit()
         yield session
+        # Cleanup after
+        await session.execute(delete(DiscountRules))
+        await session.execute(delete(Discount))
+        await session.commit()
 
 @pytest.mark.asyncio
 async def test_manual_override_wins(db_session):

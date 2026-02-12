@@ -50,6 +50,6 @@ async def test_ledger_commit_free_no_discount(mock_ledger):
     # Assert
     args = mock_ledger.apply_wallet_delta_with_ledger.call_args[1]
     assert args['delta_available'] == -0.0
-    assert args['gross_amount'] == 0
+    assert args['gross_amount'] is None
     assert args['discount_amount'] == 0
     assert args['applied_discount_id'] is None
