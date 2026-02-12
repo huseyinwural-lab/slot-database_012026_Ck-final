@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
-Faz 6A Sprint 3 Deliverables Verification Test
-Tests the existence and basic functionality of required script files.
+Session Closure Verification Test
+Tests the final artifacts required for session closure:
+1. staging_soak_exit_report.md exists and is marked GO
+2. faz6a_sprint3_code_complete.md exists
+3. recon_provider.py runs without error
 """
 
 import os
 import sys
 import subprocess
 import importlib.util
+import asyncio
 from pathlib import Path
 
 def test_file_existence():
