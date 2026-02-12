@@ -39,11 +39,17 @@ const Register = () => {
       password: formData.password,
       tenant_id: 'default_casino',
     });
+    
     if (response.ok) {
       toast.push('Kayıt başarılı', 'success');
       navigate('/verify/email');
     } else {
-      setError(response.error?.message || 'Registration failed. Please try again.');
+      // Handle Rate Limit explicitly in UI text if needed, or generic
+      if (response.error?.code === "RATE_LIMITED") {
+         setError("Too many attempts. Please wait.");
+      } else {
+         setError(response.error?.message || 'Registration failed. Please try again.');
+      }
       toast.push('Kayıt başarısız', 'error');
     }
     setLoading(false);
