@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, Dict, List
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlmodel import select, func, col
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +8,9 @@ from app.core.database import get_session
 from app.models.game_models import GameRound, Game
 from app.models.sql_models import Player
 from app.utils.auth_player import get_current_player
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/player/history", tags=["player_history"])
 
@@ -26,18 +29,15 @@ async def get_game_history(
     Get aggregated game history (Round based).
     """
     
-    # Query Rounds joined with Game to get provider info
-    query = select(GameRound, Game).join(Game, GameRound.game_id == Game.id)
+    # Query Rounds joined with Game (Left Join to show rounds even if game metadata missing)
+    query = select(GameRound, Game).join(Game, GameRound.game_id == Game.id, isouter=True)
     query = query.where(GameRound.player_id == current_player.id)
     
     if currency:
-        # P0: Assume round currency matches player or game session. 
-        # Since we don't have currency on GameRound directly in P0 schema (it's on Event),
-        # we skip strict currency filtering for now OR we join GameEvent (expensive).
-        # Let's rely on frontend filtering or assume single currency wallet for P0.
         pass
 
     if provider:
+        # If game missing, provider is None
         query = query.where(Game.provider_id == provider)
 
     if start_date:
@@ -63,13 +63,13 @@ async def get_game_history(
         items.append({
             "round_id": round_obj.provider_round_id,
             "game_id": round_obj.game_id,
-            "game_name": game_obj.name or "Unknown Game",
-            "provider": game_obj.provider_id or "unknown",
+            "game_name": game_obj.name if game_obj else "Unknown Game",
+            "provider": game_obj.provider_id if game_obj else "unknown",
             "status": round_obj.status,
             "total_bet": round_obj.total_bet,
             "total_win": round_obj.total_win,
             "net": round_obj.total_win - round_obj.total_bet,
-            "currency": "USD", # P0 Default
+            "currency": "USD", 
             "created_at": round_obj.created_at.isoformat() if round_obj.created_at else None
         })
         
