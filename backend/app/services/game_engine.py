@@ -37,7 +37,10 @@ class GameEngine:
         """Process a Debit (Bet)."""
         
         # 1. Idempotency Check (Fast Path)
-        stmt = select(GameEvent).where(GameEvent.provider_event_id == provider_tx_id)
+        stmt = select(GameEvent).where(
+            GameEvent.provider_event_id == provider_tx_id,
+            GameEvent.provider == provider
+        )
         existing_event = (await session.execute(stmt)).scalars().first()
         
         if existing_event:
@@ -46,9 +49,7 @@ class GameEngine:
         # 2. Validate
         game = await session.get(Game, game_id)
         if not game:
-            # Fallback for "Simulator" game if not seeded
             if provider == "simulator":
-                # Create ad-hoc game for sim
                 game = Game(id=game_id, tenant_id="default_casino", provider_id="simulator", external_id=game_id, name="Sim Game")
                 session.add(game)
                 await session.flush()
@@ -101,6 +102,8 @@ class GameEngine:
         # 5. Record Game Event
         event = GameEvent(
             round_id=round_obj.id,
+            player_id=player_id,
+            provider=provider,
             provider_event_id=provider_tx_id,
             type="BET",
             amount=amount,
@@ -130,7 +133,10 @@ class GameEngine:
     ) -> Dict:
         """Process a Credit (Win)."""
         
-        stmt = select(GameEvent).where(GameEvent.provider_event_id == provider_tx_id)
+        stmt = select(GameEvent).where(
+            GameEvent.provider_event_id == provider_tx_id,
+            GameEvent.provider == provider
+        )
         existing_event = (await session.execute(stmt)).scalars().first()
         if existing_event:
             return await self._get_wallet_snapshot(session, player_id, currency)
@@ -181,6 +187,8 @@ class GameEngine:
 
         event = GameEvent(
             round_id=round_obj.id,
+            player_id=player_id,
+            provider=provider,
             provider_event_id=provider_tx_id,
             type="WIN",
             amount=amount,
@@ -210,22 +218,26 @@ class GameEngine:
     ) -> Dict:
         """Process a Rollback."""
         
-        stmt = select(GameEvent).where(GameEvent.provider_event_id == provider_tx_id)
+        stmt = select(GameEvent).where(
+            GameEvent.provider_event_id == provider_tx_id,
+            GameEvent.provider == provider
+        )
         if (await session.execute(stmt)).scalars().first():
             return await self._get_wallet_snapshot(session, player_id, currency)
 
-        stmt_ref = select(GameEvent).where(GameEvent.provider_event_id == ref_provider_tx_id)
+        stmt_ref = select(GameEvent).where(
+            GameEvent.provider_event_id == ref_provider_tx_id,
+            GameEvent.provider == provider
+        )
         ref_event = (await session.execute(stmt_ref)).scalars().first()
         
         if not ref_event:
-            # Assume OK to avoid deadlock
             return await self._get_wallet_snapshot(session, player_id, currency)
 
         rollback_amount = amount if amount is not None else ref_event.amount
         
         tx_id = str(uuid.uuid4())
         game = await session.get(Game, game_id)
-        # Handle fallback for sim if game deleted
         tenant_id = game.tenant_id if game else "default_casino"
 
         if ref_event.type == "BET":
@@ -260,6 +272,8 @@ class GameEngine:
 
         event = GameEvent(
             round_id=ref_event.round_id,
+            player_id=player_id,
+            provider=provider,
             provider_event_id=provider_tx_id,
             type="ROLLBACK",
             amount=rollback_amount,
