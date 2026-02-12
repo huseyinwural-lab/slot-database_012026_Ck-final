@@ -26,11 +26,6 @@ async def get_ggr_report(
     Formula: GGR = Total Bet - Total Win
     """
     
-    # RBAC Check: Admin Only
-    # get_current_admin already enforces valid admin user.
-    # We can add strict role check if needed:
-    # if current_admin.role not in ["superadmin", "admin"]: raise 403
-    
     query = select(
         func.count(GameRound.id).label("rounds_count"),
         func.sum(GameRound.total_bet).label("total_bet"),
@@ -45,11 +40,6 @@ async def get_ggr_report(
     if currency:
         query = query.where(GameRound.currency == currency)
         
-    # Provider filter would require Join with Game table, 
-    # but GameRound has provider_round_id index.
-    # For performance, usually provider is denormalized too. 
-    # P0: Skip provider filter or do Join if requested.
-    # Assuming requested:
     if provider:
         from app.models.game_models import Game
         query = query.join(Game, GameRound.game_id == Game.id)
