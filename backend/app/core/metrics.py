@@ -44,6 +44,10 @@ class Metrics:
             "Total wallet transactions",
             ["type", "status"]
         )
+        # Risk
+        self.risk_score_updates = Counter("risk_score_updates_total", "Total risk score updates")
+        self.risk_blocks = Counter("risk_blocks_total", "Total blocked actions due to risk")
+        self.risk_flags = Counter("risk_flags_total", "Total actions flagged for review")
 
 # Global Instance
 metrics = Metrics()
