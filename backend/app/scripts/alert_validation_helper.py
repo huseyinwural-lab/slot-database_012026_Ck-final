@@ -4,10 +4,11 @@ import hmac
 import hashlib
 import logging
 import uuid
+import os
 
-# Config
-BASE_URL = "http://localhost:8001"
-SECRET_KEY = "test_secret"
+# Config - Use Env or Fail
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8001")
+SECRET_KEY = os.getenv("TEST_SECRET_KEY", "test_secret")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("alert_validator")
