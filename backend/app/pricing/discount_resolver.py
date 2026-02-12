@@ -1,12 +1,11 @@
 from decimal import Decimal
 from datetime import datetime
-from typing import Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import select, or_, and_
-from app.pricing.models.discount import Discount, DiscountRule, DiscountType
+from typing import Optional, Tuple
+from sqlmodel import Session, select, or_, and_
+from app.models.discount import Discount, DiscountRules, DiscountTypeEnum, SegmentTypeEnum
 
 class AppliedDiscount:
-    def __init__(self, discount: Discount, rule: DiscountRule):
+    def __init__(self, discount: Discount, rule: DiscountRules):
         self.id = discount.id
         self.code = discount.code
         self.type = discount.type
@@ -26,22 +25,23 @@ class DiscountResolver:
         tenant_id = user_context.get('tenant_id')
         now = user_context.get('now', datetime.utcnow())
 
-        # Query Rules that match the user profile
-        # Join with Discount to check validity dates and active status
+        # Ensure segment matches Enum if passed as string, or handle as is
+        # SQLModel should handle string comparison for Enum columns often, but explicit is better
+        # if isinstance(segment, str): ...
+
         stmt = (
-            select(DiscountRule, Discount)
+            select(DiscountRules, Discount)
             .join(Discount)
             .where(
                 Discount.is_active == True,
                 Discount.start_at <= now,
                 or_(Discount.end_at == None, Discount.end_at >= now),
                 or_(
-                    DiscountRule.segment_type == segment,
-                    DiscountRule.tenant_id == tenant_id,
-                    # We could add a 'global' rule here where both are null if business requires
+                    DiscountRules.segment_type == segment,
+                    DiscountRules.tenant_id == tenant_id,
                 )
             )
-            .order_by(DiscountRule.priority.desc()) # Highest priority wins (No Stacking)
+            .order_by(DiscountRules.priority.desc()) # Highest priority wins (No Stacking)
             .limit(1) # Only 1 allowed
         )
 
@@ -53,21 +53,23 @@ class DiscountResolver:
         rule, discount = result
         return AppliedDiscount(discount, rule)
 
-    def calculate_final_price(self, base_price: Decimal, discount: Optional[AppliedDiscount]) -> tuple[Decimal, Decimal]:
+    def calculate_final_price(self, base_price: Decimal, discount: Optional[AppliedDiscount]) -> Tuple[Decimal, Decimal]:
         """Returns (Final Price, Discount Amount)"""
         if not discount:
-            return base_price, Decimal(0)
+            return Decimal(str(base_price)), Decimal(0)
 
         discount_amount = Decimal(0)
+        base_price_dec = Decimal(str(base_price))
+        value_dec = Decimal(str(discount.value))
         
-        if discount.type == DiscountType.FLAT:
-            discount_amount = discount.value
-        elif discount.type == DiscountType.PERCENTAGE:
-            discount_amount = base_price * (discount.value / Decimal(100))
+        if discount.type == DiscountTypeEnum.FLAT:
+            discount_amount = value_dec
+        elif discount.type == DiscountTypeEnum.PERCENTAGE:
+            discount_amount = base_price_dec * (value_dec / Decimal(100))
 
         # Abuse Guard: Negative Price Protection
-        if discount_amount > base_price:
-            discount_amount = base_price
+        if discount_amount > base_price_dec:
+            discount_amount = base_price_dec
 
-        final_price = base_price - discount_amount
+        final_price = base_price_dec - discount_amount
         return final_price, discount_amount
