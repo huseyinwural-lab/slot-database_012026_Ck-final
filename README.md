@@ -1,90 +1,39 @@
-# 🎰 Casino Platform (Multi-Tenant)
+## Version
+v1.0.0 — Production Ready Core
 
-Production-ready, multi-tenant casino administration and player platform.
+### Overview
+This release marks the completion of the core Casino Platform infrastructure, ready for production deployment. It includes a fully functional player funnel, financial engine, game integration layer, and admin reporting system.
 
-## 📁 Project Structure
+### Key Features
+- **Wallet & Withdrawal Engine:**
+  - Double-entry ledger system for financial integrity.
+  - Withdrawal request flow with admin approval queue.
+  - Balance locking logic (Available vs Held funds).
+  - Idempotency guarantees for all financial transactions.
 
-```
-/
-├── backend/           # FastAPI (Port: 8001) - Core API & Logic
-├── frontend/          # React CRA (Port: 3000) - Admin Panel (B2B)
-├── frontend-player/   # React Vite (Port: 3001) - Player Lobby (B2C)
-└── docker-compose.yml # Orchestration
-```
+- **Game Engine (Provider Ready):**
+  - Generic Provider Adapter architecture.
+  - `GameRound` and `GameEvent` tracking.
+  - Built-in Simulator provider for testing Bet/Win/Rollback cycles without external dependencies.
+  - Multi-currency support (EUR/USD/TRY) with isolated wallets.
 
-## 🚀 How to Run (The Easy Way: Docker)
+- **Security & Hardening:**
+  - Abuse protection (Rate limiting, OTP lockout) using Redis.
+  - Stripe Webhook signature verification and replay protection.
+  - RBAC (Role-Based Access Control) for Admin/Ops actions.
 
-If you have Docker Desktop installed:
+- **Reporting & Analytics:**
+  - Player Game History API.
+  - Admin GGR (Gross Gaming Revenue) Reporting.
+  - Hybrid Aggregation Layer: Combines real-time data with daily snapshots for scalable reporting.
 
-1.  **Open terminal in this folder.**
-2.  **Run:**
-    ```bash
-    docker-compose up --build
-    ```
-3.  **Wait** for all services to start.
-4.  **Access:**
-    *   **Admin Panel:** http://localhost:3000
-    *   **Player Lobby:** http://localhost:3001
-    *   **API Docs:** http://localhost:8001/docs
+### Tech Stack
+- **Backend:** FastAPI, SQLAlchemy (Async), Alembic, Pydantic.
+- **Frontend:** React, Vite, TailwindCSS, Shadcn UI.
+- **Database:** PostgreSQL (Production), SQLite (Dev/Test).
+- **Cache:** Redis (Production), InMemory Fallback (Dev).
+- **Testing:** Playwright (E2E), Pytest (Unit/Integration).
 
-*Note: Database (PostgreSQL) will start automatically within Docker.*
-
----
-
-## 🛠 How to Run (The Developer Way: VS Code)
-
-If you want to code and debug locally without Docker containers for apps:
-
-### 1. Prerequisites
-*   Node.js 18+
-*   Python 3.11+
-*   PostgreSQL (Installed locally or run `docker-compose up postgres -d`)
-
-### 2. Backend Setup
-```bash
-cd backend
-python -m venv venv
-# Windows: venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
-
-## 📖 User Manuals (Kullanım Kılavuzları)
-
-Detaylı kullanım rehberleri için aşağıdaki dokümanlara göz atın:
-
-*   👑 **[Platform Sahibi Kılavuzu](docs/manuals/PLATFORM_OWNER_GUIDE.md):** Kiracı yaratma, global ayarlar.
-*   🏢 **[Kiracı Yönetim Kılavuzu](docs/manuals/TENANT_ADMIN_GUIDE.md):** Operasyon, finans, personel yönetimi.
-*   🎰 **[Oyuncu Rehberi](docs/manuals/PLAYER_GUIDE.md):** Kayıt, para yatırma, oyun oynama.
-
-pip install -r requirements.txt
-# Dev/local seed (opsiyonel):
-#   ENV=dev SEED_ON_STARTUP=true -> startup seeding
-# Prod/staging'de seed kapalıdır.
-uvicorn server:app --reload --port 8001
-```
-
-### 3. Admin Frontend Setup
-```bash
-cd frontend
-yarn install
-yarn start
-```
-
-### 4. Player Frontend Setup
-```bash
-cd frontend-player
-yarn install
-yarn dev --host
-```
-
-## 🔑 Initial Access (Staging/Prod)
-
-- **Staging/Prod** ortamlarında seed kapalıdır.
-- İlk platform owner hesabı için **BOOTSTRAP_OWNER_EMAIL / BOOTSTRAP_OWNER_PASSWORD** env’lerini verin (one-shot, AdminUser tablosu boşsa oluşturur).
-- Tenant admin kullanıcıları owner tarafından oluşturulur (password artık zorunlu).
-
-## 🛠 VS Code Configuration
-This project includes `.vscode` folder with:
-*   `launch.json`: Pre-configured debuggers for Backend & Chrome.
-*   `extensions.json`: Recommended extensions.
-
-Enjoy building! 🚀
+### Deployment
+Refer to `docker-compose.prod.yml` for production deployment configuration.
+Ensure all secrets (`STRIPE_*`, `TWILIO_*`, `REDIS_URL`) are injected via environment variables.
