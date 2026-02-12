@@ -136,7 +136,7 @@ class GameEngine:
             metrics.bet_amount.labels(provider=provider, currency=currency).inc(amount)
             metrics.engine_latency.labels(operation="bet", provider=provider).observe(time.time() - start_time)
             
-            return await self._get_wallet_snapshot(session, player_id, currency)
+            return await self._get_wallet_snapshot(session, player_id, currency, tx_id)
             
         except Exception as e:
             # If not already handled app error
@@ -238,7 +238,7 @@ class GameEngine:
             metrics.win_amount.labels(provider=provider, currency=currency).inc(amount)
             metrics.engine_latency.labels(operation="win", provider=provider).observe(time.time() - start_time)
 
-            return await self._get_wallet_snapshot(session, player_id, currency)
+            return await self._get_wallet_snapshot(session, player_id, currency, tx_id)
         except Exception as e:
             raise e
 
@@ -262,7 +262,7 @@ class GameEngine:
             GameEvent.provider == provider
         )
         if (await session.execute(stmt)).scalars().first():
-            return await self._get_wallet_snapshot(session, player_id, currency)
+            return await self._get_wallet_snapshot(session, player_id, currency) # Rollback doesn't return tx_id usually or consistent one
 
         stmt_ref = select(GameEvent).where(
             GameEvent.provider_event_id == ref_provider_tx_id,
@@ -325,7 +325,7 @@ class GameEngine:
         metrics.rollbacks_total.labels(provider=provider, currency=currency).inc()
         metrics.engine_latency.labels(operation="rollback", provider=provider).observe(time.time() - start_time)
         
-        return await self._get_wallet_snapshot(session, player_id, currency)
+        return await self._get_wallet_snapshot(session, player_id, currency, tx_id)
     async def get_balance(self, session: AsyncSession, player_id: str, currency: str) -> Dict:
         return await self._get_wallet_snapshot(session, player_id, currency)
 
@@ -341,13 +341,13 @@ class GameEngine:
         except:
             return None
 
-    async def _get_wallet_snapshot(self, session: AsyncSession, player_id: str, currency: str) -> Dict:
+    async def _get_wallet_snapshot(self, session: AsyncSession, player_id: str, currency: str, tx_id: Optional[str] = None) -> Dict:
         player = await session.get(Player, player_id)
         if not player:
             raise AppError("PLAYER_NOT_FOUND", f"Player {player_id} not found", status_code=404)
             
         return {
-            "tx_id": None, # Default for balance check
+            "tx_id": tx_id,
             "balance": float(player.balance_real_available),
             "currency": currency
         }
