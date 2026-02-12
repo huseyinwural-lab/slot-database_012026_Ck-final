@@ -67,7 +67,7 @@ class GameEngine:
                     session.add(game)
                     await session.flush()
                 else:
-                    raise AppError("GAME_NOT_FOUND", status_code=404)
+                    raise AppError("GAME_NOT_FOUND", "Game not found", status_code=404)
 
             # 3. Upsert Round
             stmt_round = select(GameRound).where(
@@ -176,7 +176,7 @@ class GameEngine:
                     session.add(game)
                     await session.flush()
                  else:
-                    raise AppError("GAME_NOT_FOUND", status_code=404)
+                    raise AppError("GAME_NOT_FOUND", "Game not found", status_code=404)
 
             stmt_round = select(GameRound).where(
                 GameRound.provider_round_id == round_id, 
