@@ -84,6 +84,7 @@ async def test_pragmatic_e2e_flow(client: AsyncClient, async_session_factory):
         resp = await client.post("/api/v1/games/callback/pragmatic", json=payload)
         assert resp.status_code == 200
         data = resp.json()
+        assert data.get("error") == 0
         assert data["cash"] == 90.0
         assert data["transactionId"] == tx_id
         
@@ -103,6 +104,7 @@ async def test_pragmatic_e2e_flow(client: AsyncClient, async_session_factory):
         resp = await client.post("/api/v1/games/callback/pragmatic", json=payload)
         assert resp.status_code == 200
         data = resp.json()
+        assert data.get("error") == 0
         assert data["cash"] == 110.0 # 90 + 20
         
         # 5. Duplicate Win (Idempotency)
@@ -110,6 +112,7 @@ async def test_pragmatic_e2e_flow(client: AsyncClient, async_session_factory):
         resp = await client.post("/api/v1/games/callback/pragmatic", json=payload)
         assert resp.status_code == 200
         data = resp.json()
+        assert data.get("error") == 0
         assert data["cash"] == 110.0 # Should not change
         
     # 6. Verify Wallet Final State
