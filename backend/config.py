@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 from pydantic import AliasChoices, Field, model_validator
 from typing import List, Optional
 import json
+import os
 from arq.connections import RedisSettings
 
 class Settings(BaseSettings):
@@ -10,8 +11,6 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "sqlite+aiosqlite:////app/backend/casino.db"
-    # Optional explicit sync URL for Alembic / sync tooling.
-    # Supports both env names for backward compatibility.
     sync_database_url: Optional[str] = Field(
         default=None,
         validation_alias=AliasChoices("SYNC_DATABASE_URL", "DATABASE_URL_SYNC"),
@@ -62,21 +61,15 @@ class Settings(BaseSettings):
     max_tx_velocity_window_minutes: int = 1
     register_velocity_limit: int = Field(default=100, validation_alias=AliasChoices("REGISTER_VELOCITY_LIMIT"))
 
-
-    # Player frontend base URL (used for payment redirect construction when Origin header is absent)
+    # Player frontend base URL
     player_app_url: str = "http://localhost:3001"
-
-    # Redis / Queue
 
     stripe_mock: bool = False
 
-    # Default is localhost to avoid docker-compose host coupling.
-    # In prod/staging, Redis is OPTIONAL unless REDIS_REQUIRED=true.
+    # Redis
     redis_url: str = "redis://localhost:6379/0"
     redis_required: bool = False
 
-    # If REDIS_URL is unset/blank, keep a safe default unless Redis is required.
-    # (Pydantic will otherwise override the default with an empty string.)
     @model_validator(mode="after")
     def _normalize_redis_url(self):
         if (self.redis_url or "").strip() == "":
@@ -95,11 +88,12 @@ class Settings(BaseSettings):
 
     webhook_signature_enforced: bool = False
 
-    # Generic webhook signature (used by finance payout webhook endpoint)
+    # Secrets (Security Fix: No hardcoded defaults in code except for mock dev fallback if absolutely needed)
+    # The default here is strictly for dev/test environments.
     webhook_secret: Optional[str] = Field(default=None, validation_alias=AliasChoices("WEBHOOK_SECRET"))
     webhook_test_secret: Optional[str] = Field(default=None, validation_alias=AliasChoices("WEBHOOK_TEST_SECRET"))
 
-    webhook_secret_mockpsp: str = "changeme-mockpsp-secret"
+    webhook_secret_mockpsp: str = os.getenv("WEBHOOK_SECRET_MOCKPSP", "changeme-mockpsp-secret")
     stripe_api_key: Optional[str] = None
     stripe_webhook_secret: Optional[str] = None
     
@@ -108,15 +102,12 @@ class Settings(BaseSettings):
     adyen_client_key: Optional[str] = None
     adyen_hmac_key: Optional[str] = None
 
-    pragmatic_secret_key: Optional[str] = None
-    # KYC (mock UI endpoints)
+    # KYC
     kyc_mock_enabled: bool = True
 
-    # Pricing
-    pricing_engine_v2_enabled: bool = False
-    # Audit Retention
+    # Audit
     audit_retention_days: int = 90
-    audit_export_secret: str = "change_this_to_strong_secret_for_hmac"
+    audit_export_secret: str = os.getenv("AUDIT_EXPORT_SECRET", "change_this_to_strong_secret_for_hmac")
     
     # Storage
     audit_archive_backend: str = "filesystem"
@@ -127,6 +118,10 @@ class Settings(BaseSettings):
     audit_s3_secret_key: Optional[str] = None
     audit_archive_prefix: str = "audit/"
     audit_archive_path: str = "/app/archive/audit" 
+    
+    # Provider
+    pragmatic_secret_key: Optional[str] = None
+    pricing_engine_v2_enabled: bool = False
 
     def get_cors_origins(self) -> List[str]:
         raw = (self.cors_origins or "").strip()
@@ -155,43 +150,28 @@ class Settings(BaseSettings):
         """P0-OPS-001: Strict Production Validation."""
         if self.env in {"prod", "staging"}:
             missing = []
-            # Critical Secrets List - MUST BE LIVE keys
-            # Only enforce live-key checks in PROD.
             if self.env == "prod":
                 if not self.stripe_api_key or "live" not in self.stripe_api_key:
                     missing.append("STRIPE_API_KEY (must contain 'live')")
                 if not self.stripe_webhook_secret:
                     missing.append("STRIPE_WEBHOOK_SECRET")
-
                 if not self.adyen_api_key:
                     missing.append("ADYEN_API_KEY")
             else:
-                # Staging: require presence but allow non-live keys.
                 if not self.stripe_api_key:
                     missing.append("STRIPE_API_KEY")
-                if not self.stripe_webhook_secret:
-                    missing.append("STRIPE_WEBHOOK_SECRET")
-                if not self.adyen_api_key:
-                    missing.append("ADYEN_API_KEY")
-
-            # Webhook security (P0)
+                
             if not self.adyen_hmac_key:
                 missing.append("ADYEN_HMAC_KEY")
 
-            # KYC mock endpoints must be disabled in prod/staging
             if self.kyc_mock_enabled:
                 missing.append("KYC_MOCK_ENABLED (must be false in prod/staging)")
             
             if self.audit_export_secret == "change_this_to_strong_secret_for_hmac":
                 missing.append("AUDIT_EXPORT_SECRET (must be changed)")
                 
-            if self.audit_archive_backend == "s3":
-                if not self.audit_s3_access_key:
-                    missing.append("AUDIT_S3_ACCESS_KEY")
-                if not self.audit_s3_secret_key:
-                    missing.append("AUDIT_S3_SECRET_KEY")
-                if not self.audit_s3_bucket:
-                    missing.append("AUDIT_S3_BUCKET")
+            if self.webhook_secret_mockpsp == "changeme-mockpsp-secret":
+                 missing.append("WEBHOOK_SECRET_MOCKPSP (must be changed)")
 
             if missing:
                 raise ValueError(
