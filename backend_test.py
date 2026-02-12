@@ -106,7 +106,8 @@ def test_recon_provider_execution():
     except Exception as e:
         print(f"❌ recon_provider.py: EXECUTION ERROR - {e}")
         return False, str(e)
-    """Test 1-4: Check existence of required script files"""
+def test_file_existence():
+    """Legacy test: Check existence of required script files"""
     required_files = [
         "backend/app/scripts/recon_provider.py",
         "backend/app/scripts/load_test_provider.py", 
