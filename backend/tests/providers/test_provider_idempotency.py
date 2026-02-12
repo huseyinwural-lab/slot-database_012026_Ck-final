@@ -57,8 +57,18 @@ async def test_provider_idempotency(client: AsyncClient, async_session_factory):
         
         # First Call
         resp1 = await client.post("/api/v1/games/callback/pragmatic", json=payload)
+        print(f"DEBUG: Response status: {resp1.status_code}")
+        print(f"DEBUG: Response body: {resp1.text}")
+        print(f"DEBUG: Response JSON: {resp1.json()}")
         assert resp1.status_code == 200
-        assert resp1.json()["cash"] == 40.0
+        response_json = resp1.json()
+        
+        # Check if it's an error response
+        if "error" in response_json:
+            print(f"DEBUG: Got error response: {response_json}")
+            assert False, f"Expected success but got error: {response_json}"
+        
+        assert response_json["cash"] == 40.0
         
         # Second Call (Duplicate)
         resp2 = await client.post("/api/v1/games/callback/pragmatic", json=payload)
