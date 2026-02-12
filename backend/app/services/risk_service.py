@@ -7,7 +7,7 @@ from sqlmodel import select
 from redis.asyncio import Redis
 
 from app.models.risk import RiskProfile, RiskLevel
-from app.core.config import settings
+from config import settings
 
 logger = logging.getLogger(__name__)
 
