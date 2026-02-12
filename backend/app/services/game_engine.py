@@ -1,172 +1,280 @@
+from __future__ import annotations
+
+import logging
+import uuid
+from datetime import datetime
+from typing import Optional, Dict
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from datetime import datetime
-import uuid
-import logging
 
-from app.models.game_models import GameSession, GameRound, GameEvent
+from app.models.game_models import GameRound, GameEvent, Game, GameSession
 from app.models.sql_models import Player
-from app.schemas.game_schemas import ProviderEvent, ProviderResponse
-from app.services.wallet_ledger import apply_wallet_delta_with_ledger, spend_with_bonus_precedence
-from app.services.bonus_engine import find_applicable_free_grant, consume_free_use
+from app.services.wallet_ledger import (
+    apply_wallet_delta_with_ledger,
+    WalletInvariantError,
+    spend_with_bonus_precedence,
+)
 from app.core.errors import AppError
 
 logger = logging.getLogger(__name__)
 
 class GameEngine:
-    """
-    Core Logic for processing Game Events (Bet/Win) and syncing with Ledger.
-    """
-    
-    @staticmethod
-    async def process_event(session: AsyncSession, payload: ProviderEvent) -> ProviderResponse:
-        # 1. Validate Session & Player
-        game_session = await session.get(GameSession, payload.session_id)
-        if not game_session:
-            raise AppError("SESSION_NOT_FOUND", 404)
-            
-        player = await session.get(Player, game_session.player_id)
-        if not player:
-            raise AppError("PLAYER_NOT_FOUND", 404)
-            
-        # 2. Idempotency Check (GameEvent level)
-        # Check if we already processed this provider_event_id
-        stmt_exist = select(GameEvent).where(GameEvent.provider_event_id == payload.provider_event_id)
-        existing_event = (await session.execute(stmt_exist)).scalars().first()
+    """Core logic for processing Game Events (Bet, Win, Rollback)."""
+
+    async def process_bet(
+        self,
+        session: AsyncSession,
+        provider: str,
+        provider_tx_id: str,
+        player_id: str,
+        game_id: str,
+        round_id: str,
+        amount: float,
+        currency: str,
+        metadata: Optional[Dict] = None,
+    ) -> Dict:
+        """Process a Debit (Bet)."""
+        
+        # 1. Idempotency Check (Fast Path)
+        stmt = select(GameEvent).where(GameEvent.provider_event_id == provider_tx_id)
+        existing_event = (await session.execute(stmt)).scalars().first()
         
         if existing_event:
-            logger.info(f"Idempotency hit for GameEvent {payload.provider_event_id}")
-            # Return current balance without processing
-            return ProviderResponse(
-                balance=float(player.balance_real_available or 0.0) + float(player.balance_bonus or 0.0),
-                currency=payload.currency,
-                event_id=existing_event.id
-            )
+            return await self._get_wallet_snapshot(session, player_id, currency)
 
-        # 3. Handle Round Lifecycle
-        # Find or Create Round
+        # 2. Validate
+        game = await session.get(Game, game_id)
+        if not game:
+            # Fallback for "Simulator" game if not seeded
+            if provider == "simulator":
+                # Create ad-hoc game for sim
+                game = Game(id=game_id, tenant_id="default_casino", provider_id="simulator", external_id=game_id, name="Sim Game")
+                session.add(game)
+                await session.flush()
+            else:
+                raise AppError("GAME_NOT_FOUND", status_code=404)
+
+        # 3. Upsert Round
         stmt_round = select(GameRound).where(
-            GameRound.provider_round_id == payload.provider_round_id,
-            GameRound.provider_round_id is not None # Safety
+            GameRound.provider_round_id == round_id, 
+            GameRound.game_id == game_id
         )
-        game_round = (await session.execute(stmt_round)).scalars().first()
+        round_obj = (await session.execute(stmt_round)).scalars().first()
         
-        if not game_round:
-            # New Round
-            game_round = GameRound(
-                tenant_id=game_session.tenant_id,
-                player_id=player.id,
-                session_id=game_session.id,
-                game_id=game_session.game_id,
-                provider_round_id=payload.provider_round_id,
-                status="open"
+        if not round_obj:
+            round_obj = GameRound(
+                id=str(uuid.uuid4()),
+                tenant_id=game.tenant_id,
+                player_id=player_id,
+                session_id=str(uuid.uuid4()), 
+                game_id=game_id,
+                provider_round_id=round_id,
+                status="open",
+                total_bet=0.0,
+                total_win=0.0,
             )
-            session.add(game_round)
-            await session.flush() # Get ID
-            
-        # 4. Apply wallet changes with P0-05 precedence rules
+            session.add(round_obj)
+            await session.flush()
+
+        # 4. Wallet Debit
         tx_id = str(uuid.uuid4())
-        ledger_type = f"game_{payload.event_type.lower()}"
-
         try:
-            if payload.event_type == "BET":
-                # P0-01/02: if player has an applicable free bet/spin for this game, consume a use and skip debit.
-                game_id = payload.game_id or game_session.game_id
-                free_grant = await find_applicable_free_grant(
-                    session,
-                    tenant_id=player.tenant_id,
-                    player_id=player.id,
-                    game_id=str(game_id),
-                )
+            success = await spend_with_bonus_precedence(
+                session,
+                tenant_id=game.tenant_id,
+                player_id=player_id,
+                tx_id=tx_id,
+                event_type="game_bet",
+                amount=amount,
+                currency=currency,
+                idempotency_key=provider_tx_id, 
+                provider=provider,
+                provider_event_id=provider_tx_id,
+            )
+        except WalletInvariantError as e:
+            raise AppError("INSUFFICIENT_FUNDS", status_code=402, message=str(e))
 
-                if free_grant:
-                    await consume_free_use(session, grant=free_grant, provider_event_id=payload.provider_event_id)
-                    # Track bet volume but do not debit wallet.
-                    game_round.total_bet += abs(payload.amount)
-                else:
-                    # Debit: bonus first then real
-                    await spend_with_bonus_precedence(
-                        session,
-                        tenant_id=player.tenant_id,
-                        player_id=player.id,
-                        tx_id=tx_id,
-                        event_type=ledger_type,
-                        amount=float(abs(payload.amount)),
-                        currency=payload.currency,
-                        idempotency_key=f"game:{payload.provider_event_id}",
-                        provider=payload.provider_id,
-                        provider_ref=payload.provider_round_id,
-                        provider_event_id=payload.provider_event_id,
-                    )
-                    game_round.total_bet += abs(payload.amount)
+        if not success:
+            return await self._get_wallet_snapshot(session, player_id, currency)
 
-            elif payload.event_type == "WIN":
-                # Bonus: Update Wagering Progress
-                if player.wagering_remaining > 0:
-                    player.wagering_remaining = max(0.0, player.wagering_remaining - abs(payload.amount))
-                    session.add(player)
-
-                await apply_wallet_delta_with_ledger(
-                    session,
-                    tenant_id=player.tenant_id,
-                    player_id=player.id,
-                    tx_id=tx_id,
-                    event_type=ledger_type,
-                    delta_available=float(abs(payload.amount)),
-                    delta_held=0.0,
-                    currency=payload.currency,
-                    idempotency_key=f"game:{payload.provider_event_id}",
-                    provider=payload.provider_id,
-                    provider_ref=payload.provider_round_id,
-                    provider_event_id=payload.provider_event_id,
-                )
-                game_round.total_win += abs(payload.amount)
-
-            elif payload.event_type == "REFUND":
-                await apply_wallet_delta_with_ledger(
-                    session,
-                    tenant_id=player.tenant_id,
-                    player_id=player.id,
-                    tx_id=tx_id,
-                    event_type=ledger_type,
-                    delta_available=float(abs(payload.amount)),
-                    delta_held=0.0,
-                    currency=payload.currency,
-                    idempotency_key=f"game:{payload.provider_event_id}",
-                    provider=payload.provider_id,
-                    provider_ref=payload.provider_round_id,
-                    provider_event_id=payload.provider_event_id,
-                )
-                game_round.total_bet -= abs(payload.amount)
-
-        except Exception as e:
-            logger.error(f"Ledger Error: {e}")
-            if "went negative" in str(e) or "INSUFFICIENT_FUNDS" in str(e):
-                raise AppError("INSUFFICIENT_FUNDS", 402)
-            raise e
-
-        # spend/apply functions are idempotent at the ledger level; nothing else required here.
-
-        # 6. Record Game Event
-        new_event = GameEvent(
-            round_id=game_round.id,
-            provider_event_id=payload.provider_event_id,
-            type=payload.event_type,
-            amount=payload.amount,
-            currency=payload.currency,
+        # 5. Record Game Event
+        event = GameEvent(
+            round_id=round_obj.id,
+            provider_event_id=provider_tx_id,
+            type="BET",
+            amount=amount,
+            currency=currency,
             tx_id=tx_id
         )
-        session.add(new_event)
+        session.add(event)
         
-        # 7. Update Session Activity
-        game_session.last_activity_at = datetime.utcnow()
-        session.add(game_session)
+        # Update Round Totals
+        round_obj.total_bet += amount
+        session.add(round_obj)
         
-        await session.commit()
-        await session.refresh(player)
+        return await self._get_wallet_snapshot(session, player_id, currency)
+
+    async def process_win(
+        self,
+        session: AsyncSession,
+        provider: str,
+        provider_tx_id: str,
+        player_id: str,
+        game_id: str,
+        round_id: str,
+        amount: float,
+        currency: str,
+        is_round_complete: bool = False,
+        metadata: Optional[Dict] = None,
+    ) -> Dict:
+        """Process a Credit (Win)."""
         
-        return ProviderResponse(
-            balance=float(player.balance_real_available or 0.0) + float(player.balance_bonus or 0.0),
-            currency=payload.currency,
-            event_id=new_event.id
+        stmt = select(GameEvent).where(GameEvent.provider_event_id == provider_tx_id)
+        existing_event = (await session.execute(stmt)).scalars().first()
+        if existing_event:
+            return await self._get_wallet_snapshot(session, player_id, currency)
+
+        game = await session.get(Game, game_id)
+        if not game:
+             if provider == "simulator":
+                game = Game(id=game_id, tenant_id="default_casino", provider_id="simulator", external_id=game_id, name="Sim Game")
+                session.add(game)
+                await session.flush()
+             else:
+                raise AppError("GAME_NOT_FOUND", status_code=404)
+
+        stmt_round = select(GameRound).where(
+            GameRound.provider_round_id == round_id, 
+            GameRound.game_id == game_id
         )
+        round_obj = (await session.execute(stmt_round)).scalars().first()
+        
+        if not round_obj:
+             round_obj = GameRound(
+                id=str(uuid.uuid4()),
+                tenant_id=game.tenant_id,
+                player_id=player_id,
+                session_id=str(uuid.uuid4()),
+                game_id=game_id,
+                provider_round_id=round_id,
+                status="open",
+            )
+             session.add(round_obj)
+             await session.flush()
+
+        tx_id = str(uuid.uuid4())
+        
+        await apply_wallet_delta_with_ledger(
+            session,
+            tenant_id=game.tenant_id,
+            player_id=player_id,
+            tx_id=tx_id,
+            event_type="game_win",
+            delta_available=amount,
+            delta_held=0.0,
+            currency=currency,
+            idempotency_key=provider_tx_id,
+            provider=provider,
+            provider_event_id=provider_tx_id,
+        )
+
+        event = GameEvent(
+            round_id=round_obj.id,
+            provider_event_id=provider_tx_id,
+            type="WIN",
+            amount=amount,
+            currency=currency,
+            tx_id=tx_id
+        )
+        session.add(event)
+        
+        round_obj.total_win += amount
+        if is_round_complete:
+            round_obj.status = "closed"
+        session.add(round_obj)
+
+        return await self._get_wallet_snapshot(session, player_id, currency)
+
+    async def process_rollback(
+        self,
+        session: AsyncSession,
+        provider: str,
+        provider_tx_id: str,
+        ref_provider_tx_id: str,
+        player_id: str,
+        game_id: str,
+        round_id: str,
+        amount: Optional[float] = None,
+        currency: str = "USD",
+    ) -> Dict:
+        """Process a Rollback."""
+        
+        stmt = select(GameEvent).where(GameEvent.provider_event_id == provider_tx_id)
+        if (await session.execute(stmt)).scalars().first():
+            return await self._get_wallet_snapshot(session, player_id, currency)
+
+        stmt_ref = select(GameEvent).where(GameEvent.provider_event_id == ref_provider_tx_id)
+        ref_event = (await session.execute(stmt_ref)).scalars().first()
+        
+        if not ref_event:
+            # Assume OK to avoid deadlock
+            return await self._get_wallet_snapshot(session, player_id, currency)
+
+        rollback_amount = amount if amount is not None else ref_event.amount
+        
+        tx_id = str(uuid.uuid4())
+        game = await session.get(Game, game_id)
+        # Handle fallback for sim if game deleted
+        tenant_id = game.tenant_id if game else "default_casino"
+
+        if ref_event.type == "BET":
+            await apply_wallet_delta_with_ledger(
+                session,
+                tenant_id=tenant_id,
+                player_id=player_id,
+                tx_id=tx_id,
+                event_type="game_rollback_bet",
+                delta_available=rollback_amount,
+                delta_held=0.0,
+                currency=currency,
+                idempotency_key=provider_tx_id,
+                provider=provider,
+                provider_event_id=provider_tx_id,
+            )
+        elif ref_event.type == "WIN":
+            await apply_wallet_delta_with_ledger(
+                session,
+                tenant_id=tenant_id,
+                player_id=player_id,
+                tx_id=tx_id,
+                event_type="game_rollback_win",
+                delta_available=-rollback_amount,
+                delta_held=0.0,
+                currency=currency,
+                idempotency_key=provider_tx_id,
+                provider=provider,
+                provider_event_id=provider_tx_id,
+                allow_negative=True, 
+            )
+
+        event = GameEvent(
+            round_id=ref_event.round_id,
+            provider_event_id=provider_tx_id,
+            type="ROLLBACK",
+            amount=rollback_amount,
+            currency=currency,
+            tx_id=tx_id
+        )
+        session.add(event)
+        
+        return await self._get_wallet_snapshot(session, player_id, currency)
+
+    async def _get_wallet_snapshot(self, session: AsyncSession, player_id: str, currency: str) -> Dict:
+        player = await session.get(Player, player_id)
+        return {
+            "balance": float(player.balance_real_available),
+            "currency": currency
+        }
+
+game_engine = GameEngine()
