@@ -290,6 +290,8 @@ app.include_router(poker_mtt_player.router)
 from app.routes import reconciliation as reconciliation_router
 from app.routes import admin_withdrawals
 app.include_router(admin_withdrawals.router)
+from app.routes import games_callback
+app.include_router(games_callback.router)
 app.include_router(reconciliation_router.router)
 
 from app.routes import ci_seed
