@@ -16,7 +16,7 @@
         - link "Support" [ref=e13] [cursor=pointer]:
           - /url: /support
       - generic [ref=e14]:
-        - generic [ref=e16]: user_1770856140235
+        - generic [ref=e16]: user_1770856235119
         - generic [ref=e17]:
           - generic [ref=e18]: Bakiye
           - generic [ref=e19]: 500.00 USD
@@ -36,15 +36,8 @@
         - spinbutton [ref=e35]: "100"
         - textbox "IBAN / Address" [ref=e36]: TR123456
         - button "Request Withdrawal" [active] [ref=e37] [cursor=pointer]
-      - generic [ref=e38]:
-        - generic [ref=e39]: History
-        - generic [ref=e41]:
-          - generic [ref=e42]:
-            - generic [ref=e43]: deposit
-            - generic [ref=e44]: completed • 2/12/2026
-          - generic [ref=e45]: "+500"
-  - contentinfo [ref=e46]:
-    - generic [ref=e47]:
-      - paragraph [ref=e48]: © 2025 CasinoLobby. All rights reserved.
-      - paragraph [ref=e49]: Responsible Gaming | 18+
+  - contentinfo [ref=e38]:
+    - generic [ref=e39]:
+      - paragraph [ref=e40]: © 2025 CasinoLobby. All rights reserved.
+      - paragraph [ref=e41]: Responsible Gaming | 18+
 ```
