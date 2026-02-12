@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from typing import Dict, Any, List
+from datetime import datetime, timedelta
 from datetime import datetime
 
 from app.core.database import get_session
@@ -50,6 +51,11 @@ async def override_risk_score(
     Payload: { "score": 50, "reason": "Investigation result" }
     """
     new_score = payload.get("score")
+    expiry_hours = payload.get("expiry_hours")
+    
+    expires_at = None
+    if expiry_hours:
+        expires_at = datetime.utcnow() + timedelta(hours=int(expiry_hours))
     reason = payload.get("reason")
     
     if new_score is None or not (0 <= new_score <= 100):
@@ -74,6 +80,9 @@ async def override_risk_score(
     profile.risk_score = new_score
     profile.risk_level = service._map_score_to_level(new_score)
     profile.last_event_at = datetime.utcnow()
+    if expires_at:
+        profile.override_expires_at = expires_at
+        profile.flags["override_active"] = True
     
     history = RiskHistory(
         user_id=profile.user_id,
