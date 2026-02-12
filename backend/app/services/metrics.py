@@ -26,6 +26,9 @@ class MetricsService:
         self.reconciliation_findings = 0
         self.reconciliation_critical = 0
 
+        self.risk_blocks = 0
+        self.risk_flags = 0
+        self.risk_score_updates = 0
     def increment_request(self):
         self.request_count += 1
 
@@ -62,6 +65,14 @@ class MetricsService:
         self.reconciliation_findings += findings
         self.reconciliation_critical += critical
         
+    def record_risk_block(self):
+        self.risk_blocks += 1
+
+    def record_risk_flag(self):
+        self.risk_flags += 1
+
+    def record_risk_score_update(self):
+        self.risk_score_updates += 1
         if critical > 0:
             logger.error(f"[ALERT] Critical Reconciliation Findings Detected: {critical}")
 
@@ -113,6 +124,11 @@ class MetricsService:
                 "total_findings": self.reconciliation_findings,
                 "critical_findings": self.reconciliation_critical,
                 "findings_by_severity": {"critical": self.reconciliation_critical, "warning": self.reconciliation_findings - self.reconciliation_critical}
+            },
+            "risk": {
+                "blocks": self.risk_blocks,
+                "flags": self.risk_flags,
+                "score_updates": self.risk_score_updates
             }
         }
 

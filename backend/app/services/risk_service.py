@@ -7,6 +7,7 @@ from sqlmodel import select
 from redis.asyncio import Redis
 
 from app.models.risk import RiskProfile, RiskLevel
+from app.services.metrics import metrics
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ class RiskService:
                 profile.last_event_at = datetime.utcnow()
                 self.db.add(profile)
                 await self.db.commit()
+                metrics.record_risk_score_update()
                 
                 logger.info(f"Risk score updated: user={user_id} score={profile.risk_score} level={profile.risk_level}")
                 
@@ -61,10 +63,12 @@ class RiskService:
                 
             # 2. Hard Block Checks
             if profile.risk_score >= 70:
+                metrics.record_risk_block()
                 return "BLOCK"
                 
             # 3. Soft Flag Checks
             if profile.risk_score >= 40:
+                metrics.record_risk_flag()
                 return "FLAG"
                 
             # 4. Velocity Check (Withdrawal Specific)
