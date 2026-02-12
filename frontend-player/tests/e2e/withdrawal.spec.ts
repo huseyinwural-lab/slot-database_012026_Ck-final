@@ -37,11 +37,15 @@ test.describe('P0 Withdrawal Flow', () => {
     await request.post('/api/v1/verify/sms/send', { data: { phone: "+15550009999" }, headers });
     await request.post('/api/v1/verify/sms/confirm', { data: { phone: "+15550009999", code: "123456" }, headers });
 
-    // 5. Deposit 500
-    await request.post('/api/v1/player/wallet/deposit', {
+    // 5. Deposit 500 (Use API to ensure balance)
+    // If Idempotency key issue, use unique
+    const depRes = await request.post('/api/v1/player/wallet/deposit', {
         data: { amount: 500, currency: "USD", method: "test" },
         headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
+    // Check if deposit successful (might be blocked by mocked settings)
+    const depData = await depRes.json();
+    console.log("Deposit Result:", depData);
   });
 
   test('Player Request -> Admin Approve', async ({ browser }) => {
@@ -58,6 +62,19 @@ test.describe('P0 Withdrawal Flow', () => {
     
     // Go to Wallet
     await playerPage.goto('/wallet');
+    
+    // Wait for balance load. If 0, maybe deposit failed?
+    // Retry deposit via UI if 0
+    const balanceText = await playerPage.getByTestId('wallet-balance').innerText();
+    if (balanceText.includes("0 USD")) {
+        console.log("Balance is 0, trying UI deposit...");
+        await playerPage.getByTestId('amount-input').fill('500');
+        await playerPage.getByTestId('submit-button').click();
+        await expect(playerPage).toHaveURL(/status=success/);
+        // Go back to wallet to refresh
+        await playerPage.goto('/wallet');
+    }
+
     // Check balance 500
     await expect(playerPage.getByTestId('wallet-balance')).toContainText('500');
     
@@ -70,17 +87,6 @@ test.describe('P0 Withdrawal Flow', () => {
     // Verify toast or UI update
     // Available should drop to 400 (Locked 100)
     await expect(playerPage.getByTestId('wallet-balance')).toContainText('400');
-    await expect(playerPage.getByText('Locked: 100')).toBeVisible();
-    
-    // --- Admin Context (API Level for now as Admin UI test is complex in same file) ---
-    // Or we can use API request to approve since we built the endpoint
-    // We need admin token. 
-    // We can assume default admin credentials or check DB. 
-    // Since I reset admin password in previous steps, "Admin123!" should work.
-    
-    /* 
-       NOTE: Admin login endpoint is /api/v1/auth/login (for admins)
-       NOT /api/v1/auth/player/login
-    */
+    await expect(playerPage.getByText(/Locked: 100|Kilitli: 100/)).toBeVisible();
   });
 });
