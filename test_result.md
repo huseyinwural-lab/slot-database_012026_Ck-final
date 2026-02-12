@@ -121,6 +121,9 @@ test_plan:
     - "P1.2 Discount Engine - Precedence Logic"
     - "P1.2 Discount Engine - Ledger Integration"
     - "P1.2 Discount Engine - Models and Service"
+    - "Risk Layer Sprint 1 - Risk Rules V1 Tests"
+    - "Risk Layer Sprint 1 - Withdrawal Risk Blocking Tests"
+    - "Risk Layer Sprint 1 - Database Schema Verification"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -128,3 +131,5 @@ test_plan:
 agent_communication:
     - agent: "testing"
       message: "P1.2 Discount Engine testing completed successfully. All 7 tests passed (100%). Database migrations applied, schema valid, precedence logic working, and ledger integration functional. Specific tests run: test_discount_commit_ledger.py and test_discount_precedence_integration.py as requested."
+    - agent: "testing"
+      message: "Risk Layer Sprint 1 verification completed successfully. All pytest tests passed: test_risk_rules_v1.py (3/3 tests), test_withdrawal_risk_blocking.py (2/2 tests). Database verification confirmed risk_profiles table exists with correct schema including user_id, tenant_id, risk_score, risk_level, flags, last_event_at, and version columns. Risk service functionality working correctly for scoring logic and withdrawal blocking."
