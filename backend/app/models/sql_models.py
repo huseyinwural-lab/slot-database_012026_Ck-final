@@ -87,6 +87,10 @@ class Player(SQLModel, table=True):
         default=None,
         sa_column=Column(DateTime(), nullable=True),
     )
+    segment_type: Optional[str] = Field(
+        default="INDIVIDUAL",
+        sa_column=Column(Enum("INDIVIDUAL", "DEALER", name="segment_type"), server_default="INDIVIDUAL"),
+    )
 
     tenant: Tenant = Relationship(back_populates="players")
     transactions: List["Transaction"] = Relationship(back_populates="player")
