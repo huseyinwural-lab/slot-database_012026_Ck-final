@@ -92,7 +92,8 @@ class DailyGameAggregation(SQLModel, table=True):
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
-    date_val: date = Field(index=True, sa_column=Column("date", sa.Date))
+    # Remove index=True from Field if sa_column passed with index=True in Column
+    date_val: date = Field(sa_column=Column("date", sa.Date, index=True))
     
     provider: str = Field(index=True)
     currency: str = Field(index=True)
