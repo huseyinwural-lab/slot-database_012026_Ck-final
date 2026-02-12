@@ -1,6 +1,0 @@
-Seeded Bonus Data.
-Active Grants: 2
-Total Liability: 150.0
-Pending Wager Volume: 3500.0
-CSV Export Generated.
-Abuse Check: Player has active grant -> New grant BLOCKED (simulated).

@@ -1,4 +1,0 @@
-Backup created at /app/artifacts/casino_backup.db
-Restored to /app/artifacts/casino_restored.db
-Verification: Found 75 audit events in restored DB.
-STATUS: PASS

@@ -1,9 +1,0 @@
-Verifying Audit Chain for DB: sqlite+aiosqlite:////app/backend/casino_prod.db
-Found 1 events.
-FAIL: Row 5142f8c7-9623-43ef-a340-fefeda63246a (Seq 1): Prev hash mismatch.
-  Expected: 0000000000000000000000000000000000000000000000000000000000000000
-  Found:    000
-FAIL: Row 5142f8c7-9623-43ef-a340-fefeda63246a (Seq 1): Hash mismatch.
-  Computed: ffd12eabe944e97fce2db1e51962392c2a2c2c65d54b508d07be198577435633
-  Stored:   hash
-FAILED: Found 2 integrity errors.

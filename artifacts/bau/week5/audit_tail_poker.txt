@@ -1,1 +1,0 @@
-1. POKER_HAND | Hand: hand_101 | Pot: 100.0 | Rake: 5.0 | Winner: P1

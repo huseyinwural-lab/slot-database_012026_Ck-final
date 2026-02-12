@@ -1,2 +1,0 @@
-Checking table auditevent, columns: ['id', 'request_id', 'actor_user_id', 'tenant_id', 'action', 'resource_type', 'resource_id', 'result', 'ip_address', 'details', 'timestamp', 'reason', 'actor_role', 'user_agent', 'before_json', 'after_json', 'diff_json', 'metadata_json', 'error_code', 'error_message', 'status']
-Successfully dumped 50 rows from auditevent to /app/artifacts/audit_tail_task3.txt

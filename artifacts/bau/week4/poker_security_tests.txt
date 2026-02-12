@@ -1,3 +1,0 @@
-Setup Complete.
-Idempotency Check: Existing transaction found -> Blocked (PASS)
-Ledger Invariant: Balance 1050.0 (PASS)

@@ -1,5 +1,0 @@
-Setup: Player Balance 500.0
-Table Created: 0ab8d94a-3faa-42c6-abd7-78cca7f6984b
-Session Started: e0f2129c-7639-4a36-876c-f41a1eaad74e
-Hand Complete: Bet 50, Win 95, Rake 5.
-Reconciliation: PASS (Balance 545.0 matches expected 545)

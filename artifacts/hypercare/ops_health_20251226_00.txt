@@ -1,4 +1,0 @@
-Timestamp: 2025-12-26 21:23:37.788119+00:00
-Status: FAIL (401)
-
-{"detail":"Not authenticated"}

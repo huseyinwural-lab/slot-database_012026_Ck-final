@@ -1,25 +1,0 @@
-Note: Unnecessary use of -X or --request, POST is already inferred.
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 127.0.0.1:8001...
-* Connected to localhost (127.0.0.1) port 8001 (#0)
-> POST /api/v1/finance/deposits/e3dac1da-90c9-4b48-b41b-28bac985eedc/refund HTTP/1.1
-> Host: localhost:8001
-> User-Agent: curl/7.88.1
-> Accept: */*
-> Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MDU2OTkxYy04YjU4LTRlYTUtOGJhNC0wOTEyMDdjMDZhMzkiLCJlbWFpbCI6ImFkbWluQGNhc2luby5jb20iLCJ0ZW5hbnRfaWQiOiJkZWZhdWx0X2Nhc2lubyIsInJvbGUiOiJTdXBlciBBZG1pbiIsImV4cCI6MTc2NjYyMjg1MH0.s_GiyhYFIkdENyob5d7rReejbjZ6kkemtYAh5PczJlo
-> Content-Type: application/json
-> Content-Length: 41
-> 
-} [41 bytes data]
-< HTTP/1.1 500 Internal Server Error
-< date: Wed, 24 Dec 2025 00:36:24 GMT
-< server: uvicorn
-< content-length: 33
-< content-type: application/json
-< x-request-id: c996989c-b6c4-4cdd-91bb-0dc5c8f0ee0d
-< 
-{ [33 bytes data]
-100    74  100    33  100    41   2691   3343 --:--:-- --:--:-- --:--:--  6166
-* Connection #0 to host localhost left intact
-{"detail":"Ledger update failed"}

@@ -1,5 +1,0 @@
-Setup Complete: Tenant, Player (100.0), Game.
-Game Launched. Session: f849d787-fd76-4b24-b9b8-8f171f1a54f1
-Callback BET Processed. Balance: 90.0
-Callback WIN Processed. Balance: 140.0
-Replay Attack (Win) Blocked: Idempotency Key found.

@@ -1,4 +1,0 @@
-Test: Same Win Callback Replay
-Input: idempotency_key='round_1_win'
-Result: Blocked (Existing transaction found)
-Status: PASS

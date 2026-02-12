@@ -1,3 +1,0 @@
-PROVIDER_BET | Game: 07f3e817-2400-434a-b2bf-63b794f46074 | Amount: 10.0 | Round: round_1
-PROVIDER_WIN | Game: 07f3e817-2400-434a-b2bf-63b794f46074 | Amount: 50.0 | Round: round_1
-PROVIDER_CALLBACK_REJECT | Reason: Idempotency Replay | Ref: round_1_win

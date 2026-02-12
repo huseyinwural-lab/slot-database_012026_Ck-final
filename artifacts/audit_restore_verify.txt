@@ -1,6 +1,0 @@
-Restoring audit logs for 2025-12-25...
-Signature Verified.
-Data Hash Verified.
-Loaded 63 events.
-Restoring to sqlite+aiosqlite:////app/backend/casino.db...
-Restored 0 events.

@@ -1,4 +1,0 @@
-PROD SMOKE SUITE: ALL PASS
-Finance: OK
-Game: OK
-Audit: OK

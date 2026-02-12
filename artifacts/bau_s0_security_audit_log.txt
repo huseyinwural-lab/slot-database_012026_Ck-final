@@ -1,3 +1,0 @@
---- ADMIN SECURITY AUDIT ---
-User: admin@casino.com | Role: Super Admin | Status: 1 | MFA: DISABLED (CRITICAL)
-User: tenant.admin@demo-renter.com | Role: Tenant Admin | Status: 1 | MFA: DISABLED (CRITICAL)

@@ -1,7 +1,0 @@
-Setup: Player Created.
-RG: Daily Deposit Limit set to 50.0.
-Deposit 60.0 BLOCKED (Limit 50.0). Result: PASS
-Self-Exclusion Applied: PASS
-Withdrawal BLOCKED (KYC status: pending). Result: PASS
-Admin KYC Verify: SUCCESS
-Withdrawal HELD (Risk High). Result: PASS

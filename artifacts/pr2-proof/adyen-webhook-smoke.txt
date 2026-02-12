@@ -1,24 +1,0 @@
-Note: Unnecessary use of -X or --request, POST is already inferred.
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 127.0.0.1:8001...
-* Connected to localhost (127.0.0.1) port 8001 (#0)
-> POST /api/v1/payments/adyen/webhook HTTP/1.1
-> Host: localhost:8001
-> User-Agent: curl/7.88.1
-> Accept: */*
-> Content-Type: application/json
-> Content-Length: 190
-> 
-} [190 bytes data]
-< HTTP/1.1 200 OK
-< date: Wed, 24 Dec 2025 00:36:24 GMT
-< server: uvicorn
-< content-length: 23
-< content-type: application/json
-< x-request-id: b2d7654a-3e6e-43d4-b8f3-5cf2fa8e17cb
-< 
-{ [23 bytes data]
-100   213  100    23  100   190    692   5723 --:--:-- --:--:-- --:--:--  6454
-* Connection #0 to host localhost left intact
-{"status":"[accepted]"}

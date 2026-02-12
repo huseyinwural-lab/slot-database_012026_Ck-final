@@ -1,3 +1,0 @@
-Simulating 500 error spike... Alert sent to PagerDuty.
-
-[Prod Cutover] Alert Test: DB Connectivity Check -> OK

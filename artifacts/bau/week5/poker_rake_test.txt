@@ -1,4 +1,0 @@
-Test: Rake Calculation
-Input: Pot 100, Rate 5%, Cap 3
-Result: 3.0 (Capped)
-Status: PASS (Simulated Unit Test)

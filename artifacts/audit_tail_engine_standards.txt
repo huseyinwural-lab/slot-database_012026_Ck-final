@@ -1,4 +1,0 @@
-Simulated Audit Tail for Engine Standards:
-1. ENGINE_CONFIG_UPDATE - Applied Balanced Standard
-2. ENGINE_CONFIG_UPDATE - Custom Override RTP 97%
-3. ENGINE_CONFIG_UPDATE_DANGEROUS - Dangerous RTP (REVIEW_REQUIRED)

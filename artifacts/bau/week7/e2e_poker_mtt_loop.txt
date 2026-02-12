@@ -1,6 +1,0 @@
-Setup Complete.
-Tournament 14fc39d9-c9f4-4c94-81e5-c8729f5d5416 Created (REG_OPEN).
-Players Registered. Prize Pool: 20.0
-Tournament Started.
-Tournament Finished. Payouts Distributed.
-Balance Check: PASS (P1: 104.0, P2: 94.0)

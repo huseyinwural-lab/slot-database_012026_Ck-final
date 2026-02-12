@@ -1,5 +1,0 @@
-1. GAME_LAUNCH | Round: rnd_123
-2. GAME_SPIN | Grid Hash: abcd... | Win: 50.0
-3. WALLET_UPDATE | Amount: +50.0 | Reason: Game Win
-4. LEDGER_ENTRY | Type: WAGER | Amount: 1.0
-5. LEDGER_ENTRY | Type: WIN | Amount: 50.0

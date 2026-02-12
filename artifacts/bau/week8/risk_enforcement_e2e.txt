@@ -1,4 +1,0 @@
-Setup: Risk Player Created.
-Velocity Rule Triggered: 6 deposits.
-Action: Player Flagged (Risk Score -> Medium).
-Signal Created: e340b8bd-77e1-43cb-b17c-272402cdd861

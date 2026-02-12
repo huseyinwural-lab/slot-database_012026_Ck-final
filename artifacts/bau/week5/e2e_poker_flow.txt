@@ -1,6 +1,0 @@
-Setup Complete: 2 Players with 1000 balance.
-P1 Bet 50: OK
-P2 Bet 50: OK
-P1 Wins 95.0: OK
-Rake 5.0 Recorded: OK
-Hand Audit: OK

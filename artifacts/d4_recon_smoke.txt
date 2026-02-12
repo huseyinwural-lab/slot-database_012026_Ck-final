@@ -1,2 +1,0 @@
-Reconciliation Report (Smoke): PASS
-No mismatches found in simulation.

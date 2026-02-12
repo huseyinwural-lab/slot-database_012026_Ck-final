@@ -1,3 +1,0 @@
-Setup: Bonus Player with 100 Bonus Balance.
-Bet Attempt: 10.0
-Result: REJECTED (Max Bet Exceeded: 5.0)
