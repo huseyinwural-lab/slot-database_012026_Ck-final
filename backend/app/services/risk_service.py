@@ -143,8 +143,6 @@ class RiskService:
         except Exception as e:
             logger.error(f"Throttle check failed: {e}")
             return True # Fail-Open for betting to avoid revenue loss on redis glitch
-        Returns: 'ALLOW', 'FLAG', 'BLOCK'
-        """
         try:
             # 1. Get Profile
             stmt = select(RiskProfile).where(RiskProfile.user_id == user_id)
