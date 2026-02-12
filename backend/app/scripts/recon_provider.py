@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func
-from app.core.database import async_session_factory
+from app.core.database import async_session
 from app.models.sql_models import Transaction
 from app.core.metrics import metrics
 from app.models.reconciliation_run import ReconciliationReport
@@ -124,7 +124,7 @@ class ReconciliationEngine:
 
 async def main():
     # Use factory to get session
-    async with async_session_factory() as session:
+    async with async_session() as session:
         engine = ReconciliationEngine(session)
         # Default to Yesterday
         yesterday = datetime.utcnow() - timedelta(days=1)
