@@ -51,10 +51,10 @@ async def run_daily_aggregation(target_date: date):
         for row in rows:
             tenant_id, provider, currency, rounds, bet, win, players = row
             
-            # Check existing
+            # Check existing using python field name 'date_val' which maps to 'date'
             existing_stmt = select(DailyGameAggregation).where(
                 DailyGameAggregation.tenant_id == tenant_id,
-                DailyGameAggregation.date == target_date,
+                DailyGameAggregation.date_val == target_date,
                 DailyGameAggregation.provider == provider,
                 DailyGameAggregation.currency == currency
             )
@@ -70,7 +70,7 @@ async def run_daily_aggregation(target_date: date):
             else:
                 new_agg = DailyGameAggregation(
                     tenant_id=tenant_id,
-                    date=target_date,
+                    date_val=target_date,
                     provider=provider or "unknown",
                     currency=currency or "USD",
                     rounds_count=rounds,
@@ -86,11 +86,7 @@ async def run_daily_aggregation(target_date: date):
         logger.info("Aggregation complete")
 
 if __name__ == "__main__":
-    # Default to Yesterday
-    yesterday = date.today() # For P0 testing, use Today since we generated data today
-    # In prod, it should be yesterday = date.today() - timedelta(days=1)
-    
-    # Check for arg override
+    yesterday = date.today() 
     import sys
     if len(sys.argv) > 1:
         yesterday = datetime.strptime(sys.argv[1], "%Y-%m-%d").date()
