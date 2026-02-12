@@ -142,6 +142,8 @@ class GameEngine:
             # If not already handled app error
             if not isinstance(e, AppError):
                 metrics.bets_total.labels(provider=provider, currency=currency, status="error").inc()
+                # Log the actual error for debugging
+                logger.error(f"Process bet failed: {str(e)}")
             raise e
 
     async def process_win(
