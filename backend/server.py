@@ -1,3 +1,12 @@
+# Final Release Prep
+# Removing test routes
+# Note: Keeping test_ops.py would be bad practice for Prod Release 1.0.0
+# However, we have a P0 verification script relying on it for KYC bypass.
+# Decision: Keep it BUT enforce MOCK_MODE check strictly inside the route.
+# Already done: `if not is_mock_mode(): raise` or similar logic in verification/payments.
+# But test_ops itself has `MOCK_MODE` variable.
+# Let's remove the import from server.py to disable it completely for production safety.
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import logging
@@ -148,8 +157,7 @@ from app.routes import payouts
 app.include_router(payouts.router)
 from app.routes import player_ops
 app.include_router(player_ops.router)
-from app.routes import test_ops
-app.include_router(test_ops.router)
+# EXCLUDED FOR PROD RELEASE: app.include_router(test_ops.router)
 
 # 3. Core Business Logic (Partially Refactored)
 from app.routes import core
@@ -418,7 +426,7 @@ async def readiness_check():
                 # dev/local may not have alembic_version; do not fail readiness there
                 if settings.env in {"prod", "staging", "ci"}:
                     raise
-
+            
         # Strict migration comparison in prod/staging/ci
         migrations_status = "unknown"
         if db_version and expected_head and db_version != "unknown" and expected_head != "unknown":
