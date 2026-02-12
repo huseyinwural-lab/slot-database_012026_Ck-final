@@ -6,13 +6,14 @@ import httpx
 import hmac
 import hashlib
 import logging
+import os
 
 # Config
-BASE_URL = "http://localhost:8001" # Internal container URL
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8001") # Internal container URL
 PROVIDER_ENDPOINT = "/api/v1/games/callback/pragmatic"
-SECRET_KEY = "test_secret" # Must match env
-CONCURRENCY = 10
-TOTAL_REQUESTS = 1000
+SECRET_KEY = os.getenv("TEST_SECRET_KEY", "test_secret") 
+CONCURRENCY = int(os.getenv("LOAD_TEST_CONCURRENCY", 10))
+TOTAL_REQUESTS = int(os.getenv("LOAD_TEST_REQUESTS", 1000))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("load_test")
@@ -68,7 +69,7 @@ class PragmaticLoadTest:
         start_global = time.time()
         
         tasks = []
-        # Simulate 10 users doing 100 bets each
+        # Simulate users
         for i in range(CONCURRENCY):
             user_id = f"load_user_{i}"
             tasks.append(self.worker(user_id, int(TOTAL_REQUESTS / CONCURRENCY)))
