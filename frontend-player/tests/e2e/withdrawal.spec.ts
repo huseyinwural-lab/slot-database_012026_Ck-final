@@ -6,7 +6,6 @@ test.describe('P0 Withdrawal Flow', () => {
   
   const timestamp = Date.now();
   const playerEmail = `withdraw_${timestamp}@test.com`;
-  // Use unique phone to avoid rate limit collision from previous tests
   const playerPhone = `+1555${timestamp.toString().slice(-7)}`;
 
   test.beforeAll(async ({ request }) => {
@@ -47,6 +46,11 @@ test.describe('P0 Withdrawal Flow', () => {
         data: { amount: 500, currency: "USD", method: "test" },
         headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
+    
+    const depData = await depRes.json();
+    console.log("Deposit Response:", JSON.stringify(depData));
+    
+    // Allow retries or check if blocked by limit
     expect(depRes.ok()).toBeTruthy();
   });
 
