@@ -1,7 +1,7 @@
-"""phase4 consolidated
+"""phase4 consolidated real
 
 Revision ID: phase4_consolidated
-Revises: phase4_fix_columns
+Revises: phase4c_daily_aggregation
 Create Date: 2026-02-12 13:00:00
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 revision = "phase4_consolidated"
-down_revision = "phase4_fix_columns"
+down_revision = "phase4c_daily_aggregation"
 branch_labels = None
 depends_on = None
 
