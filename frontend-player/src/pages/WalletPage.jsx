@@ -22,7 +22,7 @@ const WalletPage = () => {
         available: res.data.available_real || 0,
         held: res.data.held_real || 0,
         total: res.data.total_real || 0,
-        currency: 'USD' // backend default
+        currency: 'USD'
       });
     }
     const txRes = await walletApi.getTransactions();
@@ -43,7 +43,7 @@ const WalletPage = () => {
         toast.push('Deposit initiated', 'success');
         if (res.data?.redirect_url) window.location.href = res.data.redirect_url;
         
-        // Immediate Update from Response
+        // Use response or force refresh
         if (res.data?.balance) {
              setBalance({
                 available: res.data.balance.available_real,
@@ -52,6 +52,7 @@ const WalletPage = () => {
                 currency: 'USD'
              });
         } else {
+             // Fallback
              await fetchWallet();
         }
         
@@ -78,7 +79,8 @@ const WalletPage = () => {
     
     if (res.ok) {
         toast.push('Withdrawal requested', 'success');
-        // Immediate Update from Response
+        
+        // Critical Fix for E2E: Update state from response immediately
         if (res.data?.balance) {
              setBalance({
                 available: res.data.balance.available_real,
