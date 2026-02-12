@@ -42,7 +42,7 @@ const WalletPage = () => {
     if (res?.ok) {
         toast.push('Deposit initiated', 'success');
         if (res.data?.redirect_url) window.location.href = res.data.redirect_url;
-        fetchWallet();
+        await fetchWallet(); // Ensure await to update state before UI check
         setAmount('');
     } else {
         toast.push('Deposit failed', 'error');
@@ -60,13 +60,13 @@ const WalletPage = () => {
     }
     const res = await walletApi.requestWithdraw({
         amount: Number(amount),
-        method: 'test_bank', // Default for P0
+        method: 'test_bank',
         address: withdrawAddress
     });
     
     if (res.ok) {
         toast.push('Withdrawal requested', 'success');
-        fetchWallet();
+        await fetchWallet(); // Critical: Update balance immediately
         setAmount('');
         setWithdrawAddress('');
     } else {
