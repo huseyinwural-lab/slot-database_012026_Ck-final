@@ -313,6 +313,54 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Faz 6A Sprint 2 - E2E HTTP Tests"
+    implemented: true
+    working: false
+    file: "backend/tests/providers/test_pragmatic_e2e_http.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL: Test fails with ImportError: cannot import name 'WalletBalance' from 'app.models.wallet'. The test imports WalletBalance from wrong module - should import from app.repositories.ledger_repo instead of app.models.wallet."
+
+  - task: "Faz 6A Sprint 2 - Provider Idempotency Tests"
+    implemented: true
+    working: false
+    file: "backend/tests/providers/test_provider_idempotency.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL: Test fails with KeyError: 'cash'. Expected response field 'cash' not found. Actual response shows error 100 with description 'NoneType' object has no attribute 'balance_real_available'. Game engine's _get_wallet_snapshot method fails when player doesn't exist."
+
+  - task: "Faz 6A Sprint 2 - Provider Round Consistency Tests"
+    implemented: true
+    working: false
+    file: "backend/tests/providers/test_provider_round_consistency.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL: Test fails with KeyError: 'cash'. Same issue as idempotency test - game engine fails to handle nonexistent players properly in _get_wallet_snapshot method."
+
+  - task: "Faz 6A Sprint 2 - Exception Handling Verification"
+    implemented: true
+    working: false
+    file: "backend/app/routes/games_callback.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL: Exception handling is NOT deterministic. Two major issues found: 1) AppError constructor missing required 'message' argument causing 'AppError.__init__() missing 1 required positional argument: message' 2) Game engine _get_wallet_snapshot method doesn't handle None player objects, causing 'NoneType' object has no attribute 'balance_real_available'. Both exceptions are caught but return inconsistent error responses."
+
 agent_communication:
     - agent: "testing"
       message: "P1.2 Discount Engine testing completed successfully. All 7 tests passed (100%). Database migrations applied, schema valid, precedence logic working, and ledger integration functional. Specific tests run: test_discount_commit_ledger.py and test_discount_precedence_integration.py as requested."
@@ -326,3 +374,5 @@ agent_communication:
       message: "Risk Layer Faz 6C Final Verification completed successfully. All 3 pytest resilience tests passed (100%): test_risk_resilience_redis_down, test_risk_resilience_override_expiry_simulation, test_risk_resilience_downgrade_reset. Release documentation confirmed: risk_v2_release_note.md exists with complete rollback plan and migration references. Monitoring setup confirmed: risk_alert_matrix.md exists with proper alert rules for CRITICAL/WARNING/INFO severity levels and notification channels. Risk V2 system is stable and ready for production closure."
     - agent: "testing"
       message: "Faz 6A Sprint 1 (Provider Integration) verification completed successfully. All 4 tests passed (100%): PragmaticAdapter implementation verified with all methods working correctly (signature validation, request/response mapping, error handling), GamesCallbackRouter updated with proper metrics and provider integration, Metrics implementation confirmed with all required provider and game metrics, Pytest tests for PragmaticAdapter passed (4/4 tests). Provider integration system is complete and functional."
+    - agent: "testing"
+      message: "Faz 6A Sprint 2 verification FAILED. All 3 pytest tests failed due to critical implementation issues: 1) test_pragmatic_e2e_http.py fails with ImportError - wrong WalletBalance import path, 2) test_provider_idempotency.py and test_provider_round_consistency.py fail with KeyError 'cash' - game engine _get_wallet_snapshot method doesn't handle None players, 3) games_callback.py exception handling is NOT deterministic - AppError constructor issues and inconsistent error responses. These are blocking issues that prevent proper provider integration testing."
