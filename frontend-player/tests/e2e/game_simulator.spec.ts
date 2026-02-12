@@ -25,6 +25,7 @@ test.describe('P0 Game Provider Simulator Flow', () => {
     const loginData = await loginRes.json();
     token = loginData.access_token;
     playerId = loginData.user.id;
+    console.log("Player ID:", playerId);
     
     const headers = { Authorization: `Bearer ${token}` };
     
@@ -32,10 +33,11 @@ test.describe('P0 Game Provider Simulator Flow', () => {
     await request.post('/api/v1/test/set-kyc', { data: { email: playerEmail, status: "verified" } });
     
     // 4. Deposit 1000
-    await request.post('/api/v1/player/wallet/deposit', {
+    const depRes = await request.post('/api/v1/player/wallet/deposit', {
         data: { amount: 1000, currency: "USD", method: "test" },
         headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
+    expect(depRes.ok()).toBeTruthy();
   });
 
   test('Game Cycle: Bet -> Win -> Rollback', async ({ request }) => {
@@ -44,8 +46,9 @@ test.describe('P0 Game Provider Simulator Flow', () => {
     const txBet = `tx_bet_${Date.now()}`;
     const txWin = `tx_win_${Date.now()}`;
     
+    console.log("Starting Bet...");
+    
     // 1. BET 100
-    // POST /api/v1/games/callback/simulator
     const betRes = await request.post('/api/v1/games/callback/simulator', {
         data: {
             action: "bet",
@@ -57,8 +60,10 @@ test.describe('P0 Game Provider Simulator Flow', () => {
             currency: "USD"
         }
     });
-    expect(betRes.ok()).toBeTruthy();
+    
     const betData = await betRes.json();
+    console.log("Bet Response:", JSON.stringify(betData));
+    expect(betRes.ok()).toBeTruthy();
     expect(betData.data.balance).toBe(900); // 1000 - 100
 
     // 2. WIN 200
