@@ -8936,34 +8936,34 @@ class PlayersExportXLSXTestSuite:
             return False
 
 async def main():
-    """Main test runner - Run Health Endpoints and SEC-P0-02 RBAC Backend Enforcement"""
-    print("🎯 P0 Health Endpoints + SEC-P0-02 RBAC Backend Enforcement Test Runner")
+    """Main test runner - Run Faz 6A Sprint 1 Provider Integration Tests"""
+    print("🎯 Faz 6A Sprint 1 (Provider Integration) Test Runner")
     print("=" * 80)
     
-    # Run Health Endpoints test suite (P0 requirement from review request)
-    health_suite = HealthEndpointsTestSuite()
-    health_success = await health_suite.run_all_tests()
+    # Run Faz 6A Sprint 1 test suite (primary focus for this review request)
+    faz6a_suite = Faz6ASprintTestSuite()
+    faz6a_success = await faz6a_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     
-    # Run SEC-P0-02 RBAC test suite (primary focus for this review request)
-    rbac_suite = SECP002RBACTestSuite()
-    rbac_success = await rbac_suite.run_all_tests()
+    # Run Health Endpoints test suite (basic health check)
+    health_suite = HealthEndpointsTestSuite()
+    health_success = await health_suite.run_all_tests()
     
     print("\n" + "=" * 80)
     print("🏁 FINAL SUMMARY")
     print("=" * 80)
     
+    faz6a_status = "✅ PASS" if faz6a_success else "❌ FAIL"
     health_status = "✅ PASS" if health_success else "❌ FAIL"
-    rbac_status = "✅ PASS" if rbac_success else "❌ FAIL"
     
-    print(f"{health_status}: P0 Health Endpoints (/api/v1/healthz, /api/v1/readyz)")
-    print(f"{rbac_status}: SEC-P0-02 RBAC Backend Enforcement")
+    print(f"{faz6a_status}: Faz 6A Sprint 1 (Provider Integration)")
+    print(f"{health_status}: Health Endpoints (/api/health, /api/readiness)")
     
-    overall_success = health_success and rbac_success
+    overall_success = faz6a_success and health_success
     
     if overall_success:
-        print("🎉 All P0 health endpoints and RBAC backend enforcement tests PASSED!")
+        print("🎉 All Faz 6A Sprint 1 provider integration tests PASSED!")
         return True
     else:
         print("⚠️  Some tests failed. Review the details above.")
