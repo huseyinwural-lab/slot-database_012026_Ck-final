@@ -309,6 +309,7 @@ test_plan:
     - "Faz 6A Sprint 1 - GamesCallbackRouter Updates"
     - "Faz 6A Sprint 1 - Metrics Implementation"
     - "Faz 6A Sprint 1 - Pytest Tests"
+    - "Faz 6A Sprint 3 - Script Deliverables Verification"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
