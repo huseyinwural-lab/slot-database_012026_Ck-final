@@ -188,6 +188,42 @@ test_plan:
           agent: "testing"
           comment: "All 3 risk admin API endpoints are reachable and working: GET /api/v1/admin/risk/{user_id}/profile (returns NO_PROFILE for non-existent users), GET /api/v1/admin/risk/{user_id}/history (returns empty list), POST /api/v1/admin/risk/{user_id}/override (creates profiles and updates scores correctly)."
 
+  - task: "Risk Sprint 2 Closure - Cross Flow Tests"
+    implemented: true
+    working: true
+    file: "backend/tests/risk/test_risk_cross_flow.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "All 2 cross flow tests passed: test_risk_cross_flow (high risk user throttled and blocked), test_risk_cross_flow_low_risk (low risk user allowed). Risk service correctly handles cross-flow scenarios between bet throttling and withdrawal evaluation."
+
+  - task: "Risk Sprint 2 Closure - Override Lifecycle Tests"
+    implemented: true
+    working: true
+    file: "backend/tests/risk/test_override_lifecycle.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Override lifecycle test passed: test_override_with_expiry. Risk override functionality working correctly with expiry handling and database persistence."
+
+  - task: "Risk Sprint 2 Closure - Database Schema Verification"
+    implemented: true
+    working: true
+    file: "backend/casino.db"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Database schema verification completed. risk_profiles table contains required columns: risk_engine_version (VARCHAR) and override_expires_at (DATETIME). risk_history table contains required column: risk_engine_version (VARCHAR). All Sprint 2 schema requirements satisfied."
+
 frontend:
   - task: "Frontend Testing"
     implemented: false
