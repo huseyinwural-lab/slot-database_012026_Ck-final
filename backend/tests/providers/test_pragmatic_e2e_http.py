@@ -8,6 +8,7 @@ from app.models.sql_models import Player, Tenant
 # Correct import for WalletBalance
 from app.repositories.ledger_repo import WalletBalance
 from app.services.game_engine import game_engine
+from app.models.game_models import Game
 
 # Mock Secret
 SECRET_KEY = "test_secret"
@@ -50,6 +51,16 @@ async def test_pragmatic_e2e_flow(client: AsyncClient, async_session_factory):
             balance_real_available=100.0
         )
         s.add(wb)
+        
+        # Create Game (Mandatory for validation)
+        game = Game(
+            id="g_1",
+            tenant_id=tenant.id,
+            provider_id="pragmatic",
+            external_id="g_1",
+            name="Test Slot"
+        )
+        s.add(game)
         await s.commit()
 
     with pytest.MonkeyPatch.context() as m:
