@@ -46,7 +46,6 @@ def _hash_code(code: str) -> str:
     return hashlib.sha256(code.encode()).hexdigest()
 
 async def _check_rate_limit(redis: Redis, key: str, limit: int, window: int):
-    # If redis is mock, it should work fine
     current = await redis.incr(key)
     if current == 1:
         await redis.expire(key, window)
@@ -109,7 +108,6 @@ async def send_email_code(
     code_key = f"vfy:email:code:{payload.email}"
     attempts_key = f"vfy:attempts:email:{payload.email}"
     
-    # Explicitly set without pipeline to debug potential mock issues
     await redis.setex(code_key, OTP_TTL, _hash_code(code))
     await redis.setex(cooldown_key, RESEND_COOLDOWN, "1")
     await redis.delete(attempts_key)
@@ -141,11 +139,9 @@ async def confirm_email_code(
         logger.info("Mock approval triggered")
 
     if not approved:
-        # If not approved via fallback and no hash, check existence first
         if not stored_hash and not (is_mock_mode() and payload.code == "123456"):
              return {"ok": False, "error": {"code": "VERIFY_EMAIL_REQUIRED", "message": "Code expired or not sent"}}
 
-        # If hash existed but mismatch
         attempts = await redis.incr(attempts_key)
         if attempts >= MAX_ATTEMPTS:
             await redis.setex(lock_key, LOCKOUT_DURATION, "1")
@@ -159,8 +155,13 @@ async def confirm_email_code(
     if not player:
         return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
 
+    # FIX: Update the player object explicitly and commit
     player.email_verified = True
+    session.add(player) # Ensure it's in session
     await session.commit()
+    await session.refresh(player) # Confirm update
+    
+    logger.info(f"Player {player.id} email_verified set to {player.email_verified}")
     
     await redis.delete(code_key)
     await redis.delete(attempts_key)
@@ -249,8 +250,11 @@ async def confirm_sms_code(
     if not player:
         return {"ok": False, "error": {"code": "AUTH_INVALID", "message": "Player not found"}}
         
+    # FIX: Explicit add and commit
     player.sms_verified = True
+    session.add(player)
     await session.commit()
+    await session.refresh(player)
     
     if is_mock_mode():
         await redis.delete(f"vfy:sms:code:{payload.phone}")
