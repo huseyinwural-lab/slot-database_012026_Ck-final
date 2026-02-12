@@ -49,7 +49,7 @@ async def provider_callback(
             token = req_data.get("token")
             player_id = await game_engine.authenticate(session, token)
             if not player_id:
-                raise AppError("PLAYER_NOT_FOUND", "Invalid Token")
+                raise AppError("PLAYER_NOT_FOUND", "Invalid Token", status_code=404)
             # Return balance/profile
             result = await game_engine.get_balance(session, player_id, "USD")
             
@@ -98,7 +98,7 @@ async def provider_callback(
                 currency=req_data.get("currency")
             )
         else:
-            raise AppError("INVALID_ACTION", f"Unknown action: {cmd}")
+            raise AppError("INVALID_ACTION", f"Unknown action: {cmd}", status_code=400)
 
         await session.commit()
         

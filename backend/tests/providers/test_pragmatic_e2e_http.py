@@ -5,7 +5,8 @@ import hashlib
 import hmac
 import json
 from app.models.sql_models import Player, Tenant
-from app.models.wallet import WalletBalance
+# Correct import for WalletBalance
+from app.repositories.ledger_repo import WalletBalance
 from app.services.game_engine import game_engine
 
 # Mock Secret
@@ -42,7 +43,6 @@ async def test_pragmatic_e2e_flow(client: AsyncClient, async_session_factory):
         player_id = str(player.id)
         
         # Inject Balance Snapshot
-        from app.repositories.ledger_repo import WalletBalance
         wb = WalletBalance(
             tenant_id=tenant.id,
             player_id=player.id,
@@ -52,13 +52,6 @@ async def test_pragmatic_e2e_flow(client: AsyncClient, async_session_factory):
         s.add(wb)
         await s.commit()
 
-    # Mock Settings for Secret Key
-    # We rely on settings injection or just patching the adapter for test? 
-    # Better: Update adapter to read from env or settings mock.
-    # For now, let's patch `settings.pragmatic_secret_key` via fixture if possible, 
-    # or just assume dev mode (no sig check) BUT we want to test sig check.
-    # Let's bypass sig check for E2E logic focus, or set env var.
-    
     with pytest.MonkeyPatch.context() as m:
         m.setattr("config.settings.pragmatic_secret_key", SECRET_KEY)
         

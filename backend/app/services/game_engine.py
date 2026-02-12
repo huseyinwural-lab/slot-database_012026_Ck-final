@@ -341,7 +341,11 @@ class GameEngine:
 
     async def _get_wallet_snapshot(self, session: AsyncSession, player_id: str, currency: str) -> Dict:
         player = await session.get(Player, player_id)
+        if not player:
+            raise AppError("PLAYER_NOT_FOUND", f"Player {player_id} not found", status_code=404)
+            
         return {
+            "tx_id": None, # Default for balance check
             "balance": float(player.balance_real_available),
             "currency": currency
         }
