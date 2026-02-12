@@ -23,7 +23,7 @@ def sign_payload(payload: dict, secret: str = SECRET_KEY) -> str:
 
 async def trigger_signature_failure():
     logger.info("Triggering Signature Failure...")
-    payload = {"action": "bet", "userId": "u1", "amount": 10}
+    payload = {"action": "bet", "userId": "load_user_0", "amount": 10} # Valid user
     payload["hash"] = sign_payload(payload, "WRONG_KEY")
     
     async with httpx.AsyncClient() as client:
@@ -38,9 +38,9 @@ async def trigger_duplicate_callback():
     tx_id = str(uuid.uuid4())
     payload = {
         "action": "bet",
-        "userId": "u1",
-        "gameId": "g1",
-        "roundId": "r1",
+        "userId": "load_user_0",
+        "gameId": "load_game_1",
+        "roundId": "r_dup",
         "reference": tx_id,
         "amount": 1.0,
         "currency": "USD"
