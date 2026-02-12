@@ -2,6 +2,7 @@ from typing import Optional, Dict, TYPE_CHECKING
 from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON, UniqueConstraint
+import sqlalchemy as sa
 import uuid
 
 if TYPE_CHECKING:
@@ -84,7 +85,6 @@ class CallbackNonce(SQLModel, table=True):
 # Phase 4C: Aggregation Table
 class DailyGameAggregation(SQLModel, table=True):
     __tablename__ = "daily_game_aggregation"
-    # Note: Use 'date' string in constraint referencing the DB column name
     __table_args__ = (
         UniqueConstraint("tenant_id", "date", "provider", "currency", name="uq_daily_game_agg"),
         {'extend_existing': True}
@@ -92,7 +92,6 @@ class DailyGameAggregation(SQLModel, table=True):
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
-    # The field name in python is 'date_val', mapped to DB column 'date'
     date_val: date = Field(index=True, sa_column=Column("date", sa.Date))
     
     provider: str = Field(index=True)
