@@ -42,6 +42,17 @@ async def test_provider_round_consistency(client: AsyncClient, async_session_fac
         from app.repositories.ledger_repo import WalletBalance
         wb = WalletBalance(tenant_id=tenant.id, player_id=player.id, currency="USD", balance_real_available=10.0)
         s.add(wb)
+        
+        # Create Game (Required for validation)
+        from app.models.game_models import Game
+        game = Game(
+            id="g_new",
+            tenant_id=tenant.id,
+            provider_id="pragmatic",
+            external_id="g_new",
+            name="Test Round Consistency Game"
+        )
+        s.add(game)
         await s.commit()
 
     with pytest.MonkeyPatch.context() as m:
