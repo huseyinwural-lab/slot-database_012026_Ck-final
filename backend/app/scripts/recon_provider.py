@@ -8,7 +8,7 @@ from sqlmodel import select, func
 from app.core.database import async_session
 from app.repositories.ledger_repo import LedgerTransaction
 from app.core.metrics import metrics
-from app.models.reconciliation_run import ReconciliationReport
+from app.models.sql_models import ReconciliationReport
 
 # Logging Setup
 logging.basicConfig(level=logging.INFO)
