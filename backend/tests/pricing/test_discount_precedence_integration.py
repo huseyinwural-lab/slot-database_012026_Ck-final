@@ -45,8 +45,8 @@ async def test_manual_override_wins(db_session):
 @pytest.mark.asyncio
 async def test_campaign_beats_segment(db_session):
     now = datetime.utcnow()
-    d1 = Discount(code="D1", type=DiscountTypeEnum.PERCENTAGE, value=20, start_at=now)
-    d2 = Discount(code="D2", type=DiscountTypeEnum.PERCENTAGE, value=30, start_at=now)
+    d1 = Discount(code="D1_T2", type=DiscountTypeEnum.PERCENTAGE, value=20, start_at=now)
+    d2 = Discount(code="D2_T2", type=DiscountTypeEnum.PERCENTAGE, value=30, start_at=now)
     db_session.add_all([d1, d2])
     await db_session.commit()
     await db_session.refresh(d1); await db_session.refresh(d2)
@@ -61,7 +61,7 @@ async def test_campaign_beats_segment(db_session):
     
     applied = await resolver.resolve(context, Decimal(100))
     
-    assert applied.code == "D2"
+    assert applied.code == "D2_T2"
     
     final, amount = resolver.calculate_final_price(Decimal(100), applied)
     assert final == 70 # 100 - 30%
