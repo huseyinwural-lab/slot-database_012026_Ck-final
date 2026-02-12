@@ -68,6 +68,41 @@ class RiskService:
     async def evaluate_withdrawal(self, user_id: str, amount: float) -> str:
         """
         Guard method for Withdrawal Service.
+        Returns: 'ALLOW', 'FLAG', 'BLOCK'
+        """
+        try:
+            # 1. Get Profile
+            stmt = select(RiskProfile).where(RiskProfile.user_id == user_id)
+            result = await self.db.execute(stmt)
+            profile = result.scalars().first()
+            
+            if not profile:
+                # Default safety: New users without history are treated cautiously but allowed if no other signals
+                return "ALLOW" # Or FLAG if strictly paranoid
+                
+            # 2. Hard Block Checks
+            if profile.risk_score >= 70:
+                metrics.record_risk_block()
+                return "BLOCK"
+                
+            # 3. Soft Flag Checks
+            if profile.risk_score >= 40:
+                metrics.record_risk_flag()
+                return "FLAG"
+                
+            # 4. Velocity Check (Withdrawal Specific)
+            # Check 24h limit
+            w_key = f"risk:velocity:wdraw_amt:{user_id}:86400"
+            current_24h = await self.redis.get(w_key)
+            if current_24h and (float(current_24h) + amount) > 5000:
+                return "FLAG" # Velocity limit hit
+                
+            return "ALLOW"
+            
+        except Exception as e:
+            logger.error(f"Risk evaluation failed: {e}")
+            return "FLAG" # Fail-Safe
+
     async def check_bet_throttle(self, user_id: str) -> bool:
         """
         Check if user exceeded bet velocity limits.
