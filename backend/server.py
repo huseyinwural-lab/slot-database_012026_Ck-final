@@ -294,6 +294,8 @@ from app.routes import games_callback
 app.include_router(games_callback.router)
 from app.routes import player_history
 app.include_router(player_history.router)
+from app.routes import admin_reports
+app.include_router(admin_reports.router)
 app.include_router(reconciliation_router.router)
 
 from app.routes import ci_seed
