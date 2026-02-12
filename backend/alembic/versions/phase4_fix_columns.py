@@ -23,10 +23,8 @@ def upgrade():
     
     if 'created_at' not in columns:
         with op.batch_alter_table("gameevent") as batch_op:
-            batch_op.add_column(sa.Column("created_at", sa.DateTime(), nullable=True))
-            # Set default for existing
-            batch_op.execute("UPDATE gameevent SET created_at = datetime('now') WHERE created_at IS NULL")
+            batch_op.add_column(sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=True))
 
 
 def downgrade():
-    pass # No drop to be safe
+    pass 
