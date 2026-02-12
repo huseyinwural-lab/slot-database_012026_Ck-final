@@ -3,7 +3,9 @@ import os
 import secrets
 from sqlmodel import select
 from app.core.database import async_session
+# Import all models to populate registry
 from app.models.sql_models import Player, Tenant
+from app.models.game_models import Game
 from app.utils.auth import get_password_hash
 from datetime import datetime
 
