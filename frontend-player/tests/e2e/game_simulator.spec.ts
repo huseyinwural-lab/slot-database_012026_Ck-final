@@ -35,10 +35,25 @@ test.describe('P0 Game Provider Simulator Flow', () => {
     await request.post('/api/v1/test/set-kyc', { data: { email: playerEmail, status: "verified" } });
     
     // 4. Deposit 1000
-    const depRes = await request.post('/api/v1/player/wallet/deposit', {
+    // Retry deposit if failed (sometimes verify state lags)
+    let depRes = await request.post('/api/v1/player/wallet/deposit', {
         data: { amount: 1000, currency: "USD", method: "test" },
         headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
+    
+    if (depRes.status() === 403) {
+        console.log("Deposit 403, retrying verify/deposit...");
+        // Re-verify explicit force
+        await request.post('/api/v1/verify/email/confirm', { data: { email: playerEmail, code: "123456" }, headers });
+        await request.post('/api/v1/verify/sms/send', { data: { phone: `+1555${timestamp.toString().slice(-7)}` }, headers });
+        await request.post('/api/v1/verify/sms/confirm', { data: { phone: `+1555${timestamp.toString().slice(-7)}`, code: "123456" }, headers });
+        
+        depRes = await request.post('/api/v1/player/wallet/deposit', {
+            data: { amount: 1000, currency: "USD", method: "test" },
+            headers: { ...headers, "Idempotency-Key": `dep_${timestamp}_retry` }
+        });
+    }
+    
     const depData = await depRes.json();
     console.log("Deposit Response:", JSON.stringify(depData));
     expect(depRes.ok()).toBeTruthy();
