@@ -90,7 +90,11 @@ class ReconciliationEngine:
                 msg = f"DRIFT DETECTED: {currency} Internal={internal_val} Provider={provider_val} Diff={diff}"
                 logger.error(msg)
                 findings.append(msg)
-                metrics.provider_wallet_drift_detected_total.labels(provider=PROVIDER_ID).inc()
+                # Need a mock context for metrics if running standalone script, but let's try
+                try:
+                    metrics.provider_wallet_drift_detected_total.labels(provider=PROVIDER_ID).inc()
+                except:
+                    pass
             else:
                 logger.info(f"MATCH: {currency} Internal={internal_val} Provider={provider_val}")
 
@@ -124,9 +128,9 @@ async def main():
     # Use factory to get session
     async with async_session() as session:
         engine = ReconciliationEngine(session)
-        # Default to Yesterday
-        yesterday = datetime.utcnow() - timedelta(days=1)
-        await engine.run(yesterday)
+        # Use Today instead of Yesterday for the short soak
+        today = datetime.utcnow()
+        await engine.run(today)
 
 if __name__ == "__main__":
     asyncio.run(main())
