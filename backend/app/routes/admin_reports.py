@@ -115,3 +115,45 @@ async def get_ggr_report(
             "live_included": bool(live_start)
         }
     }
+
+@router.get("/financials")
+async def get_financial_report(
+    current_admin: AdminUser = Depends(get_current_admin),
+    session: AsyncSession = Depends(get_session),
+    start_date: datetime = Query(...),
+    end_date: datetime = Query(...)
+):
+    """
+    Financial Report (Ledger Based).
+    Summarizes Gross, Discount, and Net amounts from the ledger.
+    """
+    from app.repositories.ledger_repo import LedgerTransaction
+    
+    query = select(
+        func.sum(LedgerTransaction.gross_amount),
+        func.sum(LedgerTransaction.discount_amount),
+        func.sum(LedgerTransaction.net_amount) # Or amount if net_amount is not populated
+    ).where(
+        LedgerTransaction.tenant_id == current_admin.tenant_id,
+        LedgerTransaction.created_at >= start_date,
+        LedgerTransaction.created_at <= end_date,
+        LedgerTransaction.gross_amount != None # Only count pricing-related txs
+    )
+    
+    res = await session.execute(query)
+    row = res.first()
+    
+    gross = float(row[0] or 0.0)
+    discount = float(row[1] or 0.0)
+    net = float(row[2] or 0.0)
+    
+    # If net_amount wasn't explicitly stored in early tests, fallback:
+    # In V2 service we store it.
+    
+    return {
+        "period": {"start": start_date, "end": end_date},
+        "gross_revenue": gross,
+        "total_discounts": discount,
+        "net_revenue": net,
+        "effective_discount_rate": (discount / gross) if gross > 0 else 0.0
+    }
