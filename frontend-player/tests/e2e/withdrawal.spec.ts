@@ -6,6 +6,8 @@ test.describe('P0 Withdrawal Flow', () => {
   
   const timestamp = Date.now();
   const playerEmail = `withdraw_${timestamp}@test.com`;
+  // Use unique phone to avoid rate limit collision from previous tests
+  const playerPhone = `+1555${timestamp.toString().slice(-7)}`;
 
   test.beforeAll(async ({ request }) => {
     const health = await request.get('/api/health');
@@ -16,7 +18,7 @@ test.describe('P0 Withdrawal Flow', () => {
             email: playerEmail,
             password: "Password123!",
             username: `user_${timestamp}`,
-            phone: "+15550009999",
+            phone: playerPhone,
             dob: "1990-01-01"
         }
     });
@@ -29,26 +31,23 @@ test.describe('P0 Withdrawal Flow', () => {
     
     const headers = { Authorization: `Bearer ${token}` };
     
-    // Explicitly check verification responses to avoid silent failures
     const emailSend = await request.post('/api/v1/verify/email/send', { data: { email: playerEmail }, headers });
     expect(emailSend.ok()).toBeTruthy();
     
     const emailConf = await request.post('/api/v1/verify/email/confirm', { data: { email: playerEmail, code: "123456" }, headers });
     expect(emailConf.ok()).toBeTruthy();
     
-    const smsSend = await request.post('/api/v1/verify/sms/send', { data: { phone: "+15550009999" }, headers });
+    const smsSend = await request.post('/api/v1/verify/sms/send', { data: { phone: playerPhone }, headers });
     expect(smsSend.ok()).toBeTruthy();
     
-    const smsConf = await request.post('/api/v1/verify/sms/confirm', { data: { phone: "+15550009999", code: "123456" }, headers });
+    const smsConf = await request.post('/api/v1/verify/sms/confirm', { data: { phone: playerPhone, code: "123456" }, headers });
     expect(smsConf.ok()).toBeTruthy();
 
     const depRes = await request.post('/api/v1/player/wallet/deposit', {
         data: { amount: 500, currency: "USD", method: "test" },
         headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
-    const depData = await depRes.json();
-    console.log("Deposit Result:", JSON.stringify(depData));
-    expect(depRes.ok()).toBeTruthy(); // Fail early if deposit blocked
+    expect(depRes.ok()).toBeTruthy();
   });
 
   test('Player Request -> Admin Approve', async ({ browser }) => {
@@ -63,7 +62,6 @@ test.describe('P0 Withdrawal Flow', () => {
     
     await playerPage.goto('/wallet');
     
-    // Check balance 500
     await expect(playerPage.getByTestId('wallet-balance')).toContainText('500');
     
     await playerPage.getByTestId('tab-withdraw').click();
