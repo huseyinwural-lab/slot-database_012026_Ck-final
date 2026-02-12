@@ -111,6 +111,8 @@ class Settings(BaseSettings):
     # KYC (mock UI endpoints)
     kyc_mock_enabled: bool = True
 
+    # Pricing
+    pricing_engine_v2_enabled: bool = False
     # Audit Retention
     audit_retention_days: int = 90
     audit_export_secret: str = "change_this_to_strong_secret_for_hmac"
