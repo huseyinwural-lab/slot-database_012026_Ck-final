@@ -374,6 +374,18 @@ test_plan:
           agent: "testing"
           comment: "All Faz 6A Sprint 3 deliverables verified successfully. Files exist: recon_provider.py, load_test_provider.py, prod_guard.py, alert_validation_helper.py. All scripts have valid Python syntax. Minor import warning in recon_provider.py (uses deprecated async_session_factory instead of async_session) but does not affect core functionality."
 
+  - task: "Final Smoke Test for Fixes"
+    implemented: true
+    working: true
+    file: "final_smoke_test.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "All 5 verification requirements passed: 1) backend/app/routes/approvals.py EXISTS with status parameter, 2) backend/app/routes/risk_dashboard.py EXISTS, 3) backend/app/routes/fraud_detection.py EXISTS, 4) backend/config.py uses os.getenv for secrets (WEBHOOK_SECRET_MOCKPSP, AUDIT_EXPORT_SECRET), 5) artifacts/ folder is GONE. Fixed syntax error in metrics.py. Backend service running correctly."
+
 agent_communication:
     - agent: "testing"
       message: "P1.2 Discount Engine testing completed successfully. All 7 tests passed (100%). Database migrations applied, schema valid, precedence logic working, and ledger integration functional. Specific tests run: test_discount_commit_ledger.py and test_discount_precedence_integration.py as requested."
