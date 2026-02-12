@@ -1,26 +1,26 @@
 import pytest
 from datetime import datetime, timedelta
 from app.models.risk import RiskProfile, RiskLevel
-from app.models.risk_history import RiskHistory
-from app.services.risk_service import RiskService
+import uuid
 
 @pytest.mark.asyncio
-async def test_override_lifecycle(client, session, async_session_factory):
+async def test_override_with_expiry(client, async_session_factory):
+    # Setup Admin & User
     from app.utils.auth import create_access_token
     from app.models.sql_models import Tenant, AdminUser
-    import uuid
     
-    # 1. Setup Admin
+    user_id = str(uuid.uuid4())
+    
     async with async_session_factory() as s:
-        tenant = Tenant(name="LifecycleTest", type="owner")
+        tenant = Tenant(name="ExpiryTest", type="owner")
         s.add(tenant)
         await s.commit()
         await s.refresh(tenant)
         
         admin = AdminUser(
             tenant_id=tenant.id,
-            username="lifecycle_admin",
-            email="lifecycle@admin.com",
+            username="expiry_admin",
+            email="expiry@admin.com",
             full_name="Risk Admin",
             password_hash="pw",
             role="Admin",
@@ -34,22 +34,23 @@ async def test_override_lifecycle(client, session, async_session_factory):
             expires_delta=timedelta(minutes=30)
         )
         
-        user_id = str(uuid.uuid4())
         profile = RiskProfile(user_id=user_id, tenant_id=tenant.id, risk_score=10, risk_level=RiskLevel.LOW)
         s.add(profile)
         await s.commit()
         
     headers = {"Authorization": f"Bearer {token}"}
     
-    # 2. Apply Override with Expiry
-    # Note: API might not support expiry param yet, but we will add it or verify DB column
-    # If API update is pending, we can test service level or update API now.
-    # Let's assume we update API to accept expiry_hours
+    # Apply Override with Expiry (24h)
+    payload = {"score": 90, "reason": "Short term block", "expiry_hours": 24}
+    resp = await client.post(f"/api/v1/admin/risk/{user_id}/override", json=payload, headers=headers)
     
-    # For now, let's verify manual DB update simulates expiry logic if we were to implement the job.
-    # But wait, the task is "Override Governance Strengthening".
-    # "Expired override -> otomatik revert job".
-    # We should at least verify the column exists and we can set it.
+    assert resp.status_code == 200
     
-    # Let's update the API first to accept expiry.
-    pass
+    # Verify DB
+    async with async_session_factory() as s:
+        profile = await s.get(RiskProfile, user_id)
+        assert profile.risk_score == 90
+        assert profile.risk_level == RiskLevel.HIGH
+        assert profile.override_expires_at is not None
+        assert profile.override_expires_at > datetime.utcnow()
+        assert profile.flags.get("override_active") is True
