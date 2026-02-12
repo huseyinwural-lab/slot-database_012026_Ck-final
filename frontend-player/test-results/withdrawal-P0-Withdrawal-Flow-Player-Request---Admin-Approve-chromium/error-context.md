@@ -16,7 +16,7 @@
         - link "Support" [ref=e13] [cursor=pointer]:
           - /url: /support
       - generic [ref=e14]:
-        - generic [ref=e16]: user_1770854676885
+        - generic [ref=e16]: user_1770854716015
         - generic [ref=e17]:
           - generic [ref=e18]: Bakiye
           - generic [ref=e19]: 0.00 USD
@@ -33,8 +33,8 @@
         - button "Withdraw" [ref=e32] [cursor=pointer]
       - generic [ref=e33]:
         - generic [ref=e34]: deposit
-        - spinbutton [ref=e35]
-        - button "Deposit Now" [disabled] [ref=e36]
+        - spinbutton [ref=e35]: "500"
+        - button "Deposit Now" [active] [ref=e36] [cursor=pointer]
       - generic [ref=e37]:
         - generic [ref=e38]: History
         - generic [ref=e40]: No transactions
