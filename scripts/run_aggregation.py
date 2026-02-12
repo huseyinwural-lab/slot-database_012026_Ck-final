@@ -5,7 +5,9 @@ from datetime import datetime, timedelta, date
 from sqlalchemy.future import select
 from sqlalchemy import func
 from app.core.database import async_session
+# Import all models to resolve Relationships
 from app.models.game_models import GameRound, DailyGameAggregation, Game
+from app.models.sql_models import Tenant
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
