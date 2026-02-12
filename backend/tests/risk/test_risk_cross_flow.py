@@ -9,7 +9,26 @@ async def test_risk_cross_flow():
     mock_db = AsyncMock()
     # Mock return for profile fetch: High Risk
     profile_high = RiskProfile(user_id="u_high", risk_score=80, risk_level=RiskLevel.HIGH)
-    mock_db.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(first=lambda: profile_high)))
+    
+    # We need to setup execute differently for the two different calls in the test.
+    # 1. check_bet_throttle calls execute(select(risk_level)) -> scalar()
+    # 2. evaluate_withdrawal calls execute(select(RiskProfile)) -> scalars().first()
+    
+    # We can use side_effect or specific mock setup.
+    # Simpler: RiskService logic uses DB twice.
+    
+    # Mock for evaluate_withdrawal:
+    # result.scalars().first() -> profile_high
+    mock_result_profile = MagicMock()
+    mock_result_profile.scalars.return_value.first.return_value = profile_high
+    
+    # Mock for check_bet_throttle:
+    # result.scalar() -> RiskLevel.HIGH
+    mock_result_level = MagicMock()
+    mock_result_level.scalar.return_value = RiskLevel.HIGH
+    
+    # Configure execute side_effect
+    mock_db.execute = AsyncMock(side_effect=[mock_result_level, mock_result_profile])
     
     mock_redis = MagicMock()
     # Pipeline for throttle: Simulate High usage (e.g. 15 > 10 limit)
@@ -21,23 +40,8 @@ async def test_risk_cross_flow():
     
     # 1. Verify Bet Throttled
     # High risk limit is 10. Redis returns 15. Expect False.
-    # Note: check_bet_throttle logic:
-    # if current_count > limit: return False (Throttled)
-    # 15 > 10 -> Should be False.
-    # Let's check why it returned True.
-    # Because mock_db logic might be failing to return High Risk level.
-    # "mock_db.execute = ...".
-    # check_bet_throttle does: result = await self.db.execute(stmt); level = result.scalar()
-    # Our mock: return_value=MagicMock(scalars=lambda: MagicMock(first=lambda: profile_high))
-    # Wait, 'scalar()' vs 'scalars().first()'.
-    # In check_bet_throttle: "result.scalar()"
-    # In test_risk_cross_flow: "return_value=MagicMock(scalars=lambda: MagicMock(first=lambda: profile_high))"
-    # This mock structure seems tailored for 'scalars().first()'.
-    # 'scalar()' returns the first column of the first row.
-    # We should adjust the mock or the code.
-    # Let's fix the mock.
-    
-    mock_db.execute = AsyncMock(return_value=MagicMock(scalar=lambda: RiskLevel.HIGH))
+    allowed = await service.check_bet_throttle("u_high")
+    assert allowed is False, "High Risk user should be throttled on bets"
     
     # 2. Verify Withdrawal Blocked
     # High risk score (80) > Block Threshold (70)
@@ -49,7 +53,14 @@ async def test_risk_cross_flow_low_risk():
     # Setup: Low Risk User
     mock_db = AsyncMock()
     profile_low = RiskProfile(user_id="u_low", risk_score=10, risk_level=RiskLevel.LOW)
-    mock_db.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(first=lambda: profile_low)))
+    
+    mock_result_profile = MagicMock()
+    mock_result_profile.scalars.return_value.first.return_value = profile_low
+    
+    mock_result_level = MagicMock()
+    mock_result_level.scalar.return_value = RiskLevel.LOW
+    
+    mock_db.execute = AsyncMock(side_effect=[mock_result_level, mock_result_profile])
     
     mock_redis = MagicMock()
     # Pipeline for throttle: Simulate Low usage (e.g. 5 < 60 limit)
