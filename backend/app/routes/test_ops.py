@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 
 from app.core.database import get_session
 from app.models.sql_models import Player
-from app.models.game_models import GameRound, GameEvent, Game
+from app.models.game_models import GameRound, Game
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/v1/test", tags=["test-ops"])
@@ -26,9 +26,13 @@ async def set_kyc_status(
     player = result.scalars().first()
     if player:
         player.kyc_status = payload.status
+        # Force verify flags too for P0 testing
+        player.email_verified = True
+        player.sms_verified = True
+        
         session.add(player)
         await session.commit()
-        return {"ok": True, "status": player.kyc_status}
+        return {"ok": True, "status": player.kyc_status, "verified": True}
     return {"ok": False, "error": "Player not found"}
 
 @router.get("/dump-rounds")
