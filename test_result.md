@@ -236,6 +236,54 @@ test_plan:
           agent: "testing"
           comment: "Final verification completed successfully. All 3 pytest resilience tests passed (100%): test_risk_resilience_redis_down, test_risk_resilience_override_expiry_simulation, test_risk_resilience_downgrade_reset. Release notes confirmed at docs/releases/risk_v2_release_note.md with complete rollback plan. Monitoring setup confirmed at docs/risk/risk_alert_matrix.md with proper alert rules and notification channels. Risk V2 system is stable and production-ready."
 
+  - task: "Faz 6A Sprint 1 - PragmaticAdapter Implementation"
+    implemented: true
+    working: true
+    file: "backend/app/services/providers/adapters.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "PragmaticAdapter implementation verified. All adapter methods working correctly: validate_signature (returns True in dev mode), map_request (correctly maps Pragmatic fields to canonical format), map_response (maps engine response to Pragmatic format with error=0), map_error (maps error codes correctly). Adapter is properly registered in ProviderRegistry."
+
+  - task: "Faz 6A Sprint 1 - GamesCallbackRouter Updates"
+    implemented: true
+    working: true
+    file: "backend/app/routes/games_callback.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GamesCallbackRouter updated successfully. Contains all required imports: metrics, ProviderRegistry. Implements provider callback endpoint with proper metrics tracking (provider_requests_total, provider_signature_failures). Uses ProviderRegistry.get_adapter for provider integration. Proper error handling and metrics labeling implemented."
+
+  - task: "Faz 6A Sprint 1 - Metrics Implementation"
+    implemented: true
+    working: true
+    file: "backend/app/core/metrics.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Metrics implementation verified. All required provider metrics implemented: provider_requests_total (with provider, method, status labels), provider_signature_failures (with provider label). Game metrics also present: bets_total, wins_total, rollbacks_total, bet_amount, win_amount. All metrics functional and can be incremented successfully."
+
+  - task: "Faz 6A Sprint 1 - Pytest Tests"
+    implemented: true
+    working: true
+    file: "backend/tests/providers/test_pragmatic_adapter.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Pytest tests for PragmaticAdapter passed successfully. All 4 tests passed (100%): test_pragmatic_adapter_signature, test_pragmatic_mapping, test_pragmatic_response_mapping, test_pragmatic_error_mapping. Tests verify signature validation, request/response mapping, and error handling functionality."
+
 frontend:
   - task: "Frontend Testing"
     implemented: false
