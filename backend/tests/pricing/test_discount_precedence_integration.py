@@ -1,25 +1,67 @@
 import pytest
+import pytest_asyncio
+from datetime import datetime
 from decimal import Decimal
-from datetime import datetime, timedelta
 from app.pricing.discount_resolver import DiscountResolver
-from app.pricing.models.discount import Discount, DiscountRule, DiscountType
+from app.models.discount import Discount, DiscountRules, DiscountTypeEnum, SegmentTypeEnum
 
-# Integration-like Logic Test (DB interaction mocked at query level)
+@pytest_asyncio.fixture
+async def db_session(async_session_factory):
+    async with async_session_factory() as session:
+        yield session
 
-def test_expired_discount_ignored(db_session):
-    # Setup: 1 active but expired, 1 active valid
-    expired = Discount(code="EXP", start_at=datetime.now()-timedelta(days=10), end_at=datetime.now()-timedelta(days=1), type=DiscountType.FLAT, value=10)
-    valid = Discount(code="VALID", start_at=datetime.now()-timedelta(days=1), type=DiscountType.FLAT, value=5)
+@pytest.mark.asyncio
+async def test_manual_override_wins(db_session):
+    # Setup
+    now = datetime.utcnow()
     
-    # Rules
-    r1 = DiscountRule(discount=expired, priority=100)
-    r2 = DiscountRule(discount=valid, priority=10)
-    
-    # Mock DB Query Result (simulating SQL filtering)
-    # The Resolver SQL logic should filter expired. 
-    # Here we assume the DB returned ONLY the valid one because the SQL WHERE clause handles dates.
-    # In a real integration test, we insert into DB and let the resolver query run.
-    pass 
+    d1 = Discount(code="D1", type=DiscountTypeEnum.FLAT, value=10, start_at=now)
+    d2 = Discount(code="D2", type=DiscountTypeEnum.FLAT, value=20, start_at=now)
+    d3 = Discount(code="D3", type=DiscountTypeEnum.FLAT, value=5, start_at=now)
+    db_session.add_all([d1, d2, d3])
+    await db_session.commit()
+    await db_session.refresh(d1)
+    await db_session.refresh(d2)
+    await db_session.refresh(d3)
 
-# Since we don't have a live DB in this snippet context, we define the structure for the runner.
-# The `test_discount_precedence.py` covered logic. This file placeholders the integration environment.
+    r1 = DiscountRules(discount_id=d1.id, priority=10, tenant_id="t1") # Segment Default
+    r2 = DiscountRules(discount_id=d2.id, priority=50, tenant_id="t1") # Campaign
+    r3 = DiscountRules(discount_id=d3.id, priority=100, tenant_id="t1") # Manual
+    db_session.add_all([r1, r2, r3])
+    await db_session.commit()
+
+    resolver = DiscountResolver(db_session)
+    context = {'tenant_id': "t1", 'now': now}
+    
+    applied = await resolver.resolve(context, Decimal(100))
+    
+    assert applied is not None
+    assert applied.code == "D3" # Manual override wins (priority 100)
+    
+    final, amount = resolver.calculate_final_price(Decimal(100), applied)
+    assert final == 95
+    assert amount == 5
+
+@pytest.mark.asyncio
+async def test_campaign_beats_segment(db_session):
+    now = datetime.utcnow()
+    d1 = Discount(code="D1", type=DiscountTypeEnum.PERCENTAGE, value=20, start_at=now)
+    d2 = Discount(code="D2", type=DiscountTypeEnum.PERCENTAGE, value=30, start_at=now)
+    db_session.add_all([d1, d2])
+    await db_session.commit()
+    await db_session.refresh(d1); await db_session.refresh(d2)
+
+    r1 = DiscountRules(discount_id=d1.id, priority=10, tenant_id="t1") # Dealer Rate
+    r2 = DiscountRules(discount_id=d2.id, priority=20, tenant_id="t1") # Summer Sale
+    db_session.add_all([r1, r2])
+    await db_session.commit()
+    
+    resolver = DiscountResolver(db_session)
+    context = {'tenant_id': "t1", 'now': now}
+    
+    applied = await resolver.resolve(context, Decimal(100))
+    
+    assert applied.code == "D2"
+    
+    final, amount = resolver.calculate_final_price(Decimal(100), applied)
+    assert final == 70 # 100 - 30%
