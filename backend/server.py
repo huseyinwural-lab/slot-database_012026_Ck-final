@@ -144,6 +144,7 @@ app.add_exception_handler(Exception, generic_exception_handler)
 # 1. Core Auth & Admin
 from app.routes import auth, admin, tenant, api_keys, health as health_router
 app.include_router(auth.router)
+from app.routes import risk_admin
 app.include_router(admin.router)
 app.include_router(tenant.router)
 app.include_router(api_keys.router) 
@@ -307,6 +308,7 @@ app.include_router(games_callback.router)
 from app.routes import player_history
 app.include_router(player_history.router)
 from app.routes import admin_reports
+    app.include_router(risk_admin.router)
 app.include_router(admin_reports.router)
 app.include_router(reconciliation_router.router)
 
