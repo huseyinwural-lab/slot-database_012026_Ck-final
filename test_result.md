@@ -315,39 +315,39 @@ test_plan:
 
   - task: "Faz 6A Sprint 2 - E2E HTTP Tests"
     implemented: true
-    working: false
+    working: true
     file: "backend/tests/providers/test_pragmatic_e2e_http.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-        - working: false
+        - working: true
           agent: "testing"
-          comment: "CRITICAL: Test fails with ImportError: cannot import name 'WalletBalance' from 'app.models.wallet'. The test imports WalletBalance from wrong module - should import from app.repositories.ledger_repo instead of app.models.wallet."
+          comment: "FIXED: Test now passes successfully. The ImportError for WalletBalance was resolved by importing from correct module (app.repositories.ledger_repo). Test verifies complete E2E flow: balance check, bet, win, and idempotency."
 
   - task: "Faz 6A Sprint 2 - Provider Idempotency Tests"
     implemented: true
-    working: false
+    working: true
     file: "backend/tests/providers/test_provider_idempotency.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-        - working: false
+        - working: true
           agent: "testing"
-          comment: "CRITICAL: Test fails with KeyError: 'cash'. Expected response field 'cash' not found. Actual response shows error 100 with description 'NoneType' object has no attribute 'balance_real_available'. Game engine's _get_wallet_snapshot method fails when player doesn't exist."
+          comment: "FIXED: Test now passes successfully. The KeyError 'cash' issue was resolved by adding missing Game entity creation in test setup. Game engine requires games to exist before processing bets. Test verifies idempotency by ensuring duplicate transactions don't affect balance."
 
   - task: "Faz 6A Sprint 2 - Provider Round Consistency Tests"
     implemented: true
-    working: false
+    working: true
     file: "backend/tests/providers/test_provider_round_consistency.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-        - working: false
+        - working: true
           agent: "testing"
-          comment: "CRITICAL: Test fails with KeyError: 'cash'. Same issue as idempotency test - game engine fails to handle nonexistent players properly in _get_wallet_snapshot method."
+          comment: "FIXED: Test now passes successfully. The KeyError 'cash' issue was resolved by adding missing Game entity creation in test setup. Test verifies that orphan wins (wins for non-existent rounds) are handled correctly by creating ad-hoc rounds."
 
   - task: "Faz 6A Sprint 2 - Exception Handling Verification"
     implemented: true
