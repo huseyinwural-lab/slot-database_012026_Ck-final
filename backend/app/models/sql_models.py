@@ -2,6 +2,7 @@ from typing import Optional, List, Dict, Any, TYPE_CHECKING
 from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON, Text, DateTime, Boolean, func
+from sqlalchemy import Column, JSON, Text, DateTime, Boolean, func, Enum
 from sqlalchemy.dialects.postgresql import JSONB
 import uuid
 
