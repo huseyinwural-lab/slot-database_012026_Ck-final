@@ -250,6 +250,9 @@ test_plan:
     - "Risk Layer Sprint 2 - Admin Risk Dashboard API Tests"
     - "Risk Layer Sprint 2 - Risk History Table Verification"
     - "Risk Layer Sprint 2 - Risk Admin API Endpoints"
+    - "Risk Sprint 2 Closure - Cross Flow Tests"
+    - "Risk Sprint 2 Closure - Override Lifecycle Tests"
+    - "Risk Sprint 2 Closure - Database Schema Verification"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
