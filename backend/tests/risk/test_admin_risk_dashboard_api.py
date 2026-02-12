@@ -53,8 +53,9 @@ async def test_admin_override_risk(client, session, async_session_factory):
             expires_delta=timedelta(minutes=30)
         )
         
+        import uuid
         # User to override
-        user_id = "u_override_1"
+        user_id = str(uuid.uuid4())
         # Pre-create profile
         profile = RiskProfile(user_id=user_id, tenant_id=tenant.id, risk_score=10, risk_level=RiskLevel.LOW)
         s.add(profile)
