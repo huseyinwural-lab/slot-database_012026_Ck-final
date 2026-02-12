@@ -47,7 +47,7 @@ class GameEngine:
             risk_service = RiskService(session, redis_client)
             if not await risk_service.check_bet_throttle(player_id):
                 metrics.bets_total.labels(provider=provider, currency=currency, status="throttled").inc()
-                raise AppError("RATE_LIMIT_EXCEEDED", status_code=429)
+                raise AppError("RATE_LIMIT_EXCEEDED", "Bet velocity limit exceeded", status_code=429)
 
             # 1. Idempotency Check (Fast Path)
             stmt = select(GameEvent).where(
