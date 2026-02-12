@@ -68,9 +68,13 @@ class GameEvent(SQLModel, table=True):
     __table_args__ = {'extend_existing': True}
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     round_id: str = Field(foreign_key="gameround.id", index=True)
+    player_id: str = Field(index=True) # Added Phase 4
     
     # Unique event ID from provider (Idempotency Key)
-    provider_event_id: str = Field(unique=True, index=True)
+    # We remove unique=True here to allow composite constraint in DB migration, 
+    # but index=True is fine for lookup.
+    provider_event_id: str = Field(index=True) 
+    provider: str = Field(index=True) # Added Phase 4
     
     type: str # BET, WIN, REFUND
     amount: float
@@ -78,6 +82,7 @@ class GameEvent(SQLModel, table=True):
     
     # Wallet Transaction Reference
     tx_id: Optional[str] = Field(index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow) # Ensure this exists
 
 class CallbackNonce(SQLModel, table=True):
     """Replay Protection Store"""
@@ -88,4 +93,3 @@ class CallbackNonce(SQLModel, table=True):
     expires_at: datetime
     
     # Constraint: Unique (provider, nonce) handled by logic or composite index manually if needed
-    # For now, simplistic check
