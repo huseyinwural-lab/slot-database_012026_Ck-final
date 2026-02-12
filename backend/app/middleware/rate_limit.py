@@ -1,5 +1,6 @@
 import time
 import logging
+import os
 from typing import Callable
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -7,6 +8,10 @@ from starlette.types import ASGIApp
 from app.core.redis_client import get_redis
 
 logger = logging.getLogger("app.ratelimit")
+
+def is_test_mode():
+    return os.getenv("MOCK_EXTERNAL_SERVICES", "false").lower() == "true" or \
+           os.getenv("E2E_MODE", "false").lower() == "true"
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp) -> None:
@@ -22,30 +27,33 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         limit = 100 
         window = 60 
         
-        # Split policies
+        # Policy Definition
         if path.startswith("/api/v1/auth/player/register"):
-            limit = 10 # Strict for register
+            # Strict in PROD, relaxed in TEST/MOCK
+            if is_test_mode():
+                limit = 1000 # Allow load/e2e testing from single IP
+            else:
+                limit = 10 # Strict
             key = f"rl:auth:reg:{ip}"
+            
         elif path.startswith("/api/v1/auth/player/login"):
-            limit = 20 # Moderate for login (load test needs some room, but real world IP based)
-            # In load test, all requests come from same IP (localhost).
-            # To allow load test, we might need a higher limit or user-based limit.
-            # But login is pre-auth, so only IP is available.
-            # For 50 concurrent users from 1 IP, we need limit >= 50/min or bypass.
-            # Real prod would have diverse IPs.
-            limit = 1000 # Relaxed for dev/staging load test from single source
+            if is_test_mode():
+                limit = 2000
+            else:
+                limit = 20 
             key = f"rl:auth:login:{ip}"
+            
         elif path.startswith("/api/v1/games/callback"):
-            # Provider callback - High throughput required
             limit = 10000 
             key = f"rl:prov:{ip}"
+            
         elif path.startswith("/api/v1/player"):
-            # Gameplay actions (authenticated)
-            # Ideally user-based, but middleware runs before auth dep.
-            # We can parse Authorization header if present?
-            # For P0, IP based is standard.
-            limit = 500 # Relaxed for load test
+            if is_test_mode():
+                limit = 5000
+            else:
+                limit = 500
             key = f"rl:player:{ip}"
+            
         else:
             key = f"rl:global:{ip}"
 
@@ -57,7 +65,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             
             if current > limit:
                 # logger.warning(f"Rate limit exceeded for {ip} on {path}. Count: {current}/{limit}")
-                return Response("Too Many Requests", status_code=429)
+                # Standard Error Response
+                return Response('{"error_code": "RATE_LIMITED", "message": "Too many requests"}', status_code=429, media_type="application/json")
                 
         except Exception as e:
             logger.error(f"Rate limit check failed: {e}")
