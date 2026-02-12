@@ -15,6 +15,9 @@ class RiskHistory(SQLModel, table=True):
     old_level: str
     new_level: str
     
+    # Versioning
+    risk_engine_version: str = Field(default="v1")
+    
     change_reason: str # e.g. "Rule: Rapid Deposit", "Manual: Admin"
     changed_by: Optional[str] = None # Admin ID or "System"
     

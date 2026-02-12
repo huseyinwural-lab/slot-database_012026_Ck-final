@@ -20,6 +20,10 @@ class RiskProfile(SQLModel, table=True):
     risk_score: int = Field(default=0)
     risk_level: RiskLevel = Field(sa_column=Column(Enum(RiskLevel), default=RiskLevel.LOW))
     
+    # Versioning & Override
+    risk_engine_version: str = Field(default="v1")
+    override_expires_at: Optional[datetime] = Field(default=None)
+    
     # State
     flags: Dict = Field(default={}, sa_column=Column(JSON))
     
