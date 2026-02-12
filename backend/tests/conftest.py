@@ -14,6 +14,7 @@ from config import settings
 from server import app
 from app.core.database import get_session
 from app.models.sql_models import Tenant, Player, AdminUser
+from app.models.discount import Discount # Ensure metadata registry
 from app.utils.auth_player import get_current_player
 from app.utils import auth_player as auth_player_module
 from app.utils.auth import create_access_token
