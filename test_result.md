@@ -305,11 +305,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Faz 6A Sprint 1 - PragmaticAdapter Implementation"
-    - "Faz 6A Sprint 1 - GamesCallbackRouter Updates"
-    - "Faz 6A Sprint 1 - Metrics Implementation"
-    - "Faz 6A Sprint 1 - Pytest Tests"
-    - "Faz 6A Sprint 3 - Script Deliverables Verification"
+    - "Session Closure Verification"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
