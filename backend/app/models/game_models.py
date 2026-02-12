@@ -82,17 +82,18 @@ class CallbackNonce(SQLModel, table=True):
     expires_at: datetime
 
 # Phase 4C: Aggregation Table
-# Rename field 'date' to 'agg_date' to avoid SQLModel/Pydantic collision with type
 class DailyGameAggregation(SQLModel, table=True):
     __tablename__ = "daily_game_aggregation"
+    # Note: Use 'date' string in constraint referencing the DB column name
     __table_args__ = (
-        UniqueConstraint("tenant_id", "agg_date", "provider", "currency", name="uq_daily_game_agg"),
+        UniqueConstraint("tenant_id", "date", "provider", "currency", name="uq_daily_game_agg"),
         {'extend_existing': True}
     )
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tenant_id: str = Field(index=True)
-    agg_date: date = Field(index=True, sa_column_kwargs={"name": "date"}) # Map back to DB column 'date'
+    # The field name in python is 'date_val', mapped to DB column 'date'
+    date_val: date = Field(index=True, sa_column=Column("date", sa.Date))
     
     provider: str = Field(index=True)
     currency: str = Field(index=True)
