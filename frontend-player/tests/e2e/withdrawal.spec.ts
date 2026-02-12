@@ -3,20 +3,16 @@ import { test, expect } from '@playwright/test';
 test.describe('P0 Withdrawal Flow', () => {
   let playerContext;
   let playerPage;
-  let adminContext;
-  let adminPage;
   
   const timestamp = Date.now();
   const playerEmail = `withdraw_${timestamp}@test.com`;
-  const adminEmail = "admin@casino.com";
-  const adminPass = "Admin123!";
 
-  test.beforeAll(async ({ browser, request }) => {
-    // 1. Setup Backend: Ensure Healthy
+  test.beforeAll(async ({ request }) => {
+    // 1. Setup Backend
     const health = await request.get('/api/health');
     expect(health.ok()).toBeTruthy();
     
-    // 2. Register Player via API (Shortcut)
+    // 2. Register Player
     await request.post('/api/v1/auth/player/register', {
         data: {
             email: playerEmail,
@@ -27,7 +23,7 @@ test.describe('P0 Withdrawal Flow', () => {
         }
     });
     
-    // 3. Login & Get Token to Verify & Deposit
+    // 3. Login
     const loginRes = await request.post('/api/v1/auth/player/login', {
         data: { email: playerEmail, password: "Password123!" }
     });
@@ -35,15 +31,16 @@ test.describe('P0 Withdrawal Flow', () => {
     const token = loginData.access_token;
     
     // 4. Verify Mock
-    await request.post('/api/v1/verify/email/send', { data: { email: playerEmail }, headers: { Authorization: `Bearer ${token}` } });
-    await request.post('/api/v1/verify/email/confirm', { data: { email: playerEmail, code: "123456" }, headers: { Authorization: `Bearer ${token}` } });
-    await request.post('/api/v1/verify/sms/send', { data: { phone: "+15550009999" }, headers: { Authorization: `Bearer ${token}` } });
-    await request.post('/api/v1/verify/sms/confirm', { data: { phone: "+15550009999", code: "123456" }, headers: { Authorization: `Bearer ${token}` } });
+    const headers = { Authorization: `Bearer ${token}` };
+    await request.post('/api/v1/verify/email/send', { data: { email: playerEmail }, headers });
+    await request.post('/api/v1/verify/email/confirm', { data: { email: playerEmail, code: "123456" }, headers });
+    await request.post('/api/v1/verify/sms/send', { data: { phone: "+15550009999" }, headers });
+    await request.post('/api/v1/verify/sms/confirm', { data: { phone: "+15550009999", code: "123456" }, headers });
 
     // 5. Deposit 500
     await request.post('/api/v1/player/wallet/deposit', {
         data: { amount: 500, currency: "USD", method: "test" },
-        headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": `dep_${timestamp}` }
+        headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
   });
 
@@ -54,23 +51,36 @@ test.describe('P0 Withdrawal Flow', () => {
     
     // Login
     await playerPage.goto('/login');
-    await playerPage.locator('input[type="email"]').fill(playerEmail);
-    await playerPage.locator('input[type="password"]').fill("Password123!");
-    await playerPage.getByRole('button', { name: /Login|Giriş/i }).click();
+    await playerPage.getByTestId('login-email-input').fill(playerEmail);
+    await playerPage.getByTestId('login-password-input').fill("Password123!");
+    await playerPage.getByTestId('login-submit-button').click();
     await expect(playerPage).toHaveURL(/\/lobby/);
     
     // Go to Wallet
     await playerPage.goto('/wallet');
     // Check balance 500
-    await expect(playerPage.getByText('500')).toBeVisible(); 
+    await expect(playerPage.getByTestId('wallet-balance')).toContainText('500');
     
-    // Request Withdrawal (Assume UI updated)
-    // If UI not ready, this will fail - expecting Dev to implement UI in this task.
-    // Assuming "Withdraw" tab or button.
-    // For now, let's verify API level via curl/request if UI is missing, OR implementing UI is part of task.
-    // Task said: "Player Withdrawal UI (Faz 2.1)". So I must assume I built it.
+    // Request Withdrawal
+    await playerPage.getByTestId('tab-withdraw').click();
+    await playerPage.getByTestId('amount-input').fill('100');
+    await playerPage.getByTestId('address-input').fill('TR123456');
+    await playerPage.getByTestId('submit-button').click();
     
-    // Click "Withdraw" tab/button
-    // (I need to implement this in WalletPage.jsx first)
+    // Verify toast or UI update
+    // Available should drop to 400 (Locked 100)
+    await expect(playerPage.getByTestId('wallet-balance')).toContainText('400');
+    await expect(playerPage.getByText('Locked: 100')).toBeVisible();
+    
+    // --- Admin Context (API Level for now as Admin UI test is complex in same file) ---
+    // Or we can use API request to approve since we built the endpoint
+    // We need admin token. 
+    // We can assume default admin credentials or check DB. 
+    // Since I reset admin password in previous steps, "Admin123!" should work.
+    
+    /* 
+       NOTE: Admin login endpoint is /api/v1/auth/login (for admins)
+       NOT /api/v1/auth/player/login
+    */
   });
 });
