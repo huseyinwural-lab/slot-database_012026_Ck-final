@@ -18,6 +18,8 @@ from app.services.wallet_ledger import (
 )
 from app.core.errors import AppError
 from app.core.metrics import metrics
+from app.services.risk_service import RiskService
+from app.core.redis_client import get_redis
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,13 @@ class GameEngine:
         start_time = time.time()
         
         try:
+            # 0. Risk Throttling (Sprint 2)
+            redis_client = await get_redis()
+            risk_service = RiskService(session, redis_client)
+            if not await risk_service.check_bet_throttle(player_id):
+                metrics.bets_total.labels(provider=provider, currency=currency, status="throttled").inc()
+                raise AppError("RATE_LIMIT_EXCEEDED", status_code=429)
+
             # 1. Idempotency Check (Fast Path)
             stmt = select(GameEvent).where(
                 GameEvent.provider_event_id == provider_tx_id,
