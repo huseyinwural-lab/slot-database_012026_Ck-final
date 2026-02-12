@@ -108,6 +108,7 @@ class Settings(BaseSettings):
     adyen_client_key: Optional[str] = None
     adyen_hmac_key: Optional[str] = None
 
+    pragmatic_secret_key: Optional[str] = None
     # KYC (mock UI endpoints)
     kyc_mock_enabled: bool = True
 
