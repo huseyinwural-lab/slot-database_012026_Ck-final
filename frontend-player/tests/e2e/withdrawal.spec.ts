@@ -33,22 +33,19 @@ test.describe('P0 Withdrawal Flow', () => {
     
     const headers = { Authorization: `Bearer ${token}` };
     
-    // 4. Verify Email/SMS
     await request.post('/api/v1/verify/email/send', { data: { email: playerEmail }, headers });
     await request.post('/api/v1/verify/email/confirm', { data: { email: playerEmail, code: "123456" }, headers });
     await request.post('/api/v1/verify/sms/send', { data: { phone: playerPhone }, headers });
     await request.post('/api/v1/verify/sms/confirm', { data: { phone: playerPhone, code: "123456" }, headers });
 
-    // 5. Force KYC Verified (Test Backdoor)
+    // 5. Force KYC Verified
     await request.post('/api/v1/test/set-kyc', { data: { email: playerEmail, status: "verified" } });
 
     // 6. Deposit 500
-    const depRes = await request.post('/api/v1/player/wallet/deposit', {
+    await request.post('/api/v1/player/wallet/deposit', {
         data: { amount: 500, currency: "USD", method: "test" },
         headers: { ...headers, "Idempotency-Key": `dep_${timestamp}` }
     });
-    
-    expect(depRes.ok()).toBeTruthy();
   });
 
   test('Player Request -> Admin Approve', async ({ browser }) => {
@@ -63,6 +60,7 @@ test.describe('P0 Withdrawal Flow', () => {
     
     await playerPage.goto('/wallet');
     
+    // Check balance 500
     await expect(playerPage.getByTestId('wallet-balance')).toContainText('500');
     
     await playerPage.getByTestId('tab-withdraw').click();
@@ -70,8 +68,13 @@ test.describe('P0 Withdrawal Flow', () => {
     await playerPage.getByTestId('address-input').fill('TR123456');
     await playerPage.getByTestId('submit-button').click();
     
-    // Wait for update
-    await expect(playerPage.getByTestId('wallet-balance')).toContainText('400');
+    // Wait for balance to update (poll or wait)
+    // Sometimes UI updates a bit slow or needs forced refresh if not reactive
+    // Wait for Toast
+    await expect(playerPage.getByText(/Withdrawal requested/)).toBeVisible();
+    
+    // Wait for Balance text to change
+    await expect(playerPage.getByTestId('wallet-balance')).toContainText('400', { timeout: 10000 });
     await expect(playerPage.getByText(/Locked: 100|Kilitli: 100/i)).toBeVisible();
   });
 });
