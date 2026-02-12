@@ -224,6 +224,18 @@ test_plan:
           agent: "testing"
           comment: "Database schema verification completed. risk_profiles table contains required columns: risk_engine_version (VARCHAR) and override_expires_at (DATETIME). risk_history table contains required column: risk_engine_version (VARCHAR). All Sprint 2 schema requirements satisfied."
 
+  - task: "Risk Layer Faz 6C - Final Verification"
+    implemented: true
+    working: true
+    file: "backend/tests/risk/test_risk_engine_resilience.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Final verification completed successfully. All 3 pytest resilience tests passed (100%): test_risk_resilience_redis_down, test_risk_resilience_override_expiry_simulation, test_risk_resilience_downgrade_reset. Release notes confirmed at docs/releases/risk_v2_release_note.md with complete rollback plan. Monitoring setup confirmed at docs/risk/risk_alert_matrix.md with proper alert rules and notification channels. Risk V2 system is stable and production-ready."
+
 frontend:
   - task: "Frontend Testing"
     implemented: false
