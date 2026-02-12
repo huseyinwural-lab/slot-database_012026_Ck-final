@@ -59,6 +59,42 @@ backend:
           agent: "testing"
           comment: "Discount models imported and instantiated successfully. PricingService integrates with DiscountResolver correctly"
 
+  - task: "Risk Layer Sprint 1 - Risk Rules V1 Tests"
+    implemented: true
+    working: true
+    file: "backend/tests/risk/test_risk_rules_v1.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "All 3 risk rules tests passed: test_risk_scoring_logic, test_evaluate_withdrawal_allow, test_evaluate_withdrawal_block. Risk service correctly processes events and evaluates withdrawal decisions."
+
+  - task: "Risk Layer Sprint 1 - Withdrawal Risk Blocking Tests"
+    implemented: true
+    working: true
+    file: "backend/tests/risk/test_withdrawal_risk_blocking.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "All 2 withdrawal risk blocking tests passed: test_withdrawal_blocked_for_high_risk (returns 403 RISK_BLOCK), test_withdrawal_allowed_for_low_risk (returns 200 success). Risk-based withdrawal blocking is working correctly."
+
+  - task: "Risk Layer Sprint 1 - Database Schema Verification"
+    implemented: true
+    working: true
+    file: "alembic/versions/20260216_01_risk_profile.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "risk_profiles table exists in database with correct schema: user_id (UUID), tenant_id (VARCHAR), risk_score (INTEGER), risk_level (VARCHAR), flags (JSON), last_event_at (DATETIME), version (INTEGER). Migration 20260216_01_risk_profile applied successfully."
+
 frontend:
   - task: "Frontend Testing"
     implemented: false
