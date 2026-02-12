@@ -8,6 +8,7 @@ from redis.asyncio import Redis
 
 from app.models.risk import RiskProfile, RiskLevel
 from app.services.metrics import metrics
+from app.models.risk_history import RiskHistory
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -33,10 +34,28 @@ class RiskService:
             delta_score = await self._evaluate_rules(event_type, user_id, payload, profile)
             
             if delta_score != 0:
+                old_score = profile.risk_score
+                old_level = profile.risk_level
+                
                 profile.risk_score = max(0, min(100, profile.risk_score + delta_score))
                 profile.risk_level = self._map_score_to_level(profile.risk_score)
                 profile.last_event_at = datetime.utcnow()
+                
                 self.db.add(profile)
+                
+                # History Log
+                history = RiskHistory(
+                    user_id=profile.user_id,
+                    tenant_id=profile.tenant_id,
+                    old_score=old_score,
+                    new_score=profile.risk_score,
+                    old_level=old_level,
+                    new_level=profile.risk_level,
+                    change_reason=f"Rule Trigger: {event_type}",
+                    changed_by="System"
+                )
+                self.db.add(history)
+                
                 await self.db.commit()
                 metrics.record_risk_score_update()
                 
@@ -49,6 +68,46 @@ class RiskService:
     async def evaluate_withdrawal(self, user_id: str, amount: float) -> str:
         """
         Guard method for Withdrawal Service.
+    async def check_bet_throttle(self, user_id: str) -> bool:
+        """
+        Check if user exceeded bet velocity limits.
+        Returns: True (Allowed), False (Throttled).
+        """
+        try:
+            # 1. Get Risk Level (Fast path: Redis cache could be added here, currently DB)
+            # Optimization: We can store risk_level in a Redis hash for 5 min TTL
+            stmt = select(RiskProfile.risk_level).where(RiskProfile.user_id == user_id)
+            result = await self.db.execute(stmt)
+            level = result.scalar() or RiskLevel.LOW
+            
+            # 2. Determine Limit
+            limit = 60 # LOW: 1/sec
+            if level == RiskLevel.MEDIUM:
+                limit = 30
+            elif level == RiskLevel.HIGH:
+                limit = 10
+                
+            # 3. Token Bucket (Simplified to Sliding Window for MVP)
+            # Key: risk:throttle:bet:{user_id}:{minute_epoch}
+            minute = int(datetime.utcnow().timestamp() / 60)
+            key = f"risk:throttle:bet:{user_id}:{minute}"
+            
+            pipe = self.redis.pipeline()
+            pipe.incr(key)
+            pipe.expire(key, 65) # Slightly > 60s
+            res = await pipe.execute()
+            
+            current_count = res[0]
+            
+            if current_count > limit:
+                logger.warning(f"Bet Throttled: user={user_id} level={level} count={current_count} limit={limit}")
+                return False
+                
+            return True
+            
+        except Exception as e:
+            logger.error(f"Throttle check failed: {e}")
+            return True # Fail-Open for betting to avoid revenue loss on redis glitch
         Returns: 'ALLOW', 'FLAG', 'BLOCK'
         """
         try:
