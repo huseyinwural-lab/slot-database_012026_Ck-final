@@ -14,7 +14,98 @@ import importlib.util
 import asyncio
 from pathlib import Path
 
-def test_file_existence():
+def test_staging_soak_exit_report():
+    """Test 1: Verify staging_soak_exit_report.md exists and is marked GO"""
+    report_path = "/app/staging_soak_exit_report.md"
+    
+    if not os.path.exists(report_path):
+        print("❌ staging_soak_exit_report.md: MISSING")
+        return False, "File does not exist"
+    
+    try:
+        with open(report_path, 'r') as f:
+            content = f.read()
+        
+        # Check for GO status
+        if "**Status:** GO ✅" in content:
+            print("✅ staging_soak_exit_report.md: EXISTS and marked GO")
+            return True, "File exists and marked GO"
+        else:
+            print("❌ staging_soak_exit_report.md: EXISTS but NOT marked GO")
+            return False, "File exists but not marked GO"
+            
+    except Exception as e:
+        print(f"❌ staging_soak_exit_report.md: ERROR reading file - {e}")
+        return False, str(e)
+
+def test_faz6a_sprint3_code_complete():
+    """Test 2: Verify faz6a_sprint3_code_complete.md exists"""
+    report_path = "/app/faz6a_sprint3_code_complete.md"
+    
+    if not os.path.exists(report_path):
+        print("❌ faz6a_sprint3_code_complete.md: MISSING")
+        return False, "File does not exist"
+    
+    try:
+        with open(report_path, 'r') as f:
+            content = f.read()
+        
+        # Check for CODE COMPLETE status
+        if "**Status:** CODE COMPLETE ✅" in content:
+            print("✅ faz6a_sprint3_code_complete.md: EXISTS and marked CODE COMPLETE")
+            return True, "File exists and marked CODE COMPLETE"
+        else:
+            print("✅ faz6a_sprint3_code_complete.md: EXISTS")
+            return True, "File exists"
+            
+    except Exception as e:
+        print(f"❌ faz6a_sprint3_code_complete.md: ERROR reading file - {e}")
+        return False, str(e)
+
+def test_recon_provider_execution():
+    """Test 3: Verify recon_provider.py runs without error"""
+    script_path = "/app/backend/app/scripts/recon_provider.py"
+    
+    if not os.path.exists(script_path):
+        print("❌ recon_provider.py: MISSING")
+        return False, "File does not exist"
+    
+    try:
+        # First test syntax
+        result = subprocess.run([
+            sys.executable, "-m", "py_compile", script_path
+        ], capture_output=True, text=True, cwd="/app/backend")
+        
+        if result.returncode != 0:
+            print(f"❌ recon_provider.py: SYNTAX ERROR - {result.stderr}")
+            return False, f"Syntax error: {result.stderr}"
+        
+        # Test execution with proper environment
+        env = os.environ.copy()
+        env.update({
+            'PYTHONPATH': '/app/backend',
+            'MOCK_PROVIDER_DRIFT': '0.0',  # No drift for clean test
+            'RECON_DRIFT_THRESHOLD': '0.01'
+        })
+        
+        # Run the script with timeout
+        result = subprocess.run([
+            sys.executable, script_path
+        ], capture_output=True, text=True, cwd="/app/backend", env=env, timeout=30)
+        
+        if result.returncode == 0:
+            print("✅ recon_provider.py: RUNS WITHOUT ERROR")
+            return True, "Script executed successfully"
+        else:
+            print(f"❌ recon_provider.py: EXECUTION ERROR - {result.stderr}")
+            return False, f"Execution error: {result.stderr}"
+            
+    except subprocess.TimeoutExpired:
+        print("❌ recon_provider.py: TIMEOUT (>30s)")
+        return False, "Script execution timeout"
+    except Exception as e:
+        print(f"❌ recon_provider.py: EXECUTION ERROR - {e}")
+        return False, str(e)
     """Test 1-4: Check existence of required script files"""
     required_files = [
         "backend/app/scripts/recon_provider.py",
