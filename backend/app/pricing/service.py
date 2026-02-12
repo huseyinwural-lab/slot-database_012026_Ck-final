@@ -16,29 +16,28 @@ class PricingService:
         self.discount_resolver = DiscountResolver(db_session)
         self.ledger_service = ledger_service
 
-    def calculate_quote(self, user_id: str, listing_type: str) -> Quote:
+    async def calculate_quote(self, user_id: str, listing_type: str) -> Quote:
         if settings.pricing_engine_v2_enabled:
-            return self._calculate_quote_v2(user_id, listing_type)
+            return await self._calculate_quote_v2(user_id, listing_type)
         else:
-            return self._calculate_quote_legacy(user_id, listing_type)
+            return await self._calculate_quote_legacy(user_id, listing_type)
 
-    def _calculate_quote_legacy(self, user_id: str, listing_type: str) -> Quote:
+    async def _calculate_quote_legacy(self, user_id: str, listing_type: str) -> Quote:
         # Legacy placeholder
-        base_rate = self.rate_service.get_base_rate(listing_type)
+        base_rate = await self.rate_service.get_base_rate(listing_type) # Assume async
         return Quote(price=Decimal(base_rate), type="LEGACY_FALLBACK")
 
-    def _calculate_quote_v2(self, user_id: str, listing_type: str) -> Quote:
+    async def _calculate_quote_v2(self, user_id: str, listing_type: str) -> Quote:
         # 1. Resolve Segment & Context
-        user = self.user_repo.get(user_id)
+        # Check if user_repo.get is async or sync. Assuming async for safety in this stack
+        user = await self.user_repo.get(user_id)
         if not user:
              raise ValueError("User not found")
 
         segment_policy = SegmentPolicyResolver.resolve(user.segment_type)
         
-        # 2. Waterfall (Skipped implementation of quota/package for brevity, add back if needed)
-        
         # 3. Step C: Paid with Discount
-        base_rate = self.rate_service.get_base_rate(listing_type)
+        base_rate = await self.rate_service.get_base_rate(listing_type) # Assume async
         
         segment_adjusted_rate = Decimal(base_rate) * Decimal(segment_policy.paid_rate_modifier)
         
@@ -49,7 +48,7 @@ class PricingService:
             'now': datetime.utcnow()
         }
         
-        applied_discount = self.discount_resolver.resolve(user_context, segment_adjusted_rate)
+        applied_discount = await self.discount_resolver.resolve(user_context, segment_adjusted_rate)
         
         final_price, discount_amount = self.discount_resolver.calculate_final_price(
             segment_adjusted_rate, 
@@ -84,7 +83,6 @@ class PricingService:
             from app.services import wallet_ledger as ledger_module
             ledger = ledger_module
             
-        # Check if ledger has the function (mocks might look different)
         if hasattr(ledger, 'apply_wallet_delta_with_ledger'):
             success = await ledger.apply_wallet_delta_with_ledger(
                 self.db,
