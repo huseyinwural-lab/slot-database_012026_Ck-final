@@ -38,6 +38,10 @@ async def apply_wallet_delta_with_ledger(
     provider: Optional[str] = None,
     provider_ref: Optional[str] = None,
     provider_event_id: Optional[str] = None,
+    # Pricing fields (P1.2)
+    gross_amount: Optional[float] = None,
+    discount_amount: float = 0.0,
+    applied_discount_id: Optional[str] = None,
     # Invariants
     allow_negative: bool = False,
 ) -> bool:
