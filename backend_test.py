@@ -1331,6 +1331,269 @@ class E2EBlockerTestSuite:
             print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
             return False
 
+class Faz6ASprintTestSuite:
+    def __init__(self):
+        self.base_url = f"{BACKEND_URL}/api/v1"
+        self.test_results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test result"""
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
+            "test": test_name,
+            "success": success,
+            "details": details
+        })
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    {details}")
+    
+    async def test_pragmatic_adapter_implementation(self) -> bool:
+        """Test 1: Verify PragmaticAdapter implementation exists and works"""
+        try:
+            from app.services.providers.adapters import PragmaticAdapter
+            from app.services.providers.registry import ProviderRegistry
+            
+            # Test adapter instantiation
+            adapter = PragmaticAdapter()
+            
+            # Test signature validation (should return True in dev mode)
+            sig_result = adapter.validate_signature({"hash": "test"}, {})
+            if sig_result is not True:
+                self.log_result("PragmaticAdapter Implementation", False, 
+                              f"Signature validation failed: expected True, got {sig_result}")
+                return False
+            
+            # Test request mapping
+            test_payload = {
+                "action": "bet",
+                "userId": "test_user",
+                "gameId": "test_game",
+                "roundId": "test_round",
+                "reference": "test_tx",
+                "amount": 10.0,
+                "currency": "USD"
+            }
+            
+            mapped = adapter.map_request(test_payload)
+            expected_fields = ["action", "player_id", "game_id", "round_id", "tx_id", "amount", "currency"]
+            
+            for field in expected_fields:
+                if field not in mapped:
+                    self.log_result("PragmaticAdapter Implementation", False, 
+                                  f"Missing field in mapped request: {field}")
+                    return False
+            
+            # Test response mapping
+            engine_response = {"tx_id": "test_tx", "balance": 100.0, "currency": "USD"}
+            response = adapter.map_response(engine_response)
+            
+            if response.get("error") != 0:
+                self.log_result("PragmaticAdapter Implementation", False, 
+                              f"Response mapping failed: error should be 0, got {response.get('error')}")
+                return False
+            
+            # Test error mapping
+            error_response = adapter.map_error("INSUFFICIENT_FUNDS", "No money")
+            if error_response.get("error") != 1:
+                self.log_result("PragmaticAdapter Implementation", False, 
+                              f"Error mapping failed: expected error code 1, got {error_response.get('error')}")
+                return False
+            
+            # Test registry integration
+            registry_adapter = ProviderRegistry.get_adapter("pragmatic")
+            if not isinstance(registry_adapter, PragmaticAdapter):
+                self.log_result("PragmaticAdapter Implementation", False, 
+                              f"Registry integration failed: expected PragmaticAdapter, got {type(registry_adapter)}")
+                return False
+            
+            self.log_result("PragmaticAdapter Implementation", True, 
+                          "All adapter methods working correctly and registered in provider registry")
+            return True
+            
+        except Exception as e:
+            self.log_result("PragmaticAdapter Implementation", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_games_callback_router_updated(self) -> bool:
+        """Test 2: Verify GamesCallbackRouter has been updated with metrics and proper error handling"""
+        try:
+            # Test the callback endpoint with a mock pragmatic request
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Test with invalid signature first (should return 403)
+                test_payload = {
+                    "action": "balance",
+                    "userId": "test_user",
+                    "gameId": "test_game",
+                    "hash": "invalid_hash"
+                }
+                
+                response = await client.post(
+                    f"{self.base_url}/games/callback/pragmatic",
+                    json=test_payload
+                )
+                
+                # Should return 403 for invalid signature
+                if response.status_code != 403:
+                    self.log_result("GamesCallbackRouter Updated", False, 
+                                  f"Expected 403 for invalid signature, got {response.status_code}: {response.text}")
+                    return False
+                
+                # Test with unsupported provider (should return 404)
+                response = await client.post(
+                    f"{self.base_url}/games/callback/unsupported_provider",
+                    json=test_payload
+                )
+                
+                if response.status_code != 404:
+                    self.log_result("GamesCallbackRouter Updated", False, 
+                                  f"Expected 404 for unsupported provider, got {response.status_code}: {response.text}")
+                    return False
+                
+                # Test that the endpoint exists and handles requests properly
+                # (We can't test successful flow without proper authentication setup)
+                self.log_result("GamesCallbackRouter Updated", True, 
+                              "Games callback router properly handles invalid signatures and unsupported providers")
+                return True
+                
+        except Exception as e:
+            self.log_result("GamesCallbackRouter Updated", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_metrics_implementation(self) -> bool:
+        """Test 3: Verify Metrics have been added to core/metrics.py"""
+        try:
+            from app.core.metrics import metrics
+            
+            # Check that provider-specific metrics exist
+            required_metrics = [
+                "provider_requests_total",
+                "provider_signature_failures"
+            ]
+            
+            for metric_name in required_metrics:
+                if not hasattr(metrics, metric_name):
+                    self.log_result("Metrics Implementation", False, 
+                                  f"Missing required metric: {metric_name}")
+                    return False
+            
+            # Test that metrics can be incremented (basic functionality test)
+            try:
+                metrics.provider_requests_total.labels(provider="test", method="test", status="test").inc()
+                metrics.provider_signature_failures.labels(provider="test").inc()
+            except Exception as e:
+                self.log_result("Metrics Implementation", False, 
+                              f"Failed to increment metrics: {str(e)}")
+                return False
+            
+            # Check that game-related metrics also exist
+            game_metrics = [
+                "bets_total",
+                "wins_total", 
+                "rollbacks_total",
+                "bet_amount",
+                "win_amount"
+            ]
+            
+            for metric_name in game_metrics:
+                if not hasattr(metrics, metric_name):
+                    self.log_result("Metrics Implementation", False, 
+                                  f"Missing game metric: {metric_name}")
+                    return False
+            
+            self.log_result("Metrics Implementation", True, 
+                          "All required provider and game metrics are implemented and functional")
+            return True
+            
+        except Exception as e:
+            self.log_result("Metrics Implementation", False, f"Exception: {str(e)}")
+            return False
+    
+    async def test_pytest_pragmatic_adapter(self) -> bool:
+        """Test 4: Run pytest on pragmatic adapter tests"""
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["python", "-m", "pytest", "tests/providers/test_pragmatic_adapter.py", "-v"],
+                cwd="/app/backend",
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            
+            if result.returncode != 0:
+                self.log_result("Pytest Pragmatic Adapter", False, 
+                              f"Pytest failed with return code {result.returncode}. STDOUT: {result.stdout}, STDERR: {result.stderr}")
+                return False
+            
+            # Check that all tests passed
+            if "FAILED" in result.stdout:
+                self.log_result("Pytest Pragmatic Adapter", False, 
+                              f"Some tests failed: {result.stdout}")
+                return False
+            
+            # Count passed tests
+            import re
+            passed_match = re.search(r'(\d+) passed', result.stdout)
+            if passed_match:
+                passed_count = int(passed_match.group(1))
+                if passed_count < 4:  # We expect at least 4 tests
+                    self.log_result("Pytest Pragmatic Adapter", False, 
+                                  f"Expected at least 4 tests to pass, got {passed_count}")
+                    return False
+            
+            self.log_result("Pytest Pragmatic Adapter", True, 
+                          f"All pragmatic adapter tests passed successfully: {result.stdout.split('=')[-2].strip()}")
+            return True
+            
+        except Exception as e:
+            self.log_result("Pytest Pragmatic Adapter", False, f"Exception: {str(e)}")
+            return False
+    
+    async def run_all_tests(self):
+        """Run the complete Faz 6A Sprint 1 test suite"""
+        print("🚀 Starting Faz 6A Sprint 1 (Provider Integration) Test Suite...")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Run all tests
+        test_results = []
+        
+        # Test 1: PragmaticAdapter implementation
+        test_results.append(await self.test_pragmatic_adapter_implementation())
+        
+        # Test 2: GamesCallbackRouter updated
+        test_results.append(await self.test_games_callback_router_updated())
+        
+        # Test 3: Metrics implementation
+        test_results.append(await self.test_metrics_implementation())
+        
+        # Test 4: Pytest pragmatic adapter
+        test_results.append(await self.test_pytest_pragmatic_adapter())
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("📊 FAZ 6A SPRINT 1 TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(test_results)
+        total = len(test_results)
+        
+        for result in self.test_results:
+            status = "✅" if result["success"] else "❌"
+            print(f"{status} {result['test']}")
+            if result["details"]:
+                print(f"    {result['details']}")
+        
+        print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
+        
+        if passed == total:
+            print("🎉 All Faz 6A Sprint 1 tests PASSED!")
+            return True
+        else:
+            print(f"⚠️  {total - passed} test(s) failed. Review the details above.")
+            return False
+
 class HealthEndpointsTestSuite:
     def __init__(self):
         self.base_url = f"{BACKEND_URL}/api/v1"
