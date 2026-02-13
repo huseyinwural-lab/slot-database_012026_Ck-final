@@ -2,6 +2,7 @@
 
 **Status:** MANDATORY GATE
 **Role:** DevOps / Tech Lead
+**Sign-off:** ____________________
 
 ## 1. Pre-Deploy Gate (GO / NO-GO)
 All items must be CHECKED before starting deployment.
@@ -10,12 +11,12 @@ All items must be CHECKED before starting deployment.
 - [ ] **Financial Integrity:** Drift = 0.00, Duplicate Settlement = 0.
 - [ ] **Security:** `prod_guard.py` PASS.
 - [ ] **Configuration:**
-    - [ ] `DEBUG = false`
+    - [ ] `DEBUG = false` verified.
     - [ ] Secrets loaded via ENV (not hardcoded).
     - [ ] Provider Signature Key verified.
-    - [ ] `allow_test_payment_methods = False`
-    - [ ] `ledger_enforce_balance = True`
-    - [ ] `webhook_signature_enforced = True`
+    - [ ] `allow_test_payment_methods = False`.
+    - [ ] `ledger_enforce_balance = True`.
+    - [ ] `webhook_signature_enforced = True`.
 - [ ] **Database:**
     - [ ] `alembic head` matches codebase.
     - [ ] Point-in-time Backup taken immediately before deploy.
@@ -44,3 +45,9 @@ All items must be CHECKED before starting deployment.
 - [ ] **Traffic:** Watch `provider_requests_total`.
 - [ ] **Risk:** Check for `risk_blocks_total` spikes (false positives?).
 - [ ] **Resources:** DB Pool saturation & Redis Memory.
+
+## 4. Rollback Plan
+- **Tag:** `previous-stable` (e.g. v1.0.0).
+- **DB:** If migration fail -> `alembic downgrade -1`.
+- **Command:** `helm rollback` or `docker service update --image ...`.
+- **Time Objective:** < 15 mins.
