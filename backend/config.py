@@ -177,6 +177,8 @@ class Settings(BaseSettings):
                 raise ValueError(
                     f"CRITICAL: Missing required secrets for {self.env} environment:\n" + 
                     "\n".join(f"- {m}" for m in missing)
+                )
+
     def validate_prod_security_settings(self) -> None:
         """P0: Enforce secure flags in Production."""
         if (self.env or "").lower() == "prod":
