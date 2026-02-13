@@ -200,7 +200,6 @@ class Settings(BaseSettings):
                     f"CRITICAL: Production Security Hardening Failed:\n" +
                     "\n".join(f"- {e}" for e in errors)
                 )
-                )
 
 settings = Settings()
 settings.validate_prod_secrets()
