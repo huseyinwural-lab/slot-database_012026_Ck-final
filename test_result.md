@@ -305,7 +305,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Session Closure Verification"
+    - "Final Verification of Pre-Launch Cleanup"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
