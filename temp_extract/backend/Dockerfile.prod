@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y gcc curl && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+
+ARG APP_VERSION
+ARG GIT_SHA
+ARG BUILD_TIME
+
+ENV APP_VERSION=$APP_VERSION
+ENV GIT_SHA=$GIT_SHA
+ENV BUILD_TIME=$BUILD_TIME
+
+# Copy application code
+COPY . .
+
+# Ensure alembic config and migrations are present (P0-004)
+# COPY alembic.ini . # Already included in COPY . .
+# COPY alembic/ . # Already included in COPY . .
+
+RUN chmod +x /app/scripts/start_prod.sh
+
+EXPOSE 8001
+
+CMD ["/app/scripts/start_prod.sh"]
