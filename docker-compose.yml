@@ -15,7 +15,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: casino_db
-    # ✅ Karar 2: Readiness Gate (Yeni eklendi)
+    # ✅ Karar: Veritabanı hazır mı kontrol et
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d casino_db"]
       interval: 5s
@@ -58,32 +58,10 @@ services:
       - ./backend:/app
     depends_on:
       postgres:
-        condition: service_healthy # ✅ service_started yerine healthy
+        condition: service_healthy # ✅ DB sağlıklı olmadan başlama
       redis:
         condition: service_healthy
     profiles: ["localdb"]
-
-  # 🐍 Backend (API) — EXTERNAL mode (no internal postgres/redis)
-  backend-external:
-    build: ./backend
-    container_name: casino_backend_external
-    restart: always
-    ports:
-      - "8001:8001"
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - SYNC_DATABASE_URL=${SYNC_DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
-      - ENV=dev
-      - DEBUG=True
-      - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ALGORITHM=HS256
-      - LOG_LEVEL=INFO
-      - LOG_FORMAT=plain
-    volumes:
-      - ./backend:/app
-    profiles: ["external"]
 
   # 🏢 Admin Frontend (B2B)
   frontend-admin:
@@ -101,22 +79,6 @@ services:
       - /app/node_modules
     profiles: ["localdb"]
 
-  # 🏢 Admin Frontend (B2B) — EXTERNAL mode
-  frontend-admin-external:
-    build: ./frontend
-    container_name: casino_admin_external
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_BACKEND_URL=http://localhost:8001
-    depends_on:
-      - backend-external
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    profiles: ["external"]
-
   # 🎰 Player Frontend (B2C)
   frontend-player:
     build: ./frontend-player
@@ -133,21 +95,7 @@ services:
       - /app/node_modules
     profiles: ["localdb"]
 
-  # 🎰 Player Frontend (B2C) — EXTERNAL mode
-  frontend-player-external:
-    build: ./frontend-player
-    container_name: casino_player_external
-    restart: always
-    ports:
-      - "3001:3001"
-    environment:
-      - VITE_API_URL=http://localhost:8001/api/v1
-    depends_on:
-      - backend-external
-    volumes:
-      - ./frontend-player:/app
-      - /app/node_modules
-    profiles: ["external"]
+# NOT: Diğer external profilleri ve servisleri de aynı yapıda ekleyebilirsiniz.
 
 volumes:
   postgres_data:
