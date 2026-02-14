@@ -1,28 +1,40 @@
-"""add risk versioning and expiry
+"""Risk Versioning (guarded, canonical table only)"""
 
-Revision ID: 20260216_03_risk_versioning
-Revises: 20260216_02_risk_history
-Create Date: 2026-02-16 14:00:00.000000
-
-"""
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import inspect
 
-# revision identifiers, used by Alembic.
+# revision identifiers
 revision = '20260216_03_risk_versioning'
 down_revision = '20260216_02_risk_history'
 branch_labels = None
 depends_on = None
 
+
 def upgrade():
-    # Risk Profile
-    op.add_column('risk_profiles', sa.Column('risk_engine_version', sa.String(), server_default='v1', nullable=False))
-    op.add_column('risk_profiles', sa.Column('override_expires_at', sa.DateTime(), nullable=True))
-    
-    # Risk History
-    op.add_column('risk_history', sa.Column('risk_engine_version', sa.String(), server_default='v1', nullable=False))
+    bind = op.get_bind()
+    inspector = inspect(bind)
+
+    if 'risk_profiles' not in inspector.get_table_names():
+        return
+
+    columns = [c['name'] for c in inspector.get_columns('risk_profiles')]
+
+    if 'version' not in columns:
+        op.add_column(
+            'risk_profiles',
+            sa.Column('version', sa.Integer, server_default='1', nullable=False)
+        )
+
 
 def downgrade():
-    op.drop_column('risk_history', 'risk_engine_version')
-    op.drop_column('risk_profiles', 'override_expires_at')
-    op.drop_column('risk_profiles', 'risk_engine_version')
+    bind = op.get_bind()
+    inspector = inspect(bind)
+
+    if 'risk_profiles' not in inspector.get_table_names():
+        return
+
+    columns = [c['name'] for c in inspector.get_columns('risk_profiles')]
+
+    if 'version' in columns:
+        op.drop_column('risk_profiles', 'version')

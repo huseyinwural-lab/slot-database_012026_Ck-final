@@ -179,4 +179,28 @@ class Settings(BaseSettings):
                     "\n".join(f"- {m}" for m in missing)
                 )
 
+    def validate_prod_security_settings(self) -> None:
+        """P0: Enforce secure flags in Production."""
+        if (self.env or "").lower() == "prod":
+            errors = []
+            if self.debug:
+                errors.append("DEBUG must be False in production")
+            if self.allow_test_payment_methods:
+                errors.append("ALLOW_TEST_PAYMENT_METHODS must be False in production")
+            if not self.ledger_enforce_balance:
+                errors.append("LEDGER_ENFORCE_BALANCE must be True in production")
+            if not self.webhook_signature_enforced:
+                errors.append("WEBHOOK_SIGNATURE_ENFORCED must be True in production")
+            # If ledger_shadow_write is meant to be False in prod explicitly:
+            # if self.ledger_shadow_write:
+            #    errors.append("LEDGER_SHADOW_WRITE must be False in production")
+
+            if errors:
+                raise ValueError(
+                    f"CRITICAL: Production Security Hardening Failed:\n" +
+                    "\n".join(f"- {e}" for e in errors)
+                )
+
 settings = Settings()
+settings.validate_prod_secrets()
+settings.validate_prod_security_settings()
