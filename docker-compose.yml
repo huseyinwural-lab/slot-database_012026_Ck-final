@@ -15,6 +15,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: casino_db
+    # ✅ Karar 2: Readiness Gate (Yeni eklendi)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d casino_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # 🧱 Redis (LOCAL ONLY)
   redis:
@@ -24,6 +30,11 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   # 🐍 Backend (API) — LOCALDB profile
   backend:
@@ -36,7 +47,6 @@ services:
       - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
       - SYNC_DATABASE_URL=postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@postgres:5432/casino_db
       - REDIS_URL=redis://redis:6379/0
-
       - ENV=dev
       - DEBUG=True
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
@@ -48,9 +58,9 @@ services:
       - ./backend:/app
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy # ✅ service_started yerine healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     profiles: ["localdb"]
 
   # 🐍 Backend (API) — EXTERNAL mode (no internal postgres/redis)
@@ -61,11 +71,9 @@ services:
     ports:
       - "8001:8001"
     environment:
-      # External mode: requires DATABASE_URL and REDIS_URL
       - DATABASE_URL=${DATABASE_URL}
       - SYNC_DATABASE_URL=${SYNC_DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
-
       - ENV=dev
       - DEBUG=True
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001"]
