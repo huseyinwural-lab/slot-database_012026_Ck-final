@@ -12,32 +12,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify Required Secrets
+        run: |
+          # Zorunlu değişkenlerin kontrolü
+          if [ -z "${{ secrets.POSTGRES_PASSWORD }}" ]; then echo "Error: POSTGRES_PASSWORD secret is missing"; exit 1; fi
+          if [ -z "${{ secrets.JWT_SECRET }}" ]; then echo "Error: JWT_SECRET secret is missing"; exit 1; fi
+
       - name: Set up CI Environment
         run: |
-          echo "POSTGRES_PASSWORD=postgres" >> $GITHUB_ENV
-          echo "JWT_SECRET=test_secret_key_012026" >> $GITHUB_ENV
-          mkdir -p test-results # ✅ Karar 1: Standart Dizin
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          mkdir -p test-results
 
-      - name: Build Services
-        run: docker-compose --profile localdb build
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-      - name: Start Services & Wait for Health
-        run: docker-compose --profile localdb up -d
-
-      - name: Run Acceptance Tests (Pytest)
+      - name: Install Pytest & Dependencies (Runner-side)
         run: |
-          # ✅ Karar 1 & 2: Sağlıklı DB üzerinde testleri koştur
-          docker-compose exec -T backend pytest backend/tests/acceptance --junitxml=test-results/results.xml
+          # Testleri container dışından koşturmak için gerekli paketler
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx sqlmodel python-jose[cryptography]
+
+      - name: Build and Start Services
+        run: |
+          docker-compose --profile localdb build
+          docker-compose --profile localdb up -d
+
+      - name: Run Acceptance Tests (Runner to Container)
+        env:
+          TEST_TARGET_URL: "http://localhost:8001" # Backend container adresi
+        run: |
+          # Runner üzerinden canlı container'a HTTP isteği atarak test et
+          pytest backend/tests/acceptance --junitxml=test-results/results.xml
 
       - name: Archive Diagnostic Logs
-        if: always() # ✅ Karar 3: Test kalsa da logları al
+        if: always()
         run: |
           docker-compose logs backend > test-results/backend-logs.txt
           docker-compose logs postgres > test-results/postgres-logs.txt
-          echo "Diagnostic logs collected in test-results/"
+          echo "Diagnostic logs collected."
 
       - name: Upload Test Artifacts
-        if: always() # ✅ Karar 3: Kanıtları yükle
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: acceptance-test-report
